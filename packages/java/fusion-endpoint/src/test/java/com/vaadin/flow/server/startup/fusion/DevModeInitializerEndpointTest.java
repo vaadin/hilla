@@ -128,63 +128,105 @@ public class DevModeInitializerEndpointTest {
     @Test
     public void should_generateOpenApi_when_EndpointPresents()
             throws Exception {
-
-        // Configure a folder that has .java classes with valid endpoints
-        // Not using `src/test/java` because there are invalid endpoint names
-        // in some tests
-        File src = new File(
-                getClass().getClassLoader().getResource("java").getFile());
-        System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
-                src.getAbsolutePath());
-
+        String originalJavaSourceFolder = null;
         File generatedOpenApiJson = Paths
-                .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
+                    .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
+        try {
+            originalJavaSourceFolder = System.getProperty("vaadin." 
+                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+            // Configure a folder that has .java classes with valid endpoints
+            // Not using `src/test/java` because there are invalid endpoint names
+            // in some tests
+            File src = new File(
+                    getClass().getClassLoader().getResource("java").getFile());
+            System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
+                    src.getAbsolutePath());
 
-        Assert.assertFalse(generatedOpenApiJson.exists());
-        DevModeInitializer devModeInitializer = new DevModeInitializer();
-        devModeInitializer.onStartup(classes, servletContext);
-        waitForDevModeServer();
-        Thread.sleep(200);
-        Assert.assertTrue("Should generate OpenAPI spec if Endpoint is used.",
-                generatedOpenApiJson.exists());
+            Assert.assertFalse(generatedOpenApiJson.exists());
+            DevModeInitializer devModeInitializer = new DevModeInitializer();
+            devModeInitializer.onStartup(classes, servletContext);
+            waitForDevModeServer();
+            Thread.sleep(200);
+            Assert.assertTrue("Should generate OpenAPI spec if Endpoint is used.",
+                    generatedOpenApiJson.exists());
+        } finally {
+            if (originalJavaSourceFolder != null) {
+                System.setProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
+            } else {
+                System.clearProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+            }
+            generatedOpenApiJson.delete();
+        }
     }
 
     @Test
     public void should_notGenerateOpenApi_when_EndpointIsNotUsed()
             throws Exception {
+        String originalJavaSourceFolder = null;
         File generatedOpenApiJson = Paths
                 .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
-        Assert.assertFalse(generatedOpenApiJson.exists());
-        devModeInitializer.onStartup(classes, servletContext);
-        Assert.assertFalse(
+        try {
+            originalJavaSourceFolder = System.getProperty("vaadin." 
+                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+        
+            System.clearProperty("vaadin." 
+                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+
+            Assert.assertFalse(generatedOpenApiJson.exists());
+            devModeInitializer.onStartup(classes, servletContext);
+            Assert.assertFalse(
                 "Should not generate OpenAPI spec if Endpoint is not used.",
                 generatedOpenApiJson.exists());
+        } finally {
+            if (originalJavaSourceFolder != null) {
+                System.setProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
+            } else {
+                System.clearProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+            }
+            generatedOpenApiJson.delete();
+        }
     }
 
     @Test
     public void should_generateTs_files() throws Exception {
+        String originalJavaSourceFolder = null;
+        try {
+            originalJavaSourceFolder = System.getProperty("vaadin." 
+                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+            // Configure a folder that has .java classes with valid endpoints
+            // Not using `src/test/java` because there are invalid endpoint names
+            // in some tests
+            File src = new File(
+                    getClass().getClassLoader().getResource("java").getFile());
+            System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
+                    src.getAbsolutePath());
 
-        // Configure a folder that has .java classes with valid endpoints
-        // Not using `src/test/java` because there are invalid endpoint names
-        // in some tests
-        File src = new File(
-                getClass().getClassLoader().getResource("java").getFile());
-        System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
-                src.getAbsolutePath());
+            DevModeInitializer devModeInitializer = new DevModeInitializer();
 
-        DevModeInitializer devModeInitializer = new DevModeInitializer();
+            File ts1 = new File(baseDir,
+                    DEFAULT_CONNECT_GENERATED_TS_DIR + "MyEndpoint.ts");
+            File ts2 = new File(baseDir, DEFAULT_CONNECT_GENERATED_TS_DIR
+                    + "connect-client.default.ts");
 
-        File ts1 = new File(baseDir,
-                DEFAULT_CONNECT_GENERATED_TS_DIR + "MyEndpoint.ts");
-        File ts2 = new File(baseDir, DEFAULT_CONNECT_GENERATED_TS_DIR
-                + "connect-client.default.ts");
-
-        assertFalse(ts1.exists());
-        assertFalse(ts2.exists());
-        devModeInitializer.onStartup(classes, servletContext);
-        waitForDevModeServer();
-        assertTrue(ts1.exists());
-        assertTrue(ts2.exists());
+            assertFalse(ts1.exists());
+            assertFalse(ts2.exists());
+            devModeInitializer.onStartup(classes, servletContext);
+            waitForDevModeServer();
+            assertTrue(ts1.exists());
+            assertTrue(ts2.exists());
+        } finally {
+            if (originalJavaSourceFolder != null) {
+                System.setProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
+            } else {
+                System.clearProperty("vaadin." 
+                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
+            }
+        }
     }
 
     /**
