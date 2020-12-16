@@ -10,6 +10,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -1085,6 +1086,20 @@ public class VaadinConnectControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("{\"name\":\"aa\"}", response.getBody());
+    }
+
+    @Test
+    public void should_AllowAccessToPackagePrivateEndpoint_PublicMethods() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class packagePrivateEndpoint = Class.forName("com.vaadin.flow.server.connect.generator.endpoints.packageprivate.PackagePrivateEndpoint");
+        Constructor packagePrivateEndpointConstructor = packagePrivateEndpoint.getConstructor();
+        packagePrivateEndpointConstructor.setAccessible(true);
+
+        ResponseEntity<?> response = createVaadinController(packagePrivateEndpointConstructor.newInstance())
+            .serveEndpoint("PackagePrivateEndpoint", "getRequest",
+                createRequestParameters("{}"), requestMock);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("\"Hello\"", response.getBody());
     }
 
     private void assertEndpointInfoPresent(String responseBody) {

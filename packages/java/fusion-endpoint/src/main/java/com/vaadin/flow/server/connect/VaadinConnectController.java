@@ -23,6 +23,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -221,8 +222,11 @@ public class VaadinConnectController {
                             endpointName, validationError));
         }
 
+        Method[] endpointPublicMethods = beanType.getMethods();
+        AccessibleObject.setAccessible(endpointPublicMethods, true);
+
         vaadinEndpoints.put(endpointName.toLowerCase(Locale.ENGLISH),
-                new VaadinEndpointData(endpointBean, beanType.getMethods()));
+                new VaadinEndpointData(endpointBean, endpointPublicMethods));
     }
 
     /**
