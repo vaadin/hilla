@@ -37,6 +37,8 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -68,7 +70,14 @@ public class TsFormEndpoint {
         Integer ipsum;
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Id {
+
+    }
+
     public static class MyEntity extends MyEntityId {
+        @Id
+        Long myId;
         String foo;
         MyBaz bar;
         List<MyBaz> baz;

@@ -53,26 +53,26 @@ import {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/im
  *{{#responses}}{{#message}} {{message}}{{/message}}{{/responses}}
  */{{/vendorExtensions.x-vaadin-connect-show-tsdoc}}
 function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
-  }}{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
-  {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports type ../../imports}}}{{#if @last}}{{! Append new line if it's the last param.}}
+ }}{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
+ {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports type ../../imports}}}{{#if @last}}{{! Append new line if it's the last param.}}
 {{else}},{{! Used the `~` after if to remove extra empty line by the each loop}}{{/if~}}
 {{/each}}): Promise<{{!
 }}{{#responses}}{{#dataType}}{{{getClassNameFromImports dataType ../../../imports}}}{{/dataType}}{{^dataType}}void{{/dataType}}{{/responses}}{{!
 }}> {
 {{=<% %>=}}
-  return client.call(<%!
-    %>'<%vendorExtensions.x-vaadin-connect-endpoint-name%>', <%!
-    %>'<%vendorExtensions.x-vaadin-connect-method-name%>'<%!
-    %><%^bodyParams%><%!
-      %><%^authMethods%>, undefined<%/authMethods%><%!
-    %><%/bodyParams%><%!
-    %><%#bodyParams%>, {<%!
-    %><%#each bodyParam.vendorExtensions.x-vaadin-connect-parameters%><%!
-      %><%name%><%#if @last%><%else%>, <%/if%><%!
-    %><%/each%><%!
-    %>}<%/bodyParams%><%!
-    %><%^authMethods%>, {requireCredentials: false}<%/authMethods%><%!
-  %>);
+ return client.call(<%!
+   %>'<%vendorExtensions.x-vaadin-connect-endpoint-name%>', <%!
+   %>'<%vendorExtensions.x-vaadin-connect-method-name%>'<%!
+   %><%^bodyParams%><%!
+     %><%^authMethods%>, undefined<%/authMethods%><%!
+   %><%/bodyParams%><%!
+   %><%#bodyParams%>, {<%!
+   %><%#each bodyParam.vendorExtensions.x-vaadin-connect-parameters%><%!
+     %><%name%><%#if @last%><%else%>, <%/if%><%!
+   %><%/each%><%!
+   %>}<%/bodyParams%><%!
+   %><%^authMethods%>, {requireCredentials: false}<%/authMethods%><%!
+ %>);
 }
 export {_<%vendorExtensions.x-vaadin-connect-method-name%> as <%vendorExtensions.x-vaadin-connect-method-name%>};
 <%={{ }}=%>

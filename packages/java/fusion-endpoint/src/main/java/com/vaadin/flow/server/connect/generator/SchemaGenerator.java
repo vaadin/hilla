@@ -36,10 +36,13 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.vaadin.flow.internal.ReflectTools;
+
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,6 +160,7 @@ class SchemaGenerator {
                         && !field.isAnnotationPresent(JsonIgnore.class);
             }).forEach(field -> validFields.put(field.getName(),
                     field.isAnnotationPresent(Nullable.class)
+                            || ReflectTools.hasAnnotationWithSimpleName(field, "Id")
                             || field.getType().equals(Optional.class)));
         } catch (ClassNotFoundException e) {
 
@@ -195,8 +199,8 @@ class SchemaGenerator {
                     wrapperSchema.addAllOfItem(propertySchema);
                     propertySchema = wrapperSchema;
                 }
-                if (field.isAnnotationPresent(Nullable.class) || GeneratorUtils
-                        .isTrue(propertySchema.getNullable())) {
+                if (field.isAnnotationPresent(Nullable.class) || field.isAnnotationPresent("Id")
+                        || GeneratorUtils.isTrue(propertySchema.getNullable())) {
                     // Temporarily set nullable to indicate this property is
                     // not required
                     propertySchema.setNullable(true);

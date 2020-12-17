@@ -91,6 +91,10 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('min', NumberModel, [false, new Min({value:1, message:"foo"})]);
   }
 
+  get myId(): NumberModel {
+    return this[_getPropertyModel]('myId', NumberModel, [true]);
+  }
+
   get negative(): NumberModel {
     return this[_getPropertyModel]('negative', NumberModel, [false, new Negative()]);
   }

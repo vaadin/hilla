@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.server.connect.generator.tsmodel.TsFormEndpoint.Id;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -355,6 +357,23 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
+    public void should_ReturnNull_When_AnnotatedId()
+            throws NoSuchMethodException {
+        String error = explicitNullableTypeChecker
+                .checkValueForAnnotatedElement(null,
+                        getClass().getMethod("methodWithIdAnnotation"));
+
+        Assert.assertNull("Method with @Id annotation should allow null value",
+                error);
+
+        error = explicitNullableTypeChecker.checkValueForAnnotatedElement(
+                1l, getClass().getMethod("methodWithIdAnnotation"));
+
+        Assert.assertNull("Method with @Id annotation should allow non-null value",
+                error);
+    }
+
+    @Test
     public void should_InvokeCheckValueForType_When_NotAnnotatedNullable()
             throws NoSuchMethodException {
         explicitNullableTypeChecker = spy(explicitNullableTypeChecker);
@@ -421,6 +440,14 @@ public class ExplicitNullableTypeCheckerTest {
     @Nullable
     public String stringNullable() {
         return "";
+    }
+
+    /**
+     * Method for testing
+     */
+    @Id
+    public Long methodWithIdAnnotation() {
+        return 1L;
     }
 
     /**

@@ -22,6 +22,8 @@ import java.lang.reflect.Type;
 
 import javax.annotation.Nullable;
 
+import com.vaadin.flow.internal.ReflectTools;
+
 /**
  * A checker for TypeScript null compatibility in Vaadin endpoint methods
  * parameter and return types.
@@ -41,7 +43,8 @@ public class ExplicitNullableTypeChecker {
      */
     public String checkValueForAnnotatedElement(Object value,
             AnnotatedElement annotatedElement) {
-        if (annotatedElement.isAnnotationPresent(Nullable.class)) {
+        if (annotatedElement.isAnnotationPresent(Nullable.class)
+                || ReflectTools.hasAnnotationWithSimpleName(annotatedElement, "Id")) {
             return null;
         }
         if (annotatedElement instanceof Method) {

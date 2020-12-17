@@ -103,6 +103,7 @@ import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 public class OpenApiObjectGenerator {
     public static final String EXTENSION_VAADIN_CONNECT_PARAMETERS_DESCRIPTION = "x-vaadin-parameters-description";
     public static final String EXTENSION_VAADIN_FILE_PATH = "x-vaadin-file-path";
+    private static final String EXTENSION_VAADIN_CONNECT_DEFERRABLE = "x-vaadin-connect-deferrable";
 
     private static final String VAADIN_CONNECT_OAUTH2_SECURITY_SCHEME = "vaadin-connect-oauth2";
     private static final String VAADIN_CONNECT_OAUTH2_TOKEN_URL = "/oauth/token";
@@ -123,6 +124,7 @@ public class OpenApiObjectGenerator {
     private ClassLoader typeResolverClassLoader;
     private SchemaGenerator schemaGenerator;
     private SchemaResolver schemaResolver;
+    private boolean needsDeferrableImport = false;
 
     /**
      * Adds the source path to the generator to process.
@@ -210,6 +212,7 @@ public class OpenApiObjectGenerator {
         endpointsJavadoc = new HashMap<>();
         schemaGenerator = new SchemaGenerator(this);
         schemaResolver = new SchemaResolver();
+        needsDeferrableImport = false;
         ParserConfiguration parserConfiguration = createParserConfiguration();
 
         javaSourcePaths.stream()
@@ -315,6 +318,9 @@ public class OpenApiObjectGenerator {
                         classOrInterfaceDeclaration, compilationUnit)));
         pathItems.forEach((pathName, pathItem) -> openApiModel.getPaths()
                 .addPathItem(pathName, pathItem));
+        if (needsDeferrableImport) {
+            openApiModel.addExtension(EXTENSION_VAADIN_CONNECT_DEFERRABLE, true);
+        }
         return SourceRoot.Callback.Result.DONT_SAVE;
     }
 
@@ -385,7 +391,7 @@ public class OpenApiObjectGenerator {
                     getEndpointName(classDeclaration,
                             endpointAnnotation.orElse(null)),
                     classDeclaration.getNameAsString(), classDeclaration,
-                    ResolvedTypeParametersMap.empty()));
+                    ResolvedTypeParametersMap.empty(), compilationUnit));
         }
     }
 
@@ -536,7 +542,8 @@ public class OpenApiObjectGenerator {
 
     private Map<String, PathItem> createPathItems(String endpointName,
             String tagName, ClassOrInterfaceDeclaration typeDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            CompilationUnit compilationUnit) {
         Map<String, PathItem> newPathItems = new HashMap<>();
         Collection<MethodDeclaration> methods = typeDeclaration.getMethods();
         for (MethodDeclaration methodDeclaration : methods) {
@@ -559,9 +566,11 @@ public class OpenApiObjectGenerator {
 
             String pathName = "/" + endpointName + "/" + methodName;
             pathItem.readOperationsMap()
-                    .forEach((httpMethod, operation) -> operation
+                    .forEach((httpMethod, operation) -> {
+                        operation
                             .setOperationId(String.join("_", endpointName,
-                                    methodName, httpMethod.name())));
+                                    methodName, httpMethod.name()));
+                    });
             newPathItems.put(pathName, pathItem);
         }
 
@@ -571,7 +580,7 @@ public class OpenApiObjectGenerator {
                         resolvedType, resolvedTypeParametersMap))
                 .filter(Objects::nonNull).forEach(pair -> newPathItems
                         .putAll(createPathItems(endpointName, tagName, pair.a,
-                                pair.b)));
+                                pair.b, compilationUnit)));
         return newPathItems;
     }
 
@@ -642,12 +651,16 @@ public class OpenApiObjectGenerator {
                 .replaceAll(methodDeclaration.resolve().getReturnType());
         Schema schema = parseResolvedTypeToSchema(resolvedType);
         schema.setDescription("");
-        if (methodDeclaration.isAnnotationPresent(Nullable.class)) {
+        if (isNullable(methodDeclaration)) {
             schema = schemaResolver.createNullableWrapper(schema);
         }
         usedTypes.putAll(collectUsedTypesFromSchema(schema));
         mediaItem.schema(schema);
         return mediaItem;
+    }
+
+    private boolean isNullable(MethodDeclaration methodDeclaration) {
+        return methodDeclaration.isAnnotationPresent(Nullable.class) || methodDeclaration.isAnnotationPresent("Id");
     }
 
     private RequestBody createRequestBody(MethodDeclaration methodDeclaration,
@@ -685,7 +698,8 @@ public class OpenApiObjectGenerator {
             }
             requestSchema.addProperties(name, paramSchema);
             if (GeneratorUtils.isNotTrue(paramSchema.getNullable())
-                    && !parameter.isAnnotationPresent(Nullable.class)) {
+                    && !parameter.isAnnotationPresent(Nullable.class)
+                    && !parameter.isAnnotationPresent("Id")) {
                 requestSchema.addRequiredItem(name);
             }
             paramSchema.setNullable(null);
