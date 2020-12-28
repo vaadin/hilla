@@ -1,14 +1,7 @@
 package com.vaadin.flow.server.startup.fusion;
 
-import static com.vaadin.flow.server.Constants.CONNECT_JAVA_SOURCE_FOLDER_TOKEN;
-import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_PRODUCTION_MODE;
-import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_REUSE_DEV_SERVER;
-import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_GENERATED_TS_DIR;
-import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_JAVA_SOURCE_FOLDER;
-import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_OPENAPI_JSON_FILE;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -21,18 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
-
-import com.vaadin.flow.di.Lookup;
-import com.vaadin.flow.di.ResourceProvider;
-import com.vaadin.flow.server.DevModeHandler;
-import com.vaadin.flow.server.VaadinServlet;
-import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.flow.server.frontend.fusion.EndpointGeneratorTaskFactoryImpl;
-import com.vaadin.flow.server.startup.DevModeInitializer;
-
+import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,17 +23,35 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
-import net.jcip.annotations.NotThreadSafe;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.ResourceProvider;
+import com.vaadin.flow.server.DevModeHandler;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.server.frontend.fusion.EndpointGeneratorTaskFactoryImpl;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.flow.server.startup.DevModeInitializer;
+
+import static com.vaadin.flow.server.Constants.CONNECT_JAVA_SOURCE_FOLDER_TOKEN;
+import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_PRODUCTION_MODE;
+import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_REUSE_DEV_SERVER;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_GENERATED_TS_DIR;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_JAVA_SOURCE_FOLDER;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_OPENAPI_JSON_FILE;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @NotThreadSafe
 public class DevModeInitializerEndpointTest {
     private final AtomicReference<DevModeHandler> atomicHandler = new AtomicReference<>();
-    
+
     String baseDir;
     ServletContext servletContext;
-    Map<String, String> initParams;
     Set<Class<?>> classes;
     DevModeInitializer devModeInitializer;
+    private ApplicationConfiguration appConfig;
 
     private final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -67,14 +67,24 @@ public class DevModeInitializerEndpointTest {
         temporaryFolder.create();
         baseDir = temporaryFolder.getRoot().getPath();
 
-        servletContext = Mockito.mock(ServletContext.class);
+        appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.getStringProperty(Mockito.anyString(),
+                Mockito.anyString()))
+                .thenAnswer(invocation -> invocation.getArgumentAt(1,
+                        String.class));
+        Mockito.when(appConfig.getStringProperty(FrontendUtils.PROJECT_BASEDIR,
+                null)).thenReturn(baseDir);
+        Mockito.when(appConfig.enableDevServer()).thenReturn(true);
+
+        servletContext = mockServletContext();
         ServletRegistration vaadinServletRegistration = Mockito
                 .mock(ServletRegistration.class);
 
         Lookup lookup = Mockito.mock(Lookup.class);
         Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
                 .thenReturn(lookup);
-        Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl()).when(lookup).lookup(EndpointGeneratorTaskFactory.class);
+        Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl()).when(lookup)
+                .lookup(EndpointGeneratorTaskFactory.class);
 
         ResourceProvider resourceProvider = Mockito
                 .mock(ResourceProvider.class);
@@ -83,12 +93,6 @@ public class DevModeInitializerEndpointTest {
 
         Mockito.when(vaadinServletRegistration.getClassName())
                 .thenReturn(VaadinServletSubClass.class.getName());
-
-        initParams = new HashMap<>();
-        initParams.put(FrontendUtils.PROJECT_BASEDIR, baseDir);
-
-        Mockito.when(vaadinServletRegistration.getInitParameters())
-                .thenReturn(initParams);
 
         classes = new HashSet<>();
         classes.add(this.getClass());
@@ -128,105 +132,61 @@ public class DevModeInitializerEndpointTest {
     @Test
     public void should_generateOpenApi_when_EndpointPresents()
             throws Exception {
-        String originalJavaSourceFolder = null;
         File generatedOpenApiJson = Paths
-                    .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
-        try {
-            originalJavaSourceFolder = System.getProperty("vaadin." 
-                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-            // Configure a folder that has .java classes with valid endpoints
-            // Not using `src/test/java` because there are invalid endpoint names
-            // in some tests
-            File src = new File(
-                    getClass().getClassLoader().getResource("java").getFile());
-            System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
-                    src.getAbsolutePath());
+                .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
+        File src = new File(
+                getClass().getClassLoader().getResource("java").getFile());
+        Mockito.when(appConfig.getStringProperty(
+                Mockito.eq(CONNECT_JAVA_SOURCE_FOLDER_TOKEN),
+                Mockito.anyString())).thenReturn(src.getAbsolutePath());
 
-            Assert.assertFalse(generatedOpenApiJson.exists());
-            DevModeInitializer devModeInitializer = new DevModeInitializer();
-            devModeInitializer.onStartup(classes, servletContext);
-            waitForDevModeServer();
-            Thread.sleep(200);
-            Assert.assertTrue("Should generate OpenAPI spec if Endpoint is used.",
-                    generatedOpenApiJson.exists());
-        } finally {
-            if (originalJavaSourceFolder != null) {
-                System.setProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
-            } else {
-                System.clearProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-            }
-            generatedOpenApiJson.delete();
-        }
+        Assert.assertFalse(generatedOpenApiJson.exists());
+        DevModeInitializer devModeInitializer = new DevModeInitializer();
+        devModeInitializer.process(classes, servletContext);
+        waitForDevModeServer();
+        Thread.sleep(200);
+        Assert.assertTrue("Should generate OpenAPI spec if Endpoint is used.",
+                generatedOpenApiJson.exists());
     }
 
     @Test
     public void should_notGenerateOpenApi_when_EndpointIsNotUsed()
             throws Exception {
-        String originalJavaSourceFolder = null;
         File generatedOpenApiJson = Paths
                 .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
-        try {
-            originalJavaSourceFolder = System.getProperty("vaadin." 
-                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-        
-            System.clearProperty("vaadin." 
-                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
 
-            Assert.assertFalse(generatedOpenApiJson.exists());
-            devModeInitializer.onStartup(classes, servletContext);
-            Assert.assertFalse(
+        Assert.assertFalse(generatedOpenApiJson.exists());
+        devModeInitializer.process(classes, servletContext);
+        Assert.assertFalse(
                 "Should not generate OpenAPI spec if Endpoint is not used.",
                 generatedOpenApiJson.exists());
-        } finally {
-            if (originalJavaSourceFolder != null) {
-                System.setProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
-            } else {
-                System.clearProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-            }
-            generatedOpenApiJson.delete();
-        }
     }
 
     @Test
     public void should_generateTs_files() throws Exception {
-        String originalJavaSourceFolder = null;
-        try {
-            originalJavaSourceFolder = System.getProperty("vaadin." 
-                + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-            // Configure a folder that has .java classes with valid endpoints
-            // Not using `src/test/java` because there are invalid endpoint names
-            // in some tests
-            File src = new File(
-                    getClass().getClassLoader().getResource("java").getFile());
-            System.setProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN,
-                    src.getAbsolutePath());
+        // Configure a folder that has .java classes with valid endpoints
+        // Not using `src/test/java` because there are invalid endpoint
+        // names
+        // in some tests
+        File src = new File(
+                getClass().getClassLoader().getResource("java").getFile());
+        Mockito.when(appConfig.getStringProperty(
+                Mockito.eq(CONNECT_JAVA_SOURCE_FOLDER_TOKEN),
+                Mockito.anyString())).thenReturn(src.getAbsolutePath());
 
-            DevModeInitializer devModeInitializer = new DevModeInitializer();
+        DevModeInitializer devModeInitializer = new DevModeInitializer();
 
-            File ts1 = new File(baseDir,
-                    DEFAULT_CONNECT_GENERATED_TS_DIR + "MyEndpoint.ts");
-            File ts2 = new File(baseDir, DEFAULT_CONNECT_GENERATED_TS_DIR
-                    + "connect-client.default.ts");
+        File ts1 = new File(baseDir,
+                DEFAULT_CONNECT_GENERATED_TS_DIR + "MyEndpoint.ts");
+        File ts2 = new File(baseDir,
+                DEFAULT_CONNECT_GENERATED_TS_DIR + "connect-client.default.ts");
 
-            assertFalse(ts1.exists());
-            assertFalse(ts2.exists());
-            devModeInitializer.onStartup(classes, servletContext);
-            waitForDevModeServer();
-            assertTrue(ts1.exists());
-            assertTrue(ts2.exists());
-        } finally {
-            if (originalJavaSourceFolder != null) {
-                System.setProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN, originalJavaSourceFolder);
-            } else {
-                System.clearProperty("vaadin." 
-                    + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-            }
-        }
+        assertFalse(ts1.exists());
+        assertFalse(ts2.exists());
+        devModeInitializer.process(classes, servletContext);
+        waitForDevModeServer();
+        assertTrue(ts1.exists());
+        assertTrue(ts2.exists());
     }
 
     /**
@@ -235,16 +195,25 @@ public class DevModeInitializerEndpointTest {
      * @return devModeHandler or {@code null} if not started
      */
     private DevModeHandler getDevModeHandler() {
-      return atomicHandler.get();
+        return atomicHandler.get();
     }
 
-    private void waitForDevModeServer() throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException, InterruptedException {
+    private void waitForDevModeServer()
+            throws NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException, InterruptedException {
         DevModeHandler handler = DevModeHandler.getDevModeHandler();
         Assert.assertNotNull(handler);
         Method join = DevModeHandler.class.getDeclaredMethod("join");
         join.setAccessible(true);
         join.invoke(handler);
+    }
+
+    private ServletContext mockServletContext() {
+        ServletContext context = Mockito.mock(ServletContext.class);
+        Mockito.when(
+                context.getAttribute(ApplicationConfiguration.class.getName()))
+                .thenReturn(appConfig);
+        return context;
     }
 
 }
