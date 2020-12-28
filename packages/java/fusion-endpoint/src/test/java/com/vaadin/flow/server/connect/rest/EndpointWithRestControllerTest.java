@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +38,7 @@ import com.vaadin.flow.server.connect.EndpointNameChecker;
 import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
 import com.vaadin.flow.server.connect.VaadinConnectController;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -48,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-@Import({VaadinConnectEndpoints.class, MyRestController.class})
+@Import({ VaadinConnectEndpoints.class, MyRestController.class })
 public class EndpointWithRestControllerTest {
 
     private MockMvc mockMvcForEndpoint;
@@ -56,71 +58,81 @@ public class EndpointWithRestControllerTest {
     @Autowired
     private MockMvc mockMvcForRest;
 
-
     @Autowired
     private ApplicationContext applicationContext;
 
+    private ApplicationConfiguration appConfig;
+
     @Before
     public void setUp() {
-        mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(new VaadinConnectController(
-                null, mock(VaadinConnectAccessChecker.class),
-                mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class),
-                applicationContext,
-                mock(ServletContext.class)))
+        appConfig = Mockito.mock(ApplicationConfiguration.class);
+
+        mockMvcForEndpoint = MockMvcBuilders
+                .standaloneSetup(new VaadinConnectController(null,
+                        mock(VaadinConnectAccessChecker.class),
+                        mock(EndpointNameChecker.class),
+                        mock(ExplicitNullableTypeChecker.class),
+                        applicationContext, mockServletContext()))
                 .build();
         Assert.assertNotEquals(null, applicationContext);
     }
 
     @Test
-    //https://github.com/vaadin/flow/issues/8010
+    // https://github.com/vaadin/flow/issues/8010
     public void shouldNotExposePrivateAndProtectedFields_when_CallingFromRestAPIs()
-        throws Exception {
-        String result = mockMvcForRest.perform(get("/api/get")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+            throws Exception {
+        String result = mockMvcForRest
+                .perform(
+                        get("/api/get").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn().getResponse()
+                .getContentAsString();
         assertEquals("{\"name\":\"Bond\"}", result);
     }
 
     @Test
-    //https://github.com/vaadin/flow/issues/8034
+    // https://github.com/vaadin/flow/issues/8034
     public void should_BeAbleToSerializePrivateFieldsOfABean_when_CallingFromConnectEndPoint() {
         try {
             String result = callEndpointMethod("getBeanWithPrivateFields");
-            assertEquals("{\"codeNumber\":\"007\",\"name\":\"Bond\",\"firstName\":\"James\"}", result);
+            assertEquals(
+                    "{\"codeNumber\":\"007\",\"name\":\"Bond\",\"firstName\":\"James\"}",
+                    result);
         } catch (Exception e) {
             fail("failed to serialize a bean with private fields");
         }
     }
 
     @Test
-    //https://github.com/vaadin/flow/issues/8034
+    // https://github.com/vaadin/flow/issues/8034
     public void should_BeAbleToSerializeABeanWithZonedDateTimeField() {
         try {
             String result = callEndpointMethod("getBeanWithZonedDateTimeField");
             assertNotNull(result);
             assertNotEquals("", result);
-            assertNotEquals("{\"message\":\"Failed to serialize endpoint 'VaadinConnectTypeConversionEndpoints' method 'getBeanWithZonedDateTimeField' response. Double check method's return type or specify a custom mapper bean with qualifier 'vaadinEndpointMapper'\"}", result);
+            assertNotEquals(
+                    "{\"message\":\"Failed to serialize endpoint 'VaadinConnectTypeConversionEndpoints' method 'getBeanWithZonedDateTimeField' response. Double check method's return type or specify a custom mapper bean with qualifier 'vaadinEndpointMapper'\"}",
+                    result);
         } catch (Exception e) {
             fail("failed to serialize a bean with ZonedDateTime field");
         }
     }
 
     @Test
-    //https://github.com/vaadin/flow/issues/8067
-    public void should_RepsectJacksonAnnotation_when_serializeBean() throws Exception {
+    // https://github.com/vaadin/flow/issues/8067
+    public void should_RepsectJacksonAnnotation_when_serializeBean()
+            throws Exception {
         String result = callEndpointMethod("getBeanWithJacksonAnnotation");
         assertEquals("{\"name\":null,\"rating\":2,\"bookId\":null}", result);
     }
 
     @Test
     /**
-     * this requires jackson-datatype-jsr310, which is added as a test scope dependency.
-     * jackson-datatype-jsr310 is provided in spring-boot-starter-web, which is part of
-     * vaadin-spring-boot-starter
+     * this requires jackson-datatype-jsr310, which is added as a test scope
+     * dependency. jackson-datatype-jsr310 is provided in
+     * spring-boot-starter-web, which is part of vaadin-spring-boot-starter
      */
-    public void should_serializeLocalTimeInExpectedFormat_when_UsingSpringBoot() throws Exception{
+    public void should_serializeLocalTimeInExpectedFormat_when_UsingSpringBoot()
+            throws Exception {
         String result = callEndpointMethod("getLocalTime");
         assertEquals("\"08:00:00\"", result);
     }
@@ -132,7 +144,15 @@ public class EndpointWithRestControllerTest {
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 
-        return mockMvcForEndpoint.perform(requestBuilder).andReturn().getResponse().getContentAsString();
+        return mockMvcForEndpoint.perform(requestBuilder).andReturn()
+                .getResponse().getContentAsString();
+    }
+
+    private ServletContext mockServletContext() {
+        ServletContext context = Mockito.mock(ServletContext.class);
+        Mockito.when(
+                context.getAttribute(ApplicationConfiguration.class.getName()))
+                .thenReturn(appConfig);
+        return context;
     }
 }
-
