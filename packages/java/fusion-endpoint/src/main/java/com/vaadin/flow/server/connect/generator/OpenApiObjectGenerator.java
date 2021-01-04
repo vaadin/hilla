@@ -565,12 +565,10 @@ public class OpenApiObjectGenerator {
             PathItem pathItem = new PathItem().post(post);
 
             String pathName = "/" + endpointName + "/" + methodName;
-            pathItem.readOperationsMap()
-                    .forEach((httpMethod, operation) -> {
-                        operation
-                            .setOperationId(String.join("_", endpointName,
-                                    methodName, httpMethod.name()));
-                    });
+            pathItem.readOperationsMap().forEach(
+                    (httpMethod, operation) -> operation.setOperationId(
+                            String.join("_", endpointName, methodName,
+                                    httpMethod.name())));
             newPathItems.put(pathName, pathItem);
         }
 
