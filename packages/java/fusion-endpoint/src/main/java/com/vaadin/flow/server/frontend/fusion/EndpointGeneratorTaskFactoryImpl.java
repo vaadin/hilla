@@ -28,7 +28,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenApi;
 public class EndpointGeneratorTaskFactoryImpl implements EndpointGeneratorTaskFactory {
 
     @Override
-    public TaskGenerateConnect createTaskGenerateConnect(File applicationProperties, File openApi, 
+    public TaskGenerateConnect createTaskGenerateConnect(File applicationProperties, File openApi,
             File outputFolder, File frontendDirectory) {
         Objects.requireNonNull(openApi,
                 "Vaadin OpenAPI file should not be null.");
@@ -48,4 +48,5 @@ public class EndpointGeneratorTaskFactoryImpl implements EndpointGeneratorTaskFa
                 "ClassLoader should not be null.");
         return new TaskGenerateOpenApiImpl(properties, javaSourceFolder, classLoader, output);
     }
+
 }
