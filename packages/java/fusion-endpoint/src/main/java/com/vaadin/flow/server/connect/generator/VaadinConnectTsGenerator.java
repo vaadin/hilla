@@ -35,6 +35,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import io.swagger.codegen.v3.ClientOptInput;
 import io.swagger.codegen.v3.CodegenModel;
 import io.swagger.codegen.v3.CodegenOperation;
@@ -201,7 +202,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
 
         // There is no openApi file, thus remove old stuff.
         if (!openApiJsonFile.exists()) {
-            FileUtils.deleteQuietly(generatedFrontendDirectory);
+            cleanGeneratedFolder(generatedFrontendDirectory.toString(),
+                    Collections.emptySet());
             return false;
         }
 
@@ -326,7 +328,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
     private static boolean shouldDelete(Set<File> generatedFiles, File file) {
         return !generatedFiles.contains(file)
                 && !VaadinConnectClientGenerator.CONNECT_CLIENT_NAME
-                        .equals(file.getName());
+                        .equals(file.getName())
+                && !FrontendUtils.BOOTSTRAP_FILE_NAME.equals(file.getName());
     }
 
     private static IllegalStateException getUnexpectedOpenAPIException(
