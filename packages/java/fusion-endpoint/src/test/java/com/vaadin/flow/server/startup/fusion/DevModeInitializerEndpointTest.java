@@ -36,9 +36,9 @@ import com.vaadin.flow.server.startup.DevModeInitializer;
 import static com.vaadin.flow.server.Constants.CONNECT_JAVA_SOURCE_FOLDER_TOKEN;
 import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_PRODUCTION_MODE;
 import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_REUSE_DEV_SERVER;
-import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_GENERATED_TS_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_JAVA_SOURCE_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_OPENAPI_JSON_FILE;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -177,9 +177,10 @@ public class DevModeInitializerEndpointTest {
         DevModeInitializer devModeInitializer = new DevModeInitializer();
 
         File ts1 = new File(baseDir,
-                DEFAULT_CONNECT_GENERATED_TS_DIR + "MyEndpoint.ts");
+                DEFAULT_PROJECT_FRONTEND_GENERATED_DIR + "MyEndpoint.ts");
         File ts2 = new File(baseDir,
-                DEFAULT_CONNECT_GENERATED_TS_DIR + "connect-client.default.ts");
+                DEFAULT_PROJECT_FRONTEND_GENERATED_DIR
+                        + "connect-client.default.ts");
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
