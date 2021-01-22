@@ -33,13 +33,9 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.vaadin.flow.server.connect.EndpointNameChecker;
-import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
 import com.vaadin.flow.server.connect.VaadinConnectController;
-import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+import com.vaadin.flow.server.connect.VaadinConnectControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
-import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -57,12 +53,10 @@ public abstract class BaseTypeConversionTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
+        VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
+        VaadinConnectController controller = controllerMockBuilder.withApplicationContext(applicationContext).build();
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new VaadinConnectController(null,
-                        mock(VaadinConnectAccessChecker.class),
-                        mock(EndpointNameChecker.class),
-                        mock(ExplicitNullableTypeChecker.class),
-                        applicationContext, mockServletContext()))
+                .standaloneSetup(controller)
                 .build();
         Assert.assertNotEquals(null, applicationContext);
     }
@@ -102,11 +96,4 @@ public abstract class BaseTypeConversionTest {
         return mockMvc.perform(requestBuilder).andReturn().getResponse();
     }
 
-    private ServletContext mockServletContext() {
-        ServletContext context = Mockito.mock(ServletContext.class);
-        Mockito.when(
-                context.getAttribute(ApplicationConfiguration.class.getName()))
-                .thenReturn(appConfig);
-        return context;
-    }
 }

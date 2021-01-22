@@ -101,19 +101,18 @@ public class VaadinConnectController {
     /**
      * A qualifier to override the request and response default json mapper.
      *
-     * @see #VaadinConnectController(ObjectMapper, VaadinConnectAccessChecker,
-     *      EndpointNameChecker, ExplicitNullableTypeChecker,
-     *      ApplicationContext, ServletContext)
+     * @see #VaadinConnectController(ObjectMapper, EndpointNameChecker, 
+     *       ExplicitNullableTypeChecker, ApplicationContext)
      */
     public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
 
     final Map<String, VaadinEndpointData> vaadinEndpoints = new HashMap<>();
 
     private final ObjectMapper vaadinEndpointMapper;
-    private final VaadinConnectAccessChecker accessChecker;
     private final Validator validator = Validation
             .buildDefaultValidatorFactory().getValidator();
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
+    private final ApplicationContext applicationContext;
 
     /**
      * A constructor used to initialize the controller.
@@ -124,9 +123,6 @@ public class VaadinConnectController {
      *            response bodies Use
      *            {@link VaadinConnectController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
-     * @param accessChecker
-     *            the ACL checker to verify the endpoint method access
-     *            permissions
      * @param endpointNameChecker
      *            the endpoint name checker to verify custom Vaadin endpoint
      *            names
@@ -136,30 +132,21 @@ public class VaadinConnectController {
      * @param context
      *            Spring context to extract beans annotated with
      *            {@link Endpoint} from
-     * @param servletContext
-     *            The servlet context for the controller.
      */
     public VaadinConnectController(
             @Autowired(required = false) @Qualifier(VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER) ObjectMapper vaadinEndpointMapper,
-            VaadinConnectAccessChecker accessChecker,
             EndpointNameChecker endpointNameChecker,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ApplicationContext context, ServletContext servletContext) {
+            ApplicationContext context) {
+        this.applicationContext = context;
         this.vaadinEndpointMapper = vaadinEndpointMapper != null
                 ? vaadinEndpointMapper
                 : createVaadinConnectObjectMapper(context);
-        this.accessChecker = accessChecker;
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
 
         context.getBeansWithAnnotation(Endpoint.class)
                 .forEach((name, endpointBean) -> validateEndpointBean(
                         endpointNameChecker, name, endpointBean));
-
-        ApplicationConfiguration cfg = ApplicationConfiguration
-                .get(new VaadinServletContext(servletContext));
-        if (cfg != null) {
-            accessChecker.enableCsrf(cfg.isXsrfProtectionEnabled());
-        }
     }
 
     private ObjectMapper createVaadinConnectObjectMapper(
@@ -271,7 +258,6 @@ public class VaadinConnectController {
                     .getCurrent();
             CurrentInstance.set(VaadinRequest.class,
                     new VaadinServletRequest(request, service));
-
             return invokeVaadinEndpointMethod(endpointName, methodName,
                     methodToInvoke, body, vaadinEndpointData, request);
         } catch (JsonProcessingException e) {
@@ -299,6 +285,7 @@ public class VaadinConnectController {
             String endpointName, String methodName, Method methodToInvoke,
             ObjectNode body, VaadinEndpointData vaadinEndpointData,
             HttpServletRequest request) throws JsonProcessingException {
+        VaadinConnectAccessChecker accessChecker = getAccessChecker(request.getServletContext());
         String checkError = accessChecker.check(methodToInvoke, request);
         if (checkError != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -560,5 +547,31 @@ public class VaadinConnectController {
         private Object getEndpointObject() {
             return vaadinEndpointObject;
         }
+    }
+
+    private static class VaadinConnectAccessCheckerWrapper {
+        private final VaadinConnectAccessChecker accessChecker;
+
+        private VaadinConnectAccessCheckerWrapper(
+                VaadinConnectAccessChecker checker) {
+            accessChecker = checker;
+        }
+    }
+
+    VaadinConnectAccessChecker getAccessChecker(ServletContext servletContext) {
+        VaadinServletContext vaadinServletContext = new VaadinServletContext(
+                servletContext);
+        VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext
+                .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
+                    VaadinConnectAccessChecker accessChecker = 
+                        applicationContext.getBean(VaadinConnectAccessChecker.class);
+                    ApplicationConfiguration cfg = ApplicationConfiguration
+                            .get(vaadinServletContext);
+                    if (cfg != null) {
+                        accessChecker.enableCsrf(cfg.isXsrfProtectionEnabled());
+                    }
+                    return new VaadinConnectAccessCheckerWrapper(accessChecker);
+                });
+        return wrapper.accessChecker;
     }
 }

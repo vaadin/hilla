@@ -183,6 +183,7 @@ public class VaadinConnectControllerTest {
 
         when(requestMock.getUserPrincipal()).thenReturn(principal);
         when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin CCDM");
+        doReturn(mockServletContext()).when(requestMock).getServletContext();
 
         HttpSession sessionMock = mock(HttpSession.class);
         when(sessionMock.getAttribute(com.vaadin.flow.server.VaadinService
@@ -271,11 +272,24 @@ public class VaadinConnectControllerTest {
         assertTrue(String.format("Invalid response body: '%s'", responseBody),
                 responseBody.contains(accessErrorMessage));
 
-        verify(restrictingCheckerMock).enableCsrf(Mockito.anyBoolean());
         verify(restrictingCheckerMock).check(TEST_METHOD, requestMock);
         Mockito.verifyNoMoreInteractions(restrictingCheckerMock);
         verify(restrictingCheckerMock, times(1)).check(TEST_METHOD,
                 requestMock);
+    }
+
+    @Test
+    public void should_CallEnableCsrf_When_GettingTheAccessChecker() {
+        ApplicationContext appContext = mockApplicationContext(TEST_ENDPOINT);
+        VaadinConnectAccessChecker accessChecker = mock(VaadinConnectAccessChecker.class);
+        Mockito.doReturn(accessChecker).when(appContext).getBean(VaadinConnectAccessChecker.class);
+        
+        VaadinConnectController controller = new VaadinConnectController(
+                new ObjectMapper(), mock(EndpointNameChecker.class),
+                mock(ExplicitNullableTypeChecker.class), appContext);
+        controller.getAccessChecker(mockServletContext());
+
+        verify(accessChecker).enableCsrf(Mockito.anyBoolean());
     }
 
     @Test
@@ -708,11 +722,7 @@ public class VaadinConnectControllerTest {
                 Collections.singletonMap(endpoint.getClass().getSimpleName(),
                         proxy));
 
-        VaadinConnectController vaadinConnectController = new VaadinConnectController(
-                new ObjectMapper(), mock(VaadinConnectAccessChecker.class),
-                mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class), contextMock,
-                mockServletContext());
+        VaadinConnectController vaadinConnectController = createVaadinControllerWithApplicationContext(contextMock);
 
         int inputValue = 222;
         String expectedOutput = endpoint.testMethod(inputValue);
@@ -785,11 +795,8 @@ public class VaadinConnectControllerTest {
                 .thenReturn(Collections.singletonMap(beanName,
                         new TestClassWithCustomEndpointName()));
 
-        VaadinConnectController vaadinConnectController = new VaadinConnectController(
-                new ObjectMapper(), mock(VaadinConnectAccessChecker.class),
-                mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class), contextMock,
-                mockServletContext());
+        VaadinConnectController vaadinConnectController = createVaadinControllerWithApplicationContext(contextMock);
+        
         ResponseEntity<String> response = vaadinConnectController
                 .serveEndpoint("CustomEndpoint", "testMethod",
                         createRequestParameters(
@@ -811,11 +818,7 @@ public class VaadinConnectControllerTest {
                 Collections.singletonMap(endpoint.getClass().getSimpleName(),
                         proxy));
 
-        VaadinConnectController vaadinConnectController = new VaadinConnectController(
-                new ObjectMapper(), mock(VaadinConnectAccessChecker.class),
-                mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class), contextMock,
-                mockServletContext());
+        VaadinConnectController vaadinConnectController = createVaadinControllerWithApplicationContext(contextMock);
 
         int input = 111;
         String expectedOutput = endpoint.testMethod(input);
@@ -850,10 +853,8 @@ public class VaadinConnectControllerTest {
         when(mockJacksonProperties.getVisibility())
                 .thenReturn(Collections.emptyMap());
         new VaadinConnectController(null,
-                mock(VaadinConnectAccessChecker.class),
                 mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class), contextMock,
-                mockServletContext());
+                mock(ExplicitNullableTypeChecker.class), contextMock);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -884,10 +885,8 @@ public class VaadinConnectControllerTest {
                 .thenReturn(Collections.singletonMap(PropertyAccessor.ALL,
                         JsonAutoDetect.Visibility.PUBLIC_ONLY));
         new VaadinConnectController(null,
-                mock(VaadinConnectAccessChecker.class),
                 mock(EndpointNameChecker.class),
-                mock(ExplicitNullableTypeChecker.class), contextMock,
-                mockServletContext());
+                mock(ExplicitNullableTypeChecker.class), contextMock);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1172,12 +1171,6 @@ public class VaadinConnectControllerTest {
             VaadinConnectAccessChecker accessChecker,
             EndpointNameChecker endpointNameChecker,
             ExplicitNullableTypeChecker explicitNullableTypeChecker) {
-        Class<?> endpointClass = endpoint.getClass();
-
-        ApplicationContext contextMock = mock(ApplicationContext.class);
-        when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
-                Collections.singletonMap(endpointClass.getName(), endpoint));
-
         if (vaadinEndpointMapper == null) {
             vaadinEndpointMapper = new ObjectMapper();
         }
@@ -1201,17 +1194,30 @@ public class VaadinConnectControllerTest {
                     .thenReturn(null);
         }
 
-        ServletContext servletContext = mockServletContext();
-
-        return new VaadinConnectController(vaadinEndpointMapper, accessChecker,
-                endpointNameChecker, explicitNullableTypeChecker, contextMock,
-                servletContext);
+        ApplicationContext mockApplicationContext = mockApplicationContext(endpoint);
+        VaadinConnectController connectController = Mockito.spy(
+            new VaadinConnectController(vaadinEndpointMapper, endpointNameChecker, 
+                explicitNullableTypeChecker, mockApplicationContext)
+        );
+        Mockito.doReturn(accessChecker).when(connectController).getAccessChecker(any());
+        return connectController;
     }
 
     private VaadinConnectController createVaadinControllerWithoutPrincipal() {
         when(requestMock.getUserPrincipal()).thenReturn(null);
         return createVaadinController(TEST_ENDPOINT,
                 new VaadinConnectAccessChecker());
+    }
+
+    private VaadinConnectController createVaadinControllerWithApplicationContext(
+            ApplicationContext applicationContext) {
+        VaadinConnectControllerMockBuilder controllerMockBuilder 
+                = new VaadinConnectControllerMockBuilder();
+        VaadinConnectController vaadinConnectController = controllerMockBuilder
+                .withObjectMapper(new ObjectMapper())
+                .withApplicationContext(applicationContext)
+                .build();
+        return vaadinConnectController;
     }
 
     private Method createEndpointMethodMockThatThrows(Object argument,
@@ -1236,4 +1242,14 @@ public class VaadinConnectControllerTest {
                 .thenReturn(appConfig);
         return context;
     }
+
+    private <T> ApplicationContext mockApplicationContext(T endpoint) {
+        Class<?> endpointClass = endpoint.getClass();
+
+        ApplicationContext contextMock = mock(ApplicationContext.class);
+        when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
+            Collections.singletonMap(endpointClass.getName(), endpoint));
+        return contextMock;
+    }
+
 }

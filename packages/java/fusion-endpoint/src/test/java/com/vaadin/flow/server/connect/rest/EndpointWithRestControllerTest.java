@@ -34,17 +34,14 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.vaadin.flow.server.connect.EndpointNameChecker;
-import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
 import com.vaadin.flow.server.connect.VaadinConnectController;
-import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+import com.vaadin.flow.server.connect.VaadinConnectControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,12 +64,10 @@ public class EndpointWithRestControllerTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
+        VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
+        VaadinConnectController controller = controllerMockBuilder.withApplicationContext(applicationContext).build();
         mockMvcForEndpoint = MockMvcBuilders
-                .standaloneSetup(new VaadinConnectController(null,
-                        mock(VaadinConnectAccessChecker.class),
-                        mock(EndpointNameChecker.class),
-                        mock(ExplicitNullableTypeChecker.class),
-                        applicationContext, mockServletContext()))
+                .standaloneSetup(controller)
                 .build();
         Assert.assertNotEquals(null, applicationContext);
     }
