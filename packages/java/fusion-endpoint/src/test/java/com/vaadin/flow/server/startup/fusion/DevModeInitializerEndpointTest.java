@@ -2,17 +2,17 @@ package com.vaadin.flow.server.startup.fusion;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.io.FileUtils;
@@ -34,10 +34,10 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 
 import static com.vaadin.flow.server.Constants.CONNECT_JAVA_SOURCE_FOLDER_TOKEN;
-import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_PRODUCTION_MODE;
-import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_REUSE_DEV_SERVER;
+import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_JAVA_SOURCE_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_OPENAPI_JSON_FILE;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_GENERATED_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 
 @NotThreadSafe
 public class DevModeInitializerEndpointTest {
-    private final AtomicReference<DevModeHandler> atomicHandler = new AtomicReference<>();
 
     String baseDir;
     ServletContext servletContext;
@@ -62,10 +61,20 @@ public class DevModeInitializerEndpointTest {
     @Before
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void setup() throws Exception {
-        assertNull(getDevModeHandler());
+        assertNull("No DevModeHandler should be available at test start",
+            DevModeHandler.getDevModeHandler());
 
         temporaryFolder.create();
         baseDir = temporaryFolder.getRoot().getPath();
+
+        Files.write(new File(baseDir, "package.json").toPath(),
+            "{}".getBytes(StandardCharsets.UTF_8));
+
+        final File generatedDirectory = new File(baseDir, DEFAULT_GENERATED_DIR);
+        FileUtils.forceMkdir(generatedDirectory);
+
+        Files.write(new File(generatedDirectory, "package.json").toPath(),
+            "{}".getBytes(StandardCharsets.UTF_8));
 
         appConfig = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(appConfig.getStringProperty(Mockito.anyString(),
@@ -75,6 +84,10 @@ public class DevModeInitializerEndpointTest {
         Mockito.when(appConfig.getStringProperty(FrontendUtils.PROJECT_BASEDIR,
                 null)).thenReturn(baseDir);
         Mockito.when(appConfig.enableDevServer()).thenReturn(true);
+        Mockito.when(appConfig.isPnpmEnabled()).thenReturn(true);
+        Mockito.when(appConfig
+            .getBooleanProperty(Mockito.matches(SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE),
+                Mockito.anyBoolean())).thenReturn(false);
 
         servletContext = mockServletContext();
         ServletRegistration vaadinServletRegistration = Mockito
@@ -118,14 +131,16 @@ public class DevModeInitializerEndpointTest {
     }
 
     @After
-    public void teardown() throws Exception, SecurityException {
-        System.clearProperty("vaadin." + SERVLET_PARAMETER_PRODUCTION_MODE);
-        System.clearProperty("vaadin." + SERVLET_PARAMETER_REUSE_DEV_SERVER);
-        System.clearProperty("vaadin." + CONNECT_JAVA_SOURCE_FOLDER_TOKEN);
-
+    public void teardown() throws Exception {
         temporaryFolder.delete();
-        if (getDevModeHandler() != null) {
-            getDevModeHandler().stop();
+
+        final DevModeHandler devModeHandler = DevModeHandler.getDevModeHandler();
+        if (devModeHandler != null) {
+            devModeHandler.stop();
+            // Wait until dev mode handler has stopped.
+            while(DevModeHandler.getDevModeHandler() != null) {
+                Thread.sleep(200);
+            }
         }
     }
 
@@ -157,6 +172,7 @@ public class DevModeInitializerEndpointTest {
 
         Assert.assertFalse(generatedOpenApiJson.exists());
         devModeInitializer.process(classes, servletContext);
+        waitForDevModeServer();
         Assert.assertFalse(
                 "Should not generate OpenAPI spec if Endpoint is not used.",
                 generatedOpenApiJson.exists());
@@ -190,18 +206,9 @@ public class DevModeInitializerEndpointTest {
         assertTrue(ts2.exists());
     }
 
-    /**
-     * Get the instantiated DevModeHandler.
-     *
-     * @return devModeHandler or {@code null} if not started
-     */
-    private DevModeHandler getDevModeHandler() {
-        return atomicHandler.get();
-    }
-
     private void waitForDevModeServer()
             throws NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InterruptedException {
+            InvocationTargetException {
         DevModeHandler handler = DevModeHandler.getDevModeHandler();
         Assert.assertNotNull(handler);
         Method join = DevModeHandler.class.getDeclaredMethod("join");
