@@ -134,6 +134,12 @@
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-core</artifactId>
                 </exclusion>
+                <!-- Unncessary dependencies that might cause problems 
+                if user has a different version -->
+                <exclusion>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>mailapi</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
