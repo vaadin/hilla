@@ -1115,4 +1115,9 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             return isRequired;
         }
     }
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+        // Keep the same Java enum name in TS
+        return name;
+    }
 }
