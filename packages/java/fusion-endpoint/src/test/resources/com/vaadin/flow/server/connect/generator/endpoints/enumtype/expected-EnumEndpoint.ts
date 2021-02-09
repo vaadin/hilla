@@ -33,3 +33,10 @@ function _setEnum(
   return client.call('EnumEndpoint', 'setEnum', {value});
 }
 export {_setEnum as setEnum};
+
+export const EnumEndpoint = Object.freeze({
+  echoEnum: _echoEnum,
+  echoListEnum: _echoListEnum,
+  getEnum: _getEnum,
+  setEnum: _setEnum,
+});

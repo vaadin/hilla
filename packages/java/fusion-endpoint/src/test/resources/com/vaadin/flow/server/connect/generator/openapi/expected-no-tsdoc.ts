@@ -13,3 +13,7 @@ function _getAllUsers(): Promise<void> {
   return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
 }
 export {_getAllUsers as getAllUsers};
+
+export const GeneratorTestClass = Object.freeze({
+  getAllUsers: _getAllUsers,
+});

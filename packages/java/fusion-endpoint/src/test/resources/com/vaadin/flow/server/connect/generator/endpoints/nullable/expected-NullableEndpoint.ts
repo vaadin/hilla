@@ -11,14 +11,14 @@ import ParameterType from './com/vaadin/flow/server/connect/generator/endpoints/
 import ReturnType from './com/vaadin/flow/server/connect/generator/endpoints/nullable/NullableEndpoint/ReturnType';
 
 function _echoMap(
-  shouldBeNotNull: boolean
+    shouldBeNotNull: boolean
 ): Promise<{ [key: string]: NullableModel; }> {
   return client.call('NullableEndpoint', 'echoMap', {shouldBeNotNull});
 }
 export {_echoMap as echoMap};
 
 function _echoNonNullMode(
-  nullableModels: Array<NullableModel>
+    nullableModels: Array<NullableModel>
 ): Promise<NullableModel | undefined> {
   return client.call('NullableEndpoint', 'echoNonNullMode', {nullableModels});
 }
@@ -30,14 +30,14 @@ function _getNotNullReturnType(): Promise<ReturnType | undefined> {
 export {_getNotNullReturnType as getNotNullReturnType};
 
 function _getNullableString(
-  input?: string
+    input?: string
 ): Promise<string> {
   return client.call('NullableEndpoint', 'getNullableString', {input});
 }
 export {_getNullableString as getNullableString};
 
 function _sendParameterType(
-  parameterType?: ParameterType
+    parameterType?: ParameterType
 ): Promise<void> {
   return client.call('NullableEndpoint', 'sendParameterType', {parameterType});
 }
@@ -47,3 +47,12 @@ function _stringNullable(): Promise<string | undefined> {
   return client.call('NullableEndpoint', 'stringNullable');
 }
 export {_stringNullable as stringNullable};
+
+export const NullableEndpoint = Object.freeze({
+  echoMap: _echoMap,
+  echoNonNullMode: _echoNonNullMode,
+  getNotNullReturnType: _getNotNullReturnType,
+  getNullableString: _getNullableString,
+  sendParameterType: _sendParameterType,
+  stringNullable: _stringNullable,
+});

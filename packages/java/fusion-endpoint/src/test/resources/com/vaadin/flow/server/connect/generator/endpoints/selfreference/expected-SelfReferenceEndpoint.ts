@@ -12,3 +12,7 @@ function _getModel(): Promise<SelfReference> {
   return client.call('SelfReferenceEndpoint', 'getModel');
 }
 export {_getModel as getModel};
+
+export const SelfReferenceEndpoint = Object.freeze({
+  getModel: _getModel,
+});

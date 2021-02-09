@@ -25,8 +25,13 @@ export {_getListOfUserName as getListOfUserName};
  * Return a collection
  */
 function _getSameModelPackage(
-  name: string
+    name: string
 ): Promise<Account> {
   return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name});
 }
 export {_getSameModelPackage as getSameModelPackage};
+
+export const ModelPackageEndpoint = Object.freeze({
+  getListOfUserName: _getListOfUserName,
+  getSameModelPackage: _getSameModelPackage,
+});

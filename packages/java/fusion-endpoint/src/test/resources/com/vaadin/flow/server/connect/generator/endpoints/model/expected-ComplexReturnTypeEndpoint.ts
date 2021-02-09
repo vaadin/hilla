@@ -12,3 +12,7 @@ function _getAccounts(): Promise<Array<Account>> {
   return client.call('ComplexReturnTypeEndpoint', 'getAccounts');
 }
 export {_getAccounts as getAccounts};
+
+export const ComplexReturnTypeEndpoint = Object.freeze({
+  getAccounts: _getAccounts,
+});

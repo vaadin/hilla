@@ -23,3 +23,9 @@ function _permissionAltered2(): Promise<void> {
   return client.call('customName', 'permissionAltered2');
 }
 export {_permissionAltered2 as permissionAltered2};
+
+export const GeneratorAnonymousAllowedTestClass = Object.freeze({
+  anonymousAllowed: _anonymousAllowed,
+  permissionAltered1: _permissionAltered1,
+  permissionAltered2: _permissionAltered2,
+});

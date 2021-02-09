@@ -77,4 +77,10 @@ function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
 export {_<%vendorExtensions.x-vaadin-connect-method-name%> as <%vendorExtensions.x-vaadin-connect-method-name%>};
 <%={{ }}=%>
 {{/operation}}
+
+export const {{classname}} = Object.freeze({
+{{#operation}}
+  {{vendorExtensions.x-vaadin-connect-method-name}}: _{{vendorExtensions.x-vaadin-connect-method-name}},
+{{/operation}}
+});
 {{/operations}}

@@ -12,8 +12,12 @@ import ComplexRequest from './ComplexRequest';
 import ComplexResponse from './ComplexResponse';
 
 function _complexEntitiesTest(
-  request?: ComplexRequest
+    request?: ComplexRequest
 ): Promise<ComplexResponse> {
   return client.call('GeneratorTestClass', 'complexEntitiesTest', {request});
 }
 export {_complexEntitiesTest as complexEntitiesTest};
+
+export const GeneratorTestClass = Object.freeze({
+  complexEntitiesTest: _complexEntitiesTest,
+});

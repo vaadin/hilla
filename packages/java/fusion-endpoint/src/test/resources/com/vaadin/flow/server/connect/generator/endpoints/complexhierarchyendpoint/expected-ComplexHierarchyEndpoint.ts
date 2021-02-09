@@ -12,3 +12,7 @@ function _getModel(): Promise<Model> {
   return client.call('ComplexHierarchyEndpoint', 'getModel');
 }
 export {_getModel as getModel};
+
+export const ComplexHierarchyEndpoint = Object.freeze({
+  getModel: _getModel,
+});

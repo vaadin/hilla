@@ -9,22 +9,22 @@ import client from './connect-client.default';
 import Person from './com/vaadin/flow/server/connect/generator/endpoints/superclassmethods/PersonEndpoint/Person';
 
 function _delete(
-  id: number
+    id: number
 ): Promise<void> {
   return client.call('PersonEndpoint', 'delete', {id});
 }
 export {_delete as delete};
 
 function _get(
-  id: number
+    id: number
 ): Promise<Person | undefined> {
   return client.call('PersonEndpoint', 'get', {id});
 }
 export {_get as get};
 
 function _getPage(
-  pageSize: number,
-  pageNumber: number
+    pageSize: number,
+    pageNumber: number
 ): Promise<Array<Person>> {
   return client.call('PersonEndpoint', 'getPage', {pageSize, pageNumber});
 }
@@ -36,8 +36,16 @@ function _size(): Promise<number> {
 export {_size as size};
 
 function _update(
-  entity: Person
+    entity: Person
 ): Promise<Person> {
   return client.call('PersonEndpoint', 'update', {entity});
 }
 export {_update as update};
+
+export const PersonEndpoint = Object.freeze({
+  delete: _delete,
+  get: _get,
+  getPage: _getPage,
+  size: _size,
+  update: _update,
+});

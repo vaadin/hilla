@@ -17,3 +17,7 @@ function _getAllUsers(): Promise<Array<User>> {
   return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
 }
 export {_getAllUsers as getAllUsers};
+
+export const MyFirstTsClass = Object.freeze({
+  getAllUsers: _getAllUsers,
+});
