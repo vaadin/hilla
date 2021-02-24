@@ -161,7 +161,7 @@ class SchemaResolver {
     }
 
     private boolean isCollectionType(ResolvedType type) {
-        return !type.isPrimitive() && isTypeOf(type, Collection.class);
+        return !type.isPrimitive() && (isTypeOf(type, Collection.class) || isTypeOf(type, Iterable.class));
     }
 
     private boolean isMapType(ResolvedType type) {

@@ -35,8 +35,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -186,7 +186,11 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                     ((GenericArrayType) type).getGenericComponentType(),
                     typeArguments)).getClass();
         } else if (type instanceof TypeVariable) {
-            return typeArguments.get(((TypeVariable) type).getName());
+            Class<?> argument = typeArguments
+                    .get(((TypeVariable<?>) type).getName());
+            if (argument != null) {
+                return argument;
+            }
         }
 
         return Object.class;
@@ -288,11 +292,16 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                     expectedEndpointMethod.getGenericParameterTypes();
             Class<?>[] parameterTypes =
                     new Class<?>[genericParameterTypes.length];
+            List<HashMap<String, Class<?>>> parameterTypeArguments =
+                    new ArrayList<>();
             for (int i = 0; i < genericParameterTypes.length; i++) {
                 parameterTypes[i] = applyTypeArguments(genericParameterTypes[i],
                         typeArguments);
+                parameterTypeArguments.add(i, extractTypeArguments(
+                        genericParameterTypes[i], typeArguments));
             }
             assertRequestSchema(requestSchema, parameterTypes,
+                    parameterTypeArguments,
                     expectedEndpointMethod.getParameters());
         } else {
             assertNull(String.format(
@@ -309,10 +318,11 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                 "Every operation is expected to have a single '200' response",
                 apiResponse);
 
-        Class<?> returnType = applyTypeArguments(
-                expectedEndpointMethod.getGenericReturnType(), typeArguments);
+        Type genericReturnType = expectedEndpointMethod.getGenericReturnType();
+        Class<?> returnType = applyTypeArguments(genericReturnType, typeArguments);
         if (returnType != void.class) {
-            assertSchema(extractSchema(apiResponse.getContent()), returnType);
+            assertSchema(extractSchema(apiResponse.getContent()), returnType,
+                    extractTypeArguments(genericReturnType, typeArguments));
         } else {
             assertNull(String.format(
                     "No response is expected to be present for void method '%s'",
@@ -325,7 +335,9 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
     }
 
     private void assertRequestSchema(Schema requestSchema,
-            Class<?>[] parameterTypes, Parameter[] parameters) {
+            Class<?>[] parameterTypes,
+            List<HashMap<String, Class<?>>> parameterTypeArguments,
+            Parameter[] parameters) {
         Map<String, Schema> properties = requestSchema.getProperties();
         assertEquals(
                 "Request schema should have the same amount of properties as the corresponding endpoint method parameters number",
@@ -333,7 +345,8 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
         int index = 0;
         for (Map.Entry<String, Schema> stringSchemaEntry : properties
                 .entrySet()) {
-            assertSchema(stringSchemaEntry.getValue(), parameterTypes[index]);
+            assertSchema(stringSchemaEntry.getValue(), parameterTypes[index],
+                    parameterTypeArguments.get(index));
             List requiredList = requestSchema.getRequired();
             if (parameters[index].isAnnotationPresent(Nullable.class) ||
                     Optional.class.isAssignableFrom(parameters[index].getType())) {
@@ -365,15 +378,17 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
             assertNotNull(String.format(
                     "Expected to have a schema defined for a class '%s'",
                     expectedSchemaClass), actualSchema);
-            assertSchema(actualSchema, expectedSchemaClass);
+            assertSchema(actualSchema, expectedSchemaClass, new HashMap<>());
         }
         assertEquals("Expected to have all endpoint classes defined in schemas",
                 schemasCount, actualSchemas.size());
     }
 
     private void assertSchema(Schema actualSchema,
-            Class<?> expectedSchemaClass) {
-        if (assertSpecificJavaClassSchema(actualSchema, expectedSchemaClass)) {
+            Class<?> expectedSchemaClass,
+            HashMap<String, Class<?>> typeArguments) {
+        if (assertSpecificJavaClassSchema(actualSchema, expectedSchemaClass,
+                typeArguments)) {
             return;
         }
 
@@ -395,10 +410,15 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
             } else if (actualSchema instanceof ArraySchema) {
                 if (expectedSchemaClass.isArray()) {
                     assertSchema(((ArraySchema) actualSchema).getItems(),
-                            expectedSchemaClass.getComponentType());
+                            expectedSchemaClass.getComponentType(),
+                            typeArguments);
                 } else {
-                    assertTrue(Collection.class
+                    assertTrue(Iterable.class
                             .isAssignableFrom(expectedSchemaClass));
+                    Type itemType = expectedSchemaClass.getTypeParameters()[0];
+                    assertSchema(((ArraySchema) actualSchema).getItems(),
+                            applyTypeArguments(itemType, typeArguments),
+                            new HashMap<>());
                 }
             } else if (actualSchema instanceof MapSchema) {
                 assertTrue(Map.class.isAssignableFrom(expectedSchemaClass));
@@ -418,7 +438,8 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                     for (Schema schema : allOf) {
                         if (expectedSchemaClass.getCanonicalName()
                                 .equals(schema.getName())) {
-                            assertSchemaProperties(expectedSchemaClass, schema);
+                            assertSchemaProperties(expectedSchemaClass,
+                                    typeArguments, schema);
                             break;
                         }
                     }
@@ -429,7 +450,8 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                             allOf.get(0).getName());
                 }
             } else if (actualSchema instanceof ObjectSchema) {
-                assertSchemaProperties(expectedSchemaClass, actualSchema);
+                assertSchemaProperties(expectedSchemaClass, typeArguments,
+                        actualSchema);
             } else {
                 throw new AssertionError(
                         String.format("Unknown schema '%s' for class '%s'",
@@ -439,11 +461,19 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
     }
 
     private boolean assertSpecificJavaClassSchema(Schema actualSchema,
-            Class<?> expectedSchemaClass) {
+            Class<?> expectedSchemaClass,
+            HashMap<String, Class<?>> typeArguments) {
         if (expectedSchemaClass == Optional.class) {
             if (actualSchema instanceof ComposedSchema) {
+                ComposedSchema actualComposedSchema =
+                        (ComposedSchema) actualSchema;
                 assertEquals(1,
-                        ((ComposedSchema) actualSchema).getAllOf().size());
+                        actualComposedSchema.getAllOf().size());
+                assertSchema(((ComposedSchema) actualSchema).getAllOf().get(0),
+                        typeArguments
+                                .get(expectedSchemaClass.getTypeParameters()[0]
+                                        .getName()),
+                        new HashMap<>());
             }
         } else if (expectedSchemaClass == Object.class) {
             assertNull(actualSchema.getProperties());
@@ -457,7 +487,7 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
     }
 
     private void assertSchemaProperties(Class<?> expectedSchemaClass,
-            Schema schema) {
+            HashMap<String, Class<?>> typeArguments, Schema schema) {
         int expectedFieldsCount = 0;
         Map<String, Schema> properties = schema.getProperties();
         assertNotNull(properties);
@@ -476,7 +506,9 @@ public abstract class AbstractEndpointGenerationTest extends AbstractEndpointGen
                     .get(expectedSchemaField.getName());
             assertNotNull(String.format("Property schema is not found %s",
                     expectedSchemaField.getName()), propertySchema);
-            assertSchema(propertySchema, expectedSchemaField.getType());
+            Type type = expectedSchemaField.getGenericType();
+            assertSchema(propertySchema, expectedSchemaField.getType(),
+                    extractTypeArguments(type, typeArguments));
             if (Optional.class
                     .isAssignableFrom(expectedSchemaField.getType()) ||
                     expectedSchemaField.isAnnotationPresent(Nullable.class)) {
