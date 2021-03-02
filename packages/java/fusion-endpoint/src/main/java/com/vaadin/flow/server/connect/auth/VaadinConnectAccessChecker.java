@@ -24,6 +24,8 @@ import javax.servlet.http.HttpSession;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +160,10 @@ public class VaadinConnectAccessChecker {
             return true;
         }
 
-        if (!csrfTokenInSession.equals(request.getHeader("X-CSRF-Token"))) {
+        String csrfTokenInRequest = request.getHeader("X-CSRF-Token");
+        if (csrfTokenInRequest == null || !MessageDigest.isEqual(
+                csrfTokenInSession.getBytes(StandardCharsets.UTF_8), 
+                csrfTokenInRequest.getBytes(StandardCharsets.UTF_8))) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info("Invalid CSRF token in endpoint request");
             }
