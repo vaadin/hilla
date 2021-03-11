@@ -16,9 +16,11 @@
 package com.vaadin.flow.server.connect.generator;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -258,6 +260,16 @@ public class SchemaResolverTest {
         Assert.assertEquals(1, schemaResolver.getFoundTypes().size());
     }
 
+    @Test
+    public void should_ReturnBeanSchema_When_GivenTypeIsABeanImplementingIterable() {
+        ResolvedType resolvedType = mockReferencedTypeOf(TestIterableBean.class);
+        Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
+        Assert.assertTrue(schema instanceof ObjectSchema);
+        String beanRef = schemaResolver.getFullQualifiedNameRef(TestIterableBean.class.getCanonicalName());
+        Assert.assertEquals(beanRef, schema.get$ref());
+        Assert.assertEquals(1, schemaResolver.getFoundTypes().size());
+    }
+
     private ResolvedType mockReferencedTypeOf(Class clazz) {
         ResolvedType resolvedType = mock(ResolvedType.class);
         ResolvedReferenceType resolvedReferenceType = mock(
@@ -266,8 +278,15 @@ public class SchemaResolverTest {
         when(resolvedType.isPrimitive()).thenReturn(false);
         when(resolvedType.isReferenceType()).thenReturn(true);
         when(resolvedType.asReferenceType()).thenReturn(resolvedReferenceType);
-        when(resolvedReferenceType.getQualifiedName())
-                .thenReturn(clazz.getCanonicalName());
+        when(resolvedReferenceType.getQualifiedName()).thenReturn(clazz.getCanonicalName());
+        List<ResolvedReferenceType> ancestors = new ArrayList<>();
+        for (Class<?> c : clazz.getInterfaces()) {
+            ancestors.add(mockReferencedTypeOf(c).asReferenceType());
+        }
+        if (clazz.getSuperclass() != null) {
+            ancestors.add(mockReferencedTypeOf(clazz.getSuperclass()).asReferenceType());
+        }
+        when(resolvedReferenceType.getAllAncestors()).thenReturn(ancestors);
         return resolvedType;
     }
 
@@ -283,4 +302,13 @@ public class SchemaResolverTest {
     private static class TestBean {
         String foo;
     }
+
+    private static class TestIterableBean implements Iterable<String> {
+        String foo;
+        @Override
+        public Iterator<String> iterator() {
+            return Collections.emptyIterator();
+        }
+    }
+
 }
