@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +36,6 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
-import com.vaadin.flow.server.frontend.FrontendUtils;
 import io.swagger.codegen.v3.ClientOptInput;
 import io.swagger.codegen.v3.CodegenModel;
 import io.swagger.codegen.v3.CodegenOperation;
@@ -70,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.connect.EndpointNameChecker;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 import static com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator.CONSTRAINT_ANNOTATIONS;
 
@@ -311,6 +312,10 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             for (File child : children) {
                 emptyFolders.addAll(getEmptyFolders(child));
             }
+            // Include parent when all children are empty
+            if (emptyFolders.containsAll(Arrays.asList(children))) {
+                emptyFolders.add(file);
+            }
         }
         return emptyFolders;
     }
@@ -326,10 +331,30 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
     }
 
     private static boolean shouldDelete(Set<File> generatedFiles, File file) {
-        return !generatedFiles.contains(file)
-                && !VaadinConnectClientGenerator.CONNECT_CLIENT_NAME
-                        .equals(file.getName())
-                && !FrontendUtils.BOOTSTRAP_FILE_NAME.equals(file.getName());
+        // Keep TypeScript files generated here
+        if (generatedFiles.contains(file)) {
+            return false;
+        }
+
+        // Keep default connect client
+        final String fileName = file.getName();
+        if (fileName.equals(VaadinConnectClientGenerator.CONNECT_CLIENT_NAME)) {
+            return false;
+        }
+
+        // Keep boostrap entrypoint
+        if (fileName.equals(FrontendUtils.BOOTSTRAP_FILE_NAME)) {
+            return false;
+        }
+
+        // Keep generated theme imports
+        if (fileName.equals(FrontendUtils.THEME_IMPORTS_NAME)
+                || fileName.equals(FrontendUtils.THEME_IMPORTS_D_TS_NAME)
+                || fileName.endsWith(".generated.js")) {
+            return false;
+        }
+
+        return true;
     }
 
     private static IllegalStateException getUnexpectedOpenAPIException(
@@ -571,7 +596,7 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             String arrayTypeName = matcher.group(1);
             boolean arrayTypeOptional = arrayTypeName.endsWith(OPTIONAL_SUFFIX);
             arrayTypeName = removeOptionalSuffix(arrayTypeName);
-            arguments.add(getModelVariableArguments(arrayTypeName, arrayTypeOptional, 
+            arguments.add(getModelVariableArguments(arrayTypeName, arrayTypeOptional,
                 Collections.emptyList()));
         }
         if (!constrainArguments.isEmpty()) {
@@ -730,7 +755,6 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
         codegenModel.setImports(imports);
         return codegenModel;
     }
-
 
     private void printDebugMessage(Object data, String message) {
         if (isDebugConnectMavenPlugin()) {
