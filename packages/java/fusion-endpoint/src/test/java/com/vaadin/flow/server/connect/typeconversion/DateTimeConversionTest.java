@@ -81,7 +81,7 @@ public class DateTimeConversionTest extends BaseTypeConversionTest {
         String inputTime = "\"12:12:12\"";
         String expectedTimestamp = "\"13:12:12\"";
         assertEqualExpectedValueWhenCallingMethod("addOneHourLocalTime",
-        inputTime, expectedTimestamp);
+                inputTime, expectedTimestamp);
     }
 
     @Test

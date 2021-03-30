@@ -57,7 +57,8 @@ public final class TestUtils {
         equalsIgnoreWhiteSpaces(null, expected, actual);
     }
 
-    public static void equalsIgnoreWhiteSpaces(String msg, String expected, String actual) {
+    public static void equalsIgnoreWhiteSpaces(String msg, String expected,
+            String actual) {
         Assert.assertEquals(msg, expected.replaceAll("\\s+", " ").trim(),
                 actual.replaceAll("\\s++", " ").trim());
     }

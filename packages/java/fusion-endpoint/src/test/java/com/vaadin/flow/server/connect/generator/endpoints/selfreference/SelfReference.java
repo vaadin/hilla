@@ -16,22 +16,22 @@
 package com.vaadin.flow.server.connect.generator.endpoints.selfreference;
 
 public class SelfReference {
-  private String name;
-  private SelfReference[] children;
+    private String name;
+    private SelfReference[] children;
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public SelfReference[] getChildren() {
-    return children;
-  }
+    public SelfReference[] getChildren() {
+        return children;
+    }
 
-  public void setChildren(SelfReference[] children) {
-    this.children = children;
-  }
+    public void setChildren(SelfReference[] children) {
+        this.children = children;
+    }
 }

@@ -54,10 +54,9 @@ public abstract class BaseTypeConversionTest {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
         VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
-        VaadinConnectController controller = controllerMockBuilder.withApplicationContext(applicationContext).build();
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
+        VaadinConnectController controller = controllerMockBuilder
+                .withApplicationContext(applicationContext).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Assert.assertNotEquals(null, applicationContext);
     }
 

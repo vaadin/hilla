@@ -101,8 +101,8 @@ public class VaadinConnectController {
     /**
      * A qualifier to override the request and response default json mapper.
      *
-     * @see #VaadinConnectController(ObjectMapper, EndpointNameChecker, 
-     *       ExplicitNullableTypeChecker, ApplicationContext)
+     * @see #VaadinConnectController(ObjectMapper, EndpointNameChecker,
+     *      ExplicitNullableTypeChecker, ApplicationContext)
      */
     public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
 
@@ -285,7 +285,8 @@ public class VaadinConnectController {
             String endpointName, String methodName, Method methodToInvoke,
             ObjectNode body, VaadinEndpointData vaadinEndpointData,
             HttpServletRequest request) throws JsonProcessingException {
-        VaadinConnectAccessChecker accessChecker = getAccessChecker(request.getServletContext());
+        VaadinConnectAccessChecker accessChecker = getAccessChecker(
+                request.getServletContext());
         String checkError = accessChecker.check(methodToInvoke, request);
         if (checkError != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -563,8 +564,8 @@ public class VaadinConnectController {
                 servletContext);
         VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext
                 .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
-                    VaadinConnectAccessChecker accessChecker = 
-                        applicationContext.getBean(VaadinConnectAccessChecker.class);
+                    VaadinConnectAccessChecker accessChecker = applicationContext
+                            .getBean(VaadinConnectAccessChecker.class);
                     ApplicationConfiguration cfg = ApplicationConfiguration
                             .get(vaadinServletContext);
                     if (cfg != null) {

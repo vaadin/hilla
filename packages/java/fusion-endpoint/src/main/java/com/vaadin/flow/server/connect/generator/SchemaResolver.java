@@ -110,7 +110,8 @@ class SchemaResolver {
         } else {
             ComposedSchema nullableSchema = new ComposedSchema();
             nullableSchema.setNullable(true);
-            nullableSchema.setAllOf(Collections.singletonList(nestedTypeSchema));
+            nullableSchema
+                    .setAllOf(Collections.singletonList(nestedTypeSchema));
             return nullableSchema;
         }
     }
@@ -141,8 +142,8 @@ class SchemaResolver {
     }
 
     private boolean isDateTimeType(ResolvedType resolvedType) {
-        return resolvedType.isReferenceType()
-                && isTypeOf(resolvedType, LocalDateTime.class, Instant.class, LocalTime.class);
+        return resolvedType.isReferenceType() && isTypeOf(resolvedType,
+                LocalDateTime.class, Instant.class, LocalTime.class);
     }
 
     private boolean isDateType(ResolvedType resolvedType) {
@@ -161,7 +162,8 @@ class SchemaResolver {
     }
 
     private boolean isCollectionType(ResolvedType type) {
-        return !type.isPrimitive() && (isTypeOf(type, Collection.class) || isType(type, Iterable.class));
+        return !type.isPrimitive() && (isTypeOf(type, Collection.class)
+                || isType(type, Iterable.class));
     }
 
     private boolean isMapType(ResolvedType type) {
@@ -197,7 +199,8 @@ class SchemaResolver {
         if (!type.isReferenceType()) {
             return false;
         }
-        return clazz.getName().equals(type.asReferenceType().getQualifiedName());
+        return clazz.getName()
+                .equals(type.asReferenceType().getQualifiedName());
     }
 
     /**
@@ -207,7 +210,8 @@ class SchemaResolver {
      *            type type to check
      * @param clazz
      *            the classes to match with
-     * @return true if the type can be cast to one of the given classes, false otherwise
+     * @return true if the type can be cast to one of the given classes, false
+     *         otherwise
      */
     private boolean isTypeOf(ResolvedType type, Class<?>... clazz) {
         if (!type.isReferenceType()) {
@@ -223,8 +227,8 @@ class SchemaResolver {
 
     private Schema createEnumTypeSchema(ResolvedType resolvedType) {
         ResolvedReferenceType type = resolvedType.asReferenceType();
-        List<String> entries = type
-                .getTypeDeclaration().asEnum().getEnumConstants().stream()
+        List<String> entries = type.getTypeDeclaration().asEnum()
+                .getEnumConstants().stream()
                 .map(ResolvedEnumConstantDeclaration::getName)
                 .collect(Collectors.toList());
         String qualifiedName = type.getQualifiedName();

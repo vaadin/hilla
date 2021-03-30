@@ -55,15 +55,17 @@ public class TaskGenerateOpenApiTest {
                 .newFile("application.properties");
         generatedOpenAPI = new File(temporaryFolder.newFolder(),
                 "generated-openapi.json");
-        javaSource = new File(getClass().getClassLoader().getResource("java").getFile());
+        javaSource = new File(
+                getClass().getClassLoader().getResource("java").getFile());
     }
 
     @Test
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
-        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(applicationPropertiesFile, javaSource, 
-                        this.getClass().getClassLoader(),generatedOpenAPI);
-        
+        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(
+                applicationPropertiesFile, javaSource,
+                this.getClass().getClassLoader(), generatedOpenAPI);
+
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
@@ -116,9 +118,10 @@ public class TaskGenerateOpenApiTest {
         FileUtils.writeStringToFile(applicationPropertiesFile,
                 applicationPropertiesBuilder.toString(),
                 StandardCharsets.UTF_8);
-        
-        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(applicationPropertiesFile, javaSource, 
-                        this.getClass().getClassLoader(),generatedOpenAPI);
+
+        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(
+                applicationPropertiesFile, javaSource,
+                this.getClass().getClassLoader(), generatedOpenAPI);
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
@@ -135,8 +138,7 @@ public class TaskGenerateOpenApiTest {
         Assert.assertEquals("Generated OpenAPI should a defined server", 1,
                 servers.size());
         Assert.assertEquals("Generated OpenAPI should use given url server",
-                applicationServer + applicationPrefix,
-                servers.get(0).getUrl());
+                applicationServer + applicationPrefix, servers.get(0).getUrl());
 
         Assert.assertEquals(
                 "Generated OpenAPI should use given server description",
@@ -146,31 +148,41 @@ public class TaskGenerateOpenApiTest {
     @Test
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
-        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(applicationPropertiesFile, javaSource, 
-                        this.getClass().getClassLoader(),generatedOpenAPI);
+        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(
+                applicationPropertiesFile, javaSource,
+                this.getClass().getClassLoader(), generatedOpenAPI);
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
 
-        Assert.assertTrue(generatedOpenAPI.getPaths().containsKey("/CustomEndpointName/bar"));
-        Assert.assertFalse(generatedOpenAPI.getPaths().containsKey("/CustomEndpoint/bar"));
-        Assert.assertTrue(generatedOpenAPI.getPaths().containsKey("/CustomEndpointName/foo"));
-        Assert.assertFalse(generatedOpenAPI.getPaths().containsKey("/CustomEndpoint/foo"));
+        Assert.assertTrue(generatedOpenAPI.getPaths()
+                .containsKey("/CustomEndpointName/bar"));
+        Assert.assertFalse(
+                generatedOpenAPI.getPaths().containsKey("/CustomEndpoint/bar"));
+        Assert.assertTrue(generatedOpenAPI.getPaths()
+                .containsKey("/CustomEndpointName/foo"));
+        Assert.assertFalse(
+                generatedOpenAPI.getPaths().containsKey("/CustomEndpoint/foo"));
     }
 
     @Test
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
-        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(applicationPropertiesFile, javaSource, 
-                        this.getClass().getClassLoader(),generatedOpenAPI);
+        taskGenerateOpenApi = new TaskGenerateOpenApiImpl(
+                applicationPropertiesFile, javaSource,
+                this.getClass().getClassLoader(), generatedOpenAPI);
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
 
-        Assert.assertTrue(generatedOpenAPI.getPaths().containsKey("/WithoutValueEqual/bar"));
-        Assert.assertFalse(generatedOpenAPI.getPaths().containsKey("/EndpointNoValue/bar"));
-        Assert.assertTrue(generatedOpenAPI.getPaths().containsKey("/WithoutValueEqual/foo"));
-        Assert.assertFalse(generatedOpenAPI.getPaths().containsKey("/EndpointNoValue/foo"));
+        Assert.assertTrue(generatedOpenAPI.getPaths()
+                .containsKey("/WithoutValueEqual/bar"));
+        Assert.assertFalse(generatedOpenAPI.getPaths()
+                .containsKey("/EndpointNoValue/bar"));
+        Assert.assertTrue(generatedOpenAPI.getPaths()
+                .containsKey("/WithoutValueEqual/foo"));
+        Assert.assertFalse(generatedOpenAPI.getPaths()
+                .containsKey("/EndpointNoValue/foo"));
     }
 
     private OpenAPI getGeneratedOpenAPI() throws IOException {

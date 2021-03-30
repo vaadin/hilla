@@ -62,19 +62,20 @@ public class DevModeInitializerEndpointTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void setup() throws Exception {
         assertNull("No DevModeHandler should be available at test start",
-            DevModeHandler.getDevModeHandler());
+                DevModeHandler.getDevModeHandler());
 
         temporaryFolder.create();
         baseDir = temporaryFolder.getRoot().getPath();
 
         Files.write(new File(baseDir, "package.json").toPath(),
-            "{}".getBytes(StandardCharsets.UTF_8));
+                "{}".getBytes(StandardCharsets.UTF_8));
 
-        final File generatedDirectory = new File(baseDir, DEFAULT_GENERATED_DIR);
+        final File generatedDirectory = new File(baseDir,
+                DEFAULT_GENERATED_DIR);
         FileUtils.forceMkdir(generatedDirectory);
 
         Files.write(new File(generatedDirectory, "package.json").toPath(),
-            "{}".getBytes(StandardCharsets.UTF_8));
+                "{}".getBytes(StandardCharsets.UTF_8));
 
         appConfig = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(appConfig.getStringProperty(Mockito.anyString(),
@@ -85,8 +86,8 @@ public class DevModeInitializerEndpointTest {
                 null)).thenReturn(baseDir);
         Mockito.when(appConfig.enableDevServer()).thenReturn(true);
         Mockito.when(appConfig.isPnpmEnabled()).thenReturn(true);
-        Mockito.when(appConfig
-            .getBooleanProperty(Mockito.matches(SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE),
+        Mockito.when(appConfig.getBooleanProperty(
+                Mockito.matches(SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE),
                 Mockito.anyBoolean())).thenReturn(false);
 
         servletContext = mockServletContext();
@@ -134,11 +135,12 @@ public class DevModeInitializerEndpointTest {
     public void teardown() throws Exception {
         temporaryFolder.delete();
 
-        final DevModeHandler devModeHandler = DevModeHandler.getDevModeHandler();
+        final DevModeHandler devModeHandler = DevModeHandler
+                .getDevModeHandler();
         if (devModeHandler != null) {
             devModeHandler.stop();
             // Wait until dev mode handler has stopped.
-            while(DevModeHandler.getDevModeHandler() != null) {
+            while (DevModeHandler.getDevModeHandler() != null) {
                 Thread.sleep(200);
             }
         }
@@ -194,9 +196,8 @@ public class DevModeInitializerEndpointTest {
 
         File ts1 = new File(baseDir,
                 DEFAULT_PROJECT_FRONTEND_GENERATED_DIR + "MyEndpoint.ts");
-        File ts2 = new File(baseDir,
-                DEFAULT_PROJECT_FRONTEND_GENERATED_DIR
-                        + "connect-client.default.ts");
+        File ts2 = new File(baseDir, DEFAULT_PROJECT_FRONTEND_GENERATED_DIR
+                + "connect-client.default.ts");
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
@@ -206,9 +207,8 @@ public class DevModeInitializerEndpointTest {
         assertTrue(ts2.exists());
     }
 
-    private void waitForDevModeServer()
-            throws NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException {
+    private void waitForDevModeServer() throws NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException {
         DevModeHandler handler = DevModeHandler.getDevModeHandler();
         Assert.assertNotNull(handler);
         Method join = DevModeHandler.class.getDeclaredMethod("join");

@@ -366,10 +366,11 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull("Method with @Id annotation should allow null value",
                 error);
 
-        error = explicitNullableTypeChecker.checkValueForAnnotatedElement(
-                1l, getClass().getMethod("methodWithIdAnnotation"));
+        error = explicitNullableTypeChecker.checkValueForAnnotatedElement(1l,
+                getClass().getMethod("methodWithIdAnnotation"));
 
-        Assert.assertNull("Method with @Id annotation should allow non-null value",
+        Assert.assertNull(
+                "Method with @Id annotation should allow non-null value",
                 error);
     }
 
@@ -385,7 +386,7 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull("Should allow not null value", error);
 
         verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
-            String.class);
+                String.class);
     }
 
     @Test
@@ -409,9 +410,11 @@ public class ExplicitNullableTypeCheckerTest {
         company.setId(1);
         company.setEmployees(Arrays.asList(employee));
 
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(employee, Employee.class));
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(employee, Employee.class));
 
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(company, Company.class));
+        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(company,
+                Company.class));
     }
 
     public List<String> parametrizedListMethod(String... args) {
@@ -483,7 +486,7 @@ public class ExplicitNullableTypeCheckerTest {
         public ID getId() {
             return id;
         }
-    
+
         public void setId(ID id) {
             this.id = id;
         }

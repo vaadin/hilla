@@ -249,6 +249,7 @@ public class VaadinConnectTypeConversionEndpoints {
 
     public enum TestEnum {
         FIRST(1), SECOND(2), THIRD(3);
+
         private final int value;
 
         TestEnum(int value) {

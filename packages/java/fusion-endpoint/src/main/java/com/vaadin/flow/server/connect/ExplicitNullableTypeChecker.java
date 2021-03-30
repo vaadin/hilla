@@ -43,17 +43,19 @@ public class ExplicitNullableTypeChecker {
      */
     public String checkValueForAnnotatedElement(Object value,
             AnnotatedElement annotatedElement) {
-        if (annotatedElement.isAnnotationPresent(Nullable.class)
-                || ReflectTools.hasAnnotationWithSimpleName(annotatedElement, "Id")) {
+        if (annotatedElement.isAnnotationPresent(Nullable.class) || ReflectTools
+                .hasAnnotationWithSimpleName(annotatedElement, "Id")) {
             return null;
         }
         if (annotatedElement instanceof Method) {
-            return checkValueForType(value, ((Method) annotatedElement).getGenericReturnType());
+            return checkValueForType(value,
+                    ((Method) annotatedElement).getGenericReturnType());
         }
         return null;
     }
 
     String checkValueForType(Object value, Type expectedType) {
-        return new ExplicitNullableTypeCheckerHelper().checkValueForType(value, expectedType);
+        return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
+                expectedType);
     }
 }

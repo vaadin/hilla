@@ -29,11 +29,10 @@ public class TaskGenerateConnectTest {
     @Before
     public void setUp() throws IOException {
         outputDirectory = temporaryFolder.newFolder();
-        properties = temporaryFolder
-                .newFile("application.properties");
+        properties = temporaryFolder.newFile("application.properties");
         openApiJson = new File(getClass().getResource(
-                "../../connect/generator/openapi/esmodule-generator" +
-                        "-TwoEndpointsThreeMethods.json")
+                "../../connect/generator/openapi/esmodule-generator"
+                        + "-TwoEndpointsThreeMethods.json")
                 .getPath());
     }
 
@@ -48,7 +47,8 @@ public class TaskGenerateConnectTest {
         assertFalse(ts2.exists());
         assertFalse(client.exists());
 
-        taskGenerateConnectTs = new TaskGenerateConnectImpl(properties, openApiJson, outputDirectory, frontendDirectory);
+        taskGenerateConnectTs = new TaskGenerateConnectImpl(properties,
+                openApiJson, outputDirectory, frontendDirectory);
         taskGenerateConnectTs.execute();
 
         assertTrue(ts1.exists());
@@ -56,28 +56,29 @@ public class TaskGenerateConnectTest {
         assertTrue(client.exists());
 
         String output = FileUtils.readFileToString(client, "UTF-8");
-        assertTrue(output
-                .contains("import {ConnectClient} from '@vaadin/flow-frontend/Connect';"));
+        assertTrue(output.contains(
+                "import {ConnectClient} from '@vaadin/flow-frontend/Connect';"));
         assertTrue(output.contains(
                 "const client = new ConnectClient({prefix: 'connect'});"));
         assertTrue(output.contains("export default client;"));
     }
 
     @Test
-    public void should_use_custom_endpoint_name_when_connect_client_exists() throws Exception {
+    public void should_use_custom_endpoint_name_when_connect_client_exists()
+            throws Exception {
         File ts1 = new File(outputDirectory, "FooBarEndpoint.ts");
         File ts2 = new File(outputDirectory, "FooFooEndpoint.ts");
         File client = new File(outputDirectory, "connect-client.default.ts");
         File frontendDirectory = outputDirectory.getParentFile();
-        File customConnectClient = temporaryFolder
-                .newFile("connect-client.ts");
+        File customConnectClient = temporaryFolder.newFile("connect-client.ts");
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
         assertFalse(client.exists());
         assertTrue(customConnectClient.exists());
 
-        taskGenerateConnectTs = new TaskGenerateConnectImpl(properties, openApiJson, outputDirectory, frontendDirectory);
+        taskGenerateConnectTs = new TaskGenerateConnectImpl(properties,
+                openApiJson, outputDirectory, frontendDirectory);
         taskGenerateConnectTs.execute();
 
         assertTrue(ts1.exists());
@@ -86,7 +87,9 @@ public class TaskGenerateConnectTest {
 
         String outputEndpoinTs1 = FileUtils.readFileToString(ts1, "UTF-8");
         String outputEndpoinTs2 = FileUtils.readFileToString(ts2, "UTF-8");
-        assertThat(outputEndpoinTs1, containsString("import client from '../connect-client'"));
-        assertThat(outputEndpoinTs2, containsString("import client from '../connect-client'"));
+        assertThat(outputEndpoinTs1,
+                containsString("import client from '../connect-client'"));
+        assertThat(outputEndpoinTs2,
+                containsString("import client from '../connect-client'"));
     }
 }

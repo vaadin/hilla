@@ -47,8 +47,7 @@ public class IntegerConversionTest extends BaseTypeConversionTest {
     @Test
     public void should_FailToConvertOverflowInteger_When_ReceiveOverflowNumber() {
         String overflowInputInteger = "2147483648";
-        assert400ResponseWhenCallingMethod("addOneInt",
-                overflowInputInteger);
+        assert400ResponseWhenCallingMethod("addOneInt", overflowInputInteger);
         assert400ResponseWhenCallingMethod("addOneIntBoxed",
                 overflowInputInteger);
 

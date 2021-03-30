@@ -20,7 +20,7 @@ import com.vaadin.flow.server.connect.Endpoint;
 @Endpoint
 public class SelfReferenceEndpoint {
 
-  public SelfReference getModel() {
-    return new SelfReference();
-  }
+    public SelfReference getModel() {
+        return new SelfReference();
+    }
 }

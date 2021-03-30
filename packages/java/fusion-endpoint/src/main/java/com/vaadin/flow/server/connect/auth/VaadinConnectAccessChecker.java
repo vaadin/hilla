@@ -162,7 +162,7 @@ public class VaadinConnectAccessChecker {
 
         String csrfTokenInRequest = request.getHeader("X-CSRF-Token");
         if (csrfTokenInRequest == null || !MessageDigest.isEqual(
-                csrfTokenInSession.getBytes(StandardCharsets.UTF_8), 
+                csrfTokenInSession.getBytes(StandardCharsets.UTF_8),
                 csrfTokenInRequest.getBytes(StandardCharsets.UTF_8))) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info("Invalid CSRF token in endpoint request");
@@ -207,7 +207,8 @@ public class VaadinConnectAccessChecker {
     /**
      * Enable or disable XSRF token checking in endpoints.
      *
-     * @param xsrfProtectionEnabled enable or disable protection.
+     * @param xsrfProtectionEnabled
+     *            enable or disable protection.
      */
     public void enableCsrf(boolean xsrfProtectionEnabled) {
         this.xsrfProtectionEnabled = xsrfProtectionEnabled;

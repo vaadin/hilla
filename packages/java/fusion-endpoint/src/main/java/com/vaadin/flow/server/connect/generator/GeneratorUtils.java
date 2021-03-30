@@ -28,7 +28,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
  * external libraries for these operations.
  */
 final class GeneratorUtils {
-    
+
     private GeneratorUtils() {
     }
 
@@ -46,7 +46,7 @@ final class GeneratorUtils {
     }
 
     static boolean isBlank(String s) {
-        return s == null || s.replaceAll("\\s+","").isEmpty();
+        return s == null || s.replaceAll("\\s+", "").isEmpty();
     }
 
     static boolean isNotBlank(String s) {
@@ -69,11 +69,11 @@ final class GeneratorUtils {
     static <T> T defaultIfNull(T o, T def) {
         return o != null ? o : def;
     }
-    
+
     static String replaceChars(String s, char c1, final char c2) {
         return s == null ? s : s.replace(c1, c2);
     }
-    
+
     @SuppressWarnings("squid:S2259")
     static boolean contains(String s, String p) {
         return isNotBlank(s) && isNotBlank(p) && s.contains(p);
@@ -104,12 +104,15 @@ final class GeneratorUtils {
         return endsWith(s, p) ? s.substring(0, s.lastIndexOf(p)) : s;
     }
 
-    static boolean hasAnnotation(NodeWithAnnotations<?> declaration, CompilationUnit compilationUnit,
+    static boolean hasAnnotation(NodeWithAnnotations<?> declaration,
+            CompilationUnit compilationUnit,
             Class<? extends Annotation> annotation) {
-        Optional<AnnotationExpr> endpointAnnotation = declaration.getAnnotationByClass(annotation);
+        Optional<AnnotationExpr> endpointAnnotation = declaration
+                .getAnnotationByClass(annotation);
         if (endpointAnnotation.isPresent()) {
             return compilationUnit.getImports().stream()
-                    .anyMatch(importDeclaration -> annotation.getName().equals(importDeclaration.getNameAsString())); // NOSONAR
+                    .anyMatch(importDeclaration -> annotation.getName()
+                            .equals(importDeclaration.getNameAsString())); // NOSONAR
         }
         return false;
     }

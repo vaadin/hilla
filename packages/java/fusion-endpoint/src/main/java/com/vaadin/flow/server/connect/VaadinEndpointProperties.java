@@ -30,9 +30,8 @@ public class VaadinEndpointProperties {
     private String vaadinEndpointPrefix;
 
     /**
-     * Customize the prefix for all Vaadin endpoints. See default value
-     * in the {@link VaadinEndpointProperties#vaadinEndpointPrefix} field
-     * annotation.
+     * Customize the prefix for all Vaadin endpoints. See default value in the
+     * {@link VaadinEndpointProperties#vaadinEndpointPrefix} field annotation.
      *
      * @return prefix that should be used to access any Vaadin endpoint
      */

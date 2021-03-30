@@ -24,7 +24,8 @@ import com.vaadin.flow.server.connect.generator.endpoints.model.subpackage.Model
 
 public class ModelEndpointTest extends AbstractEndpointGenerationTest {
     public ModelEndpointTest() {
-        super(Arrays.asList(ModelEndpoint.class, ModelFromDifferentPackage.class,
+        super(Arrays.asList(ModelEndpoint.class,
+                ModelFromDifferentPackage.class,
                 ComplexTypeParamsEndpoint.class,
                 ComplexReturnTypeEndpoint.class));
     }

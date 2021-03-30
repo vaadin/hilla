@@ -41,33 +41,35 @@ public class NodeTasksEndpointTest {
 
     @Test
     public void should_Generate_Connect_Files() throws Exception {
-        File src = new File(getClass().getClassLoader().getResource("java").getFile());
+        File src = new File(
+                getClass().getClassLoader().getResource("java").getFile());
         File dir = new File(userDir);
         File json = new File(dir, "api-file.json");
 
         Lookup mockLookup = Mockito.mock(Lookup.class);
-        Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl()).when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
+        Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
+                .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
         Mockito.doReturn(new DefaultClassFinder(
-            Collections.singleton(ConnectEndpointsForTesting.class))).when(mockLookup).lookup(ClassFinder.class);
+                Collections.singleton(ConnectEndpointsForTesting.class)))
+                .when(mockLookup).lookup(ClassFinder.class);
         Builder builder = new Builder(mockLookup, dir)
-                        .enablePackagesUpdate(false)
-                        .enableImportsUpdate(false)
-                        .withEmbeddableWebComponents(false)
-                        .withConnectJavaSourceFolder(src)
-                        .withConnectGeneratedOpenApiJson(json)
-                        .withConnectClientTsApiFolder(new File(dir, "api"));
+                .enablePackagesUpdate(false).enableImportsUpdate(false)
+                .withEmbeddableWebComponents(false)
+                .withConnectJavaSourceFolder(src)
+                .withConnectGeneratedOpenApiJson(json)
+                .withConnectClientTsApiFolder(new File(dir, "api"));
 
         builder.build().execute();
 
         Arrays.asList(
                 // enableClientSide
-                "target/index.html",
-                "target/index.ts",
-                // withConnectJavaSourceFolder and withConnectGeneratedOpenApiJson
+                "target/index.html", "target/index.ts",
+                // withConnectJavaSourceFolder and
+                // withConnectGeneratedOpenApiJson
                 "api-file.json",
                 // withConnectClientTsApiFolder
-                "api/connect-client.default.ts",
-                "api/MyEndpoint.ts")
-                .forEach(name -> assertTrue(name + " not created.", new File(dir, name).exists()));
+                "api/connect-client.default.ts", "api/MyEndpoint.ts")
+                .forEach(name -> assertTrue(name + " not created.",
+                        new File(dir, name).exists()));
     }
 }

@@ -22,12 +22,12 @@ import org.junit.Test;
 
 public class SelfReferenceTest extends AbstractEndpointGenerationTest {
 
-  public SelfReferenceTest() {
-    super(Arrays.asList(SelfReferenceEndpoint.class, SelfReference.class));
-  }
+    public SelfReferenceTest() {
+        super(Arrays.asList(SelfReferenceEndpoint.class, SelfReference.class));
+    }
 
-  @Test
-  public void should_NotImportSelfInTS_When_ReferencingSelfInModel() {
-    verifyOpenApiObjectAndGeneratedTs();
-  }
+    @Test
+    public void should_NotImportSelfInTS_When_ReferencingSelfInModel() {
+        verifyOpenApiObjectAndGeneratedTs();
+    }
 }

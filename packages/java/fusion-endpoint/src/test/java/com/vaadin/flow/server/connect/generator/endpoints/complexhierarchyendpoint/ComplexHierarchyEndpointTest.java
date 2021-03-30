@@ -24,7 +24,8 @@ import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.
 import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
 import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
 
-public class ComplexHierarchyEndpointTest extends AbstractEndpointGenerationTest {
+public class ComplexHierarchyEndpointTest
+        extends AbstractEndpointGenerationTest {
     public ComplexHierarchyEndpointTest() {
         super(Arrays.asList(ComplexHierarchyEndpoint.class, Model.class,
                 ParentModel.class, GrandParentModel.class));

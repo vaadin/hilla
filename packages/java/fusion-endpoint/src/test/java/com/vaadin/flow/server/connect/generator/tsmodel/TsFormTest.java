@@ -56,16 +56,17 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         assertFalse(props.getObject("foo").hasKey(CONSTRAINT_ANNOTATIONS));
         assertEquals("AssertFalse()", props.getObject("assertFalse")
                 .getArray(CONSTRAINT_ANNOTATIONS).getString(0));
-        assertEquals("AssertTrue()",
-                props.getObject("assertTrue").getArray(CONSTRAINT_ANNOTATIONS).getString(0));
+        assertEquals("AssertTrue()", props.getObject("assertTrue")
+                .getArray(CONSTRAINT_ANNOTATIONS).getString(0));
         assertEquals("Digits({integer:5, fraction:2})",
-                props.getObject("digits").getArray(CONSTRAINT_ANNOTATIONS).getString(0));
-        assertEquals("NotEmpty()",
-                props.getObject("notEmpty").getArray(CONSTRAINT_ANNOTATIONS).getString(0));
-        assertEquals("NotNull()",
-                props.getObject("notEmpty").getArray(CONSTRAINT_ANNOTATIONS).getString(1));
-        assertEquals("NotNull()",
-                props.getObject("notNullEntity").getArray(CONSTRAINT_ANNOTATIONS).getString(0));
+                props.getObject("digits").getArray(CONSTRAINT_ANNOTATIONS)
+                        .getString(0));
+        assertEquals("NotEmpty()", props.getObject("notEmpty")
+                .getArray(CONSTRAINT_ANNOTATIONS).getString(0));
+        assertEquals("NotNull()", props.getObject("notEmpty")
+                .getArray(CONSTRAINT_ANNOTATIONS).getString(1));
+        assertEquals("NotNull()", props.getObject("notNullEntity")
+                .getArray(CONSTRAINT_ANNOTATIONS).getString(0));
     }
 
     @Test
@@ -74,13 +75,19 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
 
         generateTsEndpoints();
 
-        String entityIdPath = MyEntityId.class.getName().replaceAll("[\\.\\$]", "/");
-        String entityPath = MyEntity.class.getName().replaceAll("[\\.\\$]", "/");
+        String entityIdPath = MyEntityId.class.getName().replaceAll("[\\.\\$]",
+                "/");
+        String entityPath = MyEntity.class.getName().replaceAll("[\\.\\$]",
+                "/");
 
-        File entityIdFile = new File(outputDirectory.getRoot(), entityIdPath + ".ts");
-        File formModelIdFile = new File(outputDirectory.getRoot(), entityIdPath + "Model.ts");
-        File entityFile = new File(outputDirectory.getRoot(), entityPath + ".ts");
-        File formModelFile = new File(outputDirectory.getRoot(), entityPath + "Model.ts");
+        File entityIdFile = new File(outputDirectory.getRoot(),
+                entityIdPath + ".ts");
+        File formModelIdFile = new File(outputDirectory.getRoot(),
+                entityIdPath + "Model.ts");
+        File entityFile = new File(outputDirectory.getRoot(),
+                entityPath + ".ts");
+        File formModelFile = new File(outputDirectory.getRoot(),
+                entityPath + "Model.ts");
 
         assertTrue(entityIdFile.exists());
         assertTrue(formModelIdFile.exists());
@@ -91,7 +98,8 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
                 .collect(Collectors.toList());
         final List<String> expected = Files.lines(new File(
                 getClass().getResource("expected-TsFormEndpoint.ts").getFile())
-                .toPath()).collect(Collectors.toList());
+                        .toPath())
+                .collect(Collectors.toList());
 
         content.replaceAll(line -> line.replaceAll("file://.*/fusion-endpoint", "file:///.../fusion-endpoint"));
         assertEquals("Rows in generated and expected files differ",
@@ -101,9 +109,8 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         List<String> faultyLines = new ArrayList<>();
         for (String expectedLine : expected) {
             if (!expectedLine.equals(content.get(line))) {
-                faultyLines.add(String
-                        .format("L%d :: expected: [%s] got [%s]", line + 1,
-                                expectedLine, content.get(line)));
+                faultyLines.add(String.format("L%d :: expected: [%s] got [%s]",
+                        line + 1, expectedLine, content.get(line)));
             }
             line++;
         }

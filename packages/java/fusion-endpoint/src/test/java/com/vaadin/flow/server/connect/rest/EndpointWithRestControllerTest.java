@@ -65,9 +65,9 @@ public class EndpointWithRestControllerTest {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
         VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
-        VaadinConnectController controller = controllerMockBuilder.withApplicationContext(applicationContext).build();
-        mockMvcForEndpoint = MockMvcBuilders
-                .standaloneSetup(controller)
+        VaadinConnectController controller = controllerMockBuilder
+                .withApplicationContext(applicationContext).build();
+        mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
                 .build();
         Assert.assertNotEquals(null, applicationContext);
     }

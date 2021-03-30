@@ -22,7 +22,9 @@ import com.vaadin.flow.server.connect.Endpoint;
 @Endpoint
 public class EnumEndpoint {
     public enum MyEnum {
-        ENUM1(1), ENUM2(2), ENUM_2(2), HELLO_WORLD(3), _HELLO(4), MANY_MANY_WORDS(5);
+        ENUM1(1), ENUM2(2), ENUM_2(2), HELLO_WORLD(3), _HELLO(
+                4), MANY_MANY_WORDS(5);
+
         private final int value;
 
         MyEnum(int value) {
@@ -48,8 +50,7 @@ public class EnumEndpoint {
         return value;
     }
 
-    public List<MyEnum> echoListEnum(
-            List<MyEnum> enumList) {
+    public List<MyEnum> echoListEnum(List<MyEnum> enumList) {
         return enumList;
     }
 }

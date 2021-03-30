@@ -97,8 +97,8 @@ import com.vaadin.flow.server.connect.EndpointNameChecker;
 import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
 /**
- * Java parser class which scans for all {@link Endpoint} classes and
- * produces OpenApi json.
+ * Java parser class which scans for all {@link Endpoint} classes and produces
+ * OpenApi json.
  */
 public class OpenApiObjectGenerator {
     public static final String EXTENSION_VAADIN_CONNECT_PARAMETERS_DESCRIPTION = "x-vaadin-parameters-description";
@@ -217,11 +217,12 @@ public class OpenApiObjectGenerator {
 
         javaSourcePaths.stream()
                 .map(path -> new SourceRoot(path, parserConfiguration))
-                .forEach(soureRoot -> parseSourceRoot(soureRoot, this::findEndpointExposed));
+                .forEach(soureRoot -> parseSourceRoot(soureRoot,
+                        this::findEndpointExposed));
 
         javaSourcePaths.stream()
-                .map(path -> new SourceRoot(path, parserConfiguration))
-                .forEach(soureRoot -> parseSourceRoot(soureRoot, this::process));
+                .map(path -> new SourceRoot(path, parserConfiguration)).forEach(
+                        soureRoot -> parseSourceRoot(soureRoot, this::process));
 
         for (Map.Entry<String, ResolvedReferenceType> entry : usedTypes
                 .entrySet()) {
@@ -319,7 +320,8 @@ public class OpenApiObjectGenerator {
         pathItems.forEach((pathName, pathItem) -> openApiModel.getPaths()
                 .addPathItem(pathName, pathItem));
         if (needsDeferrableImport) {
-            openApiModel.addExtension(EXTENSION_VAADIN_CONNECT_DEFERRABLE, true);
+            openApiModel.addExtension(EXTENSION_VAADIN_CONNECT_DEFERRABLE,
+                    true);
         }
         return SourceRoot.Callback.Result.DONT_SAVE;
     }
@@ -340,11 +342,13 @@ public class OpenApiObjectGenerator {
 
     private Collection<TypeDeclaration<?>> appendNestedClasses(
             ClassOrInterfaceDeclaration topLevelClass) {
-        Set<TypeDeclaration<?>> nestedClasses = topLevelClass
-                .getMembers().stream()
-                .filter(bodyDeclaration -> bodyDeclaration.isClassOrInterfaceDeclaration()
+        Set<TypeDeclaration<?>> nestedClasses = topLevelClass.getMembers()
+                .stream()
+                .filter(bodyDeclaration -> bodyDeclaration
+                        .isClassOrInterfaceDeclaration()
                         || bodyDeclaration.isEnumDeclaration())
-                .map(bodyDeclaration -> (TypeDeclaration<?>) bodyDeclaration.asTypeDeclaration())
+                .map(bodyDeclaration -> (TypeDeclaration<?>) bodyDeclaration
+                        .asTypeDeclaration())
                 .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator
                         .comparing(NodeWithSimpleName::getNameAsString))));
         nestedClasses.add(topLevelClass);
@@ -354,13 +358,16 @@ public class OpenApiObjectGenerator {
     private void parseClass(TypeDeclaration<?> typeDeclaration,
             CompilationUnit compilationUnit) {
         if (typeDeclaration.isClassOrInterfaceDeclaration()) {
-            parseClass(typeDeclaration.asClassOrInterfaceDeclaration(), compilationUnit);
+            parseClass(typeDeclaration.asClassOrInterfaceDeclaration(),
+                    compilationUnit);
         } else if (typeDeclaration.isEnumDeclaration()) {
-            EnumDeclaration enumDeclaration = typeDeclaration.asEnumDeclaration();
+            EnumDeclaration enumDeclaration = typeDeclaration
+                    .asEnumDeclaration();
             compilationUnit.getStorage().ifPresent(storage -> {
                 String className = enumDeclaration.getFullyQualifiedName()
                         .orElse(enumDeclaration.getNameAsString());
-                qualifiedNameToPath.put(className, storage.getPath().toString());
+                qualifiedNameToPath.put(className,
+                        storage.getPath().toString());
             });
             nonEndpointMap.put(enumDeclaration.resolve().getQualifiedName(),
                     enumDeclaration);
@@ -376,7 +383,8 @@ public class OpenApiObjectGenerator {
                     .orElse(classDeclaration.getNameAsString());
             qualifiedNameToPath.put(className, storage.getPath().toString());
         });
-        if (!GeneratorUtils.hasAnnotation(classDeclaration, compilationUnit, Endpoint.class)) {
+        if (!GeneratorUtils.hasAnnotation(classDeclaration, compilationUnit,
+                Endpoint.class)) {
             nonEndpointMap.put(classDeclaration.resolve().getQualifiedName(),
                     classDeclaration);
         } else {
@@ -407,10 +415,13 @@ public class OpenApiObjectGenerator {
                 .orElse(classDeclaration.getNameAsString());
 
         // detect the endpoint value name
-        if (endpointName.equals(classDeclaration.getNameAsString()) && endpointAnnotation != null) {
-            String endpointValueName = getParameterValueFromAnnotation(endpointAnnotation, "value");
+        if (endpointName.equals(classDeclaration.getNameAsString())
+                && endpointAnnotation != null) {
+            String endpointValueName = getParameterValueFromAnnotation(
+                    endpointAnnotation, "value");
             if (endpointValueName != null) {
-                endpointName = endpointValueName.substring(1, endpointValueName.length() - 1);
+                endpointName = endpointValueName.substring(1,
+                        endpointValueName.length() - 1);
             }
         }
 
@@ -423,23 +434,26 @@ public class OpenApiObjectGenerator {
         return endpointName;
     }
 
-    private String getParameterValueFromAnnotation(AnnotationExpr endpointAnnotation, String paramName) {
-        return endpointAnnotation.getChildNodes().stream().filter(node ->
-                node.getTokenRange().isPresent() &&
-                paramName.equals(node.getTokenRange().get().getBegin().getText()))
-                .map(node -> node.getTokenRange().get().getEnd().getText()).findFirst().orElse(null);
+    private String getParameterValueFromAnnotation(
+            AnnotationExpr endpointAnnotation, String paramName) {
+        return endpointAnnotation.getChildNodes().stream().filter(
+                node -> node.getTokenRange().isPresent() && paramName.equals(
+                        node.getTokenRange().get().getBegin().getText()))
+                .map(node -> node.getTokenRange().get().getEnd().getText())
+                .findFirst().orElse(null);
     }
 
     private List<Schema> parseNonEndpointClassAsSchema(
             String fullQualifiedName) {
-        TypeDeclaration<?> typeDeclaration = nonEndpointMap.get(fullQualifiedName);
+        TypeDeclaration<?> typeDeclaration = nonEndpointMap
+                .get(fullQualifiedName);
         if (typeDeclaration == null || typeDeclaration.isEnumDeclaration()) {
             return Collections.emptyList();
         }
         List<Schema> result = new ArrayList<>();
 
-        Schema schema = schemaGenerator
-                .createSingleSchema(fullQualifiedName, typeDeclaration);
+        Schema schema = schemaGenerator.createSingleSchema(fullQualifiedName,
+                typeDeclaration);
         generatedSchema.add(fullQualifiedName);
 
         NodeList<ClassOrInterfaceType> extendedTypes = null;
@@ -508,9 +522,9 @@ public class OpenApiObjectGenerator {
                     (Schema) schema.getAdditionalProperties()));
         } else if (schema instanceof ComposedSchema
                 && ((ComposedSchema) schema).getAllOf() != null) {
-                for (Schema child : ((ComposedSchema) schema).getAllOf()) {
-                    map.putAll(collectUsedTypesFromSchema(child));
-                }
+            for (Schema child : ((ComposedSchema) schema).getAllOf()) {
+                map.putAll(collectUsedTypesFromSchema(child));
+            }
         }
         if (schema.getProperties() != null) {
             schema.getProperties().values().forEach(
@@ -520,9 +534,8 @@ public class OpenApiObjectGenerator {
     }
 
     private boolean isReservedWord(String word) {
-        return word != null
-                && EndpointNameChecker.ECMA_SCRIPT_RESERVED_WORDS
-                        .contains(word.toLowerCase());
+        return word != null && EndpointNameChecker.ECMA_SCRIPT_RESERVED_WORDS
+                .contains(word.toLowerCase());
     }
 
     private Pair<ClassOrInterfaceDeclaration, ResolvedTypeParametersMap> getDeclarationAndResolvedTypeParametersMap(
@@ -565,10 +578,10 @@ public class OpenApiObjectGenerator {
             PathItem pathItem = new PathItem().post(post);
 
             String pathName = "/" + endpointName + "/" + methodName;
-            pathItem.readOperationsMap().forEach(
-                    (httpMethod, operation) -> operation.setOperationId(
-                            String.join("_", endpointName, methodName,
-                                    httpMethod.name())));
+            pathItem.readOperationsMap()
+                    .forEach((httpMethod, operation) -> operation
+                            .setOperationId(String.join("_", endpointName,
+                                    methodName, httpMethod.name())));
             newPathItems.put(pathName, pathItem);
         }
 
@@ -576,7 +589,8 @@ public class OpenApiObjectGenerator {
                 typeDeclaration.getImplementedTypes().stream())
                 .map(resolvedType -> getDeclarationAndResolvedTypeParametersMap(
                         resolvedType, resolvedTypeParametersMap))
-                .filter(Objects::nonNull).forEach(pair -> newPathItems
+                .filter(Objects::nonNull)
+                .forEach(pair -> newPathItems
                         .putAll(createPathItems(endpointName, tagName, pair.a,
                                 pair.b, compilationUnit)));
         return newPathItems;
@@ -658,7 +672,8 @@ public class OpenApiObjectGenerator {
     }
 
     private boolean isNullable(MethodDeclaration methodDeclaration) {
-        return methodDeclaration.isAnnotationPresent(Nullable.class) || methodDeclaration.isAnnotationPresent("Id");
+        return methodDeclaration.isAnnotationPresent(Nullable.class)
+                || methodDeclaration.isAnnotationPresent("Id");
     }
 
     private RequestBody createRequestBody(MethodDeclaration methodDeclaration,
@@ -731,7 +746,8 @@ public class OpenApiObjectGenerator {
                                 .equals(parent.getQualifiedName()))
                 .collect(Collectors.toList());
 
-        if (directAncestors.isEmpty() || resolvedType.getTypeDeclaration().isEnum()) {
+        if (directAncestors.isEmpty()
+                || resolvedType.getTypeDeclaration().isEnum()) {
             results.add(schema);
             results.addAll(generatedRelatedSchemas(schema));
         } else {

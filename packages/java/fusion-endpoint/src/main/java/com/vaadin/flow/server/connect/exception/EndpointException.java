@@ -23,21 +23,20 @@ import java.util.Optional;
 import com.vaadin.flow.server.connect.VaadinConnectController;
 
 /**
- * An exception that is intended to be thrown by any Vaadin endpoint
- * method to propagate exception details to the client side. When an exception
- * is thrown by an endpoint method, a particular response is constructed based
- * on the data of the exception and sent to the client side. When a client
- * library receives the response, it raises the corresponding exception using
- * the response data.
+ * An exception that is intended to be thrown by any Vaadin endpoint method to
+ * propagate exception details to the client side. When an exception is thrown
+ * by an endpoint method, a particular response is constructed based on the data
+ * of the exception and sent to the client side. When a client library receives
+ * the response, it raises the corresponding exception using the response data.
  *
- * By default, if any Vaadin endpoint method throws an exception when
- * being invoked by the client request, the exception details are concealed due
- * to security reasons. When there's a need to pass some information about the
+ * By default, if any Vaadin endpoint method throws an exception when being
+ * invoked by the client request, the exception details are concealed due to
+ * security reasons. When there's a need to pass some information about the
  * failure on the client side, this exception or any of its subclasses can be
  * used.
  *
- * Refer to the {@link EndpointException#getSerializationData()} method to
- * see the information on the data being sent to the client.
+ * Refer to the {@link EndpointException#getSerializationData()} method to see
+ * the information on the data being sent to the client.
  *
  * Refer to {@code VaadinConnectException} in the client library for more
  * information about the client side of the implementation.
@@ -125,8 +124,7 @@ public class EndpointException extends RuntimeException {
      *            a detail object that will be serialized into JSON and sent to
      *            the client, when the exception is thrown
      */
-    public EndpointException(String message, Throwable cause,
-            Object detail) {
+    public EndpointException(String message, Throwable cause, Object detail) {
         super(message, cause);
         this.detail = detail;
     }

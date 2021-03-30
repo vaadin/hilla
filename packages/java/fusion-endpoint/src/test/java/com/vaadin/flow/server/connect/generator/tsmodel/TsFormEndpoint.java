@@ -82,30 +82,54 @@ public class TsFormEndpoint {
         MyBaz bar;
         List<MyBaz> baz;
         Boolean bool;
-        @NotEmpty List<String> list;
-        @Email(message = "foo") String email;
-        @Null String isNull;
-        @NotNull String notNull;
-        @NotNull @NotEmpty String notEmpty;
-        @NotNull MyEntity notNullEntity;
-        @NotBlank String notBlank;
-        @AssertTrue String assertTrue;
-        @AssertFalse String assertFalse;
-        @Min(value = 1, message = "foo") Integer min;
-        @Max(2) Integer max;
-        @DecimalMin("0.01") double decimalMin;
-        @DecimalMax(value = "0.01", inclusive = false) double decimalMax;
-        @Negative int negative;
-        @NegativeOrZero int negativeOrCero;
-        @Positive int positive;
-        @PositiveOrZero int positiveOrCero;
-        @Size String size;
-        @Size(min = 1) String size1;
-        @Digits(integer=5, fraction = 2) String digits;
-        @Past LocalDate past;
-        @Future LocalDate future;
+        @NotEmpty
+        List<String> list;
+        @Email(message = "foo")
+        String email;
+        @Null
+        String isNull;
+        @NotNull
+        String notNull;
+        @NotNull
+        @NotEmpty
+        String notEmpty;
+        @NotNull
+        MyEntity notNullEntity;
+        @NotBlank
+        String notBlank;
+        @AssertTrue
+        String assertTrue;
+        @AssertFalse
+        String assertFalse;
+        @Min(value = 1, message = "foo")
+        Integer min;
+        @Max(2)
+        Integer max;
+        @DecimalMin("0.01")
+        double decimalMin;
+        @DecimalMax(value = "0.01", inclusive = false)
+        double decimalMax;
+        @Negative
+        int negative;
+        @NegativeOrZero
+        int negativeOrCero;
+        @Positive
+        int positive;
+        @PositiveOrZero
+        int positiveOrCero;
+        @Size
+        String size;
+        @Size(min = 1)
+        String size1;
+        @Digits(integer = 5, fraction = 2)
+        String digits;
+        @Past
+        LocalDate past;
+        @Future
+        LocalDate future;
         LocalTime localTime;
-        @Pattern(regexp = "\\d+\\..+") String pattern;
+        @Pattern(regexp = "\\d+\\..+")
+        String pattern;
         List<MyEntity> children;
         String[] stringArray;
         Number[][] numberMatrix;
@@ -116,9 +140,13 @@ public class TsFormEndpoint {
         Optional<MyEntity> optionalEntity;
         Optional<List<Optional<String>>> optionalList;
         Optional<Optional<String>[][]> optionalMatrix;
-        @Nullable String nullableString;
-        @Nullable MyEntity nullableEntity;
-        @Nullable List<Optional<String>> nullableList;
-        @Nullable Optional<String>[][] nullableMatrix;
+        @Nullable
+        String nullableString;
+        @Nullable
+        MyEntity nullableEntity;
+        @Nullable
+        List<Optional<String>> nullableList;
+        @Nullable
+        Optional<String>[][] nullableMatrix;
     }
 }

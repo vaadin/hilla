@@ -75,56 +75,56 @@ public class VaadinConnectClientGeneratorTest {
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_both_default_values(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_both_default_values() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping(VaadinConnectClientGenerator.DEFAULT_PREFIX,
-                "/*");
+        String result = generator.relativizeEndpointPrefixWithUrlMapping(
+                VaadinConnectClientGenerator.DEFAULT_PREFIX, "/*");
         Assert.assertEquals("connect", result);
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_custom_url_mapping_and_default_endpoint_prefix(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_custom_url_mapping_and_default_endpoint_prefix() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping(VaadinConnectClientGenerator.DEFAULT_PREFIX,
-                "/myapp/*");
+        String result = generator.relativizeEndpointPrefixWithUrlMapping(
+                VaadinConnectClientGenerator.DEFAULT_PREFIX, "/myapp/*");
         Assert.assertEquals("../connect", result);
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_default_url_mapping_and_custom_endpoint_prefix(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_default_url_mapping_and_custom_endpoint_prefix() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping("/my-connect",
-                "/*");
+        String result = generator
+                .relativizeEndpointPrefixWithUrlMapping("/my-connect", "/*");
         Assert.assertEquals("my-connect", result);
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_custom_url_mapping_and_custom_endpoint_prefix(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_custom_url_mapping_and_custom_endpoint_prefix() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping("/my-connect",
-                "/myapp/*");
+        String result = generator.relativizeEndpointPrefixWithUrlMapping(
+                "/my-connect", "/myapp/*");
         Assert.assertEquals("../my-connect", result);
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_multiple_level_url_mapping_and_custom_endpoint_prefix(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_multiple_level_url_mapping_and_custom_endpoint_prefix() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping("/my-connect",
-                "/myapp/yourapp/*");
+        String result = generator.relativizeEndpointPrefixWithUrlMapping(
+                "/my-connect", "/myapp/yourapp/*");
         Assert.assertEquals("../../my-connect", result);
     }
 
     @Test
-    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_multiple_level_url_mapping_and_multiple_level_endpoint_prefix(){
+    public void relativizeEndpointPrefixWithUrlMapping_should_work_with_multiple_level_url_mapping_and_multiple_level_endpoint_prefix() {
         VaadinConnectClientGenerator generator = new VaadinConnectClientGenerator(
                 new Properties());
-        String result = generator.relativizeEndpointPrefixWithUrlMapping("/my-connect/your-connect",
-                "/myapp/yourapp/*");
+        String result = generator.relativizeEndpointPrefixWithUrlMapping(
+                "/my-connect/your-connect", "/myapp/yourapp/*");
         Assert.assertEquals("../../my-connect/your-connect", result);
     }
 }

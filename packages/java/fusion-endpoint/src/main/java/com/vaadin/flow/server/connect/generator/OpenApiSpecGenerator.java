@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
  *      specification</a>
  */
 public class OpenApiSpecGenerator {
-    public static final String APPLICATION_TITLE = "vaadin.connect" +
-            ".application.title";
+    public static final String APPLICATION_TITLE = "vaadin.connect"
+            + ".application.title";
     public static final String APPLICATION_API_VERSION = "vaadin.connect.api.version";
     public static final String SERVER = "vaadin.connect.server";
     public static final String SERVER_DESCRIPTION = "vaadin.connect.server.description";

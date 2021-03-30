@@ -53,7 +53,8 @@ public class OpenApiSpecBasedTests {
     public TemporaryFolder outputDirectory = new TemporaryFolder();
 
     @Test
-    public void should_NotGenerateOutput_When_NoOpenApiInput() throws Exception {
+    public void should_NotGenerateOutput_When_NoOpenApiInput()
+            throws Exception {
         String fileName = "whatever";
 
         File output = outputDirectory.newFolder();
@@ -230,9 +231,8 @@ public class OpenApiSpecBasedTests {
                 .resolve(expectedClass + ".ts");
         String actualTs;
         try {
-            actualTs = StringUtils
-                    .toEncodedString(Files.readAllBytes(outputFilePath),
-                            StandardCharsets.UTF_8);
+            actualTs = StringUtils.toEncodedString(
+                    Files.readAllBytes(outputFilePath), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

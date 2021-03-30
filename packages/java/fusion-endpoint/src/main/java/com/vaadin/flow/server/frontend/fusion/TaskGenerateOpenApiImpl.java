@@ -26,7 +26,8 @@ import com.vaadin.flow.server.connect.generator.OpenApiSpecGenerator;
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
  */
-public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator implements TaskGenerateOpenApi {
+public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator
+        implements TaskGenerateOpenApi {
 
     private final File javaSourceFolder;
     private final ClassLoader classLoader;
@@ -36,7 +37,8 @@ public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator implem
      * Create a task for generating OpenAPI spec.
      *
      * @param javaSourceFolder
-     *            source paths of the project containing {@link com.vaadin.flow.server.connect.Endpoint}
+     *            source paths of the project containing
+     *            {@link com.vaadin.flow.server.connect.Endpoint}
      * @param classLoader
      *            The class loader which should be used to resolved types in the
      *            source paths.
@@ -50,8 +52,7 @@ public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator implem
                 "Source paths should not be null.");
         Objects.requireNonNull(output,
                 "OpenAPI output file should not be null.");
-        Objects.requireNonNull(classLoader,
-                "ClassLoader should not be null.");
+        Objects.requireNonNull(classLoader, "ClassLoader should not be null.");
         this.javaSourceFolder = javaSourceFolder;
         this.classLoader = classLoader;
         this.output = output;

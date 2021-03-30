@@ -160,7 +160,8 @@ class SchemaGenerator {
                         && !field.isAnnotationPresent(JsonIgnore.class);
             }).forEach(field -> validFields.put(field.getName(),
                     field.isAnnotationPresent(Nullable.class)
-                            || ReflectTools.hasAnnotationWithSimpleName(field, "Id")
+                            || ReflectTools.hasAnnotationWithSimpleName(field,
+                                    "Id")
                             || field.getType().equals(Optional.class)));
         } catch (ClassNotFoundException e) {
 
@@ -199,8 +200,9 @@ class SchemaGenerator {
                     wrapperSchema.addAllOfItem(propertySchema);
                     propertySchema = wrapperSchema;
                 }
-                if (field.isAnnotationPresent(Nullable.class) || field.isAnnotationPresent("Id")
-                        || GeneratorUtils.isTrue(propertySchema.getNullable())) {
+                if (field.isAnnotationPresent(Nullable.class)
+                        || field.isAnnotationPresent("Id") || GeneratorUtils
+                                .isTrue(propertySchema.getNullable())) {
                     // Temporarily set nullable to indicate this property is
                     // not required
                     propertySchema.setNullable(true);

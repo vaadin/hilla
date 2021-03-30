@@ -33,23 +33,25 @@ public class EndpointUtil {
      * Checks if the request is for an endpoint.
      *
      * Note even if this method returns <code>true</code>, there is no guarantee
-     * that an endpoint method will actually be called (it might not exist, access
-     * might be denied etc).
+     * that an endpoint method will actually be called (it might not exist,
+     * access might be denied etc).
      *
-     * @param request the HTTP request
+     * @param request
+     *            the HTTP request
      * @return <code>true</code> if the request is for an endpoint,
      *         <code>false</code> otherwise
      */
     public boolean isEndpointRequest(HttpServletRequest request) {
         String path = getRequestPath(request);
-        return path.startsWith(endpointProperties.getVaadinEndpointPrefix() + "/");
+        return path
+                .startsWith(endpointProperties.getVaadinEndpointPrefix() + "/");
     }
 
     /**
      * Returns the full request path, including the servlet path.
      *
-     * With Spring Security, the path is most often included fully as "servletPath"
-     * and pathInfo is null
+     * With Spring Security, the path is most often included fully as
+     * "servletPath" and pathInfo is null
      */
     private static String getRequestPath(HttpServletRequest request) {
         String servletPath = request.getServletPath();

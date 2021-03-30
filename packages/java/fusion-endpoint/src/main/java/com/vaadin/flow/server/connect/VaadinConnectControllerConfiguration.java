@@ -83,18 +83,17 @@ public class VaadinConnectControllerConfiguration {
     }
 
     /**
-     * Prepends the endpoint prefix URL from the Vaadin properties to
-     * the {@code pattern} of a {@link RequestMappingInfo} object, and returns
-     * the updated mapping as a new object (not modifying the given
-     * {@param mapping} parameter).
+     * Prepends the endpoint prefix URL from the Vaadin properties to the
+     * {@code pattern} of a {@link RequestMappingInfo} object, and returns the
+     * updated mapping as a new object (not modifying the given {@param mapping}
+     * parameter).
      *
      * @return a new mapping with the endpoint prefix URL prepended to the
      *         mapping pattern
      */
     private RequestMappingInfo prependEndpointPrefixUrl(
             RequestMappingInfo mapping) {
-        PatternsRequestCondition connectEndpointPattern =
-                new PatternsRequestCondition(
+        PatternsRequestCondition connectEndpointPattern = new PatternsRequestCondition(
                 vaadinEndpointProperties.getVaadinEndpointPrefix())
                         .combine(mapping.getPatternsCondition());
 

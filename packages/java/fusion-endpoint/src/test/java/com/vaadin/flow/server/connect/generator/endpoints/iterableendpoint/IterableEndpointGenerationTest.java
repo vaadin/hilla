@@ -23,17 +23,20 @@ import org.junit.Test;
 import java.util.Collections;
 
 /**
- * com.vaadin.flow.server.connect.generator.endpoints.iterableendpoint.IterableEndpointGenerationTest, created on 21/12/2020 23.00
+ * com.vaadin.flow.server.connect.generator.endpoints.iterableendpoint.IterableEndpointGenerationTest,
+ * created on 21/12/2020 23.00
+ * 
  * @author nikolaigorokhov
  */
-public class IterableEndpointGenerationTest extends AbstractEndpointGenerationTest {
+public class IterableEndpointGenerationTest
+        extends AbstractEndpointGenerationTest {
 
-  public IterableEndpointGenerationTest() {
-    super(Collections.singletonList(IterableEndpoint.class));
-  }
+    public IterableEndpointGenerationTest() {
+        super(Collections.singletonList(IterableEndpoint.class));
+    }
 
-  @Test
-  public void should_ConvertIterableIntoArrayInTS() {
-    verifyOpenApiObjectAndGeneratedTs();
-  }
+    @Test
+    public void should_ConvertIterableIntoArrayInTS() {
+        verifyOpenApiObjectAndGeneratedTs();
+    }
 }

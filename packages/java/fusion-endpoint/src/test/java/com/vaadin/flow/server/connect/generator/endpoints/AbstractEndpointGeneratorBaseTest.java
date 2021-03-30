@@ -79,8 +79,7 @@ public abstract class AbstractEndpointGeneratorBaseTest {
                 ? new Properties()
                 : TestUtils
                         .readProperties(customApplicationProperties.getPath());
-        new OpenApiSpecGenerator(applicationProperties).
-                generateOpenApiSpec(
+        new OpenApiSpecGenerator(applicationProperties).generateOpenApiSpec(
                 Collections
                         .singletonList(java.nio.file.Paths.get("src/test/java",
                                 testPackage.getName().replace('.',
@@ -102,7 +101,6 @@ public abstract class AbstractEndpointGeneratorBaseTest {
                     String.format("Failed to read the file '%s'", file));
         }
     }
-
 
     protected JsonObject readJsonFile(Path file) {
         return Json.parse(readFile(file));

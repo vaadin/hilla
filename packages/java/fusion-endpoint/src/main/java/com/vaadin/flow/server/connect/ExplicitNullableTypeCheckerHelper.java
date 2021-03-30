@@ -42,11 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A helper class for ExplicitNullableTypeChecker. 
+ * A helper class for ExplicitNullableTypeChecker.
  */
 class ExplicitNullableTypeCheckerHelper {
 
-    // A map for tracking already visited Beans. 
+    // A map for tracking already visited Beans.
     private Map<Type, Set<Object>> visitedBeans;
 
     private static Logger getLogger() {
@@ -87,13 +87,14 @@ class ExplicitNullableTypeCheckerHelper {
      * @param expectedType
      *            the declared type expected for the value
      * @param beanValueTypeCheckHelper
-     *            a helper to keep track of visited beans to avoid circular checking
+     *            a helper to keep track of visited beans to avoid circular
+     *            checking
      * @return error message when the value is null while the expected type does
      *         not explicitly allow null, or null meaning the value is OK.
      */
     String checkValueForType(Object value, Type expectedType) {
         Class<?> clazz;
-        if (expectedType instanceof TypeVariable){
+        if (expectedType instanceof TypeVariable) {
             return null;
         } else if (expectedType instanceof ParameterizedType) {
             clazz = (Class<?>) ((ParameterizedType) expectedType).getRawType();
@@ -248,9 +249,9 @@ class ExplicitNullableTypeCheckerHelper {
         }
     }
 
-    private boolean isNullable(Field field){
+    private boolean isNullable(Field field) {
         return field.isAnnotationPresent(Nullable.class)
-                    || ReflectTools.hasAnnotationWithSimpleName(field, "Id");
+                || ReflectTools.hasAnnotationWithSimpleName(field, "Id");
     }
 
 }

@@ -103,10 +103,10 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             "(" + JAVA_NAME_PATTERN + "(\\." + JAVA_NAME_PATTERN + ")*)");
     private static final Pattern ARRAY_TYPE_NAME_PATTERN = Pattern
             .compile("Array<(.*)>");
-    private static final Pattern MAPPED_TYPE_NAME_PATTERN = Pattern.compile(
-            "\\{ \\[key: string\\]: (.*); \\}");
-    private static final Pattern PRIMITIVE_TYPE_NAME_PATTERN =
-            Pattern.compile("^(string|number|boolean)");
+    private static final Pattern MAPPED_TYPE_NAME_PATTERN = Pattern
+            .compile("\\{ \\[key: string\\]: (.*); \\}");
+    private static final Pattern PRIMITIVE_TYPE_NAME_PATTERN = Pattern
+            .compile("^(string|number|boolean)");
     private static final String OPERATION = "operation";
     private static final String IMPORT = "import";
 
@@ -152,8 +152,7 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
          * Reserved words copied from
          * https://www.w3schools.com/js/js_reserved.asp
          */
-        reservedWords
-                .addAll(EndpointNameChecker.ECMA_SCRIPT_RESERVED_WORDS);
+        reservedWords.addAll(EndpointNameChecker.ECMA_SCRIPT_RESERVED_WORDS);
         reservedWords.addAll(languageSpecificPrimitives);
         typeMapping.put("BigDecimal", "number");
         typeMapping.put("map", "Map");
@@ -512,7 +511,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
 
     @Override
     public String getSchemaType(Schema schema) {
-        if (isNullableWrapperSchema(schema) && schema instanceof ComposedSchema) {
+        if (isNullableWrapperSchema(schema)
+                && schema instanceof ComposedSchema) {
             Schema wrappedSchema = ((ComposedSchema) schema).getAllOf().get(0);
             return super.getSchemaType(wrappedSchema);
         }
@@ -596,8 +596,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             String arrayTypeName = matcher.group(1);
             boolean arrayTypeOptional = arrayTypeName.endsWith(OPTIONAL_SUFFIX);
             arrayTypeName = removeOptionalSuffix(arrayTypeName);
-            arguments.add(getModelVariableArguments(arrayTypeName, arrayTypeOptional,
-                Collections.emptyList()));
+            arguments.add(getModelVariableArguments(arrayTypeName,
+                    arrayTypeOptional, Collections.emptyList()));
         }
         if (!constrainArguments.isEmpty()) {
             arguments.addAll(constrainArguments);
@@ -619,7 +619,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
         name = removeOptionalSuffix(name);
         if (ARRAY_TYPE_NAME_PATTERN.matcher(name).find()) {
             name = "Array";
-        } else if ("any".equals(name) || MAPPED_TYPE_NAME_PATTERN.matcher(name).find()) {
+        } else if ("any".equals(name)
+                || MAPPED_TYPE_NAME_PATTERN.matcher(name).find()) {
             name = "Object";
         } else if (PRIMITIVE_TYPE_NAME_PATTERN.matcher(name).find()) {
             name = GeneratorUtils.capitalize(name);
@@ -827,7 +828,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
 
     private String getUniqueNameFromQualifiedName(Set<String> usedNames,
             String qualifiedName) {
-        String[] packageSegments = qualifiedName == null ? null : qualifiedName.split("\\.");
+        String[] packageSegments = qualifiedName == null ? null
+                : qualifiedName.split("\\.");
         StringBuilder classNameBuilder = new StringBuilder();
         String newClassName = "";
         if (packageSegments != null && packageSegments.length > 1) {
@@ -1053,8 +1055,7 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
                 getClassNameFromImportsHelper());
         handlebars.registerHelper("getModelArguments",
                 getModelArgumentsHelper());
-        handlebars.registerHelper("getModelFullType",
-                getModelFullTypeHelper());
+        handlebars.registerHelper("getModelFullType", getModelFullTypeHelper());
     }
 
     private Helper<String> getMultipleLinesHelper() {
@@ -1139,6 +1140,7 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             return isRequired;
         }
     }
+
     @Override
     public String toEnumVarName(String name, String datatype) {
         // Keep the same Java enum name in TS

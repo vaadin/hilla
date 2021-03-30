@@ -36,12 +36,12 @@ public class VaadinConnectAccessCheckerTest {
         checker = new VaadinConnectAccessChecker();
         requestMock = mock(HttpServletRequest.class);
         sessionMock = mock(HttpSession.class);
-        when(sessionMock.getAttribute(VaadinService.getCsrfTokenAttributeName()))
-                .thenReturn("Vaadin CCDM");
+        when(sessionMock
+                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
+                        .thenReturn("Vaadin CCDM");
         when(requestMock.getSession(false)).thenReturn(sessionMock);
         when(requestMock.getUserPrincipal()).thenReturn(mock(Principal.class));
-        when(requestMock.getHeader("X-CSRF-Token"))
-                .thenReturn("Vaadin CCDM");
+        when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin CCDM");
         when(requestMock.isUserInRole("ROLE_USER")).thenReturn(true);
     }
 
@@ -50,17 +50,19 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     private void createDifferentSessionToken() {
-        when(sessionMock.getAttribute(VaadinService.getCsrfTokenAttributeName()))
-                .thenReturn("CCDM Token");
+        when(sessionMock
+                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
+                        .thenReturn("CCDM Token");
     }
 
     private void createNullTokenContextInHeaderRequest() {
-        when(requestMock.getHeader("X-CSRF-Token"))
-                .thenReturn(null);
+        when(requestMock.getHeader("X-CSRF-Token")).thenReturn(null);
     }
 
     private void createNullTokenSession() {
-        when(sessionMock.getAttribute(VaadinService.getCsrfTokenAttributeName())).thenReturn(null);
+        when(sessionMock
+                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
+                        .thenReturn(null);
     }
 
     private void createNullSession() {
@@ -79,7 +81,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_not_having_token_in_headerRequest() throws Exception {
+    public void should_fail_When_not_having_token_in_headerRequest()
+            throws Exception {
         class Test {
             public void test() {
             }
@@ -89,7 +92,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header() throws Exception {
+    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header()
+            throws Exception {
         class Test {
             public void test() {
             }
@@ -99,7 +103,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header_And_AnonymousAllowed() throws Exception {
+    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header_And_AnonymousAllowed()
+            throws Exception {
         @AnonymousAllowed
         class Test {
             public void test() {
@@ -110,7 +115,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_pass_When_not_having_session_And_not_having_token_in_request_header() throws Exception {
+    public void should_pass_When_not_having_session_And_not_having_token_in_request_header()
+            throws Exception {
         class Test {
             public void test() {
             }
@@ -121,7 +127,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_pass_When_not_having_session_And_not_having_token_in_request_header_And_AnonymousAllowed() throws Exception {
+    public void should_pass_When_not_having_session_And_not_having_token_in_request_header_And_AnonymousAllowed()
+            throws Exception {
         @AnonymousAllowed
         class Test {
             public void test() {
@@ -144,7 +151,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_having_different_token_between_session_and_headerRequest() throws Exception {
+    public void should_fail_When_having_different_token_between_session_and_headerRequest()
+            throws Exception {
         class Test {
             public void test() {
             }
@@ -154,7 +162,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_having_different_token_between_session_and_headerRequest_and_NoAuthentication_AnonymousAllowed() throws Exception {
+    public void should_fail_When_having_different_token_between_session_and_headerRequest_and_NoAuthentication_AnonymousAllowed()
+            throws Exception {
         class Test {
             @AnonymousAllowed
             public void test() {
@@ -176,7 +185,8 @@ public class VaadinConnectAccessCheckerTest {
     }
 
     @Test
-    public void should_Pass_When_Authentication_And_matching_token() throws Exception {
+    public void should_Pass_When_Authentication_And_matching_token()
+            throws Exception {
         class Test {
             public void test() {
             }

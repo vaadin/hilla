@@ -23,19 +23,19 @@ import com.vaadin.flow.server.connect.Endpoint;
 @Endpoint
 public class VaadinConnectEndpoints {
 
-    public BeanWithZonedDateTimeField getBeanWithZonedDateTimeField(){
+    public BeanWithZonedDateTimeField getBeanWithZonedDateTimeField() {
         return new BeanWithZonedDateTimeField();
     }
 
-    public BeanWithPrivateFields getBeanWithPrivateFields(){
+    public BeanWithPrivateFields getBeanWithPrivateFields() {
         return new BeanWithPrivateFields();
     }
 
-    public BeanWithJacksonAnnotation getBeanWithJacksonAnnotation(){
+    public BeanWithJacksonAnnotation getBeanWithJacksonAnnotation() {
         return new BeanWithJacksonAnnotation();
     }
 
-    public LocalTime getLocalTime(){
+    public LocalTime getLocalTime() {
         return LocalTime.of(8, 0, 0);
     }
 

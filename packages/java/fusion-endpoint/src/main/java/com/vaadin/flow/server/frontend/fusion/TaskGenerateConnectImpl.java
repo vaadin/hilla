@@ -29,7 +29,8 @@ import static com.vaadin.flow.server.connect.generator.VaadinConnectClientGenera
 /**
  * Generate the Vaadin TS files for endpoints, and the Client API file.
  */
-public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator implements TaskGenerateConnect {
+public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator
+        implements TaskGenerateConnect {
 
     private final File outputFolder;
     private final File openApi;
@@ -37,7 +38,7 @@ public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator implem
     private final File frontendDirectory;
 
     TaskGenerateConnectImpl(File applicationProperties, File openApi,
-                        File outputFolder, File frontendDirectory) {
+            File outputFolder, File frontendDirectory) {
         super(applicationProperties);
         Objects.requireNonNull(openApi,
                 "Vaadin OpenAPI file should not be null.");
@@ -51,11 +52,16 @@ public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator implem
 
     @Override
     public void execute() throws ExecutionFailedException {
-        File customConnectClient = new File(frontendDirectory, CUSTOM_CONNECT_CLIENT_NAME);
-        String customName = customConnectClient.exists() ? ("../" + CUSTOM_CONNECT_CLIENT_NAME) : null;
-        if (VaadinConnectTsGenerator.launch(openApi, outputFolder, customName)) {
+        File customConnectClient = new File(frontendDirectory,
+                CUSTOM_CONNECT_CLIENT_NAME);
+        String customName = customConnectClient.exists()
+                ? ("../" + CUSTOM_CONNECT_CLIENT_NAME)
+                : null;
+        if (VaadinConnectTsGenerator.launch(openApi, outputFolder,
+                customName)) {
             new VaadinConnectClientGenerator(readApplicationProperties())
-                    .generateVaadinConnectClientFile(connectClientFile.toPath());
+                    .generateVaadinConnectClientFile(
+                            connectClientFile.toPath());
         }
     }
 }
