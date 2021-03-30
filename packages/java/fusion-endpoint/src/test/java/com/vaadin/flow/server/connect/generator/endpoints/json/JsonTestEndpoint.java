@@ -198,18 +198,20 @@ public class JsonTestEndpoint {
     private Permissions permissions;
   }
 
-  /**
-   * Status bean. Used only in request parameters to verify that request
-   * parameter type descriptions are generated.
-   */
-  public static class Status {
+// @formatter:off
+/**
+ * Status bean. Used only in request parameters to verify that request
+ * parameter type descriptions are generated.
+ */
+public static class Status {
     private Instant createdAt;
     /**
      * Multiple line description should work.This is very very very very very
      * very very very long.
      */
     private String text;
-  }
+}
+// @formatter:on
 
   /**
    * This nested class is also used in the OpenApi generator test
