@@ -93,6 +93,7 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
                 getClass().getResource("expected-TsFormEndpoint.ts").getFile())
                 .toPath()).collect(Collectors.toList());
 
+        content.replaceAll(line -> line.replaceAll("file://.*/fusion-endpoint", "file:///.../fusion-endpoint"));
         assertEquals("Rows in generated and expected files differ",
                 expected.size(), content.size());
 

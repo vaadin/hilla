@@ -11,6 +11,7 @@ import {Email,Null,NotNull,NotEmpty,NotBlank,AssertTrue,AssertFalse,Negative,Neg
 /**
  * This module is generated from com.vaadin.flow.server.connect.generator.tsmodel.TsFormEndpoint.MyEntity.
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
+ * @see {@link file:///.../fusion-endpoint/src/test/java/com/vaadin/flow/server/connect/generator/tsmodel/TsFormEndpoint.java}
  */
 export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEntityIdModel<T> {
   static createEmptyValue: () => MyEntity;
