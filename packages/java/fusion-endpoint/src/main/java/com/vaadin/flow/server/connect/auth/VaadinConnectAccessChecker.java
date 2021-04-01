@@ -128,7 +128,19 @@ public class VaadinConnectAccessChecker {
     private String verifyAuthenticatedUser(Method method,
             HttpServletRequest request) {
         if (cannotAccessMethod(method, request)) {
-            return "Unauthorized access to Vaadin endpoint";
+            VaadinService vaadinService = VaadinService.getCurrent();
+            final String accessDeniedMessage;
+            if (vaadinService != null && !vaadinService
+                    .getDeploymentConfiguration().isProductionMode()) {
+                // suggest access control annotations in dev mode
+                accessDeniedMessage = "Unauthorized access to Vaadin endpoint; "
+                        + "to enable endpoint access use one of the following "
+                        + "annotations: @AnonymousAllowed, @PermitAll, "
+                        + "@RolesAllowed";
+            } else {
+                accessDeniedMessage = "Unauthorized access to Vaadin endpoint";
+            }
+            return accessDeniedMessage;
         }
         return null;
     }
@@ -136,7 +148,7 @@ public class VaadinConnectAccessChecker {
     private boolean cannotAccessMethod(Method method,
             HttpServletRequest request) {
         return requestForbidden(request)
-                || entityForbidden(getSecurityTarget(method), request);
+                || !entityAllowed(getSecurityTarget(method), request);
     }
 
     private boolean requestForbidden(HttpServletRequest request) {
@@ -174,20 +186,24 @@ public class VaadinConnectAccessChecker {
         return false;
     }
 
-    private boolean entityForbidden(AnnotatedElement entity,
+    private boolean entityAllowed(AnnotatedElement entity,
             HttpServletRequest request) {
-        return entity.isAnnotationPresent(DenyAll.class) || (!entity
-                .isAnnotationPresent(AnonymousAllowed.class)
-                && !roleAllowed(entity.getAnnotation(RolesAllowed.class),
-                        request));
+        if (entity.isAnnotationPresent(DenyAll.class)) {
+            return false;
+        }
+        if (entity.isAnnotationPresent(AnonymousAllowed.class)) {
+            return true;
+        }
+        RolesAllowed rolesAllowed = entity.getAnnotation(RolesAllowed.class);
+        if (rolesAllowed == null) {
+            return entity.isAnnotationPresent(PermitAll.class);
+        } else {
+            return roleAllowed(rolesAllowed, request);
+        }
     }
 
     private boolean roleAllowed(RolesAllowed rolesAllowed,
             HttpServletRequest request) {
-        if (rolesAllowed == null) {
-            return true;
-        }
-
         for (String role : rolesAllowed.value()) {
             if (request.isUserInRole(role)) {
                 return true;

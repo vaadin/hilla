@@ -139,6 +139,7 @@ public class VaadinConnectControllerTest {
             return "Hello, no user!";
         }
 
+        @PermitAll
         public String getUserName() {
             return VaadinService.getCurrentRequest().getUserPrincipal()
                     .getName();
