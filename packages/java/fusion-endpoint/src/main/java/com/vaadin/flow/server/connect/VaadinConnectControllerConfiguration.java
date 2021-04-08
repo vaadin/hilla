@@ -133,4 +133,14 @@ public class VaadinConnectControllerConfiguration {
     public ExplicitNullableTypeChecker typeChecker() {
         return new ExplicitNullableTypeChecker();
     }
+
+    /**
+     * Registers endpoint utility methods.
+     *
+     * @return the endpoint util class
+     */
+    @Bean
+    public EndpointUtil endpointUtil() {
+        return new EndpointUtil();
+    }
 }
