@@ -101,8 +101,15 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
                         .toPath())
                 .collect(Collectors.toList());
 
-        content.replaceAll(line -> line.replaceAll("file://.*/fusion-endpoint",
-                "file:///.../fusion-endpoint"));
+        // Path separators for files need to be changed on windows.
+        content.replaceAll(line -> {
+            if (line.contains("file://")) {
+                return line.replace('\\', '/').replaceAll(
+                        "file://.*/fusion-endpoint",
+                        "file:///.../fusion-endpoint");
+            }
+            return line;
+        });
         assertEquals("Rows in generated and expected files differ",
                 expected.size(), content.size());
 

@@ -34,9 +34,11 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 
 import static com.vaadin.flow.server.Constants.CONNECT_JAVA_SOURCE_FOLDER_TOKEN;
+import static com.vaadin.flow.server.Constants.TARGET;
 import static com.vaadin.flow.server.InitParameters.SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_JAVA_SOURCE_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_CONNECT_OPENAPI_JSON_FILE;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_FLOW_RESOURCES_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_GENERATED_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR;
 import static org.junit.Assert.assertFalse;
@@ -71,7 +73,7 @@ public class DevModeInitializerEndpointTest {
                 "{}".getBytes(StandardCharsets.UTF_8));
 
         final File generatedDirectory = new File(baseDir,
-                DEFAULT_GENERATED_DIR);
+                Paths.get(TARGET, DEFAULT_GENERATED_DIR).toString());
         FileUtils.forceMkdir(generatedDirectory);
 
         Files.write(new File(generatedDirectory, "package.json").toPath(),
@@ -89,6 +91,9 @@ public class DevModeInitializerEndpointTest {
         Mockito.when(appConfig.getBooleanProperty(
                 Mockito.matches(SERVLET_PARAMETER_DEVMODE_OPTIMIZE_BUNDLE),
                 Mockito.anyBoolean())).thenReturn(false);
+        Mockito.when(appConfig.getBuildFolder()).thenReturn(TARGET);
+        Mockito.when(appConfig.getFlowResourcesFolder())
+                .thenReturn(TARGET + "/" + DEFAULT_FLOW_RESOURCES_FOLDER);
 
         servletContext = mockServletContext();
         ServletRegistration vaadinServletRegistration = Mockito
@@ -133,8 +138,6 @@ public class DevModeInitializerEndpointTest {
 
     @After
     public void teardown() throws Exception {
-        temporaryFolder.delete();
-
         final DevModeHandler devModeHandler = DevModeHandler
                 .getDevModeHandler();
         if (devModeHandler != null) {
@@ -144,13 +147,16 @@ public class DevModeInitializerEndpointTest {
                 Thread.sleep(200);
             }
         }
+
+        temporaryFolder.delete();
     }
 
     @Test
     public void should_generateOpenApi_when_EndpointPresents()
             throws Exception {
         File generatedOpenApiJson = Paths
-                .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
+                .get(baseDir, TARGET, DEFAULT_CONNECT_OPENAPI_JSON_FILE)
+                .toFile();
         File src = new File(
                 getClass().getClassLoader().getResource("java").getFile());
         Mockito.when(appConfig.getStringProperty(
@@ -170,7 +176,8 @@ public class DevModeInitializerEndpointTest {
     public void should_notGenerateOpenApi_when_EndpointIsNotUsed()
             throws Exception {
         File generatedOpenApiJson = Paths
-                .get(baseDir, DEFAULT_CONNECT_OPENAPI_JSON_FILE).toFile();
+                .get(baseDir, TARGET, DEFAULT_CONNECT_OPENAPI_JSON_FILE)
+                .toFile();
 
         Assert.assertFalse(generatedOpenApiJson.exists());
         devModeInitializer.process(classes, servletContext);

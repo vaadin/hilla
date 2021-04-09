@@ -1,5 +1,6 @@
 package com.vaadin.flow.server.frontend.fusion;
 
+import static com.vaadin.flow.server.Constants.TARGET;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +53,7 @@ public class NodeTasksEndpointTest {
         Mockito.doReturn(new DefaultClassFinder(
                 Collections.singleton(ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
-        Builder builder = new Builder(mockLookup, dir)
+        Builder builder = new Builder(mockLookup, dir, TARGET)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
                 .withConnectJavaSourceFolder(src)
