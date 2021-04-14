@@ -119,7 +119,7 @@ public class VaadinConnectAccessChecker {
             HttpServletRequest request) {
         if (!getSecurityTarget(method)
                 .isAnnotationPresent(AnonymousAllowed.class)
-                || cannotAccessMethod(method, request)) {
+                || !canAccessMethod(method, request)) {
             return "Anonymous access is not allowed";
         }
         return null;
@@ -127,7 +127,7 @@ public class VaadinConnectAccessChecker {
 
     private String verifyAuthenticatedUser(Method method,
             HttpServletRequest request) {
-        if (cannotAccessMethod(method, request)) {
+        if (!canAccessMethod(method, request)) {
             VaadinService vaadinService = VaadinService.getCurrent();
             final String accessDeniedMessage;
             if (vaadinService != null && !vaadinService
@@ -145,20 +145,20 @@ public class VaadinConnectAccessChecker {
         return null;
     }
 
-    private boolean cannotAccessMethod(Method method,
+    private boolean canAccessMethod(Method method,
             HttpServletRequest request) {
-        return requestForbidden(request)
-                || !entityAllowed(getSecurityTarget(method), request);
+        return requestAllowed(request)
+                 && entityAllowed(getSecurityTarget(method), request);
     }
 
-    private boolean requestForbidden(HttpServletRequest request) {
+    private boolean requestAllowed(HttpServletRequest request) {
         if (!xsrfProtectionEnabled) {
-            return false;
+            return true;
         }
 
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return false;
+            return true;
         }
 
         String csrfTokenInSession = (String) session
@@ -169,7 +169,7 @@ public class VaadinConnectAccessChecker {
                         "Unable to verify CSRF token for endpoint request, got null token in session");
             }
 
-            return true;
+            return false;
         }
 
         String csrfTokenInRequest = request.getHeader("X-CSRF-Token");
@@ -180,10 +180,10 @@ public class VaadinConnectAccessChecker {
                 getLogger().info("Invalid CSRF token in endpoint request");
             }
 
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     private boolean entityAllowed(AnnotatedElement entity,
