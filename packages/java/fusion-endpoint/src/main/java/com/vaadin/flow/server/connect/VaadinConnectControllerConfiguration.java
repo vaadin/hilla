@@ -143,4 +143,15 @@ public class VaadinConnectControllerConfiguration {
     public EndpointUtil endpointUtil() {
         return new EndpointUtil();
     }
+
+    /**
+     * Registers the endpoint registry.
+     *
+     * @param endpointNameChecker the name checker to use
+     * @return the endpoint registry
+     */
+    @Bean
+    public EndpointRegistry endpointRegistry(EndpointNameChecker endpointNameChecker) {
+        return new EndpointRegistry(endpointNameChecker);
+    }
 }
