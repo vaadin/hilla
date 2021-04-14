@@ -165,9 +165,8 @@ public class DevModeInitializerEndpointTest {
 
         Assert.assertFalse(generatedOpenApiJson.exists());
         DevModeInitializer devModeInitializer = new DevModeInitializer();
-        devModeInitializer.process(classes, servletContext);
+        devModeInitializer.onStartup(classes, servletContext);
         waitForDevModeServer();
-        Thread.sleep(200);
         Assert.assertTrue("Should generate OpenAPI spec if Endpoint is used.",
                 generatedOpenApiJson.exists());
     }
@@ -180,7 +179,7 @@ public class DevModeInitializerEndpointTest {
                 .toFile();
 
         Assert.assertFalse(generatedOpenApiJson.exists());
-        devModeInitializer.process(classes, servletContext);
+        devModeInitializer.onStartup(classes, servletContext);
         waitForDevModeServer();
         Assert.assertFalse(
                 "Should not generate OpenAPI spec if Endpoint is not used.",
@@ -208,7 +207,7 @@ public class DevModeInitializerEndpointTest {
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
-        devModeInitializer.process(classes, servletContext);
+        devModeInitializer.onStartup(classes, servletContext);
         waitForDevModeServer();
         assertTrue(ts1.exists());
         assertTrue(ts2.exists());

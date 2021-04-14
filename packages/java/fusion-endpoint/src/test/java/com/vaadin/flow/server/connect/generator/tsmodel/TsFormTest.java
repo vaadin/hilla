@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.server.connect.generator.endpoints.AbstractEndpointGeneratorBaseTest;
@@ -116,9 +117,14 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         int line = 0;
         List<String> faultyLines = new ArrayList<>();
         for (String expectedLine : expected) {
-            if (!expectedLine.equals(content.get(line))) {
+            String actualLine = content.get(line);
+            // ignore the line for file reference, as the file path syntax is different on Windows
+            if (isFileRefenreceLine(expectedLine)) {
+                Assert.assertTrue("should have the file reference", 
+                        isFileRefenreceLine(actualLine)); 
+            } else if (!expectedLine.equals(actualLine)) {
                 faultyLines.add(String.format("L%d :: expected: [%s] got [%s]",
-                        line + 1, expectedLine, content.get(line)));
+                        line + 1, expectedLine, actualLine));
             }
             line++;
         }
@@ -126,5 +132,9 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
                 "Found differences in generated file: " + faultyLines.stream()
                         .collect(Collectors.joining("\n")),
                 faultyLines.isEmpty());
+    }
+
+    private boolean isFileRefenreceLine(String line) {
+        return line.contains("@see {@link file:");
     }
 }
