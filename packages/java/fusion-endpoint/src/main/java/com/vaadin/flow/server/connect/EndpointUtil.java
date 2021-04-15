@@ -15,10 +15,23 @@
  */
 package com.vaadin.flow.server.connect;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.flow.server.connect.EndpointRegistry.VaadinEndpointData;
+import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
+import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A util class related to {@link Endpoint}.
@@ -29,12 +42,18 @@ public class EndpointUtil {
     @Autowired
     private VaadinEndpointProperties endpointProperties;
 
+    @Autowired
+    private EndpointRegistry registry;
+
+    @Autowired
+    private VaadinConnectAccessChecker accessChecker;
+
     /**
      * Checks if the request is for an endpoint.
-     *
+     * <p>
      * Note even if this method returns <code>true</code>, there is no guarantee
-     * that an endpoint method will actually be called (it might not exist,
-     * access might be denied etc).
+     * that an endpoint method will actually be called, e.g. access might be
+     * denied.
      *
      * @param request
      *            the HTTP request
@@ -42,28 +61,51 @@ public class EndpointUtil {
      *         <code>false</code> otherwise
      */
     public boolean isEndpointRequest(HttpServletRequest request) {
-        String path = getRequestPath(request);
-        return path
-                .startsWith(endpointProperties.getVaadinEndpointPrefix() + "/");
+        return getEndpoint(request).isPresent();
+    }
+
+    private Optional<Method> getEndpoint(HttpServletRequest request) {
+        PathPatternParser pathParser = new PathPatternParser();
+        PathPattern pathPattern = pathParser
+                .parse(endpointProperties.getVaadinEndpointPrefix()
+                        + VaadinConnectController.ENDPOINT_METHODS);
+        RequestPath requestPath = ServletRequestPathUtils
+                .parseAndCache(request);
+        if (pathPattern.matches(requestPath)) {
+            PathMatchInfo matchInfo = pathPattern.matchAndExtract(requestPath);
+            if (matchInfo == null) {
+                return Optional.empty();
+            }
+
+            Map<String, String> uriVariables = matchInfo.getUriVariables();
+            String endpointName = uriVariables.get("endpoint");
+            String endpointMethod = uriVariables.get("method");
+
+            VaadinEndpointData data = registry.get(endpointName);
+            if (data == null) {
+                return Optional.empty();
+            }
+            return data.getMethod(endpointMethod);
+        }
+        return Optional.empty();
     }
 
     /**
-     * Returns the full request path, including the servlet path.
-     *
-     * With Spring Security, the path is most often included fully as
-     * "servletPath" and pathInfo is null
+     * Checks if the given request goes to an anonymous (public) endpoint.
+     * 
+     * @param request
+     *            the HTTP request to check
+     * @return <code>true</code> if the request goes to an anonymous endpoint,
+     *         <code>false</code> otherwise
      */
-    private static String getRequestPath(HttpServletRequest request) {
-        String servletPath = request.getServletPath();
-        String pathInfo = request.getPathInfo();
-        String url = "";
-        if (servletPath != null) {
-            url += servletPath;
+    public boolean isAnonymousEndpoint(HttpServletRequest request) {
+        Optional<Method> method = getEndpoint(request);
+        if (!method.isPresent()) {
+            return false;
         }
-        if (pathInfo != null) {
-            url += pathInfo;
-        }
-        return url;
+
+        return accessChecker.getSecurityTarget(method.get())
+                .isAnnotationPresent(AnonymousAllowed.class);
     }
 
 }
