@@ -118,10 +118,11 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         List<String> faultyLines = new ArrayList<>();
         for (String expectedLine : expected) {
             String actualLine = content.get(line);
-            // ignore the line for file reference, as the file path syntax is different on Windows
+            // ignore the line for file reference, as the file path syntax is
+            // different on Windows
             if (isFileRefenreceLine(expectedLine)) {
-                Assert.assertTrue("should have the file reference", 
-                        isFileRefenreceLine(actualLine)); 
+                Assert.assertTrue("should have the file reference",
+                        isFileRefenreceLine(actualLine));
             } else if (!expectedLine.equals(actualLine)) {
                 faultyLines.add(String.format("L%d :: expected: [%s] got [%s]",
                         line + 1, expectedLine, actualLine));
