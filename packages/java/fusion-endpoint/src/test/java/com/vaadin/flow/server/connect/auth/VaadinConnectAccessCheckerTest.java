@@ -37,7 +37,7 @@ public class VaadinConnectAccessCheckerTest {
 
     @Before
     public void before() {
-        checker = new VaadinConnectAccessChecker();
+        checker = new VaadinConnectAccessChecker(new CsrfChecker());
         requestMock = mock(HttpServletRequest.class);
         sessionMock = mock(HttpSession.class);
         when(sessionMock

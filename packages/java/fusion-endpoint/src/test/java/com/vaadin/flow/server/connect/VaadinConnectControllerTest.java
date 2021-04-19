@@ -46,6 +46,7 @@ import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
+import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 import com.vaadin.flow.server.connect.exception.EndpointException;
 import com.vaadin.flow.server.connect.exception.EndpointValidationException;
@@ -388,13 +389,14 @@ public class VaadinConnectControllerTest {
         String responseBody = response.getBody();
         assertNotNull("Response body should not be null", responseBody);
         assertTrue("Should return unauthorized error",
-                responseBody.contains("Anonymous access is not allowed"));
+                responseBody.contains("Access denied"));
     }
 
     @Test
     public void should_NotCallMethodAnonymously_When_UserPrincipalIsNotInRole() {
         VaadinConnectController vaadinController = createVaadinController(
-                TEST_ENDPOINT, new VaadinConnectAccessChecker());
+                TEST_ENDPOINT,
+                new VaadinConnectAccessChecker(new CsrfChecker()));
 
         ResponseEntity<String> response = vaadinController.serveEndpoint(
                 TEST_ENDPOINT_NAME, "testRoleAllowed",
@@ -410,7 +412,8 @@ public class VaadinConnectControllerTest {
         when(requestMock.isUserInRole("FOO_ROLE")).thenReturn(true);
 
         VaadinConnectController vaadinController = createVaadinController(
-                TEST_ENDPOINT, new VaadinConnectAccessChecker());
+                TEST_ENDPOINT,
+                new VaadinConnectAccessChecker(new CsrfChecker()));
 
         ResponseEntity<String> response = vaadinController.serveEndpoint(
                 TEST_ENDPOINT_NAME, "testRoleAllowed",
@@ -424,7 +427,8 @@ public class VaadinConnectControllerTest {
     @Test
     public void should_CallMethodAnonymously_When_AnonymousOverridesRoles() {
         VaadinConnectController vaadinController = createVaadinController(
-                TEST_ENDPOINT, new VaadinConnectAccessChecker());
+                TEST_ENDPOINT,
+                new VaadinConnectAccessChecker(new CsrfChecker()));
 
         ResponseEntity<String> response = vaadinController.serveEndpoint(
                 TEST_ENDPOINT_NAME, "anonymousOverrides",
@@ -451,7 +455,8 @@ public class VaadinConnectControllerTest {
         when(principal.getName()).thenReturn("foo");
 
         VaadinConnectController vaadinController = createVaadinController(
-                TEST_ENDPOINT, new VaadinConnectAccessChecker());
+                TEST_ENDPOINT,
+                new VaadinConnectAccessChecker(new CsrfChecker()));
 
         ResponseEntity<String> response = vaadinController.serveEndpoint(
                 TEST_ENDPOINT_NAME, "getUserName",
@@ -463,7 +468,8 @@ public class VaadinConnectControllerTest {
     @Test
     public void should_clearVaadinRequestInsntace_after_EndpointCall() {
         VaadinConnectController vaadinController = createVaadinController(
-                TEST_ENDPOINT, new VaadinConnectAccessChecker());
+                TEST_ENDPOINT,
+                new VaadinConnectAccessChecker(new CsrfChecker()));
 
         vaadinController.serveEndpoint(TEST_ENDPOINT_NAME, "getUserName",
                 createRequestParameters("{}"), requestMock);
@@ -1242,7 +1248,7 @@ public class VaadinConnectControllerTest {
     private VaadinConnectController createVaadinControllerWithoutPrincipal() {
         when(requestMock.getUserPrincipal()).thenReturn(null);
         return createVaadinController(TEST_ENDPOINT,
-                new VaadinConnectAccessChecker());
+                new VaadinConnectAccessChecker(new CsrfChecker()));
     }
 
     private VaadinConnectController createVaadinControllerWithApplicationContext(

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 
 import org.junit.Assert;
@@ -20,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = { EndpointUtil.class, VaadinEndpointProperties.class,
         EndpointRegistry.class, EndpointNameChecker.class,
-        VaadinConnectAccessChecker.class })
+        VaadinConnectAccessChecker.class, CsrfChecker.class })
 @RunWith(SpringRunner.class)
 public class EndpointUtilTest {
 

@@ -78,6 +78,7 @@ import org.junit.Assert;
 
 import com.vaadin.flow.server.connect.Endpoint;
 import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
 import com.vaadin.flow.server.connect.generator.TestUtils;
@@ -106,7 +107,8 @@ public abstract class AbstractEndpointGenerationTest
     private static final List<Class> DENY_LIST_CHECKING_ABSOLUTE_PATH = Arrays
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
     private final Set<String> schemaReferences = new HashSet<>();
-    private static final VaadinConnectAccessChecker accessChecker = new VaadinConnectAccessChecker();
+    private static final VaadinConnectAccessChecker accessChecker = new VaadinConnectAccessChecker(
+            new CsrfChecker());
 
     public AbstractEndpointGenerationTest(List<Class<?>> testClasses) {
         super(testClasses);
