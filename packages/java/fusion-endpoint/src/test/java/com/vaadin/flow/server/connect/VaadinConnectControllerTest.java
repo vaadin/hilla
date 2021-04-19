@@ -358,8 +358,8 @@ public class VaadinConnectControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         String responseBody = response.getBody();
         assertNotNull("Response body should not be null", responseBody);
-        assertTrue("Should return unauthorized error",
-                responseBody.contains("Anonymous access is not allowed"));
+        assertTrue("Should return unauthorized error", responseBody
+                .contains(VaadinConnectAccessChecker.ACCESS_DENIED_MSG));
     }
 
     @Test
@@ -388,8 +388,8 @@ public class VaadinConnectControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         String responseBody = response.getBody();
         assertNotNull("Response body should not be null", responseBody);
-        assertTrue("Should return unauthorized error",
-                responseBody.contains("Access denied"));
+        assertTrue("Should return unauthorized error", responseBody
+                .contains(VaadinConnectAccessChecker.ACCESS_DENIED_MSG));
     }
 
     @Test
@@ -404,7 +404,7 @@ public class VaadinConnectControllerTest {
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(response.getBody()
-                .contains("Unauthorized access to Vaadin endpoint"));
+                .contains(VaadinConnectAccessChecker.ACCESS_DENIED_MSG));
     }
 
     @Test
@@ -446,8 +446,8 @@ public class VaadinConnectControllerTest {
                 requestMock);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertTrue(
-                response.getBody().contains("Anonymous access is not allowed"));
+        assertTrue(response.getBody()
+                .contains(VaadinConnectAccessChecker.ACCESS_DENIED_MSG));
     }
 
     @Test

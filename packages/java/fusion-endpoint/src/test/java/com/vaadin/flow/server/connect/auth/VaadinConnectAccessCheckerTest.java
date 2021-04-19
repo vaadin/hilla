@@ -545,9 +545,8 @@ public class VaadinConnectAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertNotNull(accessDeniedMessage);
-            assertTrue(accessDeniedMessage
-                    .contains("Unauthorized access to Vaadin endpoint"));
+            assertEquals(VaadinConnectAccessChecker.ACCESS_DENIED_MSG_DEV_MODE,
+                    accessDeniedMessage);
             assertTrue(accessDeniedMessage
                     .contains(PermitAll.class.getSimpleName()));
             assertTrue(accessDeniedMessage
@@ -577,7 +576,7 @@ public class VaadinConnectAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertEquals("Unauthorized access to Vaadin endpoint",
+            assertEquals(VaadinConnectAccessChecker.ACCESS_DENIED_MSG,
                     accessDeniedMessage);
         } finally {
             CurrentInstance.clearAll();

@@ -70,7 +70,10 @@ import com.vaadin.flow.server.VaadinService;
  */
 public class VaadinConnectAccessChecker {
 
-    private static final String ACCESS_DENIED = "Access denied";
+    public static final String ACCESS_DENIED_MSG = "Access denied";
+
+    public static final String ACCESS_DENIED_MSG_DEV_MODE = "Unauthorized access to Vaadin endpoint; "
+            + "to enable endpoint access use one of the following annotations: @AnonymousAllowed, @PermitAll, @RolesAllowed";
 
     private CsrfChecker csrfChecker;
 
@@ -96,14 +99,10 @@ public class VaadinConnectAccessChecker {
      */
     public String check(Method method, HttpServletRequest request) {
         if (!csrfChecker.validateCsrfTokenInRequest(request)) {
-            return ACCESS_DENIED;
+            return ACCESS_DENIED_MSG;
         }
 
-        if (request.getUserPrincipal() != null) {
-            return verifyAuthenticatedUser(method, request);
-        } else {
-            return verifyAnonymousUser(method, request);
-        }
+        return canAccess(method, request);
     }
 
     /**
@@ -126,31 +125,16 @@ public class VaadinConnectAccessChecker {
                 : method.getDeclaringClass();
     }
 
-    private String verifyAnonymousUser(Method method,
-            HttpServletRequest request) {
-        if (getSecurityTarget(method)
-                .isAnnotationPresent(AnonymousAllowed.class)
-                && annotationAllowsAccess(getSecurityTarget(method), request)) {
-            return null;
-        }
-
-        return "Anonymous access is not allowed";
-    }
-
-    private String verifyAuthenticatedUser(Method method,
-            HttpServletRequest request) {
+    private String canAccess(Method method, HttpServletRequest request) {
         if (annotationAllowsAccess(getSecurityTarget(method), request)) {
             return null;
         }
 
         if (isDevMode()) {
             // suggest access control annotations in dev mode
-            return "Unauthorized access to Vaadin endpoint; "
-                    + "to enable endpoint access use one of the following "
-                    + "annotations: @AnonymousAllowed, @PermitAll, "
-                    + "@RolesAllowed";
+            return ACCESS_DENIED_MSG_DEV_MODE;
         } else {
-            return "Unauthorized access to Vaadin endpoint";
+            return ACCESS_DENIED_MSG;
         }
     }
 
@@ -169,6 +153,9 @@ public class VaadinConnectAccessChecker {
         if (annotatedClassOrMethod
                 .isAnnotationPresent(AnonymousAllowed.class)) {
             return true;
+        }
+        if (request.getUserPrincipal() == null) {
+            return false;
         }
         RolesAllowed rolesAllowed = annotatedClassOrMethod
                 .getAnnotation(RolesAllowed.class);
