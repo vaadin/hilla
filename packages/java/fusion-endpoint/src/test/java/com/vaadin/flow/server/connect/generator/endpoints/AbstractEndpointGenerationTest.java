@@ -78,6 +78,7 @@ import org.junit.Assert;
 
 import com.vaadin.flow.server.connect.Endpoint;
 import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
@@ -108,7 +109,7 @@ public abstract class AbstractEndpointGenerationTest
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
     private final Set<String> schemaReferences = new HashSet<>();
     private static final VaadinConnectAccessChecker accessChecker = new VaadinConnectAccessChecker(
-            new CsrfChecker());
+            new AccessAnnotationChecker(), new CsrfChecker());
 
     public AbstractEndpointGenerationTest(List<Class<?>> testClasses) {
         super(testClasses);
@@ -230,7 +231,8 @@ public abstract class AbstractEndpointGenerationTest
         for (Method expectedEndpointMethod : testMethodsClass
                 .getDeclaredMethods()) {
             if (!Modifier.isPublic(expectedEndpointMethod.getModifiers())
-                    || accessChecker.getSecurityTarget(expectedEndpointMethod)
+                    || accessChecker.getAccessAnnotationChecker()
+                            .getSecurityTarget(expectedEndpointMethod)
                             .isAnnotationPresent(DenyAll.class)) {
                 continue;
             }

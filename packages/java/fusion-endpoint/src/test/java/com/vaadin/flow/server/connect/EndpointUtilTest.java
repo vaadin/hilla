@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.flow.server.connect.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.connect.auth.AccessAnnotationCheckerTest;
 import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 
@@ -21,7 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = { EndpointUtil.class, VaadinEndpointProperties.class,
         EndpointRegistry.class, EndpointNameChecker.class,
-        VaadinConnectAccessChecker.class, CsrfChecker.class })
+        VaadinConnectAccessChecker.class, CsrfChecker.class,
+        AccessAnnotationChecker.class })
 @RunWith(SpringRunner.class)
 public class EndpointUtilTest {
 
@@ -30,21 +33,9 @@ public class EndpointUtilTest {
     @Autowired
     private EndpointRegistry registry;
 
-    private static final Class<?>[] endpointClasses = new Class<?>[] {
-            TestEndpoints.AnonymousAllowedEndpoint.class,
-            TestEndpoints.DenyAllEndpoint.class,
-            TestEndpoints.NoAnnotationEndpoint.class,
-            TestEndpoints.PermitAllEndpoint.class,
-            TestEndpoints.RolesAllowedAdminEndpoint.class,
-            TestEndpoints.RolesAllowedUserEndpoint.class };
-
-    private static final String[] endpointMethods = new String[] {
-            "noannotation", "anonymousallowed", "permitall", "denyall",
-            "rolesalloweduser", "rolesallowedadmin" };
-
-    private static final String[] endpointNames = Stream.of(endpointClasses)
-            .map(cls -> cls.getSimpleName().toLowerCase(Locale.ENGLISH))
-            .toArray(String[]::new);
+    private static final Class<?>[] endpointClasses = AccessAnnotationCheckerTest.ENDPOINT_CLASSES;
+    private static final String[] endpointMethods = AccessAnnotationCheckerTest.ENDPOINT_METHODS;
+    private static final String[] endpointNames = AccessAnnotationCheckerTest.ENDPOINT_NAMES;
 
     @Before
     public void setup() throws Exception {
@@ -68,25 +59,25 @@ public class EndpointUtilTest {
 
     @Test
     public void isAnonymousEndpoint() {
-        verifyAnonymousAccessAllowed("AnonymousAllowedEndpoint", "noannotation",
-                "anonymousallowed");
-        verifyAnonymousAccessAllowed("DenyAllEndpoint", "anonymousallowed");
+        verifyAnonymousAccessAllowed("AnonymousAllowedEndpoint", "noAnnotation",
+                "anonymousAllowed");
+        verifyAnonymousAccessAllowed("DenyAllEndpoint", "anonymousAllowed");
         verifyAnonymousAccessAllowed("NoAnnotationEndpoint",
-                "anonymousallowed");
-        verifyAnonymousAccessAllowed("DenyAllEndpoint", "anonymousallowed");
-        verifyAnonymousAccessAllowed("PermitAllEndpoint", "anonymousallowed");
+                "anonymousAllowed");
+        verifyAnonymousAccessAllowed("DenyAllEndpoint", "anonymousAllowed");
+        verifyAnonymousAccessAllowed("PermitAllEndpoint", "anonymousAllowed");
         verifyAnonymousAccessAllowed("RolesAllowedAdminEndpoint",
-                "anonymousallowed");
+                "anonymousAllowed");
         verifyAnonymousAccessAllowed("RolesAllowedUserEndpoint",
-                "anonymousallowed");
+                "anonymousAllowed");
     }
 
     private void verifyAnonymousAccessAllowed(String endpointName,
             String... expectedAnonMethods) {
         List<String> expectedAnonList = Arrays.asList(expectedAnonMethods);
         for (String endpointMethod : endpointMethods) {
-            verifyEndpointPathIsAnonymous(
-                    "/connect/" + endpointName + "/" + endpointMethod,
+            String path = "/connect/" + endpointName + "/" + endpointMethod;
+            verifyEndpointPathIsAnonymous(path,
                     expectedAnonList.contains(endpointMethod));
         }
     }

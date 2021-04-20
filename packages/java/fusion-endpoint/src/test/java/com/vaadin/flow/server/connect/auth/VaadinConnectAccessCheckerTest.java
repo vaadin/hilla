@@ -28,16 +28,14 @@ import static org.mockito.Mockito.when;
 public class VaadinConnectAccessCheckerTest {
     private static final String ROLE_USER = "ROLE_USER";
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     private VaadinConnectAccessChecker checker;
     private HttpServletRequest requestMock;
     private HttpSession sessionMock;
 
     @Before
     public void before() {
-        checker = new VaadinConnectAccessChecker(new CsrfChecker());
+        checker = new VaadinConnectAccessChecker(new AccessAnnotationChecker(),
+                new CsrfChecker());
         requestMock = mock(HttpServletRequest.class);
         sessionMock = mock(HttpSession.class);
         when(sessionMock
@@ -464,67 +462,6 @@ public class VaadinConnectAccessCheckerTest {
 
         createAnonymousContext();
         shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_Throw_When_PrivateMethodIsPassed() throws Exception {
-        class Test {
-            private void test() {
-            }
-        }
-
-        Method method = Test.class.getDeclaredMethod("test");
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(method.toString());
-        checker.getSecurityTarget(method);
-    }
-
-    @Test
-    public void should_ReturnEnclosingClassAsSecurityTarget_When_NoSecurityAnnotationsPresent()
-            throws Exception {
-        class Test {
-            public void test() {
-            }
-        }
-        assertEquals(Test.class,
-                checker.getSecurityTarget(Test.class.getMethod("test")));
-    }
-
-    @Test
-    public void should_ReturnEnclosingClassAsSecurityTarget_When_OnlyClassHasSecurityAnnotations()
-            throws Exception {
-        @AnonymousAllowed
-        class Test {
-            public void test() {
-            }
-        }
-        assertEquals(Test.class,
-                checker.getSecurityTarget(Test.class.getMethod("test")));
-    }
-
-    @Test
-    public void should_ReturnMethodAsSecurityTarget_When_OnlyMethodHasSecurityAnnotations()
-            throws Exception {
-        class Test {
-            @AnonymousAllowed
-            public void test() {
-            }
-        }
-        Method securityMethod = Test.class.getMethod("test");
-        assertEquals(securityMethod, checker.getSecurityTarget(securityMethod));
-    }
-
-    @Test
-    public void should_ReturnMethodAsSecurityTarget_When_BothClassAndMethodHaveSecurityAnnotations()
-            throws Exception {
-        @AnonymousAllowed
-        class Test {
-            @AnonymousAllowed
-            public void test() {
-            }
-        }
-        Method securityMethod = Test.class.getMethod("test");
-        assertEquals(securityMethod, checker.getSecurityTarget(securityMethod));
     }
 
     @Test

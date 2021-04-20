@@ -40,6 +40,10 @@ public class TestEndpoints {
 
         }
 
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
+        }
+
     }
 
     @Endpoint
@@ -73,6 +77,10 @@ public class TestEndpoints {
         @RolesAllowed("admin")
         public void rolesAllowedAdmin() {
 
+        }
+
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
         }
 
     }
@@ -110,6 +118,10 @@ public class TestEndpoints {
 
         }
 
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
+        }
+
     }
 
     @Endpoint
@@ -143,6 +155,10 @@ public class TestEndpoints {
         @RolesAllowed("admin")
         public void rolesAllowedAdmin() {
 
+        }
+
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
         }
 
     }
@@ -180,6 +196,10 @@ public class TestEndpoints {
 
         }
 
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
+        }
+
     }
 
     @Endpoint
@@ -213,6 +233,10 @@ public class TestEndpoints {
         @RolesAllowed("admin")
         public void rolesAllowedAdmin() {
 
+        }
+
+        @RolesAllowed({ "user", "admin" })
+        public void rolesAllowedUserAdmin() {
         }
 
     }

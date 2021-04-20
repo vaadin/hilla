@@ -16,9 +16,7 @@
 
 package com.vaadin.flow.server.connect.auth;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
@@ -77,13 +75,20 @@ public class VaadinConnectAccessChecker {
 
     private CsrfChecker csrfChecker;
 
+    private AccessAnnotationChecker accessAnnotationChecker;
+
     /**
      * Creates a new instance.
      * 
      * @param csrfChecker
      *            the csrf checker to use
+     * @param accessAnnotationChecker
+     *            the access checker to use
      */
-    public VaadinConnectAccessChecker(CsrfChecker csrfChecker) {
+    public VaadinConnectAccessChecker(
+            AccessAnnotationChecker accessAnnotationChecker,
+            CsrfChecker csrfChecker) {
+        this.accessAnnotationChecker = accessAnnotationChecker;
         this.csrfChecker = csrfChecker;
     }
 
@@ -102,31 +107,7 @@ public class VaadinConnectAccessChecker {
             return ACCESS_DENIED_MSG;
         }
 
-        return canAccess(method, request);
-    }
-
-    /**
-     * Gets the entity to check for Vaadin endpoint security restrictions.
-     *
-     * @param method
-     *            the method to analyze, not {@code null}
-     * @return the entity that is responsible for security settings for the
-     *         method passed
-     * @throws IllegalArgumentException
-     *             if the method is not public
-     */
-    public AnnotatedElement getSecurityTarget(Method method) {
-        if (!Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException(String.format(
-                    "The method '%s' is not public hence cannot have a security target",
-                    method));
-        }
-        return hasSecurityAnnotation(method) ? method
-                : method.getDeclaringClass();
-    }
-
-    private String canAccess(Method method, HttpServletRequest request) {
-        if (annotationAllowsAccess(getSecurityTarget(method), request)) {
+        if (accessAnnotationChecker.annotationAllowsAccess(method, request)) {
             return null;
         }
 
@@ -144,46 +125,6 @@ public class VaadinConnectAccessChecker {
                 .getDeploymentConfiguration().isProductionMode());
     }
 
-    private boolean annotationAllowsAccess(
-            AnnotatedElement annotatedClassOrMethod,
-            HttpServletRequest request) {
-        if (annotatedClassOrMethod.isAnnotationPresent(DenyAll.class)) {
-            return false;
-        }
-        if (annotatedClassOrMethod
-                .isAnnotationPresent(AnonymousAllowed.class)) {
-            return true;
-        }
-        if (request.getUserPrincipal() == null) {
-            return false;
-        }
-        RolesAllowed rolesAllowed = annotatedClassOrMethod
-                .getAnnotation(RolesAllowed.class);
-        if (rolesAllowed == null) {
-            return annotatedClassOrMethod.isAnnotationPresent(PermitAll.class);
-        } else {
-            return roleAllowed(rolesAllowed, request);
-        }
-    }
-
-    private boolean roleAllowed(RolesAllowed rolesAllowed,
-            HttpServletRequest request) {
-        for (String role : rolesAllowed.value()) {
-            if (request.isUserInRole(role)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean hasSecurityAnnotation(Method method) {
-        return method.isAnnotationPresent(AnonymousAllowed.class)
-                || method.isAnnotationPresent(PermitAll.class)
-                || method.isAnnotationPresent(DenyAll.class)
-                || method.isAnnotationPresent(RolesAllowed.class);
-    }
-
     /**
      * Enable or disable XSRF token checking in endpoints.
      *
@@ -192,6 +133,15 @@ public class VaadinConnectAccessChecker {
      */
     public void enableCsrf(boolean xsrfProtectionEnabled) {
         csrfChecker.setCsrfProtection(xsrfProtectionEnabled);
+    }
+
+    /**
+     * Returns the instance used for checking access based on annotations.
+     * 
+     * @return the instance used for checking access based on annotations
+     */
+    public AccessAnnotationChecker getAccessAnnotationChecker() {
+        return accessAnnotationChecker;
     }
 
 }
