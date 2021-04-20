@@ -76,15 +76,15 @@ public class OpenApiSpecGenerator {
     public void generateOpenApiSpec(Collection<Path> sourcesPaths,
             Path specOutputFile) {
         sourcesPaths.forEach(generator::addSourcePath);
-        log.info("Parsing java files from {}", sourcesPaths);
+        log.debug("Parsing java files from {}", sourcesPaths);
         OpenAPI openAPI = generator.generateOpenApi();
         try {
             if (openAPI.getPaths().size() > 0) {
-                log.info("writing file {}", specOutputFile);
+                log.debug("writing file {}", specOutputFile);
                 FileUtils.writeStringToFile(specOutputFile.toFile(),
                         Json.pretty(openAPI), StandardCharsets.UTF_8);
             } else {
-                log.info("There are no endpoints to generate.");
+                log.debug("There are no endpoints to generate.");
                 FileUtils.deleteQuietly(specOutputFile.toFile());
             }
         } catch (IOException e) {
