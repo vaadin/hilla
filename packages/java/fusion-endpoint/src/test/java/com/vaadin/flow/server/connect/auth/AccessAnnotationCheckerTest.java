@@ -5,35 +5,38 @@ import static org.junit.Assert.assertEquals;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.vaadin.flow.server.connect.TestEndpoints;
-import com.vaadin.flow.server.connect.TestEndpoints.AnonymousAllowedEndpoint;
-import com.vaadin.flow.server.connect.TestEndpoints.DenyAllEndpoint;
-import com.vaadin.flow.server.connect.TestEndpoints.NoAnnotationEndpoint;
-import com.vaadin.flow.server.connect.TestEndpoints.PermitAllEndpoint;
-import com.vaadin.flow.server.connect.TestEndpoints.RolesAllowedAdminEndpoint;
-import com.vaadin.flow.server.connect.TestEndpoints.RolesAllowedUserEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.AnonymousAllowedEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.DenyAllEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.NoAnnotationEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.PermitAllEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.RolesAllowedAdminEndpoint;
+import com.vaadin.flow.server.connect.AccessControlTestClasses.RolesAllowedUserEndpoint;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.mockito.Mockito;
 
 public class AccessAnnotationCheckerTest {
     public static final Class<?>[] ENDPOINT_CLASSES = new Class<?>[] {
-            TestEndpoints.AnonymousAllowedEndpoint.class,
-            TestEndpoints.DenyAllEndpoint.class,
-            TestEndpoints.NoAnnotationEndpoint.class,
-            TestEndpoints.PermitAllEndpoint.class,
-            TestEndpoints.RolesAllowedAdminEndpoint.class,
-            TestEndpoints.RolesAllowedUserEndpoint.class };
+            AccessControlTestClasses.AnonymousAllowedEndpoint.class,
+            AccessControlTestClasses.DenyAllEndpoint.class,
+            AccessControlTestClasses.NoAnnotationEndpoint.class,
+            AccessControlTestClasses.PermitAllEndpoint.class,
+            AccessControlTestClasses.RolesAllowedAdminEndpoint.class,
+            AccessControlTestClasses.RolesAllowedUserEndpoint.class };
 
     public static final String[] ENDPOINT_METHODS = new String[] {
             "noAnnotation", "anonymousAllowed", "permitAll", "denyAll",
@@ -41,7 +44,14 @@ public class AccessAnnotationCheckerTest {
 
     public static final String[] ENDPOINT_NAMES = Stream.of(ENDPOINT_CLASSES)
             .map(cls -> cls.getSimpleName().toLowerCase(Locale.ENGLISH))
-            .toArray(String[]::new);;
+            .toArray(String[]::new);
+
+    private static final Principal USER_PRINCIPAL = new Principal() {
+        @Override
+        public String getName() {
+            return "John Doe";
+        }
+    };
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -118,7 +128,7 @@ public class AccessAnnotationCheckerTest {
 
     @Test
     public void anonymousAccessAllowed() throws Exception {
-        MockHttpServletRequest anonRequest = new MockHttpServletRequest();
+        HttpServletRequest anonRequest = createRequest(null);
 
         verifyMethodAccessAllowed(AnonymousAllowedEndpoint.class, anonRequest,
                 "noAnnotation", "anonymousAllowed");
@@ -147,14 +157,8 @@ public class AccessAnnotationCheckerTest {
 
     @Test
     public void loggedInUserAccessAllowed() throws Exception {
-        MockHttpServletRequest loggedInURequest = new MockHttpServletRequest();
-        loggedInURequest.setUserPrincipal(new Principal() {
-            @Override
-            public String getName() {
-                return "John Doe";
-            }
+        HttpServletRequest loggedInURequest = createRequest(USER_PRINCIPAL);
 
-        });
         verifyMethodAccessAllowed(AnonymousAllowedEndpoint.class,
                 loggedInURequest, "noAnnotation", "anonymousAllowed",
                 "permitAll");
@@ -185,14 +189,8 @@ public class AccessAnnotationCheckerTest {
 
     @Test
     public void userRoleAccessAllowed() throws Exception {
-        MockHttpServletRequest userRoleRequest = new MockHttpServletRequest();
-        userRoleRequest.setUserPrincipal(new Principal() {
-            @Override
-            public String getName() {
-                return "John Doe";
-            }
-        });
-        userRoleRequest.addUserRole("user");
+        HttpServletRequest userRoleRequest = createRequest(USER_PRINCIPAL,
+                "user");
 
         verifyMethodAccessAllowed(AnonymousAllowedEndpoint.class,
                 userRoleRequest, "noAnnotation", "anonymousAllowed",
@@ -228,15 +226,8 @@ public class AccessAnnotationCheckerTest {
 
     @Test
     public void userAndAdminRoleAccessAllowed() throws Exception {
-        MockHttpServletRequest adminRoleRequest = new MockHttpServletRequest();
-        adminRoleRequest.setUserPrincipal(new Principal() {
-            @Override
-            public String getName() {
-                return "John Doe";
-            }
-        });
-        adminRoleRequest.addUserRole("user");
-        adminRoleRequest.addUserRole("admin");
+        HttpServletRequest adminRoleRequest = createRequest(USER_PRINCIPAL,
+                "user", "admin");
 
         // Method level access
 
@@ -280,14 +271,8 @@ public class AccessAnnotationCheckerTest {
 
     @Test
     public void adminRoleAccessAllowed() throws Exception {
-        MockHttpServletRequest adminRoleRequest = new MockHttpServletRequest();
-        adminRoleRequest.setUserPrincipal(new Principal() {
-            @Override
-            public String getName() {
-                return "John Doe";
-            }
-        });
-        adminRoleRequest.addUserRole("admin");
+        HttpServletRequest adminRoleRequest = createRequest(USER_PRINCIPAL,
+                "admin");
 
         verifyMethodAccessAllowed(AnonymousAllowedEndpoint.class,
                 adminRoleRequest, "noAnnotation", "anonymousAllowed",
@@ -321,7 +306,20 @@ public class AccessAnnotationCheckerTest {
                 adminRoleRequest, true);
         verifyClassAccessAllowed(RolesAllowedUserEndpoint.class,
                 adminRoleRequest, false);
+    }
 
+    private HttpServletRequest createRequest(Principal userPrincipal,
+            String... roles) {
+        Set<String> roleSet = new HashSet<>();
+        Collections.addAll(roleSet, roles);
+
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getUserPrincipal()).thenReturn(userPrincipal);
+        Mockito.when(request.isUserInRole(Mockito.anyString()))
+                .thenAnswer(query -> {
+                    return roleSet.contains(query.getArguments()[0]);
+                });
+        return request;
     }
 
     private void verifyMethodAccessAllowed(Class<?> endpointClass,

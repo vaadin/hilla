@@ -133,7 +133,8 @@ public class AccessAnnotationChecker {
     /**
      * Gets the class to check for security restrictions.
      *
-     * @param cls the class to check
+     * @param cls
+     *            the class to check
      * @return the entity that is responsible for security settings for the
      *         method passed
      * @throws IllegalArgumentException

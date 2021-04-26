@@ -6,9 +6,8 @@ import javax.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
-public class TestEndpoints {
+public class AccessControlTestClasses {
 
-    @Endpoint
     public static class NoAnnotationEndpoint {
 
         public void noAnnotation() {
@@ -46,7 +45,6 @@ public class TestEndpoints {
 
     }
 
-    @Endpoint
     @AnonymousAllowed
     public static class AnonymousAllowedEndpoint {
 
@@ -85,7 +83,6 @@ public class TestEndpoints {
 
     }
 
-    @Endpoint
     @PermitAll
     public static class PermitAllEndpoint {
 
@@ -124,7 +121,6 @@ public class TestEndpoints {
 
     }
 
-    @Endpoint
     @DenyAll
     public static class DenyAllEndpoint {
 
@@ -163,7 +159,6 @@ public class TestEndpoints {
 
     }
 
-    @Endpoint
     @RolesAllowed("user")
     public static class RolesAllowedUserEndpoint {
 
@@ -202,7 +197,6 @@ public class TestEndpoints {
 
     }
 
-    @Endpoint
     @RolesAllowed("admin")
     public static class RolesAllowedAdminEndpoint {
 
