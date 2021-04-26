@@ -72,6 +72,26 @@ public class AccessAnnotationChecker {
     }
 
     /**
+     * 
+     * Checks if the user defined by the request (using
+     * {@link HttpServletRequest#getUserPrincipal()} and
+     * {@link HttpServletRequest#isUserInRole(String)} has access to the given
+     * class.
+     * 
+     * @param cls
+     *            the class to check access to
+     * @param request
+     *            the http request to use for user information
+     * @return {@code true} if the user has access to the given method,
+     *         {@code false} otherwise
+     */
+    public boolean annotationAllowsAccess(Class<?> cls,
+            HttpServletRequest request) {
+        return annotationAllowsAccess(getSecurityTarget(cls),
+                request.getUserPrincipal(), request::isUserInRole);
+    }
+
+    /**
      * Checks if the user defined by the given {@link Principal} and role
      * checker has access to the given method.
      * 
@@ -91,7 +111,7 @@ public class AccessAnnotationChecker {
     }
 
     /**
-     * Gets the entity to check for security restrictions.
+     * Gets the method or class to check for security restrictions.
      *
      * @param method
      *            the method to look up
@@ -108,6 +128,19 @@ public class AccessAnnotationChecker {
         }
         return hasSecurityAnnotation(method) ? method
                 : method.getDeclaringClass();
+    }
+
+    /**
+     * Gets the class to check for security restrictions.
+     *
+     * @param cls the class to check
+     * @return the entity that is responsible for security settings for the
+     *         method passed
+     * @throws IllegalArgumentException
+     *             if the method is not public
+     */
+    public AnnotatedElement getSecurityTarget(Class<?> cls) {
+        return cls;
     }
 
     private boolean annotationAllowsAccess(
