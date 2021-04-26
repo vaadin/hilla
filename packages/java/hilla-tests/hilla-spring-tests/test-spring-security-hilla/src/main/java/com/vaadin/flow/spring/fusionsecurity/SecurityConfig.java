@@ -45,13 +45,7 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
 
         super.configure(http);
 
-        FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
-        formLogin.loginPage("/login").permitAll();
-        formLogin.successHandler(new VaadinSavedRequestAwareAuthenticationSuccessHandler());
-        http.csrf().ignoringAntMatchers("/login");
-
-        // Redirect to / after logout
-        http.logout().logoutSuccessUrl("/");
+        setLoginView(http, "/login");
     }
 
     @Override
