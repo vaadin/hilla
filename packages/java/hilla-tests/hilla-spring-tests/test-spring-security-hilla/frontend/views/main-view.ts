@@ -95,4 +95,8 @@ export class MainView extends Layout {
       (viewRoute) => viewRoute.path == appStore.location
     );
   }
+  connectedCallback() {
+    super.connectedCallback();
+    this.id = "main-view";
+  }
 }

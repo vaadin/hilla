@@ -7,13 +7,16 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AppViewIT extends ChromeBrowserTest {
 
+    private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
+    private static final int SERVER_PORT = 9999;
+    private static final String USER_FULLNAME = "John the User";
+
     @Override
     protected int getDeploymentPort() {
-        return 9999;
+        return SERVER_PORT;
     }
 
     @After
@@ -56,34 +59,12 @@ public class AppViewIT extends ChromeBrowserTest {
         assertLoginViewShown();
     }
 
-    private void assertLoginViewShown() {
-        assertPathShown("login");
-        waitUntil(driver -> $(LoginOverlayElement.class).exists());
-    }
-
-    private void navigateTo(String path) {
-        navigateTo(path, true);
-    }
-
-    private void navigateTo(String path, boolean assertPathShown) {
-        waitUntil(driver -> $("main-view").exists());
-        $("main-view").first().$("a").attribute("href", path).first().click();
-        if (assertPathShown) {
-            assertPathShown(path);
-        }
-    }
-
-    private void assertPathShown(String path) {
-        waitUntil(driver -> driver.getCurrentUrl().equals(getRootURL() + "/" + path));
-    }
-
     @Test
-    public void private_page_should_require_login() {
+    public void redirect_to_private_view_after_login() {
         open("private");
-        waitForPath("login");
+        assertPathShown("login");
         loginUser();
-        waitForPath("private");
-        assertPrivatePageShown("John the User");
+        assertPrivatePageShown(USER_FULLNAME);
     }
 
     @Test
@@ -95,32 +76,24 @@ public class AppViewIT extends ChromeBrowserTest {
         assertRootPageShown();
     }
 
-    private void assertRootPageShown() {
-        waitUntil(drive -> $("h1").attribute("id", "header").exists());
-        Assert.assertEquals("Welcome to the TypeScript Bank of Vaadin", $("h1").id("header").getText());
-    }
-
-    private void assertPrivatePageShown(String fullName) {
-        waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
-        String balance = $("span").id("balanceText").getText();
-        Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
+    @Test
+    public void redirect_to_resource_after_login() {
+        String contents = "Secret document for admin";
+        String path = "admin-only/secret.txt";
+        open(path);
+        loginAdmin();
+        assertPathShown(path);
+        String result = getDriver().getPageSource();
+        Assert.assertTrue(result.contains(contents));
     }
 
     @Test
     public void refresh_when_logged_in_stays_logged_in() {
         open("private");
         loginUser();
-        assertPrivatePageShown("John the User");
+        assertPrivatePageShown(USER_FULLNAME);
         refresh();
-        assertPrivatePageShown("John the User");
-    }
-
-    private void refresh() {
-        getDriver().navigate().refresh();
-    }
-
-    private void waitForPath(String path) {
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/" + path));
+        assertPrivatePageShown(USER_FULLNAME);
     }
 
     @Test
@@ -166,15 +139,6 @@ public class AppViewIT extends ChromeBrowserTest {
         assertLoginViewShown();
     }
 
-    private void assertForbiddenPage() {
-        assertPageContains("There was an unexpected error (type=Forbidden, status=403).");
-    }
-
-    private void assertPageContains(String contents) {
-        String pageSource = getDriver().getPageSource();
-        Assert.assertTrue(pageSource.contains(contents));
-    }
-
     @Test
     public void static_resources_accessible_without_login() throws Exception {
         open("manifest.webmanifest");
@@ -197,6 +161,40 @@ public class AppViewIT extends ChromeBrowserTest {
         Assert.assertTrue(shouldBeTextFile.contains("Public document for all users"));
     }
 
+    private void navigateTo(String path) {
+        navigateTo(path, true);
+    }
+
+    private void navigateTo(String path, boolean assertPathShown) {
+        waitUntil(driver -> $("*").attribute("id", "main-view").exists());
+        $("*").attribute("id", "main-view").first().$("a").attribute("href", path).first().click();
+        if (assertPathShown) {
+            assertPathShown(path);
+        }
+    }
+
+    private void assertLoginViewShown() {
+        assertPathShown("login");
+        waitUntil(driver -> $(LoginOverlayElement.class).exists());
+    }
+
+    private void assertRootPageShown() {
+        waitUntil(drive -> $("h1").attribute("id", "header").exists());
+        String headerText = $("h1").id("header").getText();
+        Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
+    }
+
+    private void assertPrivatePageShown(String fullName) {
+        assertPathShown("private");
+        waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
+        String balance = $("span").id("balanceText").getText();
+        Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
+    }
+
+    private void assertPathShown(String path) {
+        waitUntil(driver -> driver.getCurrentUrl().equals(getRootURL() + "/" + path));
+    }
+
     private void loginUser() {
         login("john", "john");
     }
@@ -213,6 +211,19 @@ public class AppViewIT extends ChromeBrowserTest {
         form.getPasswordField().setValue(password);
         form.submit();
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
+    }
+
+    private void refresh() {
+        getDriver().navigate().refresh();
+    }
+
+    private void assertForbiddenPage() {
+        assertPageContains("There was an unexpected error (type=Forbidden, status=403).");
+    }
+
+    private void assertPageContains(String contents) {
+        String pageSource = getDriver().getPageSource();
+        Assert.assertTrue(pageSource.contains(contents));
     }
 
 }
