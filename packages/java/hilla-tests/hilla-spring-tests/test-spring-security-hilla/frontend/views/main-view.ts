@@ -1,8 +1,10 @@
+import { Router } from "@vaadin/router";
 import "@vaadin/vaadin-app-layout";
 import "@vaadin/vaadin-app-layout/vaadin-drawer-toggle";
 import "@vaadin/vaadin-avatar/vaadin-avatar";
 import "@vaadin/vaadin-tabs";
 import "@vaadin/vaadin-tabs/vaadin-tab";
+import { logout } from "Frontend/auth";
 import { customElement, html } from "lit-element";
 import { nothing } from "lit-html";
 import { router } from "../index";
@@ -13,6 +15,7 @@ interface RouteInfo {
   path: string;
   title: string;
   requiresAuthentication?: boolean;
+  requiresRole?: string;
   disable?: boolean;
 }
 @customElement("main-view")
@@ -58,6 +61,13 @@ export class MainView extends Layout {
                 </vaadin-tab>
               `
             )}
+            <vaadin-tab
+              ><vaadin-button id="logout" @click=${this.logout} tabindex="-1"
+                >Logout${!appStore.user
+                  ? html` (hidden)`
+                  : nothing}</vaadin-button
+              ></vaadin-tab
+            >
           </vaadin-tabs>
         </div>
         <slot></slot>
@@ -65,6 +75,10 @@ export class MainView extends Layout {
     `;
   }
 
+  private logout() {
+    logout();
+    Router.go("");
+  }
   private getMenuRoutes(): RouteInfo[] {
     const views: RouteInfo[] = [
       {
@@ -77,13 +91,18 @@ export class MainView extends Layout {
         requiresAuthentication: true,
       },
       {
-        path: "logout",
-        title: "Logout",
-        requiresAuthentication: true,
+        path: "admin",
+        title: "Admin",
+        requiresRole: "admin",
       },
     ];
     views.forEach((route) => {
       if (route.requiresAuthentication && !appStore.user) {
+        route.disable = true;
+      } else if (
+        route.requiresRole &&
+        !appStore.isUserInRole(route.requiresRole)
+      ) {
         route.disable = true;
       }
     });

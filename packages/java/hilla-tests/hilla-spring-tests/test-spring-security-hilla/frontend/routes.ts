@@ -1,5 +1,6 @@
 import { Commands, Context, Route } from "@vaadin/router";
 import { logout, isAuthenticated } from "./auth";
+import { appStore } from "./stores/app-store";
 import "./views/main-view";
 
 export type ViewRoute = Route & { title?: string; children?: ViewRoute[] };
@@ -23,6 +24,18 @@ export const views: ViewRoute[] = [
         return commands.redirect("/login");
       }
       await import("./views/private/private-view");
+      return undefined;
+    },
+  },
+  {
+    path: "admin",
+    component: "admin-view",
+    title: "Admin View",
+    action: async (_context: Context, commands: Commands) => {
+      if (!appStore.isUserInRole("admin")) {
+        return commands.redirect("/login");
+      }
+      await import("./views/admin/admin-view");
       return undefined;
     },
   },

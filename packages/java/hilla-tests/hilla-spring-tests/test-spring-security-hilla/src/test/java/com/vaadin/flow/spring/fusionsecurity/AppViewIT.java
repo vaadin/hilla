@@ -1,8 +1,14 @@
 package com.vaadin.flow.spring.fusionsecurity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.TestBenchElement;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -13,6 +19,7 @@ public class AppViewIT extends ChromeBrowserTest {
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
     private static final int SERVER_PORT = 9999;
     private static final String USER_FULLNAME = "John the User";
+    private static final String ADMIN_FULLNAME = "Emma the Admin";
 
     @Override
     protected int getDeploymentPort() {
@@ -23,7 +30,6 @@ public class AppViewIT extends ChromeBrowserTest {
     public void tearDown() {
         if (getDriver() != null) {
             checkForBrowserErrors();
-            logout();
         }
     }
 
@@ -35,15 +41,55 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void logout() {
-        open("logout");
+        if (!$(ButtonElement.class).attribute("id", "logout").exists()) {
+            open("");
+            assertRootPageShown();
+        }
+        clickLogout();
+        assertRootPageShown();
     }
 
     private void clickLogout() {
-        navigateTo("logout", false);
+        getMainView().$(ButtonElement.class).id("logout").click();
     }
 
     private void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
+    }
+
+    @Test
+    public void menu_correct_for_anonymous() {
+        open("");
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", false));
+        expectedItems.add(new MenuItem("admin", "Admin", false));
+        Assert.assertEquals(expectedItems, menuItems);
+    }
+
+    @Test
+    public void menu_correct_for_user() {
+        open("login");
+        loginUser();
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", true));
+        expectedItems.add(new MenuItem("admin", "Admin", false));
+        Assert.assertEquals(expectedItems, menuItems);
+    }
+
+    @Test
+    public void menu_correct_for_admin() {
+        open("login");
+        loginAdmin();
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", true));
+        expectedItems.add(new MenuItem("admin", "Admin", true));
+        Assert.assertEquals(expectedItems, menuItems);
     }
 
     @Test
@@ -60,11 +106,26 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
+    public void navigate_to_admin_view_prevented() {
+        open("");
+        navigateTo("admin", false);
+        assertLoginViewShown();
+    }
+
+    @Test
     public void redirect_to_private_view_after_login() {
         open("private");
         assertPathShown("login");
         loginUser();
         assertPrivatePageShown(USER_FULLNAME);
+    }
+
+    @Test
+    public void redirect_to_admin_view_after_login() {
+        open("admin");
+        assertPathShown("login");
+        loginAdmin();
+        assertAdminPageShown(ADMIN_FULLNAME);
     }
 
     @Test
@@ -106,13 +167,11 @@ public class AppViewIT extends ChromeBrowserTest {
         loginUser();
         assertPageContains(contents);
         logout();
-        assertRootPageShown();
 
         open(path);
         loginAdmin();
         assertPageContains(contents);
         logout();
-        assertRootPageShown();
 
         open(path);
         assertLoginViewShown();
@@ -128,7 +187,6 @@ public class AppViewIT extends ChromeBrowserTest {
         open(path);
         assertForbiddenPage();
         logout();
-        assertRootPageShown();
 
         open(path);
         loginAdmin();
@@ -166,11 +224,14 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void navigateTo(String path, boolean assertPathShown) {
-        waitUntil(driver -> $("*").attribute("id", "main-view").exists());
-        $("*").attribute("id", "main-view").first().$("a").attribute("href", path).first().click();
+        getMainView().$("a").attribute("href", path).first().click();
         if (assertPathShown) {
             assertPathShown(path);
         }
+    }
+
+    private TestBenchElement getMainView() {
+        return waitUntil(driver -> $("*").id("main-view"));
     }
 
     private void assertLoginViewShown() {
@@ -189,6 +250,13 @@ public class AppViewIT extends ChromeBrowserTest {
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
         Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
+    }
+
+    private void assertAdminPageShown(String fullName) {
+        assertPathShown("admin");
+        TestBenchElement welcome = waitUntil(driver -> $("*").id("welcome"));
+        String welcomeText = welcome.getText();
+        Assert.assertEquals("Welcome to the admin page, " + fullName, welcomeText);
     }
 
     private void assertPathShown(String path) {
@@ -224,6 +292,21 @@ public class AppViewIT extends ChromeBrowserTest {
     private void assertPageContains(String contents) {
         String pageSource = getDriver().getPageSource();
         Assert.assertTrue(pageSource.contains(contents));
+    }
+
+    private List<MenuItem> getMenuItems() {
+        List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first().$("a").all();
+
+        return anchors.stream().map(anchor -> {
+            String href = (String) anchor.callFunction("getAttribute", "href");
+            String text = anchor.getPropertyString("textContent");
+            boolean available = true;
+            if (text.endsWith((" (hidden)"))) {
+                text = text.replace(" (hidden)", "");
+                available = false;
+            }
+            return new MenuItem(href, text, available);
+        }).collect(Collectors.toList());
     }
 
 }
