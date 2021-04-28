@@ -7,8 +7,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.vaadin.flow.server.connect.auth.AccessAnnotationChecker;
-import com.vaadin.flow.server.connect.auth.AccessAnnotationCheckerTest;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 
@@ -33,9 +32,21 @@ public class EndpointUtilTest {
     @Autowired
     private EndpointRegistry registry;
 
-    private static final Class<?>[] endpointClasses = AccessAnnotationCheckerTest.ENDPOINT_CLASSES;
-    private static final String[] endpointMethods = AccessAnnotationCheckerTest.ENDPOINT_METHODS;
-    private static final String[] endpointNames = AccessAnnotationCheckerTest.ENDPOINT_NAMES;
+    private static final Class<?>[] endpointClasses = new Class<?>[] {
+            AccessControlTestClasses.AnonymousAllowedEndpoint.class,
+            AccessControlTestClasses.DenyAllEndpoint.class,
+            AccessControlTestClasses.NoAnnotationEndpoint.class,
+            AccessControlTestClasses.PermitAllEndpoint.class,
+            AccessControlTestClasses.RolesAllowedAdminEndpoint.class,
+            AccessControlTestClasses.RolesAllowedUserEndpoint.class };
+
+    private static final String[] endpointMethods = new String[] {
+            "noAnnotation", "anonymousAllowed", "permitAll", "denyAll",
+            "rolesAllowedUser", "rolesAllowedAdmin", "rolesAllowedUserAdmin" };
+
+    private static final String[] endpointNames = Stream.of(endpointClasses)
+            .map(cls -> cls.getSimpleName().toLowerCase(Locale.ENGLISH))
+            .toArray(String[]::new);
 
     @Before
     public void setup() throws Exception {

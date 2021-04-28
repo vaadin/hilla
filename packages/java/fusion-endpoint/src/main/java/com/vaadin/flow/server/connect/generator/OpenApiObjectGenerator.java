@@ -15,10 +15,6 @@
  */
 package com.vaadin.flow.server.connect.generator;
 
-import javax.annotation.Nullable;
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +32,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
@@ -65,6 +66,14 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.Pair;
 import com.github.javaparser.utils.SourceRoot;
 import com.github.javaparser.utils.SourceRoot.Callback;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.EndpointNameChecker;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -88,13 +97,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.EndpointNameChecker;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
 /**
  * Java parser class which scans for all {@link Endpoint} classes and produces

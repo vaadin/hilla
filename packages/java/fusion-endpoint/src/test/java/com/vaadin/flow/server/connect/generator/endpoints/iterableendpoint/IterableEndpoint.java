@@ -18,8 +18,8 @@ package com.vaadin.flow.server.connect.generator.endpoints.iterableendpoint;
 
 import java.util.Arrays;
 
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
 @Endpoint
 @AnonymousAllowed

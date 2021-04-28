@@ -1,7 +1,7 @@
 package com.vaadin.flow.server.connect.generator.endpoints.packageprivate;
 
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
 /**
  * com.vaadin.flow.server.connect.generator.endpoints.packageprivate.PackagePrivateEndpoint,

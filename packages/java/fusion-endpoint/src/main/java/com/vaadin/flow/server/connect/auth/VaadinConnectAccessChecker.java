@@ -24,6 +24,8 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Component used for checking role-based ACL in Vaadin Endpoints.

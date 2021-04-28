@@ -1,7 +1,7 @@
 package com.vaadin.flow.server.connect.generator.endpoints.superclassmethods;
 
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
 @EndpointExposed
 @AnonymousAllowed

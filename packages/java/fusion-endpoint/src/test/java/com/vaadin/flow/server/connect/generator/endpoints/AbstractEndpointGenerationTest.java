@@ -16,8 +16,12 @@
 
 package com.vaadin.flow.server.connect.generator.endpoints;
 
-import javax.annotation.Nullable;
-import javax.annotation.security.DenyAll;
+import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -52,7 +56,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+import javax.annotation.security.DenyAll;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.auth.CsrfChecker;
+import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
+import com.vaadin.flow.server.connect.generator.TestUtils;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.GrandParentModel;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
+
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -73,25 +94,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-
-import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.auth.AccessAnnotationChecker;
-import com.vaadin.flow.server.connect.auth.CsrfChecker;
-import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
-import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
-import com.vaadin.flow.server.connect.generator.TestUtils;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.GrandParentModel;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
-
-import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractEndpointGenerationTest
         extends AbstractEndpointGeneratorBaseTest {
