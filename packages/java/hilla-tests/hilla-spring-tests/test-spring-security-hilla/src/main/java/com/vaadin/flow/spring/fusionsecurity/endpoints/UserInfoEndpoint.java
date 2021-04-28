@@ -3,7 +3,7 @@ package com.vaadin.flow.spring.fusionsecurity.endpoints;
 import javax.annotation.Nullable;
 
 import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.fusionsecurity.SecurityUtils;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 
