@@ -200,23 +200,28 @@ public class AppViewIT extends ChromeBrowserTest {
     @Test
     public void static_resources_accessible_without_login() throws Exception {
         open("manifest.webmanifest");
-        Assert.assertTrue(getDriver().getPageSource().contains("\"name\":\"Spring Security Helper Test Project\""));
+        Assert.assertTrue(getDriver().getPageSource()
+                .contains("\"name\":\"Spring Security Helper Test Project\""));
         open("sw.js");
-        Assert.assertTrue(getDriver().getPageSource().contains("this._installAndActiveListenersAdded"));
+        Assert.assertTrue(getDriver().getPageSource()
+                .contains("this._installAndActiveListenersAdded"));
         open("sw-runtime-resources-precache.js");
-        Assert.assertTrue(getDriver().getPageSource().contains("self.additionalManifestEntries = ["));
+        Assert.assertTrue(getDriver().getPageSource()
+                .contains("self.additionalManifestEntries = ["));
     }
 
     @Test
     public void public_app_resources_available_for_all() {
         open("public/public.txt");
         String shouldBeTextFile = getDriver().getPageSource();
-        Assert.assertTrue(shouldBeTextFile.contains("Public document for all users"));
+        Assert.assertTrue(
+                shouldBeTextFile.contains("Public document for all users"));
         open("login");
         loginUser();
         open("public/public.txt");
         shouldBeTextFile = getDriver().getPageSource();
-        Assert.assertTrue(shouldBeTextFile.contains("Public document for all users"));
+        Assert.assertTrue(
+                shouldBeTextFile.contains("Public document for all users"));
     }
 
     private void navigateTo(String path) {
@@ -249,18 +254,21 @@ public class AppViewIT extends ChromeBrowserTest {
         assertPathShown("private");
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
-        Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
+        Assert.assertTrue(balance.startsWith(
+                "Hello " + fullName + ", your bank account balance is $"));
     }
 
     private void assertAdminPageShown(String fullName) {
         assertPathShown("admin");
         TestBenchElement welcome = waitUntil(driver -> $("*").id("welcome"));
         String welcomeText = welcome.getText();
-        Assert.assertEquals("Welcome to the admin page, " + fullName, welcomeText);
+        Assert.assertEquals("Welcome to the admin page, " + fullName,
+                welcomeText);
     }
 
     private void assertPathShown(String path) {
-        waitUntil(driver -> driver.getCurrentUrl().equals(getRootURL() + "/" + path));
+        waitUntil(driver -> driver.getCurrentUrl()
+                .equals(getRootURL() + "/" + path));
     }
 
     private void loginUser() {
@@ -274,7 +282,8 @@ public class AppViewIT extends ChromeBrowserTest {
     private void login(String username, String password) {
         assertLoginViewShown();
 
-        LoginFormElement form = $(LoginOverlayElement.class).first().getLoginForm();
+        LoginFormElement form = $(LoginOverlayElement.class).first()
+                .getLoginForm();
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
@@ -286,7 +295,8 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void assertForbiddenPage() {
-        assertPageContains("There was an unexpected error (type=Forbidden, status=403).");
+        assertPageContains(
+                "There was an unexpected error (type=Forbidden, status=403).");
     }
 
     private void assertPageContains(String contents) {
@@ -295,7 +305,8 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private List<MenuItem> getMenuItems() {
-        List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first().$("a").all();
+        List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first()
+                .$("a").all();
 
         return anchors.stream().map(anchor -> {
             String href = (String) anchor.callFunction("getAttribute", "href");

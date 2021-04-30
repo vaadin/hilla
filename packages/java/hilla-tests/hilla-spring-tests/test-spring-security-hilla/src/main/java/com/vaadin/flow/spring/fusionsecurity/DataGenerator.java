@@ -18,8 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class DataGenerator {
 
     @Bean
-    public CommandLineRunner loadData(UserInfoRepository userInfoRepository, AccountRepository accountRepository,
-            PasswordEncoder encoder) {
+    public CommandLineRunner loadData(UserInfoRepository userInfoRepository,
+            AccountRepository accountRepository, PasswordEncoder encoder) {
         return args -> {
             Logger logger = LoggerFactory.getLogger(getClass());
             if (userInfoRepository.count() != 0L) {
@@ -29,9 +29,11 @@ public class DataGenerator {
             logger.info("Generating demo data");
 
             logger.info("... generating 2 UserInfo entities...");
-            UserInfo user = new UserInfo("john", encoder.encode("john"), "John the User", "public/profiles/user.svg",
+            UserInfo user = new UserInfo("john", encoder.encode("john"),
+                    "John the User", "public/profiles/user.svg",
                     SecurityConfig.ROLE_USER);
-            UserInfo admin = new UserInfo("emma", encoder.encode("emma"), "Emma the Admin", "public/profiles/admin.svg",
+            UserInfo admin = new UserInfo("emma", encoder.encode("emma"),
+                    "Emma the Admin", "public/profiles/admin.svg",
                     SecurityConfig.ROLE_ADMIN);
             user = userInfoRepository.save(user);
             admin = userInfoRepository.save(admin);

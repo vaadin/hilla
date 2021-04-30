@@ -26,7 +26,8 @@ public class MenuItem {
 
     @Override
     public String toString() {
-        return "MenuItem [available=" + available + ", href=" + href + ", text=" + text + "]";
+        return "MenuItem [available=" + available + ", href=" + href + ", text="
+                + text + "]";
     }
 
     @Override

@@ -31,6 +31,7 @@ public class BankService {
 
     public BigDecimal getBalance() {
         String name = utils.getAuthenticatedUser().getUsername();
-        return accountRepository.findByOwner(name).map(Account::getBalance).orElse(null);
+        return accountRepository.findByOwner(name).map(Account::getBalance)
+                .orElse(null);
     }
 }

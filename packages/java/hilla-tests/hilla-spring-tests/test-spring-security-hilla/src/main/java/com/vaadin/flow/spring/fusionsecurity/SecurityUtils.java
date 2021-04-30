@@ -21,7 +21,8 @@ public class SecurityUtils {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) context.getAuthentication().getPrincipal();
+            UserDetails userDetails = (UserDetails) context.getAuthentication()
+                    .getPrincipal();
             return userDetails;
         }
         // Anonymous or no authentication.
@@ -37,7 +38,8 @@ public class SecurityUtils {
     }
 
     public void logout() {
-        new SecurityContextLogoutHandler().logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null,
+        new SecurityContextLogoutHandler().logout(
+                VaadinServletRequest.getCurrent().getHttpServletRequest(), null,
                 null);
     }
 

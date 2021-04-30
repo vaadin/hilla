@@ -41,7 +41,8 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
         // Public access
         http.authorizeRequests().antMatchers("/").permitAll();
         // Admin only access
-        http.authorizeRequests().antMatchers("/admin-only/**").hasAnyRole(ROLE_ADMIN);
+        http.authorizeRequests().antMatchers("/admin-only/**")
+                .hasAnyRole(ROLE_ADMIN);
 
         super.configure(http);
 
@@ -55,14 +56,20 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth)
+            throws Exception {
         auth.userDetailsService(username -> {
             UserInfo userInfo = userInfoRepository.findByUsername(username);
             if (userInfo == null) {
-                throw new UsernameNotFoundException("No user present with username: " + username);
+                throw new UsernameNotFoundException(
+                        "No user present with username: " + username);
             } else {
-                return new User(userInfo.getUsername(), userInfo.getEncodedPassword(), userInfo.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(Collectors.toList()));
+                return new User(userInfo.getUsername(),
+                        userInfo.getEncodedPassword(),
+                        userInfo.getRoles().stream()
+                                .map(role -> new SimpleGrantedAuthority(
+                                        "ROLE_" + role))
+                                .collect(Collectors.toList()));
             }
         });
     }
