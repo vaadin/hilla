@@ -17,7 +17,7 @@ import {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/im
  }}{{/vendorExtensions.x-vaadin-file-path}}
  */
 {{#if vendorExtensions.x-is-enum}}
-const enum {{{getClassNameFromImports classname ../../imports}}} {
+enum {{{getClassNameFromImports classname ../../imports}}} {
 {{#allowableValues.enumVars}}
   {{name}} = {{{value}}},
 {{/allowableValues.enumVars}}
