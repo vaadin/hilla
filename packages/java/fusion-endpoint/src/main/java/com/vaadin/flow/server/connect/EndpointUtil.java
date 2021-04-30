@@ -104,7 +104,7 @@ public class EndpointUtil {
         }
 
         return accessChecker.getAccessAnnotationChecker()
-                .annotationAllowsAccess(method.get(), null, role -> false);
+                .hasAccess(method.get(), null, role -> false);
     }
 
 }

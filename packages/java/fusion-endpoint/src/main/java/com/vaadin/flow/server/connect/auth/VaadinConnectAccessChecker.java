@@ -109,7 +109,7 @@ public class VaadinConnectAccessChecker {
             return ACCESS_DENIED_MSG;
         }
 
-        if (accessAnnotationChecker.annotationAllowsAccess(method, request)) {
+        if (accessAnnotationChecker.hasAccess(method, request)) {
             return null;
         }
 
