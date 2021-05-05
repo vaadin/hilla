@@ -2,17 +2,12 @@ import "@vaadin/vaadin-button";
 import "@vaadin/vaadin-text-field";
 import { BalanceEndpoint } from "Frontend/generated/BalanceEndpoint";
 import { appStore } from "Frontend/stores/app-store";
-import {
-  customElement,
-  html,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import { customElement, html, state, PropertyValues } from "lit-element";
 import { View } from "../view";
 
 @customElement("private-view")
 export class PrivateTSView extends View {
-  @internalProperty()
+  @state()
   private balance: number = 0;
 
   render() {

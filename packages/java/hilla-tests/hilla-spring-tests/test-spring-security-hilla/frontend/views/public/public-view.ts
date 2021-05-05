@@ -1,12 +1,12 @@
 import "@vaadin/vaadin-button";
 import "@vaadin/vaadin-text-field";
 import { PublicEndpoint } from "Frontend/generated/PublicEndpoint";
-import { customElement, html, internalProperty } from "lit-element";
+import { customElement, html, state } from "lit-element";
 import { View } from "../view";
 
 @customElement("public-view")
 export class PublicTSView extends View {
-  @internalProperty()
+  @state()
   private time: string = "";
 
   async connectedCallback() {

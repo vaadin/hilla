@@ -1,13 +1,13 @@
 import { LoginResult } from "@vaadin/flow-frontend";
 import { AfterEnterObserver, RouterLocation } from "@vaadin/router";
 import "@vaadin/vaadin-login/vaadin-login-overlay";
-import { customElement, html, internalProperty } from "lit-element";
+import { customElement, html, state } from "lit-element";
 import { login } from "../auth";
 import { View } from "./view";
 
 @customElement("login-view")
 export class LoginView extends View implements AfterEnterObserver {
-  @internalProperty()
+  @state()
   private error = false;
 
   // the url to redirect to after a successful login
