@@ -5,7 +5,7 @@ import Account from './Account';
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface Group {
-  creator: Account;
-  groupId: string;
-  groupName: string;
+  creator?: Account;
+  groupId?: string;
+  groupName?: string;
 }

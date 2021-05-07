@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.server.connect.generator.endpoints.nullable;
+package com.vaadin.flow.server.connect.generator.endpoints.nonnullable;
 
 import java.util.Collections;
 
@@ -21,10 +21,10 @@ import org.junit.Test;
 
 import com.vaadin.flow.server.connect.generator.endpoints.AbstractEndpointGenerationTest;
 
-public class NullableEndpointTest extends AbstractEndpointGenerationTest {
+public class NonNullableEndpointTest extends AbstractEndpointGenerationTest {
 
-    public NullableEndpointTest() {
-        super(Collections.singletonList(NullableEndpoint.class));
+    public NonNullableEndpointTest() {
+        super(Collections.singletonList(NonNullableEndpoint.class));
     }
 
     @Test

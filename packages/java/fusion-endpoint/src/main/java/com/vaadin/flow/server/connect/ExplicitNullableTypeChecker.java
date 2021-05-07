@@ -19,16 +19,41 @@ package com.vaadin.flow.server.connect;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
-import com.vaadin.flow.internal.ReflectTools;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 
 /**
  * A checker for TypeScript null compatibility in Vaadin endpoint methods
  * parameter and return types.
  */
 public class ExplicitNullableTypeChecker {
+    /**
+     * Checks if the element should be required (not nullable) in the generated
+     * Typescript code.
+     * 
+     * @param element
+     *            an element to be required
+     * @return a result of check
+     */
+    public static boolean isRequired(AnnotatedElement element) {
+        return Stream.of(element.getAnnotations())
+                .anyMatch(annotation -> "nonnull".equalsIgnoreCase(
+                        annotation.annotationType().getSimpleName()));
+    }
+
+    /**
+     * Checks if the element should be required (not nullable) in the generated
+     * Typescript code.
+     *
+     * @param node
+     *            a node to be required
+     * @return a result of check
+     */
+    public static boolean isRequired(NodeWithAnnotations<?> node) {
+        return node.getAnnotations().stream().anyMatch(annotation -> "nonnull"
+                .equalsIgnoreCase(annotation.getName().getIdentifier()));
+    }
 
     /**
      * Validates the given value for the given expected method return value
@@ -43,8 +68,7 @@ public class ExplicitNullableTypeChecker {
      */
     public String checkValueForAnnotatedElement(Object value,
             AnnotatedElement annotatedElement) {
-        if (annotatedElement.isAnnotationPresent(Nullable.class) || ReflectTools
-                .hasAnnotationWithSimpleName(annotatedElement, "Id")) {
+        if (!isRequired(annotatedElement)) {
             return null;
         }
         if (annotatedElement instanceof Method) {

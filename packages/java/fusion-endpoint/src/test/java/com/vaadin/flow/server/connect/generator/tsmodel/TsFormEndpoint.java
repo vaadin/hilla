@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.server.connect.generator.tsmodel;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
@@ -36,7 +36,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.LocalDate;
@@ -50,12 +49,10 @@ import com.vaadin.flow.server.connect.Endpoint;
 @Endpoint
 public class TsFormEndpoint {
 
-    @Nullable
     public MyEntity getEntity() {
         return new MyEntity();
     }
 
-    @Nullable
     public String stringNullable() {
         return "";
     }
@@ -140,13 +137,11 @@ public class TsFormEndpoint {
         Optional<MyEntity> optionalEntity;
         Optional<List<Optional<String>>> optionalList;
         Optional<Optional<String>[][]> optionalMatrix;
-        @Nullable
-        String nullableString;
-        @Nullable
-        MyEntity nullableEntity;
-        @Nullable
-        List<Optional<String>> nullableList;
-        @Nullable
-        Optional<String>[][] nullableMatrix;
+        @Nonnull
+        String nonNullableString;
+        @Nonnull
+        List<Optional<String>> nonNullableList;
+        @Nonnull
+        Optional<String>[][] nonNullableMatrix;
     }
 }

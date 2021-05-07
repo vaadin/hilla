@@ -16,12 +16,7 @@
 
 package com.vaadin.flow.server.connect.generator.endpoints;
 
-import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import javax.annotation.security.DenyAll;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -56,24 +51,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-import javax.annotation.security.DenyAll;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.auth.CsrfChecker;
-import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
-import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
-import com.vaadin.flow.server.connect.generator.TestUtils;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.GrandParentModel;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
-import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -94,6 +72,26 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
+import com.vaadin.flow.server.connect.auth.CsrfChecker;
+import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
+import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
+import com.vaadin.flow.server.connect.generator.TestUtils;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.GrandParentModel;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
+import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
+
+import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractEndpointGenerationTest
         extends AbstractEndpointGeneratorBaseTest {
@@ -109,9 +107,9 @@ public abstract class AbstractEndpointGenerationTest
      */
     private static final List<Class> DENY_LIST_CHECKING_ABSOLUTE_PATH = Arrays
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
-    private final Set<String> schemaReferences = new HashSet<>();
     private static final VaadinConnectAccessChecker accessChecker = new VaadinConnectAccessChecker(
             new AccessAnnotationChecker(), new CsrfChecker());
+    private final Set<String> schemaReferences = new HashSet<>();
 
     public AbstractEndpointGenerationTest(List<Class<?>> testClasses) {
         super(testClasses);
@@ -353,16 +351,13 @@ public abstract class AbstractEndpointGenerationTest
             assertSchema(stringSchemaEntry.getValue(), parameterTypes[index],
                     parameterTypeArguments.get(index));
             List requiredList = requestSchema.getRequired();
-            if (parameters[index].isAnnotationPresent(Nullable.class)
-                    || Optional.class
-                            .isAssignableFrom(parameters[index].getType())) {
+            if (ExplicitNullableTypeChecker.isRequired(parameters[index])) {
+                assertTrue(requiredList.contains(stringSchemaEntry.getKey()));
+            } else {
                 boolean notRequired = requiredList == null
                         || !requiredList.contains(stringSchemaEntry.getKey());
-                assertTrue("@Nullable or Optional request parameter "
-                        + "should not be required", notRequired);
-
-            } else {
-                assertTrue(requiredList.contains(stringSchemaEntry.getKey()));
+                assertTrue("Request parameter without @Nonnull annotation"
+                        + " should not be required", notRequired);
             }
             index++;
         }
@@ -513,15 +508,13 @@ public abstract class AbstractEndpointGenerationTest
             Type type = expectedSchemaField.getGenericType();
             assertSchema(propertySchema, expectedSchemaField.getType(),
                     extractTypeArguments(type, typeArguments));
-            if (Optional.class.isAssignableFrom(expectedSchemaField.getType())
-                    || expectedSchemaField
-                            .isAnnotationPresent(Nullable.class)) {
+            if (ExplicitNullableTypeChecker.isRequired(expectedSchemaField)) {
+                assertTrue(schema.getRequired()
+                        .contains(expectedSchemaField.getName()));
+            } else {
                 boolean notRequired = schema.getRequired() == null || !schema
                         .getRequired().contains(expectedSchemaField.getName());
                 assertTrue(notRequired);
-            } else {
-                assertTrue(schema.getRequired()
-                        .contains(expectedSchemaField.getName()));
             }
         }
         assertEquals(expectedFieldsCount, properties.size());

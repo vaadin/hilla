@@ -13,7 +13,7 @@ import Account from './com/vaadin/flow/server/connect/generator/endpoints/modelp
  *
  * Return list of user name
  */
-function _getListOfUserName(): Promise<Array<string>> {
+function _getListOfUserName(): Promise<Array<string> | undefined> {
   return client.call('ModelPackageEndpoint', 'getListOfUserName');
 }
 export {_getListOfUserName as getListOfUserName};
@@ -25,8 +25,8 @@ export {_getListOfUserName as getListOfUserName};
  * Return a collection
  */
 function _getSameModelPackage(
-    name: string
-): Promise<Account> {
+    name?: string
+): Promise<Account | undefined> {
   return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name});
 }
 export {_getSameModelPackage as getSameModelPackage};

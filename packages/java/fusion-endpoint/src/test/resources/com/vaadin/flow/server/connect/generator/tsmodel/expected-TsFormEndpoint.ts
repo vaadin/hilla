@@ -17,79 +17,79 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   static createEmptyValue: () => MyEntity;
 
   get assertFalse(): StringModel {
-    return this[_getPropertyModel]('assertFalse', StringModel, [false, new AssertFalse()]);
+    return this[_getPropertyModel]('assertFalse', StringModel, [true, new AssertFalse()]);
   }
 
   get assertTrue(): StringModel {
-    return this[_getPropertyModel]('assertTrue', StringModel, [false, new AssertTrue()]);
+    return this[_getPropertyModel]('assertTrue', StringModel, [true, new AssertTrue()]);
   }
 
   get bar(): MyBazModel {
-    return this[_getPropertyModel]('bar', MyBazModel, [false]);
+    return this[_getPropertyModel]('bar', MyBazModel, [true]);
   }
 
   get baz(): ArrayModel<ModelType<MyBazModel>, MyBazModel> {
-    return this[_getPropertyModel]('baz', ArrayModel, [false, MyBazModel, [false]]);
+    return this[_getPropertyModel]('baz', ArrayModel, [true, MyBazModel, [false]]);
   }
 
   get bool(): BooleanModel {
-    return this[_getPropertyModel]('bool', BooleanModel, [false]);
+    return this[_getPropertyModel]('bool', BooleanModel, [true]);
   }
 
   get children(): ArrayModel<ModelType<MyEntityModel>, MyEntityModel> {
-    return this[_getPropertyModel]('children', ArrayModel, [false, MyEntityModel, [false]]);
+    return this[_getPropertyModel]('children', ArrayModel, [true, MyEntityModel, [false]]);
   }
 
   get decimalMax(): NumberModel {
-    return this[_getPropertyModel]('decimalMax', NumberModel, [false, new DecimalMax({value:"0.01", inclusive:false})]);
+    return this[_getPropertyModel]('decimalMax', NumberModel, [true, new DecimalMax({value:"0.01", inclusive:false})]);
   }
 
   get decimalMin(): NumberModel {
-    return this[_getPropertyModel]('decimalMin', NumberModel, [false, new DecimalMin("0.01")]);
+    return this[_getPropertyModel]('decimalMin', NumberModel, [true, new DecimalMin("0.01")]);
   }
 
   get digits(): StringModel {
-    return this[_getPropertyModel]('digits', StringModel, [false, new Digits({integer:5, fraction:2})]);
+    return this[_getPropertyModel]('digits', StringModel, [true, new Digits({integer:5, fraction:2})]);
   }
 
   get email(): StringModel {
-    return this[_getPropertyModel]('email', StringModel, [false, new Email({message:"foo"})]);
+    return this[_getPropertyModel]('email', StringModel, [true, new Email({message:"foo"})]);
   }
 
   get entityMap(): ObjectModel<{ [key: string]: ModelType<MyBazModel>; }> {
-    return this[_getPropertyModel]('entityMap', ObjectModel, [false]);
+    return this[_getPropertyModel]('entityMap', ObjectModel, [true]);
   }
 
   get entityMatrix(): ArrayModel<ModelType<ArrayModel<ModelType<MyEntityModel>, MyEntityModel>>, ArrayModel<ModelType<MyEntityModel>, MyEntityModel>> {
-    return this[_getPropertyModel]('entityMatrix', ArrayModel, [false, ArrayModel, [false, MyEntityModel, [false]]]);
+    return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [false, MyEntityModel, [false]]]);
   }
 
   get foo(): StringModel {
-    return this[_getPropertyModel]('foo', StringModel, [false]);
+    return this[_getPropertyModel]('foo', StringModel, [true]);
   }
 
   get future(): StringModel {
-    return this[_getPropertyModel]('future', StringModel, [false, new Future()]);
+    return this[_getPropertyModel]('future', StringModel, [true, new Future()]);
   }
 
   get isNull(): StringModel {
-    return this[_getPropertyModel]('isNull', StringModel, [false, new Null()]);
+    return this[_getPropertyModel]('isNull', StringModel, [true, new Null()]);
   }
 
   get list(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('list', ArrayModel, [false, StringModel, [false], new NotEmpty()]);
+    return this[_getPropertyModel]('list', ArrayModel, [true, StringModel, [false], new NotEmpty()]);
   }
 
   get localTime(): StringModel {
-    return this[_getPropertyModel]('localTime', StringModel, [false]);
+    return this[_getPropertyModel]('localTime', StringModel, [true]);
   }
 
   get max(): NumberModel {
-    return this[_getPropertyModel]('max', NumberModel, [false, new Max(2)]);
+    return this[_getPropertyModel]('max', NumberModel, [true, new Max(2)]);
   }
 
   get min(): NumberModel {
-    return this[_getPropertyModel]('min', NumberModel, [false, new Min({value:1, message:"foo"})]);
+    return this[_getPropertyModel]('min', NumberModel, [true, new Min({value:1, message:"foo"})]);
   }
 
   get myId(): NumberModel {
@@ -97,47 +97,43 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get negative(): NumberModel {
-    return this[_getPropertyModel]('negative', NumberModel, [false, new Negative()]);
+    return this[_getPropertyModel]('negative', NumberModel, [true, new Negative()]);
   }
 
   get negativeOrCero(): NumberModel {
-    return this[_getPropertyModel]('negativeOrCero', NumberModel, [false, new NegativeOrZero()]);
+    return this[_getPropertyModel]('negativeOrCero', NumberModel, [true, new NegativeOrZero()]);
+  }
+
+  get nonNullableList(): ArrayModel<string, StringModel> {
+    return this[_getPropertyModel]('nonNullableList', ArrayModel, [false, StringModel, [true]]);
+  }
+
+  get nonNullableMatrix(): ArrayModel<ModelType<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
+    return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [false, StringModel, [true]]]);
+  }
+
+  get nonNullableString(): StringModel {
+    return this[_getPropertyModel]('nonNullableString', StringModel, [false]);
   }
 
   get notBlank(): StringModel {
-    return this[_getPropertyModel]('notBlank', StringModel, [false, new NotBlank()]);
+    return this[_getPropertyModel]('notBlank', StringModel, [true, new NotBlank()]);
   }
 
   get notEmpty(): StringModel {
-    return this[_getPropertyModel]('notEmpty', StringModel, [false, new NotEmpty(), new NotNull()]);
+    return this[_getPropertyModel]('notEmpty', StringModel, [true, new NotEmpty(), new NotNull()]);
   }
 
   get notNull(): StringModel {
-    return this[_getPropertyModel]('notNull', StringModel, [false, new NotNull()]);
+    return this[_getPropertyModel]('notNull', StringModel, [true, new NotNull()]);
   }
 
   get notNullEntity(): MyEntityModel {
-    return this[_getPropertyModel]('notNullEntity', MyEntityModel, [false, new NotNull()]);
-  }
-
-  get nullableEntity(): MyEntityModel {
-    return this[_getPropertyModel]('nullableEntity', MyEntityModel, [true]);
-  }
-
-  get nullableList(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('nullableList', ArrayModel, [true, StringModel, [true]]);
-  }
-
-  get nullableMatrix(): ArrayModel<ModelType<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
-    return this[_getPropertyModel]('nullableMatrix', ArrayModel, [true, ArrayModel, [false, StringModel, [true]]]);
-  }
-
-  get nullableString(): StringModel {
-    return this[_getPropertyModel]('nullableString', StringModel, [true]);
+    return this[_getPropertyModel]('notNullEntity', MyEntityModel, [true, new NotNull()]);
   }
 
   get numberMatrix(): ArrayModel<ModelType<ArrayModel<number, NumberModel>>, ArrayModel<number, NumberModel>> {
-    return this[_getPropertyModel]('numberMatrix', ArrayModel, [false, ArrayModel, [false, NumberModel, [false]]]);
+    return this[_getPropertyModel]('numberMatrix', ArrayModel, [true, ArrayModel, [false, NumberModel, [false]]]);
   }
 
   get optionalEntity(): MyEntityModel {
@@ -157,34 +153,34 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get past(): StringModel {
-    return this[_getPropertyModel]('past', StringModel, [false, new Past()]);
+    return this[_getPropertyModel]('past', StringModel, [true, new Past()]);
   }
 
   get pattern(): StringModel {
-    return this[_getPropertyModel]('pattern', StringModel, [false, new Pattern({regexp:"\\d+\\..+"})]);
+    return this[_getPropertyModel]('pattern', StringModel, [true, new Pattern({regexp:"\\d+\\..+"})]);
   }
 
   get positive(): NumberModel {
-    return this[_getPropertyModel]('positive', NumberModel, [false, new Positive()]);
+    return this[_getPropertyModel]('positive', NumberModel, [true, new Positive()]);
   }
 
   get positiveOrCero(): NumberModel {
-    return this[_getPropertyModel]('positiveOrCero', NumberModel, [false, new PositiveOrZero()]);
+    return this[_getPropertyModel]('positiveOrCero', NumberModel, [true, new PositiveOrZero()]);
   }
 
   get size(): StringModel {
-    return this[_getPropertyModel]('size', StringModel, [false, new Size()]);
+    return this[_getPropertyModel]('size', StringModel, [true, new Size()]);
   }
 
   get size1(): StringModel {
-    return this[_getPropertyModel]('size1', StringModel, [false, new Size({min:1})]);
+    return this[_getPropertyModel]('size1', StringModel, [true, new Size({min:1})]);
   }
 
   get stringArray(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('stringArray', ArrayModel, [false, StringModel, [false]]);
+    return this[_getPropertyModel]('stringArray', ArrayModel, [true, StringModel, [false]]);
   }
 
   get stringMap(): ObjectModel<{ [key: string]: string; }> {
-    return this[_getPropertyModel]('stringMap', ObjectModel, [false]);
+    return this[_getPropertyModel]('stringMap', ObjectModel, [true]);
   }
 }

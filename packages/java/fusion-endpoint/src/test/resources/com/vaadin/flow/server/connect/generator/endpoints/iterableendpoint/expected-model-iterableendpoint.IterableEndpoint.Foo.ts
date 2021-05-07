@@ -4,5 +4,5 @@
  */
 
 export default interface Foo {
-    bar: string;
+    bar?: string;
 }

@@ -15,8 +15,8 @@ import Collection from './com/vaadin/flow/server/connect/generator/endpoints/col
  * Return a collection
  */
 function _getCollectionByAuthor(
-    name: string
-): Promise<Collection> {
+    name?: string
+): Promise<Collection | undefined> {
   return client.call('CollectionEndpoint', 'getCollectionByAuthor', {name});
 }
 export {_getCollectionByAuthor as getCollectionByAuthor};
@@ -26,7 +26,7 @@ export {_getCollectionByAuthor as getCollectionByAuthor};
  *
  * Return list of user name
  */
-function _getListOfUserName(): Promise<Array<string>> {
+function _getListOfUserName(): Promise<Array<string> | undefined> {
   return client.call('CollectionEndpoint', 'getListOfUserName');
 }
 export {_getListOfUserName as getListOfUserName};

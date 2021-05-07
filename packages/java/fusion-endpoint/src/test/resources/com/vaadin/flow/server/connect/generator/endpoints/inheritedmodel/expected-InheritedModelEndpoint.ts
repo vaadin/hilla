@@ -10,8 +10,8 @@ import ChildModel from './com/vaadin/flow/server/connect/generator/endpoints/inh
 import ParentModel from './com/vaadin/flow/server/connect/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ParentModel';
 
 function _getParentModel(
-    child: ChildModel
-): Promise<ParentModel> {
+    child?: ChildModel
+): Promise<ParentModel | undefined> {
   return client.call('InheritedModelEndpoint', 'getParentModel', {child});
 }
 export {_getParentModel as getParentModel};

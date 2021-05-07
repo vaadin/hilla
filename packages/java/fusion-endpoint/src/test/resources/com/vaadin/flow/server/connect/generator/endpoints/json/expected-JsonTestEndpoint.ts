@@ -17,7 +17,7 @@ import User from './com/vaadin/flow/server/connect/generator/endpoints/json/Json
  *
  * Return number of user
  */
-function _countUser(): Promise<number> {
+function _countUser(): Promise<number | undefined> {
   return client.call('JsonTestEndpoint', 'countUser');
 }
 export {_countUser as countUser};
@@ -29,8 +29,8 @@ export {_countUser as countUser};
  * Return current time as an Instant
  */
 function _fullFQNMethod(
-    input: number
-): Promise<string> {
+    input?: number
+): Promise<string | undefined> {
   return client.call('JsonTestEndpoint', 'fullFQNMethod', {input});
 }
 export {_fullFQNMethod as fullFQNMethod};
@@ -40,7 +40,7 @@ export {_fullFQNMethod as fullFQNMethod};
  *
  * Return map of user and roles
  */
-function _getAllUserRolesMap(): Promise<{ [key: string]: User; }> {
+function _getAllUserRolesMap(): Promise<{ [key: string]: User; } | undefined> {
   return client.call('JsonTestEndpoint', 'getAllUserRolesMap');
 }
 export {_getAllUserRolesMap as getAllUserRolesMap};
@@ -50,7 +50,7 @@ export {_getAllUserRolesMap as getAllUserRolesMap};
  *
  * Return list of users
  */
-function _getAllUsers(): Promise<Array<User>> {
+function _getAllUsers(): Promise<Array<User> | undefined> {
   return client.call('JsonTestEndpoint', 'getAllUsers');
 }
 export {_getAllUsers as getAllUsers};
@@ -62,8 +62,8 @@ export {_getAllUsers as getAllUsers};
  * Return array of int
  */
 function _getArrayInt(
-    input: Array<string>
-): Promise<Array<number>> {
+    input?: Array<string>
+): Promise<Array<number> | undefined> {
   return client.call('JsonTestEndpoint', 'getArrayInt', {input});
 }
 export {_getArrayInt as getArrayInt};
@@ -75,8 +75,8 @@ export {_getArrayInt as getArrayInt};
  * Return boolean value
  */
 function _getBooleanValue(
-    input: { [key: string]: User; }
-): Promise<boolean> {
+    input?: { [key: string]: User; }
+): Promise<boolean | undefined> {
   return client.call('JsonTestEndpoint', 'getBooleanValue', {input});
 }
 export {_getBooleanValue as getBooleanValue};
@@ -89,9 +89,9 @@ export {_getBooleanValue as getBooleanValue};
  * Return boolean value
  */
 function _getTwoParameters(
-    input: string,
-    secondInput: number
-): Promise<boolean> {
+    input?: string,
+    secondInput?: number
+): Promise<boolean | undefined> {
   return client.call('JsonTestEndpoint', 'getTwoParameters', {input, secondInput});
 }
 export {_getTwoParameters as getTwoParameters};
@@ -103,21 +103,21 @@ export {_getTwoParameters as getTwoParameters};
  * Return user with given id
  */
 function _getUserById(
-    id: number
-): Promise<User> {
+    id?: number
+): Promise<User | undefined> {
   return client.call('JsonTestEndpoint', 'getUserById', {id});
 }
 export {_getUserById as getUserById};
 
 function _inputBeanTypeDependency(
-    input: Version
+    input?: Version
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'inputBeanTypeDependency', {input});
 }
 export {_inputBeanTypeDependency as inputBeanTypeDependency};
 
 function _inputBeanTypeLocal(
-    input: Status
+    input?: Status
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'inputBeanTypeLocal', {input});
 }
@@ -125,7 +125,7 @@ export {_inputBeanTypeLocal as inputBeanTypeLocal};
 
 function _optionalParameter(
     parameter?: Array<string>,
-    requiredParameter: string
+    requiredParameter?: string
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'optionalParameter', {parameter, requiredParameter});
 }
@@ -137,7 +137,7 @@ function _optionalReturn(): Promise<User | undefined> {
 export {_optionalReturn as optionalReturn};
 
 function _reservedWordInParameter(
-    _delete: boolean
+    _delete?: boolean
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'reservedWordInParameter', {_delete});
 }
@@ -150,7 +150,7 @@ export {_reservedWordInParameter as reservedWordInParameter};
  *
  */
 function _updateUser(
-    user: User
+    user?: User
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'updateUser', {user});
 }

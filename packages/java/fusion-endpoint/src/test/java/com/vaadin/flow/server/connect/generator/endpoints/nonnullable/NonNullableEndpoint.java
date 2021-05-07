@@ -13,10 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.server.connect.generator.endpoints.nullable;
+package com.vaadin.flow.server.connect.generator.endpoints.nonnullable;
 
-import javax.annotation.Nullable;
-
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,53 +24,53 @@ import java.util.Optional;
 import com.vaadin.flow.server.connect.Endpoint;
 
 @Endpoint
-public class NullableEndpoint {
+public class NonNullableEndpoint {
 
-    public String getNullableString(@Nullable String input) {
+    @Nonnull
+    public String getNullableString(String input) {
         return "";
     }
 
-    @Nullable
-    public NullableModel echoNonNullMode(NullableModel[] nullableModels) {
-        return new NullableModel();
+    public NonNullableModel echoNonNullMode(
+            @Nonnull NonNullableModel[] nonNullableModels) {
+        return new NonNullableModel();
     }
 
-    public Map<String, NullableModel> echoMap(boolean shouldBeNotNull) {
+    @Nonnull
+    public Map<String, NonNullableModel> echoMap(
+            @Nonnull boolean shouldBeNotNull) {
         return Collections.emptyMap();
     }
 
-    @Nullable
-    public NullableEndpoint.ReturnType getNotNullReturnType() {
+    public NonNullableEndpoint.ReturnType getNotNullReturnType() {
         return new ReturnType();
     }
 
     public void sendParameterType(
-            @Nullable NullableEndpoint.ParameterType parameterType) {
-
+            NonNullableEndpoint.ParameterType parameterType) {
     }
 
-    @Nullable
     public String stringNullable() {
         return "";
     }
 
-    public static class NullableModel {
-
+    public static class NonNullableModel {
+        @Nonnull
         String foo;
-        String bar;
+        @Nonnull
         int shouldBeNotNullByDefault;
         Optional<Integer> nullableInteger;
-        @Nullable
         List<Map<String, String>> listOfMapNullable;
-        @Nullable
         List<Map<String, String>> listOfMapNullableNotNull;
     }
 
     public static class ReturnType {
+        @Nonnull
         String foo;
     }
 
     public static class ParameterType {
+        @Nonnull
         String foo;
     }
 }

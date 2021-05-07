@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 
+import static com.vaadin.flow.server.connect.generator.IndentationUtils.unifyIndentation;
+
 public final class TestUtils {
     private TestUtils() {
     }
@@ -59,7 +61,11 @@ public final class TestUtils {
 
     public static void equalsIgnoreWhiteSpaces(String msg, String expected,
             String actual) {
-        Assert.assertEquals(msg, expected.replaceAll("\\s+", " ").trim(),
-                actual.replaceAll("\\s++", " ").trim());
+        try {
+            Assert.assertEquals(msg, unifyIndentation(expected, 2),
+                    unifyIndentation(actual, 2));
+        } catch (IndentationUtils.IndentationSyntaxException e) {
+            throw new AssertionError("Failed to unify indentation", e);
+        }
     }
 }

@@ -7,8 +7,8 @@ import ArraySchema from '../../../../../../../../../io/swagger/v3/oas/models/med
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface ChildModel extends ParentModel {
-  abc: Array<{ [key: string]: Version; }>;
-  def: Array<{ [key: string]: { [key: string]: Version; }; }>;
-  name: string;
-  testObject: ArraySchema;
+  abc?: Array<{ [key: string]: Version; }>;
+  def?: Array<{ [key: string]: { [key: string]: Version; }; }>;
+  name?: string;
+  testObject?: ArraySchema;
 }

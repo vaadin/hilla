@@ -9,26 +9,26 @@ import client from './connect-client.default';
 import MyEnum from './com/vaadin/flow/server/connect/generator/endpoints/enumtype/EnumEndpoint/MyEnum';
 
 function _echoEnum(
-    value: MyEnum
-): Promise<MyEnum> {
+    value?: MyEnum
+): Promise<MyEnum | undefined> {
   return client.call('EnumEndpoint', 'echoEnum', {value});
 }
 export {_echoEnum as echoEnum};
 
 function _echoListEnum(
-    enumList: Array<MyEnum>
-): Promise<Array<MyEnum>> {
+    enumList?: Array<MyEnum>
+): Promise<Array<MyEnum> | undefined> {
   return client.call('EnumEndpoint', 'echoListEnum', {enumList});
 }
 export {_echoListEnum as echoListEnum};
 
-function _getEnum(): Promise<MyEnum> {
+function _getEnum(): Promise<MyEnum | undefined> {
   return client.call('EnumEndpoint', 'getEnum');
 }
 export {_getEnum as getEnum};
 
 function _setEnum(
-    value: MyEnum
+    value?: MyEnum
 ): Promise<void> {
   return client.call('EnumEndpoint', 'setEnum', {value});
 }

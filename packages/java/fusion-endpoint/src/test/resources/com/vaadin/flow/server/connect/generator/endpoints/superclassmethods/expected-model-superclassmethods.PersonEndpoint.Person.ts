@@ -4,5 +4,5 @@
  */
 
 export default interface Person {
-  name: string;
+  name?: string;
 }

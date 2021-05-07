@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.server.connect.generator;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,11 +35,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
@@ -66,14 +64,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.Pair;
 import com.github.javaparser.utils.SourceRoot;
 import com.github.javaparser.utils.SourceRoot.Callback;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.EndpointNameChecker;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -97,6 +87,14 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
+import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.flow.server.connect.EndpointExposed;
+import com.vaadin.flow.server.connect.EndpointNameChecker;
 
 /**
  * Java parser class which scans for all {@link Endpoint} classes and produces
@@ -105,13 +103,11 @@ import io.swagger.v3.oas.models.tags.Tag;
 public class OpenApiObjectGenerator {
     public static final String EXTENSION_VAADIN_CONNECT_PARAMETERS_DESCRIPTION = "x-vaadin-parameters-description";
     public static final String EXTENSION_VAADIN_FILE_PATH = "x-vaadin-file-path";
+    public static final String CONSTRAINT_ANNOTATIONS = "x-annotations";
     private static final String EXTENSION_VAADIN_CONNECT_DEFERRABLE = "x-vaadin-connect-deferrable";
-
     private static final String VAADIN_CONNECT_OAUTH2_SECURITY_SCHEME = "vaadin-connect-oauth2";
     private static final String VAADIN_CONNECT_OAUTH2_TOKEN_URL = "/oauth/token";
-
-    public static final String CONSTRAINT_ANNOTATIONS = "x-annotations";
-
+    private final EndpointNameChecker endpointNameChecker = new EndpointNameChecker();
     private List<Path> javaSourcePaths = new ArrayList<>();
     private OpenApiConfiguration configuration;
     private Map<String, ResolvedReferenceType> usedTypes;
@@ -122,17 +118,20 @@ public class OpenApiObjectGenerator {
     private Map<String, PathItem> pathItems;
     private Set<String> generatedSchema;
     private OpenAPI openApiModel;
-    private final EndpointNameChecker endpointNameChecker = new EndpointNameChecker();
     private ClassLoader typeResolverClassLoader;
     private SchemaGenerator schemaGenerator;
     private SchemaResolver schemaResolver;
     private boolean needsDeferrableImport = false;
 
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(OpenApiObjectGenerator.class);
+    }
+
     /**
      * Adds the source path to the generator to process.
      *
      * @param sourcePath
-     *            the source path to generate the medatata from
+     *            the source path to generate the metadata from
      */
     public void addSourcePath(Path sourcePath) {
         if (sourcePath == null) {
@@ -219,12 +218,13 @@ public class OpenApiObjectGenerator {
 
         javaSourcePaths.stream()
                 .map(path -> new SourceRoot(path, parserConfiguration))
-                .forEach(soureRoot -> parseSourceRoot(soureRoot,
+                .forEach(sourceRoot -> parseSourceRoot(sourceRoot,
                         this::findEndpointExposed));
 
         javaSourcePaths.stream()
-                .map(path -> new SourceRoot(path, parserConfiguration)).forEach(
-                        soureRoot -> parseSourceRoot(soureRoot, this::process));
+                .map(path -> new SourceRoot(path, parserConfiguration))
+                .forEach(sourceRoot -> parseSourceRoot(sourceRoot,
+                        this::process));
 
         for (Map.Entry<String, ResolvedReferenceType> entry : usedTypes
                 .entrySet()) {
@@ -336,9 +336,9 @@ public class OpenApiObjectGenerator {
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                 .filter(declaration -> GeneratorUtils.hasAnnotation(declaration,
                         compilationUnit, EndpointExposed.class))
-                .map(delcaration -> endpointExposedMap.put(
-                        delcaration.resolve().getQualifiedName(),
-                        delcaration)));
+                .map(declaration -> endpointExposedMap.put(
+                        declaration.resolve().getQualifiedName(),
+                        declaration)));
         return SourceRoot.Callback.Result.DONT_SAVE;
     }
 
@@ -665,17 +665,12 @@ public class OpenApiObjectGenerator {
                 .replaceAll(methodDeclaration.resolve().getReturnType());
         Schema schema = parseResolvedTypeToSchema(resolvedType);
         schema.setDescription("");
-        if (isNullable(methodDeclaration)) {
+        if (!ExplicitNullableTypeChecker.isRequired(methodDeclaration)) {
             schema = schemaResolver.createNullableWrapper(schema);
         }
         usedTypes.putAll(collectUsedTypesFromSchema(schema));
         mediaItem.schema(schema);
         return mediaItem;
-    }
-
-    private boolean isNullable(MethodDeclaration methodDeclaration) {
-        return methodDeclaration.isAnnotationPresent(Nullable.class)
-                || methodDeclaration.isAnnotationPresent("Id");
     }
 
     private RequestBody createRequestBody(MethodDeclaration methodDeclaration,
@@ -712,9 +707,7 @@ public class OpenApiObjectGenerator {
                         paramsDescription.remove(parameter.getNameAsString()));
             }
             requestSchema.addProperties(name, paramSchema);
-            if (GeneratorUtils.isNotTrue(paramSchema.getNullable())
-                    && !parameter.isAnnotationPresent(Nullable.class)
-                    && !parameter.isAnnotationPresent("Id")) {
+            if (ExplicitNullableTypeChecker.isRequired(parameter)) {
                 requestSchema.addRequiredItem(name);
             }
             paramSchema.setNullable(null);
@@ -725,10 +718,6 @@ public class OpenApiObjectGenerator {
                     new LinkedHashMap<>(paramsDescription));
         }
         return requestBody;
-    }
-
-    private static Logger getLogger() {
-        return LoggerFactory.getLogger(OpenApiObjectGenerator.class);
     }
 
     @SuppressWarnings("squid:S1872")
