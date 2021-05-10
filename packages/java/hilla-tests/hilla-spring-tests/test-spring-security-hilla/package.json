@@ -3,16 +3,17 @@
   "license": "UNLICENSED",
   "vaadin": {
     "dependencies": {
-      "lit-element": "2.3.1",
+      "lit-element": "2.5.0",
       "@vaadin/router": "1.7.2",
       "@polymer/polymer": "3.2.0",
-      "@vaadin/vaadin-ordered-layout": "20.0.0-alpha4",
-      "@vaadin/vaadin-login": "20.0.0-alpha4",
-      "@vaadin/vaadin-avatar": "20.0.0-alpha4",
-      "@vaadin/vaadin-button": "20.0.0-alpha4",
-      "@vaadin/vaadin-tabs": "20.0.0-alpha4",
-      "@vaadin/vaadin-lumo-styles": "20.0.0-alpha4",
-      "@vaadin/vaadin-app-layout": "20.0.0-alpha4"
+      "@vaadin/vaadin-ordered-layout": "20.0.0-beta1",
+      "@vaadin/vaadin-login": "20.0.0-beta1",
+      "@vaadin/vaadin-avatar": "20.0.0-beta1",
+      "@vaadin/vaadin-button": "20.0.0-beta1",
+      "@vaadin/vaadin-tabs": "20.0.0-beta1",
+      "@vaadin/vaadin-lumo-styles": "20.0.0-beta1",
+      "@vaadin/vaadin-app-layout": "20.0.0-beta1",
+      "lit-html": "1.4.0"
     },
     "devDependencies": {
       "css-loader": "4.2.1",
@@ -23,7 +24,6 @@
       "lit-css-loader": "0.0.4",
       "loader-utils": "2.0.0",
       "@types/validator": "13.1.0",
-      "lit-element": "2.4.0",
       "construct-style-sheets-polyfill": "2.4.16",
       "webpack": "4.46.0",
       "ts-loader": "8.0.12",
@@ -33,7 +33,6 @@
       "workbox-webpack-plugin": "6.1.0",
       "compression-webpack-plugin": "4.0.1",
       "webpack-cli": "3.3.11",
-      "lit-html": "1.3.0",
       "workbox-core": "6.1.0",
       "html-webpack-plugin": "4.5.1",
       "workbox-precaching": "6.1.0",
@@ -42,7 +41,7 @@
       "extract-loader": "5.1.0",
       "fork-ts-checker-webpack-plugin": "6.2.1"
     },
-    "hash": "2a663bd55da5b215a25d69b0b16086a16e1147b9a7f18cac4ad59b834aa8ee2b"
+    "hash": "f734c1ed08d5f4ab3f9dcb6fabf816311540255849e09ad24cdcfe9a91027724"
   },
   "devDependencies": {
     "@types/validator": "13.1.0",
@@ -60,8 +59,6 @@
     "glob": "7.1.6",
     "html-webpack-plugin": "4.5.1",
     "lit-css-loader": "0.0.4",
-    "lit-element": "2.4.0",
-    "lit-html": "1.3.0",
     "loader-utils": "2.0.0",
     "ts-loader": "8.0.12",
     "typescript": "4.2.3",
@@ -82,14 +79,15 @@
     "@vaadin/flow-frontend": "./target/flow-frontend",
     "@vaadin/form": "./target/flow-frontend/form",
     "@vaadin/router": "1.7.2",
-    "@vaadin/vaadin-app-layout": "20.0.0-alpha4",
-    "@vaadin/vaadin-avatar": "20.0.0-alpha4",
-    "@vaadin/vaadin-button": "20.0.0-alpha4",
-    "@vaadin/vaadin-login": "20.0.0-alpha4",
-    "@vaadin/vaadin-lumo-styles": "20.0.0-alpha4",
-    "@vaadin/vaadin-ordered-layout": "20.0.0-alpha4",
-    "@vaadin/vaadin-tabs": "20.0.0-alpha4",
-    "lit-element": "2.3.1",
-    "mobx": "^6.2.0"
+    "@vaadin/vaadin-app-layout": "20.0.0-beta1",
+    "@vaadin/vaadin-avatar": "20.0.0-beta1",
+    "@vaadin/vaadin-button": "20.0.0-beta1",
+    "@vaadin/vaadin-login": "20.0.0-beta1",
+    "@vaadin/vaadin-lumo-styles": "20.0.0-beta1",
+    "@vaadin/vaadin-ordered-layout": "20.0.0-beta1",
+    "@vaadin/vaadin-tabs": "20.0.0-beta1",
+    "lit-element": "2.5.0",
+    "mobx": "^6.2.0",
+    "lit-html": "1.4.0"
   }
 }
