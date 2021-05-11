@@ -29,12 +29,12 @@ export class PrivateTSView extends View {
 
   async applyForLoan() {
     await BalanceEndpoint.applyForLoan();
-    this.balance = await BalanceEndpoint.getBalance();
+    this.balance = (await BalanceEndpoint.getBalance()) ?? 0;
   }
 
   async connectedCallback() {
     super.connectedCallback();
-    this.balance = await BalanceEndpoint.getBalance();
+    this.balance = (await BalanceEndpoint.getBalance()) ?? 0;
   }
   protected shouldUpdate(_changedProperties: PropertyValues): boolean {
     if (!appStore.user) {

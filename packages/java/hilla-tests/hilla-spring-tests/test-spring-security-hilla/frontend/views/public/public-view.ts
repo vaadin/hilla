@@ -7,7 +7,7 @@ import { View } from "../view";
 @customElement("public-view")
 export class PublicTSView extends View {
   @state()
-  private time: string = "";
+  private time?: string;
 
   async connectedCallback() {
     super.connectedCallback();

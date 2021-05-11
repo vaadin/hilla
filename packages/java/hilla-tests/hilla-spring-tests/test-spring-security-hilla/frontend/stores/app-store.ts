@@ -40,7 +40,7 @@ export class AppStore {
     return !!this.user;
   }
   isUserInRole(role: string) {
-    return this.user && this.user.roles.includes(role);
+    return this.user?.roles?.includes(role);
   }
 }
 export const appStore = new AppStore();

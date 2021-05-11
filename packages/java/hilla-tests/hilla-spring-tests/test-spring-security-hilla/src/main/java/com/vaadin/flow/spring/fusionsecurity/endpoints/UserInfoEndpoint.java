@@ -16,7 +16,6 @@ public class UserInfoEndpoint {
     @Autowired
     private SecurityUtils utils;
 
-    @Nullable
     public UserInfo getUserInfo() {
         return utils.getAuthenticatedUserInfo();
     }
