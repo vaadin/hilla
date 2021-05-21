@@ -75,6 +75,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArguments>
+                        -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=19999
+                    </jvmArguments>
+                </configuration>
                 <executions>
                     <!-- start and stop application when running
                         integration tests -->
