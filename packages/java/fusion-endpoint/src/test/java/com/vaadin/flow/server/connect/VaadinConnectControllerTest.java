@@ -1,14 +1,5 @@
 package com.vaadin.flow.server.connect;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -19,15 +10,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.SimpleType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -37,11 +28,22 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.SimpleType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
@@ -61,8 +63,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -740,10 +742,17 @@ public class VaadinConnectControllerTest {
 
         ApplicationContext contextMock = mock(ApplicationContext.class);
         TestClass endpoint = new TestClass();
-        TestClass proxy = mock(TestClass.class, CALLS_REAL_METHODS);
-        when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
-                Collections.singletonMap(endpoint.getClass().getSimpleName(),
-                        proxy));
+
+        // CGLib proxies are supported as entry-point classes
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(TestClass.class);
+        enhancer.setCallback(NoOp.INSTANCE);
+        TestClass proxy = (TestClass) enhancer.create();
+
+        when(contextMock.getBeansWithAnnotation(Endpoint.class))
+
+                .thenReturn(Collections.singletonMap(
+                        endpoint.getClass().getSimpleName(), proxy));
 
         VaadinConnectController vaadinConnectController = createVaadinControllerWithApplicationContext(
                 contextMock);

@@ -82,8 +82,7 @@ public class DevModeInitializerEndpointTest {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
         Mockito.when(appConfig.getStringProperty(Mockito.anyString(),
                 Mockito.anyString()))
-                .thenAnswer(invocation -> invocation.getArgumentAt(1,
-                        String.class));
+                .thenAnswer(invocation -> invocation.getArgument(1));
         Mockito.when(appConfig.getStringProperty(FrontendUtils.PROJECT_BASEDIR,
                 null)).thenReturn(baseDir);
         Mockito.when(appConfig.enableDevServer()).thenReturn(true);
@@ -144,7 +143,7 @@ public class DevModeInitializerEndpointTest {
             devModeHandler.stop();
             // Wait until dev mode handler has stopped.
             while (DevModeHandler.getDevModeHandler() != null) {
-                Thread.sleep(200);
+                Thread.sleep(200); // NOSONAR
             }
         }
 
