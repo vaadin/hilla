@@ -25,6 +25,7 @@ import com.vaadin.flow.server.connect.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ServletRequestPathUtils;
@@ -70,23 +71,23 @@ public class EndpointUtil {
                         + VaadinConnectController.ENDPOINT_METHODS);
         RequestPath requestPath = ServletRequestPathUtils
                 .parseAndCache(request);
-        if (pathPattern.matches(requestPath)) {
-            PathMatchInfo matchInfo = pathPattern.matchAndExtract(requestPath);
-            if (matchInfo == null) {
-                return Optional.empty();
-            }
-
-            Map<String, String> uriVariables = matchInfo.getUriVariables();
-            String endpointName = uriVariables.get("endpoint");
-            String endpointMethod = uriVariables.get("method");
-
-            VaadinEndpointData data = registry.get(endpointName);
-            if (data == null) {
-                return Optional.empty();
-            }
-            return data.getMethod(endpointMethod);
+        PathContainer pathWithinApplication = requestPath
+                .pathWithinApplication();
+        PathMatchInfo matchInfo = pathPattern
+                .matchAndExtract(pathWithinApplication);
+        if (matchInfo == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        Map<String, String> uriVariables = matchInfo.getUriVariables();
+        String endpointName = uriVariables.get("endpoint");
+        String endpointMethod = uriVariables.get("method");
+
+        VaadinEndpointData data = registry.get(endpointName);
+        if (data == null) {
+            return Optional.empty();
+        }
+        return data.getMethod(endpointMethod);
     }
 
     /**

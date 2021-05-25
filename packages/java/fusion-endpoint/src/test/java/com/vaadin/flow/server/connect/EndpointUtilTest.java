@@ -69,6 +69,15 @@ public class EndpointUtilTest {
     }
 
     @Test
+    public void endpointWithContextPath() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getRequestURI()).thenReturn(
+                "/context/connect/AnonymousAllowedEndpoint/noAnnotation");
+        Mockito.when(request.getContextPath()).thenReturn("/context");
+        Assert.assertTrue(endpointUtil.isEndpointRequest(request));
+    }
+
+    @Test
     public void isAnonymousEndpoint() {
         verifyAnonymousAccessAllowed("AnonymousAllowedEndpoint", "noAnnotation",
                 "anonymousAllowed");
