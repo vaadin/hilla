@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Stack;
 
 final class IndentationUtils {
+    static String unifyIndentationCI(String code) {
+        return code.replaceAll("\\s+", " ");
+    }
+
     static String unifyIndentation(String code, int indentation)
             throws IndentationSyntaxException {
         Token[] tokens = Token.process(code);
