@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 final class IndentationUtils {
-    static String unifyIndentationCI(String code) {
-        return code.replaceAll("\\s+", " ");
-    }
+    private static final Pattern emptyOrWhiteSpaceLinePattern = Pattern
+            .compile("^\\s*$");
 
     static String unifyIndentation(String code, int indentation)
             throws IndentationSyntaxException {
@@ -78,7 +78,7 @@ final class IndentationUtils {
             }
         }
 
-        return indentedCodeBuilder.toString();
+        return indentedCodeBuilder.toString().trim();
     }
 
     static String repeat(String part, int times) {
@@ -189,15 +189,7 @@ final class IndentationUtils {
         }
 
         boolean isEmpty() {
-            int nonWhiteSpaceSymbolCount = 0;
-
-            for (int i = 0; i < content.length(); i++) {
-                if (content.charAt(i) != ' ') {
-                    nonWhiteSpaceSymbolCount += 1;
-                }
-            }
-
-            return nonWhiteSpaceSymbolCount == 0;
+            return emptyOrWhiteSpaceLinePattern.matcher(content).find();
         }
 
     }
