@@ -91,10 +91,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
 import com.vaadin.flow.server.connect.Endpoint;
 import com.vaadin.flow.server.connect.EndpointExposed;
 import com.vaadin.flow.server.connect.EndpointNameChecker;
+
+import static com.vaadin.flow.server.connect.ExplicitNullableTypeChecker.isRequired;
 
 /**
  * Java parser class which scans for all {@link Endpoint} classes and produces
@@ -665,7 +666,7 @@ public class OpenApiObjectGenerator {
                 .replaceAll(methodDeclaration.resolve().getReturnType());
         Schema schema = parseResolvedTypeToSchema(resolvedType);
         schema.setDescription("");
-        if (!ExplicitNullableTypeChecker.isRequired(methodDeclaration)) {
+        if (!isRequired(methodDeclaration)) {
             schema = schemaResolver.createNullableWrapper(schema);
         }
         usedTypes.putAll(collectUsedTypesFromSchema(schema));
@@ -707,7 +708,7 @@ public class OpenApiObjectGenerator {
                         paramsDescription.remove(parameter.getNameAsString()));
             }
             requestSchema.addProperties(name, paramSchema);
-            if (ExplicitNullableTypeChecker.isRequired(parameter)) {
+            if (isRequired(parameter)) {
                 requestSchema.addRequiredItem(name);
             }
             paramSchema.setNullable(null);

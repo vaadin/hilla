@@ -23,14 +23,14 @@ function _get(
 export {_get as get};
 
 function _getPage(
-    pageSize?: number,
-    pageNumber?: number
+    pageSize: number,
+    pageNumber: number
 ): Promise<Array<Person> | undefined> {
   return client.call('PersonEndpoint', 'getPage', {pageSize, pageNumber});
 }
 export {_getPage as getPage};
 
-function _size(): Promise<number | undefined> {
+function _size(): Promise<number> {
   return client.call('PersonEndpoint', 'size');
 }
 export {_size as size};

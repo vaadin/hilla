@@ -30,8 +30,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "number",
-                  "description" : "",
-                  "nullable" : true
+                  "description" : ""
                 }
               }
             }
@@ -211,8 +210,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "boolean",
-                  "description" : "",
-                  "nullable" : true
+                  "description" : ""
                 }
               }
             }
@@ -232,6 +230,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "secondInput" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
@@ -254,8 +253,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "boolean",
-                  "description" : "",
-                  "nullable" : true
+                  "description" : ""
                 }
               }
             }
@@ -275,6 +273,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "id" ],
                 "type" : "object",
                 "properties" : {
                   "id" : {
@@ -429,6 +428,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "_delete" ],
                 "type" : "object",
                 "properties" : {
                   "_delete" : {
@@ -548,6 +548,7 @@
         "x-vaadin-file-path": "com/vaadin/flow/server/connect/generator/endpoints/json/JsonTestEndpoint.java"
       },
       "com.fasterxml.jackson.core.Version" : {
+        "required" : [ "_majorVersion", "_minorVersion", "_patchLevel" ],
         "type" : "object",
         "properties" : {
           "_artifactId" : {
@@ -579,7 +580,7 @@
           },
           "text" : {
             "type" : "string",
-            "description" : "Multiple line description should work.This is very very very very very\nvery very very long."
+            "description" : "Multiple line description should work.This is very very very very very\r\nvery very very long."
           }
         },
         "description" : "Status bean. Used only in request parameters to verify that request\nparameter type descriptions are generated.",

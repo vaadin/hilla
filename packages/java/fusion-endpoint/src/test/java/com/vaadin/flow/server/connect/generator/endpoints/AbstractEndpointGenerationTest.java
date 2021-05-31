@@ -78,7 +78,6 @@ import org.junit.Assert;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.connect.Endpoint;
 import com.vaadin.flow.server.connect.EndpointExposed;
-import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
 import com.vaadin.flow.server.connect.auth.CsrfChecker;
 import com.vaadin.flow.server.connect.auth.VaadinConnectAccessChecker;
 import com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator;
@@ -87,6 +86,7 @@ import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.
 import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.Model;
 import com.vaadin.flow.server.connect.generator.endpoints.complexhierarchymodel.ParentModel;
 
+import static com.vaadin.flow.server.connect.ExplicitNullableTypeChecker.isRequired;
 import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -351,7 +351,7 @@ public abstract class AbstractEndpointGenerationTest
             assertSchema(stringSchemaEntry.getValue(), parameterTypes[index],
                     parameterTypeArguments.get(index));
             List requiredList = requestSchema.getRequired();
-            if (ExplicitNullableTypeChecker.isRequired(parameters[index])) {
+            if (isRequired(parameters[index])) {
                 assertTrue(requiredList.contains(stringSchemaEntry.getKey()));
             } else {
                 boolean notRequired = requiredList == null
@@ -508,7 +508,7 @@ public abstract class AbstractEndpointGenerationTest
             Type type = expectedSchemaField.getGenericType();
             assertSchema(propertySchema, expectedSchemaField.getType(),
                     extractTypeArguments(type, typeArguments));
-            if (ExplicitNullableTypeChecker.isRequired(expectedSchemaField)) {
+            if (isRequired(expectedSchemaField)) {
                 assertTrue(schema.getRequired()
                         .contains(expectedSchemaField.getName()));
             } else {

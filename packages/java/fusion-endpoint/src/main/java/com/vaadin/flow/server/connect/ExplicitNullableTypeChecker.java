@@ -17,11 +17,15 @@
 package com.vaadin.flow.server.connect;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithType;
 
 /**
  * A checker for TypeScript null compatibility in Vaadin endpoint methods
@@ -29,30 +33,41 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
  */
 public class ExplicitNullableTypeChecker {
     /**
-     * Checks if the element should be required (not nullable) in the generated
-     * Typescript code.
-     * 
+     * Checks if the reflected element should be required (not nullable) in the
+     * generated Typescript code based on annotations.
+     *
      * @param element
      *            an element to be required
      * @return a result of check
      */
     public static boolean isRequired(AnnotatedElement element) {
-        return Stream.of(element.getAnnotations())
+        boolean isPrimitive = (element instanceof Field
+                && ((Field) element).getType().isPrimitive())
+                || (element instanceof Parameter
+                        && ((Parameter) element).getType().isPrimitive());
+
+        return isPrimitive || Stream.of(element.getAnnotations())
                 .anyMatch(annotation -> "nonnull".equalsIgnoreCase(
                         annotation.annotationType().getSimpleName()));
     }
 
     /**
-     * Checks if the element should be required (not nullable) in the generated
-     * Typescript code.
+     * Checks if the OpenAPI schema node should be required (not nullable) in
+     * the generated Typescript code based on annotations.
      *
      * @param node
      *            a node to be required
      * @return a result of check
      */
-    public static boolean isRequired(NodeWithAnnotations<?> node) {
-        return node.getAnnotations().stream().anyMatch(annotation -> "nonnull"
-                .equalsIgnoreCase(annotation.getName().getIdentifier()));
+    public static boolean isRequired(Node node) {
+        return (node instanceof NodeWithType
+                && ((NodeWithType<?, ?>) node).getType().isPrimitiveType())
+                || (node instanceof NodeWithAnnotations
+                        && ((NodeWithAnnotations<?>) node).getAnnotations()
+                                .stream()
+                                .anyMatch(annotation -> "nonnull"
+                                        .equalsIgnoreCase(annotation.getName()
+                                                .getIdentifier())));
     }
 
     /**

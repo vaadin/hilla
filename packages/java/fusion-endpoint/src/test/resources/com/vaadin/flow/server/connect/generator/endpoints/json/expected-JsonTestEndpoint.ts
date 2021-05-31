@@ -17,7 +17,7 @@ import User from './com/vaadin/flow/server/connect/generator/endpoints/json/Json
  *
  * Return number of user
  */
-function _countUser(): Promise<number | undefined> {
+function _countUser(): Promise<number> {
   return client.call('JsonTestEndpoint', 'countUser');
 }
 export {_countUser as countUser};
@@ -76,7 +76,7 @@ export {_getArrayInt as getArrayInt};
  */
 function _getBooleanValue(
     input?: { [key: string]: User; }
-): Promise<boolean | undefined> {
+): Promise<boolean> {
   return client.call('JsonTestEndpoint', 'getBooleanValue', {input});
 }
 export {_getBooleanValue as getBooleanValue};
@@ -90,8 +90,8 @@ export {_getBooleanValue as getBooleanValue};
  */
 function _getTwoParameters(
     input?: string,
-    secondInput?: number
-): Promise<boolean | undefined> {
+    secondInput: number
+): Promise<boolean> {
   return client.call('JsonTestEndpoint', 'getTwoParameters', {input, secondInput});
 }
 export {_getTwoParameters as getTwoParameters};
@@ -103,7 +103,7 @@ export {_getTwoParameters as getTwoParameters};
  * Return user with given id
  */
 function _getUserById(
-    id?: number
+    id: number
 ): Promise<User | undefined> {
   return client.call('JsonTestEndpoint', 'getUserById', {id});
 }
@@ -137,7 +137,7 @@ function _optionalReturn(): Promise<User | undefined> {
 export {_optionalReturn as optionalReturn};
 
 function _reservedWordInParameter(
-    _delete?: boolean
+    _delete: boolean
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'reservedWordInParameter', {_delete});
 }

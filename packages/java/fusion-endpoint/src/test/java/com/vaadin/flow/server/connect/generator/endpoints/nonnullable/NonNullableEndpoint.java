@@ -37,8 +37,7 @@ public class NonNullableEndpoint {
     }
 
     @Nonnull
-    public Map<String, NonNullableModel> echoMap(
-            @Nonnull boolean shouldBeNotNull) {
+    public Map<String, NonNullableModel> echoMap(boolean shouldBeNotNull) {
         return Collections.emptyMap();
     }
 
@@ -57,8 +56,8 @@ public class NonNullableEndpoint {
     public static class NonNullableModel {
         @Nonnull
         String foo;
-        @Nonnull
         int shouldBeNotNullByDefault;
+        int first, second, third;
         Optional<Integer> nullableInteger;
         List<Map<String, String>> listOfMapNullable;
         List<Map<String, String>> listOfMapNullableNotNull;

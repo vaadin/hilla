@@ -42,7 +42,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.server.connect.ExplicitNullableTypeChecker;
+import static com.vaadin.flow.server.connect.ExplicitNullableTypeChecker.isRequired;
 
 /**
  * Methods related with creating schema declarations, used by
@@ -157,7 +157,7 @@ class SchemaGenerator {
                         && !Modifier.isTransient(modifiers)
                         && !field.isAnnotationPresent(JsonIgnore.class);
             }).forEach(field -> validFields.put(field.getName(),
-                    !ExplicitNullableTypeChecker.isRequired(field)));
+                    !isRequired(field)));
         } catch (ClassNotFoundException e) {
 
             String message = String.format(
@@ -195,7 +195,7 @@ class SchemaGenerator {
                     wrapperSchema.addAllOfItem(propertySchema);
                     propertySchema = wrapperSchema;
                 }
-                if (!ExplicitNullableTypeChecker.isRequired(field)) {
+                if (!isRequired(variableDeclarator) && !isRequired(field)) {
                     // Temporarily set nullable to indicate this property is
                     // not required
                     propertySchema.setNullable(true);

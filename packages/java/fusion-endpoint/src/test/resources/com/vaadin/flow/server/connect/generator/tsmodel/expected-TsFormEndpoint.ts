@@ -33,7 +33,11 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get bool(): BooleanModel {
-    return this[_getPropertyModel]('bool', BooleanModel, [true]);
+    return this[_getPropertyModel]('bool', BooleanModel, [false]);
+  }
+
+  get boolWrapper(): BooleanModel {
+    return this[_getPropertyModel]('boolWrapper', BooleanModel, [true]);
   }
 
   get children(): ArrayModel<ModelType<MyEntityModel>, MyEntityModel> {
@@ -41,11 +45,11 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get decimalMax(): NumberModel {
-    return this[_getPropertyModel]('decimalMax', NumberModel, [true, new DecimalMax({value:"0.01", inclusive:false})]);
+    return this[_getPropertyModel]('decimalMax', NumberModel, [false, new DecimalMax({value:"0.01", inclusive:false})]);
   }
 
   get decimalMin(): NumberModel {
-    return this[_getPropertyModel]('decimalMin', NumberModel, [true, new DecimalMin("0.01")]);
+    return this[_getPropertyModel]('decimalMin', NumberModel, [false, new DecimalMin("0.01")]);
   }
 
   get digits(): StringModel {
@@ -97,11 +101,11 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get negative(): NumberModel {
-    return this[_getPropertyModel]('negative', NumberModel, [true, new Negative()]);
+    return this[_getPropertyModel]('negative', NumberModel, [false, new Negative()]);
   }
 
-  get negativeOrCero(): NumberModel {
-    return this[_getPropertyModel]('negativeOrCero', NumberModel, [true, new NegativeOrZero()]);
+  get negativeOrZero(): NumberModel {
+    return this[_getPropertyModel]('negativeOrZero', NumberModel, [false, new NegativeOrZero()]);
   }
 
   get nonNullableList(): ArrayModel<string, StringModel> {
@@ -161,11 +165,11 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get positive(): NumberModel {
-    return this[_getPropertyModel]('positive', NumberModel, [true, new Positive()]);
+    return this[_getPropertyModel]('positive', NumberModel, [false, new Positive()]);
   }
 
-  get positiveOrCero(): NumberModel {
-    return this[_getPropertyModel]('positiveOrCero', NumberModel, [true, new PositiveOrZero()]);
+  get positiveOrZero(): NumberModel {
+    return this[_getPropertyModel]('positiveOrZero', NumberModel, [false, new PositiveOrZero()]);
   }
 
   get size(): StringModel {

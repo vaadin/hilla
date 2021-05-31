@@ -78,7 +78,8 @@ public class TsFormEndpoint {
         String foo;
         MyBaz bar;
         List<MyBaz> baz;
-        Boolean bool;
+        Boolean boolWrapper;
+        boolean bool;
         @NotEmpty
         List<String> list;
         @Email(message = "foo")
@@ -109,11 +110,11 @@ public class TsFormEndpoint {
         @Negative
         int negative;
         @NegativeOrZero
-        int negativeOrCero;
+        int negativeOrZero;
         @Positive
         int positive;
         @PositiveOrZero
-        int positiveOrCero;
+        int positiveOrZero;
         @Size
         String size;
         @Size(min = 1)
