@@ -5,15 +5,15 @@
     "dependencies": {
       "@vaadin/router": "1.7.2",
       "@polymer/polymer": "3.2.0",
+      "construct-style-sheets-polyfill": "2.4.16",
+      "lit": "2.0.0-rc.1",
       "@vaadin/vaadin-ordered-layout": "21.0.0-alpha2",
       "@vaadin/vaadin-login": "21.0.0-alpha2",
       "@vaadin/vaadin-avatar": "21.0.0-alpha2",
       "@vaadin/vaadin-button": "21.0.0-alpha2",
       "@vaadin/vaadin-tabs": "21.0.0-alpha2",
       "@vaadin/vaadin-lumo-styles": "21.0.0-alpha2",
-      "@vaadin/vaadin-app-layout": "21.0.0-alpha2",
-      "construct-style-sheets-polyfill": "2.4.16",
-      "lit": "2.0.0-rc.1"
+      "@vaadin/vaadin-app-layout": "21.0.0-alpha2"
     },
     "devDependencies": {
       "css-loader": "4.2.1",
@@ -77,15 +77,15 @@
     "@vaadin/flow-frontend": "./target/flow-frontend",
     "@vaadin/form": "./target/flow-frontend/form",
     "@vaadin/router": "1.7.2",
-    "@vaadin/vaadin-app-layout": "21.0.0-alpha2",
-    "@vaadin/vaadin-avatar": "21.0.0-alpha2",
-    "@vaadin/vaadin-button": "21.0.0-alpha2",
-    "@vaadin/vaadin-login": "21.0.0-alpha2",
-    "@vaadin/vaadin-lumo-styles": "21.0.0-alpha2",
-    "@vaadin/vaadin-ordered-layout": "21.0.0-alpha2",
-    "@vaadin/vaadin-tabs": "21.0.0-alpha2",
     "mobx": "^6.2.0",
     "construct-style-sheets-polyfill": "2.4.16",
-    "lit": "2.0.0-rc.1"
+    "lit": "2.0.0-rc.1",
+    "@vaadin/vaadin-ordered-layout": "21.0.0-alpha2",
+    "@vaadin/vaadin-login": "21.0.0-alpha2",
+    "@vaadin/vaadin-avatar": "21.0.0-alpha2",
+    "@vaadin/vaadin-button": "21.0.0-alpha2",
+    "@vaadin/vaadin-tabs": "21.0.0-alpha2",
+    "@vaadin/vaadin-lumo-styles": "21.0.0-alpha2",
+    "@vaadin/vaadin-app-layout": "21.0.0-alpha2"
   }
 }

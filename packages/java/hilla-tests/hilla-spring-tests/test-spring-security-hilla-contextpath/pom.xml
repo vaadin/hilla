@@ -7,8 +7,8 @@
         <artifactId>vaadin-spring-tests</artifactId>
         <version>18.0-SNAPSHOT</version>
     </parent>
-    <artifactId>test-spring-security-fusion</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion</name>
+    <artifactId>test-spring-security-fusion-contextpath</artifactId>
+    <name>Integration tests for Vaadin Spring Security and Fusion With Context Path</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -24,10 +24,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>fusion-endpoint</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev-server</artifactId>
-        </dependency>		
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -48,6 +44,24 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>test-spring-security-fusion</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>test-spring-security-fusion</artifactId>
+            <version>${project.version}</version>
+            <classifier>frontend</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>test-spring-security-fusion</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -64,6 +78,30 @@
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.vaadin</groupId>
+                                    <artifactId>test-spring-security-fusion</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>frontend</classifier>
+                                    <outputDirectory>${project.basedir}/frontend</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
                 <version>${vaadin.flow.version}</version>
@@ -79,11 +117,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <jvmArguments>
-                        -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=19999
-                    </jvmArguments>
-                </configuration>
                 <executions>
                     <!-- start and stop application when running
                         integration tests -->
@@ -98,28 +131,6 @@
                         <goals>
                             <goal>stop</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>package-frontend-folder</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>frontend</classifier>
-                            <classesDirectory>${project.basedir}/frontend</classesDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

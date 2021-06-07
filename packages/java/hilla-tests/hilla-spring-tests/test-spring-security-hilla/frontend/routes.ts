@@ -10,6 +10,7 @@ export const views: ViewRoute[] = [
   {
     path: "",
     component: "public-view",
+    name: "public",
     title: "Public",
     action: async () => {
       await import("./views/public/public-view");

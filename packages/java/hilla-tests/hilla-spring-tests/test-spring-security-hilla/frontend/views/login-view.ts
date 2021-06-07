@@ -22,7 +22,7 @@ export class LoginView extends View implements AfterEnterObserver {
 
     // As we do not know if the target is a resource or a Fusion view or a Flow view, we cannot just use Router.go
     window.location.href =
-      result.redirectUrl || this.returnUrl || result.defaultUrl || "/";
+      result.redirectUrl || this.returnUrl || '';
   };
 
   render() {
