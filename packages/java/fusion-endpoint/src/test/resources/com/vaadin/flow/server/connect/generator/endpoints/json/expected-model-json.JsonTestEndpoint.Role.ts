@@ -7,6 +7,9 @@ import Permissions from './Permissions';
  */
 
 export default interface Role {
+  /**
+   * Description for permissions.
+   */
   permissions?: Permissions;
   /**
    * Description for roleName.

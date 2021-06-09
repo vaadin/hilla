@@ -16,8 +16,8 @@ function _echoEnum(
 export {_echoEnum as echoEnum};
 
 function _echoListEnum(
-    enumList?: Array<MyEnum>
-): Promise<Array<MyEnum> | undefined> {
+    enumList?: Array<MyEnum | undefined>
+): Promise<Array<MyEnum | undefined> | undefined> {
   return client.call('EnumEndpoint', 'echoListEnum', {enumList});
 }
 export {_echoListEnum as echoListEnum};

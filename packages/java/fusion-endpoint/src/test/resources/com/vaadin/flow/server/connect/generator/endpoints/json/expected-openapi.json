@@ -94,7 +94,10 @@
                 "schema" : {
                   "type" : "object",
                   "additionalProperties" : {
-                    "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    "nullable" : true,
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    } ]
                   },
                   "description" : "",
                   "nullable" : true
@@ -123,7 +126,10 @@
                   "description" : "",
                   "nullable" : true,
                   "items" : {
-                    "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    "nullable" : true,
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    } ]
                   }
                 }
               }
@@ -150,7 +156,8 @@
                     "type" : "array",
                     "description" : "input string array",
                     "items" : {
-                      "type" : "string"
+                      "type" : "string",
+                      "nullable" : true
                     }
                   }
                 }
@@ -194,7 +201,10 @@
                   "input" : {
                     "type" : "object",
                     "additionalProperties" : {
-                      "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                      "nullable" : true,
+                      "allOf" : [ {
+                        "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                      } ]
                     },
                     "description" : "input map"
                   }
@@ -291,6 +301,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
+                  "description" : "",
                   "nullable" : true,
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
@@ -316,7 +327,9 @@
                 "type" : "object",
                 "properties" : {
                   "input" : {
-                    "$ref" : "#/components/schemas/com.fasterxml.jackson.core.Version"
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.fasterxml.jackson.core.Version"
+                    } ]
                   }
                 }
               }
@@ -344,7 +357,9 @@
                 "type" : "object",
                 "properties" : {
                   "input" : {
-                    "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Status"
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Status"
+                    } ]
                   }
                 }
               }
@@ -374,7 +389,8 @@
                   "parameter" : {
                     "type" : "array",
                     "items" : {
-                      "type" : "string"
+                      "type" : "string",
+                      "nullable" : true
                     }
                   },
                   "requiredParameter" : {
@@ -461,11 +477,11 @@
                 "type" : "object",
                 "properties" : {
                   "user" : {
-                    "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    "description" : "User to be updated",
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
+                    } ]
                   }
-                },
-                "x-vaadin-parameters-description" : {
-                  "user" : "User to be updated"
                 }
               }
             }
@@ -535,6 +551,7 @@
         "type" : "object",
         "properties" : {
           "permissions" : {
+            "description" : "Description for permissions.",
             "allOf" : [ {
               "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Permissions"
             } ]
@@ -601,7 +618,10 @@
           "roles" : {
             "type" : "object",
             "additionalProperties" : {
-              "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Role"
+              "nullable" : true,
+              "allOf" : [ {
+                "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Role"
+              } ]
             }
           }
         },

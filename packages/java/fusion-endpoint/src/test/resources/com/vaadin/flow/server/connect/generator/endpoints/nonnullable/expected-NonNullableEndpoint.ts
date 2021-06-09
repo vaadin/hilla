@@ -12,19 +12,19 @@ import ReturnType from './com/vaadin/flow/server/connect/generator/endpoints/non
 
 function _echoMap(
   shouldBeNotNull: boolean
-): Promise<{[key: string]: NonNullableModel;}> {
+): Promise<Record<string, NonNullableModel | undefined>> {
   return client.call('NonNullableEndpoint', 'echoMap', {shouldBeNotNull});
 }
 
 export {_echoMap as echoMap};
 
-function _echoNonNullMode(
-  nonNullableModels: Array<NonNullableModel>
+function _echoNonNullModel(
+  nonNullableModels: Array<NonNullableModel | undefined>
 ): Promise<NonNullableModel | undefined> {
-  return client.call('NonNullableEndpoint', 'echoNonNullMode', {nonNullableModels});
+  return client.call('NonNullableEndpoint', 'echoNonNullModel', {nonNullableModels});
 }
 
-export {_echoNonNullMode as echoNonNullMode};
+export {_echoNonNullModel as echoNonNullModel};
 
 function _getNotNullReturnType(): Promise<ReturnType | undefined> {
   return client.call('NonNullableEndpoint', 'getNotNullReturnType');
@@ -56,7 +56,7 @@ export {_stringNullable as stringNullable};
 
 export const NonNullableEndpoint = Object.freeze({
   echoMap: _echoMap,
-  echoNonNullMode: _echoNonNullMode,
+  echoNonNullModel: _echoNonNullModel,
   getNotNullReturnType: _getNotNullReturnType,
   getNullableString: _getNullableString,
   sendParameterType: _sendParameterType,

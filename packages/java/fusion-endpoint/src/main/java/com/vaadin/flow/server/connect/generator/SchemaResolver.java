@@ -53,30 +53,32 @@ class SchemaResolver {
 
     Schema parseResolvedTypeToSchema(ResolvedType resolvedType) {
         if (resolvedType.isArray()) {
-            return createArraySchema(resolvedType);
-        }
-        if (isNumberType(resolvedType)) {
-            return new NumberSchema();
+            return createNullableWrapper(createArraySchema(resolvedType));
+        } else if (isNumberType(resolvedType)) {
+            return createNullableWrapper(new NumberSchema(),
+                    !resolvedType.isPrimitive());
         } else if (isStringType(resolvedType)) {
-            return new StringSchema();
+            return createNullableWrapper(new StringSchema());
         } else if (isCollectionType(resolvedType)) {
-            return createCollectionSchema(resolvedType.asReferenceType());
+            return createNullableWrapper(
+                    createCollectionSchema(resolvedType.asReferenceType()));
         } else if (isBooleanType(resolvedType)) {
-            return new BooleanSchema();
+            return createNullableWrapper(new BooleanSchema(),
+                    !resolvedType.isPrimitive());
         } else if (isMapType(resolvedType)) {
-            return createMapSchema(resolvedType);
+            return createNullableWrapper(createMapSchema(resolvedType));
         } else if (isDateType(resolvedType)) {
-            return new DateSchema();
+            return createNullableWrapper(new DateSchema());
         } else if (isDateTimeType(resolvedType)) {
-            return new DateTimeSchema();
+            return createNullableWrapper(new DateTimeSchema());
         } else if (isOptionalType(resolvedType)) {
             return createOptionalSchema(resolvedType.asReferenceType());
         } else if (isUnhandledJavaType(resolvedType)) {
-            return new ObjectSchema();
+            return createNullableWrapper(new ObjectSchema());
         } else if (isTypeOf(resolvedType, Enum.class)) {
-            return createEnumTypeSchema(resolvedType);
+            return createNullableWrapper(createEnumTypeSchema(resolvedType));
         }
-        return createUserBeanSchema(resolvedType);
+        return createNullableWrapper(createUserBeanSchema(resolvedType));
     }
 
     private Schema createArraySchema(ResolvedType type) {
@@ -104,16 +106,24 @@ class SchemaResolver {
     }
 
     Schema createNullableWrapper(Schema nestedTypeSchema) {
+        return createNullableWrapper(nestedTypeSchema, true);
+    }
+
+    Schema createNullableWrapper(Schema nestedTypeSchema,
+            boolean shouldBeNullable) {
+        if (!shouldBeNullable) {
+            return nestedTypeSchema;
+        }
+
         if (nestedTypeSchema.get$ref() == null) {
             nestedTypeSchema.setNullable(true);
             return nestedTypeSchema;
-        } else {
-            ComposedSchema nullableSchema = new ComposedSchema();
-            nullableSchema.setNullable(true);
-            nullableSchema
-                    .setAllOf(Collections.singletonList(nestedTypeSchema));
-            return nullableSchema;
         }
+
+        ComposedSchema nullableSchema = new ComposedSchema();
+        nullableSchema.setNullable(true);
+        nullableSchema.setAllOf(Collections.singletonList(nestedTypeSchema));
+        return nullableSchema;
     }
 
     private Schema createMapSchema(ResolvedType type) {

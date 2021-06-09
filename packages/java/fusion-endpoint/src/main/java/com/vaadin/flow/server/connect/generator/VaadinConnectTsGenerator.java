@@ -104,24 +104,13 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
     private static final Pattern ARRAY_TYPE_NAME_PATTERN = Pattern
             .compile("Array<(.*)>");
     private static final Pattern MAPPED_TYPE_NAME_PATTERN = Pattern
-            .compile("\\{ \\[key: string\\]: (.*); \\}");
+            .compile("Record<string, (.*)>");
     private static final Pattern PRIMITIVE_TYPE_NAME_PATTERN = Pattern
             .compile("^(string|number|boolean)");
     private static final String OPERATION = "operation";
     private static final String IMPORT = "import";
 
     private List<Tag> tags;
-
-    private static class VaadinConnectTSOnlyGenerator extends DefaultGenerator {
-        @Override
-        public File writeToFile(String filename, String contents)
-                throws IOException {
-            if (filename.endsWith(TS)) {
-                return super.writeToFile(filename, contents);
-            }
-            return null;
-        }
-    }
 
     /**
      * Create vaadin ts codegen instance.
@@ -564,7 +553,12 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
     private String getModelFullType(String name) {
         Matcher matcher = ARRAY_TYPE_NAME_PATTERN.matcher(name);
         if (matcher.find()) {
-            String variableName = matcher.group(1);
+            String arrayItemType = matcher.group(1);
+
+            String variableName = arrayItemType.endsWith(OPTIONAL_SUFFIX)
+                    ? arrayItemType.substring(0,
+                            arrayItemType.lastIndexOf(OPTIONAL_SUFFIX))
+                    : arrayItemType;
             return "Array" + MODEL + "<" + getModelVariableType(variableName)
                     + ", " + getModelFullType(variableName) + ">";
         }
@@ -990,7 +984,7 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
             return getSimpleRef(schema.get$ref()) + optionalSuffix;
         } else if (schema.getAdditionalProperties() != null) {
             Schema inner = (Schema) schema.getAdditionalProperties();
-            return String.format("{ [key: string]: %s; }%s",
+            return String.format("Record<string, %s>%s",
                     getTypeDeclaration(inner), optionalSuffix);
         } else if (schema instanceof ComposedSchema) {
             return getTypeDeclarationFromComposedSchema((ComposedSchema) schema,
@@ -1086,6 +1080,23 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
                 prop.datatype, (List<Map<String, String>>) options.param(0)));
     }
 
+    @Override
+    public String toEnumVarName(String name, String datatype) {
+        // Keep the same Java enum name in TS
+        return name;
+    }
+
+    private static class VaadinConnectTSOnlyGenerator extends DefaultGenerator {
+        @Override
+        public File writeToFile(String filename, String contents)
+                throws IOException {
+            if (filename.endsWith(TS)) {
+                return super.writeToFile(filename, contents);
+            }
+            return null;
+        }
+    }
+
     /**
      * Parameter information object which is used to store body parameters in a
      * convenient way to process in the template.
@@ -1139,11 +1150,5 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
         public boolean isRequired() {
             return isRequired;
         }
-    }
-
-    @Override
-    public String toEnumVarName(String name, String datatype) {
-        // Keep the same Java enum name in TS
-        return name;
     }
 }

@@ -4,6 +4,6 @@
  */
 export default interface ExternalDocumentation {
   description?: string;
-  extensions?: { [key: string]: any; };
+  extensions?: Record<string, any | undefined>;
   url?: string;
 }

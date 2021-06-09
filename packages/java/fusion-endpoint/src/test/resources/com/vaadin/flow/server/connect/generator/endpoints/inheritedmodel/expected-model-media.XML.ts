@@ -4,7 +4,7 @@
  */
 export default interface XML {
   attribute?: boolean;
-  extensions?: { [key: string]: any; };
+  extensions?: Record<string, any | undefined>;
   name?: string;
   namespace?: string;
   prefix?: string;

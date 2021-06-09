@@ -25,7 +25,7 @@ export {_get as get};
 function _getPage(
     pageSize: number,
     pageNumber: number
-): Promise<Array<Person> | undefined> {
+): Promise<Array<Person | undefined> | undefined> {
   return client.call('PersonEndpoint', 'getPage', {pageSize, pageNumber});
 }
 export {_getPage as getPage};

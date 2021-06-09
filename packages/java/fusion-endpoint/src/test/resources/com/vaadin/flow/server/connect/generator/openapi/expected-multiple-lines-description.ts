@@ -16,7 +16,7 @@ import User from './User';
  *
  * Return list of users
  */
-function _getAllUsers(): Promise<Array<User>> {
+function _getAllUsers(): Promise<Array<User | undefined>> {
   return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
 }
 export {_getAllUsers as getAllUsers};

@@ -11,7 +11,7 @@ export default interface Account {
    * Multiple line description should work.This is very very very very
    * very very very very long.
    */
-  groups?: Array<Group>;
+  groups?: Array<Group | undefined>;
   modelFromDifferentPackage?: ModelFromDifferentPackage;
   /**
    * Javadoc for username.

@@ -8,7 +8,7 @@
 import client from './connect-client.default';
 import Foo from './com/vaadin/flow/server/connect/generator/endpoints/iterableendpoint/IterableEndpoint/Foo';
 
-function _getFoos(): Promise<Array<Foo> | undefined> {
+function _getFoos(): Promise<Array<Foo | undefined> | undefined> {
     return client.call('IterableEndpoint', 'getFoos');
 }
 export {_getFoos as getFoos};

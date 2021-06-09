@@ -22,8 +22,8 @@ function _echoInstant(
 export {_echoInstant as echoInstant};
 
 function _echoListLocalDateTime(
-    localDateTimeList?: Array<string>
-): Promise<Array<string> | undefined> {
+    localDateTimeList?: Array<string | undefined>
+): Promise<Array<string | undefined> | undefined> {
   return client.call('DateTimeEndpoint', 'echoListLocalDateTime', {localDateTimeList});
 }
 export {_echoListLocalDateTime as echoListLocalDateTime};
@@ -50,8 +50,8 @@ function _echoLocalTime(
 export {_echoLocalTime as echoLocalTime};
 
 function _echoMapInstant(
-    mapInstant?: { [key: string]: string; }
-): Promise<{ [key: string]: string; } | undefined> {
+    mapInstant?: Record<string, string | undefined>
+): Promise<Record<string, string | undefined> | undefined> {
   return client.call('DateTimeEndpoint', 'echoMapInstant', {mapInstant});
 }
 export {_echoMapInstant as echoMapInstant};

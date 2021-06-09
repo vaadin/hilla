@@ -24,7 +24,10 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/User"
+                    "allOf": [{
+                      "$ref" : "#/components/schemas/User"
+                    }],
+                    "nullable": true
                   }
                 }
               }

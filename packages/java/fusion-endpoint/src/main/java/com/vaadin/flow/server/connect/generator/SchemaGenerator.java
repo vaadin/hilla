@@ -121,8 +121,12 @@ class SchemaGenerator {
         schema.setProperties(new TreeMap<>());
         for (ResolvedFieldDeclaration resolvedFieldDeclaration : serializableFields) {
             String name = resolvedFieldDeclaration.getName();
-            Schema type = openApiObjectGenerator.parseResolvedTypeToSchema(
-                    resolvedFieldDeclaration.getType());
+            Schema type = openApiObjectGenerator
+                    .parseResolvedTypeToSchema(
+                            resolvedFieldDeclaration.getType())
+                    // Field is already checked to be optional, so we don't need
+                    // it to be nullable
+                    .nullable(null);
             if (!fieldsOptionalMap.get(name)) {
                 schema.addRequiredItem(name);
             }
@@ -151,7 +155,6 @@ class SchemaGenerator {
             Class<?> aClass = openApiObjectGenerator
                     .getClassFromReflection(resolvedType);
             Arrays.stream(aClass.getDeclaredFields()).filter(field -> {
-
                 int modifiers = field.getModifiers();
                 return !Modifier.isStatic(modifiers)
                         && !Modifier.isTransient(modifiers)
@@ -159,7 +162,6 @@ class SchemaGenerator {
             }).forEach(field -> validFields.put(field.getName(),
                     !isRequired(field)));
         } catch (ClassNotFoundException e) {
-
             String message = String.format(
                     "Can't get list of fields from class '%s'."
                             + "Please make sure that class '%s' is in your project's compile classpath. "
@@ -195,10 +197,11 @@ class SchemaGenerator {
                     wrapperSchema.addAllOfItem(propertySchema);
                     propertySchema = wrapperSchema;
                 }
-                if (!isRequired(variableDeclarator) && !isRequired(field)) {
+                if (GeneratorUtils.isTrue(propertySchema.getNullable())
+                        && isRequired(field)) {
                     // Temporarily set nullable to indicate this property is
                     // not required
-                    propertySchema.setNullable(true);
+                    propertySchema.setNullable(null);
                 }
                 addFieldAnnotationsToSchema(field, propertySchema);
                 properties.put(variableDeclarator.getNameAsString(),

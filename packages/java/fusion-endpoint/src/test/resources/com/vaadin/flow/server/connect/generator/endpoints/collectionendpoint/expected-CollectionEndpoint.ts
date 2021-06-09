@@ -26,7 +26,7 @@ export {_getCollectionByAuthor as getCollectionByAuthor};
  *
  * Return list of user name
  */
-function _getListOfUserName(): Promise<Array<string> | undefined> {
+function _getListOfUserName(): Promise<Array<string | undefined> | undefined> {
   return client.call('CollectionEndpoint', 'getListOfUserName');
 }
 export {_getListOfUserName as getListOfUserName};

@@ -18,12 +18,10 @@ package com.vaadin.flow.server.connect.generator.tsmodel;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.server.connect.generator.endpoints.AbstractEndpointGeneratorBaseTest;
@@ -32,11 +30,14 @@ import com.vaadin.flow.server.connect.generator.tsmodel.TsFormEndpoint.MyEntityI
 
 import elemental.json.JsonObject;
 import static com.vaadin.flow.server.connect.generator.OpenApiObjectGenerator.CONSTRAINT_ANNOTATIONS;
+import static com.vaadin.flow.server.connect.generator.TestUtils.equalsIgnoreWhiteSpaces;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
+    private Pattern TS_FORM_FILE_LINK_PATTERN = Pattern
+            .compile("file://.*\\.java");
 
     public TsFormTest() {
         super(Collections.singletonList(TsFormEndpoint.class));
@@ -95,44 +96,20 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         assertTrue(entityFile.exists());
         assertTrue(formModelFile.exists());
 
-        final List<String> content = Files.lines(formModelFile.toPath())
-                .collect(Collectors.toList());
-        final List<String> expected = Files.lines(new File(
+        String actual = new String(Files.readAllBytes(formModelFile.toPath()));
+        final String expected = new String(Files.readAllBytes(new File(
                 getClass().getResource("expected-TsFormEndpoint.ts").getFile())
-                        .toPath())
-                .collect(Collectors.toList());
+                        .toPath()));
 
-        // Path separators for files need to be changed on windows.
-        content.replaceAll(line -> {
-            if (line.contains("file://")) {
-                return line.replace('\\', '/').replaceAll(
-                        "file://.*/fusion-endpoint",
-                        "file:///.../fusion-endpoint");
-            }
-            return line;
-        });
-        assertEquals("Rows in generated and expected files differ",
-                expected.size(), content.size());
-
-        int line = 0;
-        List<String> faultyLines = new ArrayList<>();
-        for (String expectedLine : expected) {
-            String actualLine = content.get(line);
-            // ignore the line for file reference, as the file path syntax is
-            // different on Windows
-            if (isFileRefenreceLine(expectedLine)) {
-                Assert.assertTrue("should have the file reference",
-                        isFileRefenreceLine(actualLine));
-            } else if (!expectedLine.equals(actualLine)) {
-                faultyLines.add(String.format("L%d :: expected: [%s] got [%s]",
-                        line + 1, expectedLine, actualLine));
-            }
-            line++;
+        final Matcher matcher = TS_FORM_FILE_LINK_PATTERN.matcher(actual);
+        if (matcher.find()) {
+            final String uri = matcher.group(0);
+            final String updatedUri = uri.replace('\\', '/').replaceAll(
+                    "file://.*/fusion-endpoint", "file:///.../fusion-endpoint");
+            actual = actual.replace(uri, updatedUri);
         }
-        assertTrue(
-                "Found differences in generated file: " + faultyLines.stream()
-                        .collect(Collectors.joining("\n")),
-                faultyLines.isEmpty());
+
+        equalsIgnoreWhiteSpaces(expected, actual);
     }
 
     private boolean isFileRefenreceLine(String line) {

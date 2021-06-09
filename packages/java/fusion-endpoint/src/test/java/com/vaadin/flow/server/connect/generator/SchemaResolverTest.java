@@ -69,7 +69,7 @@ public class SchemaResolverTest {
 
         Schema schema = schemaResolver.parseResolvedTypeToSchema(arrayType);
         Assert.assertTrue(schema instanceof ArraySchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(
                 ((ArraySchema) schema).getItems() instanceof StringSchema);
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
@@ -87,27 +87,27 @@ public class SchemaResolverTest {
     }
 
     @Test
-    public void should_ReturnNotNullableNumberSchema_When_GivenTypeIsANumber() {
+    public void should_ReturnNullableNumberSchema_When_GivenTypeIsANumber() {
         ResolvedType numberType = mockReferencedTypeOf(Number.class);
 
         Schema schema = schemaResolver.parseResolvedTypeToSchema(numberType);
         Assert.assertTrue(schema instanceof NumberSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
 
     @Test
-    public void should_ReturnNotNullableStringSchema_When_GivenTypeIsAString() {
+    public void should_ReturnNullableStringSchema_When_GivenTypeIsAString() {
         ResolvedType resolvedType = mockReferencedTypeOf(String.class);
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof StringSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
 
     @Test
-    public void should_ReturnNotNullableArray_When_GivenTypeIsAListString() {
+    public void should_ReturnNullableArray_When_GivenTypeIsAListString() {
         ResolvedType resolvedType = mockReferencedTypeOf(Collection.class);
         ResolvedReferenceType resolvedReferenceType = resolvedType
                 .asReferenceType();
@@ -120,7 +120,7 @@ public class SchemaResolverTest {
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof ArraySchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(
                 ((ArraySchema) schema).getItems() instanceof StringSchema);
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
@@ -139,18 +139,18 @@ public class SchemaResolverTest {
     }
 
     @Test
-    public void should_ReturnNotNullableBoolean_When_GivenTypeIsABoxedBoolean() {
+    public void should_ReturnNullableBoolean_When_GivenTypeIsABoxedBoolean() {
         ResolvedType resolvedType = mockReferencedTypeOf(Boolean.class);
 
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof BooleanSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
 
     @Test
-    public void should_ReturnNotNullableMap_When_GivenTypeIsAMap() {
+    public void should_ReturnNullableMap_When_GivenTypeIsAMap() {
         ResolvedType resolvedType = mockReferencedTypeOf(Map.class);
         ResolvedReferenceType resolvedReferenceType = resolvedType
                 .asReferenceType();
@@ -162,7 +162,7 @@ public class SchemaResolverTest {
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof MapSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(
                 schema.getAdditionalProperties() instanceof NumberSchema);
 
@@ -170,23 +170,23 @@ public class SchemaResolverTest {
     }
 
     @Test
-    public void should_ReturnNotNullableDate_When_GivenTypeIsADate() {
+    public void should_ReturnNullableDate_When_GivenTypeIsADate() {
         ResolvedType resolvedType = mockReferencedTypeOf(Date.class);
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof DateSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
 
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
 
     @Test
-    public void should_ReturnNotNullableDate_When_GivenTypeIsAInstant() {
+    public void should_ReturnNullableDate_When_GivenTypeIsAInstant() {
         ResolvedType resolvedType = mockReferencedTypeOf(Instant.class);
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertTrue(schema instanceof DateTimeSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
 
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
@@ -235,27 +235,32 @@ public class SchemaResolverTest {
     }
 
     @Test
-    public void should_ReturnNotNullableObject_When_GivenTypeIsAnUnhandledJavaType() {
+    public void should_ReturnNullableObject_When_GivenTypeIsAnUnhandledJavaType() {
         ResolvedType resolvedType = mockReferencedTypeOf(Class.class);
 
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
         Assert.assertNotNull(schema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(schemaResolver.getFoundTypes().isEmpty());
     }
 
     @Test
-    public void should_ReturnNotNullableBeanSchema_When_GivenTypeIsABeanType() {
+    public void should_ReturnNullableBeanSchema_When_GivenTypeIsABeanType() {
         ResolvedType resolvedType = mockReferencedTypeOf(TestBean.class);
 
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
 
-        Assert.assertTrue(schema instanceof ObjectSchema);
-        Assert.assertNull(schema.getNullable());
+        Assert.assertTrue(schema instanceof ComposedSchema);
+        Assert.assertEquals(1, ((ComposedSchema) schema).getAllOf().size());
+        Assert.assertTrue(((ComposedSchema) schema).getAllOf()
+                .get(0) instanceof ObjectSchema);
+        ;
+        Assert.assertTrue(schema.getNullable());
         String beanRef = schemaResolver
                 .getFullQualifiedNameRef(TestBean.class.getCanonicalName());
-        Assert.assertEquals(beanRef, schema.get$ref());
+        Assert.assertEquals(beanRef,
+                ((ComposedSchema) schema).getAllOf().get(0).get$ref());
 
         Assert.assertEquals(1, schemaResolver.getFoundTypes().size());
     }
@@ -265,14 +270,18 @@ public class SchemaResolverTest {
         ResolvedType resolvedType = mockReferencedTypeOf(
                 TestIterableBean.class);
         Schema schema = schemaResolver.parseResolvedTypeToSchema(resolvedType);
-        Assert.assertTrue(schema instanceof ObjectSchema);
+        Assert.assertTrue(schema instanceof ComposedSchema);
+        Assert.assertEquals(1, ((ComposedSchema) schema).getAllOf().size());
+        Assert.assertTrue(((ComposedSchema) schema).getAllOf()
+                .get(0) instanceof ObjectSchema);
         String beanRef = schemaResolver.getFullQualifiedNameRef(
                 TestIterableBean.class.getCanonicalName());
-        Assert.assertEquals(beanRef, schema.get$ref());
+        Assert.assertEquals(beanRef,
+                ((ComposedSchema) schema).getAllOf().get(0).get$ref());
         Assert.assertEquals(1, schemaResolver.getFoundTypes().size());
     }
 
-    private ResolvedType mockReferencedTypeOf(Class clazz) {
+    private ResolvedType mockReferencedTypeOf(Class<?> clazz) {
         ResolvedType resolvedType = mock(ResolvedType.class);
         ResolvedReferenceType resolvedReferenceType = mock(
                 ResolvedReferenceType.class);

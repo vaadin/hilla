@@ -8,7 +8,7 @@
 import client from './connect-client.default';
 import Account from './com/vaadin/flow/server/connect/generator/endpoints/model/ModelEndpoint/Account';
 
-function _getAccounts(): Promise<Array<Account> | undefined> {
+function _getAccounts(): Promise<Array<Account | undefined> | undefined> {
   return client.call('ComplexReturnTypeEndpoint', 'getAccounts');
 }
 export {_getAccounts as getAccounts};

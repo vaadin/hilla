@@ -31,7 +31,7 @@ public class NonNullableEndpoint {
         return "";
     }
 
-    public NonNullableModel echoNonNullMode(
+    public NonNullableModel echoNonNullModel(
             @Nonnull NonNullableModel[] nonNullableModels) {
         return new NonNullableModel();
     }
@@ -54,6 +54,8 @@ public class NonNullableEndpoint {
     }
 
     public static class NonNullableModel {
+        int[] integers;
+        List<Integer> integersList;
         @Nonnull
         String foo;
         int shouldBeNotNullByDefault;

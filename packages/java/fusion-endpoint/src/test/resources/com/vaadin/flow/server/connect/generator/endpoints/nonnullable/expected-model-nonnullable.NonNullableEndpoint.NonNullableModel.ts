@@ -5,8 +5,10 @@
 export default interface NonNullableModel {
   first: number;
   foo: string;
-  listOfMapNullable?: Array<{ [key: string]: string; }>;
-  listOfMapNullableNotNull?: Array<{ [key: string]: string; }>;
+  integers?: Array<number>;
+  integersList?: Array<number | undefined>;
+  listOfMapNullable?: Array<Record<string, string | undefined> | undefined>;
+  listOfMapNullableNotNull?: Array<Record<string, string | undefined> | undefined>;
   nullableInteger?: number;
   second: number;
   shouldBeNotNullByDefault: number;

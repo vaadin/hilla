@@ -29,7 +29,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get baz(): ArrayModel<ModelType<MyBazModel>, MyBazModel> {
-    return this[_getPropertyModel]('baz', ArrayModel, [true, MyBazModel, [false]]);
+    return this[_getPropertyModel]('baz', ArrayModel, [true, MyBazModel, [true]]);
   }
 
   get bool(): BooleanModel {
@@ -41,7 +41,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get children(): ArrayModel<ModelType<MyEntityModel>, MyEntityModel> {
-    return this[_getPropertyModel]('children', ArrayModel, [true, MyEntityModel, [false]]);
+    return this[_getPropertyModel]('children', ArrayModel, [true, MyEntityModel, [true]]);
   }
 
   get decimalMax(): NumberModel {
@@ -65,7 +65,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get entityMatrix(): ArrayModel<ModelType<ArrayModel<ModelType<MyEntityModel>, MyEntityModel>>, ArrayModel<ModelType<MyEntityModel>, MyEntityModel>> {
-    return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [false, MyEntityModel, [false]]]);
+    return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [true, MyEntityModel, [true]]]);
   }
 
   get foo(): StringModel {
@@ -81,7 +81,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get list(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('list', ArrayModel, [true, StringModel, [false], new NotEmpty()]);
+    return this[_getPropertyModel]('list', ArrayModel, [true, StringModel, [true], new NotEmpty()]);
   }
 
   get localTime(): StringModel {
@@ -113,7 +113,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get nonNullableMatrix(): ArrayModel<ModelType<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
-    return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [false, StringModel, [true]]]);
+    return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [true, StringModel, [true]]]);
   }
 
   get nonNullableString(): StringModel {
@@ -137,7 +137,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get numberMatrix(): ArrayModel<ModelType<ArrayModel<number, NumberModel>>, ArrayModel<number, NumberModel>> {
-    return this[_getPropertyModel]('numberMatrix', ArrayModel, [true, ArrayModel, [false, NumberModel, [false]]]);
+    return this[_getPropertyModel]('numberMatrix', ArrayModel, [true, ArrayModel, [true, NumberModel, [true]]]);
   }
 
   get optionalEntity(): MyEntityModel {
@@ -149,7 +149,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get optionalMatrix(): ArrayModel<ModelType<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
-    return this[_getPropertyModel]('optionalMatrix', ArrayModel, [true, ArrayModel, [false, StringModel, [true]]]);
+    return this[_getPropertyModel]('optionalMatrix', ArrayModel, [true, ArrayModel, [true, StringModel, [true]]]);
   }
 
   get optionalString(): StringModel {
@@ -181,7 +181,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get stringArray(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('stringArray', ArrayModel, [true, StringModel, [false]]);
+    return this[_getPropertyModel]('stringArray', ArrayModel, [true, StringModel, [true]]);
   }
 
   get stringMap(): ObjectModel<{ [key: string]: string; }> {
