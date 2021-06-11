@@ -86,6 +86,10 @@ export class MainView extends Layout {
         title: "Public",
       },
       {
+        path: "form",
+        title: "Fusion Form",
+      },
+      {
         path: "private",
         title: "Private",
         requiresAuthentication: true,

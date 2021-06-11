@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppViewIT extends ChromeBrowserTest {
+public class SecurityIT extends ChromeBrowserTest {
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
     private static final int SERVER_PORT = 9999;
@@ -63,6 +63,7 @@ public class AppViewIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("form", "Fusion Form", true));
         expectedItems.add(new MenuItem("private", "Private", false));
         expectedItems.add(new MenuItem("admin", "Admin", false));
         Assert.assertEquals(expectedItems, menuItems);
@@ -75,6 +76,7 @@ public class AppViewIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("form", "Fusion Form", true));
         expectedItems.add(new MenuItem("private", "Private", true));
         expectedItems.add(new MenuItem("admin", "Admin", false));
         Assert.assertEquals(expectedItems, menuItems);
@@ -87,6 +89,7 @@ public class AppViewIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("form", "Fusion Form", true));
         expectedItems.add(new MenuItem("private", "Private", true));
         expectedItems.add(new MenuItem("admin", "Admin", true));
         Assert.assertEquals(expectedItems, menuItems);

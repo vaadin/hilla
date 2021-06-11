@@ -17,6 +17,15 @@ export const views: ViewRoute[] = [
     },
   },
   {
+    path: "form",
+    component: "vaadin-elements-view",
+    name: "form",
+    title: "Fusion Form",
+    action: async () => {
+      await import("./views/public/vaadin-elements-view");
+    },
+  },
+  {
     path: "private",
     component: "private-view",
     title: "Private",

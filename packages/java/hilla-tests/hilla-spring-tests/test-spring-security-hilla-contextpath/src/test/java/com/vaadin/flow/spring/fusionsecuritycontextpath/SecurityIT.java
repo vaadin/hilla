@@ -1,6 +1,6 @@
 package com.vaadin.flow.spring.fusionsecuritycontextpath;
 
-public class AppViewIT extends com.vaadin.flow.spring.fusionsecurity.AppViewIT {
+public class SecurityIT extends com.vaadin.flow.spring.fusionsecurity.SecurityIT {
 
     @Override
     protected String getRootURL() {
