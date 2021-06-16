@@ -11,7 +11,7 @@ import Group from './com/vaadin/flow/server/connect/generator/endpoints/model/Mo
 import ModelFromDifferentPackage from './com/vaadin/flow/server/connect/generator/endpoints/model/subpackage/ModelFromDifferentPackage';
 
 function _getAccountByGroups(
-    groups?: Array<Group | undefined>
+    groups: Array<Group | undefined> | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelEndpoint', 'getAccountByGroups', {groups});
 }
@@ -24,7 +24,7 @@ export {_getAccountByGroups as getAccountByGroups};
  * Return the account with given userName
  */
 function _getAccountByUserName(
-    userName?: string
+    userName: string | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelEndpoint', 'getAccountByUserName', {userName});
 }

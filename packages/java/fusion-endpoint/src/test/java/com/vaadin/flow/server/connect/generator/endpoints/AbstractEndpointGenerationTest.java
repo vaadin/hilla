@@ -351,14 +351,7 @@ public abstract class AbstractEndpointGenerationTest
             assertSchema(stringSchemaEntry.getValue(), parameterTypes[index],
                     parameterTypeArguments.get(index));
             List requiredList = requestSchema.getRequired();
-            if (isRequired(parameters[index])) {
-                assertTrue(requiredList.contains(stringSchemaEntry.getKey()));
-            } else {
-                boolean notRequired = requiredList == null
-                        || !requiredList.contains(stringSchemaEntry.getKey());
-                assertTrue("Request parameter without @Nonnull annotation"
-                        + " should not be required", notRequired);
-            }
+            assertTrue(requiredList.contains(stringSchemaEntry.getKey()));
             index++;
         }
     }

@@ -25,4 +25,8 @@ public class ComplexTypeParamsEndpoint {
     public void getComplexTypeParams(List<ModelEndpoint.Account> accounts,
             Map<String, ModelEndpoint.Group> groups) {
     }
+
+    public void send(String text, int chatPartnerId) {
+
+    }
 }

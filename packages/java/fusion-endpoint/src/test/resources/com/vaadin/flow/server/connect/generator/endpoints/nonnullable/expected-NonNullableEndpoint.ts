@@ -33,7 +33,7 @@ function _getNotNullReturnType(): Promise<ReturnType | undefined> {
 export {_getNotNullReturnType as getNotNullReturnType};
 
 function _getNullableString(
-  input?: string
+  input: string | undefined
 ): Promise<string> {
   return client.call('NonNullableEndpoint', 'getNullableString', {input});
 }
@@ -41,7 +41,7 @@ function _getNullableString(
 export {_getNullableString as getNullableString};
 
 function _sendParameterType(
-  parameterType?: ParameterType
+  parameterType: ParameterType | undefined
 ): Promise<void> {
   return client.call('NonNullableEndpoint', 'sendParameterType', {parameterType});
 }

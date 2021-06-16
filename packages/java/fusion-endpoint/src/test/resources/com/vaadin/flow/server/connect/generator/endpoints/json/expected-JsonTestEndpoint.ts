@@ -29,7 +29,7 @@ export {_countUser as countUser};
  * Return current time as an Instant
  */
 function _fullFQNMethod(
-    input?: number
+    input: number | undefined
 ): Promise<string | undefined> {
   return client.call('JsonTestEndpoint', 'fullFQNMethod', {input});
 }
@@ -62,7 +62,7 @@ export {_getAllUsers as getAllUsers};
  * Return array of int
  */
 function _getArrayInt(
-    input?: Array<string | undefined>
+    input: Array<string | undefined> | undefined
 ): Promise<Array<number> | undefined> {
   return client.call('JsonTestEndpoint', 'getArrayInt', {input});
 }
@@ -75,7 +75,7 @@ export {_getArrayInt as getArrayInt};
  * Return boolean value
  */
 function _getBooleanValue(
-    input?: Record<string, User | undefined>
+    input: Record<string, User | undefined> | undefined
 ): Promise<boolean> {
   return client.call('JsonTestEndpoint', 'getBooleanValue', {input});
 }
@@ -89,7 +89,7 @@ export {_getBooleanValue as getBooleanValue};
  * Return boolean value
  */
 function _getTwoParameters(
-    input?: string,
+    input: string | undefined,
     secondInput: number
 ): Promise<boolean> {
   return client.call('JsonTestEndpoint', 'getTwoParameters', {input, secondInput});
@@ -110,22 +110,22 @@ function _getUserById(
 export {_getUserById as getUserById};
 
 function _inputBeanTypeDependency(
-    input?: Version
+    input: Version | undefined
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'inputBeanTypeDependency', {input});
 }
 export {_inputBeanTypeDependency as inputBeanTypeDependency};
 
 function _inputBeanTypeLocal(
-    input?: Status
+    input: Status | undefined
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'inputBeanTypeLocal', {input});
 }
 export {_inputBeanTypeLocal as inputBeanTypeLocal};
 
 function _optionalParameter(
-    parameter?: Array<string | undefined>,
-    requiredParameter?: string
+    parameter: Array<string | undefined> | undefined,
+    requiredParameter: string | undefined
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'optionalParameter', {parameter, requiredParameter});
 }
@@ -150,7 +150,7 @@ export {_reservedWordInParameter as reservedWordInParameter};
  *
  */
 function _updateUser(
-    user?: User
+    user: User | undefined
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'updateUser', {user});
 }

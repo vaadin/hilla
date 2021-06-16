@@ -10,21 +10,21 @@ import SameClassNameModel from './com/vaadin/flow/server/connect/generator/endpo
 import SubpackageSameClassNameModel from './com/vaadin/flow/server/connect/generator/endpoints/sameclassname/subpackage/SameClassNameModel';
 
 function _getMyClass(
-    sameClassNameModel?: Array<SubpackageSameClassNameModel | undefined>
+    sameClassNameModel: Array<SubpackageSameClassNameModel | undefined> | undefined
 ): Promise<SameClassNameModel | undefined> {
   return client.call('SameClassNameEndpoint', 'getMyClass', {sameClassNameModel});
 }
 export {_getMyClass as getMyClass};
 
 function _getSubpackageModelList(
-    sameClassNameModel?: Record<string, SubpackageSameClassNameModel | undefined>
+    sameClassNameModel: Record<string, SubpackageSameClassNameModel | undefined> | undefined
 ): Promise<Array<SubpackageSameClassNameModel | undefined> | undefined> {
   return client.call('SameClassNameEndpoint', 'getSubpackageModelList', {sameClassNameModel});
 }
 export {_getSubpackageModelList as getSubpackageModelList};
 
 function _getSubpackageModelMap(
-    sameClassNameModel?: Record<string, SameClassNameModel | undefined>
+    sameClassNameModel: Record<string, SameClassNameModel | undefined> | undefined
 ): Promise<Record<string, SubpackageSameClassNameModel | undefined> | undefined> {
   return client.call('SameClassNameEndpoint', 'getSubpackageModelMap', {sameClassNameModel});
 }
@@ -36,7 +36,7 @@ function _getSubpackageModel(): Promise<SubpackageSameClassNameModel | undefined
 export {_getSubpackageModel as getSubpackageModel};
 
 function _setSubpackageModel(
-    model?: SubpackageSameClassNameModel
+    model: SubpackageSameClassNameModel | undefined
 ): Promise<void> {
   return client.call('SameClassNameEndpoint', 'setSubpackageModel', {model});
 }

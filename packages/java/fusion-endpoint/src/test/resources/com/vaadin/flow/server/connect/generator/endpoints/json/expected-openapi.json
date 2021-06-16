@@ -50,11 +50,13 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "input" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
                     "type" : "number",
-                    "description" : "input parameter"
+                    "description" : "input parameter",
+                    "nullable" : true
                   }
                 }
               }
@@ -150,11 +152,13 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "input" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
                     "type" : "array",
                     "description" : "input string array",
+                    "nullable" : true,
                     "items" : {
                       "type" : "string",
                       "nullable" : true
@@ -196,6 +200,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "input" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
@@ -206,7 +211,8 @@
                         "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
                       } ]
                     },
-                    "description" : "input map"
+                    "description" : "input map",
+                    "nullable" : true
                   }
                 }
               }
@@ -240,12 +246,13 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "required" : [ "secondInput" ],
+                "required" : [ "input", "secondInput" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
                     "type" : "string",
-                    "description" : "first input description"
+                    "description" : "first input description",
+                    "nullable" : true
                   },
                   "secondInput" : {
                     "type" : "number",
@@ -324,9 +331,11 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "input" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
+                    "nullable" : true,
                     "allOf" : [ {
                       "$ref" : "#/components/schemas/com.fasterxml.jackson.core.Version"
                     } ]
@@ -354,9 +363,11 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "input" ],
                 "type" : "object",
                 "properties" : {
                   "input" : {
+                    "nullable" : true,
                     "allOf" : [ {
                       "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.Status"
                     } ]
@@ -384,17 +395,20 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "parameter", "requiredParameter" ],
                 "type" : "object",
                 "properties" : {
                   "parameter" : {
                     "type" : "array",
+                    "nullable" : true,
                     "items" : {
                       "type" : "string",
                       "nullable" : true
                     }
                   },
                   "requiredParameter" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "nullable" : true
                   }
                 }
               }
@@ -474,10 +488,12 @@
           "content" : {
             "application/json" : {
               "schema" : {
+                "required" : [ "user" ],
                 "type" : "object",
                 "properties" : {
                   "user" : {
                     "description" : "User to be updated",
+                    "nullable" : true,
                     "allOf" : [ {
                       "$ref" : "#/components/schemas/com.vaadin.flow.server.connect.generator.endpoints.json.JsonTestEndpoint.User"
                     } ]

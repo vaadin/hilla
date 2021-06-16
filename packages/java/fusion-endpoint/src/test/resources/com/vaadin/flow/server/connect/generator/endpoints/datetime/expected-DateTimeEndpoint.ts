@@ -8,49 +8,49 @@
 import client from './connect-client.default';
 
 function _echoDate(
-    date?: string
+    date: string | undefined
 ): Promise<string | undefined> {
   return client.call('DateTimeEndpoint', 'echoDate', {date});
 }
 export {_echoDate as echoDate};
 
 function _echoInstant(
-    instant?: string
+    instant: string | undefined
 ): Promise<string | undefined> {
   return client.call('DateTimeEndpoint', 'echoInstant', {instant});
 }
 export {_echoInstant as echoInstant};
 
 function _echoListLocalDateTime(
-    localDateTimeList?: Array<string | undefined>
+    localDateTimeList: Array<string | undefined> | undefined
 ): Promise<Array<string | undefined> | undefined> {
   return client.call('DateTimeEndpoint', 'echoListLocalDateTime', {localDateTimeList});
 }
 export {_echoListLocalDateTime as echoListLocalDateTime};
 
 function _echoLocalDate(
-    localDate?: string
+    localDate: string | undefined
 ): Promise<string | undefined> {
   return client.call('DateTimeEndpoint', 'echoLocalDate', {localDate});
 }
 export {_echoLocalDate as echoLocalDate};
 
 function _echoLocalDateTime(
-    localDateTime?: string
+    localDateTime: string | undefined
 ): Promise<string | undefined> {
   return client.call('DateTimeEndpoint', 'echoLocalDateTime', {localDateTime});
 }
 export {_echoLocalDateTime as echoLocalDateTime};
 
 function _echoLocalTime(
-    localTime?: string
+    localTime: string | undefined
 ): Promise<string | undefined> {
   return client.call('DateTimeEndpoint', 'echoLocalTime', {localTime});
 }
 export {_echoLocalTime as echoLocalTime};
 
 function _echoMapInstant(
-    mapInstant?: Record<string, string | undefined>
+    mapInstant: Record<string, string | undefined> | undefined
 ): Promise<Record<string, string | undefined> | undefined> {
   return client.call('DateTimeEndpoint', 'echoMapInstant', {mapInstant});
 }
