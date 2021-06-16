@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.fusionform;
+package com.vaadin.flow.spring.fusionsecurity.fusionform;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

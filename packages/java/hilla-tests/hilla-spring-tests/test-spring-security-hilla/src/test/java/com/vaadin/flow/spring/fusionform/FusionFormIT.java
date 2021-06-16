@@ -5,6 +5,7 @@ import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,6 +30,13 @@ public class FusionFormIT extends ChromeBrowserTest {
         waitUntil(driver -> $("vaadin-elements-view").exists());
     }
 
+    @After
+    public void tearDown() {
+        if (getDriver() != null) {
+            checkLogsForErrors();
+        }
+    }
+
     @Test
     public void save_empty_values_for_required_fields_no_runtime_errors() {
         ButtonElement saveButton = $(ButtonElement.class).id("save");
@@ -36,7 +44,6 @@ public class FusionFormIT extends ChromeBrowserTest {
         NotificationElement notification = $(NotificationElement.class).id("notification");
         Assert.assertNotNull(notification);
         waitUntil(driver -> notification.isOpen());
-        System.out.println(notification.getText());
         Assert.assertTrue(notification.getText().contains("must not be empty"));
         Assert.assertFalse(notification.getText().contains("Expected string but received a undefined"));
     }

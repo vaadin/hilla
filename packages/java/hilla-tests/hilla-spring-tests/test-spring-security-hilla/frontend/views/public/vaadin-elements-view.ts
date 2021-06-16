@@ -28,7 +28,7 @@ import '@vaadin/vaadin-notification';
 import { field, Binder } from '@vaadin/form';
 
 import { View } from '../view';
-import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionform/ElementsModel';
+import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/fusionform/ElementsModel';
 import { ElementsEndpoint } from 'Frontend/generated/ElementsEndpoint';
 
 @customElement('vaadin-elements-view')
