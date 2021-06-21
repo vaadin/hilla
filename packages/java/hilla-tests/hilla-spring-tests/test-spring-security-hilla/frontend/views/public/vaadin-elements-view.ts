@@ -1,5 +1,5 @@
 import { LitElement, html} from 'lit';
-import { customElement, query } from 'lit-element';
+import { customElement, query, state } from 'lit-element';
 import {until} from 'lit-html/directives/until.js';
 import {repeat} from 'lit-html/directives/repeat.js';
 
@@ -38,6 +38,9 @@ export class VaadinElementsView extends View {
   private options = ElementsEndpoint.getOptions();
   @query('vaadin-notification') private notification: any;
 
+  @state()
+  private loading:boolean = false;
+
   firstUpdated(arg: any) {
     super.firstUpdated(arg);
     this.binder.read(ElementsModel.createEmptyValue());
@@ -45,9 +48,10 @@ export class VaadinElementsView extends View {
 
   render() {
     return html`
-      <vaadin-button @click="${() => this.submit()}" id="save">save</vaadin-button>
+      <vaadin-button @click="${() => this.submit()}" id="save" ?disabled="${this.loading}">save</vaadin-button>
       <vaadin-button @click="${() => this.binder.clear()}">clear</vaadin-button>
       <vaadin-button @click="${() => this.binder.reset()}">reset</vaadin-button>
+      <vaadin-button @click="${() => this.loadDataFromEndpoint()}" id="load-from-endpoint">Load Data From Endpoint</vaadin-button>
       <vaadin-form-layout @click="${() => this.notification.close()}">
         <vaadin-checkbox ...="${field(this.binder.model.checkbox)}">checkbox</vaadin-checkbox>
         <vaadin-radio-button ...="${field(this.binder.model.radioButton)}">radio-button</vaadin-radio-button>
@@ -108,4 +112,10 @@ export class VaadinElementsView extends View {
     this.notification.open();
   }
 
+  async loadDataFromEndpoint() {
+    this.loading = true;
+    const data = await ElementsEndpoint.getElements();
+    this.binder.read(data!);
+    this.loading = false;
+  }
 }

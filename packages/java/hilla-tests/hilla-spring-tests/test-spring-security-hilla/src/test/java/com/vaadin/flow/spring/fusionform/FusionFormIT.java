@@ -33,7 +33,10 @@ public class FusionFormIT extends ChromeBrowserTest {
     @After
     public void tearDown() {
         if (getDriver() != null) {
-            checkLogsForErrors();
+            checkLogsForErrors(msg -> {
+                // form validation errors
+                return msg.contains("the server responded with a status of 400 ()");
+            });
         }
     }
 
@@ -46,6 +49,20 @@ public class FusionFormIT extends ChromeBrowserTest {
         waitUntil(driver -> notification.isOpen());
         Assert.assertTrue(notification.getText().contains("must not be empty"));
         Assert.assertFalse(notification.getText().contains("Expected string but received a undefined"));
+    }
+
+    @Test
+    public void save_backend_loaded_empty_values_for_required_fields_no_runtime_errors() {
+        ButtonElement loadDataButton = $(ButtonElement.class).id("load-from-endpoint");
+        loadDataButton.click();
+        ButtonElement saveButton = $(ButtonElement.class).id("save");
+        waitUntil(driver -> saveButton.isEnabled());
+        saveButton.click();
+        NotificationElement notification = $(NotificationElement.class).id("notification");
+        Assert.assertNotNull(notification);
+        waitUntil(driver -> notification.isOpen());
+        Assert.assertTrue(notification.getText().contains("must not be empty"));
+        Assert.assertFalse(notification.getText().contains("Expected string but received null"));
     }
 
     @Test
