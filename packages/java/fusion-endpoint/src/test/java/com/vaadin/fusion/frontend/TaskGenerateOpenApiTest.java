@@ -37,7 +37,7 @@ import com.vaadin.fusion.generator.OpenApiSpecGenerator;
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
  * content of the generator, they are tested in other package
- * {@link com.vaadin.flow.server.connect.generator}
+ * {@link com.vaadin.fusion.generator}
  */
 public class TaskGenerateOpenApiTest {
 

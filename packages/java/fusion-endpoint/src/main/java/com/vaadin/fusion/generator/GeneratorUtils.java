@@ -17,7 +17,11 @@ package com.vaadin.fusion.generator;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -115,5 +119,11 @@ final class GeneratorUtils {
                             .equals(importDeclaration.getNameAsString())); // NOSONAR
         }
         return false;
+    }
+
+    static <P1, P2, R> Stream<R> zip(List<P1> first, List<P2> second,
+            BiFunction<P1, P2, R> zipper) {
+        return IntStream.range(0, Math.min(first.size(), second.size()))
+                .mapToObj(i -> zipper.apply(first.get(i), second.get(i)));
     }
 }

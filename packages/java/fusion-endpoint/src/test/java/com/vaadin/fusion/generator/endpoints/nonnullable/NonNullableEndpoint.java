@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import com.vaadin.fusion.Endpoint;
 
 @Endpoint
@@ -38,6 +40,12 @@ public class NonNullableEndpoint {
 
     @Nonnull
     public Map<String, NonNullableModel> echoMap(boolean shouldBeNotNull) {
+        return Collections.emptyMap();
+    }
+
+    @Nonnull
+    public Map<String, @NonNull NonNullableModel> echoNonNullableMap(
+            @Nonnull List<@NonNull String> nonNullableList) {
         return Collections.emptyMap();
     }
 
@@ -61,7 +69,7 @@ public class NonNullableEndpoint {
         int shouldBeNotNullByDefault;
         int first, second, third;
         Optional<Integer> nullableInteger;
-        List<Map<String, String>> listOfMapNullable;
+        List<@NonNull Map<String, @NonNull String>> listOfMapNullable;
         List<Map<String, String>> listOfMapNullableNotNull;
     }
 

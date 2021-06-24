@@ -21,9 +21,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 
 /**
  * A checker for TypeScript null compatibility in Vaadin endpoint methods
@@ -53,13 +54,14 @@ public class ExplicitNullableTypeChecker {
      * Checks if the OpenAPI schema node should be required (not nullable) in
      * the generated Typescript code based on annotations.
      *
-     * @param node
-     *            a node to be required
+     * @param annotations
+     *            a list of annotations to check
      * @return a result of check
      */
-    public static boolean isRequired(NodeWithAnnotations<?> node) {
-        return node.getAnnotations().stream().anyMatch(annotation -> "nonnull"
-                .equalsIgnoreCase(annotation.getName().getIdentifier()));
+    public static boolean isRequired(List<AnnotationExpr> annotations) {
+        return annotations != null && annotations.stream()
+                .anyMatch(annotation -> "nonnull".equalsIgnoreCase(
+                        annotation.getName().getIdentifier()));
     }
 
     /**

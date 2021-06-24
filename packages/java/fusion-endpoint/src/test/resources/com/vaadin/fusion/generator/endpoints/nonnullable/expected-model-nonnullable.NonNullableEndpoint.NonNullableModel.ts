@@ -7,7 +7,7 @@ export default interface NonNullableModel {
   foo: string;
   integers?: Array<number>;
   integersList?: Array<number | undefined>;
-  listOfMapNullable?: Array<Record<string, string | undefined> | undefined>;
+  listOfMapNullable?: Array<Record<string, string>>;
   listOfMapNullableNotNull?: Array<Record<string, string | undefined> | undefined>;
   nullableInteger?: number;
   second: number;

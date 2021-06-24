@@ -738,8 +738,8 @@ public abstract class AbstractEndpointGenerationTest
      * Shorten the expected model file name. The format is:
      * <code>expected-model-lastPackageSegment.DeclaringClass(IfAny).ModelClass
      * .ts</code>. For example: The generated model of
-     * <code>com.vaadin.flow.server.connect.SomeModel</code> will be expected to
-     * be the same as file <code>expected-model-connect.SomeModel.ts</code>
+     * <code>com.vaadin.fusion.SomeModel</code> will be expected to be the same
+     * as file <code>expected-model-connect.SomeModel.ts</code>
      *
      * @param expectedClass
      * @return

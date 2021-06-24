@@ -26,6 +26,14 @@ function _echoNonNullModel(
 
 export {_echoNonNullModel as echoNonNullModel};
 
+function _echoNonNullableMap(
+  nonNullableList: Array<string>
+): Promise<Record<string, NonNullableModel>> {
+  return client.call('NonNullableEndpoint', 'echoNonNullableMap', {nonNullableList});
+}
+
+export {_echoNonNullableMap as echoNonNullableMap};
+
 function _getNotNullReturnType(): Promise<ReturnType | undefined> {
   return client.call('NonNullableEndpoint', 'getNotNullReturnType');
 }
@@ -57,6 +65,7 @@ export {_stringNullable as stringNullable};
 export const NonNullableEndpoint = Object.freeze({
   echoMap: _echoMap,
   echoNonNullModel: _echoNonNullModel,
+  echoNonNullableMap: _echoNonNullableMap,
   getNotNullReturnType: _getNotNullReturnType,
   getNullableString: _getNullableString,
   sendParameterType: _sendParameterType,

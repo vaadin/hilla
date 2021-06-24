@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
@@ -80,10 +81,11 @@ class SchemaGenerator {
         return schema;
     }
 
-    Schema parseTypeToSchema(Type javaType, String description) {
+    Schema toSchema(Type javaType, List<AnnotationExpr> annotations,
+            String description) {
         try {
-            Schema schema = openApiObjectGenerator
-                    .parseResolvedTypeToSchema(javaType.resolve());
+            Schema schema = openApiObjectGenerator.parseResolvedTypeToSchema(
+                    new GeneratorType(javaType), annotations);
             if (GeneratorUtils.isNotBlank(description)) {
                 schema.setDescription(description);
             }
@@ -96,23 +98,24 @@ class SchemaGenerator {
         return new ObjectSchema();
     }
 
-    Schema createSingleSchemaFromResolvedType(
-            ResolvedReferenceType resolvedType) {
-        if (resolvedType.getTypeDeclaration().isEnum()) {
-            List<String> entries = resolvedType.getTypeDeclaration().asEnum()
-                    .getEnumConstants().stream()
+    Schema createSingleSchemaFromResolvedType(GeneratorType type) {
+        ResolvedReferenceType resolvedReferenceType = type.asResolvedType()
+                .asReferenceType();
+
+        if (type.isEnum()) {
+            List<String> entries = resolvedReferenceType.getTypeDeclaration()
+                    .asEnum().getEnumConstants().stream()
                     .map(ResolvedEnumConstantDeclaration::getName)
                     .collect(Collectors.toList());
             StringSchema schema = new StringSchema();
-            schema.name(resolvedType.getQualifiedName());
+            schema.name(resolvedReferenceType.getQualifiedName());
             schema.setEnum(entries);
             return schema;
         }
         Schema schema = new ObjectSchema()
-                .name(resolvedType.getQualifiedName());
-        Map<String, Boolean> fieldsOptionalMap = getFieldsAndOptionalMap(
-                resolvedType);
-        Set<ResolvedFieldDeclaration> serializableFields = resolvedType
+                .name(resolvedReferenceType.getQualifiedName());
+        Map<String, Boolean> fieldsOptionalMap = getFieldsAndOptionalMap(type);
+        Set<ResolvedFieldDeclaration> serializableFields = resolvedReferenceType
                 .getDeclaredFields().stream()
                 .filter(resolvedFieldDeclaration -> fieldsOptionalMap
                         .containsKey(resolvedFieldDeclaration.getName()))
@@ -121,16 +124,16 @@ class SchemaGenerator {
         schema.setProperties(new TreeMap<>());
         for (ResolvedFieldDeclaration resolvedFieldDeclaration : serializableFields) {
             String name = resolvedFieldDeclaration.getName();
-            Schema type = openApiObjectGenerator
-                    .parseResolvedTypeToSchema(
-                            resolvedFieldDeclaration.getType())
+            Schema subtype = openApiObjectGenerator
+                    .parseResolvedTypeToSchema(new GeneratorType(
+                            resolvedFieldDeclaration.getType()))
                     // Field is already checked to be optional, so we don't need
                     // it to be nullable
                     .nullable(null);
             if (!fieldsOptionalMap.get(name)) {
                 schema.addRequiredItem(name);
             }
-            schema.addProperties(name, type);
+            schema.addProperties(name, subtype);
         }
         return schema;
     }
@@ -140,20 +143,23 @@ class SchemaGenerator {
      * annotation of a field using JavaParser API. We need this method to
      * reflect the type and get those information from the reflected object.
      *
-     * @param resolvedType
+     * @param type
      *            type of the class to get fields information
      * @return set of fields' name that we should generate.
      */
-    private Map<String, Boolean> getFieldsAndOptionalMap(
-            ResolvedReferenceType resolvedType) {
-        if (!resolvedType.getTypeDeclaration().isClass()
-                || resolvedType.getTypeDeclaration().isAnonymousClass()) {
+    private Map<String, Boolean> getFieldsAndOptionalMap(GeneratorType type) {
+        ResolvedReferenceType resolvedReferenceType = type.asResolvedType()
+                .asReferenceType();
+
+        if (!resolvedReferenceType.getTypeDeclaration().isClass()
+                || resolvedReferenceType.getTypeDeclaration()
+                        .isAnonymousClass()) {
             return Collections.emptyMap();
         }
         HashMap<String, Boolean> validFields = new HashMap<>();
         try {
             Class<?> aClass = openApiObjectGenerator
-                    .getClassFromReflection(resolvedType);
+                    .getClassFromReflection(type);
             Arrays.stream(aClass.getDeclaredFields()).filter(field -> {
                 int modifiers = field.getModifiers();
                 return !Modifier.isStatic(modifiers)
@@ -166,8 +172,8 @@ class SchemaGenerator {
                     "Can't get list of fields from class '%s'."
                             + "Please make sure that class '%s' is in your project's compile classpath. "
                             + "As the result, the generated TypeScript file will be empty.",
-                    resolvedType.getQualifiedName(),
-                    resolvedType.getQualifiedName());
+                    resolvedReferenceType.getQualifiedName(),
+                    resolvedReferenceType.getQualifiedName());
             getLogger().info(message);
             getLogger().debug(message, e);
         }
@@ -185,9 +191,8 @@ class SchemaGenerator {
             Optional<String> fieldDescription = field.getJavadoc()
                     .map(javadoc -> javadoc.getDescription().toText());
             field.getVariables().forEach(variableDeclarator -> {
-                Schema propertySchema = parseTypeToSchema(
-                        variableDeclarator.getType(),
-                        fieldDescription.orElse(""));
+                Schema propertySchema = toSchema(variableDeclarator.getType(),
+                        field.getAnnotations(), fieldDescription.orElse(""));
                 if (GeneratorUtils.isNotBlank(propertySchema.get$ref())) {
                     // Schema extensions, e. g., `x-annotations` we use, are
                     // not supported for the Reference Object Schema.
@@ -196,12 +201,6 @@ class SchemaGenerator {
                     wrapperSchema.name(propertySchema.getName());
                     wrapperSchema.addAllOfItem(propertySchema);
                     propertySchema = wrapperSchema;
-                }
-                if (GeneratorUtils.isTrue(propertySchema.getNullable())
-                        && isRequired(field)) {
-                    // Temporarily set nullable to indicate this property is
-                    // not required
-                    propertySchema.setNullable(null);
                 }
                 addFieldAnnotationsToSchema(field, propertySchema);
                 properties.put(variableDeclarator.getNameAsString(),
