@@ -22,6 +22,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -139,6 +140,7 @@ public class VaadinConnectControllerConfiguration {
      * @return the default bean
      */
     @Bean
+    @ConditionalOnMissingBean
     public AccessAnnotationChecker accessAnnotationChecker() {
         return new AccessAnnotationChecker();
     }
