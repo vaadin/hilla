@@ -1,2 +1,2 @@
-com.vaadin.flow.server.startup.fusion.ConnectEndpointsValidator
+com.vaadin.fusion.startup.ConnectEndpointsValidator
 
