@@ -9,6 +9,7 @@ import client from './connect-client.default';
 import NonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/NonNullableModel';
 import ParameterType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ParameterType';
 import ReturnType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ReturnType';
+import VaadinNonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/VaadinNonNullableModel';
 
 function _echoMap(
   shouldBeNotNull: boolean
@@ -34,19 +35,33 @@ function _echoNonNullableMap(
 
 export {_echoNonNullableMap as echoNonNullableMap};
 
+function _echoVaadinNonNullableMap (
+  nonNullableParameter: Array<string>
+): Promise<Record<string, VaadinNonNullableModel>> {
+  return client.call ('NonNullableEndpoint', 'echoVaadinNonNullableMap', {nonNullableParameter});
+}
+
+export {_echoVaadinNonNullableMap as echoVaadinNonNullableMap};
+
+function _getNonNullableIndex(): Promise<number> {
+  return client.call('NonNullableEndpoint', 'getNonNullableIndex');
+}
+
+export {_getNonNullableIndex as getNonNullableIndex};
+
+function _getNonNullableString (
+  input: string | undefined
+): Promise<string> {
+  return client.call ('NonNullableEndpoint', 'getNonNullableString', {input});
+}
+
+export {_getNonNullableString as getNonNullableString};
+
 function _getNotNullReturnType(): Promise<ReturnType | undefined> {
   return client.call('NonNullableEndpoint', 'getNotNullReturnType');
 }
 
 export {_getNotNullReturnType as getNotNullReturnType};
-
-function _getNullableString(
-  input: string | undefined
-): Promise<string> {
-  return client.call('NonNullableEndpoint', 'getNullableString', {input});
-}
-
-export {_getNullableString as getNullableString};
 
 function _sendParameterType(
   parameterType: ParameterType | undefined
@@ -66,8 +81,10 @@ export const NonNullableEndpoint = Object.freeze({
   echoMap: _echoMap,
   echoNonNullModel: _echoNonNullModel,
   echoNonNullableMap: _echoNonNullableMap,
+  echoVaadinNonNullableMap: _echoVaadinNonNullableMap,
+  getNonNullableIndex: _getNonNullableIndex,
+  getNonNullableString: _getNonNullableString,
   getNotNullReturnType: _getNotNullReturnType,
-  getNullableString: _getNullableString,
   sendParameterType: _sendParameterType,
   stringNullable: _stringNullable,
 });

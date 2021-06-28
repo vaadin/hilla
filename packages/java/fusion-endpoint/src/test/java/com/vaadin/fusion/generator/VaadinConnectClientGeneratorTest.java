@@ -28,6 +28,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.vaadin.fusion.utils.TestUtils;
+
 public class VaadinConnectClientGeneratorTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();

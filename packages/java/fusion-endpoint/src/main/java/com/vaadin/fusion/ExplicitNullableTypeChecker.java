@@ -16,6 +16,7 @@
 
 package com.vaadin.fusion;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -40,22 +41,33 @@ public class ExplicitNullableTypeChecker {
      * @return a result of check
      */
     public static boolean isRequired(AnnotatedElement element) {
-        boolean isPrimitive = (element instanceof Field
+        if ((element instanceof Field
                 && ((Field) element).getType().isPrimitive())
                 || (element instanceof Parameter
-                        && ((Parameter) element).getType().isPrimitive());
+                        && ((Parameter) element).getType().isPrimitive())) {
+            return true;
+        }
 
-        return isPrimitive || Stream.of(element.getAnnotations())
-                .anyMatch(annotation -> "nonnull".equalsIgnoreCase(
-                        annotation.annotationType().getSimpleName()));
+        Stream<Annotation> annotations = Stream.of(element.getAnnotations());
+
+        if (element instanceof Field) {
+            annotations = Stream.concat(annotations, Stream
+                    .of(((Field) element).getAnnotatedType().getAnnotations()));
+        } else if (element instanceof Parameter) {
+            annotations = Stream.concat(annotations, Stream.of(
+                    ((Parameter) element).getAnnotatedType().getAnnotations()));
+        }
+
+        return annotations.anyMatch(annotation -> "nonnull"
+                .equalsIgnoreCase(annotation.annotationType().getSimpleName()));
     }
 
     /**
-     * Checks if the OpenAPI schema node should be required (not nullable) in
-     * the generated Typescript code based on annotations.
+     * Checks if the parsed node should be required (not nullable) in the
+     * generated Typescript code based on the list of annotations.
      *
      * @param annotations
-     *            a list of annotations to check
+     *            a list of node annotations to check
      * @return a result of check
      */
     public static boolean isRequired(List<AnnotationExpr> annotations) {

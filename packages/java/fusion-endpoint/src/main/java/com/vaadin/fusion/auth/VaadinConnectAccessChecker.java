@@ -16,12 +16,11 @@
 
 package com.vaadin.fusion.auth;
 
-import java.lang.reflect.Method;
-
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
@@ -81,7 +80,7 @@ public class VaadinConnectAccessChecker {
 
     /**
      * Creates a new instance.
-     * 
+     *
      * @param csrfChecker
      *            the csrf checker to use
      * @param accessAnnotationChecker
@@ -139,7 +138,7 @@ public class VaadinConnectAccessChecker {
 
     /**
      * Returns the instance used for checking access based on annotations.
-     * 
+     *
      * @return the instance used for checking access based on annotations
      */
     public AccessAnnotationChecker getAccessAnnotationChecker() {

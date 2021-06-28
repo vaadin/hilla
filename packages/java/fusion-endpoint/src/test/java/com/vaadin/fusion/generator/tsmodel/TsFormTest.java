@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vaadin.fusion.generator.TestUtils;
-import com.vaadin.fusion.generator.endpoints.AbstractEndpointGeneratorBaseTest;
 import org.junit.Test;
+
+import com.vaadin.fusion.generator.endpoints.AbstractEndpointGeneratorBaseTest;
+import com.vaadin.fusion.utils.TestUtils;
 
 import elemental.json.JsonObject;
 import static com.vaadin.fusion.generator.OpenApiObjectGenerator.CONSTRAINT_ANNOTATIONS;
-import static com.vaadin.fusion.generator.TestUtils.equalsIgnoreWhiteSpaces;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

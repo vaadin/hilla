@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import com.vaadin.fusion.generator.TestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -35,11 +34,11 @@ import org.junit.rules.TemporaryFolder;
 
 import com.vaadin.fusion.generator.VaadinConnectClientGenerator;
 import com.vaadin.fusion.generator.VaadinConnectTsGenerator;
+import com.vaadin.fusion.utils.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static com.vaadin.fusion.generator.TestUtils.equalsIgnoreWhiteSpaces;
 
 public class OpenApiSpecBasedTests {
     @Rule

@@ -28,8 +28,12 @@ import com.vaadin.fusion.Endpoint;
 @Endpoint
 public class NonNullableEndpoint {
 
+    public int getNonNullableIndex() {
+        return 0;
+    }
+
     @Nonnull
-    public String getNullableString(String input) {
+    public String getNonNullableString(String input) {
         return "";
     }
 
@@ -46,6 +50,12 @@ public class NonNullableEndpoint {
     @Nonnull
     public Map<String, @NonNull NonNullableModel> echoNonNullableMap(
             @Nonnull List<@NonNull String> nonNullableList) {
+        return Collections.emptyMap();
+    }
+
+    @com.vaadin.fusion.Nonnull
+    public Map<String, @com.vaadin.fusion.Nonnull VaadinNonNullableModel> echoVaadinNonNullableMap(
+            @com.vaadin.fusion.Nonnull List<@com.vaadin.fusion.Nonnull String> nonNullableParameter) {
         return Collections.emptyMap();
     }
 
@@ -73,8 +83,17 @@ public class NonNullableEndpoint {
         List<Map<String, String>> listOfMapNullableNotNull;
     }
 
+    public static class VaadinNonNullableModel {
+        @com.vaadin.fusion.Nonnull
+        String foo;
+        @com.vaadin.fusion.Nonnull
+        List<@com.vaadin.fusion.Nonnull Integer> nonNullableList;
+        @com.vaadin.fusion.Nonnull
+        Map<String, @com.vaadin.fusion.Nonnull String> nonNullableMap;
+    }
+
     public static class ReturnType {
-        @Nonnull
+        @NonNull
         String foo;
     }
 

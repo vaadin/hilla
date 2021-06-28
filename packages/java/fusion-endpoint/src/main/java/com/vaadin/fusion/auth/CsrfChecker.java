@@ -15,16 +15,15 @@
  */
 package com.vaadin.fusion.auth;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import com.vaadin.flow.server.VaadinService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Handles checking of a CSRF token in endpoint requests.
@@ -44,7 +43,7 @@ public class CsrfChecker {
      * <p>
      * Note! If CSRF protection is disabled, this method will always return
      * {@code true}.
-     * 
+     *
      * @param request
      *            the request to validate
      * @return {@code true} if the CSRF token is ok or checking is disabled or

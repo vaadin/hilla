@@ -18,7 +18,6 @@ package com.vaadin.fusion.generator.endpoints.json;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.Version;
@@ -28,6 +27,7 @@ import com.vaadin.fusion.generator.OpenApiSpecGenerator;
 import com.vaadin.fusion.generator.VaadinConnectClientGenerator;
 import com.vaadin.fusion.generator.VaadinConnectTsGenerator;
 import com.vaadin.fusion.generator.endpoints.AbstractEndpointGenerationTest;
+import com.vaadin.fusion.utils.TestUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -67,10 +67,7 @@ public class JsonTestEndpointGeneratedTest
                 customConnectClientPath);
 
         new OpenApiSpecGenerator(new Properties()).generateOpenApiSpec(
-                Collections
-                        .singletonList(java.nio.file.Paths.get("src/test/java",
-                                getClass().getPackage().getName().replace('.',
-                                        File.separatorChar))),
+                TestUtils.getClassFilePath(getClass().getPackage()),
                 openApiJsonOutput);
 
         VaadinConnectTsGenerator.launch(openApiJsonOutput.toFile(),

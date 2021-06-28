@@ -14,13 +14,17 @@
  * the License.
  */
 
-package com.vaadin.fusion.generator;
+package com.vaadin.fusion.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -28,6 +32,12 @@ import org.junit.Assert;
 
 public final class TestUtils {
     private TestUtils() {
+    }
+
+    public static List<Path> getClassFilePath(Package pack) {
+        return Collections
+                .singletonList(java.nio.file.Paths.get("src/test/java",
+                        pack.getName().replace('.', File.separatorChar)));
     }
 
     public static Properties readProperties(String filePath) {

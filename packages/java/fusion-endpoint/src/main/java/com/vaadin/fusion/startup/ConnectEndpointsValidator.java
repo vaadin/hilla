@@ -18,15 +18,14 @@ package com.vaadin.fusion.startup;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
-
 import java.io.Serializable;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.fusion.Endpoint;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
+import com.vaadin.fusion.Endpoint;
 
 /**
  * Validation class that is run during servlet container initialization which

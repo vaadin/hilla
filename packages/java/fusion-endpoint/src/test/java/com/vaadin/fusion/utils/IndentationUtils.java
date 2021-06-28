@@ -1,4 +1,4 @@
-package com.vaadin.fusion.generator;
+package com.vaadin.fusion.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

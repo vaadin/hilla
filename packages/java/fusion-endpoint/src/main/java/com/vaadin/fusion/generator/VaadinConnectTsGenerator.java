@@ -36,7 +36,6 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
-import com.vaadin.fusion.EndpointNameChecker;
 import io.swagger.codegen.v3.ClientOptInput;
 import io.swagger.codegen.v3.CodegenModel;
 import io.swagger.codegen.v3.CodegenOperation;
@@ -71,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.fusion.EndpointNameChecker;
 
 /**
  * Vaadin fusion JavaScript generator implementation for swagger-codegen. Some

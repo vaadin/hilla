@@ -15,13 +15,10 @@
  */
 package com.vaadin.fusion;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.PathContainer;
@@ -31,6 +28,8 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
 import org.springframework.web.util.pattern.PathPatternParser;
+
+import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
 
 /**
  * A util class related to {@link Endpoint}.
@@ -91,7 +90,7 @@ public class EndpointUtil {
 
     /**
      * Checks if the given request goes to an anonymous (public) endpoint.
-     * 
+     *
      * @param request
      *            the HTTP request to check
      * @return <code>true</code> if the request goes to an anonymous endpoint,

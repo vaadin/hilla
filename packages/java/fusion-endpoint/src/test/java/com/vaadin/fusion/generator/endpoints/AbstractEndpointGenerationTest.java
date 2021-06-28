@@ -52,10 +52,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.fusion.generator.TestUtils;
-import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.GrandParentModel;
-import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.Model;
-import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.ParentModel;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -85,9 +81,12 @@ import com.vaadin.fusion.EndpointExposed;
 import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
 import com.vaadin.fusion.generator.OpenApiObjectGenerator;
+import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.GrandParentModel;
+import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.Model;
+import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.ParentModel;
+import com.vaadin.fusion.utils.TestUtils;
 
 import static com.vaadin.fusion.ExplicitNullableTypeChecker.isRequired;
-import static com.vaadin.fusion.generator.TestUtils.equalsIgnoreWhiteSpaces;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

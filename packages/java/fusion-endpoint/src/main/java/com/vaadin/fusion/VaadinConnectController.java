@@ -15,6 +15,11 @@
  */
 package com.vaadin.fusion;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,12 +36,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,19 +43,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.fusion.EndpointRegistry.VaadinEndpointData;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
-import com.vaadin.fusion.exception.EndpointException;
-import com.vaadin.fusion.exception.EndpointValidationException;
-import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorData;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +60,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.fusion.EndpointRegistry.VaadinEndpointData;
+import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.exception.EndpointException;
+import com.vaadin.fusion.exception.EndpointValidationException;
+import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorData;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.

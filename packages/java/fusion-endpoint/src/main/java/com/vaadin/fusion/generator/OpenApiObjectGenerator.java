@@ -63,9 +63,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.Pair;
 import com.github.javaparser.utils.SourceRoot;
 import com.github.javaparser.utils.SourceRoot.Callback;
-import com.vaadin.fusion.Endpoint;
-import com.vaadin.fusion.EndpointExposed;
-import com.vaadin.fusion.EndpointNameChecker;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -93,6 +90,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.fusion.Endpoint;
+import com.vaadin.fusion.EndpointExposed;
+import com.vaadin.fusion.EndpointNameChecker;
 
 /**
  * Java parser class which scans for all {@link Endpoint} classes and produces

@@ -8,11 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import com.vaadin.fusion.generator.TestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -25,6 +23,7 @@ import com.vaadin.fusion.generator.OpenApiConfiguration;
 import com.vaadin.fusion.generator.OpenApiObjectGenerator;
 import com.vaadin.fusion.generator.OpenApiSpecGenerator;
 import com.vaadin.fusion.generator.VaadinConnectTsGenerator;
+import com.vaadin.fusion.utils.TestUtils;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -80,11 +79,7 @@ public abstract class AbstractEndpointGeneratorBaseTest {
                 : TestUtils
                         .readProperties(customApplicationProperties.getPath());
         new OpenApiSpecGenerator(applicationProperties).generateOpenApiSpec(
-                Collections
-                        .singletonList(java.nio.file.Paths.get("src/test/java",
-                                testPackage.getName().replace('.',
-                                        File.separatorChar))),
-                openApiJsonOutput);
+                TestUtils.getClassFilePath(testPackage), openApiJsonOutput);
     }
 
     protected List<File> getTsFiles(File directory) {
