@@ -36,8 +36,8 @@ function _echoNonNullableMap(
 export {_echoNonNullableMap as echoNonNullableMap};
 
 function _echoVaadinNonNullableMap (
-  nonNullableParameter: Array<string>
-): Promise<Record<string, VaadinNonNullableModel>> {
+  nonNullableParameter: ReadonlyArray<string>
+): Promise<Readonly<Record<string, VaadinNonNullableModel>>> {
   return client.call ('NonNullableEndpoint', 'echoVaadinNonNullableMap', {nonNullableParameter});
 }
 
