@@ -60,7 +60,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('email', StringModel, [true, new Email({message:"foo"})]);
   }
 
-  get entityMap(): ObjectModel<{ [key: string]: ModelType<MyBazModel>; }> {
+  get entityMap(): ObjectModel<Readonly<Record<string, ModelType<MyBazModel>>>> {
     return this[_getPropertyModel]('entityMap', ObjectModel, [true]);
   }
 
@@ -184,7 +184,7 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('stringArray', ArrayModel, [true, StringModel, [true]]);
   }
 
-  get stringMap(): ObjectModel<{ [key: string]: string; }> {
+  get stringMap(): ObjectModel<Readonly<Record<string, string>>> {
     return this[_getPropertyModel]('stringMap', ObjectModel, [true]);
   }
 }

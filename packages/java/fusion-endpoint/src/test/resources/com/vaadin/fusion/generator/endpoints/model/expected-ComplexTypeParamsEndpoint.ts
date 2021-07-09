@@ -10,8 +10,8 @@ import Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint
 import Group from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Group';
 
 function _getComplexTypeParams(
-    accounts: Array<Account | undefined> | undefined,
-    groups: Record<string, Group | undefined> | undefined
+    accounts: ReadonlyArray<Account | undefined> | undefined,
+    groups: Readonly<Record<string, Group | undefined>> | undefined
 ): Promise<void> {
   return client.call('ComplexTypeParamsEndpoint', 'getComplexTypeParams', {accounts, groups});
 }

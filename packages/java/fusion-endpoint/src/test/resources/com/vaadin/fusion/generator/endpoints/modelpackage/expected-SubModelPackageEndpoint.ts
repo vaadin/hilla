@@ -9,7 +9,7 @@ import client from './connect-client.default';
 import Account from './com/vaadin/fusion/generator/endpoints/modelpackage/subpackage/Account';
 
 function _getSubAccountPackage(
-    name: string | undefined
+  name: string | undefined
 ): Promise<Account | undefined> {
   return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name});
 }

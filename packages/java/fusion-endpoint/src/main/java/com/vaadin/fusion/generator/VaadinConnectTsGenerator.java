@@ -100,9 +100,9 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
     private static final Pattern FULLY_QUALIFIED_NAME_PATTERN = Pattern.compile(
             "(" + JAVA_NAME_PATTERN + "(\\." + JAVA_NAME_PATTERN + ")*)");
     private static final Pattern ARRAY_TYPE_NAME_PATTERN = Pattern
-            .compile("Array<(.*)>");
+            .compile("ReadonlyArray<(.*)>");
     private static final Pattern MAPPED_TYPE_NAME_PATTERN = Pattern
-            .compile("Record<string, (.*)>");
+            .compile("Readonly<Record<string, (.*)>>");
     private static final Pattern PRIMITIVE_TYPE_NAME_PATTERN = Pattern
             .compile("^(string|number|boolean)");
     private static final String OPERATION = "operation";
@@ -562,8 +562,8 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
         }
         matcher = MAPPED_TYPE_NAME_PATTERN.matcher(name);
         if (matcher.find()) {
-            return "Object" + MODEL + "<{ [key: string]: "
-                    + getModelVariableType(matcher.group(1)) + "; }>";
+            return "Object" + MODEL + "<Readonly<Record<string, "
+                    + getModelVariableType(matcher.group(1)) + ">>>";
         }
         return fixNameForModel(name);
     }
@@ -976,13 +976,13 @@ public class VaadinConnectTsGenerator extends AbstractTypeScriptClientCodegen {
         if (schema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) schema;
             Schema inner = arraySchema.getItems();
-            return String.format("Array<%s>%s", this.getTypeDeclaration(inner),
-                    optionalSuffix);
+            return String.format("ReadonlyArray<%s>%s",
+                    this.getTypeDeclaration(inner), optionalSuffix);
         } else if (GeneratorUtils.isNotBlank(schema.get$ref())) {
             return getSimpleRef(schema.get$ref()) + optionalSuffix;
         } else if (schema.getAdditionalProperties() != null) {
             Schema inner = (Schema) schema.getAdditionalProperties();
-            return String.format("Record<string, %s>%s",
+            return String.format("Readonly<Record<string, %s>>%s",
                     getTypeDeclaration(inner), optionalSuffix);
         } else if (schema instanceof ComposedSchema) {
             return getTypeDeclarationFromComposedSchema((ComposedSchema) schema,

@@ -11,7 +11,7 @@ import Group from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/G
 import ModelFromDifferentPackage from './com/vaadin/fusion/generator/endpoints/model/subpackage/ModelFromDifferentPackage';
 
 function _getAccountByGroups(
-    groups: Array<Group | undefined> | undefined
+    groups: ReadonlyArray<Group | undefined> | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelEndpoint', 'getAccountByGroups', {groups});
 }
@@ -30,12 +30,12 @@ function _getAccountByUserName(
 }
 export {_getAccountByUserName as getAccountByUserName};
 
-function _getArrayOfAccount(): Promise<Array<Account | undefined> | undefined> {
+function _getArrayOfAccount(): Promise<ReadonlyArray<Account | undefined> | undefined> {
   return client.call('ModelEndpoint', 'getArrayOfAccount');
 }
 export {_getArrayOfAccount as getArrayOfAccount};
 
-function _getMapGroups(): Promise<Record<string, Group | undefined> | undefined> {
+function _getMapGroups(): Promise<Readonly<Record<string, Group | undefined>> | undefined> {
   return client.call('ModelEndpoint', 'getMapGroups');
 }
 export {_getMapGroups as getMapGroups};

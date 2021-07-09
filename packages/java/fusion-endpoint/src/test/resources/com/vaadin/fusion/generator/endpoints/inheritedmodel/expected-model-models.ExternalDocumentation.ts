@@ -3,7 +3,7 @@
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface ExternalDocumentation {
-  description?: string;
-  extensions?: Record<string, any | undefined>;
-  url?: string;
+  readonly description?: string;
+  readonly extensions?: Readonly<Record<string, any | undefined>>;
+  readonly url?: string;
 }

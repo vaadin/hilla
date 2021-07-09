@@ -6,15 +6,15 @@ import ModelFromDifferentPackage from '../subpackage/ModelFromDifferentPackage';
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface Account {
-  children?: Account;
+  readonly children?: Account;
   /**
    * Multiple line description should work.This is very very very very
    * very very very very long.
    */
-  groups?: Array<Group | undefined>;
-  modelFromDifferentPackage?: ModelFromDifferentPackage;
+  readonly groups?: ReadonlyArray<Group | undefined>;
+  readonly modelFromDifferentPackage?: ModelFromDifferentPackage;
   /**
    * Javadoc for username.
    */
-  username?: string;
+  readonly username?: string;
 }

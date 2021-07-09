@@ -4,10 +4,10 @@
  */
 
 export default interface Version {
-  artifactId?: string;
-  groupId?: string;
-  majorVersion: number;
-  minorVersion: number;
-  patchLevel: number;
-  snapshotInfo?: string;
+  readonly artifactId?: string;
+  readonly groupId?: string;
+  readonly majorVersion: number;
+  readonly minorVersion: number;
+  readonly patchLevel: number;
+  readonly snapshotInfo?: string;
 }

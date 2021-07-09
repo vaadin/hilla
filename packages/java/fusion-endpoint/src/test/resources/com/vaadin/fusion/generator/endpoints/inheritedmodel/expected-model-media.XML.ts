@@ -3,10 +3,10 @@
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface XML {
-  attribute?: boolean;
-  extensions?: Record<string, any | undefined>;
-  name?: string;
-  namespace?: string;
-  prefix?: string;
-  wrapped?: boolean;
+  readonly attribute?: boolean;
+  readonly extensions?: Readonly<Record<string, any | undefined>>;
+  readonly name?: string;
+  readonly namespace?: string;
+  readonly prefix?: string;
+  readonly wrapped?: boolean;
 }

@@ -13,7 +13,7 @@ import Account from './com/vaadin/fusion/generator/endpoints/modelpackage/ModelP
  *
  * Return list of user name
  */
-function _getListOfUserName(): Promise<Array<string | undefined> | undefined> {
+function _getListOfUserName(): Promise<ReadonlyArray<string | undefined> | undefined> {
   return client.call('ModelPackageEndpoint', 'getListOfUserName');
 }
 export {_getListOfUserName as getListOfUserName};

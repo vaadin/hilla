@@ -8,7 +8,7 @@
 import client from './connect-client.default';
 import Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Account';
 
-function _getAccounts(): Promise<Array<Account | undefined> | undefined> {
+function _getAccounts(): Promise<ReadonlyArray<Account | undefined> | undefined> {
   return client.call('ComplexReturnTypeEndpoint', 'getAccounts');
 }
 export {_getAccounts as getAccounts};

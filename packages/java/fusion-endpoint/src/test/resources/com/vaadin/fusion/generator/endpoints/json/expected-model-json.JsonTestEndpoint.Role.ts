@@ -10,9 +10,9 @@ export default interface Role {
   /**
    * Description for permissions.
    */
-  permissions?: Permissions;
+  readonly permissions?: Permissions;
   /**
    * Description for roleName.
    */
-  roleName?: string;
+  readonly roleName?: string;
 }
