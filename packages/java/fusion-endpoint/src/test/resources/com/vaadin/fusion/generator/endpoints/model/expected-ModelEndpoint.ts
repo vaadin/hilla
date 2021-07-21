@@ -6,16 +6,15 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Account';
-import Group from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Group';
-import ModelFromDifferentPackage from './com/vaadin/fusion/generator/endpoints/model/subpackage/ModelFromDifferentPackage';
+import type Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Account';
+import type Group from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Group';
+import type ModelFromDifferentPackage from './com/vaadin/fusion/generator/endpoints/model/subpackage/ModelFromDifferentPackage';
 
 function _getAccountByGroups(
-    groups: ReadonlyArray<Group | undefined> | undefined
+  groups: ReadonlyArray<Group | undefined> | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelEndpoint', 'getAccountByGroups', {groups});
 }
-export {_getAccountByGroups as getAccountByGroups};
 
 /**
  * Get account by username.
@@ -24,21 +23,18 @@ export {_getAccountByGroups as getAccountByGroups};
  * Return the account with given userName
  */
 function _getAccountByUserName(
-    userName: string | undefined
+  userName: string | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelEndpoint', 'getAccountByUserName', {userName});
 }
-export {_getAccountByUserName as getAccountByUserName};
 
 function _getArrayOfAccount(): Promise<ReadonlyArray<Account | undefined> | undefined> {
   return client.call('ModelEndpoint', 'getArrayOfAccount');
 }
-export {_getArrayOfAccount as getArrayOfAccount};
 
 function _getMapGroups(): Promise<Readonly<Record<string, Group | undefined>> | undefined> {
   return client.call('ModelEndpoint', 'getMapGroups');
 }
-export {_getMapGroups as getMapGroups};
 
 /**
  * The import path of this model should be correct.
@@ -48,12 +44,11 @@ export {_getMapGroups as getMapGroups};
 function _getModelFromDifferentPackage(): Promise<ModelFromDifferentPackage | undefined> {
   return client.call('ModelEndpoint', 'getModelFromDifferentPackage');
 }
-export {_getModelFromDifferentPackage as getModelFromDifferentPackage};
 
-export const ModelEndpoint = Object.freeze({
-  getAccountByGroups: _getAccountByGroups,
-  getAccountByUserName: _getAccountByUserName,
-  getArrayOfAccount: _getArrayOfAccount,
-  getMapGroups: _getMapGroups,
-  getModelFromDifferentPackage: _getModelFromDifferentPackage,
-});
+export {
+  _getAccountByGroups as getAccountByGroups,
+  _getAccountByUserName as getAccountByUserName,
+  _getArrayOfAccount as getArrayOfAccount,
+  _getMapGroups as getMapGroups,
+  _getModelFromDifferentPackage as getModelFromDifferentPackage,
+};

@@ -9,7 +9,7 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import User from './User';
+import type User from './User';
 
 /**
  * Get all users
@@ -19,8 +19,7 @@ import User from './User';
 function _getAllUsers(): Promise<ReadonlyArray<User | undefined>> {
   return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
 }
-export {_getAllUsers as getAllUsers};
 
-export const GeneratorTestClass = Object.freeze({
-  getAllUsers: _getAllUsers,
-});
+export {
+  _getAllUsers as getAllUsers,
+};

@@ -27,16 +27,16 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 @SuppressWarnings("unused")
-public class VaadinConnectAccessCheckerTest {
+public class FusionAccessCheckerTest {
     private static final String ROLE_USER = "ROLE_USER";
 
-    private VaadinConnectAccessChecker checker;
+    private FusionAccessChecker checker;
     private HttpServletRequest requestMock;
     private HttpSession sessionMock;
 
     @Before
     public void before() {
-        checker = new VaadinConnectAccessChecker(new AccessAnnotationChecker(),
+        checker = new FusionAccessChecker(new AccessAnnotationChecker(),
                 new CsrfChecker());
         requestMock = mock(HttpServletRequest.class);
         sessionMock = mock(HttpSession.class);
@@ -484,7 +484,7 @@ public class VaadinConnectAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertEquals(VaadinConnectAccessChecker.ACCESS_DENIED_MSG_DEV_MODE,
+            assertEquals(FusionAccessChecker.ACCESS_DENIED_MSG_DEV_MODE,
                     accessDeniedMessage);
             assertTrue(accessDeniedMessage
                     .contains(PermitAll.class.getSimpleName()));
@@ -515,7 +515,7 @@ public class VaadinConnectAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertEquals(VaadinConnectAccessChecker.ACCESS_DENIED_MSG,
+            assertEquals(FusionAccessChecker.ACCESS_DENIED_MSG,
                     accessDeniedMessage);
         } finally {
             CurrentInstance.clearAll();

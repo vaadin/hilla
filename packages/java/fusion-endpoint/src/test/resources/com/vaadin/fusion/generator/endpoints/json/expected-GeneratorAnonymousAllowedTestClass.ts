@@ -12,20 +12,17 @@ import client from './connect-client.default';
 function _anonymousAllowed(): Promise<void> {
   return client.call('customName', 'anonymousAllowed');
 }
-export {_anonymousAllowed as anonymousAllowed};
 
 function _permissionAltered1(): Promise<void> {
   return client.call('customName', 'permissionAltered1');
 }
-export {_permissionAltered1 as permissionAltered1};
 
 function _permissionAltered2(): Promise<void> {
   return client.call('customName', 'permissionAltered2');
 }
-export {_permissionAltered2 as permissionAltered2};
 
-export const GeneratorAnonymousAllowedTestClass = Object.freeze({
-  anonymousAllowed: _anonymousAllowed,
-  permissionAltered1: _permissionAltered1,
-  permissionAltered2: _permissionAltered2,
-});
+export {
+  _anonymousAllowed as anonymousAllowed,
+  _permissionAltered1 as permissionAltered1,
+  _permissionAltered2 as permissionAltered2,
+};

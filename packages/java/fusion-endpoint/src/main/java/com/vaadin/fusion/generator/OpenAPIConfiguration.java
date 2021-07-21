@@ -18,7 +18,7 @@ package com.vaadin.fusion.generator;
 /**
  * Basic information of the OpenApi spec.
  */
-public class OpenApiConfiguration {
+public class OpenAPIConfiguration {
 
     private final String applicationTitle;
     private final String applicationApiVersion;
@@ -37,7 +37,7 @@ public class OpenApiConfiguration {
      * @param serverDescription
      *            Description of the server
      */
-    public OpenApiConfiguration(String applicationTitle,
+    public OpenAPIConfiguration(String applicationTitle,
             String applicationApiVersion, String serverUrl,
             String serverDescription) {
         this.applicationTitle = applicationTitle;

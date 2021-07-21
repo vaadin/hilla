@@ -33,12 +33,12 @@ So `// @ts-ignore` is used for now to mute this error. The consequences are:
 - But only the generated code is affected, so this is acceptable.
 - Does not affect type checking in the user’s code that uses the generated
   TypeScript.
-- We don’t export the `client` from here, only use it in the implementation.
+- We don’t export the `__client` from here, only use it in the implementation.
 
 }}// @ts-ignore
 import client from '{{vaadinConnectDefaultClientPath}}';
 {{#each imports}}
-import {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/importAs}} from '{{importPath}}';
+import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/importAs}} from '{{importPath}}';
 {{/each}}
 {{#operations}}
 {{#operation}}
@@ -74,13 +74,11 @@ function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
    %><%^authMethods%>, {requireCredentials: false}<%/authMethods%><%!
  %>);
 }
-export {_<%vendorExtensions.x-vaadin-connect-method-name%> as <%vendorExtensions.x-vaadin-connect-method-name%>};
 <%={{ }}=%>
 {{/operation}}
-
-export const {{classname}} = Object.freeze({
-{{#operation}}
-  {{vendorExtensions.x-vaadin-connect-method-name}}: _{{vendorExtensions.x-vaadin-connect-method-name}},
-{{/operation}}
-});
+export {
+  {{#operation}}
+  _{{vendorExtensions.x-vaadin-connect-method-name}} as {{vendorExtensions.x-vaadin-connect-method-name}},
+  {{/operation}}
+};
 {{/operations}}

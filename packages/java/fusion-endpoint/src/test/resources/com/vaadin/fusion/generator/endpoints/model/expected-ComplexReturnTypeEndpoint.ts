@@ -6,13 +6,12 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Account';
+import type Account from './com/vaadin/fusion/generator/endpoints/model/ModelEndpoint/Account';
 
 function _getAccounts(): Promise<ReadonlyArray<Account | undefined> | undefined> {
   return client.call('ComplexReturnTypeEndpoint', 'getAccounts');
 }
-export {_getAccounts as getAccounts};
 
-export const ComplexReturnTypeEndpoint = Object.freeze({
-  getAccounts: _getAccounts,
-});
+export {
+  _getAccounts as getAccounts,
+};

@@ -69,7 +69,7 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.fusion.EndpointRegistry.VaadinEndpointData;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 import com.vaadin.fusion.exception.EndpointException;
 import com.vaadin.fusion.exception.EndpointValidationException;
 import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorData;
@@ -91,16 +91,15 @@ import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorDa
  * parameter types should also correspond for the request to be successful.
  */
 @RestController
-@Import({ VaadinConnectControllerConfiguration.class,
-        VaadinEndpointProperties.class })
+@Import({ FusionControllerConfiguration.class, FusionEndpointProperties.class })
 @ConditionalOnBean(annotation = Endpoint.class)
-public class VaadinConnectController {
+public class FusionController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
     /**
      * A qualifier to override the request and response default json mapper.
      *
-     * @see #VaadinConnectController(ObjectMapper, ExplicitNullableTypeChecker,
+     * @see #FusionController(ObjectMapper, ExplicitNullableTypeChecker,
      *      ApplicationContext, EndpointRegistry)
      */
     public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
@@ -120,7 +119,7 @@ public class VaadinConnectController {
      *            optional bean to override the default {@link ObjectMapper}
      *            that is used for serializing and deserializing request and
      *            response bodies Use
-     *            {@link VaadinConnectController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
+     *            {@link FusionController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
      * @param explicitNullableTypeChecker
      *            the method parameter and return value type checker to verify
@@ -131,7 +130,7 @@ public class VaadinConnectController {
      * @param endpointRegistry
      *            the registry used to store endpoint information
      */
-    public VaadinConnectController(
+    public FusionController(
             @Autowired(required = false) @Qualifier(VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER) ObjectMapper vaadinEndpointMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ApplicationContext context, EndpointRegistry endpointRegistry) {
@@ -162,7 +161,7 @@ public class VaadinConnectController {
     }
 
     private static Logger getLogger() {
-        return LoggerFactory.getLogger(VaadinConnectController.class);
+        return LoggerFactory.getLogger(FusionController.class);
     }
 
     /**
@@ -248,7 +247,7 @@ public class VaadinConnectController {
             String endpointName, String methodName, Method methodToInvoke,
             ObjectNode body, VaadinEndpointData vaadinEndpointData,
             HttpServletRequest request) throws JsonProcessingException {
-        VaadinConnectAccessChecker accessChecker = getAccessChecker(
+        FusionAccessChecker accessChecker = getAccessChecker(
                 request.getServletContext());
         String checkError = accessChecker.check(methodToInvoke, request);
         if (checkError != null) {
@@ -490,21 +489,20 @@ public class VaadinConnectController {
     }
 
     private static class VaadinConnectAccessCheckerWrapper {
-        private final VaadinConnectAccessChecker accessChecker;
+        private final FusionAccessChecker accessChecker;
 
-        private VaadinConnectAccessCheckerWrapper(
-                VaadinConnectAccessChecker checker) {
+        private VaadinConnectAccessCheckerWrapper(FusionAccessChecker checker) {
             accessChecker = checker;
         }
     }
 
-    VaadinConnectAccessChecker getAccessChecker(ServletContext servletContext) {
+    FusionAccessChecker getAccessChecker(ServletContext servletContext) {
         VaadinServletContext vaadinServletContext = new VaadinServletContext(
                 servletContext);
         VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext
                 .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
-                    VaadinConnectAccessChecker accessChecker = applicationContext
-                            .getBean(VaadinConnectAccessChecker.class);
+                    FusionAccessChecker accessChecker = applicationContext
+                            .getBean(FusionAccessChecker.class);
                     ApplicationConfiguration cfg = ApplicationConfiguration
                             .get(vaadinServletContext);
                     if (cfg != null) {

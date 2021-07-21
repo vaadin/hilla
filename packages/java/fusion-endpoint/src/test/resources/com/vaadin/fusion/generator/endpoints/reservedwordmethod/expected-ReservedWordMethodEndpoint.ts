@@ -12,8 +12,7 @@ import client from './connect-client.default';
 function _delete(): Promise<void> {
   return client.call('ReservedWordMethodEndpoint', 'delete');
 }
-export {_delete as delete};
 
-export const ReservedWordMethodEndpoint = Object.freeze({
-  delete: _delete,
-});
+export {
+  _delete as delete,
+};

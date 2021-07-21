@@ -23,17 +23,17 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 
 /**
- * Annotation to mark the endpoints to be processed by
- * {@link VaadinConnectController} class. Each class annotated automatically
- * becomes a Spring {@link Component} bean.
+ * Annotation to mark the endpoints to be processed by {@link FusionController}
+ * class. Each class annotated automatically becomes a Spring {@link Component}
+ * bean.
  *
  * After the class is annotated and processed, it becomes available as a Vaadin
  * endpoint. This means that the class name and all its public methods can be
  * executed via the post call with the correct parameters sent in a request JSON
  * body. The methods' return values will be returned back as a response to the
- * calls. Refer to {@link VaadinConnectController} for more details.
+ * calls. Refer to {@link FusionController} for more details.
  *
- * @see VaadinConnectController
+ * @see FusionController
  * @see Component
  */
 @Target(ElementType.TYPE)

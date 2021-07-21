@@ -31,13 +31,13 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.vaadin.fusion.VaadinConnectController;
-import com.vaadin.fusion.VaadinConnectControllerMockBuilder;
+import com.vaadin.fusion.FusionController;
+import com.vaadin.fusion.FusionControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-@Import(VaadinConnectTypeConversionEndpoints.class)
+@Import(FusionTypeConversionEndpoints.class)
 public abstract class BaseTypeConversionTest {
 
     private MockMvc mockMvc;
@@ -51,8 +51,8 @@ public abstract class BaseTypeConversionTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
-        VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
-        VaadinConnectController controller = controllerMockBuilder
+        FusionControllerMockBuilder controllerMockBuilder = new FusionControllerMockBuilder();
+        FusionController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Assert.assertNotEquals(null, applicationContext);
@@ -83,7 +83,7 @@ public abstract class BaseTypeConversionTest {
 
     protected MockHttpServletResponse callMethod(String methodName,
             String requestValue) throws Exception {
-        String endpointName = VaadinConnectTypeConversionEndpoints.class
+        String endpointName = FusionTypeConversionEndpoints.class
                 .getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         String body = String.format("{\"value\": %s}", requestValue);

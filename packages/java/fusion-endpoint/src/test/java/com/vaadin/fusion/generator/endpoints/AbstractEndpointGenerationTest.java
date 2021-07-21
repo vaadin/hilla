@@ -79,8 +79,8 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.Endpoint;
 import com.vaadin.fusion.EndpointExposed;
 import com.vaadin.fusion.auth.CsrfChecker;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
-import com.vaadin.fusion.generator.OpenApiObjectGenerator;
+import com.vaadin.fusion.auth.FusionAccessChecker;
+import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.GrandParentModel;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.Model;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.ParentModel;
@@ -106,7 +106,7 @@ public abstract class AbstractEndpointGenerationTest
      */
     private static final List<Class> DENY_LIST_CHECKING_ABSOLUTE_PATH = Arrays
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
-    private static final VaadinConnectAccessChecker accessChecker = new VaadinConnectAccessChecker(
+    private static final FusionAccessChecker accessChecker = new FusionAccessChecker(
             new AccessAnnotationChecker(), new CsrfChecker());
     private final Set<String> schemaReferences = new HashSet<>();
 
@@ -585,9 +585,9 @@ public abstract class AbstractEndpointGenerationTest
             if (stringSchemaEntry.getValue().getExtensions() != null) {
                 schemaNameAndFilePathMap.put(stringSchemaEntry.getKey(),
                         (String) stringSchemaEntry.getValue().getExtensions()
-                                .get(OpenApiObjectGenerator.EXTENSION_VAADIN_FILE_PATH));
+                                .get(OpenAPIObjectGenerator.EXTENSION_VAADIN_FILE_PATH));
                 stringSchemaEntry.getValue().getExtensions().remove(
-                        OpenApiObjectGenerator.EXTENSION_VAADIN_FILE_PATH);
+                        OpenAPIObjectGenerator.EXTENSION_VAADIN_FILE_PATH);
             }
         }
     }
@@ -625,9 +625,9 @@ public abstract class AbstractEndpointGenerationTest
             if (tag.getExtensions() != null) {
                 tagNameFilePathMap.put(tag.getName(), (String) tag
                         .getExtensions()
-                        .get(OpenApiObjectGenerator.EXTENSION_VAADIN_FILE_PATH));
+                        .get(OpenAPIObjectGenerator.EXTENSION_VAADIN_FILE_PATH));
                 tag.getExtensions().remove(
-                        OpenApiObjectGenerator.EXTENSION_VAADIN_FILE_PATH);
+                        OpenAPIObjectGenerator.EXTENSION_VAADIN_FILE_PATH);
             }
         }).collect(Collectors.toList());
     }

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import com.vaadin.fusion.Endpoint;
 
 @Endpoint
-public class VaadinConnectTypeConversionEndpoints {
+public class FusionTypeConversionEndpoints {
     public int addOneInt(int value) {
         return value + 1;
     }
@@ -234,8 +234,8 @@ public class VaadinConnectTypeConversionEndpoints {
         return enumSet;
     }
 
-    public VaadinConnectTestBean getFooBean(VaadinConnectTestBean value) {
-        VaadinConnectTestBean newBean = new VaadinConnectTestBean();
+    public FusionTestBean getFooBean(FusionTestBean value) {
+        FusionTestBean newBean = new FusionTestBean();
         newBean.name = value.name + "-foo";
         newBean.address = value.address + "-foo";
         newBean.age = value.age + 1;

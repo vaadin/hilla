@@ -6,15 +6,14 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import Account from './com/vaadin/fusion/generator/endpoints/modelpackage/subpackage/Account';
+import type Account from './com/vaadin/fusion/generator/endpoints/modelpackage/subpackage/Account';
 
 function _getSubAccountPackage(
   name: string | undefined
 ): Promise<Account | undefined> {
   return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name});
 }
-export {_getSubAccountPackage as getSubAccountPackage};
 
-export const SubModelPackageEndpoint = Object.freeze({
-  getSubAccountPackage: _getSubAccountPackage,
-});
+export {
+  _getSubAccountPackage as getSubAccountPackage,
+};

@@ -19,25 +19,22 @@ import java.io.File;
 import java.util.Objects;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateConnect;
-import com.vaadin.fusion.generator.VaadinConnectClientGenerator;
-import com.vaadin.fusion.generator.VaadinConnectTsGenerator;
+import com.vaadin.flow.server.frontend.TaskGenerateFusion;
+import com.vaadin.fusion.generator.MainGenerator;
 
-import static com.vaadin.fusion.generator.VaadinConnectClientGenerator.CONNECT_CLIENT_NAME;
-import static com.vaadin.fusion.generator.VaadinConnectClientGenerator.CUSTOM_CONNECT_CLIENT_NAME;
+import static com.vaadin.fusion.generator.ClientAPIGenerator.CUSTOM_CONNECT_CLIENT_NAME;
 
 /**
- * Generate the Vaadin TS files for endpoints, and the Client API file.
+ * Starts the generation of TS files for endpoints.
  */
-public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator
-        implements TaskGenerateConnect {
+public class TaskGenerateFusionImpl extends AbstractTaskFusionGenerator
+        implements TaskGenerateFusion {
 
-    private final File outputFolder;
-    private final File openApi;
-    private final File connectClientFile;
     private final File frontendDirectory;
+    private final File openApi;
+    private final File outputFolder;
 
-    TaskGenerateConnectImpl(File applicationProperties, File openApi,
+    TaskGenerateFusionImpl(File applicationProperties, File openApi,
             File outputFolder, File frontendDirectory) {
         super(applicationProperties);
         Objects.requireNonNull(openApi,
@@ -46,7 +43,6 @@ public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator
                 "Vaadin output folder should not be null.");
         this.openApi = openApi;
         this.outputFolder = outputFolder;
-        this.connectClientFile = new File(outputFolder, CONNECT_CLIENT_NAME);
         this.frontendDirectory = frontendDirectory;
     }
 
@@ -57,11 +53,8 @@ public class TaskGenerateConnectImpl extends AbstractTaskConnectGenerator
         String customName = customConnectClient.exists()
                 ? ("../" + CUSTOM_CONNECT_CLIENT_NAME)
                 : null;
-        if (VaadinConnectTsGenerator.launch(openApi, outputFolder,
-                customName)) {
-            new VaadinConnectClientGenerator(readApplicationProperties())
-                    .generateVaadinConnectClientFile(
-                            connectClientFile.toPath());
-        }
+
+        new MainGenerator(openApi, outputFolder, readApplicationProperties(),
+                customName).start();
     }
 }

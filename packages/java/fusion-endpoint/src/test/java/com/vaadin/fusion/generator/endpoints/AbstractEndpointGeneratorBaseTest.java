@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,10 +20,10 @@ import org.junit.rules.TemporaryFolder;
 
 import com.vaadin.fusion.Endpoint;
 import com.vaadin.fusion.EndpointExposed;
-import com.vaadin.fusion.generator.OpenApiConfiguration;
-import com.vaadin.fusion.generator.OpenApiObjectGenerator;
-import com.vaadin.fusion.generator.OpenApiSpecGenerator;
-import com.vaadin.fusion.generator.VaadinConnectTsGenerator;
+import com.vaadin.fusion.generator.MainGenerator;
+import com.vaadin.fusion.generator.OpenAPIConfiguration;
+import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
+import com.vaadin.fusion.generator.OpenAPISpecGenerator;
 import com.vaadin.fusion.utils.TestUtils;
 
 import elemental.json.Json;
@@ -30,24 +31,18 @@ import elemental.json.JsonObject;
 
 public abstract class AbstractEndpointGeneratorBaseTest {
 
-    @Rule
-    public TemporaryFolder outputDirectory = new TemporaryFolder();
-    protected Path openApiJsonOutput;
     protected final List<Class<?>> endpointClasses = new ArrayList<>();
     protected final List<Class<?>> endpointExposedClasses = new ArrayList<>();
     protected final List<Class<?>> nonEndpointClasses = new ArrayList<>();
     protected final Package testPackage;
+    @Rule
+    public TemporaryFolder outputDirectory = new TemporaryFolder();
+    protected Path openApiJsonOutput;
 
     public AbstractEndpointGeneratorBaseTest(List<Class<?>> testClasses) {
         testPackage = getClass().getPackage();
         collectEndpointClasses(endpointClasses, endpointExposedClasses,
                 nonEndpointClasses, testClasses);
-    }
-
-    @Before
-    public void setUpOutputFile() {
-        openApiJsonOutput = java.nio.file.Paths.get(
-                outputDirectory.getRoot().getAbsolutePath(), "openapi.json");
     }
 
     private void collectEndpointClasses(List<Class<?>> endpointClasses,
@@ -68,18 +63,31 @@ public abstract class AbstractEndpointGeneratorBaseTest {
         }
     }
 
-    protected void generateTsEndpoints() {
-        VaadinConnectTsGenerator.launch(openApiJsonOutput.toFile(),
-                outputDirectory.getRoot());
-    }
-
     protected void generateOpenApi(URL customApplicationProperties) {
         Properties applicationProperties = customApplicationProperties == null
                 ? new Properties()
                 : TestUtils
                         .readProperties(customApplicationProperties.getPath());
-        new OpenApiSpecGenerator(applicationProperties).generateOpenApiSpec(
+        new OpenAPISpecGenerator(applicationProperties).generateOpenApiSpec(
                 TestUtils.getClassFilePath(testPackage), openApiJsonOutput);
+    }
+
+    protected void generateTsEndpoints() {
+        new MainGenerator(openApiJsonOutput.toFile(), outputDirectory.getRoot())
+                .start();
+    }
+
+    protected OpenAPI getOpenApiObject() {
+        OpenAPIObjectGenerator generator = new OpenAPIObjectGenerator();
+
+        Path javaSourcePath = Paths.get("src/test/java/",
+                testPackage.getName().replace('.', File.separatorChar));
+        generator.addSourcePath(javaSourcePath);
+
+        generator.setOpenApiConfiguration(new OpenAPIConfiguration("Test title",
+                "0.0.1", "https://server.test", "Test description"));
+
+        return generator.getOpenApi();
     }
 
     protected List<File> getTsFiles(File directory) {
@@ -101,17 +109,10 @@ public abstract class AbstractEndpointGeneratorBaseTest {
         return Json.parse(readFile(file));
     }
 
-    protected OpenAPI getOpenApiObject() {
-        OpenApiObjectGenerator generator = new OpenApiObjectGenerator();
-
-        Path javaSourcePath = java.nio.file.Paths.get("src/test/java/",
-                testPackage.getName().replace('.', File.separatorChar));
-        generator.addSourcePath(javaSourcePath);
-
-        generator.setOpenApiConfiguration(new OpenApiConfiguration("Test title",
-                "0.0.1", "https://server.test", "Test description"));
-
-        return generator.getOpenApi();
+    @Before
+    public void setUpOutputFile() {
+        openApiJsonOutput = Paths.get(
+                outputDirectory.getRoot().getAbsolutePath(), "openapi.json");
     }
 
 }

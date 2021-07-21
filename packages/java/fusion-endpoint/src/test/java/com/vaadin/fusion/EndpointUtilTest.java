@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.auth.CsrfChecker;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest(classes = { EndpointUtil.class, VaadinEndpointProperties.class,
+@SpringBootTest(classes = { EndpointUtil.class, FusionEndpointProperties.class,
         EndpointRegistry.class, EndpointNameChecker.class,
-        VaadinConnectAccessChecker.class, CsrfChecker.class,
+        FusionAccessChecker.class, CsrfChecker.class,
         AccessAnnotationChecker.class })
 @RunWith(SpringRunner.class)
 public class EndpointUtilTest {

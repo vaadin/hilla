@@ -98,7 +98,7 @@ import com.vaadin.fusion.EndpointNameChecker;
  * Java parser class which scans for all {@link Endpoint} classes and produces
  * OpenApi json.
  */
-public class OpenApiObjectGenerator {
+public class OpenAPIObjectGenerator {
     public static final String EXTENSION_VAADIN_CONNECT_PARAMETERS_DESCRIPTION = "x-vaadin-parameters-description";
     public static final String EXTENSION_VAADIN_FILE_PATH = "x-vaadin-file-path";
     public static final String CONSTRAINT_ANNOTATIONS = "x-annotations";
@@ -107,7 +107,7 @@ public class OpenApiObjectGenerator {
     private static final String VAADIN_CONNECT_OAUTH2_TOKEN_URL = "/oauth/token";
     private final EndpointNameChecker endpointNameChecker = new EndpointNameChecker();
     private final List<Path> javaSourcePaths = new ArrayList<>();
-    private OpenApiConfiguration configuration;
+    private OpenAPIConfiguration configuration;
     private Map<String, GeneratorType> usedTypes;
     private Map<ClassOrInterfaceDeclaration, String> endpointsJavadoc;
     private Map<String, TypeDeclaration<?>> nonEndpointMap;
@@ -121,7 +121,7 @@ public class OpenApiObjectGenerator {
     private boolean needsDeferrableImport = false;
 
     private static Logger getLogger() {
-        return LoggerFactory.getLogger(OpenApiObjectGenerator.class);
+        return LoggerFactory.getLogger(OpenAPIObjectGenerator.class);
     }
 
     /**
@@ -159,7 +159,7 @@ public class OpenApiObjectGenerator {
      * @param configuration
      *            the generator configuration
      */
-    public void setOpenApiConfiguration(OpenApiConfiguration configuration) {
+    public void setOpenApiConfiguration(OpenAPIConfiguration configuration) {
         this.configuration = configuration;
     }
 

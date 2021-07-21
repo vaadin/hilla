@@ -6,37 +6,33 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import MyEnum from './com/vaadin/fusion/generator/endpoints/enumtype/EnumEndpoint/MyEnum';
+import type MyEnum from './com/vaadin/fusion/generator/endpoints/enumtype/EnumEndpoint/MyEnum';
 
 function _echoEnum(
     value: MyEnum | undefined
 ): Promise<MyEnum | undefined> {
   return client.call('EnumEndpoint', 'echoEnum', {value});
 }
-export {_echoEnum as echoEnum};
 
 function _echoListEnum(
     enumList: ReadonlyArray<MyEnum | undefined> | undefined
 ): Promise<ReadonlyArray<MyEnum | undefined> | undefined> {
   return client.call('EnumEndpoint', 'echoListEnum', {enumList});
 }
-export {_echoListEnum as echoListEnum};
 
 function _getEnum(): Promise<MyEnum | undefined> {
   return client.call('EnumEndpoint', 'getEnum');
 }
-export {_getEnum as getEnum};
 
 function _setEnum(
     value: MyEnum | undefined
 ): Promise<void> {
   return client.call('EnumEndpoint', 'setEnum', {value});
 }
-export {_setEnum as setEnum};
 
-export const EnumEndpoint = Object.freeze({
-  echoEnum: _echoEnum,
-  echoListEnum: _echoListEnum,
-  getEnum: _getEnum,
-  setEnum: _setEnum,
-});
+export {
+  _echoEnum as echoEnum,
+  _echoListEnum as echoListEnum,
+  _getEnum as getEnum,
+  _setEnum as setEnum,
+};

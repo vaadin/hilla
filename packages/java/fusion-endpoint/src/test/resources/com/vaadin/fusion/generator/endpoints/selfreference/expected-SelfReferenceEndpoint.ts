@@ -6,13 +6,11 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import SelfReference from './com/vaadin/fusion/generator/endpoints/selfreference/SelfReference';
+import type SelfReference from './com/vaadin/fusion/generator/endpoints/selfreference/SelfReference';
 
 function _getModel(): Promise<SelfReference | undefined> {
   return client.call('SelfReferenceEndpoint', 'getModel');
 }
-export {_getModel as getModel};
-
-export const SelfReferenceEndpoint = Object.freeze({
-  getModel: _getModel,
-});
+export {
+  _getModel as getModel,
+};

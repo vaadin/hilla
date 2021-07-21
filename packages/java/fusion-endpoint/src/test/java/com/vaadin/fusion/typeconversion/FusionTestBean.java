@@ -20,12 +20,12 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-public class VaadinConnectTestBean {
+public class FusionTestBean {
     public String name;
     public String address;
     public int age;
     public boolean isAdmin;
-    public VaadinConnectTypeConversionEndpoints.TestEnum testEnum;
+    public FusionTypeConversionEndpoints.TestEnum testEnum;
     public Collection<String> roles;
     private String customProperty;
 

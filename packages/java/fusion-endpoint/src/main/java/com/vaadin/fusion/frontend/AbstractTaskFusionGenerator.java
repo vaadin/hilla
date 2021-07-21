@@ -30,10 +30,10 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
 /**
  * Abstract class for Vaadin Fusion related generators.
  */
-abstract class AbstractTaskConnectGenerator implements FallibleCommand {
+abstract class AbstractTaskFusionGenerator implements FallibleCommand {
     private final File applicationProperties;
 
-    AbstractTaskConnectGenerator(File applicationProperties) {
+    AbstractTaskFusionGenerator(File applicationProperties) {
         this.applicationProperties = applicationProperties;
     }
 
@@ -58,6 +58,6 @@ abstract class AbstractTaskConnectGenerator implements FallibleCommand {
     }
 
     Logger log() {
-        return LoggerFactory.getLogger(AbstractTaskConnectGenerator.class);
+        return LoggerFactory.getLogger(AbstractTaskFusionGenerator.class);
     }
 }

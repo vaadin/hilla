@@ -1,6 +1,6 @@
 package com.vaadin.fusion;
 
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,20 +10,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest(classes = VaadinEndpointProperties.class)
-@ContextConfiguration(classes = VaadinConnectControllerConfiguration.class)
+@SpringBootTest(classes = FusionEndpointProperties.class)
+@ContextConfiguration(classes = FusionControllerConfiguration.class)
 @RunWith(SpringRunner.class)
-public class VaadinConnectControllerConfigurationTest {
+public class FusionControllerConfigurationTest {
 
     @Autowired
     private EndpointRegistry endpointRegistry;
 
     @Autowired
-    private VaadinConnectAccessChecker vaadinConnectAccessChecker;
+    private FusionAccessChecker fusionAccessChecker;
 
     @Test
     public void dependenciesAvailable() {
         Assert.assertNotNull(endpointRegistry);
-        Assert.assertNotNull(vaadinConnectAccessChecker);
+        Assert.assertNotNull(fusionAccessChecker);
     }
 }

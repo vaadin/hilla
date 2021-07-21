@@ -28,33 +28,32 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.auth.CsrfChecker;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 
 /**
- * A configuration class for customizing the {@link VaadinConnectController}
- * class.
+ * A configuration class for customizing the {@link FusionController} class.
  */
 @Configuration
-public class VaadinConnectControllerConfiguration {
-    private final VaadinEndpointProperties vaadinEndpointProperties;
+public class FusionControllerConfiguration {
+    private final FusionEndpointProperties fusionEndpointProperties;
 
     /**
      * Initializes the endpoint configuration.
      *
-     * @param vaadinEndpointProperties
+     * @param fusionEndpointProperties
      *            Vaadin ednpoint properties
      */
-    public VaadinConnectControllerConfiguration(
-            VaadinEndpointProperties vaadinEndpointProperties) {
-        this.vaadinEndpointProperties = vaadinEndpointProperties;
+    public FusionControllerConfiguration(
+            FusionEndpointProperties fusionEndpointProperties) {
+        this.fusionEndpointProperties = fusionEndpointProperties;
     }
 
     /**
-     * Registers {@link VaadinConnectController} to use
-     * {@link VaadinEndpointProperties#getVaadinEndpointPrefix()} as a prefix
+     * Registers {@link FusionController} to use
+     * {@link FusionEndpointProperties#getVaadinEndpointPrefix()} as a prefix
      * for all Vaadin endpoints.
      *
-     * @return updated configuration for {@link VaadinConnectController}
+     * @return updated configuration for {@link FusionController}
      */
     @Bean
     public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
@@ -73,7 +72,7 @@ public class VaadinConnectControllerConfiguration {
                         // version in `flow-server` and in `vaadin-spring` is
                         // the same.
 
-                        if (VaadinConnectController.class
+                        if (FusionController.class
                                 .equals(method.getDeclaringClass())) {
                             mapping = prependEndpointPrefixUrl(mapping);
                         }
@@ -97,7 +96,7 @@ public class VaadinConnectControllerConfiguration {
     private RequestMappingInfo prependEndpointPrefixUrl(
             RequestMappingInfo mapping) {
         PatternsRequestCondition connectEndpointPattern = new PatternsRequestCondition(
-                vaadinEndpointProperties.getVaadinEndpointPrefix())
+                fusionEndpointProperties.getVaadinEndpointPrefix())
                         .combine(mapping.getPatternsCondition());
 
         return new RequestMappingInfo(mapping.getName(), connectEndpointPattern,
@@ -118,7 +117,7 @@ public class VaadinConnectControllerConfiguration {
     }
 
     /**
-     * Registers a default {@link VaadinConnectAccessChecker} bean instance.
+     * Registers a default {@link FusionAccessChecker} bean instance.
      *
      * @param accessAnnotationChecker
      *            the access controlks checker to use
@@ -127,11 +126,10 @@ public class VaadinConnectControllerConfiguration {
      * @return the default Vaadin endpoint access checker bean
      */
     @Bean
-    public VaadinConnectAccessChecker accessChecker(
+    public FusionAccessChecker accessChecker(
             AccessAnnotationChecker accessAnnotationChecker,
             CsrfChecker csrfChecker) {
-        return new VaadinConnectAccessChecker(accessAnnotationChecker,
-                csrfChecker);
+        return new FusionAccessChecker(accessAnnotationChecker, csrfChecker);
     }
 
     /**

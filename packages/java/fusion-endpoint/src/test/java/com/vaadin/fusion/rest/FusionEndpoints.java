@@ -21,7 +21,7 @@ import java.time.ZonedDateTime;
 import com.vaadin.fusion.Endpoint;
 
 @Endpoint
-public class VaadinConnectEndpoints {
+public class FusionEndpoints {
 
     public BeanWithZonedDateTimeField getBeanWithZonedDateTimeField() {
         return new BeanWithZonedDateTimeField();

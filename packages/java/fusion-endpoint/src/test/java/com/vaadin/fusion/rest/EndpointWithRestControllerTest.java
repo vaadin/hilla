@@ -34,8 +34,8 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.vaadin.fusion.VaadinConnectController;
-import com.vaadin.fusion.VaadinConnectControllerMockBuilder;
+import com.vaadin.fusion.FusionController;
+import com.vaadin.fusion.FusionControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-@Import({ VaadinConnectEndpoints.class, MyRestController.class })
+@Import({ FusionEndpoints.class, MyRestController.class })
 public class EndpointWithRestControllerTest {
 
     private MockMvc mockMvcForEndpoint;
@@ -64,8 +64,8 @@ public class EndpointWithRestControllerTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
-        VaadinConnectControllerMockBuilder controllerMockBuilder = new VaadinConnectControllerMockBuilder();
-        VaadinConnectController controller = controllerMockBuilder
+        FusionControllerMockBuilder controllerMockBuilder = new FusionControllerMockBuilder();
+        FusionController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
         mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
                 .build();
@@ -133,7 +133,7 @@ public class EndpointWithRestControllerTest {
     }
 
     private String callEndpointMethod(String methodName) throws Exception {
-        String endpointName = VaadinConnectEndpoints.class.getSimpleName();
+        String endpointName = FusionEndpoints.class.getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)

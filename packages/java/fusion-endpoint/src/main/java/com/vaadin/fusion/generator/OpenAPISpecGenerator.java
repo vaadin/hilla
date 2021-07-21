@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://github.com/OAI/OpenAPI-Specification">OpenAPI
  *      specification</a>
  */
-public class OpenApiSpecGenerator {
+public class OpenAPISpecGenerator {
     public static final String APPLICATION_TITLE = "vaadin.connect"
             + ".application.title";
     public static final String APPLICATION_API_VERSION = "vaadin.connect.api.version";
@@ -49,8 +49,8 @@ public class OpenApiSpecGenerator {
     public static final String DEFAULT_PREFIX = "/connect";
 
     private static final Logger log = LoggerFactory
-            .getLogger(OpenApiSpecGenerator.class);
-    private final OpenApiObjectGenerator generator;
+            .getLogger(OpenAPISpecGenerator.class);
+    private final OpenAPIObjectGenerator generator;
 
     /**
      * Creates the generator, getting the data needed for the generation out of
@@ -59,8 +59,8 @@ public class OpenApiSpecGenerator {
      * @param applicationProperties
      *            the properties with the data required for the generation
      */
-    public OpenApiSpecGenerator(Properties applicationProperties) {
-        generator = new OpenApiObjectGenerator();
+    public OpenAPISpecGenerator(Properties applicationProperties) {
+        generator = new OpenAPIObjectGenerator();
         generator.setOpenApiConfiguration(
                 extractOpenApiConfiguration(applicationProperties));
     }
@@ -112,7 +112,7 @@ public class OpenApiSpecGenerator {
         generateOpenApiSpec(sourcesPaths, specOutputFile);
     }
 
-    private OpenApiConfiguration extractOpenApiConfiguration(
+    private OpenAPIConfiguration extractOpenApiConfiguration(
             Properties applicationProperties) {
         String prefix = (String) applicationProperties.getOrDefault(PREFIX,
                 DEFAULT_PREFIX);
@@ -125,7 +125,7 @@ public class OpenApiSpecGenerator {
         String applicationApiVersion = (String) applicationProperties
                 .getOrDefault(APPLICATION_API_VERSION,
                         DEFAULT_APPLICATION_API_VERSION);
-        return new OpenApiConfiguration(applicationTitle, applicationApiVersion,
+        return new OpenAPIConfiguration(applicationTitle, applicationApiVersion,
                 server + prefix, serverDescription);
     }
 }

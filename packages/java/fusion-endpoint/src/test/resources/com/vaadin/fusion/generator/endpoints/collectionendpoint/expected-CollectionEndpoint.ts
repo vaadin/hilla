@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import Collection from './com/vaadin/fusion/generator/endpoints/collectionendpoint/CollectionEndpoint/Collection';
+import type Collection from './com/vaadin/fusion/generator/endpoints/collectionendpoint/CollectionEndpoint/Collection';
 
 /**
  * Get a collection by author name. The generator should not mix this type with the Java's Collection type.
@@ -15,11 +15,10 @@ import Collection from './com/vaadin/fusion/generator/endpoints/collectionendpoi
  * Return a collection
  */
 function _getCollectionByAuthor(
-    name: string | undefined
+  name: string | undefined
 ): Promise<Collection | undefined> {
   return client.call('CollectionEndpoint', 'getCollectionByAuthor', {name});
 }
-export {_getCollectionByAuthor as getCollectionByAuthor};
 
 /**
  * Get a list of user name.
@@ -29,9 +28,8 @@ export {_getCollectionByAuthor as getCollectionByAuthor};
 function _getListOfUserName(): Promise<ReadonlyArray<string | undefined> | undefined> {
   return client.call('CollectionEndpoint', 'getListOfUserName');
 }
-export {_getListOfUserName as getListOfUserName};
 
-export const CollectionEndpoint = Object.freeze({
-  getCollectionByAuthor: _getCollectionByAuthor,
-  getListOfUserName: _getListOfUserName,
-});
+export {
+  _getCollectionByAuthor as getCollectionByAuthor,
+  _getListOfUserName as getListOfUserName,
+};

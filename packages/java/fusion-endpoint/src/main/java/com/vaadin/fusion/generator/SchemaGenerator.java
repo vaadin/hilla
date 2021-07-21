@@ -47,12 +47,12 @@ import static com.vaadin.fusion.ExplicitNullableTypeChecker.isRequired;
 
 /**
  * Methods related with creating schema declarations, used by
- * OpenApiObjectGenerator.
+ * OpenAPIObjectGenerator.
  */
 class SchemaGenerator {
-    private final OpenApiObjectGenerator openApiObjectGenerator;
+    private final OpenAPIObjectGenerator openApiObjectGenerator;
 
-    SchemaGenerator(OpenApiObjectGenerator openApiObjectGenerator) {
+    SchemaGenerator(OpenAPIObjectGenerator openApiObjectGenerator) {
         this.openApiObjectGenerator = openApiObjectGenerator;
     }
 
@@ -232,7 +232,7 @@ class SchemaGenerator {
             }
         });
         if (!annotations.isEmpty()) {
-            schema.addExtension(OpenApiObjectGenerator.CONSTRAINT_ANNOTATIONS,
+            schema.addExtension(OpenAPIObjectGenerator.CONSTRAINT_ANNOTATIONS,
                     annotations.stream()
                             .sorted((a, b) -> isAnnotationIndicatingRequired(a)
                                     ? -1

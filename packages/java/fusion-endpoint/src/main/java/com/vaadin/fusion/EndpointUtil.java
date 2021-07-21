@@ -29,7 +29,7 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 
 /**
  * A util class related to {@link Endpoint}.
@@ -38,13 +38,13 @@ import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
 public class EndpointUtil {
 
     @Autowired
-    private VaadinEndpointProperties endpointProperties;
+    private FusionEndpointProperties endpointProperties;
 
     @Autowired
     private EndpointRegistry registry;
 
     @Autowired
-    private VaadinConnectAccessChecker accessChecker;
+    private FusionAccessChecker accessChecker;
 
     /**
      * Checks if the request is for an endpoint.
@@ -66,7 +66,7 @@ public class EndpointUtil {
         PathPatternParser pathParser = new PathPatternParser();
         PathPattern pathPattern = pathParser
                 .parse(endpointProperties.getVaadinEndpointPrefix()
-                        + VaadinConnectController.ENDPOINT_METHODS);
+                        + FusionController.ENDPOINT_METHODS);
         RequestPath requestPath = ServletRequestPathUtils
                 .parseAndCache(request);
         PathContainer pathWithinApplication = requestPath

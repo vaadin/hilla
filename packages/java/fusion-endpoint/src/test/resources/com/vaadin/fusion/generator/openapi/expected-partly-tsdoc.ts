@@ -8,16 +8,14 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import ComplexRequest from './ComplexRequest';
-import ComplexResponse from './ComplexResponse';
+import type ComplexRequest from './ComplexRequest';
+import type ComplexResponse from './ComplexResponse';
 
 function _complexEntitiesTest(
-    request?: ComplexRequest
+  request?: ComplexRequest
 ): Promise<ComplexResponse> {
   return client.call('GeneratorTestClass', 'complexEntitiesTest', {request});
 }
-export {_complexEntitiesTest as complexEntitiesTest};
-
-export const GeneratorTestClass = Object.freeze({
-  complexEntitiesTest: _complexEntitiesTest,
-});
+export {
+  _complexEntitiesTest as complexEntitiesTest,
+};

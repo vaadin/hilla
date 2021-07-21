@@ -6,10 +6,10 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import NonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/NonNullableModel';
-import ParameterType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ParameterType';
-import ReturnType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ReturnType';
-import VaadinNonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/VaadinNonNullableModel';
+import type NonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/NonNullableModel';
+import type ParameterType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ParameterType';
+import type ReturnType from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/ReturnType';
+import type VaadinNonNullableModel from './com/vaadin/fusion/generator/endpoints/nonnullable/NonNullableEndpoint/VaadinNonNullableModel';
 
 function _echoMap(
   shouldBeNotNull: boolean
@@ -17,15 +17,11 @@ function _echoMap(
   return client.call('NonNullableEndpoint', 'echoMap', {shouldBeNotNull});
 }
 
-export {_echoMap as echoMap};
-
 function _echoNonNullModel(
   nonNullableModels: ReadonlyArray<NonNullableModel | undefined>
 ): Promise<NonNullableModel | undefined> {
   return client.call('NonNullableEndpoint', 'echoNonNullModel', {nonNullableModels});
 }
-
-export {_echoNonNullModel as echoNonNullModel};
 
 function _echoNonNullableMap(
   nonNullableList: ReadonlyArray<string>
@@ -33,35 +29,25 @@ function _echoNonNullableMap(
   return client.call('NonNullableEndpoint', 'echoNonNullableMap', {nonNullableList});
 }
 
-export {_echoNonNullableMap as echoNonNullableMap};
-
-function _echoVaadinNonNullableMap (
+function _echoVaadinNonNullableMap(
   nonNullableParameter: ReadonlyArray<string>
 ): Promise<Readonly<Record<string, VaadinNonNullableModel>>> {
   return client.call ('NonNullableEndpoint', 'echoVaadinNonNullableMap', {nonNullableParameter});
 }
 
-export {_echoVaadinNonNullableMap as echoVaadinNonNullableMap};
-
 function _getNonNullableIndex(): Promise<number> {
   return client.call('NonNullableEndpoint', 'getNonNullableIndex');
 }
 
-export {_getNonNullableIndex as getNonNullableIndex};
-
-function _getNonNullableString (
+function _getNonNullableString(
   input: string | undefined
 ): Promise<string> {
-  return client.call ('NonNullableEndpoint', 'getNonNullableString', {input});
+  return client.call('NonNullableEndpoint', 'getNonNullableString', {input});
 }
-
-export {_getNonNullableString as getNonNullableString};
 
 function _getNotNullReturnType(): Promise<ReturnType | undefined> {
   return client.call('NonNullableEndpoint', 'getNotNullReturnType');
 }
-
-export {_getNotNullReturnType as getNotNullReturnType};
 
 function _sendParameterType(
   parameterType: ParameterType | undefined
@@ -69,22 +55,18 @@ function _sendParameterType(
   return client.call('NonNullableEndpoint', 'sendParameterType', {parameterType});
 }
 
-export {_sendParameterType as sendParameterType};
-
 function _stringNullable(): Promise<string | undefined> {
   return client.call('NonNullableEndpoint', 'stringNullable');
 }
 
-export {_stringNullable as stringNullable};
-
-export const NonNullableEndpoint = Object.freeze({
-  echoMap: _echoMap,
-  echoNonNullModel: _echoNonNullModel,
-  echoNonNullableMap: _echoNonNullableMap,
-  echoVaadinNonNullableMap: _echoVaadinNonNullableMap,
-  getNonNullableIndex: _getNonNullableIndex,
-  getNonNullableString: _getNonNullableString,
-  getNotNullReturnType: _getNotNullReturnType,
-  sendParameterType: _sendParameterType,
-  stringNullable: _stringNullable,
-});
+export {
+  _echoMap as echoMap,
+  _echoNonNullModel as echoNonNullModel,
+  _echoNonNullableMap as echoNonNullableMap,
+  _echoVaadinNonNullableMap as echoVaadinNonNullableMap,
+  _getNonNullableIndex as getNonNullableIndex,
+  _getNonNullableString as getNonNullableString,
+  _getNotNullReturnType as getNotNullReturnType,
+  _sendParameterType as sendParameterType,
+  _stringNullable as stringNullable,
+};

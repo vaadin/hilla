@@ -49,7 +49,7 @@ class ExplicitNullableTypeCheckerHelper {
     private Map<Type, Set<Object>> visitedBeans;
 
     private static Logger getLogger() {
-        return LoggerFactory.getLogger(VaadinConnectController.class);
+        return LoggerFactory.getLogger(FusionController.class);
     }
 
     /**

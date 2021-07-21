@@ -3,7 +3,7 @@ package com.vaadin.fusion;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.fusion.auth.VaadinConnectAccessChecker;
+import com.vaadin.fusion.auth.FusionAccessChecker;
 
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContext;
 /**
  * A helper class to build a mocked VaadinConnectController.
  */
-public class VaadinConnectControllerMockBuilder {
+public class FusionControllerMockBuilder {
     private ApplicationContext applicationContext;
     private ObjectMapper objectMapper;
     private EndpointNameChecker endpointNameChecker = mock(
@@ -19,38 +19,37 @@ public class VaadinConnectControllerMockBuilder {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker = mock(
             ExplicitNullableTypeChecker.class);
 
-    public VaadinConnectControllerMockBuilder withApplicationContext(
+    public FusionControllerMockBuilder withApplicationContext(
             ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         return this;
     }
 
-    public VaadinConnectControllerMockBuilder withObjectMapper(
+    public FusionControllerMockBuilder withObjectMapper(
             ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         return this;
     }
 
-    public VaadinConnectControllerMockBuilder withEndpointNameChecker(
+    public FusionControllerMockBuilder withEndpointNameChecker(
             EndpointNameChecker endpointNameChecker) {
         this.endpointNameChecker = endpointNameChecker;
         return this;
     }
 
-    public VaadinConnectControllerMockBuilder withExplicitNullableTypeChecker(
+    public FusionControllerMockBuilder withExplicitNullableTypeChecker(
             ExplicitNullableTypeChecker explicitNullableTypeChecker) {
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         return this;
     }
 
-    public VaadinConnectController build() {
+    public FusionController build() {
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
-        VaadinConnectController controller = Mockito
-                .spy(new VaadinConnectController(objectMapper,
-                        explicitNullableTypeChecker, applicationContext,
-                        registry));
-        Mockito.doReturn(mock(VaadinConnectAccessChecker.class))
-                .when(controller).getAccessChecker(Mockito.any());
+        FusionController controller = Mockito.spy(
+                new FusionController(objectMapper, explicitNullableTypeChecker,
+                        applicationContext, registry));
+        Mockito.doReturn(mock(FusionAccessChecker.class)).when(controller)
+                .getAccessChecker(Mockito.any());
         return controller;
     }
 }

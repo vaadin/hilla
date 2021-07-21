@@ -35,7 +35,7 @@ import com.vaadin.fusion.Endpoint;
  * @since 3.0
  */
 @HandlesTypes({ Endpoint.class })
-public class ConnectEndpointsValidator
+public class FusionEndpointsValidator
         implements ClassLoaderAwareServletContainerInitializer, Serializable {
 
     private String classToCheck = "org.springframework.boot.autoconfigure.jackson.JacksonProperties";

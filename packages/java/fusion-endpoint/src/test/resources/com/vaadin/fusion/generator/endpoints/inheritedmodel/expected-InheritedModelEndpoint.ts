@@ -6,16 +6,15 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import ChildModel from './com/vaadin/fusion/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ChildModel';
-import ParentModel from './com/vaadin/fusion/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ParentModel';
+import type ChildModel from './com/vaadin/fusion/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ChildModel';
+import type ParentModel from './com/vaadin/fusion/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ParentModel';
 
 function _getParentModel(
-    child: ChildModel | undefined
+  child: ChildModel | undefined
 ): Promise<ParentModel | undefined> {
   return client.call('InheritedModelEndpoint', 'getParentModel', {child});
 }
-export {_getParentModel as getParentModel};
 
-export const InheritedModelEndpoint = Object.freeze({
-  getParentModel: _getParentModel,
-});
+export {
+  _getParentModel as getParentModel,
+};

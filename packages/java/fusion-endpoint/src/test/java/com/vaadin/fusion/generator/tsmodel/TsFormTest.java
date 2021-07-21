@@ -28,7 +28,7 @@ import com.vaadin.fusion.generator.endpoints.AbstractEndpointGeneratorBaseTest;
 import com.vaadin.fusion.utils.TestUtils;
 
 import elemental.json.JsonObject;
-import static com.vaadin.fusion.generator.OpenApiObjectGenerator.CONSTRAINT_ANNOTATIONS;
+import static com.vaadin.fusion.generator.OpenAPIObjectGenerator.CONSTRAINT_ANNOTATIONS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

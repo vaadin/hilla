@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.fusion.Endpoint;
 
-public class ConnectEndpointsValidatorTest {
+public class FusionEndpointsValidatorTest {
 
     @Endpoint
     public static class WithConnectEndpoint {
@@ -37,7 +37,7 @@ public class ConnectEndpointsValidatorTest {
 
     @Test
     public void should_start_when_spring_in_classpath() throws Exception {
-        ConnectEndpointsValidator validator = new ConnectEndpointsValidator();
+        FusionEndpointsValidator validator = new FusionEndpointsValidator();
         classes.add(WithConnectEndpoint.class);
         validator.process(classes, servletContext);
     }
@@ -45,7 +45,7 @@ public class ConnectEndpointsValidatorTest {
     @Test
     public void should_trow_when_spring_not_in_classpath() throws Exception {
         exception.expect(ServletException.class);
-        ConnectEndpointsValidator validator = new ConnectEndpointsValidator();
+        FusionEndpointsValidator validator = new FusionEndpointsValidator();
         validator.setClassToCheck("foo.bar.Baz");
         classes.add(WithConnectEndpoint.class);
         validator.process(classes, servletContext);
@@ -55,14 +55,14 @@ public class ConnectEndpointsValidatorTest {
     @Test
     public void should_start_when_no_endpoints_and_spring_not_in_classpath()
             throws Exception {
-        ConnectEndpointsValidator validator = new ConnectEndpointsValidator();
+        FusionEndpointsValidator validator = new FusionEndpointsValidator();
         classes.add(WithoutConnectEndpoint.class);
         validator.process(classes, servletContext);
     }
 
     @Test
     public void should_start_when_CDI_environment() throws Exception {
-        ConnectEndpointsValidator validator = new ConnectEndpointsValidator();
+        FusionEndpointsValidator validator = new FusionEndpointsValidator();
         classes = null;
         validator.process(classes, servletContext);
     }

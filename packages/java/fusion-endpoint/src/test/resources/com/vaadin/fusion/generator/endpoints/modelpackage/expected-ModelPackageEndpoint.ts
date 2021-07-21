@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import client from './connect-client.default';
-import Account from './com/vaadin/fusion/generator/endpoints/modelpackage/ModelPackageEndpoint/Account';
+import type Account from './com/vaadin/fusion/generator/endpoints/modelpackage/ModelPackageEndpoint/Account';
 
 /**
  * Get a list of user name.
@@ -16,7 +16,6 @@ import Account from './com/vaadin/fusion/generator/endpoints/modelpackage/ModelP
 function _getListOfUserName(): Promise<ReadonlyArray<string | undefined> | undefined> {
   return client.call('ModelPackageEndpoint', 'getListOfUserName');
 }
-export {_getListOfUserName as getListOfUserName};
 
 /**
  * Get a collection by author name. The generator should not mix this type with the Java's Collection type.
@@ -25,13 +24,12 @@ export {_getListOfUserName as getListOfUserName};
  * Return a collection
  */
 function _getSameModelPackage(
-    name: string | undefined
+  name: string | undefined
 ): Promise<Account | undefined> {
   return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name});
 }
-export {_getSameModelPackage as getSameModelPackage};
 
-export const ModelPackageEndpoint = Object.freeze({
-  getListOfUserName: _getListOfUserName,
-  getSameModelPackage: _getSameModelPackage,
-});
+export {
+  _getListOfUserName as getListOfUserName,
+  _getSameModelPackage as getSameModelPackage,
+};

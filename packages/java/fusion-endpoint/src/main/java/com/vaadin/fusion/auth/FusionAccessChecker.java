@@ -67,7 +67,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
  * </pre>
  *
  */
-public class VaadinConnectAccessChecker {
+public class FusionAccessChecker {
 
     public static final String ACCESS_DENIED_MSG = "Access denied";
 
@@ -86,8 +86,7 @@ public class VaadinConnectAccessChecker {
      * @param accessAnnotationChecker
      *            the access checker to use
      */
-    public VaadinConnectAccessChecker(
-            AccessAnnotationChecker accessAnnotationChecker,
+    public FusionAccessChecker(AccessAnnotationChecker accessAnnotationChecker,
             CsrfChecker csrfChecker) {
         this.accessAnnotationChecker = accessAnnotationChecker;
         this.csrfChecker = csrfChecker;

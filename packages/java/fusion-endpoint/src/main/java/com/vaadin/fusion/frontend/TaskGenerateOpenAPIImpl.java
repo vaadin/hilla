@@ -20,15 +20,15 @@ import java.util.Collections;
 import java.util.Objects;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateOpenApi;
+import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.fusion.Endpoint;
-import com.vaadin.fusion.generator.OpenApiSpecGenerator;
+import com.vaadin.fusion.generator.OpenAPISpecGenerator;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
  */
-public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator
-        implements TaskGenerateOpenApi {
+public class TaskGenerateOpenAPIImpl extends AbstractTaskFusionGenerator
+        implements TaskGenerateOpenAPI {
 
     private final File javaSourceFolder;
     private final ClassLoader classLoader;
@@ -45,7 +45,7 @@ public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator
      * @param output
      *            the output path of the generated json file.
      */
-    TaskGenerateOpenApiImpl(File properties, File javaSourceFolder,
+    TaskGenerateOpenAPIImpl(File properties, File javaSourceFolder,
             ClassLoader classLoader, File output) {
         super(properties);
         Objects.requireNonNull(javaSourceFolder,
@@ -60,7 +60,7 @@ public class TaskGenerateOpenApiImpl extends AbstractTaskConnectGenerator
 
     @Override
     public void execute() throws ExecutionFailedException {
-        OpenApiSpecGenerator openApiSpecGenerator = new OpenApiSpecGenerator(
+        OpenAPISpecGenerator openApiSpecGenerator = new OpenAPISpecGenerator(
                 readApplicationProperties());
         openApiSpecGenerator.generateOpenApiSpec(
                 Collections.singletonList(javaSourceFolder.toPath()),
