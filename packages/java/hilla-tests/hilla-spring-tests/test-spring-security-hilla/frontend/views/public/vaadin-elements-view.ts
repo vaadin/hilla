@@ -29,7 +29,7 @@ import { field, Binder } from '@vaadin/form';
 
 import { View } from '../view';
 import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/fusionform/ElementsModel';
-import { ElementsEndpoint } from 'Frontend/generated/ElementsEndpoint';
+import { ElementsEndpoint } from 'Frontend/generated/endpoints';
 
 @customElement('vaadin-elements-view')
 export class VaadinElementsView extends View {

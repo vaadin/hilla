@@ -1,6 +1,6 @@
 import "@vaadin/vaadin-button";
 import "@vaadin/vaadin-text-field";
-import { BalanceEndpoint } from "Frontend/generated/BalanceEndpoint";
+import { BalanceEndpoint } from "Frontend/generated/endpoints";
 import { appStore } from "Frontend/stores/app-store";
 import { customElement, html, state, PropertyValues } from "lit-element";
 import { View } from "../view";
