@@ -23,6 +23,8 @@ import java.util.Set;
 import io.swagger.codegen.v3.config.CodegenConfigurator;
 import io.swagger.v3.oas.models.OpenAPI;
 
+import com.vaadin.fusion.generator.typescript.CodeGenerator;
+
 /**
  * Performs the generation of TypeScript files for endpoints, Client API file
  * and endpoint barrel file based on the data from the OpenAPI json. Generation
@@ -105,7 +107,7 @@ public class MainGenerator {
         this.outputDirectory = new GenerationOutputDirectory(outputDirectory);
         parser = openApiJsonFile.exists()
                 ? new OpenAPIParser(openApiJsonFile, this.outputDirectory,
-                        TypescriptCodeGenerator.class, defaultClientPath)
+                        CodeGenerator.class, defaultClientPath)
                 : null;
         clientGenerator = properties != null
                 ? new ClientAPIGenerator(this.outputDirectory.toPath(),
@@ -140,7 +142,7 @@ public class MainGenerator {
     private boolean generateTypescriptCode(OpenAPI openAPI) {
         CodegenConfigurator configurator = parser.getConfigurator();
 
-        Set<File> files = TypescriptCodeGenerator.generateFiles(
+        Set<File> files = CodeGenerator.generateFiles(
                 configurator.toClientOptInput().openAPI(openAPI));
 
         outputDirectory.clean(files);

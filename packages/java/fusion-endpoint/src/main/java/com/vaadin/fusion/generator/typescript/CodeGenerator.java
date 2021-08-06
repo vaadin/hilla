@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.fusion.generator;
+package com.vaadin.fusion.generator.typescript;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +38,6 @@ import io.swagger.codegen.v3.ClientOptInput;
 import io.swagger.codegen.v3.CodegenModel;
 import io.swagger.codegen.v3.CodegenOperation;
 import io.swagger.codegen.v3.CodegenParameter;
-import io.swagger.codegen.v3.CodegenProperty;
 import io.swagger.codegen.v3.CodegenResponse;
 import io.swagger.codegen.v3.CodegenType;
 import io.swagger.codegen.v3.DefaultGenerator;
@@ -58,44 +57,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.fusion.EndpointNameChecker;
+import com.vaadin.fusion.generator.GeneratorUtils;
+import com.vaadin.fusion.generator.MainGenerator;
+import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
+
+import static com.vaadin.fusion.generator.typescript.CodeGeneratorUtils.getSimpleNameFromImports;
+import static com.vaadin.fusion.generator.typescript.CodeGeneratorUtils.getSimpleNameFromQualifiedName;
+import static com.vaadin.fusion.generator.typescript.ModelGenerator.getModelArgumentsHelper;
+import static com.vaadin.fusion.generator.typescript.ModelGenerator.getModelFullTypeHelper;
 
 /**
  * Vaadin fusion JavaScript generator implementation for swagger-codegen. Some
  * parts of the implementation are copied from
  * {@link io.swagger.codegen.languages.JavascriptClientCodegen}
  */
-public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
-    private static final Pattern ARRAY_TYPE_NAME_PATTERN = Pattern
-            .compile("ReadonlyArray<(.*)>");
+public class CodeGenerator extends AbstractTypeScriptClientCodegen {
+    static final String IMPORT = "import";
     private static final String EXTENSION_VAADIN_CONNECT_METHOD_NAME = "x-vaadin-connect-method-name";
     private static final String EXTENSION_VAADIN_CONNECT_PARAMETERS = "x-vaadin-connect-parameters";
     private static final String EXTENSION_VAADIN_CONNECT_SERVICE_NAME = "x-vaadin-connect-endpoint-name";
     private static final String EXTENSION_VAADIN_CONNECT_SHOW_TSDOC = "x-vaadin-connect-show-tsdoc";
     private static final String GENERATOR_NAME = "javascript-vaadin-connect";
-    private static final String IMPORT = "import";
-    private static final String JAVA_NAME_PATTERN = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
-    // Pattern for matching fully qualified name in a complex type
-    // e.g. 'com.example.mypackage.Bean' will be extracted in the type
-    // `Map<String, Map<String, com.example.mypackage.Bean>>`
-    private static final Pattern FULLY_QUALIFIED_NAME_PATTERN = Pattern.compile(
-            "(" + JAVA_NAME_PATTERN + "(\\." + JAVA_NAME_PATTERN + ")*)");
-    private static final Pattern MAPPED_TYPE_NAME_PATTERN = Pattern
-            .compile("Readonly<Record<string, (.*)>>");
     private static final String OPERATION = "operation";
     private static final Pattern PATH_REGEX = Pattern
             .compile("^/([^/{}\n\t]+)/([^/{}\n\t]+)$");
-    private static final Pattern PRIMITIVE_TYPE_NAME_PATTERN = Pattern
-            .compile("^(string|number|boolean)");
     private static final String VAADIN_CONNECT_CLASS_DESCRIPTION = "vaadinConnectClassDescription";
     private static final String VAADIN_FILE_PATH = "vaadinFilePath";
-    private final Logger logger = LoggerFactory
-            .getLogger(TypescriptCodeGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
     private List<Tag> tags;
 
     /**
      * Create vaadin ts codegen instance.
      */
-    public TypescriptCodeGenerator() {
+    public CodeGenerator() {
         super();
 
         // set the output folder here
@@ -424,7 +418,7 @@ public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
 
     @Override
     protected void addImport(CodegenModel m, String type) {
-        if (!GeneratorUtils.equals(m.getName(), type)) {
+        if (!Objects.equals(m.getName(), type)) {
             super.addImport(m, type);
         }
     }
@@ -517,33 +511,9 @@ public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
         return "./" + GeneratorUtils.replaceChars(qualifiedName, '.', '/');
     }
 
-    private String fixNameForModel(String name) {
-        name = removeOptionalSuffix(name);
-        if (ARRAY_TYPE_NAME_PATTERN.matcher(name).find()) {
-            name = "Array";
-        } else if ("any".equals(name)
-                || MAPPED_TYPE_NAME_PATTERN.matcher(name).find()) {
-            name = "Object";
-        } else if (PRIMITIVE_TYPE_NAME_PATTERN.matcher(name).find()) {
-            name = GeneratorUtils.capitalize(name);
-        }
-        return name + MainGenerator.MODEL;
-    }
-
     private Helper<String> getClassNameFromImportsHelper() {
         return (className, options) -> getSimpleNameFromImports(className,
                 options.param(0));
-    }
-
-    private List<String> getConstrainsArguments(CodegenProperty property) {
-        List<String> annotations = (List) property.getVendorExtensions()
-                .get(OpenAPIObjectGenerator.CONSTRAINT_ANNOTATIONS);
-        if (annotations != null) {
-            return annotations.stream()
-                    .map(annotation -> String.format("new " + "%s", annotation))
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
     }
 
     private String getDescriptionFromParameterExtension(String paramName,
@@ -555,81 +525,6 @@ public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
                 .getExtensions()
                 .get(OpenAPIObjectGenerator.EXTENSION_VAADIN_CONNECT_PARAMETERS_DESCRIPTION);
         return paramDescription.getOrDefault(paramName, "");
-    }
-
-    private String getModelArguments(CodegenProperty property,
-            List<Map<String, String>> imports) {
-        String dataType = property.datatype;
-        boolean optional = !property.required;
-        String simpleName = getSimpleNameFromImports(dataType, imports);
-        return getModelVariableArguments(simpleName, optional,
-                getConstrainsArguments(property));
-    }
-
-    private Helper<CodegenProperty> getModelArgumentsHelper() {
-        return (prop, options) -> getModelArguments(prop, options.param(0));
-    }
-
-    private String getModelFullType(String name) {
-        Matcher matcher = ARRAY_TYPE_NAME_PATTERN.matcher(name);
-        if (matcher.find()) {
-            String arrayItemType = matcher.group(1);
-
-            String variableName = arrayItemType
-                    .endsWith(MainGenerator.OPTIONAL_SUFFIX)
-                            ? arrayItemType.substring(0,
-                                    arrayItemType.lastIndexOf(
-                                            MainGenerator.OPTIONAL_SUFFIX))
-                            : arrayItemType;
-            return "Array" + MainGenerator.MODEL + "<"
-                    + getModelVariableType(variableName) + ", "
-                    + getModelFullType(variableName) + ">";
-        }
-        matcher = MAPPED_TYPE_NAME_PATTERN.matcher(name);
-        if (matcher.find()) {
-            return "Object" + MainGenerator.MODEL + "<Readonly<Record<string, "
-                    + getModelVariableType(matcher.group(1)) + ">>>";
-        }
-        return fixNameForModel(name);
-    }
-
-    private Helper<CodegenProperty> getModelFullTypeHelper() {
-        return (prop, options) -> getModelFullType(
-                getSimpleNameFromImports(prop.datatype, options.param(0)));
-    }
-
-    private String getModelVariableArguments(String name, boolean optional,
-            List<String> constrainArguments) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(fixNameForModel(name));
-        stringBuilder.append(", [");
-        List<String> arguments = new ArrayList<>();
-        arguments.add(String.valueOf(optional));
-        Matcher matcher = ARRAY_TYPE_NAME_PATTERN.matcher(name);
-        if (matcher.find()) {
-            String arrayTypeName = matcher.group(1);
-            boolean arrayTypeOptional = arrayTypeName
-                    .endsWith(MainGenerator.OPTIONAL_SUFFIX);
-            arrayTypeName = removeOptionalSuffix(arrayTypeName);
-            arguments.add(getModelVariableArguments(arrayTypeName,
-                    arrayTypeOptional, Collections.emptyList()));
-        }
-        if (!constrainArguments.isEmpty()) {
-            arguments.addAll(constrainArguments);
-        }
-        stringBuilder
-                .append(arguments.stream().collect(Collectors.joining(", ")));
-        stringBuilder.append("]");
-        return stringBuilder.toString();
-    }
-
-    private String getModelVariableType(String variableName) {
-        Matcher matcher = PRIMITIVE_TYPE_NAME_PATTERN.matcher(variableName);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return MainGenerator.MODEL + "Type<" + getModelFullType(variableName)
-                + ">";
     }
 
     private Helper<String> getMultipleLinesHelper() {
@@ -678,42 +573,6 @@ public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
             return mediaType.getSchema();
         }
         return null;
-    }
-
-    private String getSimpleNameFromComplexType(String dataType,
-            List<Map<String, String>> imports) {
-        Matcher matcher = FULLY_QUALIFIED_NAME_PATTERN.matcher(dataType);
-        StringBuffer builder = new StringBuffer();
-        while (matcher.find()) {
-            String fqnName = matcher.group(1);
-            matcher.appendReplacement(builder,
-                    getSimpleNameFromImports(fqnName, imports));
-        }
-        matcher.appendTail(builder);
-        return builder.toString();
-    }
-
-    private String getSimpleNameFromImports(String dataType,
-            List<Map<String, String>> imports) {
-        for (Map<String, String> anImport : imports) {
-            if (GeneratorUtils.equals(dataType, anImport.get(IMPORT))) {
-                return GeneratorUtils.firstNonBlank(anImport.get("importAs"),
-                        anImport.get("className"));
-            }
-        }
-        if (GeneratorUtils.contains(dataType, "<")
-                || GeneratorUtils.contains(dataType, "{")
-                || GeneratorUtils.contains(dataType, "|")) {
-            return getSimpleNameFromComplexType(dataType, imports);
-        }
-        return getSimpleNameFromQualifiedName(dataType);
-    }
-
-    private String getSimpleNameFromQualifiedName(String qualifiedName) {
-        if (GeneratorUtils.contains(qualifiedName, ".")) {
-            return GeneratorUtils.substringAfterLast(qualifiedName, ".");
-        }
-        return qualifiedName;
     }
 
     private String getTypeDeclarationFromComposedSchema(
@@ -807,14 +666,6 @@ public class TypescriptCodeGenerator extends AbstractTypeScriptClientCodegen {
         relativePath = relativePath.replace("\\", "/");
         // prepend with `./` if the string does not start with `./`, `.` or `/`
         return relativePath.replaceFirst("^(?!(\\./|\\.|/))", "./");
-    }
-
-    private String removeOptionalSuffix(String name) {
-        if (name.endsWith(MainGenerator.OPTIONAL_SUFFIX)) {
-            return name.substring(0,
-                    name.length() - MainGenerator.OPTIONAL_SUFFIX.length());
-        }
-        return name;
     }
 
     private void setShouldShowTsDoc(List<CodegenOperation> operations) {

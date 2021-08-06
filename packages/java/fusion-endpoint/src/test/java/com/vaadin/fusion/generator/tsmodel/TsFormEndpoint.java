@@ -144,5 +144,8 @@ public class TsFormEndpoint {
         List<Optional<String>> nonNullableList;
         @Nonnull
         Optional<String>[][] nonNullableMatrix;
+        Map<String, List<String>> mapWithList;
+        Map<List<String>, Map<String, List<MyEntity>>> complexMap;
+        List<List<Map<String, List<String>>>> nestedArrays;
     }
 }
