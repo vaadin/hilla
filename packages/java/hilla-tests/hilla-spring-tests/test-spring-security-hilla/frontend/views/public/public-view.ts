@@ -1,7 +1,8 @@
 import "@vaadin/vaadin-button";
 import "@vaadin/vaadin-text-field";
 import { PublicEndpoint } from "Frontend/generated/endpoints";
-import { customElement, html, state } from "lit-element";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators";
 import { View } from "../view";
 
 @customElement("public-view")

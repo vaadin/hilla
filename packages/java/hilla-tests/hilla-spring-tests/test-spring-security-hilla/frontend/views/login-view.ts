@@ -1,7 +1,8 @@
 import { LoginResult } from "@vaadin/flow-frontend";
 import { AfterEnterObserver, RouterLocation } from "@vaadin/router";
 import "@vaadin/vaadin-login/vaadin-login-overlay";
-import { customElement, html, state } from "lit-element";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators";
 import { login } from "../auth";
 import { View } from "./view";
 
