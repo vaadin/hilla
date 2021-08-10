@@ -1,5 +1,13 @@
 package com.vaadin.fusion;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -10,19 +18,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
-import com.vaadin.fusion.auth.CsrfChecker;
-import com.vaadin.fusion.generator.endpoints.iterableendpoint.IterableEndpoint;
-import com.vaadin.fusion.generator.endpoints.superclassmethods.PersonEndpoint;
-import com.vaadin.fusion.testendpoint.BridgeMethodTestEndpoint;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.SimpleType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -39,24 +43,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.SimpleType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
 import com.vaadin.fusion.exception.EndpointException;
 import com.vaadin.fusion.exception.EndpointValidationException;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.fusion.generator.endpoints.iterableendpoint.IterableEndpoint;
+import com.vaadin.fusion.generator.endpoints.superclassmethods.PersonEndpoint;
+import com.vaadin.fusion.testendpoint.BridgeMethodTestEndpoint;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -188,13 +188,11 @@ public class FusionControllerTest {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
         when(requestMock.getUserPrincipal()).thenReturn(principal);
-        when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin CCDM");
+        when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
         doReturn(mockServletContext()).when(requestMock).getServletContext();
 
-        HttpSession sessionMock = mock(HttpSession.class);
-        when(sessionMock.getAttribute(com.vaadin.flow.server.VaadinService
-                .getCsrfTokenAttributeName())).thenReturn("Vaadin CCDM");
-        when(requestMock.getSession(false)).thenReturn(sessionMock);
+        when(requestMock.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
     }
 
     @Test

@@ -15,56 +15,57 @@
  */
 package com.vaadin.fusion.auth;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.server.VaadinService;
 
 /**
  * Handles checking of a CSRF token in endpoint requests.
  */
 public class CsrfChecker {
+    private static final String CSRF_COOKIE_NAME = "csrfToken";
 
     private boolean csrfProtectionEnabled = true;
+
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(FusionAccessChecker.class);
+    }
 
     /**
      * Validates the CSRF token that is included in the request.
      * <p>
      * Checks that the CSRF token in the request matches the expected one that
-     * is stored in the HTTP session.
-     * <p>
-     * Note! If there is no session, this method will always return
-     * {@code true}.
+     * is stored in the HTTP cookie.
      * <p>
      * Note! If CSRF protection is disabled, this method will always return
      * {@code true}.
      *
      * @param request
      *            the request to validate
-     * @return {@code true} if the CSRF token is ok or checking is disabled or
-     *         there is no HTTP session, {@code false} otherwise
+     * @return {@code true} if the CSRF token is ok or checking is disabled,
+     *         {@code false} otherwise
      */
     public boolean validateCsrfTokenInRequest(HttpServletRequest request) {
         if (!isCsrfProtectionEnabled()) {
             return true;
         }
 
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
-        }
-
-        String csrfTokenInSession = (String) session
-                .getAttribute(VaadinService.getCsrfTokenAttributeName());
-        if (csrfTokenInSession == null) {
+        String csrfTokenInCookie = Optional.ofNullable(request.getCookies())
+                .map(Arrays::stream).orElse(Stream.empty())
+                .filter(cookie -> cookie.getName().equals(CSRF_COOKIE_NAME))
+                .findFirst().map(Cookie::getValue).orElse(null);
+        if (csrfTokenInCookie == null) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info(
-                        "Unable to verify CSRF token for endpoint request, got null token in session");
+                        "Unable to verify CSRF token for endpoint request, "
+                                + "got null token in cookie");
             }
 
             return false;
@@ -72,7 +73,7 @@ public class CsrfChecker {
 
         String csrfTokenInRequest = request.getHeader("X-CSRF-Token");
         if (csrfTokenInRequest == null || !MessageDigest.isEqual(
-                csrfTokenInSession.getBytes(StandardCharsets.UTF_8),
+                csrfTokenInCookie.getBytes(StandardCharsets.UTF_8),
                 csrfTokenInRequest.getBytes(StandardCharsets.UTF_8))) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info("Invalid CSRF token in endpoint request");
@@ -101,10 +102,6 @@ public class CsrfChecker {
      */
     public boolean isCsrfProtectionEnabled() {
         return csrfProtectionEnabled;
-    }
-
-    private static Logger getLogger() {
-        return LoggerFactory.getLogger(FusionAccessChecker.class);
     }
 
 }

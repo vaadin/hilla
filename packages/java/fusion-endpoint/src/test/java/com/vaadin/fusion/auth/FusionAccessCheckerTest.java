@@ -1,5 +1,24 @@
 package com.vaadin.fusion.auth;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.security.Principal;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.shared.ApplicationConstants;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -7,45 +26,22 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
-import java.security.Principal;
-
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 @SuppressWarnings("unused")
 public class FusionAccessCheckerTest {
     private static final String ROLE_USER = "ROLE_USER";
 
     private FusionAccessChecker checker;
     private HttpServletRequest requestMock;
-    private HttpSession sessionMock;
 
     @Before
     public void before() {
         checker = new FusionAccessChecker(new AccessAnnotationChecker(),
                 new CsrfChecker());
         requestMock = mock(HttpServletRequest.class);
-        sessionMock = mock(HttpSession.class);
-        when(sessionMock
-                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
-                        .thenReturn("Vaadin CCDM");
-        when(requestMock.getSession(false)).thenReturn(sessionMock);
         when(requestMock.getUserPrincipal()).thenReturn(mock(Principal.class));
-        when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin CCDM");
+        when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
+        when(requestMock.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
         when(requestMock.isUserInRole("ROLE_USER")).thenReturn(true);
     }
 
@@ -53,25 +49,22 @@ public class FusionAccessCheckerTest {
         when(requestMock.getUserPrincipal()).thenReturn(null);
     }
 
-    private void createDifferentSessionToken() {
-        when(sessionMock
-                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
-                        .thenReturn("CCDM Token");
+    private void createDifferentCookieToken() {
+        when(requestMock.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Fusion token") });
     }
 
     private void createNullTokenContextInHeaderRequest() {
         when(requestMock.getHeader("X-CSRF-Token")).thenReturn(null);
     }
 
-    private void createNullTokenSession() {
-        when(sessionMock
-                .getAttribute(VaadinService.getCsrfTokenAttributeName()))
-                        .thenReturn(null);
+    private void createNullTokenCookies() {
+        when(requestMock.getCookies())
+                .thenReturn(new Cookie[] { new Cookie("JSESSIONID", "0") });
     }
 
-    private void createNullSession() {
-        when(requestMock.getSession(false)).thenReturn(null);
-        when(requestMock.getSession()).thenReturn(null);
+    private void createNullCookies() {
+        when(requestMock.getCookies()).thenReturn(null);
     }
 
     private void shouldPass(Class<?> test) throws Exception {
@@ -96,52 +89,52 @@ public class FusionAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header()
+    public void should_fail_When_not_having_token_in_cookies_but_have_token_in_request_header()
             throws Exception {
         class Test {
             public void test() {
             }
         }
-        createNullTokenSession();
+        createNullTokenCookies();
         shouldFail(Test.class);
     }
 
     @Test
-    public void should_fail_When_not_having_token_in_session_but_have_token_in_request_header_And_AnonymousAllowed()
+    public void should_fail_When_not_having_token_in_cookies_but_have_token_in_request_header_And_AnonymousAllowed()
             throws Exception {
         @AnonymousAllowed
         class Test {
             public void test() {
             }
         }
-        createNullTokenSession();
+        createNullTokenCookies();
         shouldFail(Test.class);
     }
 
     @Test
-    public void should_pass_When_not_having_session_And_not_having_token_in_request_header()
+    public void should_fail_When_not_having_cookies_And_not_having_token_in_request_header()
             throws Exception {
         @PermitAll
         class Test {
             public void test() {
             }
         }
-        createNullSession();
+        createNullCookies();
         createNullTokenContextInHeaderRequest();
-        shouldPass(Test.class);
+        shouldFail(Test.class);
     }
 
     @Test
-    public void should_pass_When_not_having_session_And_not_having_token_in_request_header_And_AnonymousAllowed()
+    public void should_fail_When_not_having_cookies_And_not_having_token_in_request_header_And_AnonymousAllowed()
             throws Exception {
         @AnonymousAllowed
         class Test {
             public void test() {
             }
         }
-        createNullSession();
+        createNullCookies();
         createNullTokenContextInHeaderRequest();
-        shouldPass(Test.class);
+        shouldFail(Test.class);
     }
 
     @Test
@@ -157,18 +150,18 @@ public class FusionAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_having_different_token_between_session_and_headerRequest()
+    public void should_fail_When_having_different_token_between_cookie_and_headerRequest()
             throws Exception {
         class Test {
             public void test() {
             }
         }
-        createDifferentSessionToken();
+        createDifferentCookieToken();
         shouldFail(Test.class);
     }
 
     @Test
-    public void should_fail_When_having_different_token_between_session_and_headerRequest_and_NoAuthentication_AnonymousAllowed()
+    public void should_fail_When_having_different_token_between_cookie_and_headerRequest_and_NoAuthentication_AnonymousAllowed()
             throws Exception {
         class Test {
             @AnonymousAllowed
@@ -176,7 +169,7 @@ public class FusionAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        createDifferentSessionToken();
+        createDifferentCookieToken();
         shouldFail(Test.class);
     }
 
