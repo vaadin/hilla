@@ -16,12 +16,12 @@ import {Email,Null,NotNull,NotEmpty,NotBlank,AssertTrue,AssertFalse,Negative,Neg
 export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEntityIdModel<T> {
   static createEmptyValue: () => MyEntity;
 
-  get assertFalse(): StringModel {
-    return this[_getPropertyModel]('assertFalse', StringModel, [true, new AssertFalse()]);
+  get myId(): NumberModel {
+    return this[_getPropertyModel]('myId', NumberModel, [true]);
   }
 
-  get assertTrue(): StringModel {
-    return this[_getPropertyModel]('assertTrue', StringModel, [true, new AssertTrue()]);
+  get foo(): StringModel {
+    return this[_getPropertyModel]('foo', StringModel, [true]);
   }
 
   get bar(): MyBazModel {
@@ -32,80 +32,64 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('baz', ArrayModel, [true, MyBazModel, [true]]);
   }
 
-  get bool(): BooleanModel {
-    return this[_getPropertyModel]('bool', BooleanModel, [false]);
-  }
-
   get boolWrapper(): BooleanModel {
     return this[_getPropertyModel]('boolWrapper', BooleanModel, [true]);
   }
 
-  get children(): ArrayModel<ModelValue<MyEntityModel>, MyEntityModel> {
-    return this[_getPropertyModel]('children', ArrayModel, [true, MyEntityModel, [true]]);
-  }
-
-  get complexMap(): ObjectModel<Readonly<Record<string, ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>>>>>>>> {
-    return this [_getPropertyModel]('complexMap', ObjectModel, [true]);
-  }
-
-  get decimalMax(): NumberModel {
-    return this[_getPropertyModel]('decimalMax', NumberModel, [false, new DecimalMax({value:"0.01", inclusive:false})]);
-  }
-
-  get decimalMin(): NumberModel {
-    return this[_getPropertyModel]('decimalMin', NumberModel, [false, new DecimalMin("0.01")]);
-  }
-
-  get digits(): StringModel {
-    return this[_getPropertyModel]('digits', StringModel, [true, new Digits({integer:5, fraction:2})]);
-  }
-
-  get email(): StringModel {
-    return this[_getPropertyModel]('email', StringModel, [true, new Email({message:"foo"})]);
-  }
-
-  get entityMap(): ObjectModel<Readonly<Record<string, ModelValue<MyBazModel>>>> {
-    return this[_getPropertyModel]('entityMap', ObjectModel, [true]);
-  }
-
-  get entityMatrix(): ArrayModel<ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>, ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>> {
-    return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [true, MyEntityModel, [true]]]);
-  }
-
-  get foo(): StringModel {
-    return this[_getPropertyModel]('foo', StringModel, [true]);
-  }
-
-  get future(): StringModel {
-    return this[_getPropertyModel]('future', StringModel, [true, new Future()]);
-  }
-
-  get isNull(): StringModel {
-    return this[_getPropertyModel]('isNull', StringModel, [true, new Null()]);
+  get bool(): BooleanModel {
+    return this[_getPropertyModel]('bool', BooleanModel, [false]);
   }
 
   get list(): ArrayModel<string, StringModel> {
     return this[_getPropertyModel]('list', ArrayModel, [true, StringModel, [true], new NotEmpty()]);
   }
 
-  get localTime(): StringModel {
-    return this[_getPropertyModel]('localTime', StringModel, [true]);
+  get email(): StringModel {
+    return this[_getPropertyModel]('email', StringModel, [true, new Email({message:"foo"})]);
   }
 
-  get mapWithList(): ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>> {
-    return this [_getPropertyModel]('mapWithList', ObjectModel, [true]);
+  get isNull(): StringModel {
+    return this[_getPropertyModel]('isNull', StringModel, [true, new Null()]);
   }
 
-  get max(): NumberModel {
-    return this[_getPropertyModel]('max', NumberModel, [true, new Max(2)]);
+  get notNull(): StringModel {
+    return this[_getPropertyModel]('notNull', StringModel, [true, new NotNull()]);
+  }
+
+  get notEmpty(): StringModel {
+    return this[_getPropertyModel]('notEmpty', StringModel, [true, new NotEmpty(), new NotNull()]);
+  }
+
+  get notNullEntity(): MyEntityModel {
+    return this[_getPropertyModel]('notNullEntity', MyEntityModel, [true, new NotNull()]);
+  }
+
+  get notBlank(): StringModel {
+    return this[_getPropertyModel]('notBlank', StringModel, [true, new NotBlank()]);
+  }
+
+  get assertTrue(): StringModel {
+    return this[_getPropertyModel]('assertTrue', StringModel, [true, new AssertTrue()]);
+  }
+
+  get assertFalse(): StringModel {
+    return this[_getPropertyModel]('assertFalse', StringModel, [true, new AssertFalse()]);
   }
 
   get min(): NumberModel {
     return this[_getPropertyModel]('min', NumberModel, [true, new Min({value:1, message:"foo"})]);
   }
 
-  get myId(): NumberModel {
-    return this[_getPropertyModel]('myId', NumberModel, [true]);
+  get max(): NumberModel {
+    return this[_getPropertyModel]('max', NumberModel, [true, new Max(2)]);
+  }
+
+  get decimalMin(): NumberModel {
+    return this[_getPropertyModel]('decimalMin', NumberModel, [false, new DecimalMin("0.01")]);
+  }
+
+  get decimalMax(): NumberModel {
+    return this[_getPropertyModel]('decimalMax', NumberModel, [false, new DecimalMax({value:"0.01", inclusive:false})]);
   }
 
   get negative(): NumberModel {
@@ -114,66 +98,6 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
 
   get negativeOrZero(): NumberModel {
     return this[_getPropertyModel]('negativeOrZero', NumberModel, [false, new NegativeOrZero()]);
-  }
-
-  get nestedArrays(): ArrayModel<ModelValue<ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>>, ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>> {
-    return this [_getPropertyModel]('nestedArrays', ArrayModel, [true, ArrayModel, [true, ObjectModel, [true]]]);
-  }
-
-  get nonNullableList(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('nonNullableList', ArrayModel, [false, StringModel, [true]]);
-  }
-
-  get nonNullableMatrix(): ArrayModel<ModelValue<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
-    return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [true, StringModel, [true]]]);
-  }
-
-  get nonNullableString(): StringModel {
-    return this[_getPropertyModel]('nonNullableString', StringModel, [false]);
-  }
-
-  get notBlank(): StringModel {
-    return this[_getPropertyModel]('notBlank', StringModel, [true, new NotBlank()]);
-  }
-
-  get notEmpty(): StringModel {
-    return this[_getPropertyModel]('notEmpty', StringModel, [true, new NotEmpty(), new NotNull()]);
-  }
-
-  get notNull(): StringModel {
-    return this[_getPropertyModel]('notNull', StringModel, [true, new NotNull()]);
-  }
-
-  get notNullEntity(): MyEntityModel {
-    return this[_getPropertyModel]('notNullEntity', MyEntityModel, [true, new NotNull()]);
-  }
-
-  get numberMatrix(): ArrayModel<ModelValue<ArrayModel<number, NumberModel>>, ArrayModel<number, NumberModel>> {
-    return this[_getPropertyModel]('numberMatrix', ArrayModel, [true, ArrayModel, [true, NumberModel, [true]]]);
-  }
-
-  get optionalEntity(): MyEntityModel {
-    return this[_getPropertyModel]('optionalEntity', MyEntityModel, [true]);
-  }
-
-  get optionalList(): ArrayModel<string, StringModel> {
-    return this[_getPropertyModel]('optionalList', ArrayModel, [true, StringModel, [true]]);
-  }
-
-  get optionalMatrix(): ArrayModel<ModelValue<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
-    return this[_getPropertyModel]('optionalMatrix', ArrayModel, [true, ArrayModel, [true, StringModel, [true]]]);
-  }
-
-  get optionalString(): StringModel {
-    return this[_getPropertyModel]('optionalString', StringModel, [true]);
-  }
-
-  get past(): StringModel {
-    return this[_getPropertyModel]('past', StringModel, [true, new Past()]);
-  }
-
-  get pattern(): StringModel {
-    return this[_getPropertyModel]('pattern', StringModel, [true, new Pattern({regexp:"\\d+\\..+"})]);
   }
 
   get positive(): NumberModel {
@@ -192,11 +116,87 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('size1', StringModel, [true, new Size({min:1})]);
   }
 
+  get digits(): StringModel {
+    return this[_getPropertyModel]('digits', StringModel, [true, new Digits({integer:5, fraction:2})]);
+  }
+
+  get past(): StringModel {
+    return this[_getPropertyModel]('past', StringModel, [true, new Past()]);
+  }
+
+  get future(): StringModel {
+    return this[_getPropertyModel]('future', StringModel, [true, new Future()]);
+  }
+
+  get localTime(): StringModel {
+    return this[_getPropertyModel]('localTime', StringModel, [true]);
+  }
+
+  get pattern(): StringModel {
+    return this[_getPropertyModel]('pattern', StringModel, [true, new Pattern({regexp:"\\d+\\..+"})]);
+  }
+
+  get children(): ArrayModel<ModelValue<MyEntityModel>, MyEntityModel> {
+    return this[_getPropertyModel]('children', ArrayModel, [true, MyEntityModel, [true]]);
+  }
+
   get stringArray(): ArrayModel<string, StringModel> {
     return this[_getPropertyModel]('stringArray', ArrayModel, [true, StringModel, [true]]);
   }
 
+  get numberMatrix(): ArrayModel<ModelValue<ArrayModel<number, NumberModel>>, ArrayModel<number, NumberModel>> {
+    return this[_getPropertyModel]('numberMatrix', ArrayModel, [true, ArrayModel, [true, NumberModel, [true]]]);
+  }
+
+  get entityMatrix(): ArrayModel<ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>, ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>> {
+    return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [true, MyEntityModel, [true]]]);
+  }
+
   get stringMap(): ObjectModel<Readonly<Record<string, string>>> {
     return this[_getPropertyModel]('stringMap', ObjectModel, [true]);
+  }
+
+  get entityMap(): ObjectModel<Readonly<Record<string, ModelValue<MyBazModel>>>> {
+    return this[_getPropertyModel]('entityMap', ObjectModel, [true]);
+  }
+
+  get optionalString(): StringModel {
+    return this[_getPropertyModel]('optionalString', StringModel, [true]);
+  }
+
+  get optionalEntity(): MyEntityModel {
+    return this[_getPropertyModel]('optionalEntity', MyEntityModel, [true]);
+  }
+
+  get optionalList(): ArrayModel<string, StringModel> {
+    return this[_getPropertyModel]('optionalList', ArrayModel, [true, StringModel, [true]]);
+  }
+
+  get optionalMatrix(): ArrayModel<ModelValue<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
+    return this[_getPropertyModel]('optionalMatrix', ArrayModel, [true, ArrayModel, [true, StringModel, [true]]]);
+  }
+
+  get nonNullableString(): StringModel {
+    return this[_getPropertyModel]('nonNullableString', StringModel, [false]);
+  }
+
+  get nonNullableList(): ArrayModel<string, StringModel> {
+    return this[_getPropertyModel]('nonNullableList', ArrayModel, [false, StringModel, [true]]);
+  }
+
+  get nonNullableMatrix(): ArrayModel<ModelValue<ArrayModel<string, StringModel>>, ArrayModel<string, StringModel>> {
+    return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [true, StringModel, [true]]]);
+  }
+
+  get mapWithList(): ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>> {
+    return this[_getPropertyModel]('mapWithList', ObjectModel, [true]);
+  }
+
+  get complexMap(): ObjectModel<Readonly<Record<string, ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>>>>>>>> {
+    return this[_getPropertyModel]('complexMap', ObjectModel, [true]);
+  }
+
+  get nestedArrays(): ArrayModel<ModelValue<ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>>, ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>> {
+    return this[_getPropertyModel]('nestedArrays', ArrayModel, [true, ArrayModel, [true, ObjectModel, [true]]]);
   }
 }

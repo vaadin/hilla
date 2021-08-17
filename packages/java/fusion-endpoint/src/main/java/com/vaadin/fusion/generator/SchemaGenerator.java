@@ -20,12 +20,12 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -115,13 +115,13 @@ class SchemaGenerator {
         Schema schema = new ObjectSchema()
                 .name(resolvedReferenceType.getQualifiedName());
         Map<String, Boolean> fieldsOptionalMap = getFieldsAndOptionalMap(type);
-        Set<ResolvedFieldDeclaration> serializableFields = resolvedReferenceType
-                .getDeclaredFields().stream()
+        List<ResolvedFieldDeclaration> serializableFields = resolvedReferenceType
+                .getTypeDeclaration().getDeclaredFields().stream()
                 .filter(resolvedFieldDeclaration -> fieldsOptionalMap
                         .containsKey(resolvedFieldDeclaration.getName()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         // Make sure the order is consistent in properties map
-        schema.setProperties(new TreeMap<>());
+        schema.setProperties(new LinkedHashMap<>());
         for (ResolvedFieldDeclaration resolvedFieldDeclaration : serializableFields) {
             String name = resolvedFieldDeclaration.getName();
             Schema subtype = openApiObjectGenerator
@@ -182,7 +182,7 @@ class SchemaGenerator {
 
     private Map<String, Schema> getPropertiesFromClassDeclaration(
             TypeDeclaration<?> typeDeclaration) {
-        Map<String, Schema> properties = new TreeMap<>();
+        Map<String, Schema> properties = new LinkedHashMap<>();
         for (FieldDeclaration field : typeDeclaration.getFields()) {
             if (field.isTransient() || field.isStatic()
                     || field.isAnnotationPresent(JsonIgnore.class)) {

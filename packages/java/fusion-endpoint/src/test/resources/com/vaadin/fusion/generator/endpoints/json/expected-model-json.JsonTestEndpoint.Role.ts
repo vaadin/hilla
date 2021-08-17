@@ -8,11 +8,11 @@ import Permissions from './Permissions';
 
 export default interface Role {
   /**
-   * Description for permissions.
-   */
-  readonly permissions?: Permissions;
-  /**
    * Description for roleName.
    */
   readonly roleName?: string;
+  /**
+   * Description for permissions.
+   */
+  readonly permissions?: Permissions;
 }

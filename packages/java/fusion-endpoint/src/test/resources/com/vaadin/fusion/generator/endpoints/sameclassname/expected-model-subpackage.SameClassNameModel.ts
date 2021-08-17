@@ -7,6 +7,6 @@ import SubpackageSubProperty from './SubProperty';
  */
 export default interface SameClassNameModel {
   readonly bar?: string;
-  readonly barbarfoo?: SubpackageSubProperty;
   readonly foofoo?: SubProperty;
+  readonly barbarfoo?: SubpackageSubProperty;
 }

@@ -5,6 +5,6 @@ import Schema from './Schema';
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface ArraySchema extends Schema {
-  readonly items?: Schema;
   readonly type?: string;
+  readonly items?: Schema;
 }
