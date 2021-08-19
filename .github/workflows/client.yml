@@ -26,7 +26,7 @@ jobs:
       - name: Use NodeJS LTS
         uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 16.x
       - name: Installation
         run: npm ci
       - name: Building
