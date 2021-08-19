@@ -1,0 +1,35 @@
+{
+  "name": "@vaadin/client",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vaadin client TypeScript code",
+  "main": "index.js",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "lint": "lerna run lint",
+    "postinstall": "lerna bootstrap",
+    "test": "lerna run test",
+    "typecheck": "lerna run typecheck"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/vaadin/flow/client"
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@web/dev-server-esbuild": "^0.2.12",
+    "eslint": "^7.32.0",
+    "eslint-config-vaadin": "^0.4.0",
+    "eslint-plugin-chai-friendly": "^0.7.2",
+    "lerna": "^4.0.0",
+    "lint-staged": "^11.1.2",
+    "prettier": "^2.3.2",
+    "simple-git-hooks": "^2.6.1",
+    "typescript": "^4.3.5"
+  }
+}

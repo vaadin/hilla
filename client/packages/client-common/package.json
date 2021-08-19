@@ -1,0 +1,44 @@
+{
+  "name": "@vaadin/client-commons",
+  "version": "22.0.0-alpha1",
+  "description": "Vaadin client common utils",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "repository": "vaadin/flow/client",
+  "keywords": [
+    "Vaadin",
+    "Fusion"
+  ],
+  "scripts": {
+    "build": "tsc --isolatedModules",
+    "lint": "eslint --fix src/**/*.{ts,js}",
+    "test": "web-test-runner \"test/**/*.test.ts\" --config ../../web-test-runner.config.js",
+    "test:watch": "yarn run test -- --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/flow/issues"
+  },
+  "homepage": "https://vaadin.com/fusion",
+  "files": [
+    "*.d.ts",
+    "*.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "lit": "^2.0.0-rc.2"
+  },
+  "devDependencies": {
+    "@open-wc/testing": "^2.5.33",
+    "@types/chai": "^4.2.21",
+    "@types/mocha": "^9.0.0",
+    "@types/sinon": "^10.0.2",
+    "@types/sinon-chai": "^3.2.5",
+    "@web/test-runner": "^0.13.16",
+    "sinon": "^11.1.2"
+  }
+}

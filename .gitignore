@@ -1,0 +1,60 @@
+
+# /
+.classpath
+*.project
+*.settings
+/.cvsignore
+/.tomcatplugin
+/work
+/.gwt-cache
+/.externalToolBuilders
+/extras
+**/bin
+*~
+
+*pom.xml.versionsBackup
+
+**/target
+**/error-screenshots
+
+**/.sts4-cache/*
+.factorypath
+
+# Mac
+*.DS_Store
+
+# Python
+scripts/*.pyc
+
+# Intellij Idea files
+.idea
+*.iml
+
+# VS Code
+.vscode
+
+# Selenium driver folders
+selenium_standalone_zips
+driver_zips
+driver
+
+bower_components
+node
+node_modules
+/frontend
+*/flow-*/frontend
+package-lock.json
+**/webpack.generated.js
+
+flow-tests/**/package.json
+flow-tests/**/webpack*.js
+flow-tests/**/tsconfig.json
+flow-tests/**/pnpm-lock.yaml
+yarn.lock
+
+flow-client/src/main/frontend/FlowClient.js
+flow-tests/**/types.d.ts
+/flow-tests/**/*.generated.js
+/flow-tests/**/generated/**
+flow-tests/**/pnpmfile.js
+flow-tests/**/*.npmrc
