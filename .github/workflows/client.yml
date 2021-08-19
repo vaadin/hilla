@@ -1,0 +1,42 @@
+name: Client CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/client.yml'
+      - 'client/**/*'
+      - '!client/.simple-git-hooks.json'
+      - '!client/.lintstagedrc.json'
+
+jobs:
+  testing:
+    name: Build
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use NodeJS LTS
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Open Project Directory
+        run: cd client
+      - name: Installation
+        run: npm ci
+      - name: Building
+        run: npm run build
+      - name: Linting
+        run: npm run check
+      - name: Testing
+        run: npm run test
+        env:
+          CI: true
+      - name: Source Analysis and Coverage
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
