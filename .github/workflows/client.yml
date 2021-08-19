@@ -8,6 +8,10 @@ on:
       - '!client/.simple-git-hooks.json'
       - '!client/.lintstagedrc.json'
 
+defaults:
+  run:
+    working-directory: client
+
 jobs:
   testing:
     name: Test & Analysis
@@ -23,8 +27,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - name: Open Project Directory
-        run: cd client
       - name: Installation
         run: npm ci
       - name: Building
