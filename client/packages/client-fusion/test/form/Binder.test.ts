@@ -342,5 +342,21 @@ describe('form/Binder', () => {
       await binder.validate();
       assert.isFalse(binder.invalid);
     });
+
+    // https://github.com/vaadin/fusion/issues/43
+    it('should be able to bind to a nested property of an optional parent', async () => {
+      const superNameNode = binder.for(binder.model.supervisor.fullName);
+      binder.read({
+        ...expectedEmptyEmployee,
+      });
+      assert.equal('', superNameNode.value);
+    });
+
+    // https://github.com/vaadin/fusion/issues/43
+    it('should be able to read a nested property of an optional parent after clear', async () => {
+      const superNameNode = binder.for(binder.model.supervisor.fullName);
+      binder.clear();
+      assert.equal('', superNameNode.value);
+    });
   });
 });

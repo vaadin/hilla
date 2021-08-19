@@ -96,6 +96,9 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * The current value related to the model
    */
   get value(): T | undefined {
+    if (this.parent!.value === undefined) {
+      this.parent!.initializeValue(true);
+    }
     return this.parent!.value[this.model[_key]];
   }
 
