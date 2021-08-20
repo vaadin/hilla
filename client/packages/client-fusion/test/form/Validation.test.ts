@@ -5,7 +5,7 @@ import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { customElement, query } from 'lit/decorators.js';
 // API to test
-import { Binder, field, Required, ValidationError, Validator, ValueError } from '../../src/form';
+import { Binder, field, Required, ValidationError, Validator, ValueError } from '../../src';
 import { IdEntity, IdEntityModel, Order, OrderModel, TestEntity, TestModel } from './TestModels';
 
 @customElement('order-view')

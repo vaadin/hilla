@@ -12,7 +12,7 @@ import {
   NumberModel,
   Positive,
   Size,
-} from '../../src/form';
+} from '../../src';
 
 import { IdEntity, IdEntityModel, TestEntity, TestModel } from './TestModels';
 
