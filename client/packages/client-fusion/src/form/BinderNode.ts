@@ -146,12 +146,12 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * @param model The nested model instance
    */
   for<NM extends AbstractModel<any>>(model: NM): BinderNode<ReturnType<NM['valueOf']>, NM> {
-    const binderNode = getBinderNode(model);
-    if (binderNode.binder !== this.binder) {
+    const node = getBinderNode(model);
+    if (node.binder !== this.binder) {
       throw new Error('Unknown binder');
     }
 
-    return binderNode;
+    return node;
   }
 
   /**
