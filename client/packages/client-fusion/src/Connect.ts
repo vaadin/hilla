@@ -341,7 +341,8 @@ export class ConnectClient {
     ): Promise<Response> => {
       const response = await next(context);
       await assertResponseIsOk(response);
-      return response.json();
+      const text = await response.text();
+      return JSON.parse(text, (_, value: any) => (value === null ? undefined : value));
     };
 
     // The actual fetch call itself is expressed as a middleware
