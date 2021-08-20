@@ -1,0 +1,39 @@
+name: Client
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/client.yml'
+      - 'client/**/*'
+      - '!client/.simple-git-hooks.json'
+      - '!client/.lintstagedrc.json'
+
+defaults:
+  run:
+    working-directory: client
+
+jobs:
+  testing:
+    name: Test & Analysis
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use NodeJS LTS
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - name: Installation
+        run: npm ci
+      - name: Building
+        run: npm run build
+      - name: Linting
+        run: npm run check
+      - name: Testing
+        run: npm run test
+        env:
+          CI: true

@@ -1,16 +1,17 @@
 {
   "name": "@vaadin/client",
   "private": true,
-  "version": "1.0.0",
   "description": "Vaadin client TypeScript code",
   "main": "index.js",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "lerna run build",
+    "check": "concurrently npm:lint npm:typecheck",
+    "build": "lerna run build --include-dependencies --stream",
     "lint": "lerna run lint",
     "postinstall": "lerna bootstrap",
+    "publish": "lerna publish",
     "test": "lerna run test",
     "typecheck": "lerna run typecheck"
   },
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@web/dev-server-esbuild": "^0.2.12",
+    "concurrently": "^6.2.1",
     "eslint": "^7.32.0",
     "eslint-config-vaadin": "^0.4.0",
     "eslint-plugin-chai-friendly": "^0.7.2",
