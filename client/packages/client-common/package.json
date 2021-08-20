@@ -23,8 +23,7 @@
   },
   "homepage": "https://vaadin.com/fusion",
   "files": [
-    "*.d.ts",
-    "*.js"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
