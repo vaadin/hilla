@@ -1,4 +1,4 @@
-name: Client CI
+name: Client
 
 on:
   pull_request:
@@ -37,8 +37,3 @@ jobs:
         run: npm run test
         env:
           CI: true
-      - name: Source Analysis and Coverage
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
