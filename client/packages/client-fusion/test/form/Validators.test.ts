@@ -51,8 +51,10 @@ describe('form/Validators', () => {
   it('Email', () => {
     const validator = new Email();
     assert.isNotTrue(validator.impliesRequired);
+    assert.isTrue(validator.validate(undefined));
+    assert.isTrue(validator.validate(null));
     assert.isTrue(validator.validate('foo@vaadin.com'));
-    assert.isFalse(validator.validate(''));
+    assert.isTrue(validator.validate(''));
     assert.isFalse(validator.validate('foo'));
     assert.isFalse(validator.validate('foo@vaadin.c'));
     assert.isFalse(validator.validate('ñññ@vaadin.c'));
