@@ -1,6 +1,6 @@
 <a target="_blank" href="https://vaad.in/fusion"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Vaadin Fusion Discord"></img></a>
 
-Vaadin Fusion
+Vaadin Fusion!
 ======
 *[Vaadin Fusion](https://vaadin.com/fusion) is a TypeScript and Java web framework for building modern web applications. You can create UIs in TypeScript and connect to any backend through endpoints written in Java.*
 
