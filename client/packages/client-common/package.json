@@ -1,6 +1,5 @@
 {
   "name": "@vaadin/client-commons",
-  "version": "22.0.0-alpha1",
   "description": "Vaadin client common utils",
   "main": "dist/index.js",
   "module": "dist/index.js",

@@ -1,6 +1,5 @@
 {
   "name": "@vaadin/client-fusion",
-  "version": "22.0.0-alpha1",
   "description": "Vaadin Fusion client utils",
   "main": "dist/index.js",
   "module": "dist/index.js",

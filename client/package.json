@@ -1,7 +1,6 @@
 {
   "name": "@vaadin/client",
   "private": true,
-  "version": "1.0.0",
   "description": "Vaadin client TypeScript code",
   "main": "index.js",
   "workspaces": [
