@@ -1,2 +1,2 @@
-export * from './ConnectionState';
-export * from './ConnectionIndicator';
+export * from './ConnectionState.js';
+export * from './ConnectionIndicator.js';

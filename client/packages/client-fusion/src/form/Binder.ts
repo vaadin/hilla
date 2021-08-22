@@ -1,13 +1,13 @@
 // TODO: Fix dependency cycle
 
 // eslint-disable-next-line import/no-cycle
-import { BinderNode } from './BinderNode';
+import { BinderNode } from './BinderNode.js';
 // eslint-disable-next-line import/no-cycle
-import { _parent, AbstractModel, ModelConstructor } from './Models';
+import { _parent, AbstractModel, ModelConstructor } from './Models.js';
 // eslint-disable-next-line import/no-cycle
-import { runValidator, ServerValidator, ValidationError, Validator, ValueError } from './Validation';
+import { runValidator, ServerValidator, ValidationError, Validator, ValueError } from './Validation.js';
 // eslint-disable-next-line import/no-cycle
-import { FieldStrategy, getDefaultFieldStrategy } from './Field';
+import { FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 
 const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');

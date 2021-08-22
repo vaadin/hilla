@@ -1,8 +1,8 @@
-export * from './Binder';
-export * from './Field';
-export * from './Models';
-export * from './Validation';
-export * from './Validators';
+export * from './Binder.js';
+export * from './Field.js';
+export * from './Models.js';
+export * from './Validation.js';
+export * from './Validators.js';
 
 const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};

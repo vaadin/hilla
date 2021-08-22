@@ -1,14 +1,14 @@
-import isAfter from 'validator/es/lib/isAfter';
-import isBefore from 'validator/es/lib/isBefore';
-import isBoolean from 'validator/es/lib/isBoolean';
-import isDecimal from 'validator/es/lib/isDecimal';
-import isEmail from 'validator/es/lib/isEmail';
-import isFloat from 'validator/es/lib/isFloat';
-import isLength from 'validator/es/lib/isLength';
-import isNumeric from 'validator/es/lib/isNumeric';
-import matches from 'validator/es/lib/matches';
-import toFloat from 'validator/es/lib/toFloat';
-import type { Validator } from './Validation';
+import isAfter from 'validator/es/lib/isAfter.js';
+import isBefore from 'validator/es/lib/isBefore.js';
+import isBoolean from 'validator/es/lib/isBoolean.js';
+import isDecimal from 'validator/es/lib/isDecimal.js';
+import isEmail from 'validator/es/lib/isEmail.js';
+import isFloat from 'validator/es/lib/isFloat.js';
+import isLength from 'validator/es/lib/isLength.js';
+import isNumeric from 'validator/es/lib/isNumeric.js';
+import matches from 'validator/es/lib/matches.js';
+import toFloat from 'validator/es/lib/toFloat.js';
+import type { Validator } from './Validation.js';
 
 interface ValidatorAttributes {
   message?: string;

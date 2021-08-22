@@ -1,4 +1,4 @@
-import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect';
+import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 
 const $wnd = window as any;
 

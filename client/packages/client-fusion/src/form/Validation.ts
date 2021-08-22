@@ -1,10 +1,10 @@
 // TODO: Fix dependency cycle
 
-import type { Binder } from './Binder';
+import type { Binder } from './Binder.js';
 // eslint-disable-next-line import/no-cycle
-import { AbstractModel, getBinderNode, NumberModel } from './Models';
+import { AbstractModel, getBinderNode, NumberModel } from './Models.js';
 // eslint-disable-next-line import/no-cycle
-import { Required } from './Validators';
+import { Required } from './Validators.js';
 
 export interface ValueError<T> {
   property: string | AbstractModel<any>;

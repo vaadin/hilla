@@ -1,2 +1,2 @@
-export * from './Authentication';
-export * from './Connect';
+export * from './Authentication.js';
+export * from './Connect.js';
