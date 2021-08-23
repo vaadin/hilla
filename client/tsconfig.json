@@ -4,11 +4,14 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "declaration": true,
+    "declarationMap": true,
     "target": "es2019",
     "module": "esnext",
     "moduleResolution": "node",
     "lib": ["es2019", "dom"],
     "strict": true,
+    "sourceMap": true,
+    "inlineSources": true,
     "importsNotUsedAsValues": "error"
   },
   "include": ["packages/**"]
