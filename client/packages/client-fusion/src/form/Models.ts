@@ -1,10 +1,10 @@
 // TODO: Fix dependency cycle
 
-import isNumeric from 'validator/es/lib/isNumeric';
+import isNumeric from 'validator/es/lib/isNumeric.js';
 // eslint-disable-next-line import/no-cycle
-import { BinderNode } from './BinderNode';
-import type { Validator } from './Validation';
-import { IsNumber } from './Validators';
+import { BinderNode } from './BinderNode.js';
+import type { Validator } from './Validation.js';
+import { IsNumber } from './Validators.js';
 
 export const _ItemModel = Symbol('ItemModel');
 export const _parent = Symbol('parent');

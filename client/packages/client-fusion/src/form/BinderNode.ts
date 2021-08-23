@@ -15,7 +15,7 @@
  */
 // TODO: Fix dependency cycle
 
-import type { Binder } from './Binder';
+import type { Binder } from './Binder.js';
 // eslint-disable-next-line import/no-cycle
 import {
   _binderNode,
@@ -29,8 +29,8 @@ import {
   ModelConstructor,
   ModelValue,
   ObjectModel,
-} from './Models';
-import type { Validator, ValueError } from './Validation';
+} from './Models.js';
+import type { Validator, ValueError } from './Validation.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
 const _visited = Symbol('visited');

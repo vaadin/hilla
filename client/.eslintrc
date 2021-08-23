@@ -4,6 +4,8 @@
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    // https://github.com/import-js/eslint-plugin-import/issues/2170#issuecomment-889657579
+    "import/no-unresolved": "off",
     "max-classes-per-file": "off",
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "no-restricted-syntax": [

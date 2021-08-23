@@ -17,7 +17,7 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { ConnectionState, ConnectionStateStore } from './ConnectionState';
+import { ConnectionState, ConnectionStateStore } from './ConnectionState.js';
 
 const DEFAULT_STYLE_ID = 'css-loading-indicator';
 
