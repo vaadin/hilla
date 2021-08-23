@@ -12,7 +12,7 @@ import {
   Required,
   Size,
   StringModel,
-} from '../../src/form';
+} from '../../src';
 
 export interface IdEntity {
   idString: string;
