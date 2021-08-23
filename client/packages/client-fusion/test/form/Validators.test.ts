@@ -23,7 +23,7 @@ import {
   PositiveOrZero,
   Required,
   Size,
-} from '../../src/form';
+} from '../../src';
 
 describe('form/Validators', () => {
   it('custom error message', () => {

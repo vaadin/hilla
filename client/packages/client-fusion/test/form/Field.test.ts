@@ -17,7 +17,7 @@ import {
   AbstractModel,
   FieldStrategy,
   AbstractFieldStrategy,
-} from '../../src/form';
+} from '../../src';
 import { OrderModel, TestModel, TestEntity, Order } from './TestModels';
 
 describe('form/Field', () => {
