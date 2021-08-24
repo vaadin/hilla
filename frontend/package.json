@@ -1,23 +1,24 @@
 {
-  "name": "@vaadin/client",
+  "name": "@vaadin/frontend",
   "private": true,
-  "description": "Vaadin client TypeScript code",
+  "description": "Vaadin frontend code",
   "main": "index.js",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
+    "bootstrap": "lerna bootstrap",
     "build": "lerna run build --include-dependencies --stream",
     "lint": "lerna run lint",
-    "postinstall": "lerna bootstrap",
+    "postinstall": "npm run bootstrap",
     "publish": "lerna publish",
     "test": "lerna run test",
     "typecheck": "lerna run typecheck"
   },
   "repository": {
     "type": "git",
-    "url": "github.com/vaadin/flow/client"
+    "url": "github.com/vaadin/fusion/frontend"
   },
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",

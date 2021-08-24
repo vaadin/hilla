@@ -142,7 +142,7 @@ export class ConnectionIndicator extends LitElement {
 
   render() {
     return html`
-      <div class="v-loading-indicator ${this.loadingBarState}" style="${this.getLoadingBarStyle()}"></div>
+      <div class="v-loading-indicator ${this.loadingBarState}" style=${this.getLoadingBarStyle()}></div>
 
       <div
         class="v-status-message ${classMap({

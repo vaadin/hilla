@@ -1,3 +1,0 @@
-{
-  "pre-commit": "cd client && npx lint-staged"
-}

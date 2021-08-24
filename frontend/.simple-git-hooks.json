@@ -1,0 +1,3 @@
+{
+  "pre-commit": "cd frontend && npx lint-staged"
+}
