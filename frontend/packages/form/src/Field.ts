@@ -1,4 +1,4 @@
-import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
+import { ElementPart, noChange, nothing, PropertyPart } from 'lit/index.js';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
 import { _fromString, AbstractModel, getBinderNode } from './Models.js';
 
