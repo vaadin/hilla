@@ -9,7 +9,7 @@
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
     "bootstrap": "lerna bootstrap",
-    "build": "lerna run build --include-dependencies --stream",
+    "build": "lerna run build --include-dependencies",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
     "publish": "lerna publish",

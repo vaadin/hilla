@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend/index.js';
+import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
 
 const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};
