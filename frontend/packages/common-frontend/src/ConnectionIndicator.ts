@@ -14,7 +14,7 @@
  * the License.
  */
 
-import { html, LitElement } from 'lit';
+import { html, LitElement } from 'lit/index.js';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { ConnectionState, ConnectionStateStore } from './ConnectionState.js';
