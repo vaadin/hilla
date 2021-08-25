@@ -3,6 +3,7 @@
   "private": true,
   "description": "Vaadin frontend code",
   "main": "index.js",
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@web/dev-server-esbuild": "^0.2.12",
+    "@web/test-runner-chrome": "^0.10.2",
     "concurrently": "^6.2.1",
     "eslint": "^7.32.0",
     "eslint-config-vaadin": "^0.4.0",

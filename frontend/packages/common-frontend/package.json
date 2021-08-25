@@ -4,7 +4,8 @@
   "description": "Vaadin frontend utils used by Flow and Fusion",
   "main": "./index.js",
   "module": "./index.js",
-  "repository": "vaadin/flow/client",
+  "type": "module",
+  "repository": "vaadin/fusion/frontend",
   "keywords": [
     "Vaadin",
     "Fusion"
