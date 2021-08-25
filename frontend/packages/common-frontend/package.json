@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/client-fusion",
+  "name": "@vaadin/common-frontend",
   "version": "22.0.0-alpha1",
-  "description": "Vaadin Fusion client utils",
+  "description": "Vaadin frontend utils used by Flow and Fusion",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "repository": "vaadin/flow/client",
@@ -19,7 +19,7 @@
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/flow/issues"
+    "url": "https://github.com/vaadin/fusion/issues"
   },
   "homepage": "https://vaadin.com/fusion",
   "files": [
@@ -29,9 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/client-commons": "^22.0.0-alpha1",
-    "lit": "^2.0.0-rc.2",
-    "validator": "^13.6.0"
+    "lit": "^2.0.0-rc.2"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",
@@ -39,9 +37,7 @@
     "@types/mocha": "^9.0.0",
     "@types/sinon": "^10.0.2",
     "@types/sinon-chai": "^3.2.5",
-    "@types/validator": "^13.6.3",
     "@web/test-runner": "^0.13.16",
-    "fetch-mock": "^9.11.0",
     "sinon": "^11.1.2"
   }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
 import { expect } from '@open-wc/testing';
-import { ConnectionState, ConnectionStateStore } from '@vaadin/client-commons';
+import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client';
 import sinon from 'sinon';
 import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src';

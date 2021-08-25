@@ -1,16 +1,16 @@
-name: Client
+name: Frontend CI
 
 on:
   pull_request:
     paths:
-      - '.github/workflows/client.yml'
-      - 'client/**/*'
-      - '!client/.simple-git-hooks.json'
-      - '!client/.lintstagedrc.json'
+      - '.github/workflows/frontend.yml'
+      - 'frontend/**/*'
+      - '!frontend/.simple-git-hooks.json'
+      - '!frontend/.lintstagedrc.json'
 
 defaults:
   run:
-    working-directory: client
+    working-directory: frontend
 
 jobs:
   testing:
