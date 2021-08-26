@@ -2,8 +2,8 @@
   "name": "@vaadin/form",
   "version": "22.0.0-alpha1",
   "description": "Vaadin form utils",
-  "main": "./index.js",
-  "module": "./index.js",
+  "main": "index.js",
+  "module": "index.js",
   "type": "module",
   "repository": "vaadin/fusion/frontend",
   "keywords": [
@@ -50,13 +50,7 @@
   },
   "homepage": "https://vaadin.com/fusion",
   "files": [
-    "Binder.{d.ts.map,d.ts,js.map,js}",
-    "BinderNode.{d.ts.map,d.ts,js.map,js}",
-    "Field.{d.ts.map,d.ts,js.map,js}",
-    "index.{d.ts.map,d.ts,js.map,js}",
-    "Models.{d.ts.map,d.ts,js.map,js}",
-    "Validation.{d.ts.map,d.ts,js.map,js}",
-    "Validators.{d.ts.map,d.ts,js.map,js}"
+    "*.{d.ts.map,d.ts,js.map,js}"
   ],
   "publishConfig": {
     "access": "public"
