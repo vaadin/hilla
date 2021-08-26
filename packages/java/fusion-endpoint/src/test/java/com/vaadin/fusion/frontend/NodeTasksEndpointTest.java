@@ -3,11 +3,9 @@ package com.vaadin.fusion.frontend;
 import static com.vaadin.flow.server.Constants.TARGET;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -18,15 +16,11 @@ import com.vaadin.flow.server.frontend.NodeTasks.Builder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
 
 public class NodeTasksEndpointTest {
 
@@ -82,22 +76,4 @@ public class NodeTasksEndpointTest {
                         new File(dir, name).exists()));
     }
 
-    @Test
-    public void should_AddDependenciesToPackageJson() throws Exception {
-        builder.createMissingPackageJson(true);
-
-        builder.build().execute();
-
-        File packageJson = new File(dir, "package.json");
-
-        JsonObject content = Json
-                .parse(FileUtils.readFileToString(packageJson, UTF_8));
-
-        assertTrue(content.hasKey("dependencies"));
-
-        JsonObject dependencies = content.getObject("dependencies");
-
-        assertTrue(dependencies.hasKey("@adobe/lit-mobx"));
-        assertTrue(dependencies.hasKey("mobx"));
-    }
 }

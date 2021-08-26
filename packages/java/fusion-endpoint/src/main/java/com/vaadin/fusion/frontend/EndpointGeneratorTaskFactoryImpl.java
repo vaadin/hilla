@@ -21,7 +21,6 @@ import java.util.Objects;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 import com.vaadin.flow.server.frontend.TaskGenerateFusion;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-import com.vaadin.flow.server.frontend.TaskUseFusionPackage;
 
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
@@ -52,15 +51,6 @@ public class EndpointGeneratorTaskFactoryImpl
         Objects.requireNonNull(classLoader, "ClassLoader should not be null.");
         return new TaskGenerateOpenAPIImpl(properties, javaSourceFolder,
                 classLoader, output);
-    }
-
-    @Override
-    public TaskUseFusionPackage createTaskUseFusionPackage(File npmFolder,
-            File generatedPath, File flowResourcesPath, String buildDir) {
-        Objects.requireNonNull(npmFolder,
-                "Vaadin npm folder should not be null.");
-        return new TaskUseFusionPackageImpl(npmFolder, generatedPath,
-                flowResourcesPath, buildDir);
     }
 
 }
