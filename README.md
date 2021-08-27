@@ -9,3 +9,9 @@ Vaadin Fusion
 Join the Vaadin Fusion community chat in https://vaad.in/fusion
 
 **Note**: Currently the code of Vaadin Fusion is hosted at https://github.com/vaadin/flow together with the Flow framework. The Fusion-only code will be ported to this repository in the near future. Tickets can already be created in this repository.
+
+## Packages
+
+| Package                        |
+|--------------------------------|
+| [@vaadin/frontend](./frontend) |
