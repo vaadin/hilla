@@ -5,8 +5,8 @@ import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 // API to test
-import { Binder, BinderConfiguration } from '../../src';
-import { Employee, EmployeeModel, Order, OrderModel, TestEntity, TestModel } from './TestModels';
+import { Binder, BinderConfiguration } from '../src';
+import { Employee, EmployeeModel, Order, OrderModel, TestEntity, TestModel } from './TestModels.js';
 
 @customElement('lit-order-view')
 class LitOrderView extends LitElement {}

@@ -2,9 +2,10 @@
   "name": "@vaadin/common-frontend",
   "version": "22.0.0-alpha1",
   "description": "Vaadin frontend utils used by Flow and Fusion",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "repository": "vaadin/flow/client",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module",
+  "repository": "vaadin/fusion/frontend",
   "keywords": [
     "Vaadin",
     "Fusion"
@@ -16,6 +17,20 @@
     "test:watch": "yarn run test -- --watch",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./ConnectionIndicator.js": {
+      "default": "./ConnectionIndicator.js"
+    },
+    "./ConnectionState.js": {
+      "default": "./ConnectionState.js"
+    },
+    "./index.js": {
+      "default": "./index.js"
+    }
+  },
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
   "bugs": {
@@ -23,7 +38,7 @@
   },
   "homepage": "https://vaadin.com/fusion",
   "files": [
-    "dist"
+    "*.{d.ts.map,d.ts,js.map,js}"
   ],
   "publishConfig": {
     "access": "public"

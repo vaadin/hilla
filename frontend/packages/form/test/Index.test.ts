@@ -23,7 +23,7 @@ describe('form/Index', () => {
   });
 
   it('should add registration', async () => {
-    await import('../../src/form');
+    await import('../src');
     assert.isDefined($wnd.Vaadin);
     assert.isArray($wnd.Vaadin.registrations);
     const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@vaadin/form');

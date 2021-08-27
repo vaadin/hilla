@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { LitElement, nothing, render } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
 import { customElement, query } from 'lit/decorators.js';
-import type { BinderNode } from '../../src/form/BinderNode';
+import type { BinderNode } from '../src/form/BinderNode';
 // API to test
 import {
   Binder,
@@ -17,7 +17,7 @@ import {
   AbstractModel,
   FieldStrategy,
   AbstractFieldStrategy,
-} from '../../src';
+} from '../src';
 import { OrderModel, TestModel, TestEntity, Order } from './TestModels';
 
 describe('form/Field', () => {
