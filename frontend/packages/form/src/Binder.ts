@@ -167,7 +167,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     this.update(this.value);
     try {
       return await endpointMethod.call(this.context, this.value);
-    } catch (error) {
+    } catch (error: any) {
       if (error.validationErrorData && error.validationErrorData.length) {
         const valueErrors: Array<ValueError<any>> = [];
         error.validationErrorData.forEach((data: any) => {
