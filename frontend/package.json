@@ -18,7 +18,7 @@
     "bump": "node scripts/bump.js",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
-    "publish": "lerna publish",
+    "publish": "node scripts/dummy-publish-tmp.js",
     "test": "lerna run test",
     "test:coverage": "lerna run test:coverage",
     "typecheck": "lerna run typecheck"
