@@ -32,11 +32,15 @@ async function updateLernaConfig() {
 
 async function updatePackageRegistrations() {
   const versionPattern = /version:.+$/m;
-  const packages = await readdir(resolve(root, 'packages'));
+  const packagesRoot = resolve(root, 'packages');
+  const packages = await readdir(packagesRoot);
+
   await Promise.all(
     packages.map(async (_package) => {
-      const indexFile = resolve(_package, 'src/index.ts');
-      indexFile.replace(versionPattern, `version: /* updated-by-script */ '${version}',`);
+      const indexFile = resolve(packagesRoot, _package, 'src/index.ts');
+      const content = await readFile(indexFile, 'utf8');
+      const updated = content.replace(versionPattern, `version: /* updated-by-script */ '${version}',`);
+      await writeFile(indexFile, updated, 'utf8');
     })
   );
 }
