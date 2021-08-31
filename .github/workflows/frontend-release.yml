@@ -1,4 +1,4 @@
-name: Frontend CI
+name: Frontend Release
 
 on:
   release:
@@ -23,17 +23,17 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
-      - name: Installation
+      - name: Install
         run: npm ci
-      - name: Building
+      - name: Build
         run: npm run build
-      - name: Linting
+      - name: Lint
         run: npm run check
-      - name: Testing
+      - name: Test
         run: npm run test
         env:
           CI: true
-      - name: Bump new version
+      - name: Bump New Version
         run: |
           npm run bump -- -v ${{ github.event.release.tag_name }}
           git commit -m "chore(release): ${{ github.event.release.tag_name }}"
