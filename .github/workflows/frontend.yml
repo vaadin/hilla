@@ -48,7 +48,7 @@ jobs:
         run: |
           COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
-      - name: Transfer Coverage to Codecov
+      - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -56,3 +56,4 @@ jobs:
           flags: unittests
           fail_ci_if_error: true
           verbose: true
+          working-directory: frontend
