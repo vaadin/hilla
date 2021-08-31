@@ -1,6 +1,13 @@
 name: Frontend CI
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/frontend.yml'
+      - 'frontend/**/*'
+      - '!frontend/.simple-git-hooks.json'
+      - '!frontend/.lintstagedrc.json'
   pull_request:
     paths:
       - '.github/workflows/frontend.yml'
