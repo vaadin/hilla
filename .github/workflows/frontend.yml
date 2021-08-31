@@ -27,13 +27,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - name: Installation
+      - name: Install
         run: npm ci
-      - name: Building
+      - name: Build
         run: npm run build
-      - name: Linting
+      - name: Lint
         run: npm run check
-      - name: Testing
-        run: npm run test
+      - name: Test
+        run: npm run test:coverage
         env:
           CI: true
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
+      - name: Transfer Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ${{ env.COVFILES }}
+          flags: unittests
+          verbose: true
