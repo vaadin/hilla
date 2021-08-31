@@ -74,12 +74,16 @@ import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.NullHandling;
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.Endpoint;
 import com.vaadin.fusion.EndpointExposed;
 import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
+import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
+import com.vaadin.fusion.endpointransfermapper.PageableDTO;
 import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.GrandParentModel;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.Model;
@@ -157,12 +161,29 @@ public abstract class AbstractEndpointGenerationTest
             Map<String, Schema> componentSchemas = Optional
                     .ofNullable(actualOpenAPI.getComponents())
                     .map(Components::getSchemas).orElse(Collections.emptyMap());
+
+            removeMapperClasses(componentSchemas);
             assertTrue(String.format(
                     "Got schemas that correspond to no class provided in test parameters, schemas: '%s'",
                     componentSchemas), componentSchemas.isEmpty());
         }
 
         verifySchemaReferences();
+    }
+
+    private void removeMapperClasses(Map<String, Schema> componentSchemas) {
+        componentSchemas.keySet().removeIf(clsName -> {
+            /* Skip classes that are added because of the mappers */
+            if (clsName.startsWith(
+                    PageableDTO.class.getPackage().getName() + ".")) {
+                return true;
+            }
+            if (Direction.class.getCanonicalName().equals(clsName)
+                    || NullHandling.class.getCanonicalName().equals(clsName)) {
+                return true;
+            }
+            return false;
+        });
     }
 
     private void assertPaths(Paths actualPaths,
@@ -322,6 +343,11 @@ public abstract class AbstractEndpointGenerationTest
         Type genericReturnType = expectedEndpointMethod.getGenericReturnType();
         Class<?> returnType = applyTypeArguments(genericReturnType,
                 typeArguments);
+        Class<?> mappedType = new EndpointTransferMapper()
+                .getTransferType(returnType);
+        if (mappedType != null) {
+            returnType = mappedType;
+        }
         if (returnType != void.class) {
             assertSchema(extractSchema(apiResponse.getContent()), returnType,
                     extractTypeArguments(genericReturnType, typeArguments));
@@ -439,8 +465,15 @@ public abstract class AbstractEndpointGenerationTest
                 } else {
                     // Nullable schema for referring schema object
                     assertEquals(1, allOf.size());
-                    assertEquals(expectedSchemaClass.getCanonicalName(),
-                            allOf.get(0).getName());
+                    String expectedName = expectedSchemaClass
+                            .getCanonicalName();
+                    Class<?> transferType = new EndpointTransferMapper()
+                            .getTransferType(expectedSchemaClass);
+                    if (transferType != null) {
+                        expectedName = transferType.getCanonicalName();
+                        ;
+                    }
+                    assertEquals(expectedName, allOf.get(0).getName());
                 }
             } else if (actualSchema instanceof ObjectSchema) {
                 assertSchemaProperties(expectedSchemaClass, typeArguments,

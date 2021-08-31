@@ -44,6 +44,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -51,12 +52,15 @@ import com.github.javaparser.ast.expr.LiteralStringValueExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.resolution.types.parametrization.ResolvedTypeParametersMap;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.model.typesystem.ReferenceTypeImpl;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -93,6 +97,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.fusion.Endpoint;
 import com.vaadin.fusion.EndpointExposed;
 import com.vaadin.fusion.EndpointNameChecker;
+import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
 
 /**
  * Java parser class which scans for all {@link Endpoint} classes and produces
@@ -119,6 +124,8 @@ public class OpenAPIObjectGenerator {
     private ClassLoader typeResolverClassLoader;
     private SchemaGenerator schemaGenerator;
     private boolean needsDeferrableImport = false;
+    private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
+    private CombinedTypeSolver typeSolver;
 
     private static Logger getLogger() {
         return LoggerFactory.getLogger(OpenAPIObjectGenerator.class);
@@ -244,14 +251,13 @@ public class OpenAPIObjectGenerator {
     }
 
     private ParserConfiguration createParserConfiguration() {
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver(
-                new ReflectionTypeSolver(false));
+        typeSolver = new CombinedTypeSolver(new ReflectionTypeSolver(false));
         if (typeResolverClassLoader != null) {
-            combinedTypeSolver
-                    .add(new ClassLoaderTypeSolver(typeResolverClassLoader));
+            typeSolver.add(new ClassLoaderTypeSolver(typeResolverClassLoader));
         }
-        return new ParserConfiguration()
-                .setSymbolResolver(new JavaSymbolSolver(combinedTypeSolver));
+        JavaSymbolSolver symbolResolver = new JavaSymbolSolver(typeSolver);
+
+        return new ParserConfiguration().setSymbolResolver(symbolResolver);
     }
 
     private void parseSourceRoot(SourceRoot sourceRoot, Callback callback) {
@@ -659,14 +665,62 @@ public class OpenAPIObjectGenerator {
     private MediaType createReturnMediaType(MethodDeclaration methodDeclaration,
             ResolvedTypeParametersMap resolvedTypeParametersMap) {
         MediaType mediaItem = new MediaType();
-        Schema schema = parseResolvedTypeToSchema(
-                new GeneratorType(methodDeclaration.getType(),
-                        resolvedTypeParametersMap.replaceAll(
-                                methodDeclaration.resolve().getReturnType())),
+        GeneratorType generatorType = createSchemaType(methodDeclaration,
+                resolvedTypeParametersMap);
+        Schema schema = parseResolvedTypeToSchema(generatorType,
                 methodDeclaration.getAnnotations());
         schema.setDescription("");
         mediaItem.schema(schema);
         return mediaItem;
+    }
+
+    ResolvedType toMappedType(ResolvedType type) {
+        if (!type.isReferenceType()) {
+            return null;
+        }
+        String className = getFullyQualifiedName(new GeneratorType(type));
+        String mappedClassName = endpointTransferMapper
+                .getTransferType(className);
+        if (mappedClassName == null) {
+            return null;
+        }
+
+        ResolvedReferenceTypeDeclaration solved = typeSolver
+                .solveType(mappedClassName);
+        return new ReferenceTypeImpl(solved, new ArrayList<>(), typeSolver);
+    }
+
+    ResolvedType toMappedType(Type type) {
+        ResolvedType resolvedType;
+        try {
+            resolvedType = type.resolve();
+        } catch (UnsupportedOperationException e) { // NOSONAR
+            // This is called for T
+            return null;
+        }
+        if (!resolvedType.isReferenceType()) {
+            return null;
+        }
+        String className = getFullyQualifiedName(new GeneratorType(type));
+        String mappedClassName = endpointTransferMapper
+                .getTransferType(className);
+        if (mappedClassName == null) {
+            return null;
+        }
+        List<ResolvedType> typeArguments = new ArrayList<>();
+        if (type.isClassOrInterfaceType()) {
+            Optional<NodeList<Type>> maybeTypeArgs = type
+                    .asClassOrInterfaceType().getTypeArguments();
+            if (maybeTypeArgs.isPresent()) {
+                NodeList<Type> typeArgs = maybeTypeArgs.get();
+                for (Type typeArg : typeArgs) {
+                    typeArguments.add(typeArg.resolve());
+                }
+            }
+        }
+        ResolvedReferenceTypeDeclaration solved = typeSolver
+                .solveType(mappedClassName);
+        return new ReferenceTypeImpl(solved, typeArguments, typeSolver);
     }
 
     private RequestBody createRequestBody(MethodDeclaration methodDeclaration,
@@ -691,11 +745,12 @@ public class OpenAPIObjectGenerator {
         requestBodyObject.schema(requestSchema);
 
         methodDeclaration.getParameters().forEach(parameter -> {
-            Schema paramSchema = parseResolvedTypeToSchema(
-                    new GeneratorType(parameter.getType(),
-                            resolvedTypeParametersMap
-                                    .replaceAll(parameter.resolve().getType())),
+            GeneratorType generatorType = createSchemaType(parameter,
+                    resolvedTypeParametersMap);
+
+            Schema paramSchema = parseResolvedTypeToSchema(generatorType,
                     parameter.getAnnotations());
+
             paramSchema.setDescription("");
             usedTypes.putAll(collectUsedTypesFromSchema(paramSchema));
             String name = (isReservedWord(parameter.getNameAsString()) ? "_"
@@ -713,6 +768,34 @@ public class OpenAPIObjectGenerator {
                     new LinkedHashMap<>(paramsDescription));
         }
         return requestBody;
+    }
+
+    private GeneratorType createSchemaType(MethodDeclaration methodDeclaration,
+            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+        Type type = methodDeclaration.getType();
+        ResolvedType resolvedType = methodDeclaration.resolve().getReturnType();
+        return createSchemaType(type, resolvedType, resolvedTypeParametersMap);
+    }
+
+    private GeneratorType createSchemaType(Parameter parameter,
+            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+        Type type = parameter.getType();
+        ResolvedType resolvedType = parameter.resolve().getType();
+        return createSchemaType(type, resolvedType, resolvedTypeParametersMap);
+    }
+
+    private GeneratorType createSchemaType(Type type, ResolvedType resolvedType,
+            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+        ResolvedType mappedType = toMappedType(type);
+
+        if (mappedType != null) {
+            resolvedType = mappedType;
+            return new GeneratorType(
+                    resolvedTypeParametersMap.replaceAll(resolvedType));
+        } else {
+            return new GeneratorType(type,
+                    resolvedTypeParametersMap.replaceAll(resolvedType));
+        }
     }
 
     @SuppressWarnings("squid:S1872")

@@ -70,6 +70,7 @@ import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.fusion.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.fusion.auth.FusionAccessChecker;
+import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
 import com.vaadin.fusion.exception.EndpointException;
 import com.vaadin.fusion.exception.EndpointValidationException;
 import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorData;
@@ -111,6 +112,8 @@ public class FusionController {
     private final ApplicationContext applicationContext;
 
     EndpointRegistry endpointRegistry;
+
+    private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
 
     /**
      * A constructor used to initialize the controller.
@@ -322,6 +325,8 @@ public class FusionController {
             return handleMethodExecutionError(endpointName, methodName, e);
         }
 
+        returnValue = endpointTransferMapper.toTransferType(returnValue);
+
         String implicitNullError = this.explicitNullableTypeChecker
                 .checkValueForAnnotatedElement(returnValue, methodToInvoke);
         if (implicitNullError != null) {
@@ -397,20 +402,28 @@ public class FusionController {
         Set<ConstraintViolation<Object>> constraintViolations = new LinkedHashSet<>();
 
         for (int i = 0; i < javaParameters.length; i++) {
-            Type expectedType = javaParameters[i];
+            Type parameterType = javaParameters[i];
+            Type incomingType = parameterType;
             try {
+                Class<?> mappedType = getTransferType(parameterType);
+                if (mappedType != null) {
+                    incomingType = mappedType;
+                }
                 Object parameter = vaadinEndpointMapper
                         .readerFor(vaadinEndpointMapper.getTypeFactory()
-                                .constructType(expectedType))
+                                .constructType(incomingType))
                         .readValue(requestParameters.get(parameterNames[i]));
-
+                if (mappedType != null) {
+                    parameter = endpointTransferMapper.toEndpointType(parameter,
+                            (Class) parameterType);
+                }
                 endpointParameters[i] = parameter;
 
                 if (parameter != null) {
                     constraintViolations.addAll(validator.validate(parameter));
                 }
             } catch (IOException e) {
-                String typeName = expectedType.getTypeName();
+                String typeName = parameterType.getTypeName();
                 getLogger().error(
                         "Unable to deserialize an endpoint '{}' method '{}' "
                                 + "parameter '{}' with type '{}'",
@@ -425,6 +438,14 @@ public class FusionController {
         }
         throw getInvalidEndpointParametersException(methodName, endpointName,
                 errorParams, constraintViolations);
+    }
+
+    private Class<?> getTransferType(Type type) {
+        if (!(type instanceof Class)) {
+            return null;
+        }
+
+        return endpointTransferMapper.getTransferType((Class) type);
     }
 
     private EndpointValidationException getInvalidEndpointParametersException(
