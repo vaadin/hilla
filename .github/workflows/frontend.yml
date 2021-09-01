@@ -44,10 +44,15 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.COVFILES }}
           flags: unittests
           fail_ci_if_error: true
           root_dir: ${{ github.workspace }}/frontend
