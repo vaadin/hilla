@@ -56,4 +56,3 @@ jobs:
           flags: unittests
           fail_ci_if_error: true
           root_dir: ${{ github.workspace }}/frontend
-          verbose: true
