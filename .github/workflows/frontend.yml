@@ -51,9 +51,9 @@ jobs:
       - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          directory: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
           flags: unittests
           fail_ci_if_error: true
+          root_dir: frontend
           verbose: true
