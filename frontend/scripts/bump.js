@@ -1,8 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/no-extraneous-dependencies,no-console */
 import { readdir, readFile, writeFile } from 'fs/promises';
 import meow from 'meow';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+
+function log(message) {
+  console.log(`[${new Date().toISOString()}][info]: ${message}`);
+}
 
 const {
   flags: { version },
@@ -28,6 +32,8 @@ async function updateLernaConfig() {
   };
 
   await writeFile(lernaConfigFile, JSON.stringify(config, null, 2), 'utf8');
+
+  log('lerna.json updated');
 }
 
 async function updatePackageRegistrations() {
@@ -42,6 +48,8 @@ async function updatePackageRegistrations() {
       const content = await readFile(indexFile, 'utf8');
       const updated = content.replace(versionPattern, `version: /* updated-by-script */ '${version}',`);
       await writeFile(indexFile, updated, 'utf8');
+
+      log(`@vaadin/${_package} registration updated`);
     })
   );
 }
