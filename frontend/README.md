@@ -1,5 +1,8 @@
 # Vaadin Frontend
 
+![Frontend CI](https://github.com/vaadin/fusion/actions/workflows/frontend.yml/badge.svg)
+[![codecov](https://codecov.io/gh/vaadin/fusion/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/fusion)
+
 The collection of frontend utilities used by Vaadin Flow and Fusion.
 
 | Package                 | Status |

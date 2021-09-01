@@ -19,6 +19,7 @@
     "postinstall": "npm run bootstrap",
     "publish": "lerna publish",
     "test": "lerna run test",
+    "test:coverage": "lerna run test:coverage",
     "typecheck": "lerna run typecheck"
   },
   "repository": {

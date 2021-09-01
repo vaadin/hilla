@@ -24,6 +24,7 @@ export default {
   browserStartTimeout: 60000, // default 30000
   testsStartTimeout: 60000, // default 10000
   testsFinishTimeout: 60000, // default 20000
+  preserveSymlinks: true,
   plugins: [
     esbuildPlugin({ ts: true, target: 'auto' }),
     {
@@ -42,4 +43,14 @@ export default {
       },
     }),
   ],
+  coverageConfig: {
+    report: true,
+    reportDir: '.coverage',
+    threshold: {
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70,
+    },
+  },
 };
