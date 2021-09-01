@@ -145,7 +145,7 @@ export async function login(username: string, password: string, options?: LoginO
       errorTitle: 'Incorrect username or password.',
       errorMessage: 'Check that you have entered the correct username and password and try again.',
     };
-  } catch (e) {
+  } catch (e: any) {
     return {
       error: true,
       errorTitle: e.name,

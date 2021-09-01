@@ -15,9 +15,10 @@
     "check": "concurrently npm:lint npm:typecheck",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build --include-dependencies",
+    "bump": "node scripts/bump.js",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
-    "publish": "lerna publish",
+    "publish": "node scripts/dummy-publish-tmp.js",
     "test": "lerna run test",
     "test:coverage": "lerna run test:coverage",
     "typecheck": "lerna run typecheck"
@@ -30,7 +31,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.4",
-    "@web/dev-server-esbuild": "^0.2.12",
+    "@web/dev-server-esbuild": "^0.2.14",
     "@web/test-runner-chrome": "^0.10.2",
     "concurrently": "^6.2.1",
     "eslint": "^7.32.0",
@@ -38,8 +39,10 @@
     "eslint-plugin-chai-friendly": "^0.7.2",
     "lerna": "^4.0.0",
     "lint-staged": "^11.1.2",
+    "meow": "^10.1.1",
+    "minimist": "^1.2.5",
     "prettier": "^2.3.2",
     "simple-git-hooks": "^2.6.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.2"
   }
 }
