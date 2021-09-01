@@ -1,8 +1,9 @@
 name: Frontend Release
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    paths:
+      - '.github/workflows/frontend-release.yml'
 
 defaults:
   run:
