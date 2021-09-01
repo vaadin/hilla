@@ -33,7 +33,8 @@ async function updateLernaConfig() {
 async function updatePackageRegistrations() {
   const versionPattern = /version:.+$/m;
   const packagesRoot = resolve(root, 'packages');
-  const packages = await readdir(packagesRoot);
+  // Removing folders like .DS_Store
+  const packages = (await readdir(packagesRoot)).filter((dir) => !dir.startsWith('.'));
 
   await Promise.all(
     packages.map(async (_package) => {
