@@ -46,7 +46,7 @@ jobs:
           CI: true
       - name: Collect Coverage
         run: |
-          COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//' | sed '$s/packages/\.\/packages/')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2
