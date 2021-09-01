@@ -55,5 +55,5 @@ jobs:
           files: ${{ env.COVFILES }}
           flags: unittests
           fail_ci_if_error: true
-          root_dir: frontend
+          root_dir: ${{ github.workspace }}/frontend
           verbose: true
