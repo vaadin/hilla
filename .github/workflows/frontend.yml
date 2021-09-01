@@ -46,6 +46,7 @@ jobs:
           CI: true
       - name: Collect Coverage
         run: |
+          echo "${{ github.workspace }}/frontend"
           COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
@@ -56,4 +57,4 @@ jobs:
           flags: unittests
           fail_ci_if_error: true
           verbose: true
-          working-directory: frontend
+          working-directory: ${{ github.workspace }}/frontend
