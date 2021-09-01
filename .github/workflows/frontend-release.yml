@@ -38,8 +38,11 @@ jobs:
         run: |
           npm run bump -- -v ${{ github.event.release.tag_name }}
           git add --all
-          git -c user.name="Vaadin Bot" -c user.email="vaadin-bot@users.noreply.github.com" commit -m "chore(release): ${{ github.event.release.tag_name }}"
-          git push origin HEAD:main --force
+          git \
+            -c user.name="Vaadin Bot" \
+            -c user.email="vaadin-bot@users.noreply.github.com" \
+            commit -m "chore(release): ${{ github.event.release.tag_name }}"
+          git push origin HEAD:main
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       - name: Publish
