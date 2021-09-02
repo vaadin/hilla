@@ -811,7 +811,8 @@ public class OpenAPIObjectGenerator {
 
         List<ResolvedReferenceType> directAncestors = resolvedReferenceType
                 .getDirectAncestors().stream()
-                .filter(parent -> parent.getTypeDeclaration().isClass()
+                .filter(parent -> parent.getTypeDeclaration()
+                        .orElseThrow(IllegalArgumentException::new).isClass()
                         && !Object.class.getName()
                                 .equals(parent.getQualifiedName()))
                 .collect(Collectors.toList());
@@ -864,7 +865,8 @@ public class OpenAPIObjectGenerator {
      */
     private String getFullyQualifiedName(GeneratorType type) {
         ResolvedReferenceTypeDeclaration typeDeclaration = type.asResolvedType()
-                .asReferenceType().getTypeDeclaration();
+                .asReferenceType().getTypeDeclaration()
+                .orElseThrow(IllegalArgumentException::new);
         String packageName = typeDeclaration.getPackageName();
         String canonicalName = typeDeclaration.getQualifiedName();
         if (GeneratorUtils.isBlank(packageName)) {

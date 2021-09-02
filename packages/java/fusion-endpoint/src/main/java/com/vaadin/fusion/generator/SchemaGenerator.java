@@ -35,6 +35,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 
@@ -115,7 +116,8 @@ class SchemaGenerator {
 
         if (type.isEnum()) {
             List<String> entries = resolvedReferenceType.getTypeDeclaration()
-                    .asEnum().getEnumConstants().stream()
+                    .orElseThrow(IllegalArgumentException::new).asEnum()
+                    .getEnumConstants().stream()
                     .map(ResolvedEnumConstantDeclaration::getName)
                     .collect(Collectors.toList());
             StringSchema schema = new StringSchema();
@@ -127,7 +129,8 @@ class SchemaGenerator {
                 .name(resolvedReferenceType.getQualifiedName());
         Map<String, Boolean> fieldsOptionalMap = getFieldsAndOptionalMap(type);
         List<ResolvedFieldDeclaration> serializableFields = resolvedReferenceType
-                .getTypeDeclaration().getDeclaredFields().stream()
+                .getTypeDeclaration().orElseThrow(IllegalArgumentException::new)
+                .getDeclaredFields().stream()
                 .filter(resolvedFieldDeclaration -> fieldsOptionalMap
                         .containsKey(resolvedFieldDeclaration.getName()))
                 .collect(Collectors.toList());
@@ -167,9 +170,11 @@ class SchemaGenerator {
         ResolvedReferenceType resolvedReferenceType = type.asResolvedType()
                 .asReferenceType();
 
-        if (!resolvedReferenceType.getTypeDeclaration().isClass()
-                || resolvedReferenceType.getTypeDeclaration()
-                        .isAnonymousClass()) {
+        Optional<ResolvedReferenceTypeDeclaration> typeDeclaration = resolvedReferenceType
+                .getTypeDeclaration();
+        if (!typeDeclaration
+                .filter(td -> td.isClass() && !td.isAnonymousClass())
+                .isPresent()) {
             return Collections.emptyMap();
         }
         HashMap<String, Boolean> validFields = new HashMap<>();
