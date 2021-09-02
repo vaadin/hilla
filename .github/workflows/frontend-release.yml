@@ -1,8 +1,9 @@
 name: Frontend Release
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    paths:
+      - '.github/workflows/frontend-release.yml'
 
 defaults:
   run:
@@ -35,13 +36,17 @@ jobs:
           CI: true
       - name: Bump New Version
         run: |
-          npm run bump -- -v ${{ github.event.release.tag_name }}
-          git commit -m "chore(release): ${{ github.event.release.tag_name }}"
-          git push
+          node scripts/bump.js ${{ github.event.release.tag_name }}
+          git add --all
+          git \
+            -c user.name='Vaadin Bot' \
+            -c user.email='vaadin-bot@users.noreply.github.com' \
+            commit -m 'chore(release): ${{ github.event.release.tag_name }}'
+          node scripts/exec-over-branch-protection.js 'git push origin HEAD:main'
         env:
-          GIT_AUTHOR_NAME: Vaadin Bot
-          GIT_AUTHOR_EMAIL: vaadin-bot@users.noreply.github.com
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCH: main
       - name: Publish
         run: npm run publish
         env:
