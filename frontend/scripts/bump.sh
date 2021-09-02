@@ -17,7 +17,7 @@ protection_config=$(ghr -X GET)
 
 remapped=$(node scripts/protection-remap.js "$protection_config")
 
-ghr -X PUT -d "$(sed 's/enforce_admins:\s*true/enforce_admins:false/' "$remapped")"
+ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')"
 
 git push origin HEAD:main
 
