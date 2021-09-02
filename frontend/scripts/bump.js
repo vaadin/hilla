@@ -9,16 +9,8 @@ function log(message) {
 }
 
 const {
-  flags: { version },
-} = meow({
-  importMeta: import.meta,
-  flags: {
-    version: {
-      type: 'string',
-      alias: 'v',
-    },
-  },
-});
+  input: [version],
+} = meow({ importMeta: import.meta });
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
