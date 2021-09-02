@@ -1,9 +1,8 @@
 name: Frontend Release
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/frontend-release.yml'
+  release:
+    types: [published]
 
 defaults:
   run:
@@ -42,7 +41,7 @@ jobs:
             -c user.name='Vaadin Bot' \
             -c user.email='vaadin-bot@users.noreply.github.com' \
             commit -m 'chore(release): ${{ github.event.release.tag_name }}'
-          node scripts/exec-over-branch-protection.js 'git push origin HEAD:main'
+          node scripts/git-push.js
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
