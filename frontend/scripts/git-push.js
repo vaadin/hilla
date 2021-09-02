@@ -44,14 +44,14 @@ function remapBranchProtectionResponseToRequest({
   };
 }
 
-const { GITHUB_TOKEN, REPO, BRANCH } = process.env;
+const { GITHUB_TOKEN, REPO } = process.env;
 
 const headers = {
   Accept: 'application/vnd.github.v3+json',
   Authorization: `token ${GITHUB_TOKEN}`,
 };
 
-const branchProtectionURL = `https://api.github.com/repos/${REPO}/branches/${BRANCH}/protection`;
+const branchProtectionURL = `https://api.github.com/repos/${REPO}/branches/main/protection`;
 
 const branchProtectionData = await fetch(branchProtectionURL, {
   method: 'GET',
@@ -70,7 +70,7 @@ await fetch(branchProtectionURL, {
 }).then((res) => res.json());
 
 try {
-  await exec(`git push origin HEAD:${BRANCH}`, { shell: false });
+  await exec(`git push origin HEAD:main`, { shell: false });
 } catch (e) {
   console.error('The git push failed', e);
 } finally {
