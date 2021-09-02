@@ -34,18 +34,11 @@ jobs:
         env:
           CI: true
       - name: Bump New Version
-        run: |
-          node scripts/bump.js ${{ github.event.release.tag_name }}
-          git add --all
-          git \
-            -c user.name='Vaadin Bot' \
-            -c user.email='vaadin-bot@users.noreply.github.com' \
-            commit -m 'chore(release): ${{ github.event.release.tag_name }}'
-          node scripts/git-push.js
+        run: sh scripts/bump.sh
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
-          BRANCH: main
+          VERSION_TAG: ${{ github.event.release.tag_name }}
       - name: Publish
         run: npm run publish
         env:
