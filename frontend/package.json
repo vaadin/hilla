@@ -40,7 +40,6 @@
     "lint-staged": "^11.1.2",
     "meow": "^10.1.1",
     "minimist": "^1.2.5",
-    "node-fetch": "^3.0.0",
     "prettier": "^2.3.2",
     "simple-git-hooks": "^2.6.1",
     "typescript": "^4.4.2"
