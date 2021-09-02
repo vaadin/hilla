@@ -27,8 +27,8 @@ function remapBranchProtectionResponseToRequest({
       ? {
           dismissal_restrictions: required_pull_request_reviews.dismissal_restrictions
             ? {
-                users: required_pull_request_reviews.dismissal_restrictions.users,
-                teams: required_pull_request_reviews.dismissal_restrictions.teams,
+                users: required_pull_request_reviews.dismissal_restrictions.users.map(({ login }) => login),
+                teams: required_pull_request_reviews.dismissal_restrictions.teams.map(({ slug }) => slug),
               }
             : {},
           dismiss_stale_reviews: required_pull_request_reviews.dismiss_stale_reviews,
@@ -67,10 +67,10 @@ await fetch(branchProtectionURL, {
     ...remappedBranchProtectionData,
     enforce_admins: false,
   }),
-});
+}).then((res) => res.json());
 
 try {
-  await exec('git push HEAD:main', { shell: false });
+  await exec(`git push origin HEAD:${BRANCH}`, { shell: false });
 } catch (e) {
   console.error('The git push failed', e);
 } finally {
