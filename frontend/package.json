@@ -15,7 +15,6 @@
     "check": "concurrently npm:lint npm:typecheck",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build --include-dependencies",
-    "bump": "node scripts/bump.js",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
     "publish": "node scripts/dummy-publish-tmp.js",

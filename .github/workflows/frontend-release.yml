@@ -34,14 +34,11 @@ jobs:
         env:
           CI: true
       - name: Bump New Version
-        run: |
-          npm run bump -- -v ${{ github.event.release.tag_name }}
-          git commit -m "chore(release): ${{ github.event.release.tag_name }}"
-          git push
+        run: sh scripts/bump.sh
         env:
-          GIT_AUTHOR_NAME: Vaadin Bot
-          GIT_AUTHOR_EMAIL: vaadin-bot@users.noreply.github.com
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+          VERSION_TAG: ${{ github.event.release.tag_name }}
       - name: Publish
         run: npm run publish
         env:
