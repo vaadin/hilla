@@ -23,6 +23,6 @@ remapped=$(node scripts/protection-remap.js "$protection_config")
 
 ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')" > /dev/null
 
-git push origin HEAD:$branch
+git push https://vaadin-bot:"$GITHUB_TOKEN"@github.com/"$REPO".git HEAD:$branch
 
 ghr -X PUT -d "$remapped" > /dev/null
