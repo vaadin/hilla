@@ -12,8 +12,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <validation.api.version>2.0.1.Final</validation.api.version>
-        <jackson.version>2.10.2</jackson.version>
         <spring.version>5.3.0</spring.version>
         <spring.autoconfigure.version>2.2.0.RELEASE</spring.autoconfigure.version>
         <javax.annotation.api.version>1.3.2</javax.annotation.api.version>
@@ -111,6 +109,7 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+        
         <!-- Needed for security annotations -->
         <dependency>
             <groupId>javax.annotation</groupId>

@@ -23,7 +23,7 @@ public class DateTimeConversionTest extends BaseTypeConversionTest {
     @Test
     public void should_ConvertToDate_When_ReceiveATimeStampAsNumber() {
         String timeStamp = "1546300800000"; // 01-01-2019 00:00:00
-        String expectedValue = "\"2019-01-02T00:00:00.000+0000\"";
+        String expectedValue = "\"2019-01-02T00:00:00.000+00:00\"";
         assertEqualExpectedValueWhenCallingMethod("addOneDayToDate", timeStamp,
                 expectedValue);
     }
@@ -31,7 +31,7 @@ public class DateTimeConversionTest extends BaseTypeConversionTest {
     @Test
     public void should_ConvertToDate_When_ReceiveATimeStampAsString() {
         String timeStamp = "\"1546300800000\""; // 01-01-2019 00:00:00
-        String expected = "\"2019-01-02T00:00:00.000+0000\"";
+        String expected = "\"2019-01-02T00:00:00.000+00:00\"";
         assertEqualExpectedValueWhenCallingMethod("addOneDayToDate", timeStamp,
                 expected);
     }
@@ -39,7 +39,7 @@ public class DateTimeConversionTest extends BaseTypeConversionTest {
     @Test
     public void should_ConvertToDate_When_ReceiveADate() {
         String inputDate = "\"2019-01-01\"";
-        String expectedTimestamp = "\"2019-01-02T00:00:00.000+0000\"";
+        String expectedTimestamp = "\"2019-01-02T00:00:00.000+00:00\"";
         assertEqualExpectedValueWhenCallingMethod("addOneDayToDate", inputDate,
                 expectedTimestamp);
     }
