@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * generates a TypeScript and converts data as if the method was defined as
  * <p>
  * <code>
- * public List&lt;Person&gt; list(PageableDTO pageable) {
+ * public List&lt;Person&gt; list(com.vaadin.fusion.mappedtypes.Pageable pageable) {
  * }
  * </code>
  * 

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.fusion.endpointransfermapper;
+package com.vaadin.fusion.mappedtypes;
 
 import javax.validation.constraints.NotBlank;
 
@@ -21,12 +21,11 @@ import com.vaadin.fusion.Nonnull;
 
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
-import org.springframework.data.domain.Sort.Order;
 
 /**
- * A DTO for {@link Order}.
+ * A DTO for {@link org.springframework.data.domain.Sort.Order}.
  */
-public class OrderDTO {
+public class Order {
     @Nonnull
     private Direction direction;
     @Nonnull

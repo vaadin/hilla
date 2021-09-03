@@ -83,11 +83,11 @@ import com.vaadin.fusion.EndpointExposed;
 import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
 import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
-import com.vaadin.fusion.endpointransfermapper.PageableDTO;
 import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.GrandParentModel;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.Model;
 import com.vaadin.fusion.generator.endpoints.complexhierarchymodel.ParentModel;
+import com.vaadin.fusion.mappedtypes.Pageable;
 import com.vaadin.fusion.utils.TestUtils;
 
 import static com.vaadin.fusion.ExplicitNullableTypeChecker.isRequired;
@@ -174,8 +174,8 @@ public abstract class AbstractEndpointGenerationTest
     private void removeMapperClasses(Map<String, Schema> componentSchemas) {
         componentSchemas.keySet().removeIf(clsName -> {
             /* Skip classes that are added because of the mappers */
-            if (clsName.startsWith(
-                    PageableDTO.class.getPackage().getName() + ".")) {
+            if (clsName
+                    .startsWith(Pageable.class.getPackage().getName() + ".")) {
                 return true;
             }
             if (Direction.class.getCanonicalName().equals(clsName)

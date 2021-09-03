@@ -19,58 +19,61 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper.Mapper;
-
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
+import com.vaadin.fusion.mappedtypes.Order;
+import com.vaadin.fusion.mappedtypes.Sort;
 
 /**
- * A mapper between {@link Sort} and {@link SortDTO}.
+ * A mapper between {@link org.springframework.data.domain.Sort} and
+ * {@link Sort}.
  */
-public class SortMapper implements Mapper<Sort, SortDTO> {
+public class SortMapper
+        implements Mapper<org.springframework.data.domain.Sort, Sort> {
 
     @Override
-    public Class<? extends Sort> getEndpointType() {
+    public Class<? extends org.springframework.data.domain.Sort> getEndpointType() {
+        return org.springframework.data.domain.Sort.class;
+    }
+
+    @Override
+    public Class<? extends Sort> getTransferType() {
         return Sort.class;
     }
 
     @Override
-    public Class<? extends SortDTO> getTransferType() {
-        return SortDTO.class;
-    }
+    public Sort toTransferType(org.springframework.data.domain.Sort sort) {
 
-    @Override
-    public SortDTO toTransferType(Sort sort) {
-
-        SortDTO sortDto = new SortDTO();
-        List<OrderDTO> orders = new ArrayList<>();
-        for (Order order : sort) {
-            OrderDTO orderDTO = new OrderDTO();
-            orderDTO.setProperty(order.getProperty());
-            orderDTO.setDirection(order.getDirection());
-            orderDTO.setIgnoreCase(order.isIgnoreCase());
-            orderDTO.setNullHandling(order.getNullHandling());
-            orders.add(orderDTO);
+        Sort transferSort = new Sort();
+        List<Order> transferOrders = new ArrayList<>();
+        for (org.springframework.data.domain.Sort.Order order : sort) {
+            Order transferOrder = new Order();
+            transferOrder.setProperty(order.getProperty());
+            transferOrder.setDirection(order.getDirection());
+            transferOrder.setIgnoreCase(order.isIgnoreCase());
+            transferOrder.setNullHandling(order.getNullHandling());
+            transferOrders.add(transferOrder);
         }
 
-        sortDto.setOrders(orders);
-        return sortDto;
+        transferSort.setOrders(transferOrders);
+        return transferSort;
     }
 
     @Override
-    public Sort toEndpointType(SortDTO sort) {
-        if (sort == null) {
+    public org.springframework.data.domain.Sort toEndpointType(
+            Sort transferSort) {
+        if (transferSort == null) {
             return null;
         }
-        List<Order> orders = new ArrayList<>();
-        for (OrderDTO orderDto : sort.getOrders()) {
-            Order order = new Order(orderDto.getDirection(),
-                    orderDto.getProperty(), orderDto.getNullHandling());
-            if (orderDto.isIgnoreCase()) {
+        List<org.springframework.data.domain.Sort.Order> orders = new ArrayList<>();
+        for (Order transferOrder : transferSort.getOrders()) {
+            org.springframework.data.domain.Sort.Order order = new org.springframework.data.domain.Sort.Order(
+                    transferOrder.getDirection(), transferOrder.getProperty(),
+                    transferOrder.getNullHandling());
+            if (transferOrder.isIgnoreCase()) {
                 order = order.ignoreCase();
             }
             orders.add(order);
         }
-        return Sort.by(orders);
+        return org.springframework.data.domain.Sort.by(orders);
     }
 
 }

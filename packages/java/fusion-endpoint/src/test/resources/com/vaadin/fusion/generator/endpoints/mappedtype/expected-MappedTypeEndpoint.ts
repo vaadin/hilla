@@ -5,14 +5,14 @@
 */
 // @ts-ignore
 import client from './connect-client.default';
-import type PageableDTO from './com/vaadin/fusion/endpointransfermapper/PageableDTO';
-function _getPageable(): Promise<PageableDTO | undefined> {
+import type Pageable from './com/vaadin/fusion/mappedtypes/Pageable';
+function _getPageable(): Promise<Pageable | undefined> {
   return client.call (
     'MappedTypeEndpoint', 'getPageable'
   );
 }
 function _parameter (
-  pageable: PageableDTO | undefined
+  pageable: Pageable | undefined
 ): Promise<void> {
   return client.call (
     'MappedTypeEndpoint', 'parameter', {
@@ -20,7 +20,7 @@ function _parameter (
     }
   );
 }
-function _returnValue(): Promise<PageableDTO | undefined> {
+function _returnValue(): Promise<Pageable | undefined> {
   return client.call (
     'MappedTypeEndpoint', 'returnValue'
   );

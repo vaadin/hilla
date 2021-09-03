@@ -13,28 +13,41 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.fusion.endpointransfermapper;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.vaadin.fusion.mappedtypes;
 
 import com.vaadin.fusion.Nonnull;
 
-import org.springframework.data.domain.Sort;
-
 /**
- * A DTO for {@link Sort}.
+ * A DTO for {@link org.springframework.data.domain.Pageable}.
  */
-public class SortDTO {
+public class Pageable {
+    private int pageNumber;
+    private int pageSize;
     @Nonnull
-    private List<OrderDTO> orders = new ArrayList<>();
+    private Sort sort = new Sort();
 
-    public List<OrderDTO> getOrders() {
-        return orders;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
-    public void setOrders(List<OrderDTO> orders) {
-        this.orders = orders;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Sort getSort() {
+        return sort;
+    }
+
+    public void setSort(Sort sort) {
+        this.sort = sort;
     }
 
 }
