@@ -42,6 +42,7 @@ import io.swagger.codegen.v3.CodegenResponse;
 import io.swagger.codegen.v3.CodegenType;
 import io.swagger.codegen.v3.DefaultGenerator;
 import io.swagger.codegen.v3.generators.typescript.AbstractTypeScriptClientCodegen;
+import io.swagger.codegen.v3.generators.util.OpenAPIUtil;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -229,10 +230,10 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
 
     @Override
     @SuppressWarnings("unchecked")
-    public CodegenParameter fromRequestBody(RequestBody body,
-            Map<String, Schema> schemas, Set<String> imports) {
-        CodegenParameter codegenParameter = super.fromRequestBody(body, schemas,
-                imports);
+    public CodegenParameter fromRequestBody(RequestBody body, String name,
+            Schema schema, Map<String, Schema> schemas, Set<String> imports) {
+        CodegenParameter codegenParameter = super.fromRequestBody(body, name,
+                schema, schemas, imports);
         Schema requestBodySchema = getRequestBodySchema(body);
         if (requestBodySchema != null) {
             imports.addAll(collectImportsFromSchema(requestBodySchema));
@@ -304,7 +305,7 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
             return String.format("ReadonlyArray<%s>%s",
                     this.getTypeDeclaration(inner), optionalSuffix);
         } else if (GeneratorUtils.isNotBlank(schema.get$ref())) {
-            return getSimpleRef(schema.get$ref()) + optionalSuffix;
+            return OpenAPIUtil.getSimpleRef(schema.get$ref()) + optionalSuffix;
         } else if (schema.getAdditionalProperties() != null) {
             Schema inner = (Schema) schema.getAdditionalProperties();
             return String.format("Readonly<Record<string, %s>>%s",
@@ -417,7 +418,7 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
     }
 
     @Override
-    protected void addImport(CodegenModel m, String type) {
+    public void addImport(CodegenModel m, String type) {
         if (!Objects.equals(m.getName(), type)) {
             super.addImport(m, type);
         }
@@ -486,7 +487,7 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
     private Set<String> collectImportsFromSchema(Schema schema) {
         Set<String> imports = new HashSet<>();
         if (GeneratorUtils.isNotBlank(schema.get$ref())) {
-            imports.add(getSimpleRef(schema.get$ref()));
+            imports.add(OpenAPIUtil.getSimpleRef(schema.get$ref()));
         }
         if (schema instanceof ArraySchema) {
             imports.addAll(collectImportsFromSchema(

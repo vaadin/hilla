@@ -75,6 +75,30 @@
               }
             }
           }
+        },
+        "ComplexRequest" : {
+          "type" : "object",
+          "properties" : {
+            "valueA" : {
+              "type" : "string"
+            },
+            "valueB" : {
+              "type" : "string"
+            }
+          },
+          "description" : "ComplexRequest bean"
+        },
+        "ComplexResponse" : {
+          "type" : "object",
+          "properties" : {
+            "valueC" : {
+              "type" : "string"
+            },
+            "valueD" : {
+              "type" : "string"
+            }
+          },
+          "description" : "ComplexResponse bean"
         }
       },
       "securitySchemes" : {
