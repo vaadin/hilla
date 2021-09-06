@@ -36,7 +36,7 @@ jobs:
       - name: Bump New Version
         run: sh scripts/bump.sh
         env:
-          GITHUB_RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
           VERSION_TAG: ${{ github.event.release.tag_name }}
       - name: Publish
