@@ -1,0 +1,46 @@
+name: Frontend Release
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/frontend.yml'
+      - '.github/workflows/test-release.yml'
+      - 'frontend/**/*'
+      - '!frontend/.simple-git-hooks.json'
+      - '!frontend/.lintstagedrc.json'
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  testing:
+    name: Release
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use NodeJS LTS
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Lint
+        run: npm run check
+      - name: Test
+        run: npm run test
+        env:
+          CI: true
+      - name: Bump New Version
+        run: sh scripts/bump.sh
+        env:
+          GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
+          REPO: ${{ github.repository }}
+          VERSION_TAG: ${{ github.event.release.tag_name }}

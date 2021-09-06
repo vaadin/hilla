@@ -3,7 +3,7 @@
 # Fails the script if any command failed or any variable is unset
 set -eu
 
-branch=main
+branch=test/workflow-test
 
 # shellcheck disable=SC2139
 alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
@@ -24,8 +24,8 @@ protection_config=$(ghr -X GET)
 
 remapped=$(node scripts/protection-remap.js "$protection_config")
 
-ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')" > /dev/null
+ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')"
 
 git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git HEAD:$branch
 
-ghr -X PUT -d "$remapped" > /dev/null
+ghr -X PUT -d "$remapped"
