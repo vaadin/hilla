@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 branch=main
 
 # shellcheck disable=SC2139
