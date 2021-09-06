@@ -24,7 +24,7 @@ protection_config=$(ghr -X GET)
 
 remapped=$(node scripts/protection-remap.js "$protection_config")
 
-ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')"
+ghr -X DELETE
 
 git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git HEAD:$branch
 
