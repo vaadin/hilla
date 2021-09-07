@@ -24,8 +24,17 @@ protection_config=$(ghr -X GET)
 
 remapped=$(node scripts/protection-remap.js "$protection_config")
 
-ghr -X PUT -d "$(echo "$remapped" | sed '$s/"enforce_admins":true/"enforce_admins":false/')" > /dev/null
+# Restores the protection of the branch
+restore_protection() {
+  ghr -X PUT -d "$remapped" > /dev/null
+  echo "Branch protection restored"
+}
+
+# Will execute "restore" function if "git push" causes an error
+trap "restore" ERR
+
+ghr -X DELETE > /dev/null
 
 git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git HEAD:$branch
 
-ghr -X PUT -d "$remapped" > /dev/null
+restore_protection
