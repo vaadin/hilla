@@ -12,7 +12,7 @@ const {
   input: [version],
 } = meow({ importMeta: import.meta });
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 async function updateLernaConfig() {
   const lernaConfigFile = resolve(root, 'lerna.json');
