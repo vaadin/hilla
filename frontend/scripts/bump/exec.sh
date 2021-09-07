@@ -3,7 +3,7 @@
 # Fails the script if any command failed or any variable is unset
 set -eu
 
-branch=test/workflow-test
+branch=main
 dir=$(dirname -- "$0")
 
 # shellcheck disable=SC2139
