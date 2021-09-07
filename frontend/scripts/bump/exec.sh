@@ -3,7 +3,8 @@
 # Fails the script if any command failed or any variable is unset
 set -eu
 
-branch=main
+branch=test/workflow-test
+dir=$(dirname -- "$0")
 
 # shellcheck disable=SC2139
 alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
@@ -11,7 +12,7 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -H 'Authorization: token $GIT_RELEASE_TOKEN' \
   -s"
 
-node scripts/update-package-versions.js "$VERSION_TAG"
+node "$dir"/update-package-versions.js "$VERSION_TAG"
 
 git add --all
 
@@ -22,19 +23,18 @@ git \
 
 protection_config=$(ghr -X GET)
 
-remapped=$(node scripts/protection-remap.js "$protection_config")
+remapped=$(node "$dir"/protection-remap.js "$protection_config")
 
 # Restores the protection of the branch
 restore_protection() {
   ghr -X PUT -d "$remapped" > /dev/null
-  echo "Branch protection restored"
+  echo "[$(date -Iseconds)][info] Protection of ${branch} branch restored"
 }
 
-# Will execute "restore" function if "git push" causes an error
-trap "restore" ERR
+# Will execute "restore_protection" function in the end of the script even if
+# the script exits with an error
+trap "restore_protection" EXIT
 
-ghr -X DELETE > /dev/null
+< "$dir"/disabled-protection.json ghr -X PUT -d '@-' > /dev/null
 
 git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git HEAD:$branch
-
-restore_protection
