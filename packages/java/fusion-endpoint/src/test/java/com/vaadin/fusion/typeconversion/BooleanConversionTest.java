@@ -15,6 +15,7 @@
  */
 package com.vaadin.fusion.typeconversion;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BooleanConversionTest extends BaseTypeConversionTest {
@@ -53,6 +54,7 @@ public class BooleanConversionTest extends BaseTypeConversionTest {
     }
 
     @Test
+    @Ignore("Ignored after https://github.com/FasterXML/jackson-databind/issues/1852 in Jackson 2.12.0")
     public void should_FailToConvertToBoolean_When_ReceiveUppercaseString() {
         assert400ResponseWhenCallingMethod("revertBoolean", "\"TRUE\"");
         assert400ResponseWhenCallingMethod("revertBoolean", "\"TRue\"");
