@@ -6,5 +6,5 @@ $wnd.Vaadin = $wnd.Vaadin || {};
 $wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
 $wnd.Vaadin.registrations.push({
   is: '@vaadin/fusion-frontend',
-  version: /* updated-by-script */ '8.0-SNAPSHOT',
+  version: /* updated-by-script */ '0.0.7',
 });
