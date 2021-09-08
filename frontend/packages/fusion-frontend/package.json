@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/fusion-frontend",
-  "version": "22.0.0-alpha1",
+  "version": "0.0.10",
   "description": "Vaadin frontend utils used by Fusion",
   "main": "index.js",
   "module": "index.js",
