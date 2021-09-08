@@ -37,11 +37,16 @@ async function updatePackageRegistrations() {
   await Promise.all(
     packages.map(async (_package) => {
       const indexFile = resolve(packagesRoot, _package, 'src/index.ts');
-      const content = await readFile(indexFile, 'utf8');
-      const updated = content.replace(versionPattern, `version: /* updated-by-script */ '${version}',`);
-      await writeFile(indexFile, updated, 'utf8');
+      const packageFile = resolve(packagesRoot, _package, 'package.json');
+      const [indexContent, packageContent] = await Promise.all([
+        readFile(indexFile, 'utf8'),
+        readFile(packageFile, 'utf8'),
+      ]);
+      const indexUpdated = indexContent.replace(versionPattern, `version: /* updated-by-script */ '${version}',`);
+      const packageUpdated = JSON.stringify({ ...JSON.parse(packageContent), version }, null, 2);
+      await Promise.all([writeFile(indexFile, indexUpdated, 'utf8'), writeFile(packageFile, packageUpdated, 'utf8')]);
 
-      log(`@vaadin/${_package} registration updated`);
+      log(`@vaadin/${_package} version and registration updated`);
     })
   );
 }
