@@ -45,7 +45,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/common-frontend": "^22.0.0-alpha1",
+    "@vaadin/common-frontend": "^0.0.10",
     "lit": "^2.0.0-rc.2"
   },
   "devDependencies": {

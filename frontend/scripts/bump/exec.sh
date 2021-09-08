@@ -12,7 +12,10 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -H 'Authorization: token $GIT_RELEASE_TOKEN' \
   -s"
 
-node "$dir"/update-package-versions.js "$VERSION_TAG"
+# Updating the registration version for all packages
+find "$PWD"/packages/*/src/index.ts -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
+
+npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
 
 git add --all
 
