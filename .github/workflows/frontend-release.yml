@@ -45,7 +45,7 @@ jobs:
         run: npm run build
       - name: Publish
         run: |
-          npx lerna publish from-package --dist-tag \
+          npx lerna publish from-package --yes --dist-tag \
             "$([[ ${{ github.event.release.tag_name }} =~ alpha|beta|rc ]] && echo "next" || echo "latest")"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
