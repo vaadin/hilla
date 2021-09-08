@@ -54,17 +54,21 @@ public class BooleanConversionTest extends BaseTypeConversionTest {
     }
 
     @Test
-    @Ignore("Ignored after https://github.com/FasterXML/jackson-databind/issues/1852 in Jackson 2.12.0")
-    public void should_FailToConvertToBoolean_When_ReceiveUppercaseString() {
-        assert400ResponseWhenCallingMethod("revertBoolean", "\"TRUE\"");
+    public void should_FailToConvertToBoolean_When_ReceiveMixedcaseString() {
         assert400ResponseWhenCallingMethod("revertBoolean", "\"TRue\"");
         assert400ResponseWhenCallingMethod("revertBoolean", "\"FAlse\"");
-        assert400ResponseWhenCallingMethod("revertBoolean", "\"FALSE\"");
 
-        assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"TRUE\"");
         assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"TRue\"");
-        assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"FALSE\"");
         assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"FAlse\"");
+    }
+
+    @Test
+    public void should_ConvertToBoolean_When_ReceiveUppercaseString() {
+        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"TRUE\"", "false");
+        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"FALSE\"", "true");
+
+        assertEqualExpectedValueWhenCallingMethod("revertBooleanBoxed", "\"TRUE\"", "false");
+        assertEqualExpectedValueWhenCallingMethod("revertBooleanBoxed", "\"FALSE\"", "true");
     }
 
     @Test
