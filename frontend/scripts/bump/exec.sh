@@ -37,4 +37,4 @@ trap "restore_protection" EXIT
 
 < "$dir"/disabled-protection.json ghr -X PUT -d '@-' > /dev/null
 
-git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git HEAD:$branch
+git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git "$branch"
