@@ -58,16 +58,16 @@ public class BooleanConversionTest extends BaseTypeConversionTest {
         assert400ResponseWhenCallingMethod("revertBoolean", "\"TRue\"");
         assert400ResponseWhenCallingMethod("revertBoolean", "\"FAlse\"");
 
-        assert400ResponseWhenCallingMethod("revertBooleanBoxed",
-                "\"TRue\"");
-        assert400ResponseWhenCallingMethod("revertBooleanBoxed",
-                "\"FAlse\"");
+        assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"TRue\"");
+        assert400ResponseWhenCallingMethod("revertBooleanBoxed", "\"FAlse\"");
     }
 
     @Test
     public void should_ConvertToBoolean_When_ReceiveUppercaseString() {
-        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"TRUE\"", "false");
-        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"FALSE\"", "true");
+        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"TRUE\"",
+                "false");
+        assertEqualExpectedValueWhenCallingMethod("revertBoolean", "\"FALSE\"",
+                "true");
 
         assertEqualExpectedValueWhenCallingMethod("revertBooleanBoxed",
                 "\"TRUE\"", "false");
