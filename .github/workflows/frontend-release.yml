@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: main
       - name: Use NodeJS LTS
         uses: actions/setup-node@v2
         with:
@@ -41,6 +42,8 @@ jobs:
           REPO: ${{ github.repository }}
           VERSION_TAG: ${{ github.event.release.tag_name }}
       - name: Publish
-        run: npx lerna publish
+        run: |
+          npx lerna publish --dist-tag \
+            "$([[ ${{ github.event.release.tag_name }} =~ alpha|beta|rc ]] && echo "next" || echo "latest")"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
