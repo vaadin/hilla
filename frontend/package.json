@@ -17,7 +17,6 @@
     "build": "lerna run build --include-dependencies",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
-    "publish": "node scripts/dummy-publish-tmp.js",
     "test": "lerna run test",
     "test:coverage": "lerna run test:coverage",
     "typecheck": "lerna run typecheck"
