@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/fusion-frontend",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "Vaadin frontend utils used by Fusion",
   "main": "index.js",
   "module": "index.js",
@@ -45,7 +45,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/common-frontend": "^0.0.10",
+    "@vaadin/common-frontend": "^0.0.12",
     "lit": "^2.0.0-rc.2"
   },
   "devDependencies": {

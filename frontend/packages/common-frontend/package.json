@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/common-frontend",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "Vaadin frontend utils used by Flow and Fusion",
   "main": "index.js",
   "module": "index.js",
