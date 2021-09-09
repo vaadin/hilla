@@ -3,3 +3,4 @@ packages/*/*.d.ts.map
 packages/*/*.js
 packages/*/*.js.map
 packages/*/.coverage
+docs

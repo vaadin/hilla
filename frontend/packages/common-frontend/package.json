@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules",
+    "docs": "typedoc src/index.ts --out ../../docs/common-frontend --options ../../typedoc.config.json",
     "lint": "eslint --fix src/**/*.ts",
     "test": "web-test-runner \"test/**/*.test.ts\" --config ../../web-test-runner.config.js",
     "test:coverage": "npm run test -- --coverage",

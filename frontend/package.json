@@ -15,6 +15,7 @@
     "check": "concurrently npm:lint npm:typecheck",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build --include-dependencies",
+    "docs": "typedoc --options typedoc.config.json",
     "lint": "lerna run lint",
     "postinstall": "npm run bootstrap",
     "test": "lerna run test",
@@ -41,6 +42,7 @@
     "minimist": "^1.2.5",
     "prettier": "^2.3.2",
     "simple-git-hooks": "^2.6.1",
+    "typedoc": "^0.21.9",
     "typescript": "^4.4.2"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "entryPoints": [
+    "./packages/common-frontend/src/index.ts",
+    "./packages/form/src/index.ts",
+    "./packages/fusion-frontend/src/index.ts"
+  ],
+  "out": "./docs",
+  "tsconfig": "./tsconfig.typedoc.json",
+  "excludePrivate": true,
+  "excludeExternals": true
+}
