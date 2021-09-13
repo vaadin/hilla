@@ -40,5 +40,4 @@ export default interface Schema {
   readonly extensions?: Readonly<Record<string, any | undefined>>;
   readonly _enum?: ReadonlyArray<any | undefined>;
   readonly discriminator?: Discriminator;
-  readonly exampleSetFlag: boolean;
 }
