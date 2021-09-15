@@ -1,5 +1,7 @@
 # Vaadin Fusion Frontend
 
+[API documentation ↗](https://vaadin.com/docs/latest/fusion/tutorials/in-depth-course/login-and-authentication#handling-login-and-logout)
+
 [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/fusion-frontend.svg)](https://www.npmjs.com/package/@vaadin/fusion-frontend)
 
 A set of utilities to interact with the Vaadin [Fusion](https://vaadin.com/docs/latest/fusion/overview) application server.

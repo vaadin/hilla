@@ -1,8 +1,12 @@
-# Vaadin Common Frontend
+# Vaadin Form
+
+[API documentation ↗](https://vaadin.com/docs/latest/fusion/forms/appendix-client-side-form-binding-reference)
 
 [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form)
 
-A tool to connect HTML forms with the Fusion backend seamlessly.
+A set of utilities for building forms in TypeScript, including data binding, validation, code generation, backend integration, Lit directives, and more.
+
+A part of the Fusion project.
 
 ## Installation
 
