@@ -5,7 +5,7 @@
   "main": "index.js",
   "module": "index.js",
   "type": "module",
-  "repository": "vaadin/fusion/frontend",
+  "repository": "https://github.com/vaadin/fusion/frontend/packages/common-frontend",
   "keywords": [
     "Vaadin",
     "Fusion"
