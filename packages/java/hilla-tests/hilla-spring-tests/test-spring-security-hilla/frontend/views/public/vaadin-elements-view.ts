@@ -105,7 +105,7 @@ export class VaadinElementsView extends View {
     try {
       await this.binder.submitTo(ElementsEndpoint.saveElements);
       message = "<h3>saved</h3>";
-    } catch (error) {
+    } catch (error:any) {
       message = error.message.replace(/\n/g, '<br/>');
     }
     this.notification.renderer = (root: Element) => root.innerHTML = '<br/>' + message + '<br/><br/>';
