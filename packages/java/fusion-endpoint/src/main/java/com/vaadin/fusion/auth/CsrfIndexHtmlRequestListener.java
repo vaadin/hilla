@@ -66,7 +66,11 @@ public class CsrfIndexHtmlRequestListener implements IndexHtmlRequestListener {
         Cookie csrfCookie = new Cookie(ApplicationConstants.CSRF_TOKEN,
                 csrfToken);
         csrfCookie.setSecure(request.isSecure());
-        csrfCookie.setPath(request.getContextPath());
+        String path = request.getContextPath();
+        if (path == null || path.isEmpty()) {
+            path = "/";
+        }
+        csrfCookie.setPath(path);
         csrfCookie.setHttpOnly(false);
         response.addCookie(csrfCookie);
     }
