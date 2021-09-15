@@ -4,7 +4,7 @@
 
 [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form)
 
-A set of utilities for building forms in TypeScript, including data binding, validation, code generation, backend integration, Lit directives, and more.
+A set of utilities for building forms with TypeScript and [Lit](https://lit.dev/), including data binding, validation, code generation, backend integration, Lit directives, and more.
 
 A part of the Fusion project.
 
