@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.vaadin.fusion</groupId>
+  <artifactId>fusion-project</artifactId>
+  <name>Fusion</name>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+
+  <modules>
+    <module>fusion-maven-plugin</module>
+    <module>parser-jvm</module>
+  </modules>
+
+  <organization>
+    <name>Vaadin Ltd</name>
+    <url>https://vaadin.com</url>
+  </organization>
+  <url>https://vaadin.com</url>
+  <licenses>
+    <license>
+      <name>Apache License Version 2.0</name>
+      <distribution>repo</distribution>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>net.revelc.code.formatter</groupId>
+        <artifactId>formatter-maven-plugin</artifactId>
+        <version>2.11.0</version>
+        <configuration>
+          <configFile>${project.basedir}/.config/VaadinJavaConventions.xml
+          </configFile>
+          <!-- Provide a dummy JS config file to avoid errors -->
+          <configJsFile>${project.basedir}/.config/VaadinJavaConventions.xml
+          </configJsFile>
+          <lineEnding>LF</lineEnding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
