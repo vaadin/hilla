@@ -56,7 +56,7 @@ public class TaskGenerateFusionTest {
 
         String output = FileUtils.readFileToString(client, "UTF-8");
         assertTrue(output.contains(
-                "import {ConnectClient} from '@vaadin/flow-frontend/Connect';"));
+                "import {ConnectClient} from '@vaadin/fusion-frontend';"));
         assertTrue(output.contains(
                 "const client = new ConnectClient({prefix: 'connect'});"));
         assertTrue(output.contains("export default client;"));
