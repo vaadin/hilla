@@ -7,6 +7,7 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class FusionFormIT extends ChromeBrowserTest {
@@ -66,6 +67,7 @@ public class FusionFormIT extends ChromeBrowserTest {
     }
 
     @Test
+    @Ignore
     // https://github.com/vaadin/fusion/issues/13
     public void no_validation_error_when_clearing_number_field() {
         NumberFieldElement numberFieldElement = $(NumberFieldElement.class).id("number-field");
