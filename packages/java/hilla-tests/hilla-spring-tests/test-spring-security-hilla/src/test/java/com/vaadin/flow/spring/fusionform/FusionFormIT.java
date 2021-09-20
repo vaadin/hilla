@@ -67,7 +67,6 @@ public class FusionFormIT extends ChromeBrowserTest {
     }
 
     @Test
-    @Ignore
     // https://github.com/vaadin/fusion/issues/13
     public void no_validation_error_when_clearing_number_field() {
         NumberFieldElement numberFieldElement = $(NumberFieldElement.class).id("number-field");
