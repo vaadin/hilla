@@ -92,7 +92,7 @@ export class BooleanModel extends PrimitiveModel<boolean> implements HasFromStri
   [_fromString] = Boolean;
 }
 
-export class NumberModel extends PrimitiveModel<number> implements HasFromString<number> {
+export class NumberModel extends PrimitiveModel<number> implements HasFromString<number | undefined> {
   static createEmptyValue = Number;
 
   constructor(
@@ -105,7 +105,10 @@ export class NumberModel extends PrimitiveModel<number> implements HasFromString
     super(parent, key, optional, new IsNumber(optional), ...validators);
   }
 
-  [_fromString](str: string): number {
+  [_fromString](str: string): number | undefined {
+    // Returning undefined is needed to support passing the validation when the value of an optional number field is
+    // an empty string
+    if (str === '') return undefined;
     return isNumeric(str) ? Number.parseFloat(str) : NaN;
   }
 }

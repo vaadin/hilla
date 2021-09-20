@@ -61,14 +61,14 @@ describe('form/Model', () => {
     });
 
     describe('_fromString', () => {
-      let fromString: (str: string) => number;
+      let fromString: (str: string) => number | undefined;
 
       beforeEach(() => {
         fromString = binder.model.fieldNumber[_fromString];
       });
 
       it('should disallow empty string', async () => {
-        expect(fromString('')).to.satisfy(Number.isNaN);
+        expect(fromString('')).to.equal(undefined);
       });
 
       it('should integer format', async () => {
