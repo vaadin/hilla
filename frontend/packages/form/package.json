@@ -57,8 +57,10 @@
     "access": "public"
   },
   "dependencies": {
-    "lit": "^2.0.0-rc.2",
     "validator": "^13.6.0"
+  },
+  "peerDependencies": {
+    "lit": "^2.0.0"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",
