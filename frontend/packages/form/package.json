@@ -57,7 +57,7 @@
     "access": "public"
   },
   "dependencies": {
-    "lit": "^2.0.0-rc.2",
+    "lit": "^2.0.0",
     "validator": "^13.6.0"
   },
   "devDependencies": {

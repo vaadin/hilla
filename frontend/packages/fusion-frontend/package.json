@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@vaadin/common-frontend": "^0.0.12",
-    "lit": "^2.0.0-rc.2"
+    "lit": "^2.0.0"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",
