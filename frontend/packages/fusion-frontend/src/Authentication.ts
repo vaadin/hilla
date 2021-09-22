@@ -1,30 +1,11 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
+import { getSpringCsrfInfoFromDocument, getSpringCsrfTokenHeadersFromDocument } from './CsrfUtils';
 
 const $wnd = window as any;
 
 function updateVaadinCsrfToken(token: string | undefined) {
   $wnd.Vaadin.TypeScript = $wnd.Vaadin.TypeScript || {};
   $wnd.Vaadin.TypeScript.csrfToken = token;
-}
-
-function getSpringCsrfInfoFromDocument(doc: Document): Record<string, string> {
-  const csrf = doc.head.querySelector('meta[name="_csrf"]');
-  const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
-  const headers: Record<string, string> = {};
-  if (csrf !== null && csrfHeader !== null) {
-    headers._csrf = (csrf as HTMLMetaElement).content;
-    headers._csrf_header = (csrfHeader as HTMLMetaElement).content;
-  }
-  return headers;
-}
-
-function getSpringCsrfTokenHeadersFromDocument(doc: Document): Record<string, string> {
-  const csrfInfo = getSpringCsrfInfoFromDocument(doc);
-  const headers: Record<string, string> = {};
-  if (csrfInfo._csrf && csrfInfo._csrf_header) {
-    headers[csrfInfo._csrf_header] = csrfInfo._csrf;
-  }
-  return headers;
 }
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
