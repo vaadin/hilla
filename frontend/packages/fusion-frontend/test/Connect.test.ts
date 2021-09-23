@@ -228,9 +228,9 @@ describe('ConnectClient', () => {
     it('should set header for preventing CSRF', async () => {
       await client.call('FooEndpoint', 'fooMethod');
 
-      let expectedVaadinCsrfToken = {};
-      expectedVaadinCsrfToken[VAADIN_CSRF_HEADER.toLowerCase()] = '';
-      expect(fetchMock.lastOptions()?.headers).to.deep.include(expectedVaadinCsrfToken);
+      expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        [VAADIN_CSRF_HEADER.toLowerCase()]: '',
+      });
     });
 
     it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
@@ -241,9 +241,9 @@ describe('ConnectClient', () => {
         await client.call('FooEndpoint', 'fooMethod');
 
         const headers = fetchMock.lastOptions().headers;
-        const csrfHeader = {};
-        csrfHeader[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
-        expect(headers).to.deep.include(csrfHeader);
+        expect(headers).to.deep.include({
+          [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
+        });
       } finally {
         clearCookie(SPRING_CSRF_COOKIE_NAME);
         clearSpringCsrfMetaTags();
@@ -257,9 +257,9 @@ describe('ConnectClient', () => {
         await client.call('FooEndpoint', 'fooMethod');
 
         const headers = fetchMock.lastOptions().headers;
-        const csrfHeader = {};
-        csrfHeader[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
-        expect(headers).to.deep.include(csrfHeader);
+        expect(headers).to.deep.include({
+          [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
+        });
       } finally {
         clearSpringCsrfMetaTags();
       }
@@ -274,10 +274,9 @@ describe('ConnectClient', () => {
 
         const headers = fetchMock.lastOptions().headers;
 
-        let expectedCsrfHeader = {};
-        expectedCsrfHeader[VAADIN_CSRF_HEADER.toLowerCase()] = csrfToken;
-
-        expect(headers).to.deep.include(expectedCsrfHeader);
+        expect(headers).to.deep.include({
+          [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
+        });
       } finally {
         clearCookie('csrfToken');
       }

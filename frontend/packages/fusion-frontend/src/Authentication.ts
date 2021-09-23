@@ -1,13 +1,6 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils';
 
-const $wnd = window as any;
-
-function updateVaadinCsrfToken(token: string | undefined) {
-  $wnd.Vaadin.TypeScript = $wnd.Vaadin.TypeScript || {};
-  $wnd.Vaadin.TypeScript.csrfToken = token;
-}
-
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
   return getSpringCsrfInfo(doc);
@@ -39,7 +32,6 @@ const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined =>
 async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
   const responseText = await response.text();
   const token = getVaadinCsrfTokenFromResponseBody(responseText);
-  updateVaadinCsrfToken(token);
   const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
   updateSpringCsrfMetaTags(springCsrfTokenInfo);
 
@@ -103,7 +95,6 @@ export async function login(username: string, password: string, options?: LoginO
 
     if (loginSuccessful) {
       const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') || undefined;
-      updateVaadinCsrfToken(vaadinCsrfToken);
 
       const springCsrfHeader = response.headers.get('Spring-CSRF-header') || undefined;
       const springCsrfToken = response.headers.get('Spring-CSRF-token') || undefined;
@@ -154,7 +145,6 @@ export async function logout(options?: LogoutOptions) {
       await doLogout(logoutUrl, headers);
     } catch (error) {
       // clear the token if the call fails
-      delete $wnd.Vaadin?.TypeScript?.csrfToken;
       clearSpringCsrfMetaTags();
       throw error;
     }

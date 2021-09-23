@@ -7,6 +7,7 @@ import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_TOKEN_VALUE,
+  TEST_VAADIN_CSRF_TOKEN_VALUE,
   TET_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test';
@@ -19,7 +20,7 @@ const $wnd = window as any;
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
   const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
-  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TET_SPRING_CSRF_HEADER_NAME}"></meta></head><script>window.Vaadin = {TypeScript: {"csrfToken":"${vaadinCsrfToken}"}};</script>`;
+  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TET_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
     'Vaadin-CSRF': vaadinCsrfToken,
@@ -103,7 +104,6 @@ describe('Authentication', () => {
         { headers: requestHeaders }
       );
       await login('valid-username', 'valid-password');
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.equal('some-new-token');
       verifySpringCsrfToken('some-new-spring-token');
     });
 
@@ -135,10 +135,6 @@ describe('Authentication', () => {
   });
 
   describe('logout', () => {
-    beforeEach(() => {
-      $wnd.Vaadin.TypeScript = {};
-      $wnd.Vaadin.TypeScript.csrfToken = vaadinCsrfToken;
-    });
     afterEach(() => fetchMock.restore());
 
     it('should set the csrf token on logout', async () => {
@@ -152,7 +148,6 @@ describe('Authentication', () => {
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(1);
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.equal(vaadinCsrfToken);
     });
 
     it('should clear the csrf tokens on failed server logout', async () => {
@@ -173,7 +168,6 @@ describe('Authentication', () => {
         expect(err).to.equal(fakeError);
       }
       expect(fetchMock.calls()).to.have.lengthOf(3);
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.be.undefined;
       verifySpringCsrfTokenIsCleared();
     });
 
@@ -196,7 +190,6 @@ describe('Authentication', () => {
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.equal(vaadinCsrfToken);
       verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
 
@@ -225,7 +218,6 @@ describe('Authentication', () => {
         expect(err).to.equal(fakeError);
       }
       expect(fetchMock.calls()).to.have.lengthOf(3);
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.be.undefined;
 
       setupSpringCsrfMetaTags();
     });
@@ -253,7 +245,6 @@ describe('Authentication', () => {
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
-      expect($wnd.Vaadin.TypeScript.csrfToken).to.equal(vaadinCsrfToken);
       verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
   });
@@ -271,7 +262,7 @@ describe('Authentication', () => {
 
         return {
           error: false,
-          token: vaadinCsrfToken,
+          token: TEST_VAADIN_CSRF_TOKEN_VALUE,
         };
       });
 
@@ -283,9 +274,9 @@ describe('Authentication', () => {
 
       expect(invalidSessionCallback.calledOnce).to.be.true;
 
-      let expectedVaadinCsrfToken = {};
-      expectedVaadinCsrfToken[VAADIN_CSRF_HEADER.toLowerCase()] = vaadinCsrfToken;
-      expect(fetchMock.lastOptions()?.headers).to.deep.include(expectedVaadinCsrfToken);
+      expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        [VAADIN_CSRF_HEADER.toLowerCase()]: TEST_VAADIN_CSRF_TOKEN_VALUE,
+      });
     });
 
     it('should not invoke the onInvalidSession callback on 200 response', async () => {
