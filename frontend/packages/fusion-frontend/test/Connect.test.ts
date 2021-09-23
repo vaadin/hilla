@@ -5,6 +5,12 @@ import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client';
 import sinon from 'sinon';
 import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src';
+import {
+  clearSpringCsrfMetaTags,
+  setupSpringCsrfMetaTags,
+  springCsrfHeaderName,
+  springCsrfToken,
+} from './SpringCsrfTestUtils.test';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -115,18 +121,16 @@ describe('ConnectClient', () => {
   });
 
   describe('call method', () => {
-    beforeEach(() => {
-      fetchMock.post(base + '/connect/FooEndpoint/fooMethod', { fooData: 'foo' });
-      fetchMock.post(base + '/connect/FooEndpoint/fooMethodWithNullValue', { fooData: 'foo', propWithNullValue: null });
-    });
-
-    afterEach(() => fetchMock.restore());
-
     let client: ConnectClient;
 
     beforeEach(() => {
+      fetchMock.post(base + '/connect/FooEndpoint/fooMethod', { fooData: 'foo' });
+      fetchMock.post(base + '/connect/FooEndpoint/fooMethodWithNullValue', { fooData: 'foo', propWithNullValue: null });
       client = new ConnectClient();
+      document.cookie = '';
     });
+
+    afterEach(() => fetchMock.restore());
 
     it('should require 2 arguments', async () => {
       try {
@@ -215,6 +219,8 @@ describe('ConnectClient', () => {
     });
 
     it('should set header for preventing CSRF', async () => {
+      document.cookie = '';
+
       await client.call('FooEndpoint', 'fooMethod');
 
       expect(fetchMock.lastOptions()?.headers).to.deep.include({
@@ -222,8 +228,26 @@ describe('ConnectClient', () => {
       });
     });
 
-    it('should set header for preventing CSRF using Flow csrfToken cookie', async () => {
-      const originalCookie = document.cookie;
+    // it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
+    //   // const originalCookie = document.cookie;
+    //   try {
+    //     document.cookie = 'XSRF-TOKEN=spring-csrf-foo';
+    //     setupSpringCsrfMetaTags();
+
+    //     await client.call('FooEndpoint', 'fooMethod');
+
+    //     const headers = fetchMock.lastOptions().headers;
+    //     const csrfHeader = {};
+    //     csrfHeader[springCsrfHeaderName] = 'spring-csrf-foo';
+    //     expect(headers).to.deep.include(csrfHeader);
+    //   } finally {
+    //     // document.cookie = originalCookie;
+    //     clearSpringCsrfMetaTags();
+    //   }
+    // });
+
+    it('should set header for preventing CSRF using Fusion csrfToken cookie when no Spring csrf token presents', async () => {
+      // const originalCookie = document.cookie;
       try {
         document.cookie = 'csrfToken=foo';
 
@@ -234,7 +258,8 @@ describe('ConnectClient', () => {
           'x-csrf-token': 'foo',
         });
       } finally {
-        document.cookie = originalCookie;
+        document.cookie = '';
+        // document.cookie = originalCookie;
       }
     });
 

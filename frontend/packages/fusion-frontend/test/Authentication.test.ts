@@ -2,6 +2,13 @@ import { expect } from '@open-wc/testing';
 import fetchMock from 'fetch-mock/esm/client';
 import sinon from 'sinon';
 import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
+import {
+  clearSpringCsrfMetaTags,
+  setupSpringCsrfMetaTags,
+  springCsrfHeaderName,
+  springCsrfToken,
+  verifySpringCsrfTokenIsCleared,
+} from './SpringCsrfTestUtils.test';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -9,11 +16,9 @@ const base = window.location.origin;
 const $wnd = window as any;
 
 describe('Authentication', () => {
-  const springCsrfToken = 'spring-csrf-token';
-  const springCsrfHeaderName = 'X-CSRF-TOKEN';
   const requestHeaders: Record<string, string> = {};
   const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
-  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="X-CSRF-TOKEN"></meta></head><script>window.Vaadin = {TypeScript: {"csrfToken":"${vaadinCsrfToken}"}};</script>`;
+  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${springCsrfHeaderName}"></meta></head><script>window.Vaadin = {TypeScript: {"csrfToken":"${vaadinCsrfToken}"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
     'Vaadin-CSRF': vaadinCsrfToken,
@@ -22,6 +27,7 @@ describe('Authentication', () => {
     'Spring-CSRF-header': springCsrfHeaderName,
     'Spring-CSRF-token': springCsrfToken,
   };
+  // let originalCookie;
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
@@ -29,42 +35,17 @@ describe('Authentication', () => {
       springCsrfHeaderName
     );
   }
-  function verifySpringCsrfTokenIsCleared() {
-    expect(document.head.querySelector('meta[name="_csrf"]')).to.be.null;
-    expect(document.head.querySelector('meta[name="_csrf_header"]')).to.be.null;
-  }
 
-  function clearSpringCsrfMetaTags() {
-    Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
-      el.remove()
-    );
-  }
-  function setupSpringCsrfMetaTags(csrfToken = springCsrfToken) {
-    let csrfMetaTag = document.head.querySelector('meta[name="_csrf"]') as HTMLMetaElement | null;
-    let csrfHeaderNameMetaTag = document.head.querySelector('meta[name="_csrf_header"]') as HTMLMetaElement | null;
-
-    if (!csrfMetaTag) {
-      csrfMetaTag = document.createElement('meta');
-      csrfMetaTag.name = '_csrf';
-      document.head.appendChild(csrfMetaTag);
-    }
-    csrfMetaTag.content = csrfToken;
-
-    if (!csrfHeaderNameMetaTag) {
-      csrfHeaderNameMetaTag = document.createElement('meta');
-      csrfHeaderNameMetaTag.name = '_csrf_header';
-      document.head.appendChild(csrfHeaderNameMetaTag);
-    }
-    csrfHeaderNameMetaTag.content = springCsrfHeaderName;
-  }
   beforeEach(() => {
     setupSpringCsrfMetaTags();
+    // originalCookie = document.cookie;
     document.cookie = '';
     requestHeaders[springCsrfHeaderName] = springCsrfToken;
   });
   afterEach(() => {
     // @ts-ignore
     delete window.Vaadin.TypeScript;
+    // document.cookie = originalCookie;
     clearSpringCsrfMetaTags();
   });
 
@@ -115,7 +96,7 @@ describe('Authentication', () => {
           headers: {
             ...happyCaseResponseHeaders,
             'Vaadin-CSRF': 'some-new-token',
-            'Spring-CSRF-header': 'X-CSRF-TOKEN',
+            'Spring-CSRF-header': springCsrfHeaderName,
             'Spring-CSRF-token': 'some-new-spring-token',
           },
         },

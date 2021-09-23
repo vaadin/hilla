@@ -1,5 +1,5 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import { getSpringCsrfInfoFromDocument, getSpringCsrfTokenHeadersFromDocument } from './CsrfUtils';
+import { getSpringCsrfInfo, getSpringCsrfTokenHeadersFromDocument } from './CsrfUtils';
 
 const $wnd = window as any;
 
@@ -10,7 +10,7 @@ function updateVaadinCsrfToken(token: string | undefined) {
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
-  return getSpringCsrfInfoFromDocument(doc);
+  return getSpringCsrfInfo(doc);
 }
 
 function clearSpringCsrfMetaTags() {

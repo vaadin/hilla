@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import { getSpringCsrfTokenHeadersFromDocument, getCsrfTokenFromCookie } from './CsrfUtils';
+import { getCsrfTokenHeaders } from './CsrfUtils';
 
 const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};
@@ -301,12 +301,11 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    const springCsrfHeaders = getSpringCsrfTokenHeadersFromDocument(document);
+    const csrfHeaders = getCsrfTokenHeaders(document);
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-CSRF-Token': getCsrfTokenFromCookie('csrfToken='),
-      ...springCsrfHeaders,
+      ...csrfHeaders,
     };
 
     // helper to keep the undefined value in object after JSON.stringify
