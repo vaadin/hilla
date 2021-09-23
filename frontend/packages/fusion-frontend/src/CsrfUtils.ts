@@ -1,3 +1,6 @@
+export const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
+export const VAADIN_CSRF_COOKIE_PREFIX = 'csrfToken=';
+
 function getSpringCsrfHeaderFromDocument(doc: Document): string {
   const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
   return (csrfHeader && (csrfHeader as HTMLMetaElement).content) || '';
@@ -48,8 +51,6 @@ export function getCsrfTokenHeaders(doc: Document): Record<string, string> {
   if (csrfInfo._csrf && csrfInfo._csrf_header) {
     headers[csrfInfo._csrf_header] = csrfInfo._csrf;
   } else {
-    const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
-    const VAADIN_CSRF_COOKIE_PREFIX = 'csrfToken=';
     headers[VAADIN_CSRF_HEADER] = getCsrfTokenFromCookie(VAADIN_CSRF_COOKIE_PREFIX);
   }
 

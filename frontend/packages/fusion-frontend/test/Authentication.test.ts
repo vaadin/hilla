@@ -2,6 +2,7 @@ import { expect } from '@open-wc/testing';
 import fetchMock from 'fetch-mock/esm/client';
 import sinon from 'sinon';
 import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
+import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
@@ -27,7 +28,7 @@ describe('Authentication', () => {
     'Spring-CSRF-header': springCsrfHeaderName,
     'Spring-CSRF-token': springCsrfToken,
   };
-  // let originalCookie;
+  let originalCookie;
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
@@ -38,14 +39,13 @@ describe('Authentication', () => {
 
   beforeEach(() => {
     setupSpringCsrfMetaTags();
-    // originalCookie = document.cookie;
-    document.cookie = '';
+    originalCookie = document.cookie;
     requestHeaders[springCsrfHeaderName] = springCsrfToken;
   });
   afterEach(() => {
     // @ts-ignore
     delete window.Vaadin.TypeScript;
-    // document.cookie = originalCookie;
+    document.cookie = originalCookie;
     clearSpringCsrfMetaTags();
   });
 
@@ -271,7 +271,7 @@ describe('Authentication', () => {
 
         return {
           error: false,
-          token: 'csrf-token',
+          token: vaadinCsrfToken,
         };
       });
 
@@ -283,9 +283,9 @@ describe('Authentication', () => {
 
       expect(invalidSessionCallback.calledOnce).to.be.true;
 
-      expect(fetchMock.lastOptions()?.headers).to.deep.include({
-        'x-csrf-token': 'csrf-token',
-      });
+      let expectedVaadinCsrfToken = {};
+      expectedVaadinCsrfToken[VAADIN_CSRF_HEADER.toLowerCase()] = vaadinCsrfToken;
+      expect(fetchMock.lastOptions()?.headers).to.deep.include(expectedVaadinCsrfToken);
     });
 
     it('should not invoke the onInvalidSession callback on 200 response', async () => {

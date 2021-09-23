@@ -1,5 +1,5 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersFromDocument } from './CsrfUtils';
+import { getSpringCsrfInfo, getSpringCsrfTokenHeadersFromDocument, VAADIN_CSRF_HEADER } from './CsrfUtils';
 
 const $wnd = window as any;
 
@@ -188,7 +188,7 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
     if (response.status === 401) {
       const loginResult = await this.onInvalidSessionCallback();
       if (loginResult.token) {
-        clonedContext.request.headers.set('X-CSRF-Token', loginResult.token);
+        clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
         return next(clonedContext);
       }
     }

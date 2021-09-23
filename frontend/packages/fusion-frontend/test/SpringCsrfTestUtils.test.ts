@@ -1,6 +1,8 @@
 import { expect } from '@open-wc/testing';
 export const springCsrfToken = 'spring-csrf-token';
-export const springCsrfHeaderName = 'X-XSRF-TOKEN';
+export const springCsrfHeaderName = 'x-xsrf-token';
+export const springCsrfCookieName = 'XSRF-TOKEN';
+export const vaadinCsrfToken = 'vaadin-csrf-token';
 
 export function setupSpringCsrfMetaTags(csrfToken = springCsrfToken) {
   let csrfMetaTag = document.head.querySelector('meta[name="_csrf"]') as HTMLMetaElement | null;
@@ -30,4 +32,12 @@ export function clearSpringCsrfMetaTags() {
 export function verifySpringCsrfTokenIsCleared() {
   expect(document.head.querySelector('meta[name="_csrf"]')).to.be.null;
   expect(document.head.querySelector('meta[name="_csrf_header"]')).to.be.null;
+}
+
+export function setCookie(name: string, value: string) {
+  document.cookie = name + '=' + value;
+}
+
+export function clearCookie(name: string) {
+  setCookie(name, '');
 }

@@ -5,9 +5,13 @@ import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client';
 import sinon from 'sinon';
 import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src';
+import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils';
 import {
+  clearCookie,
   clearSpringCsrfMetaTags,
+  setCookie,
   setupSpringCsrfMetaTags,
+  springCsrfCookieName,
   springCsrfHeaderName,
   springCsrfToken,
 } from './SpringCsrfTestUtils.test';
@@ -122,15 +126,19 @@ describe('ConnectClient', () => {
 
   describe('call method', () => {
     let client: ConnectClient;
+    let originalCookie;
 
     beforeEach(() => {
       fetchMock.post(base + '/connect/FooEndpoint/fooMethod', { fooData: 'foo' });
       fetchMock.post(base + '/connect/FooEndpoint/fooMethodWithNullValue', { fooData: 'foo', propWithNullValue: null });
       client = new ConnectClient();
-      document.cookie = '';
+      originalCookie = document.cookie;
     });
 
-    afterEach(() => fetchMock.restore());
+    afterEach(() => {
+      fetchMock.restore();
+      document.cookie = originalCookie;
+    });
 
     it('should require 2 arguments', async () => {
       try {
@@ -219,47 +227,60 @@ describe('ConnectClient', () => {
     });
 
     it('should set header for preventing CSRF', async () => {
-      document.cookie = '';
-
       await client.call('FooEndpoint', 'fooMethod');
 
-      expect(fetchMock.lastOptions()?.headers).to.deep.include({
-        'x-csrf-token': '',
-      });
+      let expectedVaadinCsrfToken = {};
+      expectedVaadinCsrfToken[VAADIN_CSRF_HEADER.toLowerCase()] = '';
+      expect(fetchMock.lastOptions()?.headers).to.deep.include(expectedVaadinCsrfToken);
     });
 
-    // it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
-    //   // const originalCookie = document.cookie;
-    //   try {
-    //     document.cookie = 'XSRF-TOKEN=spring-csrf-foo';
-    //     setupSpringCsrfMetaTags();
-
-    //     await client.call('FooEndpoint', 'fooMethod');
-
-    //     const headers = fetchMock.lastOptions().headers;
-    //     const csrfHeader = {};
-    //     csrfHeader[springCsrfHeaderName] = 'spring-csrf-foo';
-    //     expect(headers).to.deep.include(csrfHeader);
-    //   } finally {
-    //     // document.cookie = originalCookie;
-    //     clearSpringCsrfMetaTags();
-    //   }
-    // });
-
-    it('should set header for preventing CSRF using Fusion csrfToken cookie when no Spring csrf token presents', async () => {
-      // const originalCookie = document.cookie;
+    it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
       try {
-        document.cookie = 'csrfToken=foo';
+        setCookie(springCsrfCookieName, springCsrfToken);
+        setupSpringCsrfMetaTags();
 
         await client.call('FooEndpoint', 'fooMethod');
 
         const headers = fetchMock.lastOptions().headers;
-        expect(headers).to.deep.include({
-          'x-csrf-token': 'foo',
-        });
+        const csrfHeader = {};
+        csrfHeader[springCsrfHeaderName] = springCsrfToken;
+        expect(headers).to.deep.include(csrfHeader);
       } finally {
-        document.cookie = '';
-        // document.cookie = originalCookie;
+        clearCookie(springCsrfCookieName);
+        clearSpringCsrfMetaTags();
+      }
+    });
+
+    it('should set header for preventing CSRF using Spring csrf when presents in meta tags', async () => {
+      try {
+        setupSpringCsrfMetaTags();
+
+        await client.call('FooEndpoint', 'fooMethod');
+
+        const headers = fetchMock.lastOptions().headers;
+        const csrfHeader = {};
+        csrfHeader[springCsrfHeaderName] = springCsrfToken;
+        expect(headers).to.deep.include(csrfHeader);
+      } finally {
+        clearSpringCsrfMetaTags();
+      }
+    });
+
+    it('should set header for preventing CSRF using Fusion csrfToken cookie when no Spring csrf token presents', async () => {
+      try {
+        const csrfToken = 'foo';
+        setCookie('csrfToken', csrfToken);
+
+        await client.call('FooEndpoint', 'fooMethod');
+
+        const headers = fetchMock.lastOptions().headers;
+
+        let expectedCsrfHeader = {};
+        expectedCsrfHeader[VAADIN_CSRF_HEADER.toLowerCase()] = csrfToken;
+
+        expect(headers).to.deep.include(expectedCsrfHeader);
+      } finally {
+        clearCookie('csrfToken');
       }
     });
 
