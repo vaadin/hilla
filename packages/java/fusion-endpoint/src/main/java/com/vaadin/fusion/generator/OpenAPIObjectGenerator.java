@@ -376,7 +376,7 @@ public class OpenAPIObjectGenerator {
                 String className = enumDeclaration.getFullyQualifiedName()
                         .orElse(enumDeclaration.getNameAsString());
                 qualifiedNameToPath.put(className,
-                        storage.getPath().toString());
+                        storage.getPath().toUri().toString());
             });
             nonEndpointMap.put(enumDeclaration.resolve().getQualifiedName(),
                     enumDeclaration);
@@ -390,7 +390,8 @@ public class OpenAPIObjectGenerator {
         compilationUnit.getStorage().ifPresent(storage -> {
             String className = classDeclaration.getFullyQualifiedName()
                     .orElse(classDeclaration.getNameAsString());
-            qualifiedNameToPath.put(className, storage.getPath().toString());
+            qualifiedNameToPath.put(className,
+                    storage.getPath().toUri().toString());
         });
         if (!GeneratorUtils.hasAnnotation(classDeclaration, compilationUnit,
                 Endpoint.class)) {
