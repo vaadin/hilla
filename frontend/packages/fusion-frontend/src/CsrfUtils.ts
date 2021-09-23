@@ -1,17 +1,11 @@
-function getSpringCsrfHeaderFromDocument(doc: Document): string | undefined {
+function getSpringCsrfHeaderFromDocument(doc: Document): string {
   const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
-  if (csrfHeader) {
-    return (csrfHeader as HTMLMetaElement).content;
-  }
-  return undefined;
+  return (csrfHeader && (csrfHeader as HTMLMetaElement).content) || '';
 }
 
-function getSpringCsrfTokenFromDocument(doc: Document): string | undefined {
+function getSpringCsrfTokenFromDocument(doc: Document): string {
   const csrfToken = doc.head.querySelector('meta[name="_csrf"]');
-  if (csrfToken) {
-    return (csrfToken as HTMLMetaElement).content;
-  }
-  return undefined;
+  return (csrfToken && (csrfToken as HTMLMetaElement).content) || '';
 }
 
 export function getCsrfTokenFromCookie(csrfCookieNamePrefix: string): string {
@@ -25,9 +19,12 @@ export function getCsrfTokenFromCookie(csrfCookieNamePrefix: string): string {
 
 export function getSpringCsrfInfoFromDocument(doc: Document): Record<string, string> {
   const csrfHeader = getSpringCsrfHeaderFromDocument(doc);
-  const csrf = getCsrfTokenFromCookie('XSRF-TOKEN=') ?? getSpringCsrfTokenFromDocument(doc);
+  let csrf = getCsrfTokenFromCookie('XSRF-TOKEN=');
+  if (csrf.length === 0) {
+    csrf = getSpringCsrfTokenFromDocument(doc);
+  }
   const headers: Record<string, string> = {};
-  if (csrf && csrfHeader) {
+  if (csrf.length > 0 && csrfHeader.length > 0) {
     headers._csrf = csrf;
     headers._csrf_header = csrfHeader;
   }

@@ -59,7 +59,7 @@ describe('Authentication', () => {
   }
   beforeEach(() => {
     setupSpringCsrfMetaTags();
-    document.cookie = undefined;
+    document.cookie = '';
     requestHeaders[springCsrfHeaderName] = springCsrfToken;
   });
   afterEach(() => {
