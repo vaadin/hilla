@@ -6,8 +6,8 @@ import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
-  springCsrfHeaderName,
-  springCsrfToken,
+  TEST_SPRING_CSRF_TOKEN_VALUE,
+  TET_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test';
 
@@ -19,28 +19,28 @@ const $wnd = window as any;
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
   const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
-  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${springCsrfHeaderName}"></meta></head><script>window.Vaadin = {TypeScript: {"csrfToken":"${vaadinCsrfToken}"}};</script>`;
+  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TET_SPRING_CSRF_HEADER_NAME}"></meta></head><script>window.Vaadin = {TypeScript: {"csrfToken":"${vaadinCsrfToken}"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
     'Vaadin-CSRF': vaadinCsrfToken,
     Result: 'success',
     'Default-url': '/',
-    'Spring-CSRF-header': springCsrfHeaderName,
-    'Spring-CSRF-token': springCsrfToken,
+    'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
+    'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
   };
   let originalCookie;
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
     expect(document.head.querySelector('meta[name="_csrf_header"]')!.getAttribute('content')).to.equal(
-      springCsrfHeaderName
+      TET_SPRING_CSRF_HEADER_NAME
     );
   }
 
   beforeEach(() => {
     setupSpringCsrfMetaTags();
     originalCookie = document.cookie;
-    requestHeaders[springCsrfHeaderName] = springCsrfToken;
+    requestHeaders[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
   });
   afterEach(() => {
     // @ts-ignore
@@ -96,7 +96,7 @@ describe('Authentication', () => {
           headers: {
             ...happyCaseResponseHeaders,
             'Vaadin-CSRF': 'some-new-token',
-            'Spring-CSRF-header': springCsrfHeaderName,
+            'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
             'Spring-CSRF-token': 'some-new-spring-token',
           },
         },
@@ -197,7 +197,7 @@ describe('Authentication', () => {
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
       expect($wnd.Vaadin.TypeScript.csrfToken).to.equal(vaadinCsrfToken);
-      verifySpringCsrfToken(springCsrfToken);
+      verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
 
     // when started the app offline, the spring csrf meta tags are not available
@@ -232,12 +232,12 @@ describe('Authentication', () => {
 
     // when the page has been opend too long the session has expired
     it('should retry when expired spring csrf metas in the doc', async () => {
-      const expiredSpringCsrfToken = `expired-${springCsrfToken}`;
+      const expiredSpringCsrfToken = `expired-${TEST_SPRING_CSRF_TOKEN_VALUE}`;
 
       setupSpringCsrfMetaTags(expiredSpringCsrfToken);
 
       const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
-      headersWithExpiredSpringCsrfToken[springCsrfHeaderName] = expiredSpringCsrfToken;
+      headersWithExpiredSpringCsrfToken[TET_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
 
       fetchMock.post('/logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
       fetchMock.get('?nocache', {
@@ -254,7 +254,7 @@ describe('Authentication', () => {
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
       expect($wnd.Vaadin.TypeScript.csrfToken).to.equal(vaadinCsrfToken);
-      verifySpringCsrfToken(springCsrfToken);
+      verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
   });
 
