@@ -1,10 +1,9 @@
 import { expect } from '@open-wc/testing';
-export const springCsrfToken = 'spring-csrf-token';
-export const springCsrfHeaderName = 'x-xsrf-token';
-export const springCsrfCookieName = 'XSRF-TOKEN';
-export const vaadinCsrfToken = 'vaadin-csrf-token';
+export const TET_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
+export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';
+export const TEST_VAADIN_CSRF_TOKEN_VALUE = 'vaadin-csrf-token';
 
-export function setupSpringCsrfMetaTags(csrfToken = springCsrfToken) {
+export function setupSpringCsrfMetaTags(csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE) {
   let csrfMetaTag = document.head.querySelector('meta[name="_csrf"]') as HTMLMetaElement | null;
   let csrfHeaderNameMetaTag = document.head.querySelector('meta[name="_csrf_header"]') as HTMLMetaElement | null;
 
@@ -20,7 +19,7 @@ export function setupSpringCsrfMetaTags(csrfToken = springCsrfToken) {
     csrfHeaderNameMetaTag.name = '_csrf_header';
     document.head.appendChild(csrfHeaderNameMetaTag);
   }
-  csrfHeaderNameMetaTag.content = springCsrfHeaderName;
+  csrfHeaderNameMetaTag.content = TET_SPRING_CSRF_HEADER_NAME;
 }
 
 export function clearSpringCsrfMetaTags() {

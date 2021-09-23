@@ -1,7 +1,6 @@
 export const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
-
-const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
-const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
+export const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
+export const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
 
 function getSpringCsrfHeaderFromMetaTag(doc: Document): string {
   const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
