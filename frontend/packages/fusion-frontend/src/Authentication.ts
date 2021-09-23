@@ -1,5 +1,5 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersFromDocument, VAADIN_CSRF_HEADER } from './CsrfUtils';
+import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils';
 
 const $wnd = window as any;
 
@@ -85,7 +85,7 @@ export async function login(username: string, password: string, options?: LoginO
     data.append('password', password);
 
     const loginProcessingUrl = options && options.loginProcessingUrl ? options.loginProcessingUrl : 'login';
-    const headers = getSpringCsrfTokenHeadersFromDocument(document);
+    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     headers.source = 'typescript';
     const response = await fetch(loginProcessingUrl, {
       method: 'POST',
@@ -143,14 +143,14 @@ export async function logout(options?: LogoutOptions) {
   // this assumes the default Spring Security logout configuration (handler URL)
   const logoutUrl = options && options.logoutUrl ? options.logoutUrl : 'logout';
   try {
-    const headers = getSpringCsrfTokenHeadersFromDocument(document);
+    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     await doLogout(logoutUrl, headers);
   } catch {
     try {
       const response = await fetch('?nocache');
       const responseText = await response.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersFromDocument(doc);
+      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
       await doLogout(logoutUrl, headers);
     } catch (error) {
       // clear the token if the call fails
