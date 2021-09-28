@@ -1,32 +1,27 @@
 package com.vaadin.fusion.parser;
 
-import java.util.List;
-import java.util.function.Consumer;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class PluginManager {
-  private final PluginManagerStore enters = new PluginManagerStore(Visit.Stage.Enter);
-  private final PluginManagerStore exits = new PluginManagerStore(Visit.Stage.Exit);
+  private final Set<Plugin> plugins;
 
-  void add(Plugin plugin) {
-    enters.add(plugin);
-    exits.add(plugin);
+  PluginManager(Set<String> pluginClassNames) {
+    ClassLoader loader = getClass().getClassLoader();
+    plugins = pluginClassNames.stream().map(name -> {
+      try {
+        return ((Class<Plugin>) loader.loadClass(name)).getDeclaredConstructor().newInstance();
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        throw new PluginException(
+          String.format("Cannot instantiate plugin '%s'", name), e);
+      }
+    }).collect(Collectors.toSet());
   }
 
-  void enter(Object node, Visit.Type type) {
-    if (enters.has(type)) {
-      apply(node, enters.get(type));
-    }
-  }
-
-  void exit(Object node, Visit.Type type) {
-    if (exits.has(type)) {
-      apply(node, exits.get(type));
-    }
-  }
-
-  private void apply(Object node, List<Consumer<Object>> list) {
-    for (Consumer<Object> action : list) {
-      action.accept(node);
+  void execute(RelativeClassList endpoints, RelativeClassList entities, SharedStorage storage) {
+    for (Plugin plugin : plugins) {
+      plugin.execute(endpoints, entities, storage);
     }
   }
 }

@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser;
 
 public interface Plugin {
-  String getName();
-
+  void execute(RelativeClassList endpoints, RelativeClassList entities,
+    SharedStorage storage);
 }

@@ -34,6 +34,11 @@
       <version>4.8.116</version>
     </dependency>
     <dependency>
+      <groupId>com.reprezen.kaizen</groupId>
+      <artifactId>openapi-parser</artifactId>
+      <version>4.0.4</version>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
