@@ -3,10 +3,9 @@ package com.vaadin.fusion.parser;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static com.vaadin.fusion.parser.Resolver.resolveAsRelative;
 import io.github.classgraph.MethodInfo;
 import io.github.classgraph.MethodParameterInfo;
-
-import static com.vaadin.fusion.parser.Resolver.resolveAsRelative;
 
 public class RelativeMethodInfo implements Relative {
   private final MethodInfo methodInfo;

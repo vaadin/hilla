@@ -23,47 +23,46 @@ public class RelativeClassStream {
   }
 
   public Stream<RelativeAnnotationInfo> getAnnotations(
-      Predicate<AnnotationInfo> condition) {
+    Predicate<AnnotationInfo> condition) {
     return getClassMemberStream(ClassInfo::getAnnotationInfo, condition,
-        RelativeAnnotationInfo::new);
+      RelativeAnnotationInfo::new);
   }
 
   public Stream<RelativeAnnotationInfo> getAnnotations() {
     return getClassMemberStream(ClassInfo::getAnnotationInfo,
-        RelativeAnnotationInfo::new);
+      RelativeAnnotationInfo::new);
   }
 
   public Stream<RelativeFieldInfo> getFields(Predicate<FieldInfo> condition) {
     return getClassMemberStream(ClassInfo::getFieldInfo, condition,
-        RelativeFieldInfo::new);
+      RelativeFieldInfo::new);
   }
 
   public Stream<RelativeFieldInfo> getFields() {
     return getClassMemberStream(ClassInfo::getFieldInfo,
-        RelativeFieldInfo::new);
+      RelativeFieldInfo::new);
   }
 
   public RelativeClassStream getInnerClasses(Predicate<ClassInfo> condition) {
     return new RelativeClassStream(
-        getClassMemberStream(ClassInfo::getInnerClasses, condition,
-            RelativeClassInfo::new));
+      getClassMemberStream(ClassInfo::getInnerClasses, condition,
+        RelativeClassInfo::new));
   }
 
   public RelativeClassStream getInnerClasses() {
     return new RelativeClassStream(
-        getClassMemberStream(ClassInfo::getInnerClasses,
-            RelativeClassInfo::new));
+      getClassMemberStream(ClassInfo::getInnerClasses, RelativeClassInfo::new));
   }
 
   public Stream<RelativeMethodInfo> getMethods() {
     return getClassMemberStream(ClassInfo::getMethodInfo,
-        RelativeMethodInfo::new);
+      RelativeMethodInfo::new);
   }
 
   public Stream<RelativeMethodInfo> getMethods(
-      Predicate<MethodInfo> condition) {
+    Predicate<MethodInfo> condition) {
     return getClassMemberStream(ClassInfo::getMethodInfo, condition,
-        RelativeMethodInfo::new);
+      RelativeMethodInfo::new);
   }
 
   public Stream<RelativeClassInfo> unwrap() {
@@ -71,20 +70,19 @@ public class RelativeClassStream {
   }
 
   private <Member, RelativeMember extends Relative> Stream<RelativeMember> getClassMemberStream(
-      Function<ClassInfo, List<Member>> classMemberProvider,
-      Function<Member, RelativeMember> relativeWrapper) {
+    Function<ClassInfo, List<Member>> classMemberProvider,
+    Function<Member, RelativeMember> relativeWrapper) {
     return stream.map(RelativeClassInfo::get)
-        .flatMap(cls -> classMemberProvider.apply(cls).stream())
-        .map(relativeWrapper);
+      .flatMap(cls -> classMemberProvider.apply(cls).stream())
+      .map(relativeWrapper);
   }
 
   private <Member, RelativeMember extends Relative> Stream<RelativeMember> getClassMemberStream(
-      Function<ClassInfo, List<Member>> classMemberProvider,
-      Predicate<Member> condition,
-      Function<Member, RelativeMember> relativeWrapper) {
+    Function<ClassInfo, List<Member>> classMemberProvider,
+    Predicate<Member> condition,
+    Function<Member, RelativeMember> relativeWrapper) {
     return stream.map(RelativeClassInfo::get)
-        .flatMap(cls -> classMemberProvider.apply(cls).stream())
-        .filter(condition)
-        .map(relativeWrapper);
+      .flatMap(cls -> classMemberProvider.apply(cls).stream()).filter(condition)
+      .map(relativeWrapper);
   }
 }

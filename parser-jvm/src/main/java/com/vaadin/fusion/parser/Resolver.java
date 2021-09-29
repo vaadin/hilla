@@ -16,9 +16,9 @@ class Resolver {
       return Stream.empty();
     }
 
-    return type instanceof BaseTypeSignature ?
-        resolveAbstract((BaseTypeSignature) type) :
-        resolveAbstract((ReferenceTypeSignature) type);
+    return type instanceof BaseTypeSignature ? resolveAbstract(
+      (BaseTypeSignature) type)
+      : resolveAbstract((ReferenceTypeSignature) type);
   }
 
   static Stream<ClassInfo> resolve(Stream<TypeSignature> types) {
@@ -39,7 +39,8 @@ class Resolver {
     return Stream.empty();
   }
 
-  private static Stream<ClassInfo> resolveAbstract(ReferenceTypeSignature type) {
+  private static Stream<ClassInfo> resolveAbstract(
+    ReferenceTypeSignature type) {
     if (type instanceof ArrayTypeSignature) {
       return resolveSpecific((ArrayTypeSignature) type);
     } else if (type instanceof TypeVariableSignature) {
@@ -67,8 +68,8 @@ class Resolver {
 
     // All native class refs (like List<>, Set<>, etc., are null). So if it is
     // not null, we can resolve it directly.
-    return classInfo != null ? Stream.of(classInfo) : type.getTypeArguments()
-        .stream()
+    return classInfo != null ? Stream.of(classInfo)
+      : type.getTypeArguments().stream()
         .flatMap(argument -> resolve(argument.getTypeSignature()));
   }
 }

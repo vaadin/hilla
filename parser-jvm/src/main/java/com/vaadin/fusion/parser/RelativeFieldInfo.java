@@ -1,8 +1,7 @@
 package com.vaadin.fusion.parser;
 
-import io.github.classgraph.FieldInfo;
-
 import static com.vaadin.fusion.parser.Resolver.resolveAsRelative;
+import io.github.classgraph.FieldInfo;
 
 public class RelativeFieldInfo implements Relative {
   private final StreamAPI streamAPI = new StreamAPI();

@@ -42,8 +42,7 @@ public class RelativeClassList extends ArrayList<RelativeClassInfo> {
   }
 
   public List<RelativeMethodInfo> getMethods(Predicate<MethodInfo> condition) {
-    return streamRelative().getMethods(condition)
-      .collect(Collectors.toList());
+    return streamRelative().getMethods(condition).collect(Collectors.toList());
   }
 
   public RelativeClassStream streamRelative() {

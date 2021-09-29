@@ -10,7 +10,8 @@ public class SharedStorage {
   private final OpenApi3 openAPI = new OpenApi3Parser().parse("{}", null);
   private final Map<String, Object> pluginStorage = new HashMap<>();
 
-  SharedStorage() {}
+  SharedStorage() {
+  }
 
   public OpenApi3 getOpenAPI() {
     return openAPI;
