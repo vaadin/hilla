@@ -45,7 +45,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/common-frontend": "^0.0.12"
+    "@vaadin/common-frontend": "^0.0.17",
+    "tslib": "^2.3.1"
   },
   "peerDependencies": {
     "lit": "^2.0.0"
