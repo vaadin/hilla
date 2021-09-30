@@ -14,7 +14,7 @@ class PluginManager {
         return ((Class<Plugin>) loader.loadClass(name)).getDeclaredConstructor()
           .newInstance();
       } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-        throw new PluginException(
+        throw new ParserException(
           String.format("Cannot instantiate plugin '%s'", name), e);
       }
     }).collect(Collectors.toSet());

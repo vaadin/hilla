@@ -50,7 +50,7 @@ public class RelativeMethodInfo implements Relative {
     }
 
     public RelativeClassStream getResultDependencies() {
-      return resolveAsRelative(methodInfo.getTypeSignature().getResultType());
+      return resolveAsRelative(methodInfo.getTypeSignatureOrTypeDescriptor().getResultType());
     }
   }
 }

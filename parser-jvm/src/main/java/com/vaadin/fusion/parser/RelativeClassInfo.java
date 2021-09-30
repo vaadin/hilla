@@ -40,20 +40,25 @@ public class RelativeClassInfo implements Relative {
 
   public final class StreamAPI {
     public RelativeClassStream getFieldDependencies() {
-      return new RelativeClassStream(getSuperDependencies().getFields()
+      return new RelativeClassStream(getInheritanceChain().getFields()
         .flatMap(field -> field.asStream().getDependencies().unwrap()));
     }
 
     public RelativeClassStream getInnerClassDependencies() {
-      return getSuperDependencies().getInnerClasses();
+      return getInheritanceChain().getInnerClasses();
     }
 
     public RelativeClassStream getMethodDependencies() {
-      return new RelativeClassStream(getSuperDependencies().getMethods()
+      return new RelativeClassStream(getInheritanceChain().getMethods()
         .flatMap(method -> method.asStream().getDependencies().unwrap()));
     }
 
     public RelativeClassStream getSuperDependencies() {
+      return new RelativeClassStream(
+        classInfo.getSuperclasses().stream().map(RelativeClassInfo::new));
+    }
+
+    public RelativeClassStream getInheritanceChain() {
       return new RelativeClassStream(Stream.concat(Stream.of(classInfo),
         classInfo.getSuperclasses().stream()).map(RelativeClassInfo::new));
     }

@@ -1,5 +1,8 @@
 package com.vaadin.fusion.parser;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -11,9 +14,9 @@ import io.github.classgraph.ScanResult;
 
 public class Parser {
   private final SharedStorage storage = new SharedStorage();
+  private final Set<String> pluginClassNames = new LinkedHashSet<>();
   private String classPath;
   private String endpointAnnotationName;
-  private Set<String> pluginClassNames;
 
   Parser() {
   }
@@ -54,8 +57,17 @@ public class Parser {
   }
 
   public Parser pluginClassNames(Set<String> value) {
-    pluginClassNames = value;
+    pluginClassNames.addAll(value);
+    return this;
+  }
 
+  public Parser pluginClassNames(List<String> value) {
+    pluginClassNames.addAll(value);
+    return this;
+  }
+
+  public Parser pluginClassNames(String... value) {
+    pluginClassNames.addAll(Arrays.asList(value));
     return this;
   }
 
@@ -74,8 +86,9 @@ public class Parser {
       for (int i = 0; i < entities.size(); i++) {
         RelativeClassInfo entity = entities.get(i);
 
-        collectDependencies(entity).filter(
-          dependency -> !entities.contains(dependency)).forEach(entities::add);
+        collectDependencies(entity).filter(dependency -> {
+          return !entities.contains(dependency);
+        }).forEach(entities::add);
       }
     }
 
