@@ -10,8 +10,14 @@
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8
+    </project.reporting.outputEncoding>
+  </properties>
+
   <modules>
-    <module>fusion-maven-plugin</module>
+    <module>maven-plugin</module>
     <module>parser-jvm</module>
   </modules>
 
@@ -28,19 +34,44 @@
     </license>
   </licenses>
 
+  <repositories>
+    <!-- The order of definitions matters. Explicitly defining central
+        here to make sure it has the highest priority. -->
+    <repository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <!-- The order of definitions matters. Explicitly defining central
+        here to make sure it has the highest priority. -->
+    <pluginRepository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
   <build>
     <plugins>
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.11.0</version>
+        <version>2.16.0</version>
         <configuration>
-          <configFile>${project.basedir}/.config/VaadinJavaConventions.xml
+          <configFile>.config/VaadinJavaConventions.xml
           </configFile>
           <!-- Provide a dummy JS config file to avoid errors -->
-          <configJsFile>${project.basedir}/.config/VaadinJavaConventions.xml
+          <configJsFile>.config/VaadinJavaConventions.xml
           </configJsFile>
           <lineEnding>LF</lineEnding>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>
