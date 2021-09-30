@@ -1,18 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.vaadin.fusion</groupId>
+    <parent>
+        <groupId>com.vaadin.fusion</groupId>
+        <artifactId>fusion-project</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <artifactId>fusion-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Fusion Plugin for Maven</name>
     <url>http://maven.apache.org</url>
-
-    <properties>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -38,30 +38,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.11.0</version>
-                <configuration>
-                    <configFile>eclipse/VaadinJavaConventions.xml</configFile>
-                    <!-- Provide a dummy JS config file to avoid errors -->
-                    <configJsFile>eclipse/VaadinJavaConventions.xml
-                    </configJsFile>
-                    <lineEnding>LF</lineEnding>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
