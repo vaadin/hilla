@@ -10,7 +10,6 @@
     </parent>
     <artifactId>fusion-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.0-SNAPSHOT</version>
     <name>Fusion Plugin for Maven</name>
     <url>http://maven.apache.org</url>
 

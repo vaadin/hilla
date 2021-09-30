@@ -9,7 +9,6 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>parser-jvm</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <name>Fusion JVM Parser</name>
 
   <dependencyManagement>
