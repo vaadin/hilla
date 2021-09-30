@@ -17,4 +17,7 @@ public class BasicEndpoint {
     private int getBar() {
         return bar;
     }
+
+    public class Foo {}
+    private static class Bar {}
 }

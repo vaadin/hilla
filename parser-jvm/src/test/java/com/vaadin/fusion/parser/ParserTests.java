@@ -33,7 +33,8 @@ public class ParserTests {
         parser.execute();
 
         List<String> expected = Arrays.asList("foo", "bar", "getFoo", "baz",
-                "getBar");
+                "getBar", "com.vaadin.fusion.parser.basic.BasicEndpoint$Bar",
+                "com.vaadin.fusion.parser.basic.BasicEndpoint$Foo");
         List<String> actual = (List<String>) parser.getStorage()
                 .getPluginStorage().get(BasicPlugin.STORAGE_KEY);
 
