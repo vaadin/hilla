@@ -1,13 +1,12 @@
 package com.vaadin.flow.spring.fusionsecurity.endpoints;
 
+import javax.annotation.security.PermitAll;
 import java.math.BigDecimal;
 
-import javax.annotation.security.PermitAll;
-
-import com.vaadin.fusion.Endpoint;
-import com.vaadin.flow.spring.fusionsecurity.service.BankService;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.vaadin.flow.spring.fusionsecurity.service.BankService;
+import com.vaadin.fusion.Endpoint;
 
 @Endpoint
 @PermitAll
