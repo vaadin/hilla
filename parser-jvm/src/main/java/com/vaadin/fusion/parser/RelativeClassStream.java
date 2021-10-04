@@ -1,8 +1,10 @@
 package com.vaadin.fusion.parser;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,12 +16,39 @@ import io.github.classgraph.MethodInfo;
 public class RelativeClassStream {
     private final Stream<RelativeClassInfo> stream;
 
-    public RelativeClassStream(final Stream<RelativeClassInfo> stream) {
+    private RelativeClassStream(Stream<RelativeClassInfo> stream) {
         this.stream = stream;
     }
 
-    public RelativeClassList collectToList() {
+    @SafeVarargs
+    public static RelativeClassStream of(
+            final Stream<RelativeClassInfo>... streams) {
+        return new RelativeClassStream(
+                Stream.of(streams).flatMap(Function.identity()));
+    }
+
+    public static RelativeClassStream of(final RelativeClassInfo... classes) {
+        return new RelativeClassStream(Stream.of(classes));
+    }
+
+    public static RelativeClassStream of(final ClassInfo... classes) {
+        return new RelativeClassStream(
+                Stream.of(classes).map(RelativeClassInfo::new));
+    }
+
+    @SafeVarargs
+    public static RelativeClassStream ofRaw(
+            final Stream<ClassInfo>... streams) {
+        return new RelativeClassStream(Stream.of(streams)
+                .flatMap(Function.identity()).map(RelativeClassInfo::new));
+    }
+
+    public RelativeClassList collect() {
         return stream.collect(Collectors.toCollection(RelativeClassList::new));
+    }
+
+    public <R, A> R collect(Collector<RelativeClassInfo, A, R> collector) {
+        return stream.collect(collector);
     }
 
     public Stream<RelativeAnnotationInfo> getAnnotations(
@@ -44,12 +73,12 @@ public class RelativeClassStream {
     }
 
     public RelativeClassStream getInnerClasses(Predicate<ClassInfo> condition) {
-        return new RelativeClassStream(getClassMemberStream(
+        return RelativeClassStream.of(getClassMemberStream(
                 ClassInfo::getInnerClasses, condition, RelativeClassInfo::new));
     }
 
     public RelativeClassStream getInnerClasses() {
-        return new RelativeClassStream(getClassMemberStream(
+        return RelativeClassStream.of(getClassMemberStream(
                 ClassInfo::getInnerClasses, RelativeClassInfo::new));
     }
 
@@ -64,8 +93,13 @@ public class RelativeClassStream {
                 RelativeMethodInfo::new);
     }
 
-    public Stream<RelativeClassInfo> unwrap() {
+    public Stream<RelativeClassInfo> stream() {
         return stream;
+    }
+
+    public RelativeClassStream stream(
+            Function<Stream<RelativeClassInfo>, Stream<RelativeClassInfo>> map) {
+        return new RelativeClassStream(map.apply(stream));
     }
 
     private <Member, RelativeMember extends Relative> Stream<RelativeMember> getClassMemberStream(

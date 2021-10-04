@@ -31,11 +31,11 @@ public class RelativeClassList extends ArrayList<RelativeClassInfo> {
     }
 
     public RelativeClassList getInnerClasses() {
-        return streamRelative().getInnerClasses().collectToList();
+        return streamRelative().getInnerClasses().collect();
     }
 
     public RelativeClassList getInnerClasses(Predicate<ClassInfo> condition) {
-        return streamRelative().getInnerClasses(condition).collectToList();
+        return streamRelative().getInnerClasses(condition).collect();
     }
 
     public List<RelativeMethodInfo> getMethods() {
@@ -49,6 +49,6 @@ public class RelativeClassList extends ArrayList<RelativeClassInfo> {
     }
 
     public RelativeClassStream streamRelative() {
-        return new RelativeClassStream(stream());
+        return RelativeClassStream.of(stream());
     }
 }

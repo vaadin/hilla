@@ -46,7 +46,7 @@ public class Parser {
         ScanResult result = new ClassGraph().enableAllInfo()
                 .overrideClasspath(classPath).scan();
 
-        Collector collector = new Collector(result);
+        EntitiesCollector collector = new EntitiesCollector(result);
 
         pluginManager.execute(collector.getEndpoints(), collector.getEntities(),
                 storage);
@@ -71,11 +71,11 @@ public class Parser {
         return this;
     }
 
-    private class Collector {
+    private class EntitiesCollector {
         private final RelativeClassList endpoints;
         private final RelativeClassList entities;
 
-        Collector(ScanResult result) {
+        EntitiesCollector(ScanResult result) {
             endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toCollection(RelativeClassList::new));
@@ -86,9 +86,11 @@ public class Parser {
             for (int i = 0; i < entities.size(); i++) {
                 RelativeClassInfo entity = entities.get(i);
 
-                collectDependencies(entity).filter(dependency -> {
-                    return !entities.contains(dependency);
-                }).forEach(entities::add);
+                collectDependencies(entity)
+                        .filter(dependency -> entities.stream().noneMatch(
+                                d -> Objects.equals(d.get().getName(),
+                                        dependency.get().getName())))
+                        .forEach(entities::add);
             }
         }
 
@@ -103,12 +105,11 @@ public class Parser {
         private Stream<RelativeClassInfo> collectDependencies(
                 RelativeClassInfo element) {
             return Stream
-                    .of(element.asStream().getFieldDependencies().unwrap(),
-                            element.asStream().getMethodDependencies().unwrap(),
-                            element.asStream().getInnerClassDependencies()
-                                    .unwrap(),
-                            element.asStream().getSuperDependencies().unwrap())
-                    .flatMap(Function.identity());
+                    .of(element.getFieldDependencies().stream(),
+                            element.getMethodDependencies().stream(),
+                            element.getInnerClassDependencies().stream(),
+                            element.getSuperDependencies().stream())
+                    .flatMap(Function.identity()).distinct();
         }
     }
 }

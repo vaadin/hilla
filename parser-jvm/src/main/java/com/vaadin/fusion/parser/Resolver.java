@@ -25,16 +25,6 @@ class Resolver {
         return types.flatMap(Resolver::resolve);
     }
 
-    static RelativeClassStream resolveAsRelative(TypeSignature type) {
-        return new RelativeClassStream(
-                resolve(type).map(RelativeClassInfo::new));
-    }
-
-    static RelativeClassStream resolveAsRelative(Stream<TypeSignature> types) {
-        return new RelativeClassStream(
-                resolve(types).map(RelativeClassInfo::new));
-    }
-
     // Primitive type (int, double, etc.). We don't need to resolve it, so
     // skipping.
     private static Stream<ClassInfo> resolveAbstract(BaseTypeSignature type) {
