@@ -50,8 +50,7 @@ class Resolver {
     private static Stream<ClassInfo> resolveSpecific(
             TypeVariableSignature type) {
         // We can resolve only the type variable class bound here (class bound
-        // is
-        // `com.vaadin.fusion.X` in `T extends com.vaadin.fusion.X`)
+        // is `com.vaadin.fusion.X` in `T extends com.vaadin.fusion.X`)
         TypeSignature bound = type.resolve().getClassBound();
 
         return bound != null ? resolve(bound) : Stream.empty();
@@ -62,8 +61,7 @@ class Resolver {
         ClassInfo classInfo = type.getClassInfo();
 
         // All native class refs (like List<>, Set<>, etc., are null). So if it
-        // is
-        // not null, we can resolve it directly.
+        // is not null, we can resolve it directly.
         return classInfo != null ? Stream.of(classInfo)
                 : type.getTypeArguments().stream().flatMap(
                         argument -> resolve(argument.getTypeSignature()));
