@@ -1,6 +1,5 @@
 package com.vaadin.fusion.parser;
 
-import java.lang.invoke.MethodHandles;
 import java.util.stream.Collectors;
 
 public class TestUtils {

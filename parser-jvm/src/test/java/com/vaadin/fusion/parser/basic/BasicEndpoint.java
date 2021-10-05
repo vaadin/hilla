@@ -18,6 +18,9 @@ public class BasicEndpoint {
         return bar;
     }
 
-    public class Foo {}
-    private static class Bar {}
+    public class Foo {
+    }
+
+    private static class Bar {
+    }
 }

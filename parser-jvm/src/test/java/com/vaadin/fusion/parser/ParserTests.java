@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.fusion.parser.basic.BasicPlugin;
+import com.vaadin.fusion.parser.dependency.DependencyPlugin;
 
 public class ParserTests {
     private Path targetDirPath;
@@ -35,8 +36,67 @@ public class ParserTests {
         List<String> expected = Arrays.asList("foo", "bar", "getFoo", "baz",
                 "getBar", "com.vaadin.fusion.parser.basic.BasicEndpoint$Bar",
                 "com.vaadin.fusion.parser.basic.BasicEndpoint$Foo");
+
         List<String> actual = (List<String>) parser.getStorage()
                 .getPluginStorage().get(BasicPlugin.STORAGE_KEY);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_ResolveDependenciesCorrectly_When_ReceiveDependenciesInPlugin() {
+        Parser parser = new Parser().classPath(targetDirPath.toString())
+                .endpointAnnotationName(Endpoint.class.getName())
+                .pluginClassNames(DependencyPlugin.class.getName());
+
+        parser.execute();
+
+        List<String> expected = Arrays.asList(
+                "com.vaadin.fusion.parser.dependency.DependencyEntityOne",
+                "com.vaadin.fusion.parser.dependency.DependencyEntityTwo",
+                "com.vaadin.fusion.parser.dependency.DependencyEntityTwo$InnerClass");
+
+        List<String> actual = (List<String>) parser.getStorage()
+                .getPluginStorage()
+                .get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
+        Parser parser = new Parser().classPath(targetDirPath.toString())
+                .endpointAnnotationName(Endpoint.class.getName())
+                .pluginClassNames(DependencyPlugin.class.getName());
+
+        parser.execute();
+
+        List<String> expected = Arrays.asList(
+                "com.vaadin.fusion.parser.dependency.DependencyEntityOne",
+                "com.vaadin.fusion.parser.dependency.DependencyEntityTwo");
+
+        List<String> actual = (List<String>) parser.getStorage()
+                .getPluginStorage()
+                .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_ResolveDependencyMembersCorrectly() {
+        Parser parser = new Parser().classPath(targetDirPath.toString())
+                .endpointAnnotationName(Endpoint.class.getName())
+                .pluginClassNames(DependencyPlugin.class.getName());
+
+        parser.execute();
+
+        List<String> expected = Arrays.asList("foo", "bar", "foo", "getFoo",
+                "setBar", "getFoo",
+                "com.vaadin.fusion.parser.dependency.DependencyEntityTwo$InnerClass");
+
+        List<String> actual = (List<String>) parser.getStorage()
+                .getPluginStorage()
+                .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
