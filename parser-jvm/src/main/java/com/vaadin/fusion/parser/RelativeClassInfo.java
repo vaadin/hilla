@@ -18,14 +18,19 @@ public class RelativeClassInfo implements Relative {
 
     public RelativeClassStream getDependencies() {
         return RelativeClassStream.of(getFieldDependencies().stream(),
-                getInnerClassDependencies().stream(),
                 getMethodDependencies().stream(),
+                getInnerClassDependencies().stream(),
                 getSuperDependencies().stream());
     }
 
     public RelativeClassStream getFieldDependencies() {
         return RelativeClassStream.of(getInheritanceChain().getFields()
                 .flatMap(field -> field.getDependencies().stream()));
+    }
+
+    public RelativeClassStream getInheritanceChain() {
+        return RelativeClassStream.ofRaw(Stream.of(classInfo),
+                classInfo.getSuperclasses().stream());
     }
 
     public RelativeClassStream getInnerClassDependencies() {
@@ -39,10 +44,5 @@ public class RelativeClassInfo implements Relative {
 
     public RelativeClassStream getSuperDependencies() {
         return RelativeClassStream.ofRaw(classInfo.getSuperclasses().stream());
-    }
-
-    public RelativeClassStream getInheritanceChain() {
-        return RelativeClassStream.ofRaw(Stream.of(classInfo),
-                classInfo.getSuperclasses().stream());
     }
 }
