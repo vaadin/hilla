@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/form",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Vaadin form utils",
   "main": "index.js",
   "module": "index.js",
