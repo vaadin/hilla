@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
+import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 
 const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};
@@ -300,10 +301,11 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
+    const csrfHeaders = getCsrfTokenHeadersForEndpointRequest(document);
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-CSRF-Token': this.getCsrfTokenFromCookie(),
+      ...csrfHeaders,
     };
 
     // helper to keep the undefined value in object after JSON.stringify
@@ -388,15 +390,5 @@ export class ConnectClient {
 
   private isFlowLoaded(): boolean {
     return $wnd.Vaadin.Flow?.clients?.TypeScript !== undefined;
-  }
-
-  private getCsrfTokenFromCookie(): string {
-    const csrfCookieNamePrefix = 'csrfToken=';
-    return (
-      document.cookie
-        .split(/;[ ]?/)
-        .filter((cookie) => cookie.startsWith(csrfCookieNamePrefix))
-        .map((cookie) => cookie.slice(csrfCookieNamePrefix.length))[0] || ''
-    );
   }
 }

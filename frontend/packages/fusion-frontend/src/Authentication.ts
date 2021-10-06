@@ -1,35 +1,9 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-
-const $wnd = window as any;
-
-function updateVaadinCsrfToken(token: string | undefined) {
-  $wnd.Vaadin.TypeScript = $wnd.Vaadin.TypeScript || {};
-  $wnd.Vaadin.TypeScript.csrfToken = token;
-}
-
-function getSpringCsrfInfoFromDocument(doc: Document): Record<string, string> {
-  const csrf = doc.head.querySelector('meta[name="_csrf"]');
-  const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
-  const headers: Record<string, string> = {};
-  if (csrf !== null && csrfHeader !== null) {
-    headers._csrf = (csrf as HTMLMetaElement).content;
-    headers._csrf_header = (csrfHeader as HTMLMetaElement).content;
-  }
-  return headers;
-}
-
-function getSpringCsrfTokenHeadersFromDocument(doc: Document): Record<string, string> {
-  const csrfInfo = getSpringCsrfInfoFromDocument(doc);
-  const headers: Record<string, string> = {};
-  if (csrfInfo._csrf && csrfInfo._csrf_header) {
-    headers[csrfInfo._csrf_header] = csrfInfo._csrf;
-  }
-  return headers;
-}
+import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils';
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
-  return getSpringCsrfInfoFromDocument(doc);
+  return getSpringCsrfInfo(doc);
 }
 
 function clearSpringCsrfMetaTags() {
@@ -58,7 +32,6 @@ const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined =>
 async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
   const responseText = await response.text();
   const token = getVaadinCsrfTokenFromResponseBody(responseText);
-  updateVaadinCsrfToken(token);
   const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
   updateSpringCsrfMetaTags(springCsrfTokenInfo);
 
@@ -104,7 +77,7 @@ export async function login(username: string, password: string, options?: LoginO
     data.append('password', password);
 
     const loginProcessingUrl = options && options.loginProcessingUrl ? options.loginProcessingUrl : 'login';
-    const headers = getSpringCsrfTokenHeadersFromDocument(document);
+    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     headers.source = 'typescript';
     const response = await fetch(loginProcessingUrl, {
       method: 'POST',
@@ -122,7 +95,6 @@ export async function login(username: string, password: string, options?: LoginO
 
     if (loginSuccessful) {
       const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') || undefined;
-      updateVaadinCsrfToken(vaadinCsrfToken);
 
       const springCsrfHeader = response.headers.get('Spring-CSRF-header') || undefined;
       const springCsrfToken = response.headers.get('Spring-CSRF-token') || undefined;
@@ -162,18 +134,17 @@ export async function logout(options?: LogoutOptions) {
   // this assumes the default Spring Security logout configuration (handler URL)
   const logoutUrl = options && options.logoutUrl ? options.logoutUrl : 'logout';
   try {
-    const headers = getSpringCsrfTokenHeadersFromDocument(document);
+    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     await doLogout(logoutUrl, headers);
   } catch {
     try {
       const response = await fetch('?nocache');
       const responseText = await response.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersFromDocument(doc);
+      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
       await doLogout(logoutUrl, headers);
     } catch (error) {
       // clear the token if the call fails
-      delete $wnd.Vaadin?.TypeScript?.csrfToken;
       clearSpringCsrfMetaTags();
       throw error;
     }
@@ -207,7 +178,7 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
     if (response.status === 401) {
       const loginResult = await this.onInvalidSessionCallback();
       if (loginResult.token) {
-        clonedContext.request.headers.set('X-CSRF-Token', loginResult.token);
+        clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
         return next(clonedContext);
       }
     }
