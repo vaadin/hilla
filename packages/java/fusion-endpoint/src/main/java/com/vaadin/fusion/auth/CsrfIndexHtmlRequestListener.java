@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.internal.springcsrf.SpringCsrfTokenUtil;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
@@ -47,6 +48,9 @@ public class CsrfIndexHtmlRequestListener implements IndexHtmlRequestListener {
 
     private void ensureCsrfTokenCookieIsSet(VaadinRequest request,
             VaadinResponse response) {
+        if (isSpringCsrfTokenPresent(request)) {
+            return;
+        }
         final String csrfCookieValue = Optional.ofNullable(request.getCookies())
                 .map(Arrays::stream).orElse(Stream.empty())
                 .filter(cookie -> cookie.getName()
@@ -73,5 +77,9 @@ public class CsrfIndexHtmlRequestListener implements IndexHtmlRequestListener {
         csrfCookie.setPath(path);
         csrfCookie.setHttpOnly(false);
         response.addCookie(csrfCookie);
+    }
+
+    boolean isSpringCsrfTokenPresent(VaadinRequest request) {
+        return SpringCsrfTokenUtil.getSpringCsrfToken(request).isPresent();
     }
 }

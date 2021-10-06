@@ -35,11 +35,13 @@ public class CsrfIndexHtmlRequestListenerTest {
     static private final String TEST_CONTEXT_PATH = "/test-context";
     private CsrfIndexHtmlRequestListener csrfIndexHtmlRequestListener;
     private IndexHtmlResponse indexHtmlResponse;
+    private VaadinRequest vaadinRequest;
 
     @Before
     public void setup() {
-        csrfIndexHtmlRequestListener = new CsrfIndexHtmlRequestListener();
-        VaadinRequest vaadinRequest = Mockito.mock(VaadinRequest.class);
+        csrfIndexHtmlRequestListener = Mockito
+                .spy(new CsrfIndexHtmlRequestListener());
+        vaadinRequest = Mockito.mock(VaadinRequest.class);
         Mockito.doReturn(TEST_CONTEXT_PATH).when(vaadinRequest)
                 .getContextPath();
         Mockito.doReturn(true).when(vaadinRequest).isSecure();
@@ -50,7 +52,10 @@ public class CsrfIndexHtmlRequestListenerTest {
     }
 
     @Test
-    public void should_setCsrfCookie_when_null_cookies() {
+    public void should_setCsrfCookie_when_null_cookies_and_SpringCsrfTokenNotPresent() {
+        Mockito.doReturn(false).when(csrfIndexHtmlRequestListener)
+                .isSpringCsrfTokenPresent(vaadinRequest);
+
         useRequestCookies(null);
 
         csrfIndexHtmlRequestListener.modifyIndexHtmlResponse(indexHtmlResponse);
@@ -59,7 +64,10 @@ public class CsrfIndexHtmlRequestListenerTest {
     }
 
     @Test
-    public void should_setCsrfCookie_when_absent() {
+    public void should_setCsrfCookie_when_absent_and_SpringCsrfTokenNotPresent() {
+        Mockito.doReturn(false).when(csrfIndexHtmlRequestListener)
+                .isSpringCsrfTokenPresent(vaadinRequest);
+
         useRequestCookies(new Cookie[0]);
 
         csrfIndexHtmlRequestListener.modifyIndexHtmlResponse(indexHtmlResponse);
@@ -68,7 +76,21 @@ public class CsrfIndexHtmlRequestListenerTest {
     }
 
     @Test
+    public void should_notSetCsrfCookie_when_SpringCsrfPresents() {
+        Mockito.doReturn(true).when(csrfIndexHtmlRequestListener)
+                .isSpringCsrfTokenPresent(vaadinRequest);
+
+        csrfIndexHtmlRequestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+
+        Mockito.verify(indexHtmlResponse.getVaadinResponse(), Mockito.never())
+                .addCookie(ArgumentMatchers.any());
+    }
+
+    @Test
     public void should_notSetCsrfCookie_when_present() {
+        Mockito.doReturn(false).when(csrfIndexHtmlRequestListener)
+                .isSpringCsrfTokenPresent(vaadinRequest);
+
         Cookie csrfRequestCookie = new Cookie(ApplicationConstants.CSRF_TOKEN,
                 "foo");
         useRequestCookies(new Cookie[] { csrfRequestCookie });

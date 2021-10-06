@@ -15,8 +15,12 @@
  */
 package com.vaadin.fusion.auth;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+
+import com.vaadin.flow.internal.springcsrf.SpringCsrfTokenUtil;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -30,7 +34,8 @@ import org.slf4j.LoggerFactory;
  * Handles checking of a CSRF token in endpoint requests.
  */
 public class CsrfChecker {
-    private static final String CSRF_COOKIE_NAME = "csrfToken";
+    private static final String VAADIN_CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
+    private static final String VAADIN_CSRF_COOKIE_NAME = "csrfToken";
 
     private boolean csrfProtectionEnabled = true;
 
@@ -53,14 +58,15 @@ public class CsrfChecker {
      *         {@code false} otherwise
      */
     public boolean validateCsrfTokenInRequest(HttpServletRequest request) {
+        if (isSpringCsrfTokenPresent(request)) {
+            return true;
+        }
+
         if (!isCsrfProtectionEnabled()) {
             return true;
         }
 
-        String csrfTokenInCookie = Optional.ofNullable(request.getCookies())
-                .map(Arrays::stream).orElse(Stream.empty())
-                .filter(cookie -> cookie.getName().equals(CSRF_COOKIE_NAME))
-                .findFirst().map(Cookie::getValue).orElse(null);
+        String csrfTokenInCookie = getCsrfTokenInCookie(request);
         if (csrfTokenInCookie == null) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info(
@@ -71,10 +77,8 @@ public class CsrfChecker {
             return false;
         }
 
-        String csrfTokenInRequest = request.getHeader("X-CSRF-Token");
-        if (csrfTokenInRequest == null || !MessageDigest.isEqual(
-                csrfTokenInCookie.getBytes(StandardCharsets.UTF_8),
-                csrfTokenInRequest.getBytes(StandardCharsets.UTF_8))) {
+        String csrfTokenInRequest = getCsrfTokenInRequest(request);
+        if (compareCsrfTokens(csrfTokenInCookie, csrfTokenInRequest)) {
             if (getLogger().isInfoEnabled()) {
                 getLogger().info("Invalid CSRF token in endpoint request");
             }
@@ -83,6 +87,25 @@ public class CsrfChecker {
         }
 
         return true;
+    }
+
+    private boolean compareCsrfTokens(String csrfTokenInCookie,
+            String csrfTokenInRequest) {
+        return csrfTokenInRequest == null || !MessageDigest.isEqual(
+                csrfTokenInCookie.getBytes(StandardCharsets.UTF_8),
+                csrfTokenInRequest.getBytes(StandardCharsets.UTF_8));
+    }
+
+    String getCsrfTokenInRequest(HttpServletRequest request) {
+        return request.getHeader(VAADIN_CSRF_TOKEN_HEADER_NAME);
+    }
+
+    String getCsrfTokenInCookie(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies()).map(Arrays::stream)
+                .orElse(Stream.empty())
+                .filter(cookie -> cookie.getName()
+                        .equals(VAADIN_CSRF_COOKIE_NAME))
+                .findFirst().map(Cookie::getValue).orElse(null);
     }
 
     /**
@@ -104,4 +127,7 @@ public class CsrfChecker {
         return csrfProtectionEnabled;
     }
 
+    boolean isSpringCsrfTokenPresent(ServletRequest request) {
+        return SpringCsrfTokenUtil.getSpringCsrfToken(request).isPresent();
+    }
 }

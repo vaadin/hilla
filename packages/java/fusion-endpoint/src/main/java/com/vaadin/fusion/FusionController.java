@@ -95,8 +95,8 @@ import com.vaadin.fusion.exception.EndpointValidationException.ValidationErrorDa
 @RestController
 @Import({ FusionControllerConfiguration.class, FusionEndpointProperties.class })
 @ConditionalOnBean(annotation = Endpoint.class)
-@NpmPackage(value = "@vaadin/fusion-frontend", version = "0.0.14")
-@NpmPackage(value = "@vaadin/form", version = "0.0.14")
+@NpmPackage(value = "@vaadin/fusion-frontend", version = "0.0.15")
+@NpmPackage(value = "@vaadin/form", version = "0.0.15")
 public class FusionController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
