@@ -27,9 +27,12 @@ public class ParserTests {
 
     @Test
     public void should_RunBasicPlugin() {
-        Parser parser = new Parser().classPath(targetDirPath.toString())
-                .endpointAnnotationName(Endpoint.class.getName())
-                .pluginClassNames(BasicPlugin.class.getName());
+        ParserConfig config = new ParserConfig()
+                .classPath(targetDirPath.toString())
+                .endpointAnnotation(Endpoint.class.getName())
+                .plugins(Arrays.asList(BasicPlugin.class.getName()));
+
+        Parser parser = new Parser(config);
 
         parser.execute();
 
@@ -45,9 +48,12 @@ public class ParserTests {
 
     @Test
     public void should_ResolveDependenciesCorrectly_When_ReceiveDependenciesInPlugin() {
-        Parser parser = new Parser().classPath(targetDirPath.toString())
-                .endpointAnnotationName(Endpoint.class.getName())
-                .pluginClassNames(DependencyPlugin.class.getName());
+        ParserConfig config = new ParserConfig()
+            .classPath(targetDirPath.toString())
+            .endpointAnnotation(Endpoint.class.getName())
+            .plugins(Arrays.asList(DependencyPlugin.class.getName()));
+
+        Parser parser = new Parser(config);
 
         parser.execute();
 
@@ -57,17 +63,19 @@ public class ParserTests {
                 "com.vaadin.fusion.parser.dependency.DependencyEntityTwo$InnerClass");
 
         List<String> actual = (List<String>) parser.getStorage()
-                .getPluginStorage()
-                .get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
+                .getPluginStorage().get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
 
     @Test
     public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
-        Parser parser = new Parser().classPath(targetDirPath.toString())
-                .endpointAnnotationName(Endpoint.class.getName())
-                .pluginClassNames(DependencyPlugin.class.getName());
+        ParserConfig config = new ParserConfig()
+            .classPath(targetDirPath.toString())
+            .endpointAnnotation(Endpoint.class.getName())
+            .plugins(Arrays.asList(DependencyPlugin.class.getName()));
+
+        Parser parser = new Parser(config);
 
         parser.execute();
 
@@ -84,9 +92,12 @@ public class ParserTests {
 
     @Test
     public void should_ResolveDependencyMembersCorrectly() {
-        Parser parser = new Parser().classPath(targetDirPath.toString())
-                .endpointAnnotationName(Endpoint.class.getName())
-                .pluginClassNames(DependencyPlugin.class.getName());
+        ParserConfig config = new ParserConfig()
+            .classPath(targetDirPath.toString())
+            .endpointAnnotation(Endpoint.class.getName())
+            .plugins(Arrays.asList(DependencyPlugin.class.getName()));
+
+        Parser parser = new Parser(config);
 
         parser.execute();
 

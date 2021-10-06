@@ -1,7 +1,10 @@
 package com.vaadin.fusion.parser;
 
 public class ParserException extends RuntimeException {
-    public ParserException(String message, Throwable cause) {
+    ParserException(String message) {
+        super(message);
+    }
+    ParserException(String message, Throwable cause) {
         super(message, cause);
     }
 }

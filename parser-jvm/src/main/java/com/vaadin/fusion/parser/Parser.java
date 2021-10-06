@@ -1,8 +1,6 @@
 package com.vaadin.fusion.parser;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,32 +11,20 @@ import io.github.classgraph.ScanResult;
 public class Parser {
     private final Set<String> pluginClassNames = new LinkedHashSet<>();
     private final SharedStorage storage = new SharedStorage();
-    private String classPath;
-    private String endpointAnnotationName;
+    private final ParserConfig config;
+    private final String classPath;
 
-    Parser() {
-    }
-
-    public Parser classPath(String value) {
-        classPath = value;
-
-        return this;
-    }
-
-    public Parser endpointAnnotationName(String value) {
-        endpointAnnotationName = value;
-
-        return this;
+    public Parser(ParserConfig config) {
+        this.config = config;
+        this.classPath = config.getClassPath()
+                .orElseThrow(() -> new NullPointerException(
+                        "Fusion Parser: Classpath is not provided."));
+        this.pluginClassNames.addAll(this.config.getPlugins()
+                .orElseThrow(() -> new NullPointerException(
+                        "Fusion Parser: Plugins are not provided.")));
     }
 
     public void execute() {
-        Objects.requireNonNull(classPath,
-                "Fusion Parser: Classpath is not provided.");
-        Objects.requireNonNull(pluginClassNames,
-                "Fusion Parser: Plugins are not provided.");
-        Objects.requireNonNull(endpointAnnotationName,
-                "Fusion Parser: Endpoint annotation name is not provided.");
-
         PluginManager pluginManager = new PluginManager(pluginClassNames);
 
         ScanResult result = new ClassGraph().enableAllInfo()
@@ -54,27 +40,15 @@ public class Parser {
         return storage;
     }
 
-    public Parser pluginClassNames(Set<String> value) {
-        pluginClassNames.addAll(value);
-        return this;
-    }
-
-    public Parser pluginClassNames(List<String> value) {
-        pluginClassNames.addAll(value);
-        return this;
-    }
-
-    public Parser pluginClassNames(String... value) {
-        pluginClassNames.addAll(Arrays.asList(value));
-        return this;
-    }
-
     private class EntitiesCollector {
         private final RelativeClassList endpoints;
         private final RelativeClassList entities;
 
         EntitiesCollector(ScanResult result) {
-            endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
+            endpoints = result.getClassesWithAnnotation(config
+                    .getEndpointAnnotation()
+                    .orElseThrow(() -> new NullPointerException(
+                            "Fusion Parser: Endpoint annotation name is not provided.")))
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toCollection(RelativeClassList::new));
 

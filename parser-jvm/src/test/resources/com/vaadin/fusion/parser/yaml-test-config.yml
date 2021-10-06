@@ -1,0 +1,4 @@
+endpointAnnotation: com.vaadin.fusion.Endpoint
+plugins:
+  - com.vaadin.fusion.parser.BasicPlugin
+  - com.vaadin.fusion.parser.DependencyPlugin
