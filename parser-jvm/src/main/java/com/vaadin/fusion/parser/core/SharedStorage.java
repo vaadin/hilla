@@ -7,10 +7,13 @@ import com.reprezen.kaizen.oasparser.OpenApi3Parser;
 import com.reprezen.kaizen.oasparser.model3.OpenApi3;
 
 public class SharedStorage {
+    private final ParserConfig parserConfig;
     private final OpenApi3 openAPI;
     private final Map<String, Object> pluginStorage = new HashMap<>();
 
-    SharedStorage() {
+    SharedStorage(ParserConfig parserConfig) {
+        this.parserConfig = parserConfig;
+
         try {
             openAPI = new OpenApi3Parser()
                     .parse(getClass().getResource("OpenAPIBase.json"));
@@ -21,6 +24,10 @@ public class SharedStorage {
 
     public OpenApi3 getOpenAPI() {
         return openAPI;
+    }
+
+    public ParserConfig getParserConfig() {
+        return parserConfig;
     }
 
     public Map<String, Object> getPluginStorage() {

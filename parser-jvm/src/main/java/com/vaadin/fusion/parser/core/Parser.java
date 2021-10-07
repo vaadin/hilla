@@ -1,32 +1,28 @@
 package com.vaadin.fusion.parser.core;
 
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 
 public class Parser {
-    private final Set<String> pluginClassNames = new LinkedHashSet<>();
-    private final SharedStorage storage = new SharedStorage();
+    private final SharedStorage storage;
     private final ParserConfig config;
-    private final String classPath;
 
     public Parser(ParserConfig config) {
         this.config = config;
-        this.classPath = config.getClassPath()
-                .orElseThrow(() -> new NullPointerException(
-                        "Fusion Parser: Classpath is not provided."));
-        this.pluginClassNames.addAll(this.config.getPlugins().getUse());
+        storage = new SharedStorage(config);
     }
 
     public void execute() {
-        PluginManager pluginManager = new PluginManager(pluginClassNames);
+        PluginManager pluginManager = new PluginManager(config);
 
         ScanResult result = new ClassGraph().enableAllInfo()
-                .overrideClasspath(classPath).scan();
+                .overrideClasspath(config.getClassPath()
+                        .orElseThrow(() -> new NullPointerException(
+                                "Fusion Parser: Classpath is not provided.")))
+                .scan();
 
         EntitiesCollector collector = new EntitiesCollector(result);
 
@@ -44,7 +40,8 @@ public class Parser {
 
         EntitiesCollector(ScanResult result) {
             endpoints = result
-                    .getClassesWithAnnotation(config.getApplication().getEndpointAnnotation())
+                    .getClassesWithAnnotation(
+                            config.getApplication().getEndpointAnnotation())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toCollection(RelativeClassList::new));
 

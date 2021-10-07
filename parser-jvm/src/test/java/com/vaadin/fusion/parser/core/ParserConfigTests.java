@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
@@ -15,41 +16,43 @@ import org.junit.jupiter.api.Test;
 public class ParserConfigTests {
     @Test
     public void should_parseJSONConfigFile() throws URISyntaxException {
-        ParserConfig config = ParserConfig
-                .parse(findResource("json-test.config.json"));
+        ParserConfig config = new ParserConfig.Factory(
+                findResource("json-test.config.json")).finish();
 
         assertConfig(config);
     }
 
     @Test
     public void should_parseYAMLConfigFile() throws URISyntaxException {
-        ParserConfig config = ParserConfig
-                .parse(findResource("yaml-test.config.yml"));
+        ParserConfig config = new ParserConfig.Factory(
+                findResource("yaml-test.config.yml")).finish();
 
         assertConfig(config);
     }
 
     @Test
     public void should_parseAlmostEmptyConfigFile() throws URISyntaxException {
-        ParserConfig config = ParserConfig
-            .parse(findResource("absent-elements.config.json"));
+        ParserConfig config = new ParserConfig.Factory(
+                findResource("absent-elements.config.json")).finish();
 
         assertEquals("/path/to/bytecode", config.getClassPath().get());
         assertEquals("Vaadin Application", config.getApplication().getName());
-        assertEquals("com.vaadin.fusion.Endpoint", config.getApplication().getEndpointAnnotation());
-        assertEquals(Collections.emptyList(), config.getPlugins().getDisable());
-        assertEquals(Collections.emptyList(), config.getPlugins().getUse());
+        assertEquals("com.vaadin.fusion.Endpoint",
+                config.getApplication().getEndpointAnnotation());
+        assertEquals(Collections.emptySet(), config.getPlugins().getDisable());
+        assertEquals(Collections.emptySet(), config.getPlugins().getUse());
     }
 
     private void assertConfig(ParserConfig config) {
         assertFalse(config.getClassPath().isPresent());
         assertEquals("com.vaadin.fusion.Endpoint",
                 config.getApplication().getEndpointAnnotation());
-        assertEquals(Collections.singletonList("generate-openapi"),
+        assertEquals(Collections.singleton("generate-openapi"),
                 config.getPlugins().getDisable());
         assertEquals(
-                Arrays.asList("com.vaadin.fusion.parser.BasicPlugin",
-                        "com.vaadin.fusion.parser.DependencyPlugin"),
+                new LinkedHashSet<>(
+                        Arrays.asList("com.vaadin.fusion.parser.BasicPlugin",
+                                "com.vaadin.fusion.parser.DependencyPlugin")),
                 config.getPlugins().getUse());
     }
 

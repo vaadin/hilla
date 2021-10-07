@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 class PluginManager {
     private final Set<Plugin> plugins;
 
-    PluginManager(Set<String> pluginClassNames) {
+    PluginManager(ParserConfig config) {
         ClassLoader loader = getClass().getClassLoader();
-        plugins = pluginClassNames.stream().map(name -> {
+        plugins = config.getPlugins().getUse().stream().map(name -> {
             try {
                 return ((Class<Plugin>) loader.loadClass(name))
                         .getDeclaredConstructor().newInstance();
