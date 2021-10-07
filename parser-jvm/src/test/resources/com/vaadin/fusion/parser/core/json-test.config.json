@@ -1,7 +1,14 @@
 {
   "application": {
+    "endpointAnnotation": "com.vaadin.fusion.Endpoint",
     "name": "My Cool Application",
-    "endpointAnnotation": "com.vaadin.fusion.Endpoint"
+    "version": "1.1.2",
+    "servers": [
+      {
+        "url": "http://localhost:8080/connect",
+        "description": "Vaadin backend"
+      }
+    ]
   },
   "plugins": {
     "disable": [

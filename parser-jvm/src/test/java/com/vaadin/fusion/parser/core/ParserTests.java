@@ -29,7 +29,7 @@ public class ParserTests {
     public void should_RunBasicPlugin() {
         Parser parser = new Parser(
             new ParserConfig.Factory().classPath(targetDirPath.toString())
-                .applicationEndpointAnnotation(Endpoint.class.getName())
+                .endpointAnnotation(Endpoint.class.getName())
                 .usePlugin(BasicPlugin.class.getName()).finish());
 
         parser.execute();
@@ -49,7 +49,7 @@ public class ParserTests {
     public void should_ResolveDependenciesCorrectly_When_ReceiveDependenciesInPlugin() {
         Parser parser = new Parser(
             new ParserConfig.Factory().classPath(targetDirPath.toString())
-                .applicationEndpointAnnotation(Endpoint.class.getName())
+                .endpointAnnotation(Endpoint.class.getName())
                 .usePlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();
@@ -69,7 +69,7 @@ public class ParserTests {
     public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
         Parser parser = new Parser(
             new ParserConfig.Factory().classPath(targetDirPath.toString())
-                .applicationEndpointAnnotation(Endpoint.class.getName())
+                .endpointAnnotation(Endpoint.class.getName())
                 .usePlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();
@@ -89,7 +89,7 @@ public class ParserTests {
     public void should_ResolveDependencyMembersCorrectly() {
         Parser parser = new Parser(
                 new ParserConfig.Factory().classPath(targetDirPath.toString())
-                        .applicationEndpointAnnotation(Endpoint.class.getName())
+                        .endpointAnnotation(Endpoint.class.getName())
                         .usePlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();

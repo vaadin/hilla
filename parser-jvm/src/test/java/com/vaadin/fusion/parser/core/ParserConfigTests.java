@@ -13,6 +13,8 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
+import io.swagger.v3.oas.models.servers.Server;
+
 public class ParserConfigTests {
     @Test
     public void should_parseJSONConfigFile() throws URISyntaxException {
@@ -37,8 +39,11 @@ public class ParserConfigTests {
 
         assertEquals("/path/to/bytecode", config.getClassPath().get());
         assertEquals("Vaadin Application", config.getApplication().getName());
+        assertEquals("1.0.0-SNAPSHOT", config.getApplication().getVersion());
         assertEquals("com.vaadin.fusion.Endpoint",
                 config.getApplication().getEndpointAnnotation());
+        assertEquals(Collections.emptyList(),
+                config.getApplication().getServers());
         assertEquals(Collections.emptySet(), config.getPlugins().getDisable());
         assertEquals(Collections.emptySet(), config.getPlugins().getUse());
     }
@@ -49,6 +54,11 @@ public class ParserConfigTests {
                 config.getApplication().getEndpointAnnotation());
         assertEquals(Collections.singleton("generate-openapi"),
                 config.getPlugins().getDisable());
+        assertEquals(
+                Collections.singletonList(
+                        new Server().description("Vaadin backend")
+                                .url("http://localhost:8080/connect")),
+                config.getApplication().getServers());
         assertEquals(
                 new LinkedHashSet<>(
                         Arrays.asList("com.vaadin.fusion.parser.BasicPlugin",
