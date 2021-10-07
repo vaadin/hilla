@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Primary
-public class JwtSecurityUtils extends com.vaadin.flow.spring.fusionsecurity.SecurityUtils {
+public class JwtSecurityUtils
+        extends com.vaadin.flow.spring.fusionsecurity.SecurityUtils {
 
     public UserDetails getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();

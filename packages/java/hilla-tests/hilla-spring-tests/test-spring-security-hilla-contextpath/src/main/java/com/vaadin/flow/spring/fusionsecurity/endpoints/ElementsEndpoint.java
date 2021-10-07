@@ -14,15 +14,15 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 public class ElementsEndpoint {
 
     public Elements getElements() {
-     return new Elements();
+        return new Elements();
     }
 
     public List<String> getOptions() {
-        return Stream.of(Options.values()).map(Enum::toString).collect(Collectors.toList());
+        return Stream.of(Options.values()).map(Enum::toString)
+                .collect(Collectors.toList());
     }
 
     public Elements saveElements(Elements item) {
         return item;
     }
 }
-

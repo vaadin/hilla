@@ -40,8 +40,7 @@ public class SecurityIT
     }
 
     private Cookie getJwtCookie() {
-        return getDriver().manage().getCookieNamed("jwt" +
-                ".headerAndPayload");
+        return getDriver().manage().getCookieNamed("jwt" + ".headerAndPayload");
     }
 
     private void checkJwtUsername(String expectedUsername) {
@@ -49,8 +48,8 @@ public class SecurityIT
         Assert.assertNotNull(jwtCookie);
 
         String payload = jwtCookie.getValue().split("\\.")[1];
-        JsonObject payloadJson = Json.parse(
-                new String(Base64.getUrlDecoder().decode(payload)));
+        JsonObject payloadJson = Json
+                .parse(new String(Base64.getUrlDecoder().decode(payload)));
         Assert.assertEquals(expectedUsername, payloadJson.getString("sub"));
     }
 }

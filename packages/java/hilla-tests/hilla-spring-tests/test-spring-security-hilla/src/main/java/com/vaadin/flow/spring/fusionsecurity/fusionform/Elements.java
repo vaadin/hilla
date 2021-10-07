@@ -12,11 +12,11 @@ import javax.validation.constraints.NotEmpty;
 public class Elements {
 
     public static enum Options {
-       ITEM_1,
-       ITEM_2;
-       public String toString() {
-           return super.toString().toLowerCase().replace("_", "-");
-       }
+        ITEM_1, ITEM_2;
+
+        public String toString() {
+            return super.toString().toLowerCase().replace("_", "-");
+        }
     };
 
     private Boolean radioButton = false;
@@ -33,17 +33,17 @@ public class Elements {
     private String passwordField = "bar";
     private Integer integerField = 12;
     private Double numberField = 12.33d;
-    
+
     @Email
     @NotEmpty
     private String emailField;
 
     private LocalDate datePicker = LocalDate.now().plusDays(1);
-    private LocalDateTime dateTimePicker = LocalDateTime.now().plusDays(1).plusHours(1);
+    private LocalDateTime dateTimePicker = LocalDateTime.now().plusDays(1)
+            .plusHours(1);
     private LocalTime timePicker = LocalTime.now().plusMinutes(30);
 
     private String textArea = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
     private Integer listBox = 1;
-    private String richText =
-      "[{\"insert\":\"HTML Ipsum Presents\"},{\"attributes\":{\"header\":3},\"insert\":\"\\n\"},{\"attributes\":{\"bold\":true},\"insert\":\"Pellentesque habitant morbi tristique\"},{\"insert\":\" senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae. \"}]";
+    private String richText = "[{\"insert\":\"HTML Ipsum Presents\"},{\"attributes\":{\"header\":3},\"insert\":\"\\n\"},{\"attributes\":{\"bold\":true},\"insert\":\"Pellentesque habitant morbi tristique\"},{\"insert\":\" senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae. \"}]";
 }

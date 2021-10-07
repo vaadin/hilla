@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication()
 @ComponentScan(basePackages = {
         "com.vaadin.flow.spring.fusionsecurity" }, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com\\.vaadin\\.flow\\.spring\\.fusionsecurity\\.endpoints\\..*") })
+                @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com\\.vaadin\\.flow\\.spring\\.fusionsecurity\\.endpoints\\..*") })
 @Import(JwtSecurityUtils.class)
 public class Application
         extends com.vaadin.flow.spring.fusionsecurity.Application {

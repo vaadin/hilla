@@ -37,18 +37,17 @@ public class SecurityIT extends ChromeBrowserTest {
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
             return msg.contains(
-                    "admin-only/secret.txt - Failed to load resource: the " +
-                            "server responded with a status of 403") ||
-                    msg.contains("webpack-internal://");
+                    "admin-only/secret.txt - Failed to load resource: the "
+                            + "server responded with a status of 403")
+                    || msg.contains("webpack-internal://");
         });
     }
 
     protected void logout() {
         ElementQuery<TestBenchElement> mainViewQuery = $("*").attribute("id",
                 "main-view");
-        if (!mainViewQuery.exists() ||
-                !mainViewQuery.get(0).$(ButtonElement.class)
-                        .attribute("id", "logout").exists()) {
+        if (!mainViewQuery.exists() || !mainViewQuery.get(0)
+                .$(ButtonElement.class).attribute("id", "logout").exists()) {
             open("");
             assertRootPageShown();
         }

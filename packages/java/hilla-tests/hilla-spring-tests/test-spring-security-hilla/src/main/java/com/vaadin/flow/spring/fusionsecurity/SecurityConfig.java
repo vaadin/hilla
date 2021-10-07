@@ -55,10 +55,11 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
         setLoginView(http, "/login");
 
         if (stateless) {
-            setStatelessAuthentication(http, new SecretKeySpec(
-                    Base64.getUrlDecoder()
-                            .decode("I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
-                    JwsAlgorithms.HS256), "statelessapp");
+            setStatelessAuthentication(http,
+                    new SecretKeySpec(Base64.getUrlDecoder().decode(
+                            "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
+                            JwsAlgorithms.HS256),
+                    "statelessapp");
         }
     }
 
