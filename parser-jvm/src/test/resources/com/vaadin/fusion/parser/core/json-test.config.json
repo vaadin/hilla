@@ -1,0 +1,15 @@
+{
+  "application": {
+    "name": "My Cool Application",
+    "endpointAnnotation": "com.vaadin.fusion.Endpoint"
+  },
+  "plugins": {
+    "disable": [
+      "generate-openapi"
+    ],
+    "use": [
+      "com.vaadin.fusion.parser.BasicPlugin",
+      "com.vaadin.fusion.parser.DependencyPlugin"
+    ]
+  }
+}

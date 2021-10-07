@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.dependency;
+package com.vaadin.fusion.parser.core.dependency;
 
 public class DependencyEntityOne {
     public String foo;

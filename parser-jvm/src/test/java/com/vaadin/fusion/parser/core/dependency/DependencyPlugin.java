@@ -1,14 +1,14 @@
-package com.vaadin.fusion.parser.dependency;
+package com.vaadin.fusion.parser.core.dependency;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.fusion.parser.Plugin;
-import com.vaadin.fusion.parser.RelativeClassList;
-import com.vaadin.fusion.parser.SharedStorage;
-import com.vaadin.fusion.parser.TestUtils;
+import com.vaadin.fusion.parser.core.Plugin;
+import com.vaadin.fusion.parser.core.RelativeClassList;
+import com.vaadin.fusion.parser.core.SharedStorage;
+import com.vaadin.fusion.parser.core.TestUtils;
 
 public class DependencyPlugin implements Plugin {
     public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";

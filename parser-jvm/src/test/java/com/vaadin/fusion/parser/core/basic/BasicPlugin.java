@@ -1,13 +1,13 @@
-package com.vaadin.fusion.parser.basic;
+package com.vaadin.fusion.parser.core.basic;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.fusion.parser.Plugin;
-import com.vaadin.fusion.parser.RelativeClassList;
-import com.vaadin.fusion.parser.SharedStorage;
-import com.vaadin.fusion.parser.TestUtils;
+import com.vaadin.fusion.parser.core.Plugin;
+import com.vaadin.fusion.parser.core.RelativeClassList;
+import com.vaadin.fusion.parser.core.SharedStorage;
+import com.vaadin.fusion.parser.core.TestUtils;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.FieldInfo;

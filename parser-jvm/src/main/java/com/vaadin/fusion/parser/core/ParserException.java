@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser;
+package com.vaadin.fusion.parser.core;
 
 public class ParserException extends RuntimeException {
     ParserException(String message) {

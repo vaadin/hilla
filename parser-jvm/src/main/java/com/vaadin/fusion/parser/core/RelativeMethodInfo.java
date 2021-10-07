@@ -1,6 +1,6 @@
-package com.vaadin.fusion.parser;
+package com.vaadin.fusion.parser.core;
 
-import static com.vaadin.fusion.parser.Resolver.resolve;
+import static com.vaadin.fusion.parser.core.Resolver.resolve;
 
 import java.util.Arrays;
 

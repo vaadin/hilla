@@ -1,6 +1,6 @@
-package com.vaadin.fusion.parser.basic;
+package com.vaadin.fusion.parser.core.basic;
 
-import com.vaadin.fusion.parser.Endpoint;
+import com.vaadin.fusion.parser.core.Endpoint;
 
 @Endpoint
 public class BasicEndpoint {

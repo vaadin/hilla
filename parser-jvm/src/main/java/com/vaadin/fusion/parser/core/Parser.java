@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser;
+package com.vaadin.fusion.parser.core;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public class Parser {
         this.classPath = config.getClassPath()
                 .orElseThrow(() -> new NullPointerException(
                         "Fusion Parser: Classpath is not provided."));
-        this.pluginClassNames.addAll(this.config.getPlugins());
+        this.pluginClassNames.addAll(this.config.getPlugins().getUse());
     }
 
     public void execute() {
@@ -44,7 +44,7 @@ public class Parser {
 
         EntitiesCollector(ScanResult result) {
             endpoints = result
-                    .getClassesWithAnnotation(config.getEndpointAnnotation())
+                    .getClassesWithAnnotation(config.getApplication().getEndpointAnnotation())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toCollection(RelativeClassList::new));
 

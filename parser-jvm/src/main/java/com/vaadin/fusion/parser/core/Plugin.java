@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser;
+package com.vaadin.fusion.parser.core;
 
 public interface Plugin {
     void execute(RelativeClassList endpoints, RelativeClassList entities,

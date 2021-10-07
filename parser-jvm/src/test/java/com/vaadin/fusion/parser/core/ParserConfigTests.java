@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser;
+package com.vaadin.fusion.parser.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,26 +30,27 @@ public class ParserConfigTests {
     }
 
     @Test
-    public void should_parseEmptyConfigFile() throws URISyntaxException {
+    public void should_parseAlmostEmptyConfigFile() throws URISyntaxException {
         ParserConfig config = ParserConfig
             .parse(findResource("absent-elements.config.json"));
 
         assertEquals("/path/to/bytecode", config.getClassPath().get());
-        assertEquals("com.vaadin.fusion.Endpoint", config.getEndpointAnnotation());
-        assertEquals(Collections.emptyList(), config.getDisable());
-        assertEquals(Collections.emptyList(), config.getPlugins());
+        assertEquals("Vaadin Application", config.getApplication().getName());
+        assertEquals("com.vaadin.fusion.Endpoint", config.getApplication().getEndpointAnnotation());
+        assertEquals(Collections.emptyList(), config.getPlugins().getDisable());
+        assertEquals(Collections.emptyList(), config.getPlugins().getUse());
     }
 
     private void assertConfig(ParserConfig config) {
         assertFalse(config.getClassPath().isPresent());
         assertEquals("com.vaadin.fusion.Endpoint",
-                config.getEndpointAnnotation());
+                config.getApplication().getEndpointAnnotation());
         assertEquals(Collections.singletonList("generate-openapi"),
-                config.getDisable());
+                config.getPlugins().getDisable());
         assertEquals(
                 Arrays.asList("com.vaadin.fusion.parser.BasicPlugin",
                         "com.vaadin.fusion.parser.DependencyPlugin"),
-                config.getPlugins());
+                config.getPlugins().getUse());
     }
 
     private File findResource(String resourceName) throws URISyntaxException {
