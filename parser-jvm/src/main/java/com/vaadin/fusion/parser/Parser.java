@@ -19,9 +19,7 @@ public class Parser {
         this.classPath = config.getClassPath()
                 .orElseThrow(() -> new NullPointerException(
                         "Fusion Parser: Classpath is not provided."));
-        this.pluginClassNames.addAll(this.config.getPlugins()
-                .orElseThrow(() -> new NullPointerException(
-                        "Fusion Parser: Plugins are not provided.")));
+        this.pluginClassNames.addAll(this.config.getPlugins());
     }
 
     public void execute() {
@@ -45,10 +43,8 @@ public class Parser {
         private final RelativeClassList entities;
 
         EntitiesCollector(ScanResult result) {
-            endpoints = result.getClassesWithAnnotation(config
-                    .getEndpointAnnotation()
-                    .orElseThrow(() -> new NullPointerException(
-                            "Fusion Parser: Endpoint annotation name is not provided.")))
+            endpoints = result
+                    .getClassesWithAnnotation(config.getEndpointAnnotation())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toCollection(RelativeClassList::new));
 

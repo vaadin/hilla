@@ -1,4 +1,6 @@
 endpointAnnotation: com.vaadin.fusion.Endpoint
+disable:
+  - generate-openapi
 plugins:
   - com.vaadin.fusion.parser.BasicPlugin
   - com.vaadin.fusion.parser.DependencyPlugin

@@ -2,6 +2,8 @@ package com.vaadin.fusion.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class ParserConfig {
+    private static final String DEFAULT_ENDPOINT_ANNOTATION = "com.vaadin.fusion.Endpoint";
+
     private String classPath;
+    private List<String> disable;
     private String endpointAnnotation;
     private List<String> plugins;
 
@@ -47,6 +52,11 @@ public class ParserConfig {
         return this;
     }
 
+    public ParserConfig disableDefault(List<String> value) {
+        disable = value;
+        return this;
+    }
+
     public ParserConfig endpointAnnotation(String value) {
         endpointAnnotation = value;
         return this;
@@ -56,16 +66,20 @@ public class ParserConfig {
         return Optional.ofNullable(classPath);
     }
 
+    public List<String> getDisable() {
+        return disable != null ? disable : Collections.emptyList();
+    }
+
     public ParserConfig plugins(List<String> value) {
         plugins = value;
         return this;
     }
 
-    public Optional<String> getEndpointAnnotation() {
-        return Optional.ofNullable(endpointAnnotation);
+    public String getEndpointAnnotation() {
+        return endpointAnnotation != null ? endpointAnnotation : DEFAULT_ENDPOINT_ANNOTATION;
     }
 
-    public Optional<List<String>> getPlugins() {
-        return Optional.ofNullable(plugins);
+    public List<String> getPlugins() {
+        return plugins != null ? plugins : Collections.emptyList();
     }
 }
