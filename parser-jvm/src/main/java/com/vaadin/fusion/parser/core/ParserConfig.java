@@ -57,10 +57,6 @@ public final class ParserConfig {
                     : DEFAULT_ENDPOINT_ANNOTATION;
         }
 
-        public boolean hasName() {
-            return name != null;
-        }
-
         public String getName() {
             return name != null ? name : DEFAULT_APP_NAME;
         }
@@ -68,10 +64,6 @@ public final class ParserConfig {
         public List<Server> getServers() {
             return servers != null ? Collections.unmodifiableList(servers)
                     : Collections.emptyList();
-        }
-
-        public boolean hasVersion() {
-            return version != null;
         }
 
         public String getVersion() {
@@ -134,17 +126,38 @@ public final class ParserConfig {
         }
 
         public Factory applicationName(String name) {
-            config.application.name = name;
+            return applicationName(name, true);
+        }
+
+        public Factory applicationName(String name, boolean override) {
+            if (override || config.application.name == null) {
+                config.application.name = name;
+            }
+
             return this;
         }
 
         public Factory applicationVersion(String version) {
-            config.application.version = version;
+            return applicationVersion(version, true);
+        }
+
+        public Factory applicationVersion(String version, boolean override) {
+            if (override || config.application.version == null) {
+                config.application.version = version;
+            }
+
             return this;
         }
 
         public Factory classPath(String classPath) {
-            config.classPath = classPath;
+            return classPath(classPath, true);
+        }
+
+        public Factory classPath(String classPath, boolean override) {
+            if (override || config.classPath == null) {
+                config.classPath = classPath;
+            }
+
             return this;
         }
 
@@ -154,7 +167,13 @@ public final class ParserConfig {
         }
 
         public Factory disableDefaultPlugins(Collection<String> plugins) {
-            config.plugins.disable = new LinkedHashSet<>(plugins);
+            return disableDefaultPlugins(plugins, true);
+        }
+
+        public Factory disableDefaultPlugins(Collection<String> plugins, boolean override) {
+            if (override || config.plugins.disable == null) {
+                config.plugins.disable = new LinkedHashSet<>(plugins);
+            }
             return this;
         }
 
@@ -163,7 +182,13 @@ public final class ParserConfig {
         }
 
         public Factory endpointAnnotation(String annotationQualifiedName) {
-            config.application.endpointAnnotation = annotationQualifiedName;
+            return endpointAnnotation(annotationQualifiedName, true);
+        }
+
+        public Factory endpointAnnotation(String annotationQualifiedName, boolean override) {
+            if (override || config.application.endpointAnnotation == null) {
+                config.application.endpointAnnotation = annotationQualifiedName;
+            }
             return this;
         }
 
@@ -177,7 +202,13 @@ public final class ParserConfig {
         }
 
         public Factory useServers(Collection<Server> servers) {
-            config.application.servers = new ArrayList<>(servers);
+            return useServers(servers, true);
+        }
+
+        public Factory useServers(Collection<Server> servers, boolean override) {
+            if (override || config.application.servers == null) {
+                config.application.servers = new ArrayList<>(servers);
+            }
             return this;
         }
 
@@ -191,7 +222,13 @@ public final class ParserConfig {
         }
 
         public Factory usePlugins(Collection<String> plugins) {
-            config.plugins.use = new LinkedHashSet<>(plugins);
+            return usePlugins(plugins, true);
+        }
+
+        public Factory usePlugins(Collection<String> plugins, boolean override) {
+            if (override || config.plugins.use == null) {
+                config.plugins.use = new LinkedHashSet<>(plugins);
+            }
             return this;
         }
 

@@ -1,5 +1,6 @@
 package com.vaadin.fusion;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
@@ -25,9 +26,13 @@ public class FusionGeneratorMojo extends AbstractMojo {
     public void execute() {
         String classPath = (String) project.getCompileClasspathElements()
                 .stream().collect(Collectors.joining(";"));
-        ParserConfig config = new ParserConfig.Factory(
-                Paths.get(configPath).toFile()).classPath(classPath, false)
-                        .finish();
+
+        File configFile = Paths.get(configPath).toFile();
+
+        ParserConfig config = new ParserConfig.Factory(configFile)
+                .classPath(classPath, false)
+                .applicationName(project.getName(), false)
+                .applicationVersion(project.getVersion(), false).finish();
 
         new Parser(config).execute();
     }
