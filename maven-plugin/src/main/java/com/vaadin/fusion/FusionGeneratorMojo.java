@@ -9,8 +9,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.fusion.parser.Parser;
-import com.vaadin.fusion.parser.ParserConfig;
+import com.vaadin.fusion.parser.core.Parser;
+import com.vaadin.fusion.parser.core.ParserConfig;
 
 /**
  * Fusion plugin for Maven. Handles loading the parser and its plugins.
@@ -23,9 +23,12 @@ public class FusionGeneratorMojo extends AbstractMojo {
     private MavenProject project;
 
     public void execute() {
-        String classPath = (String) project.getCompileClasspathElements().stream().collect(Collectors.joining(";"));
-        ParserConfig config = ParserConfig.parse(Paths.get(configPath).toFile()).classPath(classPath);
-        Parser parser = new Parser(config);
-        parser.execute();
+        String classPath = (String) project.getCompileClasspathElements()
+                .stream().collect(Collectors.joining(";"));
+        ParserConfig config = new ParserConfig.Factory(
+                Paths.get(configPath).toFile()).classPath(classPath, false)
+                        .finish();
+
+        new Parser(config).execute();
     }
 }
