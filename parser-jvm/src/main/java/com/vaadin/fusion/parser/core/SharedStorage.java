@@ -7,7 +7,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public class SharedStorage {
     private final ParserConfig parserConfig;
-    private final OpenAPI openAPI = new OpenAPI();
     private final Map<String, Object> pluginStorage = new HashMap<>();
 
     SharedStorage(ParserConfig parserConfig) {
@@ -15,7 +14,7 @@ public class SharedStorage {
     }
 
     public OpenAPI getOpenAPI() {
-        return openAPI;
+        return parserConfig.getOpenAPI();
     }
 
     public ParserConfig getParserConfig() {
