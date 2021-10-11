@@ -43,6 +43,9 @@ public final class ParserConfig {
         private static final String DEFAULT_ENDPOINT_ANNOTATION = "com.vaadin.fusion.Endpoint";
         private static final String DEFAULT_APP_NAME = "Vaadin Application";
         private static final String DEFAULT_APP_VERSION = "1.0.0-SNAPSHOT";
+        private static final Server DEFAULT_SERVER = new Server()
+                .description("Vaadin backend")
+                .url("http://localhost:8080/connect");
 
         private String endpointAnnotation;
         private String name;
@@ -63,7 +66,7 @@ public final class ParserConfig {
 
         public List<Server> getServers() {
             return servers != null ? Collections.unmodifiableList(servers)
-                    : Collections.emptyList();
+                    : Collections.singletonList(DEFAULT_SERVER);
         }
 
         public String getVersion() {
@@ -170,7 +173,8 @@ public final class ParserConfig {
             return disableDefaultPlugins(plugins, true);
         }
 
-        public Factory disableDefaultPlugins(Collection<String> plugins, boolean override) {
+        public Factory disableDefaultPlugins(Collection<String> plugins,
+                boolean override) {
             if (override || config.plugins.disable == null) {
                 config.plugins.disable = new LinkedHashSet<>(plugins);
             }
@@ -185,7 +189,8 @@ public final class ParserConfig {
             return endpointAnnotation(annotationQualifiedName, true);
         }
 
-        public Factory endpointAnnotation(String annotationQualifiedName, boolean override) {
+        public Factory endpointAnnotation(String annotationQualifiedName,
+                boolean override) {
             if (override || config.application.endpointAnnotation == null) {
                 config.application.endpointAnnotation = annotationQualifiedName;
             }
@@ -205,7 +210,8 @@ public final class ParserConfig {
             return useServers(servers, true);
         }
 
-        public Factory useServers(Collection<Server> servers, boolean override) {
+        public Factory useServers(Collection<Server> servers,
+                boolean override) {
             if (override || config.application.servers == null) {
                 config.application.servers = new ArrayList<>(servers);
             }
@@ -225,7 +231,8 @@ public final class ParserConfig {
             return usePlugins(plugins, true);
         }
 
-        public Factory usePlugins(Collection<String> plugins, boolean override) {
+        public Factory usePlugins(Collection<String> plugins,
+                boolean override) {
             if (override || config.plugins.use == null) {
                 config.plugins.use = new LinkedHashSet<>(plugins);
             }
