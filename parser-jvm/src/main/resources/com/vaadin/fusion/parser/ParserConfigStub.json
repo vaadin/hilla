@@ -1,0 +1,9 @@
+{
+  "application": {
+    "endpointAnnotation": "com.vaadin.fusion.Endpoint"
+  },
+  "plugins": {
+    "disable": [],
+    "use": []
+  }
+}

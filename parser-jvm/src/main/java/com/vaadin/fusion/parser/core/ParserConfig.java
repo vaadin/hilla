@@ -2,29 +2,38 @@ package com.vaadin.fusion.parser.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FilenameUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig {
     private final Application application = new Application();
     private final Plugins plugins = new Plugins();
+
+    @JsonIgnore
+    private OpenAPI openAPI;
     private String classPath;
 
-    private ParserConfig() {
+    ParserConfig() {
     }
 
     public Application getApplication() {
@@ -35,76 +44,169 @@ public final class ParserConfig {
         return Optional.ofNullable(classPath);
     }
 
+    public OpenAPI getOpenAPI() {
+        return openAPI;
+    }
+
     public Plugins getPlugins() {
         return plugins;
     }
 
     public static final class Application {
-        private static final String DEFAULT_ENDPOINT_ANNOTATION = "com.vaadin.fusion.Endpoint";
-        private static final String DEFAULT_APP_NAME = "Vaadin Application";
-        private static final String DEFAULT_APP_VERSION = "1.0.0-SNAPSHOT";
-        private static final Server DEFAULT_SERVER = new Server()
-                .description("Vaadin backend")
-                .url("http://localhost:8080/connect");
-
         private String endpointAnnotation;
-        private String name;
-        private List<Server> servers;
-        private String version;
 
         private Application() {
         }
 
         public String getEndpointAnnotation() {
-            return endpointAnnotation != null ? endpointAnnotation
-                    : DEFAULT_ENDPOINT_ANNOTATION;
-        }
-
-        public String getName() {
-            return name != null ? name : DEFAULT_APP_NAME;
-        }
-
-        public List<Server> getServers() {
-            return servers != null ? Collections.unmodifiableList(servers)
-                    : Collections.singletonList(DEFAULT_SERVER);
-        }
-
-        public String getVersion() {
-            return version != null ? version : DEFAULT_APP_VERSION;
+            return endpointAnnotation;
         }
     }
 
-    public static final class Plugins {
-        private LinkedHashSet<String> disable;
-        private LinkedHashSet<String> use;
+    public static final class Builder {
+        private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
+        private File configFile;
+        private File openAPITemplate;
 
-        private Plugins() {
+        public Builder() {
         }
 
-        public Set<String> getDisable() {
-            return disable != null ? Collections.unmodifiableSet(disable)
-                    : Collections.emptySet();
+        public Builder adjustOpenAPI(Consumer<OpenAPI> action) {
+            actions.add(config -> {
+                action.accept(config.openAPI);
+            });
+            return this;
         }
 
-        public Set<String> getUse() {
-            return use != null ? Collections.unmodifiableSet(use)
-                    : Collections.emptySet();
+        public Builder classPath(String classPath) {
+            return classPath(classPath, true);
+        }
+
+        public Builder classPath(String classPath, boolean override) {
+            actions.add(config -> {
+                if (override || config.classPath == null) {
+                    config.classPath = classPath;
+                }
+            });
+
+            return this;
+        }
+
+        public Builder configFile(File file) {
+            configFile = file;
+            return this;
+        }
+
+        public Builder disableDefaultPlugin(String plugin) {
+            actions.add(config -> config.plugins.disable.add(plugin));
+            return this;
+        }
+
+        public Builder disableDefaultPlugins(Collection<String> plugins) {
+            return disableDefaultPlugins(plugins, true);
+        }
+
+        public Builder disableDefaultPlugins(Collection<String> plugins,
+                boolean override) {
+            actions.add(config -> {
+                if (override || config.plugins.disable == null) {
+                    config.plugins.disable = new LinkedHashSet<>(plugins);
+                }
+            });
+            return this;
+        }
+
+        public Builder disableDefaultPlugins(String... plugins) {
+            return disableDefaultPlugins(Arrays.asList(plugins));
+        }
+
+        public Builder endpointAnnotation(String annotationQualifiedName) {
+            return endpointAnnotation(annotationQualifiedName, true);
+        }
+
+        public Builder endpointAnnotation(String annotationQualifiedName,
+                boolean override) {
+            actions.add(config -> {
+                if (override || config.application.endpointAnnotation == null) {
+                    config.application.endpointAnnotation = annotationQualifiedName;
+                }
+            });
+            return this;
+        }
+
+        public ParserConfig finish() {
+            Mapper<ParserConfig> configMapper = new Mapper<>(
+                    ParserConfig.class);
+            Mapper<OpenAPI> openAPIMapper = new Mapper<>(OpenAPI.class);
+
+            ParserConfig config = configFile == null
+                    ? configMapper.map(
+                            getClass().getResource("ParserConfigStub.json"))
+                    : configMapper.map(configFile);
+
+            config.openAPI = openAPITemplate == null
+                    ? openAPIMapper
+                            .map(getClass().getResource("OpenAPIStub.json"))
+                    : openAPIMapper.map(openAPITemplate);
+
+            for (Consumer<ParserConfig> action : actions) {
+                action.accept(config);
+            }
+
+            return config;
+        }
+
+        public Builder openAPITemplate(File file) {
+            openAPITemplate = file;
+            return this;
+        }
+
+        public Builder usePlugin(String plugin) {
+            actions.add(config -> config.plugins.use.add(plugin));
+            return this;
+        }
+
+        public Builder usePlugins(Collection<String> plugins) {
+            return usePlugins(plugins, true);
+        }
+
+        public Builder usePlugins(Collection<String> plugins,
+                boolean override) {
+            actions.add(config -> {
+                if (override || config.plugins.use == null) {
+                    config.plugins.use = new LinkedHashSet<>(plugins);
+                }
+            });
+            return this;
+        }
+
+        public Builder usePlugins(String... plugins) {
+            return usePlugins(Arrays.asList(plugins));
         }
     }
 
-    public static final class Factory {
-        private final ParserConfig config;
+    private static final class Mapper<T> {
+        private final Class<T> type;
 
-        public Factory() {
-            config = new ParserConfig();
-            config.application.servers = new ArrayList<>();
-            config.plugins.use = new LinkedHashSet<>();
-            config.plugins.disable = new LinkedHashSet<>();
+        Mapper(Class<T> type) {
+            this.type = type;
         }
 
-        public Factory(File configFile) {
-            String extension = FilenameUtils
-                    .getExtension(configFile.toString());
+        T map(URL url) {
+            Objects.requireNonNull(url);
+
+            ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+
+            try {
+                return map(new File(url.toURI()), mapper);
+            } catch (URISyntaxException e) {
+                throw new ParserException(e);
+            }
+        }
+
+        T map(File file) {
+            String extension = FilenameUtils.getExtension(file.toString());
+
             ObjectMapper mapper;
 
             switch (extension) {
@@ -120,127 +222,35 @@ public final class ParserConfig {
                         "The file format '.%s' is not supported", extension));
             }
 
+            return map(file, mapper);
+        }
+
+        private T map(File file, ObjectMapper mapper) {
             try {
-                config = mapper.readValue(configFile, ParserConfig.class);
+                return mapper.readValue(file, type);
             } catch (IOException e) {
                 throw new ParserException("Failed to parse configuration file",
                         e);
             }
         }
+    }
 
-        public Factory applicationName(String name) {
-            return applicationName(name, true);
+    public static final class Plugins {
+        @JsonDeserialize(as = LinkedHashSet.class)
+        private Set<String> disable;
+
+        @JsonDeserialize(as = LinkedHashSet.class)
+        private Set<String> use;
+
+        private Plugins() {
         }
 
-        public Factory applicationName(String name, boolean override) {
-            if (override || config.application.name == null) {
-                config.application.name = name;
-            }
-
-            return this;
+        public Set<String> getDisable() {
+            return Collections.unmodifiableSet(disable);
         }
 
-        public Factory applicationVersion(String version) {
-            return applicationVersion(version, true);
-        }
-
-        public Factory applicationVersion(String version, boolean override) {
-            if (override || config.application.version == null) {
-                config.application.version = version;
-            }
-
-            return this;
-        }
-
-        public Factory classPath(String classPath) {
-            return classPath(classPath, true);
-        }
-
-        public Factory classPath(String classPath, boolean override) {
-            if (override || config.classPath == null) {
-                config.classPath = classPath;
-            }
-
-            return this;
-        }
-
-        public Factory disableDefaultPlugin(String plugin) {
-            config.plugins.disable.add(plugin);
-            return this;
-        }
-
-        public Factory disableDefaultPlugins(Collection<String> plugins) {
-            return disableDefaultPlugins(plugins, true);
-        }
-
-        public Factory disableDefaultPlugins(Collection<String> plugins,
-                boolean override) {
-            if (override || config.plugins.disable == null) {
-                config.plugins.disable = new LinkedHashSet<>(plugins);
-            }
-            return this;
-        }
-
-        public Factory disableDefaultPlugins(String... plugins) {
-            return disableDefaultPlugins(Arrays.asList(plugins));
-        }
-
-        public Factory endpointAnnotation(String annotationQualifiedName) {
-            return endpointAnnotation(annotationQualifiedName, true);
-        }
-
-        public Factory endpointAnnotation(String annotationQualifiedName,
-                boolean override) {
-            if (override || config.application.endpointAnnotation == null) {
-                config.application.endpointAnnotation = annotationQualifiedName;
-            }
-            return this;
-        }
-
-        public ParserConfig finish() {
-            return config;
-        }
-
-        public Factory useServer(Server server) {
-            config.application.servers.add(server);
-            return this;
-        }
-
-        public Factory useServers(Collection<Server> servers) {
-            return useServers(servers, true);
-        }
-
-        public Factory useServers(Collection<Server> servers,
-                boolean override) {
-            if (override || config.application.servers == null) {
-                config.application.servers = new ArrayList<>(servers);
-            }
-            return this;
-        }
-
-        public Factory useServers(Server... servers) {
-            return useServers(Arrays.asList(servers));
-        }
-
-        public Factory usePlugin(String plugin) {
-            config.plugins.use.add(plugin);
-            return this;
-        }
-
-        public Factory usePlugins(Collection<String> plugins) {
-            return usePlugins(plugins, true);
-        }
-
-        public Factory usePlugins(Collection<String> plugins,
-                boolean override) {
-            if (override || config.plugins.use == null) {
-                config.plugins.use = new LinkedHashSet<>(plugins);
-            }
-            return this;
-        }
-
-        public Factory usePlugins(String... plugins) {
-            return usePlugins(Arrays.asList(plugins));
+        public Set<String> getUse() {
+            return Collections.unmodifiableSet(use);
         }
     }
 }
