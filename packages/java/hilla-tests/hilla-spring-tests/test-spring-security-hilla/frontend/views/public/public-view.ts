@@ -1,5 +1,5 @@
-import "@vaadin/vaadin-button";
-import "@vaadin/vaadin-text-field";
+import "@vaadin/button";
+import "@vaadin/text-field";
 import { PublicEndpoint } from "Frontend/generated/endpoints";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators";

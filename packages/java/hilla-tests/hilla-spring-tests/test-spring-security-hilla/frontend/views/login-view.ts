@@ -1,6 +1,6 @@
 import { LoginResult } from "@vaadin/fusion-frontend";
 import { AfterEnterObserver, RouterLocation } from "@vaadin/router";
-import "@vaadin/vaadin-login/vaadin-login-overlay";
+import "@vaadin/login/vaadin-login-overlay";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators";
 import { login } from "../auth";

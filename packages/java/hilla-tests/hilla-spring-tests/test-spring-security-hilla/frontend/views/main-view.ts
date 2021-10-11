@@ -1,9 +1,9 @@
 import { Router } from "@vaadin/router";
-import "@vaadin/vaadin-app-layout";
-import "@vaadin/vaadin-app-layout/vaadin-drawer-toggle";
-import "@vaadin/vaadin-avatar/vaadin-avatar";
-import "@vaadin/vaadin-tabs";
-import "@vaadin/vaadin-tabs/vaadin-tab";
+import "@vaadin/app-layout";
+import "@vaadin/app-layout/vaadin-drawer-toggle";
+import "@vaadin/avatar/vaadin-avatar";
+import "@vaadin/tabs";
+import "@vaadin/tabs/vaadin-tab";
 import { logout } from "Frontend/auth";
 import { html, nothing } from "lit";
 import { customElement } from "lit/decorators";
