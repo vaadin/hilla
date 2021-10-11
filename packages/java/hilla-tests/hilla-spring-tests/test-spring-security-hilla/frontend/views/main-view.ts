@@ -75,8 +75,8 @@ export class MainView extends Layout {
     `;
   }
 
-  private logout() {
-    logout();
+  private async logout() {
+    await logout();
     Router.go(router.urlForName('public'));
   }
   private getMenuRoutes(): RouteInfo[] {
