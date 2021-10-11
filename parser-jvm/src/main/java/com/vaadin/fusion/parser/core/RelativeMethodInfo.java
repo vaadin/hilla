@@ -7,16 +7,23 @@ import java.util.Arrays;
 import io.github.classgraph.MethodInfo;
 import io.github.classgraph.MethodParameterInfo;
 
-public class RelativeMethodInfo implements Relative {
+public class RelativeMethodInfo implements Relative, RelativeMember {
     private final MethodInfo methodInfo;
+    private final RelativeClassInfo host;
 
     RelativeMethodInfo(final MethodInfo methodInfo) {
         this.methodInfo = methodInfo;
+        host = new RelativeClassInfo(methodInfo.getClassInfo());
     }
 
     @Override
     public MethodInfo get() {
         return methodInfo;
+    }
+
+    @Override
+    public RelativeClassInfo getHost() {
+        return host;
     }
 
     public RelativeClassStream getDependencies() {
