@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.fusion.parser.core.Plugin;
-import com.vaadin.fusion.parser.core.RelativeClassList;
+import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 import com.vaadin.fusion.parser.core.TestUtils;
 
@@ -19,8 +19,8 @@ public class DependencyPlugin implements Plugin {
             "Dependency");
 
     @Override
-    public void execute(RelativeClassList endpoints, RelativeClassList entities,
-            SharedStorage storage) {
+    public void execute(List<RelativeClassInfo> endpoints,
+            List<RelativeClassInfo> entities, SharedStorage storage) {
         DependencyCollector collector = new DependencyCollector(
                 filter.apply(endpoints), filter.apply(entities));
 
@@ -35,11 +35,11 @@ public class DependencyPlugin implements Plugin {
     }
 
     private static class DependencyCollector {
-        private final RelativeClassList endpoints;
-        private final RelativeClassList entities;
+        private final List<RelativeClassInfo> endpoints;
+        private final List<RelativeClassInfo> entities;
 
-        DependencyCollector(RelativeClassList endpoints,
-                RelativeClassList entities) {
+        DependencyCollector(List<RelativeClassInfo> endpoints,
+                List<RelativeClassInfo> entities) {
             this.endpoints = endpoints;
             this.entities = entities;
         }
@@ -51,19 +51,20 @@ public class DependencyPlugin implements Plugin {
         }
 
         List<String> collectDependencyMemberNames() {
-            return Stream
-                    .of(entities.streamRelative().getFields()
+            return Stream.of(
+                    entities.stream().flatMap(cls -> cls.getFields().stream())
                             .map(field -> field.get().getName()),
-                            entities.streamRelative().getMethods()
-                                    .map(method -> method.get().getName()),
-                            entities.streamRelative().getInnerClasses().stream()
-                                    .map(cls -> cls.get().getName()))
+                    entities.stream().flatMap(cls -> cls.getMethods().stream())
+                            .map(method -> method.get().getName()),
+                    entities.stream()
+                            .flatMap(cls -> cls.getInnerClasses().stream())
+                            .map(cls -> cls.get().getName()))
                     .flatMap(Function.identity()).collect(Collectors.toList());
         }
 
         List<String> collectEndpointDirectDependencyNames() {
             return endpoints.stream()
-                    .flatMap(endpoint -> endpoint.getDependencies().stream())
+                    .flatMap(RelativeClassInfo::getDependencies)
                     .map(dependency -> dependency.get().getName())
                     .collect(Collectors.toList());
         }

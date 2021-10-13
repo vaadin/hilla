@@ -4,6 +4,10 @@ public class DependencyEntityOne {
     public String foo;
     private int bar;
 
+    public DependencyEntityTwo circular() {
+        return new DependencyEntityTwo();
+    }
+
     public String getFoo() {
         return foo;
     }
