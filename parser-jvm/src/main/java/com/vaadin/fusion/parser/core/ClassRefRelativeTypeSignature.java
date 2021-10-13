@@ -18,6 +18,19 @@ import io.github.classgraph.ClassRefTypeSignature;
 
 public final class ClassRefRelativeTypeSignature
         implements RelativeTypeSignature {
+    private static final Class<?>[] DATE_CLASSES = { Date.class,
+            LocalDate.class };
+    private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
+            Instant.class, LocalTime.class };
+    private static final Class<?>[] NUMBER_CLASSES = { Byte.class, Short.class,
+            Integer.class, Long.class, Float.class, Double.class };
+    private final Class<?> currentClass;
+    private final ClassRefTypeSignature signature;
+    public ClassRefRelativeTypeSignature(ClassRefTypeSignature signature) {
+        this.signature = signature;
+        currentClass = signature.loadClass();
+    }
+
     public static Stream<ClassInfo> resolve(ClassRefTypeSignature signature) {
         ClassInfo classInfo = signature.getClassInfo();
 
@@ -33,21 +46,6 @@ public final class ClassRefRelativeTypeSignature
                 ? Stream.of(Stream.of(classInfo), typeArgumentsDependencies)
                         .flatMap(Function.identity())
                 : typeArgumentsDependencies;
-    }
-
-    private static final Class<?>[] DATE_CLASSES = { Date.class,
-            LocalDate.class };
-    private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-            Instant.class, LocalTime.class };
-    private static final Class<?>[] NUMBER_CLASSES = { Byte.class, Short.class,
-            Integer.class, Long.class, Float.class, Double.class };
-
-    private final ClassRefTypeSignature signature;
-    private final Class<?> currentClass;
-
-    public ClassRefRelativeTypeSignature(ClassRefTypeSignature signature) {
-        this.signature = signature;
-        currentClass = signature.loadClass();
     }
 
     @Override

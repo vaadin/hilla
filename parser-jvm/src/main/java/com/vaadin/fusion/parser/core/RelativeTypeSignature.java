@@ -45,19 +45,15 @@ public interface RelativeTypeSignature {
         }
     }
 
+    TypeSignature get();
+
     default Stream<RelativeClassInfo> getDependencies() {
         return resolve(get()).map(RelativeClassInfo::new);
     }
 
-    TypeSignature get();
-
     default boolean isArray() {
         return false;
     }
-
-    default boolean isTypeVariable() {
-        return false;
-    };
 
     default boolean isBase() {
         return false;
@@ -99,15 +95,19 @@ public interface RelativeTypeSignature {
         return false;
     };
 
-    default boolean isString() {
-        return false;
-    };
-
     default boolean isPrimitive() {
         return false;
     };
 
+    default boolean isString() {
+        return false;
+    };
+
     default boolean isSystem() {
+        return false;
+    };
+
+    default boolean isTypeVariable() {
         return false;
     };
 

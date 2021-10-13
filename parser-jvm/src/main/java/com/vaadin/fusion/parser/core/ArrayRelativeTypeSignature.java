@@ -6,14 +6,15 @@ import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassInfo;
 
 public final class ArrayRelativeTypeSignature implements RelativeTypeSignature {
-    public static Stream<ClassInfo> resolve(ArrayTypeSignature signature) {
-        return RelativeTypeSignature.resolve(signature.getElementTypeSignature());
-    }
-
     private final ArrayTypeSignature signature;
 
     public ArrayRelativeTypeSignature(ArrayTypeSignature signature) {
         this.signature = signature;
+    }
+
+    public static Stream<ClassInfo> resolve(ArrayTypeSignature signature) {
+        return RelativeTypeSignature
+                .resolve(signature.getElementTypeSignature());
     }
 
     @Override

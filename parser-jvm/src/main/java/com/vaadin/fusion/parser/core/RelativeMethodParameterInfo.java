@@ -16,16 +16,17 @@ public class RelativeMethodParameterInfo implements Relative, RelativeMember {
         return origin;
     }
 
+    public Stream<RelativeClassInfo> getDependencies() {
+        return getType().getDependencies();
+    }
+
     @Override
     public RelativeClassInfo getHost() {
         return new RelativeClassInfo(origin.getMethodInfo().getClassInfo());
     }
 
     public RelativeTypeSignature getType() {
-        return RelativeTypeSignature.of(origin.getTypeSignatureOrTypeDescriptor());
-    }
-
-    public Stream<RelativeClassInfo> getDependencies() {
-        return getType().getDependencies();
+        return RelativeTypeSignature
+                .of(origin.getTypeSignatureOrTypeDescriptor());
     }
 }

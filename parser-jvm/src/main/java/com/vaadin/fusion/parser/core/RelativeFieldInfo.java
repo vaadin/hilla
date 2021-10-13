@@ -5,8 +5,8 @@ import java.util.stream.Stream;
 import io.github.classgraph.FieldInfo;
 
 public class RelativeFieldInfo implements Relative, RelativeMember {
-    private final FieldInfo origin;
     private final RelativeClassInfo host;
+    private final FieldInfo origin;
 
     public RelativeFieldInfo(FieldInfo origin) {
         this.origin = origin;
@@ -18,6 +18,10 @@ public class RelativeFieldInfo implements Relative, RelativeMember {
         return origin;
     }
 
+    public Stream<RelativeClassInfo> getDependencies() {
+        return getType().getDependencies();
+    }
+
     @Override
     public RelativeClassInfo getHost() {
         return host;
@@ -25,9 +29,5 @@ public class RelativeFieldInfo implements Relative, RelativeMember {
 
     public RelativeTypeSignature getType() {
         return RelativeTypeSignature.of(origin.getTypeSignature());
-    }
-
-    public Stream<RelativeClassInfo> getDependencies() {
-        return getType().getDependencies();
     }
 }

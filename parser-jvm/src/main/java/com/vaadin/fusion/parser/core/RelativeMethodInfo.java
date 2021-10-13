@@ -18,24 +18,14 @@ public class RelativeMethodInfo implements Relative, RelativeMember {
         return methodInfo;
     }
 
-    @Override
-    public RelativeClassInfo getHost() {
-        return new RelativeClassInfo(methodInfo.getClassInfo());
-    }
-
-    public RelativeTypeSignature getResultType() {
-        return RelativeTypeSignature.of(
-                methodInfo.getTypeSignatureOrTypeDescriptor().getResultType());
-    }
-
     public Stream<RelativeClassInfo> getDependencies() {
         return Stream.of(getResultDependencies(), getParameterDependencies())
                 .flatMap(Function.identity());
     }
 
-    public Stream<RelativeMethodParameterInfo> getParameters() {
-        return Arrays.stream(methodInfo.getParameterInfo())
-                .map(RelativeMethodParameterInfo::new);
+    @Override
+    public RelativeClassInfo getHost() {
+        return new RelativeClassInfo(methodInfo.getClassInfo());
     }
 
     public Stream<RelativeClassInfo> getParameterDependencies() {
@@ -43,7 +33,17 @@ public class RelativeMethodInfo implements Relative, RelativeMember {
                 .flatMap(RelativeMethodParameterInfo::getDependencies);
     }
 
+    public Stream<RelativeMethodParameterInfo> getParameters() {
+        return Arrays.stream(methodInfo.getParameterInfo())
+                .map(RelativeMethodParameterInfo::new);
+    }
+
     public Stream<RelativeClassInfo> getResultDependencies() {
         return getResultType().getDependencies();
+    }
+
+    public RelativeTypeSignature getResultType() {
+        return RelativeTypeSignature.of(
+                methodInfo.getTypeSignatureOrTypeDescriptor().getResultType());
     }
 }

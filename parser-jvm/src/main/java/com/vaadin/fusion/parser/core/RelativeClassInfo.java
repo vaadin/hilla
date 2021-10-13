@@ -17,6 +17,11 @@ public class RelativeClassInfo implements Relative {
         return origin;
     }
 
+    public Stream<RelativeAnnotationInfo> getAnnotations() {
+        return origin.getAnnotationInfo().stream()
+                .map(RelativeAnnotationInfo::new);
+    }
+
     public Stream<RelativeClassInfo> getDependencies() {
         return Stream
                 .of(getFieldDependencies(), getMethodDependencies(),
@@ -24,29 +29,12 @@ public class RelativeClassInfo implements Relative {
                 .flatMap(Function.identity());
     }
 
-    public Stream<RelativeMethodInfo> getMethods() {
-        return origin.getMethodInfo().stream().map(RelativeMethodInfo::new);
+    public Stream<RelativeClassInfo> getFieldDependencies() {
+        return getFields().flatMap(RelativeFieldInfo::getDependencies);
     }
 
     public Stream<RelativeFieldInfo> getFields() {
         return origin.getFieldInfo().stream().map(RelativeFieldInfo::new);
-    }
-
-    public Stream<RelativeClassInfo> getSuperClasses() {
-        return origin.getSuperclasses().stream().map(RelativeClassInfo::new);
-    }
-
-    public Stream<RelativeClassInfo> getInnerClasses() {
-        return origin.getInnerClasses().stream().map(RelativeClassInfo::new);
-    }
-
-    public Stream<RelativeAnnotationInfo> getAnnotations() {
-        return origin.getAnnotationInfo().stream()
-                .map(RelativeAnnotationInfo::new);
-    }
-
-    public Stream<RelativeClassInfo> getFieldDependencies() {
-        return getFields().flatMap(RelativeFieldInfo::getDependencies);
     }
 
     public Stream<RelativeClassInfo> getInheritanceChain() {
@@ -62,8 +50,20 @@ public class RelativeClassInfo implements Relative {
                 .flatMap(RelativeClassInfo::getInnerClasses);
     }
 
+    public Stream<RelativeClassInfo> getInnerClasses() {
+        return origin.getInnerClasses().stream().map(RelativeClassInfo::new);
+    }
+
     public Stream<RelativeClassInfo> getMethodDependencies() {
         return getInheritanceChain().flatMap(RelativeClassInfo::getMethods)
                 .flatMap(RelativeMethodInfo::getDependencies);
+    }
+
+    public Stream<RelativeMethodInfo> getMethods() {
+        return origin.getMethodInfo().stream().map(RelativeMethodInfo::new);
+    }
+
+    public Stream<RelativeClassInfo> getSuperClasses() {
+        return origin.getSuperclasses().stream().map(RelativeClassInfo::new);
     }
 }

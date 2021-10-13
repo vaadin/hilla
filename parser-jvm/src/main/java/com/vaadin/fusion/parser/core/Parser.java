@@ -8,8 +8,8 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 
 public class Parser {
-    private final SharedStorage storage;
     private final ParserConfig config;
+    private final SharedStorage storage;
 
     public Parser(ParserConfig config) {
         this.config = config;
@@ -53,8 +53,7 @@ public class Parser {
             for (int i = 0; i < entities.size(); i++) {
                 RelativeClassInfo entity = entities.get(i);
 
-                entity.getDependencies().filter(dependency -> entities
-                        .stream()
+                entity.getDependencies().filter(dependency -> entities.stream()
                         .noneMatch(d -> Objects.equals(d.get().getName(),
                                 dependency.get().getName())))
                         .forEach(entities::add);

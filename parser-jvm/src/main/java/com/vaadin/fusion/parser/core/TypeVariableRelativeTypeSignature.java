@@ -8,18 +8,19 @@ import io.github.classgraph.TypeVariableSignature;
 
 public final class TypeVariableRelativeTypeSignature
         implements RelativeTypeSignature {
+    private final TypeVariableSignature signature;
+
+    public TypeVariableRelativeTypeSignature(TypeVariableSignature signature) {
+        this.signature = signature;
+    }
+
     public static Stream<ClassInfo> resolve(TypeVariableSignature signature) {
         // We can resolve only the type variable class bound here (bound class
         // is `com.vaadin.fusion.X` in `T extends com.vaadin.fusion.X`)
         TypeSignature bound = signature.resolve().getClassBound();
 
-        return bound != null ? RelativeTypeSignature.resolve(bound) : Stream.empty();
-    }
-
-    private final TypeVariableSignature signature;
-
-    public TypeVariableRelativeTypeSignature(TypeVariableSignature signature) {
-        this.signature = signature;
+        return bound != null ? RelativeTypeSignature.resolve(bound)
+                : Stream.empty();
     }
 
     @Override

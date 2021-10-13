@@ -7,16 +7,16 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.TypeSignature;
 
 public final class BaseRelativeTypeSignature implements RelativeTypeSignature {
-    public static Stream<ClassInfo> resolve(BaseTypeSignature signature) {
-        // BaseTypeSignature is about primitive types (int, double, etc.).
-        // We don't need to resolve them, so skipping.
-        return Stream.empty();
-    }
-
     private final BaseTypeSignature signature;
 
     public BaseRelativeTypeSignature(BaseTypeSignature signature) {
         this.signature = signature;
+    }
+
+    public static Stream<ClassInfo> resolve(BaseTypeSignature signature) {
+        // BaseTypeSignature is about primitive types (int, double, etc.).
+        // We don't need to resolve them, so skipping.
+        return Stream.empty();
     }
 
     @Override
@@ -44,15 +44,15 @@ public final class BaseRelativeTypeSignature implements RelativeTypeSignature {
     }
 
     @Override
-    public boolean isString() {
-        return signature.getType() == Character.TYPE;
-    }
-
-    @Override
     public boolean isPrimitive() {
         Class<?> type = signature.getType();
 
         return type != null && type != Void.TYPE;
+    }
+
+    @Override
+    public boolean isString() {
+        return signature.getType() == Character.TYPE;
     }
 
     @Override

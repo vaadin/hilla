@@ -28,10 +28,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 public final class ParserConfig {
     private final Application application = new Application();
     private final Plugins plugins = new Plugins();
-
+    private String classPath;
     @JsonIgnore
     private OpenAPI openAPI;
-    private String classPath;
 
     ParserConfig() {
     }
@@ -185,6 +184,25 @@ public final class ParserConfig {
         }
     }
 
+    public static final class Plugins {
+        @JsonDeserialize(as = LinkedHashSet.class)
+        private Set<String> disable;
+
+        @JsonDeserialize(as = LinkedHashSet.class)
+        private Set<String> use;
+
+        private Plugins() {
+        }
+
+        public Set<String> getDisable() {
+            return Collections.unmodifiableSet(disable);
+        }
+
+        public Set<String> getUse() {
+            return Collections.unmodifiableSet(use);
+        }
+    }
+
     private static final class Mapper<T> {
         private final Class<T> type;
 
@@ -232,25 +250,6 @@ public final class ParserConfig {
                 throw new ParserException("Failed to parse configuration file",
                         e);
             }
-        }
-    }
-
-    public static final class Plugins {
-        @JsonDeserialize(as = LinkedHashSet.class)
-        private Set<String> disable;
-
-        @JsonDeserialize(as = LinkedHashSet.class)
-        private Set<String> use;
-
-        private Plugins() {
-        }
-
-        public Set<String> getDisable() {
-            return Collections.unmodifiableSet(disable);
-        }
-
-        public Set<String> getUse() {
-            return Collections.unmodifiableSet(use);
         }
     }
 }
