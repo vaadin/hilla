@@ -1,29 +1,33 @@
 package com.vaadin.fusion.parser.core;
 
-import static com.vaadin.fusion.parser.core.EnhancedTypeSignature.resolve;
+import java.util.stream.Stream;
 
 import io.github.classgraph.FieldInfo;
 
 public class RelativeFieldInfo implements Relative, RelativeMember {
-    private final FieldInfo fieldInfo;
+    private final FieldInfo origin;
     private final RelativeClassInfo host;
 
-    RelativeFieldInfo(final FieldInfo fieldInfo) {
-        this.fieldInfo = fieldInfo;
-        host = new RelativeClassInfo(fieldInfo.getClassInfo());
+    public RelativeFieldInfo(FieldInfo origin) {
+        this.origin = origin;
+        host = new RelativeClassInfo(origin.getClassInfo());
     }
 
     @Override
     public FieldInfo get() {
-        return fieldInfo;
+        return origin;
     }
 
     @Override
     public RelativeClassInfo getHost() {
-        return new RelativeClassInfo(fieldInfo.getClassInfo());
+        return host;
     }
 
-    public RelativeClassStream getDependencies() {
-        return RelativeClassStream.ofRaw(resolve(fieldInfo.getTypeSignature()));
+    public RelativeTypeSignature getType() {
+        return RelativeTypeSignature.of(origin.getTypeSignature());
+    }
+
+    public Stream<RelativeClassInfo> getDependencies() {
+        return getType().getDependencies();
     }
 }

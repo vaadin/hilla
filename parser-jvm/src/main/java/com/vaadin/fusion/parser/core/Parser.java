@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -35,24 +36,24 @@ public class Parser {
     }
 
     private class EntitiesCollector {
-        private final RelativeClassList endpoints;
-        private final RelativeClassList entities;
+        private final List<RelativeClassInfo> endpoints;
+        private final List<RelativeClassInfo> entities;
 
         EntitiesCollector(ScanResult result) {
             endpoints = result
                     .getClassesWithAnnotation(
                             config.getApplication().getEndpointAnnotation())
                     .stream().map(RelativeClassInfo::new)
-                    .collect(Collectors.toCollection(RelativeClassList::new));
+                    .collect(Collectors.toList());
 
             entities = endpoints.stream()
-                    .flatMap(element -> element.getDependencies().stream())
-                    .collect(Collectors.toCollection(RelativeClassList::new));
+                    .flatMap(RelativeClassInfo::getDependencies)
+                    .collect(Collectors.toList());
 
             for (int i = 0; i < entities.size(); i++) {
                 RelativeClassInfo entity = entities.get(i);
 
-                entity.getDependencies().stream().filter(dependency -> entities
+                entity.getDependencies().filter(dependency -> entities
                         .stream()
                         .noneMatch(d -> Objects.equals(d.get().getName(),
                                 dependency.get().getName())))
@@ -60,11 +61,11 @@ public class Parser {
             }
         }
 
-        RelativeClassList getEndpoints() {
+        List<RelativeClassInfo> getEndpoints() {
             return endpoints;
         }
 
-        RelativeClassList getEntities() {
+        List<RelativeClassInfo> getEntities() {
             return entities;
         }
     }

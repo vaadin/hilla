@@ -1,48 +1,69 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import io.github.classgraph.ClassInfo;
 
 public class RelativeClassInfo implements Relative {
-    private final ClassInfo classInfo;
+    private final ClassInfo origin;
 
-    RelativeClassInfo(ClassInfo classInfo) {
-        this.classInfo = classInfo;
+    public RelativeClassInfo(ClassInfo origin) {
+        this.origin = origin;
     }
 
     @Override
     public ClassInfo get() {
-        return classInfo;
+        return origin;
     }
 
-    public RelativeClassStream getDependencies() {
-        return RelativeClassStream.of(getFieldDependencies().stream(),
-                getMethodDependencies().stream(),
-                getInnerClassDependencies().stream(),
-                getSuperDependencies().stream());
+    public Stream<RelativeClassInfo> getDependencies() {
+        return Stream
+                .of(getFieldDependencies(), getMethodDependencies(),
+                        getInnerClassDependencies(), getSuperClasses())
+                .flatMap(Function.identity());
     }
 
-    public RelativeClassStream getFieldDependencies() {
-        return RelativeClassStream.of(getInheritanceChain().getFields()
-                .flatMap(field -> field.getDependencies().stream()));
+    public Stream<RelativeMethodInfo> getMethods() {
+        return origin.getMethodInfo().stream().map(RelativeMethodInfo::new);
     }
 
-    public RelativeClassStream getInheritanceChain() {
-        return RelativeClassStream.ofRaw(Stream.of(classInfo),
-                classInfo.getSuperclasses().stream());
+    public Stream<RelativeFieldInfo> getFields() {
+        return origin.getFieldInfo().stream().map(RelativeFieldInfo::new);
     }
 
-    public RelativeClassStream getInnerClassDependencies() {
-        return getInheritanceChain().getInnerClasses();
+    public Stream<RelativeClassInfo> getSuperClasses() {
+        return origin.getSuperclasses().stream().map(RelativeClassInfo::new);
     }
 
-    public RelativeClassStream getMethodDependencies() {
-        return RelativeClassStream.of(getInheritanceChain().getMethods()
-                .flatMap(method -> method.getDependencies().stream()));
+    public Stream<RelativeClassInfo> getInnerClasses() {
+        return origin.getInnerClasses().stream().map(RelativeClassInfo::new);
     }
 
-    public RelativeClassStream getSuperDependencies() {
-        return RelativeClassStream.ofRaw(classInfo.getSuperclasses().stream());
+    public Stream<RelativeAnnotationInfo> getAnnotations() {
+        return origin.getAnnotationInfo().stream()
+                .map(RelativeAnnotationInfo::new);
+    }
+
+    public Stream<RelativeClassInfo> getFieldDependencies() {
+        return getFields().flatMap(RelativeFieldInfo::getDependencies);
+    }
+
+    public Stream<RelativeClassInfo> getInheritanceChain() {
+        return Stream
+                .of(Stream.of(this),
+                        origin.getSuperclasses().stream()
+                                .map(RelativeClassInfo::new))
+                .flatMap(Function.identity());
+    }
+
+    public Stream<RelativeClassInfo> getInnerClassDependencies() {
+        return getInheritanceChain()
+                .flatMap(RelativeClassInfo::getInnerClasses);
+    }
+
+    public Stream<RelativeClassInfo> getMethodDependencies() {
+        return getInheritanceChain().flatMap(RelativeClassInfo::getMethods)
+                .flatMap(RelativeMethodInfo::getDependencies);
     }
 }

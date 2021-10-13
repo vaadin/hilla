@@ -1,19 +1,16 @@
 package com.vaadin.fusion.parser.core;
 
-import static com.vaadin.fusion.parser.core.EnhancedTypeSignature.resolve;
-
 import java.util.Arrays;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import io.github.classgraph.MethodInfo;
-import io.github.classgraph.MethodParameterInfo;
 
 public class RelativeMethodInfo implements Relative, RelativeMember {
     private final MethodInfo methodInfo;
-    private final RelativeClassInfo host;
 
-    RelativeMethodInfo(final MethodInfo methodInfo) {
+    public RelativeMethodInfo(MethodInfo methodInfo) {
         this.methodInfo = methodInfo;
-        host = new RelativeClassInfo(methodInfo.getClassInfo());
     }
 
     @Override
@@ -23,22 +20,30 @@ public class RelativeMethodInfo implements Relative, RelativeMember {
 
     @Override
     public RelativeClassInfo getHost() {
-        return host;
+        return new RelativeClassInfo(methodInfo.getClassInfo());
     }
 
-    public RelativeClassStream getDependencies() {
-        return RelativeClassStream.of(getResultDependencies().stream(),
-                getParameterDependencies().stream());
+    public RelativeTypeSignature getResultType() {
+        return RelativeTypeSignature.of(
+                methodInfo.getTypeSignatureOrTypeDescriptor().getResultType());
     }
 
-    public RelativeClassStream getParameterDependencies() {
-        return RelativeClassStream
-                .ofRaw(resolve(Arrays.stream(methodInfo.getParameterInfo())
-                        .map(MethodParameterInfo::getTypeSignature)));
+    public Stream<RelativeClassInfo> getDependencies() {
+        return Stream.of(getResultDependencies(), getParameterDependencies())
+                .flatMap(Function.identity());
     }
 
-    public RelativeClassStream getResultDependencies() {
-        return RelativeClassStream.ofRaw(resolve(
-                methodInfo.getTypeSignatureOrTypeDescriptor().getResultType()));
+    public Stream<RelativeMethodParameterInfo> getParameters() {
+        return Arrays.stream(methodInfo.getParameterInfo())
+                .map(RelativeMethodParameterInfo::new);
+    }
+
+    public Stream<RelativeClassInfo> getParameterDependencies() {
+        return getParameters()
+                .flatMap(RelativeMethodParameterInfo::getDependencies);
+    }
+
+    public Stream<RelativeClassInfo> getResultDependencies() {
+        return getResultType().getDependencies();
     }
 }

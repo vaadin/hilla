@@ -10,11 +10,31 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.TypeSignature;
 
-public final class ClassRefEnhancedTypeSignature extends EnhancedTypeSignature {
+public final class ClassRefRelativeTypeSignature
+        implements RelativeTypeSignature {
+    public static Stream<ClassInfo> resolve(ClassRefTypeSignature signature) {
+        ClassInfo classInfo = signature.getClassInfo();
+
+        Stream<ClassInfo> typeArgumentsDependencies = signature
+                .getTypeArguments().stream()
+                .flatMap(argument -> RelativeTypeSignature
+                        .resolve(argument.getTypeSignature()));
+
+        // ClassInfo for all native class refs (like List<>, Set<>, etc.),
+        // is null. So if it is not null, it is not a standard stuff, so we can
+        // resolve it directly. Otherwise, we resolve their type arguments.
+        return classInfo != null
+                ? Stream.of(Stream.of(classInfo), typeArgumentsDependencies)
+                        .flatMap(Function.identity())
+                : typeArgumentsDependencies;
+    }
+
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
@@ -22,27 +42,23 @@ public final class ClassRefEnhancedTypeSignature extends EnhancedTypeSignature {
     private static final Class<?>[] NUMBER_CLASSES = { Byte.class, Short.class,
             Integer.class, Long.class, Float.class, Double.class };
 
+    private final ClassRefTypeSignature signature;
     private final Class<?> currentClass;
 
-    public ClassRefEnhancedTypeSignature(TypeSignature signature) {
-        super(signature);
-        currentClass = ((ClassRefTypeSignature) signature).loadClass();
+    public ClassRefRelativeTypeSignature(ClassRefTypeSignature signature) {
+        this.signature = signature;
+        currentClass = signature.loadClass();
     }
 
     @Override
-    public boolean isArray() {
-        return false;
-    }
-
-    @Override
-    public boolean isBase() {
-        return false;
+    public ClassRefTypeSignature get() {
+        return signature;
     }
 
     @Override
     public boolean isBoolean() {
-        return Objects.equals(((ClassRefTypeSignature) signature)
-                .getFullyQualifiedClassName(), Boolean.class.getName());
+        return Objects.equals(signature.getFullyQualifiedClassName(),
+                Boolean.class.getName());
     }
 
     @Override
@@ -69,7 +85,7 @@ public final class ClassRefEnhancedTypeSignature extends EnhancedTypeSignature {
 
     @Override
     public boolean isEnum() {
-        return false;
+        return currentClass.isEnum();
     }
 
     @Override
@@ -94,17 +110,7 @@ public final class ClassRefEnhancedTypeSignature extends EnhancedTypeSignature {
     }
 
     @Override
-    public boolean isPrimitive() {
-        return false;
-    }
-
-    @Override
     public boolean isSystem() {
-        return ((ClassRefTypeSignature) signature).getClassInfo() == null;
-    }
-
-    @Override
-    public boolean isVoid() {
-        return false;
+        return signature.getClassInfo() == null;
     }
 }

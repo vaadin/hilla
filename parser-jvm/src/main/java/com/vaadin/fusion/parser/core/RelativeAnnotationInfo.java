@@ -3,21 +3,19 @@ package com.vaadin.fusion.parser.core;
 import io.github.classgraph.AnnotationInfo;
 
 public class RelativeAnnotationInfo implements Relative, RelativeMember {
-    private final AnnotationInfo annotationInfo;
-    private final RelativeClassInfo host;
+    private final AnnotationInfo origin;
 
-    RelativeAnnotationInfo(final AnnotationInfo annotationInfo) {
-        this.annotationInfo = annotationInfo;
-        host = new RelativeClassInfo(annotationInfo.getClassInfo());
+    public RelativeAnnotationInfo(final AnnotationInfo origin) {
+        this.origin = origin;
     }
 
     @Override
     public AnnotationInfo get() {
-        return annotationInfo;
+        return origin;
     }
 
     @Override
     public RelativeClassInfo getHost() {
-        return host;
+        return new RelativeClassInfo(origin.getClassInfo());
     }
 }
