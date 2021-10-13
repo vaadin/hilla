@@ -17,6 +17,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
 public final class ClassRefRelativeTypeSignature
+        extends AbstractRelative<ClassRefTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
@@ -24,11 +25,13 @@ public final class ClassRefRelativeTypeSignature
             Instant.class, LocalTime.class };
     private static final Class<?>[] NUMBER_CLASSES = { Byte.class, Short.class,
             Integer.class, Long.class, Float.class, Double.class };
+
     private final Class<?> currentClass;
-    private final ClassRefTypeSignature signature;
-    public ClassRefRelativeTypeSignature(ClassRefTypeSignature signature) {
-        this.signature = signature;
-        currentClass = signature.loadClass();
+
+    public ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
+            Relative<?> parent) {
+        super(origin, parent);
+        currentClass = origin.loadClass();
     }
 
     public static Stream<ClassInfo> resolve(ClassRefTypeSignature signature) {
@@ -49,13 +52,8 @@ public final class ClassRefRelativeTypeSignature
     }
 
     @Override
-    public ClassRefTypeSignature get() {
-        return signature;
-    }
-
-    @Override
     public boolean isBoolean() {
-        return Objects.equals(signature.getFullyQualifiedClassName(),
+        return Objects.equals(origin.getFullyQualifiedClassName(),
                 Boolean.class.getName());
     }
 
@@ -109,6 +107,6 @@ public final class ClassRefRelativeTypeSignature
 
     @Override
     public boolean isSystem() {
-        return signature.getClassInfo() == null;
+        return origin.getClassInfo() == null;
     }
 }

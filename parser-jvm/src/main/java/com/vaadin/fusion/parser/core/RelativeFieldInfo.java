@@ -4,30 +4,22 @@ import java.util.stream.Stream;
 
 import io.github.classgraph.FieldInfo;
 
-public class RelativeFieldInfo implements Relative, RelativeMember {
-    private final RelativeClassInfo host;
-    private final FieldInfo origin;
+public class RelativeFieldInfo
+        extends AbstractRelative<FieldInfo, RelativeClassInfo> {
+    private final RelativeTypeSignature type;
 
-    public RelativeFieldInfo(FieldInfo origin) {
-        this.origin = origin;
-        host = new RelativeClassInfo(origin.getClassInfo());
+    public RelativeFieldInfo(FieldInfo origin, RelativeClassInfo parent) {
+        super(origin, parent);
+        type = RelativeTypeSignature
+                .of(origin.getTypeSignatureOrTypeDescriptor(), this);
     }
 
     @Override
-    public FieldInfo get() {
-        return origin;
-    }
-
     public Stream<RelativeClassInfo> getDependencies() {
-        return getType().getDependencies();
-    }
-
-    @Override
-    public RelativeClassInfo getHost() {
-        return host;
+        return type.getDependencies();
     }
 
     public RelativeTypeSignature getType() {
-        return RelativeTypeSignature.of(origin.getTypeSignature());
+        return type;
     }
 }

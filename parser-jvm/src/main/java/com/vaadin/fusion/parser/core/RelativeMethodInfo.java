@@ -6,36 +6,33 @@ import java.util.stream.Stream;
 
 import io.github.classgraph.MethodInfo;
 
-public class RelativeMethodInfo implements Relative, RelativeMember {
-    private final MethodInfo methodInfo;
+public class RelativeMethodInfo
+        extends AbstractRelative<MethodInfo, RelativeClassInfo> {
+    private final RelativeTypeSignature resultType;
 
-    public RelativeMethodInfo(MethodInfo methodInfo) {
-        this.methodInfo = methodInfo;
+    public RelativeMethodInfo(MethodInfo origin, RelativeClassInfo parent) {
+        super(origin, parent);
+
+        resultType = RelativeTypeSignature.of(
+                origin.getTypeSignatureOrTypeDescriptor().getResultType(),
+                this);
     }
 
     @Override
-    public MethodInfo get() {
-        return methodInfo;
-    }
-
     public Stream<RelativeClassInfo> getDependencies() {
         return Stream.of(getResultDependencies(), getParameterDependencies())
-                .flatMap(Function.identity());
-    }
-
-    @Override
-    public RelativeClassInfo getHost() {
-        return new RelativeClassInfo(methodInfo.getClassInfo());
+                .flatMap(Function.identity()).distinct();
     }
 
     public Stream<RelativeClassInfo> getParameterDependencies() {
         return getParameters()
-                .flatMap(RelativeMethodParameterInfo::getDependencies);
+                .flatMap(RelativeMethodParameterInfo::getDependencies)
+                .distinct();
     }
 
     public Stream<RelativeMethodParameterInfo> getParameters() {
-        return Arrays.stream(methodInfo.getParameterInfo())
-                .map(RelativeMethodParameterInfo::new);
+        return Arrays.stream(origin.getParameterInfo()).map(
+                parameter -> new RelativeMethodParameterInfo(parameter, this));
     }
 
     public Stream<RelativeClassInfo> getResultDependencies() {
@@ -43,7 +40,6 @@ public class RelativeMethodInfo implements Relative, RelativeMember {
     }
 
     public RelativeTypeSignature getResultType() {
-        return RelativeTypeSignature.of(
-                methodInfo.getTypeSignatureOrTypeDescriptor().getResultType());
+        return resultType;
     }
 }

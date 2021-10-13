@@ -9,19 +9,21 @@ import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.TypeSignature;
 import io.github.classgraph.TypeVariableSignature;
 
-public interface RelativeTypeSignature {
-    static RelativeTypeSignature of(TypeSignature signature) {
+public interface RelativeTypeSignature extends Relative<Relative<?>> {
+    static RelativeTypeSignature of(TypeSignature signature,
+            Relative<?> parent) {
         if (signature instanceof BaseTypeSignature) {
-            return new BaseRelativeTypeSignature((BaseTypeSignature) signature);
+            return new BaseRelativeTypeSignature((BaseTypeSignature) signature,
+                    parent);
         } else if (signature instanceof ArrayTypeSignature) {
             return new ArrayRelativeTypeSignature(
-                    (ArrayTypeSignature) signature);
+                    (ArrayTypeSignature) signature, parent);
         } else if (signature instanceof TypeVariableSignature) {
             return new TypeVariableRelativeTypeSignature(
-                    (TypeVariableSignature) signature);
+                    (TypeVariableSignature) signature, parent);
         } else {
             return new ClassRefRelativeTypeSignature(
-                    (ClassRefTypeSignature) signature);
+                    (ClassRefTypeSignature) signature, parent);
         }
     }
 
@@ -45,10 +47,12 @@ public interface RelativeTypeSignature {
         }
     }
 
+    @Override
     TypeSignature get();
 
+    @Override
     default Stream<RelativeClassInfo> getDependencies() {
-        return resolve(get()).map(RelativeClassInfo::new);
+        return resolve(get()).distinct().map(RelativeClassInfo::new);
     }
 
     default boolean isArray() {

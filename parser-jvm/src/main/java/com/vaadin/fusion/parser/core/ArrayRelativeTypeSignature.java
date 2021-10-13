@@ -5,21 +5,17 @@ import java.util.stream.Stream;
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassInfo;
 
-public final class ArrayRelativeTypeSignature implements RelativeTypeSignature {
-    private final ArrayTypeSignature signature;
-
-    public ArrayRelativeTypeSignature(ArrayTypeSignature signature) {
-        this.signature = signature;
+public final class ArrayRelativeTypeSignature
+        extends AbstractRelative<ArrayTypeSignature, Relative<?>>
+        implements RelativeTypeSignature {
+    public ArrayRelativeTypeSignature(ArrayTypeSignature origin,
+            Relative<?> parent) {
+        super(origin, parent);
     }
 
     public static Stream<ClassInfo> resolve(ArrayTypeSignature signature) {
         return RelativeTypeSignature
                 .resolve(signature.getElementTypeSignature());
-    }
-
-    @Override
-    public ArrayTypeSignature get() {
-        return signature;
     }
 
     @Override

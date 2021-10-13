@@ -7,11 +7,12 @@ import io.github.classgraph.TypeSignature;
 import io.github.classgraph.TypeVariableSignature;
 
 public final class TypeVariableRelativeTypeSignature
+        extends AbstractRelative<TypeVariableSignature, Relative<?>>
         implements RelativeTypeSignature {
-    private final TypeVariableSignature signature;
 
-    public TypeVariableRelativeTypeSignature(TypeVariableSignature signature) {
-        this.signature = signature;
+    public TypeVariableRelativeTypeSignature(TypeVariableSignature origin,
+            Relative<?> parent) {
+        super(origin, parent);
     }
 
     public static Stream<ClassInfo> resolve(TypeVariableSignature signature) {
@@ -21,11 +22,6 @@ public final class TypeVariableRelativeTypeSignature
 
         return bound != null ? RelativeTypeSignature.resolve(bound)
                 : Stream.empty();
-    }
-
-    @Override
-    public TypeSignature get() {
-        return signature;
     }
 
     @Override

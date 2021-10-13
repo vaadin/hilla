@@ -1,32 +1,28 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.github.classgraph.MethodParameterInfo;
 
-public class RelativeMethodParameterInfo implements Relative, RelativeMember {
-    private final MethodParameterInfo origin;
+public class RelativeMethodParameterInfo
+        extends AbstractRelative<MethodParameterInfo, RelativeMethodInfo> {
+    private final RelativeTypeSignature type;
 
-    public RelativeMethodParameterInfo(MethodParameterInfo origin) {
-        this.origin = origin;
+    public RelativeMethodParameterInfo(MethodParameterInfo origin,
+            RelativeMethodInfo parent) {
+        super(origin, parent);
+
+        type = RelativeTypeSignature
+                .of(origin.getTypeSignatureOrTypeDescriptor(), this);
     }
 
     @Override
-    public MethodParameterInfo get() {
-        return origin;
-    }
-
     public Stream<RelativeClassInfo> getDependencies() {
         return getType().getDependencies();
     }
 
-    @Override
-    public RelativeClassInfo getHost() {
-        return new RelativeClassInfo(origin.getMethodInfo().getClassInfo());
-    }
-
     public RelativeTypeSignature getType() {
-        return RelativeTypeSignature
-                .of(origin.getTypeSignatureOrTypeDescriptor());
+        return type;
     }
 }
