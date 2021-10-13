@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
-import static com.vaadin.fusion.parser.core.Resolver.resolve;
+import static com.vaadin.fusion.parser.core.EnhancedTypeSignature.resolve;
 
 import io.github.classgraph.FieldInfo;
 

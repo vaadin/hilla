@@ -1,5 +1,7 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.classgraph.ArrayTypeSignature;
@@ -10,7 +12,26 @@ import io.github.classgraph.ReferenceTypeSignature;
 import io.github.classgraph.TypeSignature;
 import io.github.classgraph.TypeVariableSignature;
 
-class Resolver {
+public abstract class EnhancedTypeSignature {
+    protected final TypeSignature signature;
+
+    public static EnhancedTypeSignature of(TypeSignature signature) {
+        if (signature instanceof BaseTypeSignature) {
+            return new BaseEnhancedTypeSignature(signature);
+        } else if (signature instanceof ArrayTypeSignature) {
+            return new ArrayEnhancedTypeSignature(signature);
+        } else if (signature instanceof ClassRefTypeSignature) {
+            return new ClassRefEnhancedTypeSignature(signature);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported type of a signature provided");
+        }
+    }
+
+    protected EnhancedTypeSignature(TypeSignature signature) {
+        this.signature = signature;
+    }
+
     static Stream<ClassInfo> resolve(TypeSignature type) {
         if (type == null) {
             return Stream.empty();
@@ -22,7 +43,7 @@ class Resolver {
     }
 
     static Stream<ClassInfo> resolve(Stream<TypeSignature> types) {
-        return types.flatMap(Resolver::resolve);
+        return types.flatMap(EnhancedTypeSignature::resolve);
     }
 
     // Primitive type (int, double, etc.). We don't need to resolve it, so
@@ -61,9 +82,40 @@ class Resolver {
         ClassInfo classInfo = type.getClassInfo();
 
         // All native class refs (like List<>, Set<>, etc., are null). So if it
-        // is not null, we can resolve it directly.
+        // is not null, we can resolve it directly. Otherwise, we resolve their
+        // items.
         return classInfo != null ? Stream.of(classInfo)
                 : type.getTypeArguments().stream().flatMap(
                         argument -> resolve(argument.getTypeSignature()));
     }
+
+    public abstract boolean isArray();
+
+    public abstract boolean isBase();
+
+    public abstract boolean isBoolean();
+
+    public abstract boolean isClassRef();
+
+    public abstract boolean isCollection();
+
+    public abstract boolean isDate();
+
+    public abstract boolean isDateTime();
+
+    public abstract boolean isEnum();
+
+    public abstract boolean isMap();
+
+    public abstract boolean isNumber();
+
+    public abstract boolean isOptional();
+
+    public abstract boolean isString();
+
+    public abstract boolean isPrimitive();
+
+    public abstract boolean isSystem();
+
+    public abstract boolean isVoid();
 }
