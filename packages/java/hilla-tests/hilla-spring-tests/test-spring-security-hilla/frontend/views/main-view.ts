@@ -10,6 +10,7 @@ import { customElement } from "lit/decorators";
 import { router } from "../index";
 import { appStore } from "../stores/app-store";
 import { Layout } from "./view";
+import {SessionEndpoint} from "Frontend/generated/endpoints";
 
 interface RouteInfo {
   path: string;
@@ -121,5 +122,10 @@ export class MainView extends Layout {
   connectedCallback() {
     super.connectedCallback();
     this.id = "main-view";
+  }
+
+  // Used by SecurityIT#simulateNewServer()
+  public async invalidateSessionIfPresent(): Promise<void> {
+    return SessionEndpoint.invalidateSessionIfPresent()
   }
 }

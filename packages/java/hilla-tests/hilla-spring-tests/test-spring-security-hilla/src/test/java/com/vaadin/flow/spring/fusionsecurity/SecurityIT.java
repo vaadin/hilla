@@ -19,8 +19,8 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
     private static final int SERVER_PORT = 9999;
-    private static final String USER_FULLNAME = "John the User";
-    private static final String ADMIN_FULLNAME = "Emma the Admin";
+    protected static final String USER_FULLNAME = "John the User";
+    protected static final String ADMIN_FULLNAME = "Emma the Admin";
 
     @Override
     protected int getDeploymentPort() {
@@ -59,7 +59,7 @@ public class SecurityIT extends ChromeBrowserTest {
         getMainView().$(ButtonElement.class).id("logout").click();
     }
 
-    private void open(String path) {
+    protected void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
     }
 
@@ -233,11 +233,11 @@ public class SecurityIT extends ChromeBrowserTest {
                 shouldBeTextFile.contains("Public document for all users"));
     }
 
-    private void navigateTo(String path) {
+    protected void navigateTo(String path) {
         navigateTo(path, true);
     }
 
-    private void navigateTo(String path, boolean assertPathShown) {
+    protected void navigateTo(String path, boolean assertPathShown) {
         getMainView().$("a").attribute("href", path).first().click();
         if (assertPathShown) {
             assertPathShown(path);
@@ -259,7 +259,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
     }
 
-    private void assertPrivatePageShown(String fullName) {
+    protected void assertPrivatePageShown(String fullName) {
         assertPathShown("private");
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
@@ -299,7 +299,7 @@ public class SecurityIT extends ChromeBrowserTest {
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
     }
 
-    private void refresh() {
+    protected void refresh() {
         getDriver().navigate().refresh();
     }
 
