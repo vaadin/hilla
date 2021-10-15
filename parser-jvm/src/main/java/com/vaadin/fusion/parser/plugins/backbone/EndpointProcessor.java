@@ -67,9 +67,10 @@ class EndpointProcessor extends Processor {
             String endpointName = method.getParent()
                     .map(cls -> cls.get().getSimpleName()).orElse("Unknown");
 
-            operation.operationId(
-                    endpointName + '_' + method.get().getName() + "_POST")
-                    .addTagsItem(endpointName);
+            operation
+                    .operationId(endpointName + '_' + method.get().getName()
+                            + "_POST")
+                    .addTagsItem(endpointName).responses(createResponses());
 
             if (method.get().getParameterInfo().length > 0) {
                 operation.requestBody(createRequestBody());
@@ -88,9 +89,8 @@ class EndpointProcessor extends Processor {
             RelativeTypeSignature resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                SchemaProcessor processor = new SchemaProcessor(resultType);
-                content.addMediaType("application/json",
-                        new MediaType().schema(processor.process()));
+                content.addMediaType("application/json", new MediaType()
+                        .schema(new SchemaProcessor(resultType).process()));
             }
 
             return new ApiResponses().addApiResponse("200",

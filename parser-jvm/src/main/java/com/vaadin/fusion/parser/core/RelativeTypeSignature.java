@@ -1,17 +1,21 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.TypeSignature;
+import io.github.classgraph.HierarchicalTypeSignature;
+import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeVariableSignature;
 
 public interface RelativeTypeSignature extends Relative<Relative<?>> {
-    static RelativeTypeSignature of(TypeSignature signature,
+    static RelativeTypeSignature of(HierarchicalTypeSignature signature,
             Relative<?> parent) {
+        Objects.requireNonNull(signature);
+
         if (signature instanceof BaseTypeSignature) {
             return new BaseRelativeTypeSignature((BaseTypeSignature) signature,
                     parent);
@@ -21,13 +25,19 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         } else if (signature instanceof TypeVariableSignature) {
             return new TypeVariableRelativeTypeSignature(
                     (TypeVariableSignature) signature, parent);
+        } else if (signature instanceof TypeArgument) {
+            return new RelativeTypeArgument((TypeArgument) signature, parent);
         } else {
             return new ClassRefRelativeTypeSignature(
                     (ClassRefTypeSignature) signature, parent);
         }
     }
 
-    static Stream<ClassInfo> resolve(TypeSignature signature) {
+    static RelativeTypeSignature ofNullable(HierarchicalTypeSignature signature, Relative<?> parent) {
+        return signature == null ? null : of(signature, parent);
+    }
+
+    static Stream<ClassInfo> resolve(HierarchicalTypeSignature signature) {
         if (signature == null) {
             return Stream.empty();
         }
@@ -41,6 +51,8 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         } else if (signature instanceof TypeVariableSignature) {
             return TypeVariableRelativeTypeSignature
                     .resolve((TypeVariableSignature) signature);
+        } else if (signature instanceof TypeArgument) {
+            return RelativeTypeArgument.resolve((TypeArgument) signature);
         } else {
             return ClassRefRelativeTypeSignature
                     .resolve((ClassRefTypeSignature) signature);
@@ -48,7 +60,7 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
     }
 
     @Override
-    TypeSignature get();
+    HierarchicalTypeSignature get();
 
     @Override
     default Stream<RelativeClassInfo> getDependencies() {
@@ -71,7 +83,7 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     };
 
-    default boolean isCollection() {
+    default boolean isIterable() {
         return false;
     };
 
@@ -118,4 +130,12 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
     default boolean isVoid() {
         return false;
     };
+
+    default boolean isTypeArgument() {
+        return false;
+    }
+
+    default boolean isTypeParameter() {
+        return false;
+    }
 }

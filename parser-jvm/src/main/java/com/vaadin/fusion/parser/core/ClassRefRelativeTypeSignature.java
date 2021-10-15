@@ -5,12 +5,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.github.classgraph.ClassInfo;
@@ -27,11 +28,15 @@ public final class ClassRefRelativeTypeSignature
             Integer.class, Long.class, Float.class, Double.class };
 
     private final Class<?> currentClass;
+    private final List<RelativeTypeArgument> typeArguments;
 
-    public ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
+    ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
             Relative<?> parent) {
         super(origin, parent);
         currentClass = origin.loadClass();
+        typeArguments = origin.getTypeArguments().stream()
+                .map(arg -> new RelativeTypeArgument(arg, this))
+                .collect(Collectors.toList());
     }
 
     public static Stream<ClassInfo> resolve(ClassRefTypeSignature signature) {
@@ -63,8 +68,8 @@ public final class ClassRefRelativeTypeSignature
     }
 
     @Override
-    public boolean isCollection() {
-        return Collection.class.isAssignableFrom(currentClass);
+    public boolean isIterable() {
+        return Iterable.class.isAssignableFrom(currentClass);
     }
 
     @Override
@@ -108,5 +113,9 @@ public final class ClassRefRelativeTypeSignature
     @Override
     public boolean isSystem() {
         return origin.getClassInfo() == null;
+    }
+
+    public List<RelativeTypeArgument> getTypeArguments() {
+        return typeArguments;
     }
 }

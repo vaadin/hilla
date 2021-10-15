@@ -8,8 +8,7 @@ import io.github.classgraph.ClassInfo;
 public final class BaseRelativeTypeSignature
         extends AbstractRelative<BaseTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
-
-    public BaseRelativeTypeSignature(BaseTypeSignature origin,
+    BaseRelativeTypeSignature(BaseTypeSignature origin,
             Relative<?> parent) {
         super(origin, parent);
     }
