@@ -13,7 +13,8 @@ public class RelativeTypeArgument
 
     RelativeTypeArgument(TypeArgument origin, Relative<?> parent) {
         super(origin, parent);
-        wildcardAssociatedType = RelativeTypeSignature.ofNullable(origin.getTypeSignature(), this);
+        wildcardAssociatedType = RelativeTypeSignature
+                .ofNullable(origin.getTypeSignature(), this);
     }
 
     public static Stream<ClassInfo> resolve(TypeArgument signature) {

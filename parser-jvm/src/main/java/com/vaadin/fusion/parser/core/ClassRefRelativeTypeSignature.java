@@ -14,6 +14,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
@@ -39,8 +41,9 @@ public final class ClassRefRelativeTypeSignature
                 .collect(Collectors.toList());
     }
 
-    public static Stream<ClassInfo> resolve(ClassRefTypeSignature signature) {
-        ClassInfo classInfo = signature.getClassInfo();
+    public static Stream<ClassInfo> resolve(
+            @Nonnull ClassRefTypeSignature signature) {
+        ClassInfo classInfo = Objects.requireNonNull(signature).getClassInfo();
 
         Stream<ClassInfo> typeArgumentsDependencies = signature
                 .getTypeArguments().stream()

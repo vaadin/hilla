@@ -1,6 +1,8 @@
 package com.vaadin.fusion.parser.core;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -17,11 +19,11 @@ public class RelativeClassInfo
     private final List<RelativeMethodInfo> methods;
     private final List<RelativeClassInfo> superClasses;
 
-    public RelativeClassInfo(ClassInfo origin) {
+    public RelativeClassInfo(@Nonnull ClassInfo origin) {
         this(origin, null);
     }
 
-    public RelativeClassInfo(ClassInfo origin, RelativeClassInfo parent) {
+    public RelativeClassInfo(@Nonnull ClassInfo origin, RelativeClassInfo parent) {
         super(origin, parent);
 
         annotations = getMembers(ClassInfo::getAnnotationInfo,
@@ -73,17 +75,19 @@ public class RelativeClassInfo
     }
 
     public <RelativeMember> Stream<RelativeClassInfo> getMemberDependencies(
-            Function<RelativeClassInfo, List<RelativeMember>> selector,
-            Function<RelativeMember, Stream<RelativeClassInfo>> dependencyExtractor) {
+            @Nonnull Function<RelativeClassInfo, List<RelativeMember>> selector,
+            @Nonnull Function<RelativeMember, Stream<RelativeClassInfo>> dependencyExtractor) {
+        Objects.requireNonNull(selector);
         return getInheritanceChain()
                 .flatMap(cls -> selector.apply(cls).stream())
-                .flatMap(dependencyExtractor).distinct();
+                .flatMap(Objects.requireNonNull(dependencyExtractor)).distinct();
     }
 
     public <Member, RelativeMember> List<RelativeMember> getMembers(
-            Function<ClassInfo, List<Member>> selector,
-            BiFunction<Member, RelativeClassInfo, RelativeMember> wrapper) {
-        return selector.apply(origin).stream()
+            @Nonnull Function<ClassInfo, List<Member>> selector,
+            @Nonnull BiFunction<Member, RelativeClassInfo, RelativeMember> wrapper) {
+        Objects.requireNonNull(wrapper);
+        return Objects.requireNonNull(selector).apply(origin).stream()
                 .map(member -> wrapper.apply(member, this))
                 .collect(Collectors.toList());
     }

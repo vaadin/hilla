@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -11,8 +12,8 @@ public class Parser {
     private final ParserConfig config;
     private final SharedStorage storage;
 
-    public Parser(ParserConfig config) {
-        this.config = config;
+    public Parser(@Nonnull ParserConfig config) {
+        this.config = Objects.requireNonNull(config);
         storage = new SharedStorage(config);
     }
 
@@ -20,9 +21,7 @@ public class Parser {
         PluginManager pluginManager = new PluginManager(config);
 
         ScanResult result = new ClassGraph().enableAllInfo()
-                .overrideClasspath(config.getClassPath()
-                        .orElseThrow(() -> new NullPointerException(
-                                "Fusion Parser: Classpath is not provided.")))
+                .overrideClasspath(config.getClassPath())
                 .scan();
 
         EntitiesCollector collector = new EntitiesCollector(result);
@@ -31,6 +30,7 @@ public class Parser {
                 storage);
     }
 
+    @Nonnull
     public SharedStorage getStorage() {
         return storage;
     }

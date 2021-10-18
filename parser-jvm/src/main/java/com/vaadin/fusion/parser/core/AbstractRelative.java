@@ -3,12 +3,15 @@ package com.vaadin.fusion.parser.core;
 import java.util.Objects;
 import java.util.Optional;
 
-abstract class AbstractRelative<T, P extends Relative<?>> implements Relative<P> {
+import javax.annotation.Nonnull;
+
+abstract class AbstractRelative<T, P extends Relative<?>>
+        implements Relative<P> {
     protected final T origin;
     protected final P parent;
 
-    public AbstractRelative(T origin, P parent) {
-        this.origin = origin;
+    public AbstractRelative(@Nonnull T origin, P parent) {
+        this.origin = Objects.requireNonNull(origin);
         this.parent = parent;
     }
 
@@ -32,8 +35,7 @@ abstract class AbstractRelative<T, P extends Relative<?>> implements Relative<P>
             return false;
         }
 
-        return Objects.equals(origin,
-            ((AbstractRelative<?, ?>) other).origin);
+        return Objects.equals(origin, ((AbstractRelative<?, ?>) other).origin);
     }
 
     @Override

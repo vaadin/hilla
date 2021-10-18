@@ -3,6 +3,8 @@ package com.vaadin.fusion.parser.core;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassInfo;
@@ -12,9 +14,11 @@ import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeVariableSignature;
 
 public interface RelativeTypeSignature extends Relative<Relative<?>> {
-    static RelativeTypeSignature of(HierarchicalTypeSignature signature,
-            Relative<?> parent) {
+    static RelativeTypeSignature of(
+            @Nonnull HierarchicalTypeSignature signature,
+            @Nonnull Relative<?> parent) {
         Objects.requireNonNull(signature);
+        Objects.requireNonNull(parent);
 
         if (signature instanceof BaseTypeSignature) {
             return new BaseRelativeTypeSignature((BaseTypeSignature) signature,
@@ -33,7 +37,8 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         }
     }
 
-    static RelativeTypeSignature ofNullable(HierarchicalTypeSignature signature, Relative<?> parent) {
+    static RelativeTypeSignature ofNullable(HierarchicalTypeSignature signature,
+            Relative<?> parent) {
         return signature == null ? null : of(signature, parent);
     }
 

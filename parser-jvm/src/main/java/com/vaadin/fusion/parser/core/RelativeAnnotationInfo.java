@@ -1,11 +1,16 @@
 package com.vaadin.fusion.parser.core;
 
+import javax.annotation.Nonnull;
+
+import java.util.Objects;
+
 import io.github.classgraph.AnnotationInfo;
 
 public class RelativeAnnotationInfo
         extends AbstractRelative<AnnotationInfo, Relative<?>> {
 
-    public RelativeAnnotationInfo(AnnotationInfo origin, Relative<?> parent) {
-        super(origin, parent);
+    public RelativeAnnotationInfo(@Nonnull AnnotationInfo origin,
+            @Nonnull Relative<?> parent) {
+        super(origin, Objects.requireNonNull(parent));
     }
 }

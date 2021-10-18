@@ -1,8 +1,11 @@
 package com.vaadin.fusion.parser.core;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodInfo;
 
@@ -10,8 +13,9 @@ public class RelativeMethodInfo
         extends AbstractRelative<MethodInfo, RelativeClassInfo> {
     private final RelativeTypeSignature resultType;
 
-    public RelativeMethodInfo(MethodInfo origin, RelativeClassInfo parent) {
-        super(origin, parent);
+    public RelativeMethodInfo(@Nonnull MethodInfo origin,
+            @Nonnull RelativeClassInfo parent) {
+        super(origin, Objects.requireNonNull(parent));
 
         resultType = RelativeTypeSignature.of(
                 origin.getTypeSignatureOrTypeDescriptor().getResultType(),

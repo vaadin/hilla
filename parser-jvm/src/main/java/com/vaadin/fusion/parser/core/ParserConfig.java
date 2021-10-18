@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import javax.annotation.Nonnull;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -35,18 +36,22 @@ public final class ParserConfig {
     ParserConfig() {
     }
 
+    @Nonnull
     public Application getApplication() {
         return application;
     }
 
-    public Optional<String> getClassPath() {
-        return Optional.ofNullable(classPath);
+    @Nonnull
+    public String getClassPath() {
+        return classPath;
     }
 
+    @Nonnull
     public OpenAPI getOpenAPI() {
         return openAPI;
     }
 
+    @Nonnull
     public Plugins getPlugins() {
         return plugins;
     }
@@ -70,18 +75,23 @@ public final class ParserConfig {
         public Builder() {
         }
 
-        public Builder adjustOpenAPI(Consumer<OpenAPI> action) {
-            actions.add(config -> {
-                action.accept(config.openAPI);
-            });
+        @Nonnull
+        public Builder adjustOpenAPI(@Nonnull Consumer<OpenAPI> action) {
+            Objects.requireNonNull(action);
+
+            actions.add(config -> action.accept(config.openAPI));
             return this;
         }
 
-        public Builder classPath(String classPath) {
+        @Nonnull
+        public Builder classPath(@Nonnull String classPath) {
             return classPath(classPath, true);
         }
 
-        public Builder classPath(String classPath, boolean override) {
+        @Nonnull
+        public Builder classPath(@Nonnull String classPath, boolean override) {
+            Objects.requireNonNull(classPath);
+
             actions.add(config -> {
                 if (override || config.classPath == null) {
                     config.classPath = classPath;
@@ -91,22 +101,31 @@ public final class ParserConfig {
             return this;
         }
 
-        public Builder configFile(File file) {
-            configFile = file;
+        @Nonnull
+        public Builder configFile(@Nonnull File file) {
+            configFile = Objects.requireNonNull(file);
             return this;
         }
 
-        public Builder disableDefaultPlugin(String plugin) {
+        @Nonnull
+        public Builder disableDefaultPlugin(@Nonnull String plugin) {
+            Objects.requireNonNull(plugin);
+
             actions.add(config -> config.plugins.disable.add(plugin));
             return this;
         }
 
-        public Builder disableDefaultPlugins(Collection<String> plugins) {
+        @Nonnull
+        public Builder disableDefaultPlugins(
+                @Nonnull Collection<String> plugins) {
             return disableDefaultPlugins(plugins, true);
         }
 
-        public Builder disableDefaultPlugins(Collection<String> plugins,
-                boolean override) {
+        @Nonnull
+        public Builder disableDefaultPlugins(
+                @Nonnull Collection<String> plugins, boolean override) {
+            Objects.requireNonNull(plugins);
+
             actions.add(config -> {
                 if (override || config.plugins.disable == null) {
                     config.plugins.disable = new LinkedHashSet<>(plugins);
@@ -115,16 +134,22 @@ public final class ParserConfig {
             return this;
         }
 
-        public Builder disableDefaultPlugins(String... plugins) {
+        @Nonnull
+        public Builder disableDefaultPlugins(@Nonnull String... plugins) {
             return disableDefaultPlugins(Arrays.asList(plugins));
         }
 
-        public Builder endpointAnnotation(String annotationQualifiedName) {
+        @Nonnull
+        public Builder endpointAnnotation(
+                @Nonnull String annotationQualifiedName) {
             return endpointAnnotation(annotationQualifiedName, true);
         }
 
-        public Builder endpointAnnotation(String annotationQualifiedName,
-                boolean override) {
+        @Nonnull
+        public Builder endpointAnnotation(
+                @Nonnull String annotationQualifiedName, boolean override) {
+            Objects.requireNonNull(annotationQualifiedName);
+
             actions.add(config -> {
                 if (override || config.application.endpointAnnotation == null) {
                     config.application.endpointAnnotation = annotationQualifiedName;
@@ -133,6 +158,7 @@ public final class ParserConfig {
             return this;
         }
 
+        @Nonnull
         public ParserConfig finish() {
             Mapper<ParserConfig> configMapper = new Mapper<>(
                     ParserConfig.class);
@@ -152,25 +178,36 @@ public final class ParserConfig {
                 action.accept(config);
             }
 
+            Objects.requireNonNull(config.openAPI,
+                    "Fusion Parser: Classpath is not provided.");
+
             return config;
         }
 
-        public Builder openAPITemplate(File file) {
-            openAPITemplate = file;
+        @Nonnull
+        public Builder openAPITemplate(@Nonnull File file) {
+            openAPITemplate = Objects.requireNonNull(file);
             return this;
         }
 
-        public Builder usePlugin(String plugin) {
+        @Nonnull
+        public Builder usePlugin(@Nonnull String plugin) {
+            Objects.requireNonNull(plugin);
+
             actions.add(config -> config.plugins.use.add(plugin));
             return this;
         }
 
-        public Builder usePlugins(Collection<String> plugins) {
+        @Nonnull
+        public Builder usePlugins(@Nonnull Collection<String> plugins) {
             return usePlugins(plugins, true);
         }
 
-        public Builder usePlugins(Collection<String> plugins,
+        @Nonnull
+        public Builder usePlugins(@Nonnull Collection<String> plugins,
                 boolean override) {
+            Objects.requireNonNull(plugins);
+
             actions.add(config -> {
                 if (override || config.plugins.use == null) {
                     config.plugins.use = new LinkedHashSet<>(plugins);
@@ -179,7 +216,8 @@ public final class ParserConfig {
             return this;
         }
 
-        public Builder usePlugins(String... plugins) {
+        @Nonnull
+        public Builder usePlugins(@Nonnull String... plugins) {
             return usePlugins(Arrays.asList(plugins));
         }
     }
@@ -194,10 +232,12 @@ public final class ParserConfig {
         private Plugins() {
         }
 
+        @Nonnull
         public Set<String> getDisable() {
             return Collections.unmodifiableSet(disable);
         }
 
+        @Nonnull
         public Set<String> getUse() {
             return Collections.unmodifiableSet(use);
         }
