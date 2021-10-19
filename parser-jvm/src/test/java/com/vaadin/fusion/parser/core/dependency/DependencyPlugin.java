@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core.dependency;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -8,19 +9,19 @@ import java.util.stream.Stream;
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
-import com.vaadin.fusion.parser.core.TestUtils;
+import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
 public class DependencyPlugin implements Plugin {
     public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
 
-    protected final TestUtils.PluginElementsFilter filter = new TestUtils.PluginElementsFilter(
+    protected final PluginElementsFilter filter = new PluginElementsFilter(
             "Dependency");
 
     @Override
-    public void execute(List<RelativeClassInfo> endpoints,
-            List<RelativeClassInfo> entities, SharedStorage storage) {
+    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
+                        @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
         DependencyCollector collector = new DependencyCollector(
                 filter.apply(endpoints), filter.apply(entities));
 

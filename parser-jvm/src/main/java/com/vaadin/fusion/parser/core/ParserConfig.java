@@ -178,8 +178,8 @@ public final class ParserConfig {
                 action.accept(config);
             }
 
-            Objects.requireNonNull(config.openAPI,
-                    "Fusion Parser: Classpath is not provided.");
+            Objects.requireNonNull(config.classPath,
+                    "Fusion Parser Configuration: Classpath is not provided.");
 
             return config;
         }

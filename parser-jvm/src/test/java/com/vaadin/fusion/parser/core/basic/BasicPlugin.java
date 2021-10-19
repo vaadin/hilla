@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core.basic;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -8,17 +9,17 @@ import java.util.stream.Stream;
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
-import com.vaadin.fusion.parser.core.TestUtils;
+import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
 public class BasicPlugin implements Plugin {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
-    protected final TestUtils.PluginElementsFilter filter = new TestUtils.PluginElementsFilter(
+    protected final PluginElementsFilter filter = new PluginElementsFilter(
             "Basic");
 
     @Override
-    public void execute(List<RelativeClassInfo> endpoints,
-            List<RelativeClassInfo> entities, SharedStorage storage) {
+    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
+                        @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
         storage.getPluginStorage().put(STORAGE_KEY, filter.apply(endpoints)
                 .stream()
                 .flatMap(endpoint -> Stream
