@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.core.basic;
 
-import com.vaadin.fusion.parser.core.Endpoint;
+import com.vaadin.fusion.parser.testutils.Endpoint;
 
 @Endpoint
 public class BasicEndpoint {
@@ -11,7 +11,7 @@ public class BasicEndpoint {
         return foo;
     }
 
-    protected void baz(final int id) {
+    protected void baz(int id) {
     }
 
     private int getBar() {

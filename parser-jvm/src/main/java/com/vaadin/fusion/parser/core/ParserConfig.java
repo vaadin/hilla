@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig {
@@ -253,7 +255,8 @@ public final class ParserConfig {
         T map(URL url) {
             Objects.requireNonNull(url);
 
-            ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+            ObjectMapper mapper = type == OpenAPI.class ? Json.mapper()
+                    : new ObjectMapper(new JsonFactory());
 
             try {
                 return map(new File(url.toURI()), mapper);
@@ -270,10 +273,12 @@ public final class ParserConfig {
             switch (extension) {
             case "yml":
             case "yaml":
-                mapper = new ObjectMapper(new YAMLFactory());
+                mapper = type == OpenAPI.class ? Yaml.mapper()
+                        : new ObjectMapper(new YAMLFactory());
                 break;
             case "json":
-                mapper = new ObjectMapper(new JsonFactory());
+                mapper = type == OpenAPI.class ? Json.mapper()
+                        : new ObjectMapper(new JsonFactory());
                 break;
             default:
                 throw new ParserException(String.format(

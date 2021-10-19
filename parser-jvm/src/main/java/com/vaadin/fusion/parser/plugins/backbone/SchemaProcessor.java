@@ -2,6 +2,7 @@ package com.vaadin.fusion.parser.plugins.backbone;
 
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -68,8 +70,10 @@ final class SchemaProcessor {
         String fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
                 .get().getFullyQualifiedClassName();
 
-        return new ObjectSchema().name(fullyQualifiedName)
-                .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)
+        return new ComposedSchema()
+                .anyOf(Collections.singletonList(
+                        new Schema<>().$ref(
+                                COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
                 .nullable(true);
     }
 

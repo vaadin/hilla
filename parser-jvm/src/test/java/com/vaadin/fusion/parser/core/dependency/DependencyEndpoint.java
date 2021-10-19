@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.core.dependency;
 
-import com.vaadin.fusion.parser.core.Endpoint;
+import com.vaadin.fusion.parser.testutils.Endpoint;
 
 @Endpoint
 public class DependencyEndpoint {

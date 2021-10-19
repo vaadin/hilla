@@ -1,9 +1,10 @@
 package com.vaadin.fusion.parser.core;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
@@ -17,14 +18,27 @@ public class Parser {
         storage = new SharedStorage(config);
     }
 
+    private static void checkIfJavaCompilerParametersFlagIsEnabled(
+            List<RelativeClassInfo> endpoints) {
+        endpoints.stream().flatMap(endpoint -> endpoint.getMethods().stream())
+                .flatMap(method -> method.getParameters().stream()).findFirst()
+                .ifPresent((parameter) -> {
+                    if (parameter.get().getName() == null) {
+                        throw new ParserException(
+                                "Fusion Parser requires running java compiler with -parameters flag enabled");
+                    }
+                });
+    }
+
     public void execute() {
         PluginManager pluginManager = new PluginManager(config);
 
         ScanResult result = new ClassGraph().enableAllInfo()
-                .overrideClasspath(config.getClassPath())
-                .scan();
+                .overrideClasspath(config.getClassPath()).scan();
 
         EntitiesCollector collector = new EntitiesCollector(result);
+
+        checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
 
         pluginManager.execute(collector.getEndpoints(), collector.getEntities(),
                 storage);

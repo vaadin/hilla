@@ -49,7 +49,7 @@ class EntityProcessor extends Processor {
         }
 
         public String getKey() {
-            return COMPONENTS_SCHEMAS_REF + entity.get().getName();
+            return entity.get().getName();
         }
 
         public Schema<?> getValue() {

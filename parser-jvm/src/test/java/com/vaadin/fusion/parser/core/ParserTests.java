@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.fusion.parser.core.basic.BasicPlugin;
 import com.vaadin.fusion.parser.core.dependency.DependencyPlugin;
+import com.vaadin.fusion.parser.testutils.Endpoint;
 
 public class ParserTests {
     private Path targetDirPath;

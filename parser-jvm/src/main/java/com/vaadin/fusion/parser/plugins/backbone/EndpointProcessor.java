@@ -7,12 +7,14 @@ import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 
+import io.github.classgraph.MethodTypeSignature;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -72,7 +74,7 @@ class EndpointProcessor extends Processor {
                             + "_POST")
                     .addTagsItem(endpointName).responses(createResponses());
 
-            if (method.get().getParameterInfo().length > 0) {
+            if (method.getParameters().size() > 0) {
                 operation.requestBody(createRequestBody());
             }
 
@@ -80,7 +82,15 @@ class EndpointProcessor extends Processor {
         }
 
         private RequestBody createRequestBody() {
-            return new RequestBody();
+            ObjectSchema requestMap = new ObjectSchema();
+
+            method.getParameters().forEach(parameter -> {
+                requestMap.addProperties(parameter.get().getName(),
+                        new SchemaProcessor(parameter.getType()).process());
+            });
+
+            return new RequestBody().content(new Content().addMediaType(
+                    "application/json", new MediaType().schema(requestMap)));
         }
 
         private ApiResponses createResponses() {
@@ -94,7 +104,7 @@ class EndpointProcessor extends Processor {
             }
 
             return new ApiResponses().addApiResponse("200",
-                    new ApiResponse().content(content));
+                    new ApiResponse().content(content).description(""));
         }
     }
 }
