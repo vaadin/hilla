@@ -6,10 +6,10 @@
  */
 
 export default interface Status {
-  readonly createdAt?: string;
+  createdAt?: string;
   /**
    * Multiple line description should work.This is very very very very very
    * very very very long.
    */
-  readonly text?: string;
+  text?: string;
 }

@@ -151,7 +151,7 @@ class ModelGenerator {
             node.setUndefined(false);
 
             if (isArray(node)) {
-                // ReadonlyArray<Type, Type>
+                // Array<Type, Type>
                 TypeParser.Node newNode = new TypeParser.Node(ARRAY_MODEL_NAME);
 
                 TypeParser.Node arrayItem = node.getNested().get(0);
@@ -170,26 +170,24 @@ class ModelGenerator {
                 return newNode;
             } else if (isObject(node)
                     && (parent == null || !isObjectModel(parent))) {
-                // Readonly<Record<Type, Type>>
+                // Record<Type, Type>
                 TypeParser.Node wrapper = new TypeParser.Node(
                         OBJECT_MODEL_NAME);
                 wrapper.addNested(node);
 
                 // Record<Type, Type>
-                TypeParser.Node record = node.getNested().get(0);
-                TypeParser.Node key = record.getNested().get(0);
-                TypeParser.Node value = record.getNested().get(1);
+                TypeParser.Node key = node.getNested().get(0);
+                TypeParser.Node value = node.getNested().get(1);
 
                 if (isPrimitive(value)) {
-                    record.getNested().set(1, value);
+                    node.getNested().set(1, value);
                     visitedNodes.add(value);
                 } else {
-                    record.getNested().set(1, getModelValueType(value));
+                    node.getNested().set(1, getModelValueType(value));
                 }
 
                 visitedNodes.add(wrapper);
                 visitedNodes.add(node);
-                visitedNodes.add(record);
                 visitedNodes.add(key);
 
                 return wrapper;
@@ -236,12 +234,11 @@ class ModelGenerator {
         }
 
         protected boolean isArray(TypeParser.Node node) {
-            return Objects.equals(node.getName(), "ReadonlyArray");
+            return Objects.equals(node.getName(), "Array");
         }
 
         protected boolean isObject(TypeParser.Node node) {
-            return Objects.equals(node.getName(), "Readonly") && Objects
-                    .equals(node.getNested().get(0).getName(), "Record");
+            return Objects.equals(node.getName(), "Record");
         }
 
         protected boolean isObjectModel(TypeParser.Node node) {

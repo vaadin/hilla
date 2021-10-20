@@ -152,11 +152,11 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('entityMatrix', ArrayModel, [true, ArrayModel, [true, MyEntityModel, [true]]]);
   }
 
-  get stringMap(): ObjectModel<Readonly<Record<string, string>>> {
+  get stringMap(): ObjectModel<Record<string, string>> {
     return this[_getPropertyModel]('stringMap', ObjectModel, [true]);
   }
 
-  get entityMap(): ObjectModel<Readonly<Record<string, ModelValue<MyBazModel>>>> {
+  get entityMap(): ObjectModel<Record<string, ModelValue<MyBazModel>>> {
     return this[_getPropertyModel]('entityMap', ObjectModel, [true]);
   }
 
@@ -188,15 +188,15 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
     return this[_getPropertyModel]('nonNullableMatrix', ArrayModel, [false, ArrayModel, [true, StringModel, [true]]]);
   }
 
-  get mapWithList(): ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>> {
+  get mapWithList(): ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>> {
     return this[_getPropertyModel]('mapWithList', ObjectModel, [true]);
   }
 
-  get complexMap(): ObjectModel<Readonly<Record<string, ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>>>>>>>> {
+  get complexMap(): ObjectModel<Record<string, ModelValue<ObjectModel<Record<string, ModelValue<ArrayModel<ModelValue<MyEntityModel>, MyEntityModel>>>>>>> {
     return this[_getPropertyModel]('complexMap', ObjectModel, [true]);
   }
 
-  get nestedArrays(): ArrayModel<ModelValue<ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>>, ArrayModel<ModelValue<ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ObjectModel<Readonly<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>> {
+  get nestedArrays(): ArrayModel<ModelValue<ArrayModel<ModelValue<ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>, ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ArrayModel<ModelValue<ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>, ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>> {
     return this[_getPropertyModel]('nestedArrays', ArrayModel, [true, ArrayModel, [true, ObjectModel, [true]]]);
   }
 }

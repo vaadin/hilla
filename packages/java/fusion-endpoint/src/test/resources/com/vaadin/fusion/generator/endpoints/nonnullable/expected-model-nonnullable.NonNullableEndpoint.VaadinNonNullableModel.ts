@@ -3,7 +3,7 @@
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface VaadinNonNullableModel {
-  readonly foo: string;
-  readonly nonNullableList: ReadonlyArray<number>;
-  readonly nonNullableMap: Readonly<Record<string, string>>;
+  foo: string;
+  nonNullableList: Array<number>;
+  nonNullableMap: Record<string, string>;
 }

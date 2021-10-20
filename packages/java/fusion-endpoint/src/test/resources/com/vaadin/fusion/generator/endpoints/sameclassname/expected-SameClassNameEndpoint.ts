@@ -10,20 +10,20 @@ import type SameClassNameModel from './com/vaadin/fusion/generator/endpoints/sam
 import type SubpackageSameClassNameModel from './com/vaadin/fusion/generator/endpoints/sameclassname/subpackage/SameClassNameModel';
 
 function _getMyClass(
-  sameClassNameModel: ReadonlyArray<SubpackageSameClassNameModel | undefined> | undefined
+  sameClassNameModel: Array<SubpackageSameClassNameModel | undefined> | undefined
 ): Promise<SameClassNameModel | undefined> {
   return client.call('SameClassNameEndpoint', 'getMyClass', {sameClassNameModel});
 }
 
 function _getSubpackageModelList(
-  sameClassNameModel: Readonly<Record<string, SubpackageSameClassNameModel | undefined>> | undefined
-): Promise<ReadonlyArray<SubpackageSameClassNameModel | undefined> | undefined> {
+  sameClassNameModel: Record<string, SubpackageSameClassNameModel | undefined> | undefined
+): Promise<Array<SubpackageSameClassNameModel | undefined> | undefined> {
   return client.call('SameClassNameEndpoint', 'getSubpackageModelList', {sameClassNameModel});
 }
 
 function _getSubpackageModelMap(
-  sameClassNameModel: Readonly<Record<string, SameClassNameModel | undefined>> | undefined
-): Promise<Readonly<Record<string, SubpackageSameClassNameModel | undefined>> | undefined> {
+  sameClassNameModel: Record<string, SameClassNameModel | undefined> | undefined
+): Promise<Record<string, SubpackageSameClassNameModel | undefined> | undefined> {
   return client.call('SameClassNameEndpoint', 'getSubpackageModelMap', {sameClassNameModel});
 }
 

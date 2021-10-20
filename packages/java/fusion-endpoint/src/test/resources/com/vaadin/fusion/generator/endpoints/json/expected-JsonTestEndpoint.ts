@@ -38,7 +38,7 @@ function _fullFQNMethod(
  *
  * Return map of user and roles
  */
-function _getAllUserRolesMap(): Promise<Readonly<Record<string, User | undefined>> | undefined> {
+function _getAllUserRolesMap(): Promise<Record<string, User | undefined> | undefined> {
   return client.call('JsonTestEndpoint', 'getAllUserRolesMap');
 }
 
@@ -47,7 +47,7 @@ function _getAllUserRolesMap(): Promise<Readonly<Record<string, User | undefined
  *
  * Return list of users
  */
-function _getAllUsers(): Promise<ReadonlyArray<User | undefined> | undefined> {
+function _getAllUsers(): Promise<Array<User | undefined> | undefined> {
   return client.call('JsonTestEndpoint', 'getAllUsers');
 }
 
@@ -58,8 +58,8 @@ function _getAllUsers(): Promise<ReadonlyArray<User | undefined> | undefined> {
  * Return array of int
  */
 function _getArrayInt(
-  input: ReadonlyArray<string | undefined> | undefined
-): Promise<ReadonlyArray<number> | undefined> {
+  input: Array<string | undefined> | undefined
+): Promise<Array<number> | undefined> {
   return client.call('JsonTestEndpoint', 'getArrayInt', {input});
 }
 
@@ -70,7 +70,7 @@ function _getArrayInt(
  * Return boolean value
  */
 function _getBooleanValue(
-  input: Readonly<Record<string, User | undefined>> | undefined
+  input: Record<string, User | undefined> | undefined
 ): Promise<boolean> {
   return client.call('JsonTestEndpoint', 'getBooleanValue', {input});
 }
@@ -114,7 +114,7 @@ function _inputBeanTypeLocal(
 }
 
 function _optionalParameter(
-  parameter: ReadonlyArray<string | undefined> | undefined,
+  parameter: Array<string | undefined> | undefined,
   requiredParameter: string | undefined
 ): Promise<void> {
   return client.call('JsonTestEndpoint', 'optionalParameter', {parameter, requiredParameter});

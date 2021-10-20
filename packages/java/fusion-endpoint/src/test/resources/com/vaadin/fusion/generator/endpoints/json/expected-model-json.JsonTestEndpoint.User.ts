@@ -6,8 +6,8 @@ import Role from './Role';
  */
 
 export default interface User {
-  readonly name?: string;
-  readonly password?: string;
-  readonly roles?: Readonly<Record<string, Role | undefined>>;
-  readonly optionalField?: string;
+  name?: string;
+  password?: string;
+  roles?: Record<string, Role | undefined>;
+  optionalField?: string;
 }

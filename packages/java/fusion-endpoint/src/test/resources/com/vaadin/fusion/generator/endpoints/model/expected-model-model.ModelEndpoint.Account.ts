@@ -8,12 +8,12 @@ export default interface Account {
   /**
   * Javadoc for username.
   */
-  readonly username?: string;
-  readonly children?: Account;
+  username?: string;
+  children?: Account;
   /**
   * Multiple line description should work.This is very very very very
   * very very very very long.
   */
-  readonly groups?: ReadonlyArray<Group | undefined>;
-  readonly modelFromDifferentPackage?: ModelFromDifferentPackage;
+  groups?: Array<Group | undefined>;
+  modelFromDifferentPackage?: ModelFromDifferentPackage;
 }

@@ -6,12 +6,12 @@
 // @ts-ignore
 import client from './connect-client.default';
 import type Foo from './com/vaadin/fusion/generator/endpoints/pageendpoint/PageEndpoint/Foo';
-function _getPageOfObjects(): Promise<ReadonlyArray<Foo | undefined> | undefined> {
+function _getPageOfObjects(): Promise<Array<Foo | undefined> | undefined> {
   return client.call (
     'PageEndpoint', 'getPageOfObjects'
   );
 }
-function _getPageOfStrings(): Promise<ReadonlyArray<string | undefined> | undefined> {
+function _getPageOfStrings(): Promise<Array<string | undefined> | undefined> {
   return client.call (
     'PageEndpoint', 'getPageOfStrings'
   );

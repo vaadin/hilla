@@ -30,7 +30,7 @@ export default interface {{{getClassNameFromImports classname ../../imports}}} {
    * {{{@line}}}{{/multiplelines}}
    */
 {{/unescapedDescription}}
-  readonly {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports datatype ../../../imports}}};
+  {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports datatype ../../../imports}}};
 {{/vars}}
 }
 {{#if vendorExtensions.x-is-enum}}

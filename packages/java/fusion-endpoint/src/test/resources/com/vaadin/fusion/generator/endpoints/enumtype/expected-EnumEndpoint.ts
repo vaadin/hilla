@@ -15,8 +15,8 @@ function _echoEnum(
 }
 
 function _echoListEnum(
-    enumList: ReadonlyArray<MyEnum | undefined> | undefined
-): Promise<ReadonlyArray<MyEnum | undefined> | undefined> {
+    enumList: Array<MyEnum | undefined> | undefined
+): Promise<Array<MyEnum | undefined> | undefined> {
   return client.call('EnumEndpoint', 'echoListEnum', {enumList});
 }
 

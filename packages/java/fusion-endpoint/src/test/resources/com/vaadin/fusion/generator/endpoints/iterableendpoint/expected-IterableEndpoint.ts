@@ -8,7 +8,7 @@
 import client from './connect-client.default';
 import type Foo from './com/vaadin/fusion/generator/endpoints/iterableendpoint/IterableEndpoint/Foo';
 
-function _getFoos(): Promise<ReadonlyArray<Foo | undefined> | undefined> {
+function _getFoos(): Promise<Array<Foo | undefined> | undefined> {
   return client.call('IterableEndpoint', 'getFoos');
 }
 

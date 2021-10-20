@@ -9,7 +9,7 @@ import client from './connect-client.default';
 import type ComplexTypeModel from './com/vaadin/fusion/generator/endpoints/complextypes/ComplexTypeEndpoint/ComplexTypeModel';
 
 function _getComplexTypeModel(
-  data: ReadonlyArray<Readonly<Record<string, string | undefined>> | undefined> | undefined
+  data: Array<Record<string, string | undefined> | undefined> | undefined
 ): Promise<ComplexTypeModel | undefined> {
   return client.call('ComplexTypeEndpoint', 'getComplexTypeModel', {data});
 }

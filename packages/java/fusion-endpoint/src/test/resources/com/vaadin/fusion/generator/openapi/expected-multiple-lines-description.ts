@@ -16,7 +16,7 @@ import type User from './User';
  *
  * Return list of users
  */
-function _getAllUsers(): Promise<ReadonlyArray<User | undefined>> {
+function _getAllUsers(): Promise<Array<User | undefined>> {
   return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
 }
 

@@ -3,14 +3,14 @@
  * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
  */
 export default interface NonNullableModel {
-  readonly integers?: ReadonlyArray<number>;
-  readonly integersList?: ReadonlyArray<number | undefined>;
-  readonly foo: string;
-  readonly shouldBeNotNullByDefault: number;
-  readonly first: number;
-  readonly second: number;
-  readonly third: number;
-  readonly nullableInteger?: number;
-  readonly listOfMapNullable?: ReadonlyArray<Readonly<Record<string, string>>>;
-  readonly listOfMapNullableNotNull?: ReadonlyArray<Readonly<Record<string, string | undefined>> | undefined>;
+  integers?: Array<number>;
+  integersList?: Array<number | undefined>;
+  foo: string;
+  shouldBeNotNullByDefault: number;
+  first: number;
+  second: number;
+  third: number;
+  nullableInteger?: number;
+  listOfMapNullable?: Array<Record<string, string>>;
+  listOfMapNullableNotNull?: Array<Record<string, string | undefined> | undefined>;
 }
