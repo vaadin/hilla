@@ -1,7 +1,5 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
-import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
-
 import java.util.List;
 
 import com.vaadin.fusion.parser.core.RelativeClassInfo;

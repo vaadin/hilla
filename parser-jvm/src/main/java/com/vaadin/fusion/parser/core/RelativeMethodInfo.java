@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodInfo;
-import io.github.classgraph.TypeSignature;
 
 public class RelativeMethodInfo
         extends AbstractRelative<MethodInfo, RelativeClassInfo> {

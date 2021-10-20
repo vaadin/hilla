@@ -1,7 +1,8 @@
 package com.vaadin.fusion.parser.core;
 
-import javax.annotation.Nonnull;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassInfo;

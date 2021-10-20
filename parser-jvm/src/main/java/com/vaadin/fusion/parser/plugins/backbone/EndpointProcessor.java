@@ -7,7 +7,6 @@ import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 
-import io.github.classgraph.MethodTypeSignature;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;

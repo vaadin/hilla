@@ -1,7 +1,8 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;

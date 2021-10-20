@@ -1,8 +1,8 @@
 package com.vaadin.fusion.parser.core;
 
-import javax.annotation.Nonnull;
-
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 

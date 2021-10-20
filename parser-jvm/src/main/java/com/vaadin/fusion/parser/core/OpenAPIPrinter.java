@@ -1,8 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -35,13 +33,14 @@ public class OpenAPIPrinter {
         private Pretty() {
             DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
             DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ",
-                "\n");
+                    "\n");
             printer.indentArraysWith(indenter);
             printer.indentObjectsWith(indenter);
             writer = mapper.writer(printer);
         }
 
-        public String writeAsString(OpenAPI value) throws JsonProcessingException {
+        public String writeAsString(OpenAPI value)
+                throws JsonProcessingException {
             return writer.writeValueAsString(value);
         }
     }
