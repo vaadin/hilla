@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import io.swagger.v3.core.util.Json;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
@@ -19,6 +17,7 @@ import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.testutils.Endpoint;
 import com.vaadin.fusion.parser.testutils.ResourceLoader;
 
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public class CollectionEndpointTest {
