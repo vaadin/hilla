@@ -14,7 +14,8 @@ public final class BaseRelativeTypeSignature
         super(origin, parent);
     }
 
-    public static Stream<ClassInfo> resolve(@Nonnull BaseTypeSignature signature) {
+    public static Stream<ClassInfo> resolve(
+            @Nonnull BaseTypeSignature signature) {
         // BaseTypeSignature is about primitive types (int, double, etc.).
         // We don't need to resolve them, so skipping.
         return Stream.empty();

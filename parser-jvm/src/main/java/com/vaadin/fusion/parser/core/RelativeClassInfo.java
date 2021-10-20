@@ -24,15 +24,14 @@ public class RelativeClassInfo
         this(origin, null);
     }
 
-    public RelativeClassInfo(@Nonnull ClassInfo origin, RelativeClassInfo parent) {
+    public RelativeClassInfo(@Nonnull ClassInfo origin,
+            RelativeClassInfo parent) {
         super(origin, parent);
 
         annotations = getMembers(ClassInfo::getAnnotationInfo,
                 RelativeAnnotationInfo::new);
-        fields = getMembers(ClassInfo::getFieldInfo,
-                RelativeFieldInfo::new);
-        methods = getMembers(ClassInfo::getMethodInfo,
-                RelativeMethodInfo::new);
+        fields = getMembers(ClassInfo::getFieldInfo, RelativeFieldInfo::new);
+        methods = getMembers(ClassInfo::getMethodInfo, RelativeMethodInfo::new);
         superClasses = getMembers(ClassInfo::getSuperclasses,
                 RelativeClassInfo::new);
         innerClasses = getMembers(ClassInfo::getInnerClasses,
@@ -81,7 +80,8 @@ public class RelativeClassInfo
         Objects.requireNonNull(selector);
         return getInheritanceChain()
                 .flatMap(cls -> selector.apply(cls).stream())
-                .flatMap(Objects.requireNonNull(dependencyExtractor)).distinct();
+                .flatMap(Objects.requireNonNull(dependencyExtractor))
+                .distinct();
     }
 
     public <Member, RelativeMember> List<RelativeMember> getMembers(

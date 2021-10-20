@@ -12,8 +12,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public class BackbonePlugin implements Plugin {
     @Override
-    public void execute(@Nonnull List<RelativeClassInfo> endpoints, @Nonnull List<RelativeClassInfo> entities,
-                        @Nonnull SharedStorage storage) {
+    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
+            @Nonnull List<RelativeClassInfo> entities,
+            @Nonnull SharedStorage storage) {
         OpenAPI model = storage.getOpenAPI();
 
         new EndpointProcessor(endpoints, model).process();

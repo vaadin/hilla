@@ -71,9 +71,8 @@ final class SchemaProcessor {
                 .get().getFullyQualifiedClassName();
 
         return new ComposedSchema()
-                .anyOf(Collections.singletonList(
-                        new Schema<>().$ref(
-                                COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
+                .anyOf(Collections.singletonList(new Schema<>()
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
                 .nullable(true);
     }
 

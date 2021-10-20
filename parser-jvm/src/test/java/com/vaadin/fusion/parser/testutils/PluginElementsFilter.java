@@ -14,7 +14,7 @@ public final class PluginElementsFilter {
 
     public List<RelativeClassInfo> apply(List<RelativeClassInfo> elements) {
         return elements.stream()
-            .filter(element -> element.get().getName().contains(base))
-            .collect(Collectors.toList());
+                .filter(element -> element.get().getName().contains(base))
+                .collect(Collectors.toList());
     }
 }
