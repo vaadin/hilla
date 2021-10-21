@@ -26,9 +26,10 @@ public final class ClassRefRelativeTypeSignature
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
-    private static final Class<?>[] NUMBER_CLASSES = { Byte.class, Short.class,
-            Integer.class, Long.class, Float.class, Double.class };
-
+    private static final Class<?>[] FLOAT_CLASSES = { Float.class,
+            Double.class };
+    private static final Class<?>[] INTEGER_CLASSES = { Byte.class, Short.class,
+            Integer.class, Long.class };
     private final Class<?> currentClass;
     private final List<RelativeTypeArgument> typeArguments;
 
@@ -59,6 +60,10 @@ public final class ClassRefRelativeTypeSignature
                 : typeArgumentsDependencies;
     }
 
+    public List<RelativeTypeArgument> getTypeArguments() {
+        return typeArguments;
+    }
+
     @Override
     public boolean isBoolean() {
         return Objects.equals(origin.getFullyQualifiedClassName(),
@@ -68,11 +73,6 @@ public final class ClassRefRelativeTypeSignature
     @Override
     public boolean isClassRef() {
         return true;
-    }
-
-    @Override
-    public boolean isIterable() {
-        return Iterable.class.isAssignableFrom(currentClass);
     }
 
     @Override
@@ -93,14 +93,25 @@ public final class ClassRefRelativeTypeSignature
     }
 
     @Override
-    public boolean isMap() {
-        return Map.class.isAssignableFrom(currentClass);
+    public boolean isFloat() {
+        return Arrays.stream(FLOAT_CLASSES)
+                .anyMatch(cls -> cls.isAssignableFrom(currentClass));
     }
 
     @Override
-    public boolean isNumber() {
-        return Arrays.stream(NUMBER_CLASSES)
+    public boolean isInteger() {
+        return Arrays.stream(INTEGER_CLASSES)
                 .anyMatch(cls -> cls.isAssignableFrom(currentClass));
+    }
+
+    @Override
+    public boolean isIterable() {
+        return Iterable.class.isAssignableFrom(currentClass);
+    }
+
+    @Override
+    public boolean isMap() {
+        return Map.class.isAssignableFrom(currentClass);
     }
 
     @Override
@@ -116,9 +127,5 @@ public final class ClassRefRelativeTypeSignature
     @Override
     public boolean isSystem() {
         return origin.getClassInfo() == null;
-    }
-
-    public List<RelativeTypeArgument> getTypeArguments() {
-        return typeArguments;
     }
 }

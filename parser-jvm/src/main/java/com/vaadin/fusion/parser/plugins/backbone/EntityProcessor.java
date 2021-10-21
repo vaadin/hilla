@@ -2,6 +2,8 @@ package com.vaadin.fusion.parser.plugins.backbone;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 
@@ -17,7 +19,8 @@ class EntityProcessor extends Processor {
         return new String(c);
     }
 
-    public EntityProcessor(List<RelativeClassInfo> classes, OpenAPI model) {
+    public EntityProcessor(@Nonnull List<RelativeClassInfo> classes,
+            @Nonnull OpenAPI model) {
         super(classes, model);
     }
 

@@ -88,10 +88,6 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     };
 
-    default boolean isIterable() {
-        return false;
-    };
-
     default boolean isDate() {
         return false;
     };
@@ -104,11 +100,19 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     };
 
-    default boolean isMap() {
+    default boolean isFloat() {
         return false;
     };
 
-    default boolean isNumber() {
+    default boolean isInteger() {
+        return false;
+    };
+
+    default boolean isIterable() {
+        return false;
+    }
+
+    default boolean isMap() {
         return false;
     };
 
@@ -128,19 +132,19 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     };
 
-    default boolean isTypeVariable() {
-        return false;
-    };
-
-    default boolean isVoid() {
-        return false;
-    };
-
     default boolean isTypeArgument() {
+        return false;
+    };
+
+    default boolean isTypeParameter() {
+        return false;
+    };
+
+    default boolean isTypeVariable() {
         return false;
     }
 
-    default boolean isTypeParameter() {
+    default boolean isVoid() {
         return false;
     }
 }

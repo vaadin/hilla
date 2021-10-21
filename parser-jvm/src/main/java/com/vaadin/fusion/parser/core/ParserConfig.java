@@ -21,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -162,19 +163,25 @@ public final class ParserConfig {
 
         @Nonnull
         public ParserConfig finish() {
-            Mapper<ParserConfig> configMapper = new Mapper<>(
+            Loader<ParserConfig> configLoader = new Loader<>(
                     ParserConfig.class);
-            Mapper<OpenAPI> openAPIMapper = new Mapper<>(OpenAPI.class);
+            Loader<OpenAPI> openAPILoader = new Loader<>(OpenAPI.class);
 
-            ParserConfig config = configFile == null
-                    ? configMapper.map(
-                            getClass().getResource("ParserConfigStub.json"))
-                    : configMapper.map(configFile);
+            configLoader.load(Objects.requireNonNull(
+                    getClass().getResource("ParserConfigStub.json")));
+            openAPILoader.load(Objects.requireNonNull(
+                    getClass().getResource("OpenAPIStub.json")));
 
-            config.openAPI = openAPITemplate == null
-                    ? openAPIMapper
-                            .map(getClass().getResource("OpenAPIStub.json"))
-                    : openAPIMapper.map(openAPITemplate);
+            if (configFile != null) {
+                configLoader.load(configFile);
+            }
+
+            if (openAPITemplate != null) {
+                configLoader.load(openAPITemplate);
+            }
+
+            ParserConfig config = configLoader.getValue();
+            config.openAPI = openAPILoader.getValue();
 
             for (Consumer<ParserConfig> action : actions) {
                 action.accept(config);
@@ -245,55 +252,54 @@ public final class ParserConfig {
         }
     }
 
-    private static final class Mapper<T> {
+    private static final class Loader<T> {
         private final Class<T> type;
+        private T value;
 
-        Mapper(Class<T> type) {
+        public Loader(Class<T> type) {
             this.type = type;
         }
 
-        T map(URL url) {
-            Objects.requireNonNull(url);
+        public T getValue() {
+            return value;
+        }
 
-            ObjectMapper mapper = type == OpenAPI.class ? Json.mapper()
-                    : new ObjectMapper(new JsonFactory());
-
+        public void load(URL url) {
             try {
-                return map(new File(url.toURI()), mapper);
+                load(new File(url.toURI()));
             } catch (URISyntaxException e) {
                 throw new ParserException(e);
             }
         }
 
-        T map(File file) {
-            String extension = FilenameUtils.getExtension(file.toString());
+        public void load(File file) {
+            try {
+                ObjectMapper mapper = createMapper(file);
+                ObjectReader reader = value != null
+                        ? mapper.readerForUpdating(value)
+                        : mapper.reader();
 
-            ObjectMapper mapper;
+                value = reader.readValue(file, type);
+            } catch (IOException e) {
+                throw new ParserException("Failed to parse configuration file",
+                        e);
+            }
+        }
+
+        private ObjectMapper createMapper(File file) {
+            String extension = FilenameUtils.getExtension(file.toString());
 
             switch (extension) {
             case "yml":
             case "yaml":
-                mapper = type == OpenAPI.class ? Yaml.mapper()
+                return type == OpenAPI.class ? Yaml.mapper()
                         : new ObjectMapper(new YAMLFactory());
-                break;
             case "json":
-                mapper = type == OpenAPI.class ? Json.mapper()
+                return type == OpenAPI.class ? Json.mapper()
                         : new ObjectMapper(new JsonFactory());
-                break;
             default:
                 throw new ParserException(String.format(
                         "The file format '.%s' is not supported", extension));
-            }
-
-            return map(file, mapper);
-        }
-
-        private T map(File file, ObjectMapper mapper) {
-            try {
-                return mapper.readValue(file, type);
-            } catch (IOException e) {
-                throw new ParserException("Failed to parse configuration file",
-                        e);
             }
         }
     }

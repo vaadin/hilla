@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 import com.vaadin.fusion.parser.core.ArrayRelativeTypeSignature;
 import com.vaadin.fusion.parser.core.ClassRefRelativeTypeSignature;
 import com.vaadin.fusion.parser.core.RelativeTypeArgument;
@@ -16,6 +18,7 @@ import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -25,7 +28,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 final class SchemaProcessor {
     private final RelativeTypeSignature signature;
 
-    public SchemaProcessor(RelativeTypeSignature signature) {
+    public SchemaProcessor(@Nonnull RelativeTypeSignature signature) {
         Objects.requireNonNull(signature);
         this.signature = signature;
     }
@@ -35,7 +38,9 @@ final class SchemaProcessor {
             return stringSchema();
         } else if (signature.isBoolean()) {
             return booleanSchema();
-        } else if (signature.isNumber()) {
+        } else if (signature.isInteger()) {
+            return integerSchema();
+        } else if (signature.isFloat()) {
             return numberSchema();
         } else if (signature.isArray()) {
             return arraySchema();
@@ -78,6 +83,10 @@ final class SchemaProcessor {
 
     private Schema<?> booleanSchema() {
         return new BooleanSchema().nullable(!signature.isPrimitive());
+    }
+
+    private Schema<?> integerSchema() {
+        return new IntegerSchema().nullable(!signature.isPrimitive());
     }
 
     private Schema<?> iterableSchema() {

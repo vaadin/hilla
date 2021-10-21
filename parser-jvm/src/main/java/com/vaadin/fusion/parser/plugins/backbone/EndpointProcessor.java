@@ -3,6 +3,8 @@ package com.vaadin.fusion.parser.plugins.backbone;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
@@ -20,7 +22,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 
 class EndpointProcessor extends Processor {
-    public EndpointProcessor(List<RelativeClassInfo> classes, OpenAPI model) {
+    public EndpointProcessor(@Nonnull List<RelativeClassInfo> classes,
+            @Nonnull OpenAPI model) {
         super(classes, model);
     }
 

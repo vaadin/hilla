@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.testutils.Endpoint;
@@ -24,7 +23,6 @@ public class CollectionEndpointTest {
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
     private final ObjectMapper mapper = Json.mapper();
-    private final OpenAPIPrinter printer = new OpenAPIPrinter();
     private Path targetDir;
 
     @BeforeEach
