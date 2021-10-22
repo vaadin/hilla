@@ -3,13 +3,13 @@ import { readFile, writeFile } from 'fs/promises';
 import type { OpenAPIV3 } from 'openapi-types';
 import { resolve } from 'path';
 import { createPrinter, NewLineKind } from 'typescript';
-import type { Plugins } from './PluginManager';
+import type { PluginsConfiguration } from './PluginManager';
 import PluginManager from './PluginManager';
 import type SharedStorage from './SharedStorage';
 
 export type GeneratorConfig = Readonly<{
   outputDir: string;
-  plugins: Plugins;
+  plugins: PluginsConfiguration;
 }>;
 
 export default class Generator {
@@ -36,8 +36,7 @@ export default class Generator {
       pluginStorage: new Map(),
     };
 
-    manager.execute(storage);
-
+    await manager.execute(storage);
     await this.#write(storage);
   }
 
