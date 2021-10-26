@@ -1,15 +1,14 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
-import type { SourceFile } from 'typescript';
+import { $Refs } from '@apidevtools/swagger-parser';
+import { OpenAPIV3 } from 'openapi-types';
+import { ReadonlyDeep } from 'type-fest';
+import { Statement } from 'typescript';
 
-type TypeScriptFile = Readonly<{
-  path: string;
-  source: SourceFile;
-}>;
+export type SourceMap = Map<string, Statement[]>;
 
 type SharedStorage = Readonly<{
-  files: Set<TypeScriptFile>;
-  openAPI: ReadonlyDeep<OpenAPIV3.Document>;
+  api: ReadonlyDeep<OpenAPIV3.Document>;
+  apiRefs: $Refs;
+  sources: SourceMap;
   pluginStorage: Map<string, unknown>;
 }>;
 

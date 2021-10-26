@@ -1,12 +1,9 @@
-import { resolve } from 'path';
-import { readFile } from 'fs/promises';
 import meow from 'meow';
-import type { GeneratorConfig } from './Generator';
 import Generator from './Generator';
 
 const {
   input: [input],
-  flags: { config },
+  flags: { config, verbose },
 } = meow(
   `
   Usage:
@@ -26,9 +23,13 @@ const {
         type: 'string',
         isRequired: true,
       },
+      verbose: {
+        alias: 'v',
+        type: 'boolean',
+      },
     },
   }
 );
 
-const generatorConfig: GeneratorConfig = JSON.parse(await readFile(resolve(process.cwd(), config), 'utf8'));
-await new Generator(generatorConfig).process(input);
+const generator = await Generator.init(config, { verbose });
+generator.process(input);

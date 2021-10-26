@@ -11,6 +11,7 @@
     "sourceMap": true,
     "inlineSources": true,
     "importsNotUsedAsValues": "error",
+    "noImplicitOverride": true,
     "useUnknownInCatchVariables": true
   },
   "include": ["packages/**"]
