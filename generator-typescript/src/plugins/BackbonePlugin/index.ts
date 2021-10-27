@@ -1,13 +1,24 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
+import Pino from 'pino';
 import Plugin from '../../core/Plugin';
+import ReferenceResolver from '../../core/ReferenceResolver';
 import type SharedStorage from '../../core/SharedStorage';
-import type { SourceMap } from '../../core/SharedStorage';
-import { EndpointMethodProcessor } from './EndpointMethodProcessor';
-import { EntityProcessor } from './EntityProcessor';
+import { EndpointMethodProcessor, EndpointMethodProcessorEntry } from './EndpointMethodProcessor';
 import type { EntityInfoEntry } from './EntityProcessor';
+import { EntityProcessor } from './EntityProcessor';
+import type { BackbonePluginContext } from './utils';
 
 export default class BackbonePlugin extends Plugin {
+  readonly #context: BackbonePluginContext;
+
+  public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
+    super(resolver, logger);
+    this.#context = {
+      imports: new Map(),
+      logger,
+      resolver,
+    };
+  }
+
   public get path(): string {
     return import.meta.url;
   }
@@ -19,7 +30,7 @@ export default class BackbonePlugin extends Plugin {
 
   #processEndpoints(storage: SharedStorage): void {
     for (const entry of Object.entries(storage.api.paths).filter(([, info]) => !!info)) {
-      new EndpointMethodProcessor(entry, storage).process();
+      new EndpointMethodProcessor(entry as EndpointMethodProcessorEntry, storage.sources, this.#context).process();
     }
   }
 

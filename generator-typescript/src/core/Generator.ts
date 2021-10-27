@@ -7,6 +7,7 @@ import { createPrinter, NewLineKind } from 'typescript';
 import { defaultOutputDir } from './config.default';
 import type { PluginsConfiguration } from './PluginManager';
 import PluginManager from './PluginManager';
+import ReferenceResolver from './ReferenceResolver';
 import type SharedStorage from './SharedStorage';
 
 export type GeneratorConfig = Readonly<{
@@ -50,7 +51,7 @@ export default class Generator {
   public async process(input: string): Promise<void> {
     const [api, manager] = await Promise.all([
       this.#parseOpenAPI(this.#parser, input),
-      PluginManager.init(this.#config.plugins, this.#logger),
+      PluginManager.init(this.#config.plugins, new ReferenceResolver(this.#parser), this.#logger),
     ]);
 
     const storage: SharedStorage = {

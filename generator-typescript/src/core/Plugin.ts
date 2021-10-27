@@ -1,12 +1,15 @@
 import type Pino from 'pino';
 import type { Constructor } from 'type-fest';
+import type ReferenceResolver from './ReferenceResolver';
 import type SharedStorage from './SharedStorage';
 
 export default abstract class Plugin {
   protected readonly logger: Pino.Logger;
+  protected readonly resolver: ReferenceResolver;
 
-  public constructor(logger: Pino.Logger) {
+  public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
     this.logger = logger;
+    this.resolver = resolver;
   }
 
   public get name(): string {

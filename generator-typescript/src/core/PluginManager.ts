@@ -1,8 +1,8 @@
 import { relative, resolve } from 'path';
 import type Pino from 'pino';
-import { Constructor } from 'type-fest';
 import GeneratorError from './GeneratorException';
 import Plugin, { PluginConstructor } from './Plugin';
+import type ReferenceResolver from './ReferenceResolver';
 import type SharedStorage from './SharedStorage';
 
 export type PluginsConfiguration = Readonly<{
@@ -18,7 +18,7 @@ function absolutize(paths?: readonly string[]): readonly string[] {
   return paths ? Array.from(new Set(paths), (path) => resolve(cwd, path)) : [];
 }
 
-async function importPlugin(path: string, logger: Pino.Logger): Promise<Plugin> {
+async function importPlugin(path: string, resolver: ReferenceResolver, logger: Pino.Logger): Promise<Plugin> {
   const PluginClass: PluginConstructor = (await import(path)).default;
 
   if (!Object.prototype.isPrototypeOf.call(Plugin, PluginClass)) {
@@ -27,11 +27,15 @@ async function importPlugin(path: string, logger: Pino.Logger): Promise<Plugin> 
     throw error;
   }
 
-  return new PluginClass(logger);
+  return new PluginClass(resolver, logger);
 }
 
 export default class PluginManager {
-  public static async init(plugins: PluginsConfiguration | undefined, logger: Pino.Logger): Promise<PluginManager> {
+  public static async init(
+    plugins: PluginsConfiguration | undefined,
+    resolver: ReferenceResolver,
+    logger: Pino.Logger
+  ): Promise<PluginManager> {
     const disabledPluginsPaths = absolutize(plugins?.disable);
     const userDefinedPlugins = absolutize(plugins?.use);
 
@@ -41,7 +45,7 @@ export default class PluginManager {
     const builtInPlugins = builtInPluginPaths.filter((path) => !disabledPluginsPaths.includes(path));
 
     const importedPlugins = await Promise.all(
-      [...builtInPlugins, ...userDefinedPlugins].map((path) => importPlugin(path, logger))
+      [...builtInPlugins, ...userDefinedPlugins].map((path) => importPlugin(path, resolver, logger))
     );
 
     return new PluginManager(importedPlugins, logger);

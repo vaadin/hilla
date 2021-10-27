@@ -1,60 +1,45 @@
 import { OpenAPIV3 } from 'openapi-types';
-import type Pino from 'pino';
 import type { ReadonlyDeep } from 'type-fest';
 import type { Statement } from 'typescript';
-import type SharedStorage from '../../core/SharedStorage';
+import type { SourceMap } from '../../core/SharedStorage';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor';
-import { EndpointMethodContext } from './utils';
+import type { BackbonePluginContext, EndpointMethodData } from './utils';
 
-export type EndpointMethodObject = ReadonlyDeep<OpenAPIV3.PathItemObject>;
-export type EndpointMethodProcessorEntry = readonly [path: string, info: EndpointMethodObject];
+export type EndpointMethodPathItem = ReadonlyDeep<OpenAPIV3.PathItemObject>;
+export type EndpointMethodProcessorEntry = readonly [path: string, info: EndpointMethodPathItem];
+
+function extractMethodData(path: string): EndpointMethodData {
+  const [, endpoint, method] = path.split('/');
+  return { endpoint, method };
+}
 
 export class EndpointMethodProcessor {
-  readonly #info: EndpointMethodObject;
-  readonly #context: EndpointMethodContext;
-  readonly #logger: Pino.Logger;
+  readonly #context: BackbonePluginContext;
+  readonly #data: EndpointMethodData;
+  readonly #pathItem: EndpointMethodPathItem;
 
-  public constructor([path, info]: EndpointMethodProcessorEntry, storage: SharedStorage, logger: Pino.Logger) {
-    this.#context = this.#createContext(path, storage);
-    this.#info = info;
-    this.#logger = logger;
+  public constructor(
+    [path, pathItem]: EndpointMethodProcessorEntry,
+    sources: SourceMap,
+    context: BackbonePluginContext
+  ) {
+    this.#context = context;
+    this.#data = extractMethodData(path);
+    this.#pathItem = pathItem;
   }
 
   public process(): void {
-    this.#logger.info(
-      { endpoint: this.#context.endpoint, method: this.#context.endpointMethod },
-      'Start processing endpoint method'
-    );
+    this.#context.logger.info(this.#data, 'Start processing endpoint method');
 
     for (const method of Object.values(OpenAPIV3.HttpMethods)) {
-      if (this.#info[method]) {
+      if (this.#pathItem[method]) {
         new EndpointMethodOperationProcessor(
           method,
-          this.#info[method] as EndpointMethodOperation,
-          this.#context,
-          this.#logger
+          this.#pathItem[method] as EndpointMethodOperation,
+          this.#data,
+          this.#context
         ).process();
       }
     }
-  }
-
-  #createContext(path: string, storage: SharedStorage): EndpointMethodContext {
-    const [, endpoint, method] = path.split('/');
-
-    let source: Statement[];
-
-    if (storage.sources.has(endpoint)) {
-      source = storage.sources.get(endpoint)!;
-    } else {
-      source = [];
-      storage.sources.set(endpoint, source);
-    }
-
-    return {
-      endpoint,
-      endpointMethod: method,
-      source,
-      storage,
-    };
   }
 }

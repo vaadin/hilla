@@ -1,62 +1,55 @@
 import { OpenAPIV3 } from 'openapi-types';
-import type Pino from 'pino';
 import type { ReadonlyDeep } from 'type-fest';
 import { factory, Statement, SyntaxKind } from 'typescript';
-import type SharedStorage from '../../core/SharedStorage';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor';
-import EndpointMethod, { EndpointMethodContext } from './utils';
+import type { BackbonePluginContext, EndpointMethodData } from './utils';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
-export type EndpointMethodOperationProcessorData = Readonly<{
-  httpMethod: OpenAPIV3.HttpMethods;
-  operation: EndpointMethodOperation;
-}>;
-
 export default class EndpointMethodOperationProcessor {
-  readonly #context: EndpointMethodContext;
-  readonly #logger: Pino.Logger;
+  readonly #context: BackbonePluginContext;
+  readonly #endpointMethodData: EndpointMethodData;
   readonly #operation: EndpointMethodOperation;
   readonly #method: OpenAPIV3.HttpMethods;
 
   public constructor(
     method: OpenAPIV3.HttpMethods,
     operation: EndpointMethodOperation,
-    context: EndpointMethodContext,
-    logger: Pino.Logger
+    endpointMethodData: EndpointMethodData,
+    context: BackbonePluginContext
   ) {
     this.#context = context;
+    this.#endpointMethodData = endpointMethodData;
     this.#method = method;
     this.#operation = operation;
-    this.#logger = logger;
   }
 
   public process(): readonly Statement[] {
+    const { logger } = this.#context;
+
     switch (this.#method) {
       case OpenAPIV3.HttpMethods.POST:
-        this.#logger.info('Processing POST method');
+        logger.info('Processing POST method');
         return this.#processPost();
       default:
-        this.#logger.warn(`Processing ${this.#method.toUpperCase()} currently is not supported`);
+        logger.warn(`Processing ${this.#method.toUpperCase()} currently is not supported`);
         return [];
     }
   }
 
   #processPost(): readonly Statement[] {
-    const requestBodyProcessor = new EndpointMethodRequestBodyProcessor(
-      this.#operation.requestBody,
-      this.#context,
-      this.#logger
-    );
-    const responseProcessor = new EndpointMethodResponseProcessor(this.#operation.responses);
+    const { endpoint, method } = this.#endpointMethodData;
+
+    const requestBodyProcessor = new EndpointMethodRequestBodyProcessor(this.#operation.requestBody, this.#context);
+    const responseProcessor = new EndpointMethodResponseProcessor(this.#operation.responses, this.#context);
 
     return [
       factory.createFunctionDeclaration(
         undefined,
         [factory.createToken(SyntaxKind.AsyncKeyword)],
         undefined,
-        `_${this.#context.endpointMethod}`,
+        `_${method}`,
         undefined,
         requestBodyProcessor.process(),
         responseProcessor.process(),
@@ -67,8 +60,8 @@ export default class EndpointMethodOperationProcessor {
                 factory.createIdentifier('client'),
                 factory.createIdentifier('call')
               ),
-              factory.createStringLiteral(this.#context.endpoint),
-              factory.createStringLiteral(this.#context.endpointMethod),
+              factory.createStringLiteral(endpoint),
+              factory.createStringLiteral(method),
               requestBodyProcessor.processClientCallArguments()
             )
           ),
