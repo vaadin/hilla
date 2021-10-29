@@ -1,17 +1,10 @@
 package com.vaadin.flow.spring.fusionsecurityjwt;
 
 import java.util.Base64;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-
-import com.vaadin.testbench.TestBenchElement;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -104,6 +97,26 @@ public class SecurityIT
         assertPublicEndpointWorks();
     }
 
+    @Override
+    public void reload_when_anonymous_session_expires() {
+        // Skip: the server session is not relevant in the stateless mode
+    }
+
+    @Override
+    public void reload_when_user_session_expires() {
+        // Skip: the server session is not relevant in the stateless mode
+    }
+
+    @Test
+    public void reload_when_user_jwt_expires() {
+        openLogin();
+        loginUser();
+        getDriver().manage().deleteCookieNamed("jwt.headerAndPayload");
+        getDriver().manage().deleteCookieNamed("jwt.signature");
+        navigateTo("private", false);
+        assertLoginViewShown();
+    }
+
     private void openLogin() {
         getDriver().get(getRootURL() + "/login");
     }
@@ -113,7 +126,7 @@ public class SecurityIT
     }
 
     private Cookie getJwtCookie() {
-        return getDriver().manage().getCookieNamed("jwt" + ".headerAndPayload");
+        return getDriver().manage().getCookieNamed("jwt.headerAndPayload");
     }
 
     private void checkJwtUsername(String expectedUsername) {
@@ -124,45 +137,6 @@ public class SecurityIT
         JsonObject payloadJson = Json
                 .parse(new String(Base64.getUrlDecoder().decode(payload)));
         Assert.assertEquals(expectedUsername, payloadJson.getString("sub"));
-    }
-
-    private void simulateNewServer() {
-        TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
-        callAsyncMethod(mainView, "invalidateSessionIfPresent");
-    }
-
-    private void assertPublicEndpointWorks() {
-        TestBenchElement publicView = waitUntil(
-                driver -> $("public-view").get(0));
-        TestBenchElement timeText = publicView.findElement(By.id("time"));
-        String timeBefore = timeText.getText();
-        Assert.assertNotNull(timeBefore);
-        callAsyncMethod(publicView, "updateTime");
-        String timeAfter = timeText.getText();
-        Assert.assertNotNull(timeAfter);
-        Assert.assertNotEquals(timeAfter, timeBefore);
-    }
-
-    private String formatArgumentRef(int index) {
-        return String.format("arguments[%d]", index);
-    }
-
-    private Object callAsyncMethod(TestBenchElement element, String methodName,
-            Object... args) {
-        String objectRef = formatArgumentRef(0);
-        String argRefs = IntStream.range(1, args.length + 1)
-                .mapToObj(this::formatArgumentRef)
-                .collect(Collectors.joining(","));
-        String callbackRef = formatArgumentRef(args.length + 1);
-        String script = String.format("%s.%s(%s).then(%s)", objectRef,
-                methodName, argRefs, callbackRef);
-        Object[] scriptArgs = Stream.concat(Stream.of(element), Stream.of(args))
-                .toArray();
-        return getJavascriptExecutor().executeAsyncScript(script, scriptArgs);
-    }
-
-    private JavascriptExecutor getJavascriptExecutor() {
-        return (JavascriptExecutor) getDriver();
     }
 
 }
