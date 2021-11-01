@@ -1,10 +1,9 @@
-import Pino from 'pino';
+import type Pino from 'pino';
+import type { SourceFile } from 'typescript';
 import Plugin from '../../core/Plugin';
-import ReferenceResolver from '../../core/ReferenceResolver';
+import type ReferenceResolver from '../../core/ReferenceResolver';
 import type SharedStorage from '../../core/SharedStorage';
-import { EndpointMethodProcessor, EndpointMethodProcessorEntry } from './EndpointMethodProcessor';
-import type { EntityInfoEntry } from './EntityProcessor';
-import { EntityProcessor } from './EntityProcessor';
+import EndpointProcessor from './EndpointProcessor';
 import type { BackbonePluginContext } from './utils';
 
 export default class BackbonePlugin extends Plugin {
@@ -13,7 +12,6 @@ export default class BackbonePlugin extends Plugin {
   public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
     super(resolver, logger);
     this.#context = {
-      imports: new Map(),
       logger,
       resolver,
     };
@@ -24,21 +22,42 @@ export default class BackbonePlugin extends Plugin {
   }
 
   public async execute(storage: SharedStorage): Promise<void> {
-    this.#processEndpoints(storage);
-    this.#processEntities(storage);
+    const endpointSourceFiles = this.#processEndpoints(storage);
+    // this.#processEntities(storage);
+
+    storage.sources.push(...endpointSourceFiles);
   }
 
-  #processEndpoints(storage: SharedStorage): void {
-    for (const entry of Object.entries(storage.api.paths).filter(([, info]) => !!info)) {
-      new EndpointMethodProcessor(entry as EndpointMethodProcessorEntry, storage.sources, this.#context).process();
-    }
-  }
+  #processEndpoints(storage: SharedStorage): readonly SourceFile[] {
+    const endpoints = new Map<string, EndpointProcessor>();
 
-  #processEntities(storage: SharedStorage): void {
-    if (storage.api.components?.schemas) {
-      for (const schema of Object.entries(storage.api.components.schemas)) {
-        new EntityProcessor(schema as EntityInfoEntry, files).process();
+    for (const [path, pathItem] of Object.entries(storage.api.paths)) {
+      if (!pathItem) {
+        continue;
       }
+
+      const [, endpointName, endpointMethodName] = path.split('/');
+
+      let endpointProcessor: EndpointProcessor;
+
+      if (endpoints.has(endpointName)) {
+        endpointProcessor = endpoints.get(endpointName)!;
+      } else {
+        endpointProcessor = new EndpointProcessor(endpointName, this.#context);
+        endpoints.set(endpointName, endpointProcessor);
+      }
+
+      endpointProcessor.add(endpointMethodName, pathItem);
     }
+
+    return Array.from(endpoints.values(), (processor) => processor.process());
   }
+
+  // #processEntities(storage: SharedStorage): void {
+  //   if (storage.api.components?.schemas) {
+  //     for (const schema of Object.entries(storage.api.components.schemas)) {
+  //       new EntityProcessor(schema as EntityInfoEntry, files).process();
+  //     }
+  //   }
+  // }
 }

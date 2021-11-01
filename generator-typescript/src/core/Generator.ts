@@ -1,5 +1,5 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import type { OpenAPIV3 } from 'openapi-types';
 import { resolve } from 'path';
 import Pino from 'pino';
@@ -57,8 +57,8 @@ export default class Generator {
     const storage: SharedStorage = {
       api,
       apiRefs: this.#parser.$refs,
-      sources: new Map(),
       pluginStorage: new Map(),
+      sources: [],
     };
 
     await manager.execute(storage);
@@ -74,11 +74,11 @@ export default class Generator {
     const { outputDir = defaultOutputDir } = this.#config;
     const printer = createPrinter({ newLine: NewLineKind.LineFeed });
 
-    // await Promise.all(
-    //   Array.from(storage.files.entries(), async ([path, source]) => {
-    //     const content = printer.printFile(createSourceFile(source);
-    //     await writeFile(resolve(outputDir, path), content, 'utf8');
-    //   })
-    // );
+    await Promise.all(
+      storage.sources.map(async (file) => {
+        const content = printer.printFile(file);
+        await writeFile(resolve(outputDir, file.fileName), content, 'utf8');
+      }),
+    );
   }
 }
