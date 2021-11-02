@@ -123,7 +123,7 @@
             <artifactId>slf4j-ext</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-        
+
         <!-- Needed for security annotations -->
         <dependency>
             <groupId>javax.annotation</groupId>
