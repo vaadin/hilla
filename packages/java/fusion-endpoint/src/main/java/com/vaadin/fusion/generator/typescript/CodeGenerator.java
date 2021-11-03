@@ -362,7 +362,9 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
             }
         }
         if (objs.get(VAADIN_CONNECT_CLASS_DESCRIPTION) == null) {
-            warnNoClassInformation(classname);
+            logger.debug(
+                    "The class '{}' doesn't have JavaDoc or it is invalid. This results in no TsDoc for the generated module '{}'.",
+                    classname, classname);
         }
 
         if ((operations.get(OPERATION) instanceof List)) {
@@ -702,12 +704,6 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
                     "The '{}' operation with path '{}' contains multiple tags. The generated method will be included in classes: '{}'.",
                     httpMethod, path, fileList);
         }
-    }
-
-    private void warnNoClassInformation(String classname) {
-        logger.info(
-                "The class '{}' doesn't have JavaDoc or it is invalid. This results in no TsDoc for the generated module '{}'.",
-                classname, classname);
     }
 
     /**
