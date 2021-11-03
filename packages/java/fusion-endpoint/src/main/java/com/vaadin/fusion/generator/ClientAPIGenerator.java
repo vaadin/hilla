@@ -83,7 +83,7 @@ public class ClientAPIGenerator {
         String generatedDefaultClientTs = getDefaultClientTsTemplate()
                 .replace("{{PREFIX}}", endpointPrefix);
         try {
-            logger.info("writing file {}", outputFilePath);
+            logger.debug("writing file {}", outputFilePath);
             FileUtils.writeStringToFile(outputFilePath.toFile(),
                     generatedDefaultClientTs, StandardCharsets.UTF_8);
         } catch (IOException e) {
