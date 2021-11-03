@@ -1,6 +1,6 @@
 import type Pino from 'pino';
 import type { Statement, TypeNode } from 'typescript';
-import type ReferenceResolver from '../../core/ReferenceResolver';
+import type ReferenceResolver from '../../core/ReferenceResolver.js';
 
 export type MutableArray<T extends readonly unknown[]> = Array<T[number]>;
 

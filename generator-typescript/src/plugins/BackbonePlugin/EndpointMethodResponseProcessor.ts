@@ -1,8 +1,8 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import SchemaProcessor from './SchemaProcessor';
+import SchemaProcessor from './SchemaProcessor.js';
 import type { BackbonePluginContext, TypeNodesBag } from './utils';
-import { defaultMediaType, emptySourceBag } from './utils';
+import { defaultMediaType, emptySourceBag } from './utils.js';
 
 export type EndpointMethodResponses = ReadonlyDeep<OpenAPIV3.ResponsesObject>;
 export type EndpointMethodResponse = ReadonlyDeep<OpenAPIV3.ResponseObject>;

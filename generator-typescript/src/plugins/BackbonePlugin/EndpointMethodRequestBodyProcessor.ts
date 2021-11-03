@@ -2,10 +2,10 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { Mutable, ReadonlyDeep } from 'type-fest';
 import ts from 'typescript';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
-import { isObjectSchema } from '../../core/Schema';
-import SchemaProcessor from './SchemaProcessor';
-import type { BackbonePluginContext, MutableArray, SourceBag } from './utils';
-import { defaultMediaType, emptySourceBag } from './utils';
+import { isObjectSchema } from '../../core/Schema.js';
+import SchemaProcessor from './SchemaProcessor.js';
+import type { BackbonePluginContext, MutableArray, SourceBag } from './utils.js';
+import { defaultMediaType, emptySourceBag } from './utils.js';
 
 export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject>;
 

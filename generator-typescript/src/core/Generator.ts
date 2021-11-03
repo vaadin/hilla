@@ -1,58 +1,25 @@
-import SwaggerParser from '@apidevtools/swagger-parser';
-import { readFile, writeFile } from 'fs/promises';
+import type SwaggerParser from '@apidevtools/swagger-parser';
 import type { OpenAPIV3 } from 'openapi-types';
-import { resolve } from 'path';
-import Pino from 'pino';
-import { createPrinter, NewLineKind } from 'typescript';
-import { defaultOutputDir } from './config.default';
-import type { PluginsConfiguration } from './PluginManager';
-import PluginManager from './PluginManager';
-import ReferenceResolver from './ReferenceResolver';
-import type SharedStorage from './SharedStorage';
-
-export type GeneratorConfig = Readonly<{
-  outputDir?: string;
-  plugins?: PluginsConfiguration;
-}>;
-
-export type GeneratorOptions = GeneratorConfig &
-  Readonly<{
-    verbose?: boolean;
-  }>;
-
-const cwd = process.cwd();
+import type Pino from 'pino';
+import type { ReadonlyDeep } from 'type-fest';
+import ts from 'typescript';
+import type PluginManager from './PluginManager.js';
+import type SharedStorage from './SharedStorage.js';
+import File from './File.js';
 
 export default class Generator {
-  public static async init(configPath: string, options: GeneratorOptions): Promise<Generator> {
-    const logger = Pino({
-      name: 'tsgen',
-      level: options.verbose ? 'debug' : 'info',
-    });
-
-    const configAbsolutePath = resolve(cwd, configPath);
-
-    logger.info(`Loading config by path: '${configAbsolutePath}'`);
-
-    const config: GeneratorConfig = JSON.parse(await readFile(configAbsolutePath, 'utf8'));
-
-    return new Generator(config, logger);
-  }
-
-  readonly #config: GeneratorConfig;
+  readonly #manager: PluginManager;
   readonly #logger: Pino.Logger;
   readonly #parser: SwaggerParser;
 
-  private constructor(config: GeneratorConfig, logger: Pino.Logger) {
-    this.#config = config;
+  public constructor(parser: SwaggerParser, manager: PluginManager, logger: Pino.Logger) {
     this.#logger = logger;
-    this.#parser = new SwaggerParser();
+    this.#manager = manager;
+    this.#parser = parser;
   }
 
-  public async process(input: string): Promise<void> {
-    const [api, manager] = await Promise.all([
-      this.#parseOpenAPI(this.#parser, input),
-      PluginManager.init(this.#config.plugins, new ReferenceResolver(this.#parser), this.#logger),
-    ]);
+  public async process(input: string): Promise<readonly File[]> {
+    const api = (await this.#parser.bundle(JSON.parse(input))) as ReadonlyDeep<OpenAPIV3.Document>;
 
     const storage: SharedStorage = {
       api,
@@ -61,24 +28,10 @@ export default class Generator {
       sources: [],
     };
 
-    await manager.execute(storage);
-    await this.#write(storage);
-  }
+    await this.#manager.execute(storage);
 
-  async #parseOpenAPI(parser: SwaggerParser, input: string): Promise<OpenAPIV3.Document> {
-    const rawOpenAPI = input.startsWith('{') ? input : await readFile(resolve(cwd, input), 'utf8');
-    return parser.bundle(rawOpenAPI) as Promise<OpenAPIV3.Document>;
-  }
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-  async #write(storage: SharedStorage): Promise<void> {
-    const { outputDir = defaultOutputDir } = this.#config;
-    const printer = createPrinter({ newLine: NewLineKind.LineFeed });
-
-    await Promise.all(
-      storage.sources.map(async (file) => {
-        const content = printer.printFile(file);
-        await writeFile(resolve(outputDir, file.fileName), content, 'utf8');
-      }),
-    );
+    return storage.sources.map((file) => new File([printer.printFile(file)], file.fileName));
   }
 }

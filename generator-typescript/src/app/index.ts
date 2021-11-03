@@ -1,5 +1,5 @@
 import meow from 'meow';
-import Generator from './Generator';
+import Application from './Application.js';
 
 const {
   input: [input],
@@ -28,8 +28,7 @@ const {
         type: 'boolean',
       },
     },
-  }
+  },
 );
 
-const generator = await Generator.init(config, { verbose });
-generator.process(input);
+await new Application({ verbose }).execute(config, input);

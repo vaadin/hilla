@@ -2,8 +2,8 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { Mutable, ReadonlyDeep } from 'type-fest';
 import ts from 'typescript';
 import type { SourceFile, Statement } from 'typescript';
-import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor';
-import type { MutableArray, BackbonePluginContext, SourceBag, StatementBag } from './utils';
+import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
+import type { MutableArray, BackbonePluginContext, SourceBag, StatementBag } from './utils.js';
 
 const collator = new Intl.Collator('en', { sensitivity: 'case' });
 

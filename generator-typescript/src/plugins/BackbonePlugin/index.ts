@@ -1,9 +1,9 @@
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
-import Plugin from '../../core/Plugin';
+import Plugin from '../../core/Plugin.js';
 import type ReferenceResolver from '../../core/ReferenceResolver';
 import type SharedStorage from '../../core/SharedStorage';
-import EndpointProcessor from './EndpointProcessor';
+import EndpointProcessor from './EndpointProcessor.js';
 import type { BackbonePluginContext } from './utils';
 
 export default class BackbonePlugin extends Plugin {

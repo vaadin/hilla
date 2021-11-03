@@ -12,8 +12,8 @@ import {
   isNumberSchema,
   isReferenceSchema,
   isStringSchema,
-} from '../../core/Schema';
-import type { SourceBag, SourceBagBase, TypeNodesBag } from './utils';
+} from '../../core/Schema.js';
+import type { SourceBag, SourceBagBase, TypeNodesBag } from './utils.js';
 
 export type Schema = ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
 

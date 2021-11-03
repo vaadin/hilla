@@ -3,10 +3,10 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { Mutable, ReadonlyDeep } from 'type-fest';
 import type { Expression } from 'typescript';
 import ts from 'typescript';
-import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor';
-import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor';
-import type { BackbonePluginContext, MutableArray, StatementBag, TypeNodesBag } from './utils';
-import { emptySourceBag } from './utils';
+import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
+import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
+import type { BackbonePluginContext, MutableArray, StatementBag, TypeNodesBag } from './utils.js';
+import { emptySourceBag } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 

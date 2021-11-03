@@ -1,63 +1,34 @@
-import { relative, resolve } from 'path';
 import type Pino from 'pino';
-import GeneratorError from './GeneratorException';
-import Plugin, { PluginConstructor } from './Plugin';
+import GeneratorError from './GeneratorException.js';
+import Plugin, { PluginConstructor } from './Plugin.js';
 import type ReferenceResolver from './ReferenceResolver';
 import type SharedStorage from './SharedStorage';
 
-export type PluginsConfiguration = Readonly<{
-  disable: readonly string[];
-  use: readonly string[];
-}>;
-
-const cwd = process.cwd();
-
-const builtInPluginPaths: readonly string[] = [resolve(import.meta.url, '../plugins/BackbonePlugin')];
-
-function absolutize(paths?: readonly string[]): readonly string[] {
-  return paths ? Array.from(new Set(paths), (path) => resolve(cwd, path)) : [];
-}
-
-async function importPlugin(path: string, resolver: ReferenceResolver, logger: Pino.Logger): Promise<Plugin> {
-  const PluginClass: PluginConstructor = (await import(path)).default;
-
-  if (!Object.prototype.isPrototypeOf.call(Plugin, PluginClass)) {
-    const error = new GeneratorError(`Plugin '${relative(cwd, path)}' is not an instance of a Plugin class`);
-    logger.error(error, 'Error during plugin import');
-    throw error;
-  }
-
-  return new PluginClass(resolver, logger);
-}
-
 export default class PluginManager {
-  public static async init(
-    plugins: PluginsConfiguration | undefined,
-    resolver: ReferenceResolver,
-    logger: Pino.Logger
-  ): Promise<PluginManager> {
-    const disabledPluginsPaths = absolutize(plugins?.disable);
-    const userDefinedPlugins = absolutize(plugins?.use);
+  readonly #logger: Pino.Logger;
+  readonly #plugins: Plugin[] = [];
+  readonly #resolver: ReferenceResolver;
 
-    logger.info({ paths: disabledPluginsPaths }, 'Disabled built-in plugins');
-    logger.info({ paths: userDefinedPlugins }, 'User-defined plugins');
-
-    const builtInPlugins = builtInPluginPaths.filter((path) => !disabledPluginsPaths.includes(path));
-
-    const importedPlugins = await Promise.all(
-      [...builtInPlugins, ...userDefinedPlugins].map((path) => importPlugin(path, resolver, logger))
-    );
-
-    return new PluginManager(importedPlugins, logger);
+  public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
+    this.#logger = logger;
+    this.#resolver = resolver;
   }
 
-  readonly #logger: Pino.Logger;
+  public add(PluginClass: PluginConstructor): void {
+    this.#logger.info(`Plugin is used: '${PluginClass.name}'`);
+    this.#plugins.push(new PluginClass(this.#resolver, this.#logger));
+  }
 
-  readonly #plugins: readonly Plugin[];
+  public async load(path: string): Promise<PluginConstructor> {
+    const cls: PluginConstructor = (await import(path)).default;
 
-  private constructor(plugins: readonly Plugin[], logger: Pino.Logger) {
-    this.#logger = logger;
-    this.#plugins = plugins;
+    if (!Object.prototype.isPrototypeOf.call(Plugin, cls)) {
+      const error = new GeneratorError(`Plugin '${path}' is not an instance of a Plugin class`);
+      this.#logger.error(error, 'Error during plugin import');
+      throw error;
+    }
+
+    return cls;
   }
 
   public async execute(storage: SharedStorage): Promise<void> {
