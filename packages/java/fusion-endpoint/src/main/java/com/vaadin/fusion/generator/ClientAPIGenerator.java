@@ -97,12 +97,12 @@ public class ClientAPIGenerator {
         try (BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(
                         getClass().getClassLoader().getResourceAsStream(
-                                "connect-client.default.ts.template"),
+                                "connect-client.default.template.ts"),
                         StandardCharsets.UTF_8))) {
             return bufferedReader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "Unable to read connect-client.default.ts.template", e);
+                    "Unable to read connect-client.default.template.ts", e);
         }
     }
 
