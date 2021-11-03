@@ -14,5 +14,5 @@
     "noImplicitOverride": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["packages/**"]
+  "include": ["src/**/*.{ts,js}", "tests/**/*.{ts,js}"]
 }

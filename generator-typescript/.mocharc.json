@@ -1,0 +1,5 @@
+{
+  "extension": ["ts", "mts", "cts", "js", "mjs", "cjs"],
+  "loader": "./scripts/esbuild.js",
+  "spec": ["tests/**/*.spec.{ts,js}"]
+}
