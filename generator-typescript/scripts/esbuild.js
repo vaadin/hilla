@@ -1,6 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { transform } from 'esbuild';
-import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 
 export async function resolve(specifier, context, defaultResolve) {
@@ -8,8 +7,8 @@ export async function resolve(specifier, context, defaultResolve) {
     const { url } = defaultResolve(`${specifier.substring(0, specifier.length - 3)}.ts`, context, defaultResolve);
 
     return {
-      url,
       format: 'module',
+      url,
     };
   }
 
@@ -18,16 +17,23 @@ export async function resolve(specifier, context, defaultResolve) {
 
 export async function load(url, context, defaultLoad) {
   if (url.endsWith('.ts')) {
-    const source = await readFile(fileURLToPath(url), 'utf8');
+    const { source: rawSource, format } = await defaultLoad(url, { format: 'module' }, defaultLoad);
+
+    if (rawSource === undefined || rawSource === null) {
+      throw new Error(`Failed to load raw source: Format was '${format}' and url was '${url}''.`);
+    }
+
+    const source = typeof rawSource === 'string' ? rawSource : rawSource.toString('utf8');
+
     const { code } = await transform(source, {
-      sourcefile: url.pathname,
+      sourcefile: fileURLToPath(url),
       sourcemap: 'both',
       loader: 'ts',
       target: `node${process.versions.node}`,
       format: 'esm',
     });
 
-    return { source: code, format: 'module' };
+    return { source: code, format };
   }
 
   return defaultLoad(url, context, defaultLoad);
