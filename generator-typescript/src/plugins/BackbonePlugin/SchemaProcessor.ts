@@ -1,28 +1,16 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
 import ts from 'typescript';
-import {
-  getReferenceSchemaDetails,
-  isArraySchema,
-  isBooleanSchema,
-  isIntegerSchema,
-  isMapSchema,
-  isNullableSchema,
-  isNumberSchema,
-  isReferenceSchema,
-  isStringSchema,
-  unwrapSchema,
-} from '../../core/Schema.js';
-import { createSourceBag } from './SourceBag.js';
+import type { ArraySchema, MapSchema, ReferenceSchema } from '../../core/Schema.js';
+import type Schema from '../../core/Schema.js';
+import { createSourceBag, ExportList, ImportList } from './SourceBag.js';
 import type { SourceBag, SourceBagBase, TypeNodesBag } from './SourceBag.js';
 
 type SingleTypeNodeBag = SourceBagBase & Readonly<{ node: TypeNode }>;
 
 function createSingleTypeNodeBag(
   node: TypeNode,
-  imports: Readonly<Record<string, string>> = {},
-  exports: Readonly<Record<string, string>> = {},
+  imports: ImportList = {},
+  exports: ExportList = {},
 ): SingleTypeNodeBag {
   return {
     node,
@@ -52,9 +40,9 @@ export default class SchemaProcessor {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
   }
 
-  readonly #schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
+  readonly #schema: Schema;
 
-  public constructor(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>) {
+  public constructor(schema: Schema) {
     this.#schema = schema;
   }
 
@@ -65,39 +53,37 @@ export default class SchemaProcessor {
     let exports: SourceBag['exports'] | undefined;
     let node: TypeNode;
 
-    if (isReferenceSchema(this.#schema)) {
+    if (this.#schema.isReference()) {
       ({ node, exports, imports } = this.#processReference());
-    } else if (isArraySchema(this.#schema)) {
+    } else if (this.#schema.isArray()) {
       ({ node, exports, imports } = this.#processArray());
-    } else if (isMapSchema(this.#schema)) {
+    } else if (this.#schema.isMap()) {
       ({ node, exports, imports } = this.#processMap());
-    } else if (isBooleanSchema(this.#schema)) {
+    } else if (this.#schema.isBoolean()) {
       node = this.constructor.#createBoolean();
-    } else if (isIntegerSchema(this.#schema) || isNumberSchema(this.#schema)) {
+    } else if (this.#schema.isInteger() || this.#schema.isNumber()) {
       node = this.constructor.#createNumber();
-    } else if (isStringSchema(this.#schema)) {
+    } else if (this.#schema.isString()) {
       node = this.constructor.#createString();
     } else {
       node = this.constructor.#createUnknown();
     }
 
     return createSourceBag(
-      isNullableSchema(this.#schema) ? [node, this.constructor.#createUndefined()] : [node],
+      this.#schema.isNullable() ? [node, this.constructor.#createUndefined()] : [node],
       imports,
       exports,
     );
   }
 
   #processReference(): SingleTypeNodeBag {
-    const { identifier, path } = getReferenceSchemaDetails(this.#schema as ReadonlyDeep<OpenAPIV3.ReferenceObject>);
+    const { identifier, path } = this.#schema as ReferenceSchema;
 
     return createSingleTypeNodeBag(ts.factory.createTypeReferenceNode(identifier), { [identifier]: path });
   }
 
   #processArray(): SingleTypeNodeBag {
-    const { items } = unwrapSchema(this.#schema) as ReadonlyDeep<OpenAPIV3.ArraySchemaObject>;
-
-    const { imports, code } = new SchemaProcessor(items).process();
+    const { imports, code } = new SchemaProcessor((this.#schema as ArraySchema).items).process();
 
     return createSingleTypeNodeBag(
       ts.factory.createTypeReferenceNode('Array', [ts.factory.createUnionTypeNode(code)]),
@@ -106,16 +92,23 @@ export default class SchemaProcessor {
   }
 
   #processMap(): SingleTypeNodeBag {
-    const { additionalProperties } = unwrapSchema(this.#schema) as ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>;
+    const { values } = this.#schema as MapSchema;
 
-    const { imports, code } = new SchemaProcessor(
-      additionalProperties as ReadonlyDeep<OpenAPIV3.SchemaObject>,
-    ).process();
+    let imports: ImportList | undefined;
+    let valuesTypeNode: TypeNode;
+
+    if (values) {
+      const { imports: _imports, code } = new SchemaProcessor(values).process();
+      imports = _imports;
+      valuesTypeNode = ts.factory.createUnionTypeNode(code);
+    } else {
+      valuesTypeNode = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+    }
 
     return createSingleTypeNodeBag(
       ts.factory.createTypeReferenceNode('Record', [
         ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-        ts.factory.createUnionTypeNode(code),
+        valuesTypeNode,
       ]),
       imports,
     );

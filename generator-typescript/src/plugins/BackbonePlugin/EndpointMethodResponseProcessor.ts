@@ -1,5 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
+import Schema from '../../core/Schema.js';
 import SchemaProcessor from './SchemaProcessor.js';
 import { createSourceBag, TypeNodesBag } from './SourceBag.js';
 import type { BackbonePluginContext } from './utils.js';
@@ -30,8 +31,8 @@ export default class EndpointMethodResponseProcessor {
   }
 
   #processOk(): TypeNodesBag {
-    const schema = this.#response.content?.[defaultMediaType]?.schema;
+    const rawSchema = this.#response.content?.[defaultMediaType]?.schema;
 
-    return schema ? new SchemaProcessor(schema).process() : createSourceBag();
+    return rawSchema ? new SchemaProcessor(Schema.of(rawSchema)).process() : createSourceBag();
   }
 }

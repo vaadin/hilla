@@ -1,9 +1,12 @@
 import type { Mutable } from 'type-fest';
-import type { Statement, TypeNode } from 'typescript';
+import type { Identifier, Statement, TypeNode } from 'typescript';
+
+export type ExportList = Readonly<Record<string, Identifier>>;
+export type ImportList = Readonly<Record<string, string>>;
 
 export type SourceBagBase = Readonly<{
-  exports: Readonly<Record<string, string>>;
-  imports: Readonly<Record<string, string>>;
+  exports: ExportList;
+  imports: ImportList;
 }>;
 
 export type SourceBag<T = unknown> = SourceBagBase &
@@ -16,8 +19,8 @@ export type StatementBag = SourceBag<Statement>;
 
 export function createSourceBag<T = unknown>(
   code: readonly T[] = [],
-  imports: Readonly<Record<string, string>> = {},
-  exports: Readonly<Record<string, string>> = {},
+  imports: ImportList = {},
+  exports: ExportList = {},
 ): SourceBag<T> {
   return {
     code,
@@ -29,8 +32,8 @@ export function createSourceBag<T = unknown>(
 export function updateSourceBagMutating<T = unknown>(
   bag: Mutable<SourceBag<T>>,
   code?: readonly T[],
-  imports?: Readonly<Record<string, string>>,
-  exports?: Readonly<Record<string, string>>,
+  imports?: ImportList,
+  exports?: ExportList,
 ): SourceBag<T> {
   if (code) {
     (bag.code as Array<T>).push(...code);

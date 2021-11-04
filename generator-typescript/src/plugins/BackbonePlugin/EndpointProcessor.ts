@@ -3,7 +3,14 @@ import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import ts from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
-import { createSourceBag, SourceBag, StatementBag, updateSourceBagMutating } from './SourceBag.js';
+import {
+  createSourceBag,
+  ExportList,
+  ImportList,
+  SourceBag,
+  StatementBag,
+  updateSourceBagMutating,
+} from './SourceBag.js';
 import { BackbonePluginContext, createSourceFile } from './utils.js';
 
 const collator = new Intl.Collator('en', { sensitivity: 'case' });
@@ -13,6 +20,7 @@ export default class EndpointProcessor {
   readonly #context: BackbonePluginContext;
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
+  readonly #libraryIdentifier = ts.factory.createUniqueName('client');
 
   public constructor(name: string, context: BackbonePluginContext) {
     this.#context = context;
@@ -39,7 +47,10 @@ export default class EndpointProcessor {
     const importStatements = this.#prepareImportStatements(imports);
     const exportStatement = this.#prepareExportStatement(exports);
 
-    return createSourceFile([...importStatements, ...code, ...(exportStatement ? [exportStatement] : [])], this.#name);
+    return createSourceFile(
+      [this.#prepareLibraryImport(), ...importStatements, ...code, ...(exportStatement ? [exportStatement] : [])],
+      this.#name,
+    );
   }
 
   #mergeBags(): StatementBag {
@@ -49,7 +60,7 @@ export default class EndpointProcessor {
     );
   }
 
-  #prepareExportStatement(exports: SourceBag['imports']): Statement | undefined {
+  #prepareExportStatement(exports: ExportList): Statement | undefined {
     if (!exports) {
       return undefined;
     }
@@ -63,18 +74,14 @@ export default class EndpointProcessor {
       false,
       ts.factory.createNamedExports(
         exportKeys.map((key) =>
-          ts.factory.createExportSpecifier(
-            false,
-            ts.factory.createIdentifier(key),
-            ts.factory.createIdentifier(exports[key]),
-          ),
+          ts.factory.createExportSpecifier(false, exports[key], ts.factory.createIdentifier(key)),
         ),
       ),
       undefined,
     );
   }
 
-  #prepareImportStatements(imports: SourceBag['imports']): readonly Statement[] {
+  #prepareImportStatements(imports: ImportList): readonly Statement[] {
     if (!imports) {
       return [];
     }
@@ -94,6 +101,15 @@ export default class EndpointProcessor {
     });
   }
 
+  #prepareLibraryImport() {
+    return ts.factory.createImportDeclaration(
+      undefined,
+      undefined,
+      ts.factory.createImportClause(false, this.#libraryIdentifier, undefined),
+      ts.factory.createStringLiteral('./connect-client.default.js'),
+    );
+  }
+
   #processMethod(method: string, pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>): void {
     this.#context.logger.info(`Start processing endpoint method: ${method}`);
 
@@ -102,6 +118,7 @@ export default class EndpointProcessor {
         const bag = new EndpointMethodOperationProcessor(
           httpMethod,
           pathItem[httpMethod] as EndpointMethodOperation,
+          { libraryIdentifier: this.#libraryIdentifier },
           this.#context,
         ).process(this.#name, method);
 

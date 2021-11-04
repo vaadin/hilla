@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { Expression } from 'typescript';
+import type { Expression, Identifier } from 'typescript';
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
@@ -10,19 +10,26 @@ import type { BackbonePluginContext } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
+export type EndpointMethodOperationProcessorOptions = Readonly<{
+  libraryIdentifier: Identifier;
+}>;
+
 export default class EndpointMethodOperationProcessor {
   readonly #context: BackbonePluginContext;
-  readonly #operation: EndpointMethodOperation;
   readonly #method: OpenAPIV3.HttpMethods;
+  readonly #operation: EndpointMethodOperation;
+  readonly #options: EndpointMethodOperationProcessorOptions;
 
   public constructor(
     method: OpenAPIV3.HttpMethods,
     operation: EndpointMethodOperation,
+    options: EndpointMethodOperationProcessorOptions,
     context: BackbonePluginContext,
   ) {
     this.#context = context;
     this.#method = method;
     this.#operation = operation;
+    this.#options = options;
   }
 
   public process(endpointName: string, endpointMethodName: string): StatementBag {
@@ -55,6 +62,7 @@ export default class EndpointMethodOperationProcessor {
 
     const response = this.#prepareResponse();
 
+    const { libraryIdentifier } = this.#options;
     const uniqueName = ts.factory.createUniqueName(endpointMethodName);
 
     const declaration = ts.factory.createFunctionDeclaration(
@@ -64,14 +72,11 @@ export default class EndpointMethodOperationProcessor {
       uniqueName,
       undefined,
       parameters.code,
-      ts.factory.createUnionTypeNode(response.code),
+      ts.factory.createTypeReferenceNode('Promise', [ts.factory.createUnionTypeNode(response.code)]),
       ts.factory.createBlock([
         ts.factory.createReturnStatement(
           ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-              ts.factory.createIdentifier('client'),
-              ts.factory.createIdentifier('call'),
-            ),
+            ts.factory.createPropertyAccessExpression(libraryIdentifier, ts.factory.createIdentifier('call')),
             undefined,
             clientCallExpression,
           ),
@@ -82,7 +87,7 @@ export default class EndpointMethodOperationProcessor {
     return createSourceBag(
       [declaration],
       { ...response.imports, ...parameters.imports },
-      { ...response.exports, [endpointMethodName]: uniqueName.text, ...parameters.exports },
+      { ...response.exports, [endpointMethodName]: uniqueName, ...parameters.exports },
     );
   }
 

@@ -2,7 +2,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
 import ts from 'typescript';
-import { isObjectSchema } from '../../core/Schema.js';
+import Schema from '../../core/Schema.js';
 import SchemaProcessor from './SchemaProcessor.js';
 import { createSourceBag, SourceBag, updateSourceBagMutating } from './SourceBag.js';
 import type { BackbonePluginContext } from './utils.js';
@@ -65,17 +65,19 @@ export default class EndpointMethodRequestBodyProcessor {
 
   #extractParameterData(
     basicSchema?: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
-  ): ReadonlyArray<readonly [string, ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>]> {
+  ): ReadonlyArray<readonly [string, Schema]> {
     if (!basicSchema) {
       return [];
     }
 
     const { resolver, logger } = this.#context;
 
-    const resolvedSchema = resolver.resolve(basicSchema);
+    const resolvedSchema = Schema.of(resolver.resolve(basicSchema));
 
-    if (isObjectSchema(resolvedSchema) && resolvedSchema.properties) {
-      return Object.entries(resolvedSchema.properties);
+    if (resolvedSchema.isObject() && !resolvedSchema.isEmptyObject()) {
+      const { properties } = resolvedSchema;
+
+      return properties ? [...properties] : [];
     }
 
     logger.warn("A schema provided for endpoint method's 'requestBody' is not supported");

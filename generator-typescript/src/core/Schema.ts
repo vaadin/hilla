@@ -1,86 +1,198 @@
+/* eslint-disable no-use-before-define */
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-
-export function isComposedSchema(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>): boolean {
-  return 'anyOf' in schema;
-}
-
-export function isReferenceSchema(
-  schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
-): schema is ReadonlyDeep<OpenAPIV3.ReferenceObject> {
-  return '$ref' in schema;
-}
-
-export function isNullableSchema(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>): boolean {
-  return !isReferenceSchema(schema) && !!schema.nullable;
-}
-
-export function unwrapSchema(
-  schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
-): ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> {
-  return 'anyOf' in schema ? schema.anyOf![0] : schema;
-}
-
-export type SchemaReferenceDetails = Readonly<{
-  identifier: string;
-  path: string;
-}>;
 
 const COMPONENTS_SCHEMAS_REF = /#\/components\/schemas/;
 const QUALIFIED_NAME_DELIMITER = /[$.]/g;
 
-export function getReferenceSchemaDetails(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject>): SchemaReferenceDetails;
-export function getReferenceSchemaDetails(schema: ReadonlyDeep<OpenAPIV3.SchemaObject>): undefined;
-export function getReferenceSchemaDetails(
-  schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
-): SchemaReferenceDetails | undefined {
-  const _schema = unwrapSchema(schema);
+export default abstract class Schema {
+  public static of(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>): Schema {
+    const unwrappedSchema = 'anyOf' in schema ? schema.anyOf![0] : schema;
+    const nullable = 'nullable' in schema ? schema.nullable : false;
 
-  if (!isReferenceSchema(_schema)) {
-    return undefined;
+    if ('$ref' in unwrappedSchema) {
+      return new ReferenceSchema(unwrappedSchema, nullable);
+    }
+
+    const { additionalProperties, properties, type } = schema as ReadonlyDeep<OpenAPIV3.SchemaObject>;
+
+    if (type === 'array') {
+      return new ArraySchema(schema as ReadonlyDeep<OpenAPIV3.ArraySchemaObject>, nullable);
+    }
+
+    if (type === 'object') {
+      if (!properties && !!additionalProperties) {
+        return new MapSchema(schema as ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>, nullable);
+      }
+
+      return new ObjectSchema(schema as ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>, nullable);
+    }
+
+    return new RegularSchema(schema as ReadonlyDeep<OpenAPIV3.SchemaObject>, nullable);
   }
 
-  const { $ref } = _schema;
+  readonly #nullable: boolean;
 
-  return {
-    identifier: $ref.substring($ref.lastIndexOf('.'), $ref.length),
-    path: `/${$ref.replace(COMPONENTS_SCHEMAS_REF, '').replace(QUALIFIED_NAME_DELIMITER, '/')}`,
-  };
+  protected constructor(nullable = false) {
+    this.#nullable = nullable;
+  }
+
+  public abstract get internal(): ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
+
+  public isArray(): this is ArraySchema {
+    return false;
+  }
+
+  public isBoolean(): this is RegularSchema {
+    return false;
+  }
+
+  public isInteger(): this is RegularSchema {
+    return false;
+  }
+
+  public isMap(): this is MapSchema {
+    return false;
+  }
+
+  public isNullable(): boolean {
+    return this.#nullable;
+  }
+
+  public isNumber(): this is RegularSchema {
+    return false;
+  }
+
+  public isObject(): this is ObjectSchema {
+    return false;
+  }
+
+  public isReference(): this is ReferenceSchema {
+    return false;
+  }
+
+  public isString(): this is RegularSchema {
+    return false;
+  }
 }
 
-const positiveCheck = () => true;
-const negativeCheck = () => false;
+export class ReferenceSchema extends Schema {
+  readonly #schema: ReadonlyDeep<OpenAPIV3.ReferenceObject>;
 
-function createSchemaTypeChecker(
-  type: OpenAPIV3.ArraySchemaObjectType | OpenAPIV3.NonArraySchemaObjectType,
-  checkReferenceSchema: (schema: ReadonlyDeep<OpenAPIV3.ReferenceObject>) => boolean = negativeCheck,
-  checkNonReferenceSchema: (schema: ReadonlyDeep<OpenAPIV3.SchemaObject>) => boolean = positiveCheck,
-) {
-  return (schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>) => {
-    const _schema = unwrapSchema(schema);
-    const reference = isReferenceSchema(_schema);
+  public constructor(schema: ReadonlyDeep<OpenAPIV3.ReferenceObject>, nullable: boolean | undefined) {
+    super(nullable);
+    this.#schema = schema;
+  }
 
-    return (
-      (reference && type === 'object' && checkReferenceSchema(_schema)) ||
-      (!reference && type === _schema.type && checkNonReferenceSchema(_schema))
-    );
-  };
+  public get internal(): ReadonlyDeep<OpenAPIV3.ReferenceObject> {
+    return this.#schema;
+  }
+
+  public get identifier(): string {
+    const { $ref } = this.#schema;
+
+    return $ref.substring($ref.lastIndexOf($ref.includes('$') ? '$' : '.') + 1, $ref.length);
+  }
+
+  public get path(): string {
+    return `.${this.#schema.$ref.replace(COMPONENTS_SCHEMAS_REF, '').replace(QUALIFIED_NAME_DELIMITER, '/')}`;
+  }
+
+  public override isReference(): this is ReferenceSchema {
+    return true;
+  }
 }
 
-export const isArraySchema = createSchemaTypeChecker('array');
+export class RegularSchema extends Schema {
+  readonly #schema: ReadonlyDeep<OpenAPIV3.SchemaObject>;
 
-export const isBooleanSchema = createSchemaTypeChecker('boolean');
+  public constructor(schema: ReadonlyDeep<OpenAPIV3.SchemaObject>, nullable: boolean | undefined) {
+    super(nullable);
+    this.#schema = schema;
+  }
 
-export const isIntegerSchema = createSchemaTypeChecker('integer');
+  public get internal(): ReadonlyDeep<OpenAPIV3.SchemaObject> {
+    return this.#schema;
+  }
 
-export const isMapSchema = createSchemaTypeChecker(
-  'object',
-  negativeCheck,
-  (schema) => !schema.properties && !!schema.additionalProperties,
-);
+  public override isBoolean(): this is RegularSchema {
+    return this.#schema.type === 'boolean';
+  }
 
-export const isNumberSchema = createSchemaTypeChecker('number');
+  public override isInteger(): this is RegularSchema {
+    return this.#schema.type === 'integer';
+  }
 
-export const isObjectSchema = createSchemaTypeChecker('object', positiveCheck);
+  public override isNumber(): this is RegularSchema {
+    return this.#schema.type === 'number';
+  }
 
-export const isStringSchema = createSchemaTypeChecker('string');
+  public override isString(): this is RegularSchema {
+    return this.#schema.type === 'string';
+  }
+}
+
+export class ArraySchema extends RegularSchema {
+  readonly #schema: ReadonlyDeep<OpenAPIV3.ArraySchemaObject>;
+
+  public constructor(schema: ReadonlyDeep<OpenAPIV3.ArraySchemaObject>, nullable: boolean | undefined) {
+    super(schema, nullable);
+    this.#schema = schema;
+  }
+
+  public override isArray(): this is ArraySchema {
+    return true;
+  }
+
+  public get items(): Schema {
+    return Schema.of((this.#schema as ReadonlyDeep<OpenAPIV3.ArraySchemaObject>).items);
+  }
+}
+
+export class ObjectSchema extends RegularSchema {
+  readonly #schema: ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>;
+
+  public constructor(schema: ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>, nullable: boolean | undefined) {
+    super(schema, nullable);
+    this.#schema = schema;
+  }
+
+  public get properties(): IterableIterator<[name: string, schema: Schema]> | undefined {
+    const { properties } = this.#schema;
+
+    if (!properties) {
+      return undefined;
+    }
+
+    const list = Object.entries(properties).map(([name, schema]) => [name, Schema.of(schema)]);
+
+    return list[Symbol.iterator]() as IterableIterator<[name: string, schema: Schema]>;
+  }
+
+  public override isObject(): this is ObjectSchema {
+    return true;
+  }
+
+  public isEmptyObject(): boolean {
+    return !this.#schema.properties;
+  }
+}
+
+export class MapSchema extends ObjectSchema {
+  readonly #schema: ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>;
+
+  public constructor(schema: ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>, nullable: boolean | undefined) {
+    super(schema, nullable);
+    this.#schema = schema;
+  }
+
+  public get values(): Schema | undefined {
+    const { additionalProperties } = this.#schema;
+
+    return typeof additionalProperties === 'boolean' ? undefined : Schema.of(additionalProperties!);
+  }
+
+  public override isMap(): this is MapSchema {
+    return true;
+  }
+}
