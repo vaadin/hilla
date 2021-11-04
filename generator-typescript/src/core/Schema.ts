@@ -34,11 +34,13 @@ export function getReferenceSchemaDetails(schema: ReadonlyDeep<OpenAPIV3.SchemaO
 export function getReferenceSchemaDetails(
   schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
 ): SchemaReferenceDetails | undefined {
-  if (!isReferenceSchema(schema)) {
+  const _schema = unwrapSchema(schema);
+
+  if (!isReferenceSchema(_schema)) {
     return undefined;
   }
 
-  const { $ref } = schema;
+  const { $ref } = _schema;
 
   return {
     identifier: $ref.substring($ref.lastIndexOf('.'), $ref.length),
@@ -46,17 +48,22 @@ export function getReferenceSchemaDetails(
   };
 }
 
-const defaultCheck = () => true;
+const positiveCheck = () => true;
+const negativeCheck = () => false;
 
 function createSchemaTypeChecker(
   type: OpenAPIV3.ArraySchemaObjectType | OpenAPIV3.NonArraySchemaObjectType,
-  additionalCheck: (schema: ReadonlyDeep<OpenAPIV3.SchemaObject>) => boolean = defaultCheck,
+  checkReferenceSchema: (schema: ReadonlyDeep<OpenAPIV3.ReferenceObject>) => boolean = negativeCheck,
+  checkNonReferenceSchema: (schema: ReadonlyDeep<OpenAPIV3.SchemaObject>) => boolean = positiveCheck,
 ) {
   return (schema: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>) => {
     const _schema = unwrapSchema(schema);
     const reference = isReferenceSchema(_schema);
 
-    return (reference && type === 'object') || (!reference && type === _schema.type && additionalCheck(_schema));
+    return (
+      (reference && type === 'object' && checkReferenceSchema(_schema)) ||
+      (!reference && type === _schema.type && checkNonReferenceSchema(_schema))
+    );
   };
 }
 
@@ -68,11 +75,12 @@ export const isIntegerSchema = createSchemaTypeChecker('integer');
 
 export const isMapSchema = createSchemaTypeChecker(
   'object',
+  negativeCheck,
   (schema) => !schema.properties && !!schema.additionalProperties,
 );
 
 export const isNumberSchema = createSchemaTypeChecker('number');
 
-export const isObjectSchema = createSchemaTypeChecker('object');
+export const isObjectSchema = createSchemaTypeChecker('object', positiveCheck);
 
 export const isStringSchema = createSchemaTypeChecker('string');

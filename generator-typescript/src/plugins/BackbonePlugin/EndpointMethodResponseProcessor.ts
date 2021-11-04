@@ -1,8 +1,9 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import SchemaProcessor from './SchemaProcessor.js';
-import type { BackbonePluginContext, TypeNodesBag } from './utils';
-import { defaultMediaType, emptySourceBag } from './utils.js';
+import { createSourceBag, TypeNodesBag } from './SourceBag.js';
+import type { BackbonePluginContext } from './utils.js';
+import { defaultMediaType } from './utils.js';
 
 export type EndpointMethodResponses = ReadonlyDeep<OpenAPIV3.ResponsesObject>;
 export type EndpointMethodResponse = ReadonlyDeep<OpenAPIV3.ResponseObject>;
@@ -24,13 +25,13 @@ export default class EndpointMethodResponseProcessor {
         return this.#processOk();
       default:
         this.#context.logger.warn(`Response code '${this.#code} is not supported'`);
-        return emptySourceBag as TypeNodesBag;
+        return createSourceBag();
     }
   }
 
   #processOk(): TypeNodesBag {
     const schema = this.#response.content?.[defaultMediaType]?.schema;
 
-    return schema ? new SchemaProcessor(schema).process() : (emptySourceBag as TypeNodesBag);
+    return schema ? new SchemaProcessor(schema).process() : createSourceBag();
   }
 }

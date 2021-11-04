@@ -1,9 +1,10 @@
 import { OpenAPIV3 } from 'openapi-types';
-import type { Mutable, ReadonlyDeep } from 'type-fest';
-import ts from 'typescript';
+import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
+import ts from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
-import type { MutableArray, BackbonePluginContext, SourceBag, StatementBag } from './utils.js';
+import { createSourceBag, SourceBag, StatementBag, updateSourceBagMutating } from './SourceBag.js';
+import { BackbonePluginContext, createSourceFile } from './utils.js';
 
 const collator = new Intl.Collator('en', { sensitivity: 'case' });
 
@@ -38,35 +39,13 @@ export default class EndpointProcessor {
     const importStatements = this.#prepareImportStatements(imports);
     const exportStatement = this.#prepareExportStatement(exports);
 
-    const sourceFile = ts.factory.createSourceFile(
-      [...importStatements, ...code, ...(exportStatement ? [exportStatement] : [])],
-      ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
-      ts.NodeFlags.None,
-    );
-
-    sourceFile.fileName = `${this.#name}.ts`;
-
-    return sourceFile;
+    return createSourceFile([...importStatements, ...code, ...(exportStatement ? [exportStatement] : [])], this.#name);
   }
 
   #mergeBags(): StatementBag {
     return this.#bags.reduce<SourceBag<Statement>>(
-      (acc, { imports, exports, code }) => {
-        (acc as Mutable<StatementBag>).imports = Object.assign(
-          acc.imports as Mutable<StatementBag['imports']>,
-          imports,
-        );
-        (acc as Mutable<StatementBag>).exports = Object.assign(
-          acc.exports as Mutable<StatementBag['exports']>,
-          exports,
-        );
-        (acc.code as MutableArray<StatementBag['code']>).push(...code);
-
-        return acc;
-      },
-      {
-        code: [],
-      },
+      (acc, { imports, exports, code }) => updateSourceBagMutating(acc, code, imports, exports),
+      createSourceBag(),
     );
   }
 

@@ -1,12 +1,12 @@
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
-import type { Mutable, ReadonlyDeep } from 'type-fest';
+import type { ReadonlyDeep } from 'type-fest';
 import type { Expression } from 'typescript';
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
-import type { BackbonePluginContext, MutableArray, StatementBag, TypeNodesBag } from './utils.js';
-import { emptySourceBag } from './utils.js';
+import { createSourceBag, StatementBag, TypeNodesBag, updateSourceBagMutating } from './SourceBag.js';
+import type { BackbonePluginContext } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -34,7 +34,7 @@ export default class EndpointMethodOperationProcessor {
         return this.#processPost(endpointName, endpointMethodName);
       default:
         logger.warn(`Processing ${this.#method.toUpperCase()} currently is not supported`);
-        return emptySourceBag as StatementBag;
+        return createSourceBag();
     }
   }
 
@@ -79,30 +79,25 @@ export default class EndpointMethodOperationProcessor {
       ]),
     );
 
-    return {
-      code: [declaration],
-      exports: { ...response.exports, [endpointMethodName]: uniqueName.text, ...parameters.exports },
-      imports: { ...response.imports, ...parameters.imports },
-    };
+    return createSourceBag(
+      [declaration],
+      { ...response.imports, ...parameters.imports },
+      { ...response.exports, [endpointMethodName]: uniqueName.text, ...parameters.exports },
+    );
   }
 
   #prepareResponse(): TypeNodesBag {
     return Object.entries(this.#operation.responses)
       .map(([code, response]) => new EndpointMethodResponseProcessor(code, response, this.#context).process())
       .reduce<TypeNodesBag>(
-        (acc, { code, exports, imports }) => {
-          if (!acc.code.some((element) => equal(element, code))) {
-            (acc.code as MutableArray<TypeNodesBag['code']>).push(...code);
-          }
-
-          (acc as Mutable<TypeNodesBag>).exports = Object.assign(acc.exports, exports);
-          (acc as Mutable<TypeNodesBag>).imports = Object.assign(acc.imports, imports);
-
-          return acc;
-        },
-        {
-          code: [],
-        },
+        (acc, { code, exports, imports }) =>
+          updateSourceBagMutating(
+            acc,
+            code.filter((element) => !acc.code.find((existingElement) => !equal(existingElement, element))),
+            imports,
+            exports,
+          ),
+        createSourceBag(),
       );
   }
 }

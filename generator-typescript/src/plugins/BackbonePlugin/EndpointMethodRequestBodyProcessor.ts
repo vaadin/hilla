@@ -1,11 +1,12 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import type { Mutable, ReadonlyDeep } from 'type-fest';
-import ts from 'typescript';
+import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
+import ts from 'typescript';
 import { isObjectSchema } from '../../core/Schema.js';
 import SchemaProcessor from './SchemaProcessor.js';
-import type { BackbonePluginContext, MutableArray, SourceBag } from './utils.js';
-import { defaultMediaType, emptySourceBag } from './utils.js';
+import { createSourceBag, SourceBag, updateSourceBagMutating } from './SourceBag.js';
+import type { BackbonePluginContext } from './utils.js';
+import { defaultMediaType } from './utils.js';
 
 export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject>;
 
@@ -31,38 +32,31 @@ export default class EndpointMethodRequestBodyProcessor {
   public process(): EndpointMethodRequestBodyProcessingResult {
     if (!this.#requestBody) {
       return {
-        parameters: emptySourceBag as ParameterDeclarationsBag,
+        parameters: createSourceBag(),
       };
     }
 
     const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
 
     return {
-      parameters: parameterData.reduce<ParameterDeclarationsBag>(
-        (acc, [name, schema]) => {
-          const { imports, code } = new SchemaProcessor(schema).process();
+      parameters: parameterData.reduce<ParameterDeclarationsBag>((acc, [name, schema]) => {
+        const { imports, code } = new SchemaProcessor(schema).process();
 
-          const parameterDeclaration = ts.factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            undefined,
-            name,
-            undefined,
-            ts.factory.createUnionTypeNode(code),
-          );
-
-          (acc as Mutable<ParameterDeclarationsBag>).imports = Object.assign(
-            acc.imports as Mutable<ParameterDeclarationsBag['imports']>,
-            imports,
-          );
-          (acc.code as MutableArray<ParameterDeclarationsBag['code']>).push(parameterDeclaration);
-
-          return acc;
-        },
-        {
-          code: [],
-        },
-      ),
+        return updateSourceBagMutating(
+          acc,
+          [
+            ts.factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              undefined,
+              name,
+              undefined,
+              ts.factory.createUnionTypeNode(code),
+            ),
+          ],
+          imports,
+        );
+      }, createSourceBag()),
       packedParameters: ts.factory.createObjectLiteralExpression(
         parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
       ),
