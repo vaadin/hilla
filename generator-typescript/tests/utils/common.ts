@@ -1,9 +1,9 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import Pino from 'pino';
-import Generator from '../src/core/Generator.js';
-import type { PluginConstructor } from '../src/core/Plugin.js';
-import PluginManager from '../src/core/PluginManager.js';
-import ReferenceResolver from '../src/core/ReferenceResolver.js';
+import Generator from '../../src/core/Generator.js';
+import type { PluginConstructor } from '../../src/core/Plugin.js';
+import PluginManager from '../../src/core/PluginManager.js';
+import ReferenceResolver from '../../src/core/ReferenceResolver.js';
 
 export function createGenerator(plugins: readonly PluginConstructor[]): Generator {
   const logger = Pino({

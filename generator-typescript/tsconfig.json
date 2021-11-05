@@ -15,5 +15,5 @@
     "useUnknownInCatchVariables": true
   },
   "include": ["scripts/**/*.{ts,js}", "src/**/*.{ts,js}", "tests/**/*.{ts,js}"],
-  "exclude": ["tests/**/*.sample.ts"]
+  "exclude": ["tests/**/*.snap.ts"]
 }

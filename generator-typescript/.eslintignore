@@ -1,1 +1,1 @@
-tests/**/*.sample.ts
+tests/**/*.snap.ts
