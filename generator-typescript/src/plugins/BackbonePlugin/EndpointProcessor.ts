@@ -101,7 +101,7 @@ export default class EndpointProcessor {
     });
   }
 
-  #prepareLibraryImport() {
+  #prepareLibraryImport(): Statement {
     return ts.factory.createImportDeclaration(
       undefined,
       undefined,
