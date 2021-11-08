@@ -47,6 +47,7 @@
     "eslint-config-vaadin": "^0.4.0",
     "eslint-plugin-chai-friendly": "^0.7.2",
     "lint-staged": "^11.2.3",
+    "micromatch": "^4.0.4",
     "mocha": "^9.1.3",
     "prettier": "^2.4.1",
     "simple-git-hooks": "^2.6.1",

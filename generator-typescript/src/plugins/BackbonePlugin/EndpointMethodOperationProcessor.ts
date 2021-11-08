@@ -1,38 +1,35 @@
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { Expression, Identifier } from 'typescript';
+import type { Expression, Statement, TypeNode } from 'typescript';
 import ts from 'typescript';
+import type DependencyManager from './DependencyManager.js';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
-import { createSourceBag, StatementBag, TypeNodesBag, updateSourceBagMutating } from './SourceBag.js';
 import type { BackbonePluginContext } from './utils.js';
+import { clientLib } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
-export type EndpointMethodOperationProcessorOptions = Readonly<{
-  libraryIdentifier: Identifier;
-}>;
-
 export default class EndpointMethodOperationProcessor {
   readonly #context: BackbonePluginContext;
+  readonly #dependencies: DependencyManager;
   readonly #method: OpenAPIV3.HttpMethods;
   readonly #operation: EndpointMethodOperation;
-  readonly #options: EndpointMethodOperationProcessorOptions;
 
   public constructor(
     method: OpenAPIV3.HttpMethods,
     operation: EndpointMethodOperation,
-    options: EndpointMethodOperationProcessorOptions,
+    dependencyManager: DependencyManager,
     context: BackbonePluginContext,
   ) {
     this.#context = context;
+    this.#dependencies = dependencyManager;
     this.#method = method;
     this.#operation = operation;
-    this.#options = options;
   }
 
-  public process(endpointName: string, endpointMethodName: string): StatementBag {
+  public process(endpointName: string, endpointMethodName: string): Statement | undefined {
     const { logger } = this.#context;
 
     switch (this.#method) {
@@ -41,13 +38,22 @@ export default class EndpointMethodOperationProcessor {
         return this.#processPost(endpointName, endpointMethodName);
       default:
         logger.warn(`Processing ${this.#method.toUpperCase()} currently is not supported`);
-        return createSourceBag();
+        return undefined;
     }
   }
 
-  #processPost(endpointName: string, endpointMethodName: string): StatementBag {
+  #prepareResponseType(): readonly TypeNode[] {
+    return Object.entries(this.#operation.responses)
+      .flatMap(([code, response]) =>
+        new EndpointMethodResponseProcessor(code, response, this.#dependencies, this.#context).process(),
+      )
+      .filter((value, index, arr) => arr.findIndex((v) => equal(v, value)) === index);
+  }
+
+  #processPost(endpointName: string, endpointMethodName: string): Statement {
     const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
+      this.#dependencies,
       this.#context,
     ).process();
 
@@ -60,49 +66,28 @@ export default class EndpointMethodOperationProcessor {
       clientCallExpression.push(packedParameters);
     }
 
-    const response = this.#prepareResponse();
+    const responseType = this.#prepareResponseType();
 
-    const { libraryIdentifier } = this.#options;
-    const uniqueName = ts.factory.createUniqueName(endpointMethodName);
+    const methodIdentifier = this.#dependencies.exports.register(endpointMethodName);
+    const clientLibIdentifier = this.#dependencies.imports.getIdentifier(clientLib.specifier, clientLib.path)!;
 
-    const declaration = ts.factory.createFunctionDeclaration(
+    return ts.factory.createFunctionDeclaration(
       undefined,
       [ts.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
       undefined,
-      uniqueName,
+      methodIdentifier,
       undefined,
-      parameters.code,
-      ts.factory.createTypeReferenceNode('Promise', [ts.factory.createUnionTypeNode(response.code)]),
+      parameters,
+      ts.factory.createTypeReferenceNode('Promise', [ts.factory.createUnionTypeNode(responseType)]),
       ts.factory.createBlock([
         ts.factory.createReturnStatement(
           ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(libraryIdentifier, ts.factory.createIdentifier('call')),
+            ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),
             undefined,
             clientCallExpression,
           ),
         ),
       ]),
     );
-
-    return createSourceBag(
-      [declaration],
-      { ...response.imports, ...parameters.imports },
-      { ...response.exports, [endpointMethodName]: uniqueName, ...parameters.exports },
-    );
-  }
-
-  #prepareResponse(): TypeNodesBag {
-    return Object.entries(this.#operation.responses)
-      .map(([code, response]) => new EndpointMethodResponseProcessor(code, response, this.#context).process())
-      .reduce<TypeNodesBag>(
-        (acc, { code, exports, imports }) =>
-          updateSourceBagMutating(
-            acc,
-            code.filter((element) => !acc.code.find((existingElement) => !equal(existingElement, element))),
-            imports,
-            exports,
-          ),
-        createSourceBag(),
-      );
   }
 }

@@ -1,5 +1,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
+import { readFile } from 'fs/promises';
 import Pino from 'pino';
+import { fileURLToPath, URL } from 'url';
 import Generator from '../../src/core/Generator.js';
 import type { PluginConstructor } from '../../src/core/Plugin.js';
 import PluginManager from '../../src/core/PluginManager.js';
@@ -17,4 +19,10 @@ export function createGenerator(plugins: readonly PluginConstructor[]): Generato
   plugins.forEach((plugin) => manager.add(plugin));
 
   return new Generator(parser, manager, logger);
+}
+
+export async function loadInput(name: string, importMeta: string): Promise<string> {
+  const jsonUrl = new URL(`./resources/${name}.json`, importMeta);
+
+  return await readFile(fileURLToPath(jsonUrl), 'utf8');
 }

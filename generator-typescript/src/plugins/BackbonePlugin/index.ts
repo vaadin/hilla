@@ -3,8 +3,10 @@ import type { SourceFile } from 'typescript';
 import Plugin from '../../core/Plugin.js';
 import type ReferenceResolver from '../../core/ReferenceResolver';
 import type SharedStorage from '../../core/SharedStorage';
+import BarrelProcessor from './BarrelProcessor.js';
 import EndpointProcessor from './EndpointProcessor.js';
-import type { BackbonePluginContext } from './utils';
+import { EntityProcessor } from './EntityProcessor.js';
+import type { BackbonePluginContext } from './utils.js';
 
 export default class BackbonePlugin extends Plugin {
   readonly #context: BackbonePluginContext;
@@ -23,9 +25,10 @@ export default class BackbonePlugin extends Plugin {
 
   public async execute(storage: SharedStorage): Promise<void> {
     const endpointSourceFiles = this.#processEndpoints(storage);
-    // this.#processEntities(storage);
+    const entitySourceFiles = this.#processEntities(storage);
+    const barrelFile = new BarrelProcessor(endpointSourceFiles).process();
 
-    storage.sources.push(...endpointSourceFiles);
+    storage.sources.push(barrelFile, ...endpointSourceFiles, ...entitySourceFiles);
   }
 
   #processEndpoints(storage: SharedStorage): readonly SourceFile[] {
@@ -53,11 +56,11 @@ export default class BackbonePlugin extends Plugin {
     return Array.from(endpoints.values(), (processor) => processor.process());
   }
 
-  // #processEntities(storage: SharedStorage): void {
-  //   if (storage.api.components?.schemas) {
-  //     for (const schema of Object.entries(storage.api.components.schemas)) {
-  //       new EntityProcessor(schema as EntityInfoEntry, files).process();
-  //     }
-  //   }
-  // }
+  #processEntities(storage: SharedStorage): readonly SourceFile[] {
+    return storage.api.components?.schemas
+      ? Object.entries(storage.api.components?.schemas).map(([name, component]) =>
+          new EntityProcessor(name, component, this.#context).process(),
+        )
+      : [];
+  }
 }
