@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -235,15 +234,8 @@ public class FusionController {
                     endpointName, methodName,
                     VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER);
             getLogger().error(errorMessage, e);
-            try {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(createResponseErrorObject(errorMessage));
-            } catch (JsonProcessingException unexpected) {
-                throw new IllegalStateException(String.format(
-                        "Unexpected: Failed to serialize a plain Java string '%s' into a JSON. "
-                                + "Double check the provided mapper's configuration.",
-                        errorMessage), unexpected);
-            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createResponseErrorObject(errorMessage));
         } finally {
             CurrentInstance.set(VaadinRequest.class, null);
         }
@@ -384,10 +376,10 @@ public class FusionController {
         }
     }
 
-    private String createResponseErrorObject(String errorMessage)
-            throws JsonProcessingException {
-        return vaadinEndpointMapper.writeValueAsString(Collections.singletonMap(
-                EndpointException.ERROR_MESSAGE_FIELD, errorMessage));
+    private String createResponseErrorObject(String errorMessage) {
+        ObjectNode objectNode = vaadinEndpointMapper.createObjectNode();
+        objectNode.put(EndpointException.ERROR_MESSAGE_FIELD, errorMessage);
+        return objectNode.toString();
     }
 
     private String listMethodParameterTypes(Type[] javaParameters) {
