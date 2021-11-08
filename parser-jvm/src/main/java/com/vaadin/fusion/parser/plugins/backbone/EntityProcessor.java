@@ -1,6 +1,7 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 
 class EntityProcessor extends Processor {
     private static String decapitalize(String string) {
@@ -54,6 +56,21 @@ class EntityProcessor extends Processor {
         }
 
         public Schema<?> getValue() {
+            return entity.get().isEnum() ? processEnum() : processClass();
+        }
+
+        private Schema<?> processEnum() {
+            StringSchema schema = new StringSchema();
+
+            schema.setEnum(entity.getFields().stream()
+                    .filter(field -> field.get().isPublic())
+                    .map(field -> field.get().getName())
+                    .collect(Collectors.toList()));
+
+            return schema;
+        }
+
+        private Schema<?> processClass() {
             ObjectSchema schema = new ObjectSchema();
 
             entity.getMethods().stream()
