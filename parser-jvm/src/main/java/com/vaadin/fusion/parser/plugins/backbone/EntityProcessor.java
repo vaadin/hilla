@@ -69,7 +69,7 @@ class EntityProcessor extends Processor {
 
         public Schema<?> getValue() {
             return entity.get().isEnum() ? processEnum()
-                    : processClassWithSuperClasses();
+                    : processExtendedClass();
         }
 
         private Schema<?> processEnum() {
@@ -83,8 +83,8 @@ class EntityProcessor extends Processor {
             return schema;
         }
 
-        private Schema<?> processClassWithSuperClasses() {
-            Schema<?> processed = processDirectClass();
+        private Schema<?> processExtendedClass() {
+            Schema<?> processed = processClass();
 
             Optional<Schema<?>> result = entity.getSuperClass()
                     .map(cls -> new ComposedSchema()
@@ -96,7 +96,7 @@ class EntityProcessor extends Processor {
             return result.orElse(processed);
         }
 
-        private Schema<?> processDirectClass() {
+        private Schema<?> processClass() {
             ObjectSchema schema = new ObjectSchema();
 
             entity.getMethodsStream()
