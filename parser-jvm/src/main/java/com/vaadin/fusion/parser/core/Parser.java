@@ -21,7 +21,7 @@ public class Parser {
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
             List<RelativeClassInfo> endpoints) {
         endpoints.stream().flatMap(endpoint -> endpoint.getMethods().stream())
-                .flatMap(method -> method.getParameters().stream()).findFirst()
+                .flatMap(RelativeMethodInfo::getParametersStream).findFirst()
                 .ifPresent((parameter) -> {
                     if (parameter.get().getName() == null) {
                         throw new ParserException(
@@ -53,32 +53,34 @@ public class Parser {
         private final List<RelativeClassInfo> endpoints;
         private final List<RelativeClassInfo> entities;
 
-        EntitiesCollector(ScanResult result) {
+        public EntitiesCollector(ScanResult result) {
             endpoints = result
                     .getClassesWithAnnotation(
                             config.getApplication().getEndpointAnnotation())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
 
-            entities = endpoints.stream()
-                    .flatMap(RelativeClassInfo::getDependencies)
-                    .collect(Collectors.toList());
+            entities = endpoints.stream().flatMap(
+                    cls -> cls.getInheritanceChain().getDependenciesStream())
+                    .distinct().collect(Collectors.toList());
 
+            // ATTENTION: This loop mutates the collection during processing!
+            // It is necessary to collect all endpoint dependencies + dependencies of dependencies.
+            // Be careful changing it: the endless loop could happen.
             for (int i = 0; i < entities.size(); i++) {
                 RelativeClassInfo entity = entities.get(i);
 
-                entity.getDependencies().filter(dependency -> entities.stream()
-                        .noneMatch(d -> Objects.equals(d.get().getName(),
-                                dependency.get().getName())))
+                entity.getDependenciesStream()
+                        .filter(e -> !entities.contains(e))
                         .forEach(entities::add);
             }
         }
 
-        List<RelativeClassInfo> getEndpoints() {
+        public List<RelativeClassInfo> getEndpoints() {
             return endpoints;
         }
 
-        List<RelativeClassInfo> getEntities() {
+        public List<RelativeClassInfo> getEntities() {
             return entities;
         }
     }

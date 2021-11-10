@@ -1,5 +1,7 @@
 package com.vaadin.fusion.parser.core;
 
+import static com.vaadin.fusion.parser.core.ParserUtils.isJDKClass;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,14 +51,12 @@ public final class ClassRefRelativeTypeSignature
         Stream<ClassInfo> typeArgumentsDependencies = signature
                 .getTypeArguments().stream()
                 .flatMap(argument -> RelativeTypeSignature
-                        .resolve(argument.getTypeSignature()));
+                        .resolve(argument.getTypeSignature()))
+                .distinct();
 
-        // ClassInfo for all native class refs (like List<>, Set<>, etc.),
-        // is null. So if it is not null, it is not a standard stuff, so we can
-        // resolve it directly. Otherwise, we resolve their type arguments.
-        return classInfo != null
+        return classInfo != null && !isJDKClass(classInfo.getName())
                 ? Stream.of(Stream.of(classInfo), typeArgumentsDependencies)
-                        .flatMap(Function.identity())
+                        .flatMap(Function.identity()).distinct()
                 : typeArgumentsDependencies;
     }
 

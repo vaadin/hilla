@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.core;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -28,5 +29,9 @@ public class RelativeTypeParameter
 
     public List<RelativeTypeSignature> getInterfaceBounds() {
         return interfaceBounds;
+    }
+
+    public Stream<RelativeTypeSignature> getInterfaceBoundsStream() {
+        return interfaceBounds.stream();
     }
 }

@@ -20,8 +20,8 @@ public class RelativeMethodParameterInfo
     }
 
     @Override
-    public Stream<RelativeClassInfo> getDependencies() {
-        return getType().getDependencies();
+    public Stream<RelativeClassInfo> getDependenciesStream() {
+        return getType().getDependenciesStream();
     }
 
     public RelativeTypeSignature getType() {

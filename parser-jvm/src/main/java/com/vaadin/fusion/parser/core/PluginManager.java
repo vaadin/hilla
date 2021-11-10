@@ -32,7 +32,7 @@ final class PluginManager {
                 .collect(Collectors.toCollection(() -> plugins));
     }
 
-    void execute(List<RelativeClassInfo> endpoints,
+    public void execute(List<RelativeClassInfo> endpoints,
             List<RelativeClassInfo> entities, SharedStorage storage) {
         for (Plugin plugin : plugins) {
             plugin.execute(endpoints, entities, storage);

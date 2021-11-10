@@ -42,4 +42,9 @@ abstract class AbstractRelative<T, P extends Relative<?>>
     public int hashCode() {
         return origin.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return origin.toString();
+    }
 }

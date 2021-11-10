@@ -68,8 +68,8 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
     HierarchicalTypeSignature get();
 
     @Override
-    default Stream<RelativeClassInfo> getDependencies() {
-        return resolve(get()).distinct().map(RelativeClassInfo::new);
+    default Stream<RelativeClassInfo> getDependenciesStream() {
+        return resolve(get()).map(RelativeClassInfo::new);
     }
 
     default boolean isArray() {

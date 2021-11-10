@@ -19,8 +19,8 @@ public class RelativeFieldInfo
     }
 
     @Override
-    public Stream<RelativeClassInfo> getDependencies() {
-        return type.getDependencies();
+    public Stream<RelativeClassInfo> getDependenciesStream() {
+        return type.getDependenciesStream();
     }
 
     public RelativeTypeSignature getType() {

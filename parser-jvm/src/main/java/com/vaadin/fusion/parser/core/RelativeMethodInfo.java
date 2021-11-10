@@ -29,14 +29,18 @@ public class RelativeMethodInfo
     }
 
     @Override
-    public Stream<RelativeClassInfo> getDependencies() {
-        return Stream.of(getResultDependencies(), getParameterDependencies())
+    public Stream<RelativeClassInfo> getDependenciesStream() {
+        return Stream.of(getResultDependenciesStream(), getParameterDependenciesStream())
                 .flatMap(Function.identity()).distinct();
     }
 
-    public Stream<RelativeClassInfo> getParameterDependencies() {
-        return getParameters().stream()
-                .flatMap(RelativeMethodParameterInfo::getDependencies)
+    public List<RelativeClassInfo> getParameterDependencies() {
+        return getParameterDependenciesStream().collect(Collectors.toList());
+    }
+
+    public Stream<RelativeClassInfo> getParameterDependenciesStream() {
+        return parameters.stream()
+                .flatMap(RelativeMethodParameterInfo::getDependenciesStream)
                 .distinct();
     }
 
@@ -44,8 +48,16 @@ public class RelativeMethodInfo
         return parameters;
     }
 
-    public Stream<RelativeClassInfo> getResultDependencies() {
-        return getResultType().getDependencies();
+    public Stream<RelativeMethodParameterInfo> getParametersStream() {
+        return parameters.stream();
+    }
+
+    public List<RelativeClassInfo> getResultDependencies() {
+        return getResultDependenciesStream().collect(Collectors.toList());
+    }
+
+    public Stream<RelativeClassInfo> getResultDependenciesStream() {
+        return getResultType().getDependenciesStream();
     }
 
     public RelativeTypeSignature getResultType() {
