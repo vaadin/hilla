@@ -2,7 +2,9 @@ package com.vaadin.fusion.parser.plugins.backbone;
 
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -82,22 +84,16 @@ class EntityProcessor extends Processor {
         }
 
         private Schema<?> processClassWithSuperClasses() {
-            List<RelativeClassInfo> superClasses = entity.getSuperClasses();
+            Schema<?> processed = processDirectClass();
 
-            if (superClasses.size() == 0) {
-                return processDirectClass();
-            }
+            Optional<Schema<?>> result = entity.getSuperClass()
+                    .map(cls -> new ComposedSchema()
+                            .anyOf(Arrays.asList(
+                                    new Schema<>().$ref(COMPONENTS_SCHEMAS_REF
+                                            + cls.get().getName()),
+                                    processed)));
 
-            ComposedSchema schema = new ComposedSchema();
-
-            for (RelativeClassInfo cls : superClasses) {
-                schema.addAnyOfItem(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + cls.get().getName()));
-            }
-
-            schema.addAnyOfItem(processDirectClass());
-
-            return schema;
+            return result.orElse(processed);
         }
 
         private Schema<?> processDirectClass() {

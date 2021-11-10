@@ -50,9 +50,6 @@
             "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyParentModel"
           },
           {
-            "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyGrandParentModel"
-          },
-          {
             "type" : "object",
             "properties" : {
               "name" : {

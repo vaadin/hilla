@@ -24,6 +24,7 @@ public class RelativeClassInfo
     private final List<RelativeFieldInfo> fields;
     private final List<RelativeClassInfo> innerClasses;
     private final List<RelativeMethodInfo> methods;
+    private final RelativeClassInfo superClass;
     private final List<RelativeClassInfo> superClasses;
 
     public RelativeClassInfo(@Nonnull ClassInfo origin) {
@@ -42,6 +43,9 @@ public class RelativeClassInfo
         methods = getMembers(ClassInfo::getMethodInfo, RelativeMethodInfo::new);
         superClasses = getMembers(ClassInfo::getSuperclasses,
                 (member) -> !isJDKClass(member), RelativeClassInfo::new);
+
+        ClassInfo originSuperClass = origin.getSuperclass();
+        superClass = originSuperClass != null ? new RelativeClassInfo(originSuperClass) : null;
 
         // Should be the latest
         chain = new InheritanceChain();
@@ -184,6 +188,10 @@ public class RelativeClassInfo
     @Override
     public Optional<RelativeClassInfo> getParent() {
         return Optional.ofNullable(parent);
+    }
+
+    public Optional<RelativeClassInfo> getSuperClass() {
+        return Optional.ofNullable(superClass);
     }
 
     public List<RelativeClassInfo> getSuperClasses() {
