@@ -1,0 +1,108 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Vaadin Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Vaadin Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "ComplexHierarchyEndpoint"
+    }
+  ],
+  "paths" : {
+    "/ComplexHierarchyEndpoint/getModel" : {
+      "post" : {
+        "tags" : [
+          "ComplexHierarchyEndpoint"
+        ],
+        "operationId" : "ComplexHierarchyEndpoint_getModel_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyModel" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyParentModel"
+          },
+          {
+            "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyGrandParentModel"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string",
+                "nullable" : true
+              },
+              "id" : {
+                "type" : "string",
+                "nullable" : true
+              },
+              "build" : {
+                "type" : "integer",
+                "format" : "int32",
+                "nullable" : false
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyParentModel" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyGrandParentModel"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "nullable" : true
+              },
+              "build" : {
+                "type" : "integer",
+                "format" : "int32",
+                "nullable" : false
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel.ComplexHierarchyGrandParentModel" : {
+        "type" : "object",
+        "properties" : {
+          "build" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : false
+          }
+        }
+      }
+    }
+  }
+}

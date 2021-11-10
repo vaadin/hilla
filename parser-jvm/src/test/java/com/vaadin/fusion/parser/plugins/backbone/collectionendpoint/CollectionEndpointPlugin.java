@@ -11,7 +11,7 @@ import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
 public class CollectionEndpointPlugin extends BackbonePlugin {
     private final PluginElementsFilter filter = new PluginElementsFilter(
-            "CollectionEndpoint");
+            "Collection");
 
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,

@@ -54,19 +54,19 @@ public class DependencyPlugin implements Plugin {
 
         List<String> collectDependencyMemberNames() {
             return Stream.of(
-                    entities.stream().flatMap(cls -> cls.getFields().stream())
+                    entities.stream().flatMap(RelativeClassInfo::getFieldsStream)
                             .map(field -> field.get().getName()),
-                    entities.stream().flatMap(cls -> cls.getMethods().stream())
+                    entities.stream().flatMap(RelativeClassInfo::getMethodsStream)
                             .map(method -> method.get().getName()),
                     entities.stream()
-                            .flatMap(cls -> cls.getInnerClasses().stream())
+                            .flatMap(RelativeClassInfo::getInnerClassesStream)
                             .map(cls -> cls.get().getName()))
                     .flatMap(Function.identity()).collect(Collectors.toList());
         }
 
         List<String> collectEndpointDirectDependencyNames() {
             return endpoints.stream()
-                    .flatMap(RelativeClassInfo::getDependencies)
+                    .flatMap(RelativeClassInfo::getDependenciesStream)
                     .map(dependency -> dependency.get().getName())
                     .collect(Collectors.toList());
         }

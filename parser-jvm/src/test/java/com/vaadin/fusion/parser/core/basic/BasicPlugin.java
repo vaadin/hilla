@@ -24,11 +24,11 @@ public class BasicPlugin implements Plugin {
         storage.getPluginStorage().put(STORAGE_KEY, filter.apply(endpoints)
                 .stream()
                 .flatMap(endpoint -> Stream
-                        .of(endpoint.getFields().stream()
+                        .of(endpoint.getFieldsStream()
                                 .map(field -> field.get().getName()),
-                                endpoint.getMethods().stream()
+                                endpoint.getMethodsStream()
                                         .map(method -> method.get().getName()),
-                                endpoint.getInnerClasses().stream()
+                                endpoint.getInnerClassesStream()
                                         .map(cls -> cls.get().getName()))
                         .flatMap(Function.identity()))
                 .collect(Collectors.toList()));

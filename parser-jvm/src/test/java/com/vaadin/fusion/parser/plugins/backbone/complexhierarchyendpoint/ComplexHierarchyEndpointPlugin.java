@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.enumtype;
+package com.vaadin.fusion.parser.plugins.backbone.complexhierarchyendpoint;
 
 import java.util.List;
 
@@ -9,14 +9,14 @@ import com.vaadin.fusion.parser.core.SharedStorage;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
-public class EnumEndpointPlugin extends BackbonePlugin {
+public class ComplexHierarchyEndpointPlugin extends BackbonePlugin {
     private final PluginElementsFilter filter = new PluginElementsFilter(
-        "Enum");
+            "ComplexHierarchy");
 
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,
-                        @Nonnull List<RelativeClassInfo> entities,
-                        @Nonnull SharedStorage storage) {
+            @Nonnull List<RelativeClassInfo> entities,
+            @Nonnull SharedStorage storage) {
         super.execute(filter.apply(endpoints), filter.apply(entities), storage);
     }
 }

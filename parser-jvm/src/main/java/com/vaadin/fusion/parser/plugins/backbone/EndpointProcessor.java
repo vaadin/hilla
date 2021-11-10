@@ -39,7 +39,7 @@ class EndpointProcessor extends Processor {
     }
 
     private Paths preparePaths() {
-        return classes.stream().flatMap(cls -> cls.getMethods().stream())
+        return classes.stream().flatMap(cls -> cls.getInheritanceChain().getMethodsStream())
                 .map(MethodProcessor::new)
                 .collect(Collectors.toMap(MethodProcessor::getPathKey,
                         MethodProcessor::getPathItem, (o1, o2) -> o1,

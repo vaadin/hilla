@@ -1,5 +1,7 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
+import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +12,7 @@ import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -34,12 +37,19 @@ class EntityProcessor extends Processor {
     private Components prepareComponents() {
         Components components = new Components();
 
-        for (RelativeClassInfo entity : classes) {
-            ComponentSchemaProcessor processor = new ComponentSchemaProcessor(
-                    entity);
+        classes.stream()
+                .flatMap(cls -> cls.getInheritanceChain().getClassesStream())
+                .forEach(entity -> {
+                    if (components.getSchemas() == null
+                            || (!components.getSchemas()
+                                    .containsKey(entity.get().getName()))) {
+                        ComponentSchemaProcessor processor = new ComponentSchemaProcessor(
+                                entity);
 
-            components.addSchemas(processor.getKey(), processor.getValue());
-        }
+                        components.addSchemas(processor.getKey(),
+                                processor.getValue());
+                    }
+                });
 
         return components;
     }
@@ -56,13 +66,14 @@ class EntityProcessor extends Processor {
         }
 
         public Schema<?> getValue() {
-            return entity.get().isEnum() ? processEnum() : processClass();
+            return entity.get().isEnum() ? processEnum()
+                    : processClassWithSuperClasses();
         }
 
         private Schema<?> processEnum() {
             StringSchema schema = new StringSchema();
 
-            schema.setEnum(entity.getFields().stream()
+            schema.setEnum(entity.getFieldsStream()
                     .filter(field -> field.get().isPublic())
                     .map(field -> field.get().getName())
                     .collect(Collectors.toList()));
@@ -70,10 +81,29 @@ class EntityProcessor extends Processor {
             return schema;
         }
 
-        private Schema<?> processClass() {
+        private Schema<?> processClassWithSuperClasses() {
+            List<RelativeClassInfo> superClasses = entity.getSuperClasses();
+
+            if (superClasses.size() == 0) {
+                return processDirectClass();
+            }
+
+            ComposedSchema schema = new ComposedSchema();
+
+            for (RelativeClassInfo cls : superClasses) {
+                schema.addAnyOfItem(new Schema<>()
+                        .$ref(COMPONENTS_SCHEMAS_REF + cls.get().getName()));
+            }
+
+            schema.addAnyOfItem(processDirectClass());
+
+            return schema;
+        }
+
+        private Schema<?> processDirectClass() {
             ObjectSchema schema = new ObjectSchema();
 
-            entity.getMethods().stream()
+            entity.getMethodsStream()
                     .filter(method -> method.get().getName().startsWith("get"))
                     .forEach(method -> {
                         ComponentSchemaPropertyProcessor processor = new ComponentSchemaPropertyProcessor(

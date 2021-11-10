@@ -21,13 +21,13 @@ import com.vaadin.fusion.parser.testutils.Endpoint;
 
 @Endpoint
 public class EnumEndpoint {
-    public enum MyEnum {
+    public enum EnumEntity {
         ENUM1(1), ENUM2(2), ENUM_2(2), HELLO_WORLD(3), _HELLO(
                 4), MANY_MANY_WORDS(5);
 
         private final int value;
 
-        MyEnum(int value) {
+        EnumEntity(int value) {
             this.value = value;
         }
 
@@ -36,21 +36,21 @@ public class EnumEndpoint {
         }
     }
 
-    private MyEnum value = MyEnum.ENUM1;
+    private EnumEntity value = EnumEntity.ENUM1;
 
-    public MyEnum getEnum() {
+    public EnumEntity getEnum() {
         return value;
     }
 
-    public void setEnum(MyEnum value) {
+    public void setEnum(EnumEntity value) {
         this.value = value;
     }
 
-    public MyEnum echoEnum(MyEnum value) {
+    public EnumEntity echoEnum(EnumEntity value) {
         return value;
     }
 
-    public List<MyEnum> echoListEnum(List<MyEnum> enumList) {
+    public List<EnumEntity> echoListEnum(List<EnumEntity> enumList) {
         return enumList;
     }
 }
