@@ -25,7 +25,7 @@ export default class BarrelProcessor {
 
     return createSourceFile(
       [...importStatements, exportStatement].filter(Boolean) as readonly Statement[],
-      './endpoints.ts',
+      'endpoints',
     );
   }
 }

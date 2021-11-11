@@ -1,9 +1,8 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
-import Schema from '../../core/Schema.js';
 import type DependencyManager from './DependencyManager.js';
-import SchemaProcessor from './SchemaProcessor.js';
+import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';
 
@@ -41,6 +40,6 @@ export default class EndpointMethodResponseProcessor {
   #processOk(): readonly TypeNode[] {
     const rawSchema = this.#response.content?.[defaultMediaType]?.schema;
 
-    return rawSchema ? new SchemaProcessor(Schema.of(rawSchema), this.#dependencies).process() : [];
+    return rawSchema ? new TypeSchemaProcessor(rawSchema, this.#dependencies).process() : [];
   }
 }

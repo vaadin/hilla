@@ -1,3 +1,5 @@
+export type Nullified<T, K extends keyof T> = T & { [P in K]: undefined };
+
 export function simplifyFullyQualifiedName(name: string): string {
   return name.substring(name.lastIndexOf(name.includes('$') ? '$' : '.') + 1, name.length);
 }

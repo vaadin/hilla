@@ -1,13 +1,23 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
-import type { SourceFile, Statement } from 'typescript';
+import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
-import Schema, { EnumSchema, ObjectSchema } from '../../core/Schema.js';
+import type { EnumSchema, ReferenceSchema, Schema } from '../../core/Schema.js';
+import {
+  convertReferenceSchemaToPath,
+  convertReferenceSchemaToSpecifier,
+  decomposeSchema,
+  isComposedSchema,
+  isEmptyObject,
+  isEnumSchema,
+  isNullableSchema,
+  isObjectSchema,
+  isReferenceSchema,
+  NonEmptyObjectSchema,
+} from '../../core/Schema.js';
 import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName } from '../../core/utils.js';
 import DependencyManager from './DependencyManager.js';
-import SchemaProcessor from './SchemaProcessor.js';
-import { createSourceFile } from './utils.js';
+import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
+import { createSourceFile } from './utils.js';
 
 const exportDefaultModifiers = [
   ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
@@ -22,12 +32,8 @@ export class EntityProcessor {
   readonly #name: string;
   readonly #path: string;
 
-  public constructor(
-    name: string,
-    component: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
-    context: BackbonePluginContext,
-  ) {
-    this.#component = Schema.of(component);
+  public constructor(name: string, component: Schema, context: BackbonePluginContext) {
+    this.#component = component;
     this.#context = context;
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
@@ -36,7 +42,9 @@ export class EntityProcessor {
 
   public process(): SourceFile {
     this.#context.logger.info(`Processing entity: ${this.#name}`);
-    const declaration = this.#component.isEnum() ? this.#processEnum() : this.#processClass();
+    const declaration = isEnumSchema(this.#component)
+      ? this.#processEnum(this.#component)
+      : this.#processExtendedClass(this.#component);
 
     const { imports, exports } = this.#dependencies;
 
@@ -49,48 +57,95 @@ export class EntityProcessor {
     );
   }
 
-  #processClass(): Statement {
+  #processExtendedClass(schema: Schema): Statement | undefined {
+    const { logger } = this.#context;
+
+    if (isComposedSchema(schema)) {
+      const decomposed = decomposeSchema(schema);
+
+      if (decomposed.length > 2) {
+        logger.error(schema, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
+        return undefined;
+      }
+
+      const [parent, child] = decomposed;
+
+      if (!isReferenceSchema(parent)) {
+        logger.error(parent, 'Only reference schema allowed for parent class');
+        return undefined;
+      }
+
+      const declaration = this.#processClass(child);
+      const identifier = this.#processParentClass(parent);
+
+      return (
+        declaration &&
+        ts.factory.updateInterfaceDeclaration(
+          declaration,
+          undefined,
+          undefined,
+          declaration.name,
+          undefined,
+          [
+            ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+              ts.factory.createExpressionWithTypeArguments(identifier, undefined),
+            ]),
+          ],
+          declaration.members,
+        )
+      );
+    }
+
+    return this.#processClass(schema);
+  }
+
+  #processClass(schema: Schema): InterfaceDeclaration | undefined {
+    if (!isObjectSchema(schema)) {
+      this.#context.logger.error(schema, `The component is not an object: ${this.#fullyQualifiedName}`);
+      return undefined;
+    }
+
+    if (isEmptyObject(schema)) {
+      this.#context.logger.error(`The component has no properties: ${this.#fullyQualifiedName}`);
+      return undefined;
+    }
+
     return ts.factory.createInterfaceDeclaration(
       undefined,
       exportDefaultModifiers,
       this.#name,
       undefined,
       undefined,
-      this.#processTypeElements(),
+      this.#processTypeElements(schema as NonEmptyObjectSchema),
     );
   }
 
-  #processEnum(): Statement {
+  #processEnum({ enum: members }: EnumSchema): Statement {
     return ts.factory.createEnumDeclaration(
       undefined,
       exportDefaultModifiers,
       this.#name,
-      (this.#component as EnumSchema).members?.map((member) =>
-        ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member)),
-      ) ?? [],
+      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
     );
   }
 
-  #processTypeElements(): readonly TypeElement[] {
-    if (!this.#component.isObject()) {
-      this.#context.logger.warn(`The component is not an object: ${this.#fullyQualifiedName}`);
-      return [];
-    }
-
-    if ((this.#component as ObjectSchema).isEmptyObject()) {
-      this.#context.logger.warn(`The component has no properties: ${this.#fullyQualifiedName}`);
-      return [];
-    }
-
-    return Array.from((this.#component as ObjectSchema).properties!, ([name, schema]) => {
-      const [type] = new SchemaProcessor(schema, this.#dependencies).process();
+  #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
+    return Object.entries(properties).map(([name, schema]) => {
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
       return ts.factory.createPropertySignature(
         undefined,
         name,
-        schema.isNullable() ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+        isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
         type,
       );
     });
+  }
+
+  #processParentClass(schema: ReferenceSchema): Identifier {
+    const specifier = convertReferenceSchemaToSpecifier(schema);
+    const path = convertReferenceSchemaToPath(schema);
+
+    return this.#dependencies.imports.register(specifier, path, true);
   }
 }

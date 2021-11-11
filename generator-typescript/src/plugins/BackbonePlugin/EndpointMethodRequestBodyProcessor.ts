@@ -2,9 +2,9 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
 import ts from 'typescript';
-import Schema from '../../core/Schema.js';
+import { isEmptyObject, isObjectSchema, NonEmptyObjectSchema, Schema } from '../../core/Schema.js';
 import type DependencyManager from './DependencyManager.js';
-import SchemaProcessor from './SchemaProcessor.js';
+import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';
 
@@ -41,7 +41,7 @@ export default class EndpointMethodRequestBodyProcessor {
 
     return {
       parameters: parameterData.map(([name, schema]) => {
-        const nodes = new SchemaProcessor(schema, this.#dependencies).process();
+        const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
         return ts.factory.createParameterDeclaration(
           undefined,
@@ -67,12 +67,10 @@ export default class EndpointMethodRequestBodyProcessor {
 
     const { resolver, logger } = this.#context;
 
-    const resolvedSchema = Schema.of(resolver.resolve(basicSchema));
+    const resolvedSchema = resolver.resolve(basicSchema);
 
-    if (resolvedSchema.isObject() && !resolvedSchema.isEmptyObject()) {
-      const { properties } = resolvedSchema;
-
-      return properties ? [...properties] : [];
+    if (isObjectSchema(resolvedSchema) && !isEmptyObject(resolvedSchema)) {
+      return Object.entries((resolvedSchema as NonEmptyObjectSchema).properties);
     }
 
     logger.warn("A schema provided for endpoint method's 'requestBody' is not supported");
