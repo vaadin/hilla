@@ -7,6 +7,8 @@ import type { PluginConstructor } from '../../src/core/Plugin.js';
 import PluginManager from '../../src/core/PluginManager.js';
 import ReferenceResolver from '../../src/core/ReferenceResolver.js';
 
+export const pathBase = './com/vaadin/fusion/parser/plugins/backbone';
+
 export function createGenerator(plugins: readonly PluginConstructor[]): Generator {
   const logger = Pino({
     name: 'tsgen-test',
@@ -24,5 +26,5 @@ export function createGenerator(plugins: readonly PluginConstructor[]): Generato
 export async function loadInput(name: string, importMeta: string): Promise<string> {
   const jsonUrl = new URL(`./resources/${name}.json`, importMeta);
 
-  return await readFile(fileURLToPath(jsonUrl), 'utf8');
+  return readFile(fileURLToPath(jsonUrl), 'utf8');
 }
