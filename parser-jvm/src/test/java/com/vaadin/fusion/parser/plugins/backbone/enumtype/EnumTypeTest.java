@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
-import com.vaadin.fusion.parser.testutils.Endpoint;
+import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.testutils.ResourceLoader;
 
 import io.swagger.v3.core.util.Json;
@@ -36,7 +36,7 @@ public class EnumTypeTest {
         ParserConfig config = new ParserConfig.Builder()
             .classPath(targetDir.toString())
             .endpointAnnotation(Endpoint.class.getName())
-            .usePlugin(EnumTypePlugin.class.getName()).finish();
+            .usePlugin(BackbonePlugin.class.getName()).finish();
 
         Parser parser = new Parser(config);
         parser.execute();

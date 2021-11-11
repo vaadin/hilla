@@ -17,8 +17,6 @@ package com.vaadin.fusion.parser.plugins.backbone.enumtype;
 
 import java.util.List;
 
-import com.vaadin.fusion.parser.testutils.Endpoint;
-
 @Endpoint
 public class EnumTypeEndpoint {
     public enum EnumEntity {

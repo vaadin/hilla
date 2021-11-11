@@ -16,15 +16,12 @@
 package com.vaadin.fusion.parser.plugins.backbone.complexhierarchy;
 
 import com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel;
-import com.vaadin.fusion.parser.testutils.Endpoint;
 
 @Endpoint
 public class ComplexHierarchyEndpoint {
-
     // Using ComplexHierarchyModel from another package is intentional here to verify the
     // generator's parsing logic for that case
     public ComplexHierarchyModel getModel() {
         return new ComplexHierarchyModel();
     }
-
 }

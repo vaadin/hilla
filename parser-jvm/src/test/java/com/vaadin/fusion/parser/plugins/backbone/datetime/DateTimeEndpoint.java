@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.fusion.parser.testutils.Endpoint;
-
 @Endpoint
 public class DateTimeEndpoint {
     public Instant echoInstant(Instant instant) {

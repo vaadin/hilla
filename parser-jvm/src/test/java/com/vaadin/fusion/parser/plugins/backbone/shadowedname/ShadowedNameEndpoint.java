@@ -2,8 +2,6 @@ package com.vaadin.fusion.parser.plugins.backbone.shadowedname;
 
 import java.util.ArrayList;
 
-import com.vaadin.fusion.parser.testutils.Endpoint;
-
 @Endpoint
 public class ShadowedNameEndpoint {
 
