@@ -11,7 +11,7 @@ import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
 public class EnumTypePlugin extends BackbonePlugin {
     private final PluginElementsFilter filter = new PluginElementsFilter(
-        "Enum");
+        "EnumType");
 
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,

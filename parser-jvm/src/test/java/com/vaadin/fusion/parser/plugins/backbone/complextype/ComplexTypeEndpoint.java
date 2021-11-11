@@ -1,5 +1,7 @@
 package com.vaadin.fusion.parser.plugins.backbone.complextype;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +19,12 @@ public class ComplexTypeEndpoint {
     }
 
     public static class ComplexTypeModel {
-        List<Map<String, List<String>>> complexList;
-        Map<String, List<String>> complexMap;
+        public List<Map<String, List<String>>> getComplexList() {
+            return new ArrayList<>();
+        }
+
+        public Map<String, List<String>> getComplexMap() {
+            return new HashMap<>();
+        }
     }
 }
