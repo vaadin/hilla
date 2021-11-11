@@ -20,7 +20,7 @@ export default function snapshotMatcher(chai: Chai.ChaiStatic, utils: Chai.ChaiU
     // eslint-disable-next-line @typescript-eslint/ban-types
     async function toMatchSnapshot(this: object, snapshotName: string, importMetaUrl: string): Promise<void> {
       const obj = utils.flag(this, 'object');
-      const snapshotURL = new URL(`./resources/${snapshotName}.snap.ts`, importMetaUrl);
+      const snapshotURL = new URL(`./fixtures/${snapshotName}.snap.ts`, importMetaUrl);
       const snapshotPath = fileURLToPath(snapshotURL);
 
       if (shouldUpdate) {

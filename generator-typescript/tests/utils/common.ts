@@ -24,7 +24,7 @@ export function createGenerator(plugins: readonly PluginConstructor[]): Generato
 }
 
 export async function loadInput(name: string, importMeta: string): Promise<string> {
-  const jsonUrl = new URL(`./resources/${name}.json`, importMeta);
+  const jsonUrl = new URL(`./${name}.json`, importMeta);
 
   return readFile(fileURLToPath(jsonUrl), 'utf8');
 }
