@@ -13,11 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.fusion.parser.plugins.backbone.complexhierarchy;
 
-package com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel;
+import com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel;
+import com.vaadin.fusion.parser.testutils.Endpoint;
 
-public class ComplexHierarchyParentModel extends ComplexHierarchyGrandParentModel {
-    public String getId() {
-        return "foo-1";
+@Endpoint
+public class ComplexHierarchyEndpoint {
+
+    // Using ComplexHierarchyModel from another package is intentional here to verify the
+    // generator's parsing logic for that case
+    public ComplexHierarchyModel getModel() {
+        return new ComplexHierarchyModel();
     }
+
 }

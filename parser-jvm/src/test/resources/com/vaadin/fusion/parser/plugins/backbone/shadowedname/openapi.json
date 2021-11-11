@@ -12,16 +12,16 @@
   ],
   "tags" : [
     {
-      "name" : "CollectionEndpoint"
+      "name" : "ShadowedNameEndpoint"
     }
   ],
   "paths" : {
-    "/CollectionEndpoint/getCollectionByAuthor" : {
+    "/ShadowedNameEndpoint/getCollectionByAuthor" : {
       "post" : {
         "tags" : [
-          "CollectionEndpoint"
+          "ShadowedNameEndpoint"
         ],
-        "operationId" : "CollectionEndpoint_getCollectionByAuthor_POST",
+        "operationId" : "ShadowedNameEndpoint_getCollectionByAuthor_POST",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -46,7 +46,7 @@
                   "nullable" : true,
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.collectionendpoint.CollectionEndpoint$Collection"
+                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection"
                     }
                   ]
                 }
@@ -56,12 +56,12 @@
         }
       }
     },
-    "/CollectionEndpoint/getListOfUserName" : {
+    "/ShadowedNameEndpoint/getListOfUserName" : {
       "post" : {
         "tags" : [
-          "CollectionEndpoint"
+          "ShadowedNameEndpoint"
         ],
-        "operationId" : "CollectionEndpoint_getListOfUserName_POST",
+        "operationId" : "ShadowedNameEndpoint_getListOfUserName_POST",
         "responses" : {
           "200" : {
             "description" : "",
@@ -82,25 +82,5 @@
       }
     }
   },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.fusion.parser.plugins.backbone.collectionendpoint.CollectionEndpoint$Collection" : {
-        "type" : "object",
-        "properties" : {
-          "author" : {
-            "type" : "string",
-            "nullable" : true
-          },
-          "collectionName" : {
-            "type" : "string",
-            "nullable" : true
-          },
-          "type" : {
-            "type" : "string",
-            "nullable" : true
-          }
-        }
-      }
-    }
-  }
+  "components" : { }
 }

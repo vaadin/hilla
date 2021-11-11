@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.complexhierarchyendpoint;
+package com.vaadin.fusion.parser.plugins.backbone.shadowedname;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import com.vaadin.fusion.parser.core.SharedStorage;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
-public class ComplexHierarchyEndpointPlugin extends BackbonePlugin {
+public class ShadowedNamePlugin extends BackbonePlugin {
     private final PluginElementsFilter filter = new PluginElementsFilter(
-            "ComplexHierarchy");
+            "ShadowedName");
 
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,

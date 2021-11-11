@@ -18,6 +18,8 @@ import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.DateSchema;
+import io.swagger.v3.oas.models.media.DateTimeSchema;
 import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
@@ -52,6 +54,10 @@ final class SchemaProcessor {
             return typeArgumentSchema();
         } else if (signature.isTypeParameter()) {
             return typeParameterSchema();
+        } else if (signature.isDate()) {
+            return dateSchema();
+        } else if (signature.isDateTime()) {
+            return dateTimeSchema();
         } else if (signature.isClassRef()) {
             return refSchema();
         }
@@ -69,6 +75,14 @@ final class SchemaProcessor {
                         .process();
 
         return new ArraySchema().items(items).nullable(true);
+    }
+
+    private Schema<?> dateSchema() {
+        return new DateSchema();
+    }
+
+    private Schema<?> dateTimeSchema() {
+        return new DateTimeSchema();
     }
 
     private Schema<?> refSchema() {

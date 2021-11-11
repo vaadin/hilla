@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.fusion.parser.plugins.backbone.complexhierarchymodel;
+package com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models;
 
 public class ComplexHierarchyGrandParentModel {
     public int getBuild() {

@@ -99,7 +99,7 @@ class EntityProcessor extends Processor {
         private Schema<?> processClass() {
             ObjectSchema schema = new ObjectSchema();
 
-            entity.getMethodsStream()
+            entity.getMethodsStream().filter(method -> method.get().isPublic())
                     .filter(method -> method.get().getName().startsWith("get"))
                     .forEach(method -> {
                         ComponentSchemaPropertyProcessor processor = new ComponentSchemaPropertyProcessor(

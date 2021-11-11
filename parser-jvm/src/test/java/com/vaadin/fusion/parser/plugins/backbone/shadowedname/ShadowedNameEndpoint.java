@@ -1,11 +1,11 @@
-package com.vaadin.fusion.parser.plugins.backbone.collectionendpoint;
+package com.vaadin.fusion.parser.plugins.backbone.shadowedname;
 
 import java.util.ArrayList;
 
 import com.vaadin.fusion.parser.testutils.Endpoint;
 
 @Endpoint
-public class CollectionEndpoint {
+public class ShadowedNameEndpoint {
 
     /**
      * Get a collection by author name. The generator should not mix this type

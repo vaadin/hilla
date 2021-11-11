@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.enumtype;
+package com.vaadin.fusion.parser.plugins.backbone.datetime;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import com.vaadin.fusion.parser.core.SharedStorage;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
 
-public class EnumEndpointPlugin extends BackbonePlugin {
+public class DateTimePlugin extends BackbonePlugin {
     private final PluginElementsFilter filter = new PluginElementsFilter(
-        "Enum");
+        "DateTime");
 
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,

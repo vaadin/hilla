@@ -37,10 +37,10 @@ public class RelativeClassInfo
 
         annotations = getMembers(ClassInfo::getAnnotationInfo,
                 RelativeAnnotationInfo::new);
-        fields = getMembers(ClassInfo::getFieldInfo, RelativeFieldInfo::new);
+        fields = getMembers(ClassInfo::getDeclaredFieldInfo, RelativeFieldInfo::new);
         innerClasses = getMembers(ClassInfo::getInnerClasses,
                 RelativeClassInfo::new);
-        methods = getMembers(ClassInfo::getMethodInfo, RelativeMethodInfo::new);
+        methods = getMembers(ClassInfo::getDeclaredMethodInfo, RelativeMethodInfo::new);
         superClasses = getMembers(ClassInfo::getSuperclasses,
                 (member) -> !isJDKClass(member), RelativeClassInfo::new);
 
@@ -63,7 +63,7 @@ public class RelativeClassInfo
     public Stream<RelativeClassInfo> getDependenciesStream() {
         return Stream
                 .of(getFieldDependenciesStream(), getMethodDependenciesStream(),
-                        getInnerClassesStream())
+                        getInnerClassesStream(), getSuperClassesStream())
                 .flatMap(Function.identity()).distinct();
     }
 
