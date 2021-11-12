@@ -68,7 +68,37 @@
   "components" : {
     "schemas" : {
       "com.vaadin.fusion.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel" : {
-        "type" : "object"
+        "type" : "object",
+        "properties" : {
+          "complexList" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              },
+              "nullable" : true
+            }
+          },
+          "complexMap" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "nullable" : true,
+              "items" : {
+                "type" : "string",
+                "nullable" : true
+              }
+            },
+            "nullable" : true
+          }
+        }
       }
     }
   }

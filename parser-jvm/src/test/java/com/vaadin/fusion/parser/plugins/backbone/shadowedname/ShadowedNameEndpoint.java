@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 @Endpoint
 public class ShadowedNameEndpoint {
-
     /**
      * Get a collection by author name. The generator should not mix this type
      * with the Java's Collection type.
@@ -13,7 +12,7 @@ public class ShadowedNameEndpoint {
      *            author name
      * @return a collection
      */
-    public Collection getCollectionByAuthor(String name) {
+    public Collection getNestedUserDefinedCollection(String name) {
         return new Collection();
     }
 
@@ -22,8 +21,12 @@ public class ShadowedNameEndpoint {
      *
      * @return list of user name
      */
-    public java.util.Collection<String> getListOfUserName() {
+    public java.util.Collection<String> getJavaCollection() {
         return new ArrayList<>();
+    }
+
+    public com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection<String> getSeparateUserDefinedCollection() {
+        return new com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection<>();
     }
 
     public static class Collection {

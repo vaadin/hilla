@@ -16,12 +16,12 @@
     }
   ],
   "paths" : {
-    "/ShadowedNameEndpoint/getCollectionByAuthor" : {
+    "/ShadowedNameEndpoint/getNestedUserDefinedCollection" : {
       "post" : {
         "tags" : [
           "ShadowedNameEndpoint"
         ],
-        "operationId" : "ShadowedNameEndpoint_getCollectionByAuthor_POST",
+        "operationId" : "ShadowedNameEndpoint_getNestedUserDefinedCollection_POST",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -56,12 +56,12 @@
         }
       }
     },
-    "/ShadowedNameEndpoint/getListOfUserName" : {
+    "/ShadowedNameEndpoint/getJavaCollection" : {
       "post" : {
         "tags" : [
           "ShadowedNameEndpoint"
         ],
-        "operationId" : "ShadowedNameEndpoint_getListOfUserName_POST",
+        "operationId" : "ShadowedNameEndpoint_getJavaCollection_POST",
         "responses" : {
           "200" : {
             "description" : "",
@@ -80,7 +80,68 @@
           }
         }
       }
+    },
+    "/ShadowedNameEndpoint/getSeparateUserDefinedCollection" : {
+      "post" : {
+        "tags" : [
+          "ShadowedNameEndpoint"
+        ],
+        "operationId" : "ShadowedNameEndpoint_getSeparateUserDefinedCollection_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
-  "components" : { }
+  "components" : {
+    "schemas" : {
+      "com.vaadin.fusion.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection" : {
+        "type" : "object",
+        "properties" : {
+          "author" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "collectionName" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "type" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }
+      },
+      "com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "items" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    }
+  }
 }

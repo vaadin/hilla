@@ -196,6 +196,27 @@
         }
       }
     },
+    "/DateTimeEndpoint/echoCustomDate" : {
+      "post" : {
+        "tags" : [
+          "DateTimeEndpoint"
+        ],
+        "operationId" : "DateTimeEndpoint_echoCustomDate_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/DateTimeEndpoint/echoListLocalDateTime" : {
       "post" : {
         "tags" : [

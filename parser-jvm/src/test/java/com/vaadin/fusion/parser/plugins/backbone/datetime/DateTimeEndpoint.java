@@ -30,6 +30,10 @@ public class DateTimeEndpoint {
         return localTime;
     }
 
+    public CustomDate echoCustomDate() {
+        return new CustomDate();
+    }
+
     public List<LocalDateTime> echoListLocalDateTime(
             List<LocalDateTime> localDateTimeList) {
         return localDateTimeList;
@@ -38,5 +42,8 @@ public class DateTimeEndpoint {
     public Map<String, Instant> echoMapInstant(
             Map<String, Instant> mapInstant) {
         return mapInstant;
+    }
+
+    public static class CustomDate extends Date {
     }
 }
