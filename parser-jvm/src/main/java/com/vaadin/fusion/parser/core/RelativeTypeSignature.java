@@ -72,6 +72,14 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return resolve(get()).map(RelativeClassInfo::new);
     }
 
+    default boolean hasFloatType() {
+        return isFloat() || isDouble();
+    }
+
+    default boolean hasIntegerType() {
+        return isByte() || isShort() || isInteger() || isLong();
+    }
+
     default boolean isArray() {
         return false;
     }
@@ -84,6 +92,10 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     }
 
+    default boolean isByte() {
+        return false;
+    }
+
     default boolean isClassRef() {
         return false;
     }
@@ -93,6 +105,10 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
     }
 
     default boolean isDateTime() {
+        return false;
+    }
+
+    default boolean isDouble() {
         return false;
     }
 
@@ -112,6 +128,10 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     }
 
+    default boolean isLong() {
+        return false;
+    }
+
     default boolean isMap() {
         return false;
     }
@@ -121,6 +141,10 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
     }
 
     default boolean isPrimitive() {
+        return false;
+    }
+
+    default boolean isShort() {
         return false;
     }
 

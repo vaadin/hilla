@@ -40,9 +40,9 @@ final class SchemaProcessor {
             return stringSchema();
         } else if (signature.isBoolean()) {
             return booleanSchema();
-        } else if (signature.isInteger()) {
+        } else if (signature.hasIntegerType()) {
             return integerSchema();
-        } else if (signature.isFloat()) {
+        } else if (signature.hasFloatType()) {
             return numberSchema();
         } else if (signature.isArray()) {
             return arraySchema();
@@ -77,6 +77,10 @@ final class SchemaProcessor {
         return new ArraySchema().items(items).nullable(true);
     }
 
+    private Schema<?> booleanSchema() {
+        return new BooleanSchema().nullable(!signature.isPrimitive());
+    }
+
     private Schema<?> dateSchema() {
         return new DateSchema();
     }
@@ -85,30 +89,35 @@ final class SchemaProcessor {
         return new DateTimeSchema();
     }
 
-    private Schema<?> refSchema() {
-        String fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
-                .get().getFullyQualifiedClassName();
-
-        return new ComposedSchema()
-                .anyOf(Collections.singletonList(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
-                .nullable(true);
-    }
-
-    private Schema<?> booleanSchema() {
-        return new BooleanSchema().nullable(!signature.isPrimitive());
-    }
-
     private Schema<?> integerSchema() {
-        return new IntegerSchema().nullable(!signature.isPrimitive());
+        return new IntegerSchema().nullable(!signature.isPrimitive())
+                .format(signature.isLong() ? "int64" : "int32");
     }
 
     private Schema<?> iterableSchema() {
-        Schema<?> items = new SchemaProcessor(
-                ((ClassRefRelativeTypeSignature) signature).getTypeArguments()
-                        .get(0)).process();
+        ArraySchema schema = (ArraySchema) new ArraySchema().nullable(true);
 
-        return new ArraySchema().items(items).nullable(true);
+        if (((ClassRefRelativeTypeSignature) signature).getTypeArguments()
+                .size() > 0) {
+            return schema.items(new SchemaProcessor(
+                    ((ClassRefRelativeTypeSignature) signature)
+                            .getTypeArguments().get(0)).process());
+        }
+
+        // If it is a nested class with generic parameters, we have to look
+        // at the suffix type arguments
+        // instead of regular ones.
+        List<List<RelativeTypeArgument>> suffixTypeArguments = ((ClassRefRelativeTypeSignature) signature)
+                .getSuffixTypeArguments();
+
+        if (suffixTypeArguments.size() > 0
+                && suffixTypeArguments.get(0).size() > 0) {
+            return schema.items(
+                    new SchemaProcessor(suffixTypeArguments.get(0).get(0))
+                            .process());
+        }
+
+        return schema;
     }
 
     private Schema<?> mapSchema() {
@@ -120,7 +129,18 @@ final class SchemaProcessor {
     }
 
     private Schema<?> numberSchema() {
-        return new NumberSchema().nullable(!signature.isPrimitive());
+        return new NumberSchema().nullable(!signature.isPrimitive())
+                .format(signature.isDouble() ? "double" : "float");
+    }
+
+    private Schema<?> refSchema() {
+        String fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
+                .get().getFullyQualifiedClassName();
+
+        return new ComposedSchema()
+                .anyOf(Collections.singletonList(new Schema<>()
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
+                .nullable(true);
     }
 
     private Schema<?> stringSchema() {

@@ -2,16 +2,8 @@ package com.vaadin.fusion.parser.core;
 
 import static com.vaadin.fusion.parser.core.ParserUtils.isJDKClass;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,23 +16,21 @@ import io.github.classgraph.ClassRefTypeSignature;
 public final class ClassRefRelativeTypeSignature
         extends AbstractRelative<ClassRefTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
-    private static final Class<?>[] DATE_CLASSES = { Date.class,
-            LocalDate.class };
-    private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-            Instant.class, LocalTime.class };
-    private static final Class<?>[] FLOAT_CLASSES = { Float.class,
-            Double.class };
-    private static final Class<?>[] INTEGER_CLASSES = { Byte.class, Short.class,
-            Integer.class, Long.class };
-    private final Class<?> currentClass;
+    private final ReflectedClass reflectedClass;
+    private final List<List<RelativeTypeArgument>> suffixTypeArguments;
     private final List<RelativeTypeArgument> typeArguments;
 
     ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
             Relative<?> parent) {
         super(origin, parent);
-        currentClass = origin.loadClass();
+        reflectedClass = new ReflectedClass(origin);
         typeArguments = origin.getTypeArguments().stream()
                 .map(arg -> new RelativeTypeArgument(arg, this))
+                .collect(Collectors.toList());
+        suffixTypeArguments = origin.getSuffixTypeArguments().stream()
+                .map(list -> list.stream()
+                        .map(arg -> new RelativeTypeArgument(arg, this))
+                        .collect(Collectors.toList()))
                 .collect(Collectors.toList());
     }
 
@@ -60,14 +50,22 @@ public final class ClassRefRelativeTypeSignature
                 : typeArgumentsDependencies;
     }
 
+    public List<List<RelativeTypeArgument>> getSuffixTypeArguments() {
+        return suffixTypeArguments;
+    }
+
     public List<RelativeTypeArgument> getTypeArguments() {
         return typeArguments;
     }
 
     @Override
     public boolean isBoolean() {
-        return Objects.equals(origin.getFullyQualifiedClassName(),
-                Boolean.class.getName());
+        return reflectedClass.isBoolean();
+    }
+
+    @Override
+    public boolean isByte() {
+        return reflectedClass.isByte();
     }
 
     @Override
@@ -77,51 +75,62 @@ public final class ClassRefRelativeTypeSignature
 
     @Override
     public boolean isDate() {
-        return Arrays.stream(DATE_CLASSES)
-                .anyMatch(cls -> cls.isAssignableFrom(currentClass));
+        return reflectedClass.isDate();
     }
 
     @Override
     public boolean isDateTime() {
-        return Arrays.stream(DATE_TIME_CLASSES)
-                .anyMatch(cls -> cls.isAssignableFrom(currentClass));
+        return reflectedClass.isDateTime();
+    }
+
+    @Override
+    public boolean isDouble() {
+        return reflectedClass.isDouble();
     }
 
     @Override
     public boolean isEnum() {
-        return currentClass.isEnum();
+        return reflectedClass.isEnum();
     }
 
     @Override
     public boolean isFloat() {
-        return Arrays.stream(FLOAT_CLASSES)
-                .anyMatch(cls -> cls.isAssignableFrom(currentClass));
+        return reflectedClass.isFloat();
     }
 
     @Override
     public boolean isInteger() {
-        return Arrays.stream(INTEGER_CLASSES)
-                .anyMatch(cls -> cls.isAssignableFrom(currentClass));
+        return reflectedClass.isInteger();
     }
 
     @Override
     public boolean isIterable() {
-        return Iterable.class.isAssignableFrom(currentClass);
+        return reflectedClass.isIterable();
+    }
+
+    @Override
+    public boolean isLong() {
+        return reflectedClass.isLong();
     }
 
     @Override
     public boolean isMap() {
-        return Map.class.isAssignableFrom(currentClass);
+        return reflectedClass.isMap();
     }
 
     @Override
     public boolean isOptional() {
-        return Optional.class.isAssignableFrom(currentClass);
+        return reflectedClass.isOptional();
+    }
+
+    @Override
+    public boolean isShort() {
+        return reflectedClass.isShort();
     }
 
     @Override
     public boolean isString() {
-        return String.class.isAssignableFrom(currentClass);
+        return reflectedClass.isCharacter() || reflectedClass.isString();
     }
 
     @Override

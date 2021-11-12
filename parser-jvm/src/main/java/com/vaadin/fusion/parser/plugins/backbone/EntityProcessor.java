@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.vaadin.fusion.parser.core.ReflectedClass;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 
@@ -39,8 +40,12 @@ class EntityProcessor extends Processor {
     private Components prepareComponents() {
         Components components = new Components();
 
-        classes.stream()
-                .flatMap(cls -> cls.getInheritanceChain().getClassesStream())
+        classes.stream().filter(cls -> {
+            ReflectedClass reflectedClass = new ReflectedClass(cls);
+
+            return !reflectedClass.isDate() && !reflectedClass.isDateTime()
+                    && !reflectedClass.isIterable() && !reflectedClass.isMap();
+        }).flatMap(cls -> cls.getInheritanceChain().getClassesStream())
                 .forEach(entity -> {
                     if (components.getSchemas() == null
                             || (!components.getSchemas()

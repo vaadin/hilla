@@ -32,18 +32,30 @@ public final class BaseRelativeTypeSignature
     }
 
     @Override
-    public boolean isFloat() {
+    public boolean isByte() {
         Class<?> type = origin.getType();
 
-        return type == Float.TYPE || type == Double.TYPE;
+        return origin.getType() == Byte.TYPE;
+    }
+
+    @Override
+    public boolean isDouble() {
+        return origin.getType() == Double.TYPE;
+    }
+
+    @Override
+    public boolean isFloat() {
+        return origin.getType() == Float.TYPE;
     }
 
     @Override
     public boolean isInteger() {
-        Class<?> type = origin.getType();
+        return origin.getType() == Integer.TYPE;
+    }
 
-        return type == Byte.TYPE || type == Short.TYPE || type == Integer.TYPE
-                || type == Long.TYPE;
+    @Override
+    public boolean isLong() {
+        return origin.getType() == Long.TYPE;
     }
 
     @Override
@@ -51,6 +63,11 @@ public final class BaseRelativeTypeSignature
         Class<?> type = origin.getType();
 
         return type != null && type != Void.TYPE;
+    }
+
+    @Override
+    public boolean isShort() {
+        return origin.getType() == Short.TYPE;
     }
 
     @Override
