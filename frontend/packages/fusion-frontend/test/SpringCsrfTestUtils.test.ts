@@ -33,10 +33,10 @@ export function verifySpringCsrfTokenIsCleared() {
   expect(document.head.querySelector('meta[name="_csrf_header"]')).to.be.null;
 }
 
-export function setCookie(name: string, value: string) {
-  document.cookie = name + '=' + value;
+export function setCookie(name: string, value: string): void {
+  document.cookie = `${name}=${value}`;
 }
 
-export function clearCookie(name: string) {
-  setCookie(name, '');
+export function clearCookie(name: string): void {
+  document.cookie = `${name}=; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }
