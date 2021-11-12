@@ -15,7 +15,6 @@ import {
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
-const $wnd = window as any;
 
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
