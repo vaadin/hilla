@@ -15,5 +15,5 @@
     "importsNotUsedAsValues": "error",
     "useUnknownInCatchVariables": true
   },
-  "include": ["packages/**"]
+  "include": ["packages/**/*"]
 }
