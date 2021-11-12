@@ -28,7 +28,6 @@ describe('Authentication', () => {
     'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
     'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
   };
-  let originalCookie;
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
@@ -39,13 +38,11 @@ describe('Authentication', () => {
 
   beforeEach(() => {
     setupSpringCsrfMetaTags();
-    originalCookie = document.cookie;
     requestHeaders[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
   });
   afterEach(() => {
     // @ts-ignore
     delete window.Vaadin.TypeScript;
-    document.cookie = originalCookie;
     clearSpringCsrfMetaTags();
   });
 

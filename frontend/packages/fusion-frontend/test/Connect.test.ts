@@ -125,18 +125,15 @@ describe('ConnectClient', () => {
 
   describe('call method', () => {
     let client: ConnectClient;
-    let originalCookie;
 
     beforeEach(() => {
       fetchMock.post(base + '/connect/FooEndpoint/fooMethod', { fooData: 'foo' });
       fetchMock.post(base + '/connect/FooEndpoint/fooMethodWithNullValue', { fooData: 'foo', propWithNullValue: null });
       client = new ConnectClient();
-      originalCookie = document.cookie;
     });
 
     afterEach(() => {
       fetchMock.restore();
-      document.cookie = originalCookie;
     });
 
     it('should require 2 arguments', async () => {
