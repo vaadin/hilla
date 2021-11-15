@@ -150,7 +150,7 @@ describe('form/Validation', () => {
           // do nothing
         });
         expect.fail();
-      } catch (error) {
+      } catch (error: any) {
         expect(error.errors.length).to.gt(0);
       }
     });
@@ -163,7 +163,7 @@ describe('form/Validation', () => {
           throw new Error('whatever');
         });
         expect.fail();
-      } catch (error) {
+      } catch (error: any) {
         expect(error.message).to.be.equal('whatever');
       }
     });
@@ -186,7 +186,7 @@ describe('form/Validation', () => {
           };
         });
         expect.fail();
-      } catch (error) {
+      } catch (error: any) {
         expect(error.errors[0].message).to.be.equal('custom message');
         expect(error.errors[0].value).to.be.equal('baz');
         expect(error.errors[0].property).to.be.equal('foo');
@@ -210,7 +210,7 @@ describe('form/Validation', () => {
           };
         });
         expect.fail();
-      } catch (error) {
+      } catch (error: any) {
         expect(error.errors[0].message).to.be.equal('Custom server message');
         expect(error.errors[0].value).to.be.undefined;
         expect(error.errors[0].property).to.be.equal('bar');

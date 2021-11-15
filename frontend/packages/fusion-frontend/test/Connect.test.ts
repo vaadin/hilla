@@ -127,8 +127,8 @@ describe('ConnectClient', () => {
     let client: ConnectClient;
 
     beforeEach(() => {
-      fetchMock.post(base + '/connect/FooEndpoint/fooMethod', { fooData: 'foo' });
-      fetchMock.post(base + '/connect/FooEndpoint/fooMethodWithNullValue', { fooData: 'foo', propWithNullValue: null });
+      fetchMock.post(`${base}/connect/FooEndpoint/fooMethod`, { fooData: 'foo' });
+      fetchMock.post(`${base}/connect/FooEndpoint/fooMethodWithNullValue`, { fooData: 'foo', propWithNullValue: null });
       client = new ConnectClient();
     });
 
@@ -237,8 +237,7 @@ describe('ConnectClient', () => {
 
         await client.call('FooEndpoint', 'fooMethod');
 
-        const headers = fetchMock.lastOptions().headers;
-        expect(headers).to.deep.include({
+        expect(fetchMock.lastOptions()?.headers).to.deep.include({
           [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
@@ -253,8 +252,7 @@ describe('ConnectClient', () => {
 
         await client.call('FooEndpoint', 'fooMethod');
 
-        const headers = fetchMock.lastOptions().headers;
-        expect(headers).to.deep.include({
+        expect(fetchMock.lastOptions()?.headers).to.deep.include({
           [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
@@ -269,9 +267,7 @@ describe('ConnectClient', () => {
 
         await client.call('FooEndpoint', 'fooMethod');
 
-        const headers = fetchMock.lastOptions().headers;
-
-        expect(headers).to.deep.include({
+        expect(fetchMock.lastOptions()?.headers).to.deep.include({
           [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
         });
       } finally {
@@ -286,7 +282,7 @@ describe('ConnectClient', () => {
 
     it('should transform null value to undefined from response JSON data', async () => {
       const data = await client.call('FooEndpoint', 'fooMethodWithNullValue');
-      expect(data['propWithNullValue']).to.be.undefined;
+      expect(data.propWithNullValue).to.be.undefined;
       expect(data).to.deep.equal({ fooData: 'foo' });
     });
 
