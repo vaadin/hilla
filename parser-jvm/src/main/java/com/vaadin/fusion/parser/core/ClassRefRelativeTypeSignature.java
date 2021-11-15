@@ -36,10 +36,9 @@ public final class ClassRefRelativeTypeSignature
 
     public static Stream<ClassInfo> resolve(
             @Nonnull ClassRefTypeSignature signature) {
-        ClassInfo classInfo = Objects.requireNonNull(signature).getClassInfo();
+        var classInfo = Objects.requireNonNull(signature).getClassInfo();
 
-        Stream<ClassInfo> typeArgumentsDependencies = signature
-                .getTypeArguments().stream()
+        var typeArgumentsDependencies = signature.getTypeArguments().stream()
                 .flatMap(argument -> RelativeTypeSignature
                         .resolve(argument.getTypeSignature()))
                 .distinct();

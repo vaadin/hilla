@@ -30,7 +30,7 @@ public class ParserConfigTests {
 
     @Test
     public void should_LoadDefaultConfig_When_NoConfigOrOpenAPIFileSet() {
-        ParserConfig config = new ParserConfig.Builder()
+        var config = new ParserConfig.Builder()
                 .classPath(targetDir.toString()).finish();
 
         new ConfigComparator().compareTo(config);
@@ -65,7 +65,7 @@ public class ParserConfigTests {
 
     private void testConfigFile(String configFileName)
             throws URISyntaxException {
-        ParserConfig config = new ParserConfig.Builder()
+        var config = new ParserConfig.Builder()
                 .classPath(targetDir.toString())
                 .configFile(resourceLoader.find(configFileName)).finish();
 
@@ -79,7 +79,7 @@ public class ParserConfigTests {
 
     private void testOpenAPITemplate(String openAPITemplateName)
             throws URISyntaxException {
-        ParserConfig config = new ParserConfig.Builder()
+        var config = new ParserConfig.Builder()
                 .classPath(targetDir.toString())
                 .openAPITemplate(resourceLoader.find(openAPITemplateName))
                 .finish();

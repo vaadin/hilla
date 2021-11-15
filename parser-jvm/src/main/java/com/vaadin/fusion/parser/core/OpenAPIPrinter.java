@@ -31,9 +31,8 @@ public class OpenAPIPrinter {
         private final ObjectWriter writer;
 
         private Pretty() {
-            DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-            DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ",
-                    "\n");
+            var printer = new DefaultPrettyPrinter();
+            var indenter = new DefaultIndenter("  ", "\n");
             printer.indentArraysWith(indenter);
             printer.indentObjectsWith(indenter);
             writer = mapper.writer(printer);

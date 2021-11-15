@@ -21,7 +21,6 @@ import org.apache.commons.io.FilenameUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -163,9 +162,8 @@ public final class ParserConfig {
 
         @Nonnull
         public ParserConfig finish() {
-            Loader<ParserConfig> configLoader = new Loader<>(
-                    ParserConfig.class);
-            Loader<OpenAPI> openAPILoader = new Loader<>(OpenAPI.class);
+            var configLoader = new Loader<>(ParserConfig.class);
+            var openAPILoader = new Loader<>(OpenAPI.class);
 
             configLoader.load(Objects.requireNonNull(
                     getClass().getResource("ParserConfigStub.json")));
@@ -180,10 +178,10 @@ public final class ParserConfig {
                 configLoader.load(openAPITemplate);
             }
 
-            ParserConfig config = configLoader.getValue();
+            var config = configLoader.getValue();
             config.openAPI = openAPILoader.getValue();
 
-            for (Consumer<ParserConfig> action : actions) {
+            for (var action : actions) {
                 action.accept(config);
             }
 
@@ -274,9 +272,8 @@ public final class ParserConfig {
 
         public void load(File file) {
             try {
-                ObjectMapper mapper = createMapper(file);
-                ObjectReader reader = value != null
-                        ? mapper.readerForUpdating(value)
+                var mapper = createMapper(file);
+                var reader = value != null ? mapper.readerForUpdating(value)
                         : mapper.reader();
 
                 value = reader.readValue(file, type);
@@ -287,7 +284,7 @@ public final class ParserConfig {
         }
 
         private ObjectMapper createMapper(File file) {
-            String extension = FilenameUtils.getExtension(file.toString());
+            var extension = FilenameUtils.getExtension(file.toString());
 
             switch (extension) {
             case "yml":

@@ -31,12 +31,12 @@ public class Parser {
     }
 
     public void execute() {
-        PluginManager pluginManager = new PluginManager(config);
+        var pluginManager = new PluginManager(config);
 
-        ScanResult result = new ClassGraph().enableAllInfo()
+        var result = new ClassGraph().enableAllInfo()
                 .overrideClasspath(config.getClassPath()).scan();
 
-        EntitiesCollector collector = new EntitiesCollector(result);
+        var collector = new EntitiesCollector(result);
 
         checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
 
@@ -65,10 +65,11 @@ public class Parser {
                     .distinct().collect(Collectors.toList());
 
             // ATTENTION: This loop mutates the collection during processing!
-            // It is necessary to collect all endpoint dependencies + dependencies of dependencies.
+            // It is necessary to collect all endpoint dependencies +
+            // dependencies of dependencies.
             // Be careful changing it: the endless loop could happen.
-            for (int i = 0; i < entities.size(); i++) {
-                RelativeClassInfo entity = entities.get(i);
+            for (var i = 0; i < entities.size(); i++) {
+                var entity = entities.get(i);
 
                 entity.getDependenciesStream()
                         .filter(e -> !entities.contains(e))

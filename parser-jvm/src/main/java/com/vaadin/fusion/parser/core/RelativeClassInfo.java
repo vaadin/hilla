@@ -44,7 +44,7 @@ public class RelativeClassInfo
         superClasses = getMembers(ClassInfo::getSuperclasses,
                 (member) -> !isJDKClass(member), RelativeClassInfo::new);
 
-        ClassInfo originSuperClass = origin.getSuperclass();
+        var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null ? new RelativeClassInfo(originSuperClass) : null;
 
         // Should be the latest

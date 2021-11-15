@@ -33,7 +33,7 @@ public final class BaseRelativeTypeSignature
 
     @Override
     public boolean isByte() {
-        Class<?> type = origin.getType();
+        var type = origin.getType();
 
         return origin.getType() == Byte.TYPE;
     }
@@ -60,7 +60,7 @@ public final class BaseRelativeTypeSignature
 
     @Override
     public boolean isPrimitive() {
-        Class<?> type = origin.getType();
+        var type = origin.getType();
 
         return type != null && type != Void.TYPE;
     }

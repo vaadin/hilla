@@ -23,7 +23,7 @@ public class DependencyPlugin implements Plugin {
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,
             @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
-        DependencyCollector collector = new DependencyCollector(
+        var collector = new DependencyCollector(
                 filter.apply(endpoints), filter.apply(entities));
 
         storage.getPluginStorage().put(ALL_DEPS_STORAGE_KEY,

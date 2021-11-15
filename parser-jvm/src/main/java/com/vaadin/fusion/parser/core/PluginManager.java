@@ -1,31 +1,35 @@
 package com.vaadin.fusion.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class PluginManager {
-    private static final List<Class<? extends Plugin>> builtInPlugins = Arrays
-            .asList(BackbonePlugin.class);
+    private static final List<String> builtInPluginsClassNames = List
+            .of("com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin");
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
+    private static final Logger logger = LoggerFactory
+            .getLogger(PluginManager.class);
 
     private final Set<Plugin> plugins = new LinkedHashSet<>();
 
     PluginManager(ParserConfig config) {
-        Set<String> disabledPluginNames = config.getPlugins().getDisable();
-        Stream<Class<? extends Plugin>> activeBuiltInPlugins = builtInPlugins
-                .stream().filter(plugin -> !disabledPluginNames
-                        .contains(plugin.getName()));
+        var disabledPluginNames = config.getPlugins().getDisable();
+        var activeBuiltInPlugins = builtInPluginsClassNames.stream()
+                .filter(name -> !disabledPluginNames.contains(name))
+                .map(this::loadBuiltInClass).filter(Objects::nonNull)
+                .map(this::processClass);
 
-        Stream<Class<? extends Plugin>> userDefinedPlugins = config.getPlugins()
-                .getUse().stream().map(name -> processClass(loadClass(name)));
+        var userDefinedPlugins = config.getPlugins().getUse().stream()
+                .map(this::loadClass).map(this::processClass);
 
         Stream.concat(activeBuiltInPlugins, userDefinedPlugins)
                 .map(this::instantiatePlugin)
@@ -34,8 +38,18 @@ final class PluginManager {
 
     public void execute(List<RelativeClassInfo> endpoints,
             List<RelativeClassInfo> entities, SharedStorage storage) {
-        for (Plugin plugin : plugins) {
+        for (var plugin : plugins) {
             plugin.execute(endpoints, entities, storage);
+        }
+    }
+
+    private Class<?> loadBuiltInClass(String className) {
+        try {
+            return loader.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            logger.info(String.format("Built-in plugin '%s' cannot be loaded",
+                    className), e);
+            return null;
         }
     }
 
@@ -43,8 +57,12 @@ final class PluginManager {
         try {
             return loader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            throw new ParserException(String.format(
-                    "Plugin '%s' is not found in the classpath", className), e);
+            var message = String.format(
+                    "Plugin '%s' is not found in the classpath", className);
+
+            logger.error(message, e);
+
+            throw new ParserException(message, e);
         }
     }
 
@@ -53,9 +71,13 @@ final class PluginManager {
             return (Class<? extends Plugin>) cls;
         }
 
-        throw new ParserException(String.format(
+        var message = String.format(
                 "Plugin '%s' is not an instance of '%s' interface",
-                cls.getName(), Plugin.class.getName()));
+                cls.getName(), Plugin.class.getName());
+
+        logger.error(message);
+
+        throw new ParserException(message);
     }
 
     private Plugin instantiatePlugin(Class<? extends Plugin> pluginClass) {
@@ -63,10 +85,12 @@ final class PluginManager {
             return pluginClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException
                 | InvocationTargetException | NoSuchMethodException e) {
-            throw new ParserException(
-                    String.format("Cannot instantiate plugin '%s'",
-                            pluginClass.getName()),
-                    e);
+            var message = String.format("Cannot instantiate plugin '%s'",
+                    pluginClass.getName());
+
+            logger.error(message, e);
+
+            throw new ParserException(message, e);
         }
     }
 }
