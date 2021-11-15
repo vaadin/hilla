@@ -144,7 +144,7 @@ final class SchemaProcessor {
     }
 
     private Schema<?> stringSchema() {
-        return new StringSchema().nullable(true);
+        return new StringSchema().nullable(!signature.isPrimitive());
     }
 
     private Schema<?> typeArgumentSchema() {

@@ -335,7 +335,7 @@
               "application/json" : {
                 "schema" : {
                   "type" : "string",
-                  "nullable" : true
+                  "nullable" : false
                 }
               }
             }
