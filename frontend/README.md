@@ -15,7 +15,7 @@ The collection of frontend utilities used by Vaadin Flow and Fusion.
 You can download the project and run tests using the following commands:
 ```bash
 $ git clone https://github.com/vaadin/fusion.git
-$ cd fusion
+$ cd fusion/frontend
 $ npm install
 $ npm run build
 $ npm test
