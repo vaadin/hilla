@@ -74,22 +74,17 @@ public class FusionAccessChecker {
     public static final String ACCESS_DENIED_MSG_DEV_MODE = "Unauthorized access to Vaadin endpoint; "
             + "to enable endpoint access use one of the following annotations: @AnonymousAllowed, @PermitAll, @RolesAllowed";
 
-    private CsrfChecker csrfChecker;
-
     private AccessAnnotationChecker accessAnnotationChecker;
 
     /**
      * Creates a new instance.
      *
-     * @param csrfChecker
-     *            the csrf checker to use
      * @param accessAnnotationChecker
      *            the access checker to use
      */
-    public FusionAccessChecker(AccessAnnotationChecker accessAnnotationChecker,
-            CsrfChecker csrfChecker) {
+    public FusionAccessChecker(
+            AccessAnnotationChecker accessAnnotationChecker) {
         this.accessAnnotationChecker = accessAnnotationChecker;
-        this.csrfChecker = csrfChecker;
     }
 
     /**
@@ -103,10 +98,6 @@ public class FusionAccessChecker {
      *         issues occur, {@code null} otherwise
      */
     public String check(Method method, HttpServletRequest request) {
-        if (!csrfChecker.validateCsrfTokenInRequest(request)) {
-            return ACCESS_DENIED_MSG;
-        }
-
         if (accessAnnotationChecker.hasAccess(method, request)) {
             return null;
         }
@@ -123,16 +114,6 @@ public class FusionAccessChecker {
         VaadinService vaadinService = VaadinService.getCurrent();
         return (vaadinService != null && !vaadinService
                 .getDeploymentConfiguration().isProductionMode());
-    }
-
-    /**
-     * Enable or disable XSRF token checking in endpoints.
-     *
-     * @param xsrfProtectionEnabled
-     *            enable or disable protection.
-     */
-    public void enableCsrf(boolean xsrfProtectionEnabled) {
-        csrfChecker.setCsrfProtection(xsrfProtectionEnabled);
     }
 
     /**

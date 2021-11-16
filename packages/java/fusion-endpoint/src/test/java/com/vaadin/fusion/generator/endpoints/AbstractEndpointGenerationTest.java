@@ -80,7 +80,6 @@ import org.springframework.data.domain.Sort.NullHandling;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.Endpoint;
 import com.vaadin.fusion.EndpointExposed;
-import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
 import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
 import com.vaadin.fusion.generator.OpenAPIObjectGenerator;
@@ -111,7 +110,7 @@ public abstract class AbstractEndpointGenerationTest
     private static final List<Class> DENY_LIST_CHECKING_ABSOLUTE_PATH = Arrays
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
     private static final FusionAccessChecker accessChecker = new FusionAccessChecker(
-            new AccessAnnotationChecker(), new CsrfChecker());
+            new AccessAnnotationChecker());
     private final Set<String> schemaReferences = new HashSet<>();
 
     public AbstractEndpointGenerationTest(List<Class<?>> testClasses) {

@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -35,8 +36,7 @@ public class FusionAccessCheckerTest {
 
     @Before
     public void before() {
-        checker = new FusionAccessChecker(new AccessAnnotationChecker(),
-                new CsrfChecker());
+        checker = new FusionAccessChecker(new AccessAnnotationChecker());
         requestMock = mock(HttpServletRequest.class);
         when(requestMock.getUserPrincipal()).thenReturn(mock(Principal.class));
         when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
@@ -49,24 +49,6 @@ public class FusionAccessCheckerTest {
         when(requestMock.getUserPrincipal()).thenReturn(null);
     }
 
-    private void createDifferentCookieToken() {
-        when(requestMock.getCookies()).thenReturn(new Cookie[] {
-                new Cookie(ApplicationConstants.CSRF_TOKEN, "Fusion token") });
-    }
-
-    private void createNullTokenContextInHeaderRequest() {
-        when(requestMock.getHeader("X-CSRF-Token")).thenReturn(null);
-    }
-
-    private void createNullTokenCookies() {
-        when(requestMock.getCookies())
-                .thenReturn(new Cookie[] { new Cookie("JSESSIONID", "0") });
-    }
-
-    private void createNullCookies() {
-        when(requestMock.getCookies()).thenReturn(null);
-    }
-
     private void shouldPass(Class<?> test) throws Exception {
         Method method = test.getMethod("test");
         assertNull(checker.check(method, requestMock));
@@ -75,102 +57,6 @@ public class FusionAccessCheckerTest {
     private void shouldFail(Class<?> test) throws Exception {
         Method method = test.getMethod("test");
         assertNotNull(checker.check(method, requestMock));
-    }
-
-    @Test
-    public void should_fail_When_not_having_token_in_headerRequest()
-            throws Exception {
-        class Test {
-            public void test() {
-            }
-        }
-        createNullTokenContextInHeaderRequest();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_not_having_token_in_cookies_but_have_token_in_request_header()
-            throws Exception {
-        class Test {
-            public void test() {
-            }
-        }
-        createNullTokenCookies();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_not_having_token_in_cookies_but_have_token_in_request_header_And_AnonymousAllowed()
-            throws Exception {
-        @AnonymousAllowed
-        class Test {
-            public void test() {
-            }
-        }
-        createNullTokenCookies();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_not_having_cookies_And_not_having_token_in_request_header()
-            throws Exception {
-        @PermitAll
-        class Test {
-            public void test() {
-            }
-        }
-        createNullCookies();
-        createNullTokenContextInHeaderRequest();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_not_having_cookies_And_not_having_token_in_request_header_And_AnonymousAllowed()
-            throws Exception {
-        @AnonymousAllowed
-        class Test {
-            public void test() {
-            }
-        }
-        createNullCookies();
-        createNullTokenContextInHeaderRequest();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_csrf_disabled() throws Exception {
-        class Test {
-            @PermitAll
-            public void test() {
-            }
-        }
-        createNullTokenContextInHeaderRequest();
-        checker.enableCsrf(false);
-        shouldPass(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_having_different_token_between_cookie_and_headerRequest()
-            throws Exception {
-        class Test {
-            public void test() {
-            }
-        }
-        createDifferentCookieToken();
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_having_different_token_between_cookie_and_headerRequest_and_NoAuthentication_AnonymousAllowed()
-            throws Exception {
-        class Test {
-            @AnonymousAllowed
-            public void test() {
-            }
-        }
-        createAnonymousContext();
-        createDifferentCookieToken();
-        shouldFail(Test.class);
     }
 
     @Test

@@ -18,6 +18,8 @@ package com.vaadin.fusion;
 
 import java.lang.reflect.Method;
 
+import javax.servlet.ServletContext;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
@@ -121,15 +123,12 @@ public class FusionControllerConfiguration {
      *
      * @param accessAnnotationChecker
      *            the access controlks checker to use
-     * @param csrfChecker
-     *            the CSRF checker to use
      * @return the default Vaadin endpoint access checker bean
      */
     @Bean
     public FusionAccessChecker accessChecker(
-            AccessAnnotationChecker accessAnnotationChecker,
-            CsrfChecker csrfChecker) {
-        return new FusionAccessChecker(accessAnnotationChecker, csrfChecker);
+            AccessAnnotationChecker accessAnnotationChecker) {
+        return new FusionAccessChecker(accessAnnotationChecker);
     }
 
     /**
@@ -146,11 +145,14 @@ public class FusionControllerConfiguration {
     /**
      * Registers a default {@link CsrfChecker} bean instance.
      *
+     * @param servletContext
+     *            the servlet context
+     *
      * @return the default bean
      */
     @Bean
-    public CsrfChecker csrfChecker() {
-        return new CsrfChecker();
+    public CsrfChecker csrfChecker(ServletContext servletContext) {
+        return new CsrfChecker(servletContext);
     }
 
     /**

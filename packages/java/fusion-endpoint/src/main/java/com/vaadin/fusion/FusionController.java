@@ -67,8 +67,8 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.fusion.EndpointRegistry.VaadinEndpointData;
+import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
 import com.vaadin.fusion.endpointransfermapper.EndpointTransferMapper;
 import com.vaadin.fusion.exception.EndpointException;
@@ -103,7 +103,7 @@ public class FusionController {
      * A qualifier to override the request and response default json mapper.
      *
      * @see #FusionController(ObjectMapper, ExplicitNullableTypeChecker,
-     *      ApplicationContext, EndpointRegistry)
+     *      ApplicationContext, EndpointRegistry, CsrfChecker)
      */
     public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
 
@@ -116,6 +116,8 @@ public class FusionController {
     EndpointRegistry endpointRegistry;
 
     private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
+
+    private CsrfChecker csrfChecker;
 
     /**
      * A constructor used to initialize the controller.
@@ -134,12 +136,16 @@ public class FusionController {
      *            {@link Endpoint} from
      * @param endpointRegistry
      *            the registry used to store endpoint information
+     * @param csrfChecker
+     *            the csrf checker to use
      */
     public FusionController(
             @Autowired(required = false) @Qualifier(VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER) ObjectMapper vaadinEndpointMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ApplicationContext context, EndpointRegistry endpointRegistry) {
+            ApplicationContext context, EndpointRegistry endpointRegistry,
+            CsrfChecker csrfChecker) {
         this.applicationContext = context;
+        this.csrfChecker = csrfChecker;
         this.vaadinEndpointMapper = vaadinEndpointMapper != null
                 ? vaadinEndpointMapper
                 : createVaadinConnectObjectMapper(context);
@@ -201,6 +207,12 @@ public class FusionController {
             HttpServletRequest request) {
         getLogger().debug("Endpoint: {}, method: {}, request body: {}",
                 endpointName, methodName, body);
+
+        if (!csrfChecker.validateCsrfTokenInRequest(request)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(createResponseErrorObject(
+                            FusionAccessChecker.ACCESS_DENIED_MSG));
+        }
 
         VaadinEndpointData vaadinEndpointData = endpointRegistry
                 .get(endpointName);
@@ -519,11 +531,6 @@ public class FusionController {
                 .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
                     FusionAccessChecker accessChecker = applicationContext
                             .getBean(FusionAccessChecker.class);
-                    ApplicationConfiguration cfg = ApplicationConfiguration
-                            .get(vaadinServletContext);
-                    if (cfg != null) {
-                        accessChecker.enableCsrf(cfg.isXsrfProtectionEnabled());
-                    }
                     return new VaadinConnectAccessCheckerWrapper(accessChecker);
                 });
         return wrapper.accessChecker;

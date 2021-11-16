@@ -10,7 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest(classes = FusionEndpointProperties.class)
+@SpringBootTest(classes = { ServletContextTestSetup.class,
+        FusionEndpointProperties.class })
 @ContextConfiguration(classes = FusionControllerConfiguration.class)
 @RunWith(SpringRunner.class)
 public class FusionControllerConfigurationTest {

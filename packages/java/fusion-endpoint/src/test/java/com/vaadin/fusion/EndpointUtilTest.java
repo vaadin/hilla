@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest(classes = { EndpointUtil.class, FusionEndpointProperties.class,
-        EndpointRegistry.class, EndpointNameChecker.class,
-        FusionAccessChecker.class, CsrfChecker.class,
+@SpringBootTest(classes = { ServletContextTestSetup.class, EndpointUtil.class,
+        FusionEndpointProperties.class, EndpointRegistry.class,
+        EndpointNameChecker.class, FusionAccessChecker.class, CsrfChecker.class,
         AccessAnnotationChecker.class })
 @RunWith(SpringRunner.class)
 public class EndpointUtilTest {

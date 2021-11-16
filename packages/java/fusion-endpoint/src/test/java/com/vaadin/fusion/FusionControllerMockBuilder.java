@@ -2,14 +2,18 @@ package com.vaadin.fusion;
 
 import static org.mockito.Mockito.mock;
 
+import javax.servlet.ServletContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
 
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
 /**
- * A helper class to build a mocked VaadinConnectController.
+ * A helper class to build a mocked FusionController.
  */
 public class FusionControllerMockBuilder {
     private ApplicationContext applicationContext;
@@ -45,9 +49,12 @@ public class FusionControllerMockBuilder {
 
     public FusionController build() {
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
+        CsrfChecker csrfChecker = Mockito.mock(CsrfChecker.class);
+        Mockito.when(csrfChecker.validateCsrfTokenInRequest(Mockito.any()))
+                .thenReturn(true);
         FusionController controller = Mockito.spy(
                 new FusionController(objectMapper, explicitNullableTypeChecker,
-                        applicationContext, registry));
+                        applicationContext, registry, csrfChecker));
         Mockito.doReturn(mock(FusionAccessChecker.class)).when(controller)
                 .getAccessChecker(Mockito.any());
         return controller;

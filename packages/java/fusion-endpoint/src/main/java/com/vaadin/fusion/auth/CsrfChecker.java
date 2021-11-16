@@ -15,32 +15,49 @@
  */
 package com.vaadin.fusion.auth;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
-import com.vaadin.flow.internal.springcsrf.SpringCsrfTokenUtil;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import com.vaadin.flow.internal.springcsrf.SpringCsrfTokenUtil;
+import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Handles checking of a CSRF token in endpoint requests.
  */
+@Component
 public class CsrfChecker {
+
     private static final String VAADIN_CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
     private static final String VAADIN_CSRF_COOKIE_NAME = "csrfToken";
 
     private boolean csrfProtectionEnabled = true;
 
-    private static Logger getLogger() {
-        return LoggerFactory.getLogger(FusionAccessChecker.class);
+    /**
+     * Creates a new csrf checker for the given context.
+     * 
+     * @param servletContext
+     *            the servlet context
+     */
+    public CsrfChecker(ServletContext servletContext) {
+        ApplicationConfiguration cfg = ApplicationConfiguration
+                .get(new VaadinServletContext(servletContext));
+        if (cfg != null) {
+            setCsrfProtection(cfg.isXsrfProtectionEnabled());
+        }
+
     }
 
     /**
@@ -130,4 +147,9 @@ public class CsrfChecker {
     boolean isSpringCsrfTokenPresent(ServletRequest request) {
         return SpringCsrfTokenUtil.getSpringCsrfToken(request).isPresent();
     }
+
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(FusionAccessChecker.class);
+    }
+
 }

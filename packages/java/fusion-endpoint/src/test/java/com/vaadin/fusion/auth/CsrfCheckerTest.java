@@ -1,13 +1,30 @@
 package com.vaadin.fusion.auth;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class CsrfCheckerTest {
-    private CsrfChecker csrfChecker = Mockito.spy(new CsrfChecker());
+    private CsrfChecker csrfChecker;
+    private ServletContext servletContext;
+    private ApplicationConfiguration appConfig;
+
+    @Before
+    public void setup() {
+        servletContext = Mockito.mock(ServletContext.class);
+        appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(servletContext
+                .getAttribute(ApplicationConfiguration.class.getName()))
+                .thenReturn(appConfig);
+        Mockito.when(appConfig.isXsrfProtectionEnabled()).thenReturn(true);
+        csrfChecker = Mockito.spy(new CsrfChecker(servletContext));
+    }
 
     @Test
     public void should_skipCsrfCheck_when_SpringCsrfTokenPresents() {
@@ -41,5 +58,18 @@ public class CsrfCheckerTest {
                 .getCsrfTokenInCookie(request);
         Mockito.verify(csrfChecker, Mockito.times(1))
                 .getCsrfTokenInRequest(request);
+    }
+
+    @Test
+    public void should_enableCsrf_When_CreatingCsrfCheckerAndXsrfProtectionEnabled() {
+        Assert.assertTrue(csrfChecker.isCsrfProtectionEnabled());
+    }
+
+    @Test
+    public void should_notEnableCsrf_When_CreatingCsrfCheckerAndXsrfProtectionDisabled() {
+        Mockito.when(appConfig.isXsrfProtectionEnabled()).thenReturn(false);
+        csrfChecker = Mockito.spy(new CsrfChecker(servletContext));
+
+        Assert.assertFalse(csrfChecker.isCsrfProtectionEnabled());
     }
 }
