@@ -146,7 +146,13 @@ export async function logout(options?: LogoutOptions) {
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
-      throw error;
+
+      let cookiePath = new URL(document.baseURI).pathname;
+      // Remove trailing '/' if the path is not exactly '/'
+      if (cookiePath.length > 1 && cookiePath.substr(-1, 1) === '/') {
+        cookiePath = cookiePath.substr(0, cookiePath.length - 1);
+      }
+      document.cookie = `jwt.headerAndPayload=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=${cookiePath}`; // Unset JWT cookie
     }
   }
 }
