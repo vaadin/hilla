@@ -11,7 +11,7 @@ const cwd = process.cwd();
 // The root project directory
 const dir = dirname(fileURLToPath(import.meta.url));
 
-const packages = await readdir(resolve(dir, 'packages'));
+const packages = await readdir(resolve(dir, 'ts'));
 const index = packages.findIndex((pack) => cwd.endsWith(pack));
 
 const tsExtPattern = /\.ts$/;

@@ -18,3 +18,10 @@ node_modules
 
 # Testing files
 .coverage
+
+# Generated code
+ts/*/*.d.ts
+ts/*/*.d.ts.map
+ts/*/*.js
+ts/*/*.js.map
+ts/*/.coverage

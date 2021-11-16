@@ -1,11 +1,11 @@
 {
-  "name": "@vaadin/fusion-frontend",
+  "name": "@vaadin/form",
   "version": "0.0.15",
-  "description": "Vaadin frontend utils used by Fusion",
+  "description": "Vaadin form utils",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
-  "repository": "https://github.com/vaadin/fusion/frontend/packages/fusion-frontend",
+  "repository": "https://github.com/vaadin/fusion/ts/form",
   "keywords": [
     "Vaadin",
     "Fusion"
@@ -22,14 +22,26 @@
     ".": {
       "default": "./index.js"
     },
-    "./Authentication.js": {
-      "default": "./Authentication.js"
+    "./Binder.js": {
+      "default": "./Binder.js"
     },
-    "./Connect.js": {
-      "default": "./Connect.js"
+    "./BinderNode.js": {
+      "default": "./BinderNode.js"
+    },
+    "./Field.js": {
+      "default": "./Field.js"
     },
     "./index.js": {
       "default": "./index.js"
+    },
+    "./Models.js": {
+      "default": "./Models.js"
+    },
+    "./Validation.js": {
+      "default": "./Validation.js"
+    },
+    "./Validators.js": {
+      "default": "./Validators.js"
     }
   },
   "author": "Vaadin Ltd",
@@ -45,7 +57,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/common-frontend": "^0.0.12"
+    "validator": "^13.6.0"
   },
   "peerDependencies": {
     "lit": "^2.0.0"
@@ -56,9 +68,7 @@
     "@types/mocha": "^9.0.0",
     "@types/sinon": "^10.0.2",
     "@types/sinon-chai": "^3.2.5",
-    "@types/validator": "^13.6.3",
     "@web/test-runner": "^0.13.16",
-    "fetch-mock": "^9.11.0",
     "sinon": "^11.1.2"
   }
 }
