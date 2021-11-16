@@ -12,11 +12,12 @@
   <modules>
     <module>maven-plugin</module>
     <module>parser-jvm</module>
+    <module>parser-jvm-plugin-backbone</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
   </properties>
 
