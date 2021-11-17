@@ -2,22 +2,36 @@ name: Frontend CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - '.github/workflows/frontend.yml'
-      - 'frontend/**/*'
-      - '!frontend/.simple-git-hooks.json'
-      - '!frontend/.lintstagedrc.json'
+      - 'packages/ts/**/*'
+      - 'scripts/**/*'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.gitignore'
+      - '.prettierignore'
+      - '.prettierrc'
+      - 'lerna.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'web-test-runner.config.js'
   pull_request:
     paths:
       - '.github/workflows/frontend.yml'
-      - 'frontend/**/*'
-      - '!frontend/.simple-git-hooks.json'
-      - '!frontend/.lintstagedrc.json'
-
-defaults:
-  run:
-    working-directory: frontend
+      - 'packages/ts/**/*'
+      - 'scripts/**/*'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.gitignore'
+      - '.prettierignore'
+      - '.prettierrc'
+      - 'lerna.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'web-test-runner.config.js'
 
 jobs:
   testing:
@@ -46,7 +60,7 @@ jobs:
           CI: true
       - name: Collect Coverage
         run: |
-          COVFILES=$(find packages -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2
@@ -55,4 +69,4 @@ jobs:
           files: ${{ env.COVFILES }}
           flags: unittests
           fail_ci_if_error: true
-          root_dir: ${{ github.workspace }}/frontend
+          root_dir: ${{ github.workspace }}

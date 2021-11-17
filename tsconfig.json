@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "declaration": true,
+    "declarationMap": true,
+    "target": "es2019",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["es2019", "dom"],
+    "strict": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "importsNotUsedAsValues": "error",
+    "useUnknownInCatchVariables": true
+  },
+  "include": ["packages/ts/**/*.{ts,js}", "scripts/**/*.{ts,js}", "*.{ts,js,cjs}"],
+  "exclude": ["packages/ts/*/*.{js,d.ts}"]
+}
