@@ -19,7 +19,7 @@ The collection of frontend and NodeJS utilities used by Fusion.
 
 | Package                 | Status |
 |-------------------------|--------|
-| [@vaadin/form](./packages/ts/form) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/common-frontend) |
+| [@vaadin/form](./packages/ts/form) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form) |
 | [@vaadin/fusion-frontend](./packages/ts/fusion-frontend) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/fusion-frontend.svg)](https://www.npmjs.com/package/@vaadin/fusion-frontend) |
 
 ### Contribution
