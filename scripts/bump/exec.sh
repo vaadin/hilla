@@ -4,7 +4,8 @@
 set -eu
 
 branch=main
-dir=$(dirname -- "$0")
+bump_scripts_dir=$(dirname -- "$0")
+packages_dir="$PWD/packages/ts"
 
 # shellcheck disable=SC2139
 alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
@@ -13,7 +14,7 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -s"
 
 # Updating the registration version for all packages
-find "$PWD"/packages/*/src/index.ts -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
+find "$packages_dir/*/src/index.ts" -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
 
 npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
 
@@ -26,7 +27,7 @@ git \
 
 protection_config=$(ghr -X GET)
 
-remapped=$(node "$dir"/protection-remap.js "$protection_config")
+remapped=$(node "$bump_scripts_dir/protection-remap.js" "$protection_config")
 
 # Restores the protection of the branch
 restore_protection() {
@@ -38,6 +39,6 @@ restore_protection() {
 # the script exits with an error
 trap "restore_protection" EXIT
 
-< "$dir"/disabled-protection.json ghr -X PUT -d '@-' > /dev/null
+< "$bump_scripts_dir/disabled-protection.json" ghr -X PUT -d '@-' > /dev/null
 
-git push https://vaadin-bot:"$GIT_RELEASE_TOKEN"@github.com/"$REPO".git "$branch"
+git push "https://vaadin-bot:$GIT_RELEASE_TOKEN@github.com/$REPO.git" "$branch"

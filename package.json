@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/frontend",
+  "name": "@vaadin/fusion",
   "private": true,
-  "description": "Vaadin frontend code",
+  "description": "Fusion frontend & NodeJS code",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -9,7 +9,7 @@
     "npm": ">=7"
   },
   "workspaces": [
-    "packages/*"
+    "packages/ts/*"
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/vaadin/fusion/frontend"
+    "url": "github.com/vaadin/fusion"
   },
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
@@ -38,9 +38,9 @@
     "lerna": "^4.0.0",
     "lint-staged": "^11.1.2",
     "meow": "^10.1.1",
-    "minimist": "^1.2.5",
+    "micromatch": "^4.0.4",
     "prettier": "^2.3.2",
     "simple-git-hooks": "^2.6.1",
-    "typescript": "^4.4.2"
+    "typescript": "^4.5.1-rc"
   }
 }

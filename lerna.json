@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/*"],
+  "packages": ["packages/ts/*"],
   "npmClient": "npm",
   "useWorkspaces": true,
   "version": "0.0.15"

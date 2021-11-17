@@ -2,16 +2,15 @@
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { readdir } from 'fs/promises';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { URL } from 'url';
 
 // One of the packages in the `packages` dir
 const cwd = process.cwd();
 
 // The root project directory
-const dir = dirname(fileURLToPath(import.meta.url));
+const dir = new URL('./packages/ts', import.meta.url);
 
-const packages = await readdir(resolve(dir, 'packages'));
+const packages = await readdir(dir);
 const index = packages.findIndex((pack) => cwd.endsWith(pack));
 
 const tsExtPattern = /\.ts$/;

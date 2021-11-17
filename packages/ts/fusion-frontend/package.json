@@ -1,11 +1,15 @@
 {
   "name": "@vaadin/fusion-frontend",
   "version": "0.0.15",
-  "description": "Vaadin frontend utils used by Fusion",
+  "description": "Fusion frontend utils",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
-  "repository": "https://github.com/vaadin/fusion/frontend/packages/fusion-frontend",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/fusion.git",
+    "directory": "packages/ts/fusion-frontend"
+  },
   "keywords": [
     "Vaadin",
     "Fusion"
@@ -13,7 +17,7 @@
   "scripts": {
     "build": "tsc --isolatedModules",
     "lint": "eslint --fix src/**/*.ts test/**/*.ts",
-    "test": "web-test-runner \"test/**/*.test.ts\" --config ../../web-test-runner.config.js",
+    "test": "web-test-runner \"test/**/*.test.ts\" --config ../../../web-test-runner.config.js",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit --project test/tsconfig.json"

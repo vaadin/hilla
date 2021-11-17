@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
+import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 
 const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};

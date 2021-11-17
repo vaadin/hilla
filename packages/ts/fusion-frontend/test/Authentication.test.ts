@@ -1,8 +1,8 @@
 import { expect } from '@open-wc/testing';
-import fetchMock from 'fetch-mock/esm/client';
+import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
 import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
-import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils';
+import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
@@ -10,7 +10,7 @@ import {
   TEST_VAADIN_CSRF_TOKEN_VALUE,
   TET_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
-} from './SpringCsrfTestUtils.test';
+} from './SpringCsrfTestUtils.test.js';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock

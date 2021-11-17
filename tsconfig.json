@@ -15,5 +15,6 @@
     "importsNotUsedAsValues": "error",
     "useUnknownInCatchVariables": true
   },
-  "include": ["packages/**/*"]
+  "include": ["packages/ts/**/*.{ts,js}", "scripts/**/*.{ts,js}", "*.{ts,js,cjs}"],
+  "exclude": ["packages/ts/*/*.{js,d.ts}"]
 }
