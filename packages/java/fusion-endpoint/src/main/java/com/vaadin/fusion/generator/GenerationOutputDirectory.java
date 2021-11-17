@@ -80,8 +80,8 @@ class GenerationOutputDirectory {
     static class GeneratorFileVisitor extends SimpleFileVisitor<Path> {
         private static final List<String> filesToKeep = Arrays.asList(
                 ClientAPIGenerator.CONNECT_CLIENT_NAME,
-                FrontendUtils.BOOTSTRAP_FILE_NAME,
-                FrontendUtils.THEME_IMPORTS_NAME,
+                FrontendUtils.BOOTSTRAP_FILE_NAME, FrontendUtils.INDEX_TS,
+                FrontendUtils.INDEX_JS, FrontendUtils.THEME_IMPORTS_NAME,
                 FrontendUtils.THEME_IMPORTS_D_TS_NAME);
         private final Logger logger;
         private Set<File> generatedFiles;

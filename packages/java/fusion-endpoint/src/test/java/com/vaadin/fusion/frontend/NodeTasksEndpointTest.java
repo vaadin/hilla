@@ -66,7 +66,7 @@ public class NodeTasksEndpointTest {
 
         Arrays.asList(
                 // enableClientSide
-                "frontend/index.html", "target/index.ts",
+                "frontend/index.html", "frontend/generated/index.ts",
                 // withConnectJavaSourceFolder and
                 // withConnectGeneratedOpenApiJson
                 "api-file.json",
