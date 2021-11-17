@@ -32,6 +32,7 @@
     "@web/dev-server-esbuild": "^0.2.14",
     "@web/test-runner-chrome": "^0.10.2",
     "concurrently": "^6.2.1",
+    "esbuild": "^0.13.12",
     "eslint": "^7.32.0",
     "eslint-config-vaadin": "^0.4.0",
     "eslint-plugin-chai-friendly": "^0.7.2",

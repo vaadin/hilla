@@ -1,18 +1,23 @@
 {
-  "name": "ts-generator",
+  "name": "@vaadin/generator-typescript-cli",
   "version": "0.1.0",
   "description": "A Fusion tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": "^14.6 || >=16"
+    "node": ">= 16.13"
   },
   "scripts": {
-    "test": "mocha"
+    "build": "concurrently npm:build:*",
+    "build:transpile": "tsc --isolatedModules",
+    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vaadin/fusion.git#main"
+    "url": "https://github.com/vaadin/fusion.git",
+    "directory": "packages/ts/generator-typescript-cli"
   },
   "keywords": [
     "fusion",
@@ -24,14 +29,21 @@
   "bugs": {
     "url": "https://github.com/vaadin/fusion/issues"
   },
-  "homepage": "https://github.com/vaadin/fusion/tree/main/ts-generator#readme",
+  "homepage": "https://vaadin.com/fusion",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "bin": {
+    "tsgen": "index.js"
+  },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
-    "fast-deep-equal": "^3.1.3",
+    "@vaadin/generator-typescript": "^0.1.0",
     "meow": "^10.1.1",
     "openapi-types": "^9.3.0",
     "pino": "^7.0.5",
     "pino-pretty": "^7.1.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.5.0-beta"
   },
   "devDependencies": {
@@ -42,15 +54,8 @@
     "@types/sinon-chai": "^3.2.5",
     "chai": "^4.3.4",
     "concurrently": "^6.3.0",
-    "esbuild": "^0.13.12",
-    "eslint": "^7",
-    "eslint-config-vaadin": "^0.4.0",
-    "eslint-plugin-chai-friendly": "^0.7.2",
-    "lint-staged": "^11.2.3",
-    "micromatch": "^4.0.4",
+    "copyfiles": "^2.4.1",
     "mocha": "^9.1.3",
-    "prettier": "^2.4.1",
-    "simple-git-hooks": "^2.6.1",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
     "type-fest": "^2.5.1"

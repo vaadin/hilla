@@ -61,6 +61,7 @@
     "access": "public"
   },
   "dependencies": {
+    "rimraf": "^3.0.2",
     "validator": "^13.6.0"
   },
   "peerDependencies": {

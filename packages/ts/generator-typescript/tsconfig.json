@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": ".",
+    "target": "esnext",
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["!src/**/*"]
+}
