@@ -9,7 +9,7 @@
     "npm": ">=7"
   },
   "workspaces": [
-    "ts/*"
+    "packages/ts/*"
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",

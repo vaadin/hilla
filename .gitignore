@@ -20,8 +20,8 @@ node_modules
 .coverage
 
 # Generated code
-ts/*/*.d.ts
-ts/*/*.d.ts.map
-ts/*/*.js
-ts/*/*.js.map
-ts/*/.coverage
+packages/ts/*/*.d.ts
+packages/ts/*/*.d.ts.map
+packages/ts/*/*.js
+packages/ts/*/*.js.map
+packages/ts/*/.coverage

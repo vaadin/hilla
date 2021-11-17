@@ -5,6 +5,7 @@ set -eu
 
 branch=main
 bump_scripts_dir=$(dirname -- "$0")
+packages_dir="$PWD/packages/ts"
 
 # shellcheck disable=SC2139
 alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
@@ -13,7 +14,7 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -s"
 
 # Updating the registration version for all packages
-find "$PWD/ts/*/src/index.ts" -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
+find "$packages_dir/*/src/index.ts" -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
 
 npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
 

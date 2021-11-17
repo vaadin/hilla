@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/frontend.yml'
-      - 'typescript/**/*'
+      - 'packages/ts/**/*'
       - 'scripts/**/*'
       - '.eslintignore'
       - '.eslintrc'
@@ -20,7 +20,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/frontend.yml'
-      - 'typescript/**/*'
+      - 'packages/ts/**/*'
       - 'scripts/**/*'
       - '.eslintignore'
       - '.eslintrc'
@@ -60,7 +60,7 @@ jobs:
           CI: true
       - name: Collect Coverage
         run: |
-          COVFILES=$(find ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         uses: codecov/codecov-action@v2

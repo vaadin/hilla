@@ -1,2 +1,2 @@
-ts/*/*.js
-ts/*/*.d.ts
+packages/ts/*/*.js
+packages/ts/*/*.d.ts
