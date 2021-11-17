@@ -1,5 +1,5 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils';
+import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
