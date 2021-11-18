@@ -18,7 +18,7 @@ import {
   NonComposedSchema,
   ReferenceSchema,
   Schema,
-} from '../../core/Schema.js';
+} from '@vaadin/generator-typescript/Schema.js';
 import type DependencyManager from './DependencyManager.js';
 
 function createBoolean(): TypeNode {

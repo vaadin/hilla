@@ -1,8 +1,8 @@
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
-import Plugin from '../../core/Plugin.js';
-import type ReferenceResolver from '../../core/ReferenceResolver';
-import type SharedStorage from '../../core/SharedStorage';
+import Plugin from '@vaadin/generator-typescript/Plugin.js';
+import type ReferenceResolver from '@vaadin/generator-typescript/ReferenceResolver';
+import type SharedStorage from '@vaadin/generator-typescript/SharedStorage';
 import BarrelProcessor from './BarrelProcessor.js';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';

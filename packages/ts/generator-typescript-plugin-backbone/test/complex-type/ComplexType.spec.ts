@@ -1,9 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
-import BackbonePlugin from '../../../../src/plugins/BackbonePlugin/index.js';
-import { createGenerator, loadInput, pathBase } from '../../../utils/common.js';
-import snapshotMatcher from '../../../utils/snapshotMatcher.js';
+import BackbonePlugin from '../../src/index.js';
+import { createGenerator, loadInput, pathBase } from '../utils/common.js';
+import snapshotMatcher from '../utils/snapshotMatcher.js';
 
 use(sinonChai);
 use(snapshotMatcher);

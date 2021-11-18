@@ -12,7 +12,7 @@
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
     "build:copy": "copyfiles -f src/**/*.d.ts .",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -30,12 +30,6 @@
     },
     "./Plugin.js": {
       "default": "./Plugin.js"
-    },
-    "./PluginManager.js": {
-      "default": "./PluginManager.js"
-    },
-    "./ReferenceResolver.js": {
-      "default": "./PluginManager.js"
     },
     "./Schema.js": {
       "default": "./Schema.js"

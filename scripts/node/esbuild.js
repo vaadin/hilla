@@ -1,10 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { transform } from 'esbuild';
 import { relative } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
+
+const cwd = pathToFileURL(process.cwd()).toString();
 
 export async function resolve(specifier, context, defaultResolve) {
-  if (specifier.startsWith('.') && !context.parentURL.includes('node_modules')) {
+  if (specifier.startsWith('.') && context.parentURL?.startsWith(cwd)) {
     if (!specifier.endsWith('.js')) {
       throw new Error(
         `Local files without '.js' extensions are not supported: '${specifier}' in '${relative(

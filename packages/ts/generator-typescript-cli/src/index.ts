@@ -1,5 +1,7 @@
+import Generator from '@vaadin/generator-typescript/Generator.js';
 import meow from 'meow';
-import createApplication from './createApplication';
+import Pino from 'pino';
+import IO from './IO.js';
 
 const {
   input: [input],
@@ -38,4 +40,15 @@ const {
   },
 );
 
-await createApplication(input, { outputDir, plugins, verbose });
+const io = new IO(outputDir);
+
+const generator = new Generator(
+  await io.load(Array.from(new Set(plugins), (path) => io.resolve(path))),
+  Pino({
+    name: 'tsgen',
+    level: verbose ? 'debug' : 'info',
+  }),
+);
+
+const files = await generator.process(input.startsWith('{') ? input : await io.read(input));
+await io.write(files);

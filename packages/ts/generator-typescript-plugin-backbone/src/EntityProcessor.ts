@@ -1,6 +1,6 @@
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
-import type { EnumSchema, ReferenceSchema, Schema } from '../../core/Schema.js';
+import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript/Schema.js';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -12,8 +12,11 @@ import {
   isObjectSchema,
   isReferenceSchema,
   NonEmptyObjectSchema,
-} from '../../core/Schema.js';
-import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName } from '../../core/utils.js';
+} from '@vaadin/generator-typescript/Schema.js';
+import {
+  convertFullyQualifiedNameToRelativePath,
+  simplifyFullyQualifiedName,
+} from '@vaadin/generator-typescript/utils.js';
 import DependencyManager from './DependencyManager.js';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';

@@ -1,4 +1,0 @@
-{
-  "extension": ["ts", "mts", "cts", "js", "mjs", "cjs"],
-  "loader": "./scripts/node/esbuild.js"
-}
