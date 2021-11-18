@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>19.0-SNAPSHOT</version>
+        <version>20.0-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-fusion</artifactId>
     <name>Integration tests for Vaadin Spring Security and Fusion</name>
