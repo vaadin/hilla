@@ -13,6 +13,7 @@
   <artifactId>parser-jvm-plugin-backbone</artifactId>
   <name>Fusion JVM Parser Backbone Plugin</name>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
   <dependencyManagement>
     <dependencies>
@@ -25,22 +26,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <compilerArgs>
-            <arg>-parameters</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
   <dependencies>
     <dependency>
