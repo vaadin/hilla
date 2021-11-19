@@ -1,51 +1,35 @@
 package com.vaadin.fusion.parser.core;
 
-import java.io.File;
+import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.io.FilenameUtils;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public final class ParserConfig {
-    private final Application application = new Application();
-    private final Plugins plugins = new Plugins();
+public class ParserConfig {
     private String classPath;
-    @JsonIgnore
+    private String endpointAnnotationName;
     private OpenAPI openAPI;
-
-    ParserConfig() {
-    }
-
-    @Nonnull
-    public Application getApplication() {
-        return application;
-    }
+    private Set<String> plugins = new LinkedHashSet<>();
 
     @Nonnull
     public String getClassPath() {
         return classPath;
+    }
+
+    @Nonnull
+    public String getEndpointAnnotationName() {
+        return endpointAnnotationName;
     }
 
     @Nonnull
@@ -54,27 +38,35 @@ public final class ParserConfig {
     }
 
     @Nonnull
-    public Plugins getPlugins() {
+    public Set<String> getPlugins() {
         return plugins;
     }
 
-    public static final class Application {
-        private String endpointAnnotation;
-
-        private Application() {
+    @Override
+    public boolean equals(Object another) {
+        if (this == another) {
+            return true;
         }
 
-        public String getEndpointAnnotation() {
-            return endpointAnnotation;
+        if (!(another instanceof ParserConfig)) {
+            return false;
         }
+
+        return Objects.equals(classPath, ((ParserConfig) another).classPath)
+            && Objects.equals(endpointAnnotationName, ((ParserConfig) another).endpointAnnotationName)
+            && Objects.equals(openAPI, ((ParserConfig) another).openAPI)
+            && Objects.equals(plugins, ((ParserConfig) another).plugins);
     }
 
-    public static final class Builder {
+    public static class Builder {
         private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
-        private File configFile;
-        private File openAPITemplate;
+        private FileSpec openAPISpec;
 
-        public Builder() {
+        @Nonnull
+        public Builder addPlugin(@Nonnull String plugin) {
+            Objects.requireNonNull(plugin);
+            actions.add(config -> config.plugins.add(plugin));
+            return this;
         }
 
         @Nonnull
@@ -83,11 +75,6 @@ public final class ParserConfig {
 
             actions.add(config -> action.accept(config.openAPI));
             return this;
-        }
-
-        @Nonnull
-        public Builder classPath(@Nonnull String classPath) {
-            return classPath(classPath, true);
         }
 
         @Nonnull
@@ -104,198 +91,120 @@ public final class ParserConfig {
         }
 
         @Nonnull
-        public Builder configFile(@Nonnull File file) {
-            configFile = Objects.requireNonNull(file);
-            return this;
+        public Builder classPath(@Nonnull String classPath) {
+            return classPath(classPath, true);
         }
 
         @Nonnull
-        public Builder disableDefaultPlugin(@Nonnull String plugin) {
-            Objects.requireNonNull(plugin);
-
-            actions.add(config -> config.plugins.disable.add(plugin));
-            return this;
-        }
-
-        @Nonnull
-        public Builder disableDefaultPlugins(
-                @Nonnull Collection<String> plugins) {
-            return disableDefaultPlugins(plugins, true);
-        }
-
-        @Nonnull
-        public Builder disableDefaultPlugins(
-                @Nonnull Collection<String> plugins, boolean override) {
-            Objects.requireNonNull(plugins);
+        public Builder endpointAnnotation(
+            @Nonnull String annotationFullyQualifiedName, boolean override) {
+            Objects.requireNonNull(annotationFullyQualifiedName);
 
             actions.add(config -> {
-                if (override || config.plugins.disable == null) {
-                    config.plugins.disable = new LinkedHashSet<>(plugins);
+                if (override || config.endpointAnnotationName == null) {
+                    config.endpointAnnotationName = annotationFullyQualifiedName;
                 }
             });
             return this;
         }
 
         @Nonnull
-        public Builder disableDefaultPlugins(@Nonnull String... plugins) {
-            return disableDefaultPlugins(Arrays.asList(plugins));
-        }
-
-        @Nonnull
         public Builder endpointAnnotation(
-                @Nonnull String annotationQualifiedName) {
+            @Nonnull String annotationQualifiedName) {
             return endpointAnnotation(annotationQualifiedName, true);
         }
 
         @Nonnull
-        public Builder endpointAnnotation(
-                @Nonnull String annotationQualifiedName, boolean override) {
-            Objects.requireNonNull(annotationQualifiedName);
-
-            actions.add(config -> {
-                if (override || config.application.endpointAnnotation == null) {
-                    config.application.endpointAnnotation = annotationQualifiedName;
-                }
-            });
+        public Builder openAPISpec(@Nonnull String src, @Nonnull String ext) {
+            openAPISpec = new FileSpec(Objects.requireNonNull(src), Objects.requireNonNull(ext));
             return this;
         }
 
         @Nonnull
-        public ParserConfig finish() {
-            var configLoader = new Loader<>(ParserConfig.class);
-            var openAPILoader = new Loader<>(OpenAPI.class);
-
-            configLoader.load(Objects.requireNonNull(
-                    getClass().getResource("ParserConfigStub.json")));
-            openAPILoader.load(Objects.requireNonNull(
-                    getClass().getResource("OpenAPIStub.json")));
-
-            if (configFile != null) {
-                configLoader.load(configFile);
-            }
-
-            if (openAPITemplate != null) {
-                configLoader.load(openAPITemplate);
-            }
-
-            var config = configLoader.getValue();
-            config.openAPI = openAPILoader.getValue();
-
-            for (var action : actions) {
-                action.accept(config);
-            }
-
-            Objects.requireNonNull(config.classPath,
-                    "Fusion Parser Configuration: Classpath is not provided.");
-
-            return config;
-        }
-
-        @Nonnull
-        public Builder openAPITemplate(@Nonnull File file) {
-            openAPITemplate = Objects.requireNonNull(file);
-            return this;
-        }
-
-        @Nonnull
-        public Builder usePlugin(@Nonnull String plugin) {
-            Objects.requireNonNull(plugin);
-
-            actions.add(config -> config.plugins.use.add(plugin));
-            return this;
-        }
-
-        @Nonnull
-        public Builder usePlugins(@Nonnull Collection<String> plugins) {
-            return usePlugins(plugins, true);
-        }
-
-        @Nonnull
-        public Builder usePlugins(@Nonnull Collection<String> plugins,
-                boolean override) {
+        public Builder plugins(@Nonnull Collection<String> plugins,
+                               boolean override) {
             Objects.requireNonNull(plugins);
 
             actions.add(config -> {
-                if (override || config.plugins.use == null) {
-                    config.plugins.use = new LinkedHashSet<>(plugins);
+                if (override || config.plugins == null) {
+                    config.plugins = new LinkedHashSet<>(plugins);
                 }
             });
             return this;
         }
 
         @Nonnull
-        public Builder usePlugins(@Nonnull String... plugins) {
-            return usePlugins(Arrays.asList(plugins));
+        public Builder plugins(@Nonnull Collection<String> plugins) {
+            return plugins(plugins, true);
+        }
+
+        public ParserConfig finish() {
+            var config = new ParserConfig();
+            var openAPIParser = new OpenAPIParser();
+
+            try {
+                String src = new String(Objects.requireNonNull(
+                    getClass().getResourceAsStream("OpenAPIStub.json")).readAllBytes());
+
+                openAPIParser.parse(new FileSpec(src, "json"));
+
+                if (openAPISpec != null) {
+                    openAPIParser.parse(openAPISpec);
+                }
+
+                config.openAPI = openAPIParser.getValue();
+
+                actions.forEach(action -> action.accept(config));
+
+                return config;
+            } catch (IOException e) {
+                throw new ParserException("Failed to parse openAPI specification", e);
+            }
         }
     }
 
-    public static final class Plugins {
-        @JsonDeserialize(as = LinkedHashSet.class)
-        private Set<String> disable;
+    private static class FileSpec {
+        private final String src;
+        private final String extension;
 
-        @JsonDeserialize(as = LinkedHashSet.class)
-        private Set<String> use;
-
-        private Plugins() {
+        public FileSpec(String src, String extension) {
+            this.src = src;
+            this.extension = extension;
         }
 
-        @Nonnull
-        public Set<String> getDisable() {
-            return Collections.unmodifiableSet(disable);
+        public String getExtension() {
+            return extension;
         }
 
-        @Nonnull
-        public Set<String> getUse() {
-            return Collections.unmodifiableSet(use);
+
+        public String getSrc() {
+            return src;
         }
     }
 
-    private static final class Loader<T> {
-        private final Class<T> type;
-        private T value;
+    private static final class OpenAPIParser {
+        private OpenAPI value;
 
-        public Loader(Class<T> type) {
-            this.type = type;
-        }
-
-        public T getValue() {
+        public OpenAPI getValue() {
             return value;
         }
 
-        public void load(URL url) {
-            try {
-                load(new File(url.toURI()));
-            } catch (URISyntaxException e) {
-                throw new ParserException(e);
-            }
+        public void parse(FileSpec spec) throws JsonProcessingException {
+            var mapper = createMapper(spec.getExtension());
+            var reader = value != null ? mapper.readerForUpdating(value)
+                : mapper.reader();
+            value = reader.readValue(spec.getSrc());
         }
 
-        public void load(File file) {
-            try {
-                var mapper = createMapper(file);
-                var reader = value != null ? mapper.readerForUpdating(value)
-                        : mapper.reader();
-
-                value = reader.readValue(file, type);
-            } catch (IOException e) {
-                throw new ParserException("Failed to parse configuration file",
-                        e);
-            }
-        }
-
-        private ObjectMapper createMapper(File file) {
-            var extension = FilenameUtils.getExtension(file.toString());
-
+        private ObjectMapper createMapper(String extension) {
             switch (extension) {
-            case "yml":
-            case "yaml":
-                return type == OpenAPI.class ? Yaml.mapper()
-                        : new ObjectMapper(new YAMLFactory());
-            case "json":
-                return type == OpenAPI.class ? Json.mapper()
-                        : new ObjectMapper(new JsonFactory());
-            default:
-                throw new ParserException(String.format(
+                case "yml":
+                case "yaml":
+                    return Yaml.mapper();
+                case "json":
+                    return Json.mapper();
+                default:
+                    throw new ParserException(String.format(
                         "The file format '.%s' is not supported", extension));
             }
         }

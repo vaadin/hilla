@@ -35,7 +35,7 @@ public class SimpleTypeTest {
         var config = new ParserConfig.Builder()
             .classPath(targetDir.toString())
             .endpointAnnotation(Endpoint.class.getName())
-            .usePlugin(BackbonePlugin.class.getName()).finish();
+            .addPlugin(BackbonePlugin.class.getName()).finish();
 
         var parser = new Parser(config);
         parser.execute();

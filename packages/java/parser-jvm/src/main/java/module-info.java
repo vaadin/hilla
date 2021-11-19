@@ -3,7 +3,6 @@ module com.vaadin.fusion.parser.core {
     requires jsr305;
     requires io.swagger.v3.oas.models;
     requires com.fasterxml.jackson.databind;
-    requires org.apache.commons.io;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires io.swagger.v3.core;
     requires slf4j.api;

@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
+import io.swagger.v3.oas.models.OpenAPI;
 
 public class Parser {
     private final ParserConfig config;
@@ -30,7 +31,7 @@ public class Parser {
                 });
     }
 
-    public void execute() {
+    public OpenAPI execute() {
         var pluginManager = new PluginManager(config);
 
         var result = new ClassGraph().enableAllInfo()
@@ -42,6 +43,8 @@ public class Parser {
 
         pluginManager.execute(collector.getEndpoints(), collector.getEntities(),
                 storage);
+
+        return storage.getOpenAPI();
     }
 
     @Nonnull
@@ -56,7 +59,7 @@ public class Parser {
         public EntitiesCollector(ScanResult result) {
             endpoints = result
                     .getClassesWithAnnotation(
-                            config.getApplication().getEndpointAnnotation())
+                            config.getEndpointAnnotationName())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
 

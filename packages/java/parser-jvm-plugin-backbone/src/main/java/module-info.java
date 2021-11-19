@@ -7,4 +7,5 @@ module com.vaadin.fusion.parser.plugins.backbone {
     requires com.fasterxml.jackson.databind;
 
     opens com.vaadin.fusion.parser.plugins.backbone to com.vaadin.fusion.parser.core;
+    exports com.vaadin.fusion.parser.plugins.backbone;
 }
