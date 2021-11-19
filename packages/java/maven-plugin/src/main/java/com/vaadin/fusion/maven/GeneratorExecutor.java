@@ -28,7 +28,7 @@ public class GeneratorExecutor {
         try {
             builder.start();
         } catch (IOException e) {
-            throw new FusionMavenPluginException("Error running Fusion TS Generator", e);
+            throw new GeneratorMavenPluginException("Failed running TS Generator", e);
         }
     }
 

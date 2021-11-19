@@ -11,7 +11,7 @@ import org.apache.maven.project.MavenProject;
  * pluginSpecifications.
  */
 @Mojo(name = "fusion-generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-public class FusionGeneratorMojo extends AbstractMojo {
+public class GeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
 
@@ -30,10 +30,12 @@ public class FusionGeneratorMojo extends AbstractMojo {
         var executor = new ParserExecutor(project);
 
         parser.getClassPath().ifPresentOrElse(executor::useClassPath,
-            executor::useClassPath);
-        parser.getEndpointAnnotation().ifPresent(executor::useEndpointAnnotation);
+                executor::useClassPath);
+        parser.getEndpointAnnotation()
+                .ifPresent(executor::useEndpointAnnotation);
         parser.getOpenAPIPath().ifPresent(executor::useOpenAPIBase);
-        parser.getPlugins().ifPresentOrElse(executor::usePlugins, executor::usePlugins);
+        parser.getPlugins().ifPresentOrElse(executor::usePlugins,
+                executor::usePlugins);
 
         return executor.execute();
     }
@@ -42,8 +44,10 @@ public class FusionGeneratorMojo extends AbstractMojo {
         var executor = new GeneratorExecutor(project);
 
         executor.useInput(openAPI);
-        generator.getOutputDir().ifPresentOrElse(executor::useOutputDir, executor::useOutputDir);
-        generator.getPlugins().ifPresentOrElse(executor::usePlugins, executor::usePlugins);
+        generator.getOutputDir().ifPresentOrElse(executor::useOutputDir,
+                executor::useOutputDir);
+        generator.getPlugins().ifPresentOrElse(executor::usePlugins,
+                executor::usePlugins);
 
         executor.execute();
     }

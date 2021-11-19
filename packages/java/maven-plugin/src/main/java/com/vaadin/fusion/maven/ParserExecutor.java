@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
@@ -34,25 +35,33 @@ class ParserExecutor {
             var api = new Parser(builder.finish()).execute();
             return new OpenAPIPrinter().writeAsString(api);
         } catch (IOException e) {
-            throw new FusionMavenPluginException(
-                    "Unable to process generated OpenAPI", e);
+            throw new GeneratorMavenPluginException(
+                    "Failed processing OpenAPI generated from parsed Java code", e);
         }
     }
 
     public void useClassPath(@Nonnull ClassPathConfiguration classPath) {
-        var result = classPath.isOverride() ? classPath.getValue()
-                : Stream.concat(
-                        ((List<String>) project.getCompileClasspathElements())
-                                .stream(),
-                        Stream.of(classPath.getValue()))
-                        .collect(Collectors.joining(";"));
+        try {
+            var result = classPath.isOverride() ? classPath.getValue()
+                    : Stream.concat(
+                            project.getCompileClasspathElements().stream(),
+                            Stream.of(classPath.getValue()))
+                            .collect(Collectors.joining(";"));
 
-        builder.classPath(result);
+            builder.classPath(result);
+        } catch (DependencyResolutionRequiredException e) {
+            throw new GeneratorMavenPluginException(
+                    "Failed collecting class path", e);
+        }
     }
 
     public void useClassPath() {
-        builder.classPath(String.join(";",
-                (List<String>) project.getCompileClasspathElements()));
+        try {
+            builder.classPath(
+                    String.join(";", project.getCompileClasspathElements()));
+        } catch (DependencyResolutionRequiredException e) {
+            throw new GeneratorMavenPluginException("Failed collecting class path", e);
+        }
     }
 
     public void useEndpointAnnotation(@Nonnull String endpointAnnotation) {
@@ -67,8 +76,8 @@ class ParserExecutor {
             builder.openAPISpec(Files.readString(path),
                     FilenameUtils.getExtension(path.toString()));
         } catch (IOException e) {
-            throw new FusionMavenPluginException(
-                    "Cannot load specified OpenAPI file", e);
+            throw new GeneratorMavenPluginException("Failed loading OpenAPI spec file",
+                    e);
         }
     }
 
