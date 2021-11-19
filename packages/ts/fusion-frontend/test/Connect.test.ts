@@ -136,19 +136,29 @@ describe('ConnectClient', () => {
     });
 
     it('should require 2 arguments', async () => {
+      let thrownError;
       try {
         // @ts-ignore
         await client.call();
       } catch (err) {
-        expect(err).to.be.instanceOf(TypeError).and.have.property('message').that.has.string('2 arguments required');
+        thrownError = err;
       }
+      expect(thrownError)
+        .to.be.instanceOf(TypeError)
+        .and.have.property('message')
+        .that.has.string('2 arguments required');
 
+      thrownError = undefined;
       try {
         // @ts-ignore
         await client.call('FooEndpoint');
       } catch (err) {
-        expect(err).to.be.instanceOf(TypeError).and.have.property('message').that.has.string('2 arguments required');
+        thrownError = err;
       }
+      expect(thrownError)
+        .to.be.instanceOf(TypeError)
+        .and.have.property('message')
+        .that.has.string('2 arguments required');
     });
 
     it('should fetch endpoint and method from default prefix', async () => {
@@ -287,11 +297,13 @@ describe('ConnectClient', () => {
 
     it('should reject if response is not ok', async () => {
       fetchMock.post(`${base}/connect/FooEndpoint/notFound`, 404);
+      let thrownError;
       try {
         await client.call('FooEndpoint', 'notFound');
       } catch (err) {
-        expect(err).to.be.instanceOf(EndpointError).and.have.property('message').that.has.string('404 Not Found');
+        thrownError = err;
       }
+      expect(thrownError).to.be.instanceOf(EndpointError).and.have.property('message').that.has.string('404 Not Found');
     });
 
     it('should reject with extra parameters in the exception if response body has the data', async () => {
@@ -305,14 +317,16 @@ describe('ConnectClient', () => {
         status: 400,
       });
 
+      let thrownError;
       try {
         await client.call('FooEndpoint', 'vaadinException');
       } catch (err) {
-        expect(err).to.be.instanceOf(EndpointError);
-        expect(err).to.have.property('message').that.is.string(expectedObject.message);
-        expect(err).to.have.property('type').that.is.string(expectedObject.type);
-        expect(err).to.have.deep.property('detail', expectedObject.detail);
+        thrownError = err;
       }
+      expect(thrownError).to.be.instanceOf(EndpointError);
+      expect(thrownError).to.have.property('message').that.is.string(expectedObject.message);
+      expect(thrownError).to.have.property('type').that.is.string(expectedObject.type);
+      expect(thrownError).to.have.deep.property('detail', expectedObject.detail);
     });
 
     it('should reject with extra unexpected response parameters in the exception if response body has the data', async () => {
@@ -323,13 +337,15 @@ describe('ConnectClient', () => {
       });
       fetchMock.post(`${base}/connect/FooEndpoint/vaadinConnectResponse`, errorResponse);
 
+      let thrownError;
       try {
         await client.call('FooEndpoint', 'vaadinConnectResponse');
       } catch (err) {
-        expect(err).to.be.instanceOf(EndpointResponseError);
-        expect(err).to.have.property('message').that.is.string(body);
-        expect(err).to.have.deep.property('response', errorResponse);
+        thrownError = err;
       }
+      expect(thrownError).to.be.instanceOf(EndpointResponseError);
+      expect(thrownError).to.have.property('message').that.is.string(body);
+      expect(thrownError).to.have.deep.property('response', errorResponse);
     });
 
     it('should reject with extra validation parameters in the exception if response body has the data', async () => {
@@ -348,25 +364,29 @@ describe('ConnectClient', () => {
         status: 400,
       });
 
+      let thrownError;
       try {
         await client.call('FooEndpoint', 'validationException');
       } catch (err) {
-        expect(err).to.be.instanceOf(EndpointValidationError);
-        expect(err).to.have.property('message').that.is.string(expectedObject.message);
-        expect(err).to.have.property('type').that.is.string(expectedObject.type);
-        expect(err).to.have.property('detail');
-        expect(err).to.have.deep.property('validationErrorData', expectedObject.validationErrorData);
+        thrownError = err;
       }
+      expect(thrownError).to.be.instanceOf(EndpointValidationError);
+      expect(thrownError).to.have.property('message').that.is.string(expectedObject.message);
+      expect(thrownError).to.have.property('type').that.is.string(expectedObject.type);
+      expect(thrownError).to.have.property('detail');
+      expect(thrownError).to.have.deep.property('validationErrorData', expectedObject.validationErrorData);
     });
 
     it('should reject if fetch is rejected', async () => {
       fetchMock.post(`${base}/connect/FooEndpoint/reject`, Promise.reject(new TypeError('Network failure')));
 
+      let thrownError;
       try {
         await client.call('FooEndpoint', 'reject');
       } catch (err) {
-        expect(err).to.be.instanceOf(TypeError).and.have.property('message').that.has.string('Network failure');
+        thrownError = err;
       }
+      expect(thrownError).to.be.instanceOf(TypeError).and.have.property('message').that.has.string('Network failure');
     });
 
     it('should fetch from custom prefix', async () => {

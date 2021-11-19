@@ -158,11 +158,14 @@ describe('Authentication', () => {
       fetchMock.get('?nocache', {
         body: happyCaseLogoutResponseText,
       });
+
+      let thrownError;
       try {
         await logout();
       } catch (err) {
-        expect(err).to.equal(fakeError);
+        thrownError = err;
       }
+      expect(thrownError).to.equal(fakeError);
       expect(fetchMock.calls()).to.have.lengthOf(3);
       verifySpringCsrfTokenIsCleared();
     });
@@ -208,11 +211,13 @@ describe('Authentication', () => {
         { headers: requestHeaders, overwriteRoutes: false, repeat: 1 }
       );
 
+      let thrownError;
       try {
         await logout();
       } catch (err) {
-        expect(err).to.equal(fakeError);
+        thrownError = err;
       }
+      expect(thrownError).to.equal(fakeError);
       expect(fetchMock.calls()).to.have.lengthOf(3);
 
       setupSpringCsrfMetaTags();
