@@ -10,7 +10,7 @@ import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
-  TET_SPRING_CSRF_HEADER_NAME,
+  TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
 } from './SpringCsrfTestUtils.test.js';
 
@@ -237,7 +237,7 @@ describe('ConnectClient', () => {
         await client.call('FooEndpoint', 'fooMethod');
 
         expect(fetchMock.lastOptions()?.headers).to.deep.include({
-          [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
+          [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
         deleteCookie(SPRING_CSRF_COOKIE_NAME);
@@ -252,7 +252,7 @@ describe('ConnectClient', () => {
         await client.call('FooEndpoint', 'fooMethod');
 
         expect(fetchMock.lastOptions()?.headers).to.deep.include({
-          [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
+          [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
         clearSpringCsrfMetaTags();

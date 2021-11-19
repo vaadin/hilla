@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 
-export const TET_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
+export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
 export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';
 export const TEST_VAADIN_CSRF_TOKEN_VALUE = 'vaadin-csrf-token';
 
@@ -20,7 +20,7 @@ export function setupSpringCsrfMetaTags(csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE
     csrfHeaderNameMetaTag.name = '_csrf_header';
     document.head.appendChild(csrfHeaderNameMetaTag);
   }
-  csrfHeaderNameMetaTag.content = TET_SPRING_CSRF_HEADER_NAME;
+  csrfHeaderNameMetaTag.content = TEST_SPRING_CSRF_HEADER_NAME;
 }
 
 export function clearSpringCsrfMetaTags() {

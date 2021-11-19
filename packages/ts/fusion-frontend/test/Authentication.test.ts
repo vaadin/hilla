@@ -8,7 +8,7 @@ import {
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_TOKEN_VALUE,
   TEST_VAADIN_CSRF_TOKEN_VALUE,
-  TET_SPRING_CSRF_HEADER_NAME,
+  TEST_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test.js';
 
@@ -19,26 +19,26 @@ const base = window.location.origin;
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
   const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
-  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TET_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
+  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TEST_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
     'Vaadin-CSRF': vaadinCsrfToken,
     Result: 'success',
     'Default-url': '/',
-    'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
+    'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
     'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
   };
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
     expect(document.head.querySelector('meta[name="_csrf_header"]')!.getAttribute('content')).to.equal(
-      TET_SPRING_CSRF_HEADER_NAME
+      TEST_SPRING_CSRF_HEADER_NAME
     );
   }
 
   beforeEach(() => {
     setupSpringCsrfMetaTags();
-    requestHeaders[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
+    requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
   });
   afterEach(() => {
     // @ts-ignore
@@ -93,7 +93,7 @@ describe('Authentication', () => {
           headers: {
             ...happyCaseResponseHeaders,
             'Vaadin-CSRF': 'some-new-token',
-            'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
+            'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
             'Spring-CSRF-token': 'some-new-spring-token',
           },
         },
@@ -225,7 +225,7 @@ describe('Authentication', () => {
       setupSpringCsrfMetaTags(expiredSpringCsrfToken);
 
       const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
-      headersWithExpiredSpringCsrfToken[TET_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
+      headersWithExpiredSpringCsrfToken[TEST_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
 
       fetchMock.post('/logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
       fetchMock.get('?nocache', {
