@@ -144,6 +144,7 @@ describe('Authentication', () => {
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(1);
+      verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
 
     it('should clear the csrf tokens on failed server logout', async () => {
