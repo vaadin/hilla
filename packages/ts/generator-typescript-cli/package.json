@@ -34,7 +34,7 @@
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
   "bin": {
-    "tsgen": "index.js"
+    "tsgen": "bin/index.js"
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
