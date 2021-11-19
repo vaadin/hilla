@@ -1,4 +1,5 @@
 module com.vaadin.fusion.parser.plugins.backbone {
+    requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires io.github.classgraph;
     requires jsr305;
