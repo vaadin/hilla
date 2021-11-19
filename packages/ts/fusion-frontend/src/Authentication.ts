@@ -1,5 +1,6 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import { deleteCookie } from './CookieUtils.js';
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
@@ -152,7 +153,7 @@ export async function logout(options?: LogoutOptions) {
       if (cookiePath.length > 1 && cookiePath.substr(-1, 1) === '/') {
         cookiePath = cookiePath.substr(0, cookiePath.length - 1);
       }
-      document.cookie = `jwt.headerAndPayload=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=${cookiePath}`; // Unset JWT cookie
+      deleteCookie('jwt.headerAndPayload', { Path: cookiePath }); // Unset JWT cookie
     }
   }
 }

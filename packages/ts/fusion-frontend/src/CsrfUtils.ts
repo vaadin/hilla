@@ -1,30 +1,28 @@
+import { getCookie } from './CookieUtils.js';
+
+/** @internal */
 export const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
+/** @internal */
 export const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
+/** @internal */
 export const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
 
+/** @internal */
 function getSpringCsrfHeaderFromMetaTag(doc: Document): string {
   const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
   return (csrfHeader && (csrfHeader as HTMLMetaElement).content) || '';
 }
 
+/** @internal */
 function getSpringCsrfTokenFromMetaTag(doc: Document): string {
   const csrfToken = doc.head.querySelector('meta[name="_csrf"]');
   return (csrfToken && (csrfToken as HTMLMetaElement).content) || '';
 }
 
-function getCookieValue(cookieName: string): string {
-  const prefix = `${cookieName}=`;
-  return (
-    document.cookie
-      .split(/;[ ]?/)
-      .filter((cookie) => cookie.startsWith(prefix))
-      .map((cookie) => cookie.slice(prefix.length))[0] || ''
-  );
-}
-
+/** @internal */
 export function getSpringCsrfInfo(doc: Document): Record<string, string> {
   const csrfHeader = getSpringCsrfHeaderFromMetaTag(doc);
-  let csrf = getCookieValue(SPRING_CSRF_COOKIE_NAME);
+  let csrf = getCookie(SPRING_CSRF_COOKIE_NAME) || '';
   if (csrf.length === 0) {
     csrf = getSpringCsrfTokenFromMetaTag(doc);
   }
@@ -36,6 +34,7 @@ export function getSpringCsrfInfo(doc: Document): Record<string, string> {
   return headers;
 }
 
+/** @internal */
 export function getSpringCsrfTokenHeadersForAuthRequest(doc: Document): Record<string, string> {
   const csrfInfo = getSpringCsrfInfo(doc);
   const headers: Record<string, string> = {};
@@ -45,6 +44,7 @@ export function getSpringCsrfTokenHeadersForAuthRequest(doc: Document): Record<s
   return headers;
 }
 
+/** @internal */
 export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<string, string> {
   const headers: Record<string, string> = {};
 
@@ -52,7 +52,7 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   if (csrfInfo._csrf && csrfInfo._csrf_header) {
     headers[csrfInfo._csrf_header] = csrfInfo._csrf;
   } else {
-    headers[VAADIN_CSRF_HEADER] = getCookieValue(VAADIN_CSRF_COOKIE_NAME);
+    headers[VAADIN_CSRF_HEADER] = getCookie(VAADIN_CSRF_COOKIE_NAME) || '';
   }
 
   return headers;

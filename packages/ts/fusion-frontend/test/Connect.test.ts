@@ -2,18 +2,17 @@
 /* tslint:disable: no-unused-expression */
 import { expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
-import fetchMock from 'fetch-mock/esm/client';
+import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src';
-import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils';
+import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src/index.js';
+import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
+import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
-  clearCookie,
   clearSpringCsrfMetaTags,
-  setCookie,
   setupSpringCsrfMetaTags,
   TET_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
-} from './SpringCsrfTestUtils.test';
+} from './SpringCsrfTestUtils.test.js';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -241,7 +240,7 @@ describe('ConnectClient', () => {
           [TET_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
-        clearCookie(SPRING_CSRF_COOKIE_NAME);
+        deleteCookie(SPRING_CSRF_COOKIE_NAME);
         clearSpringCsrfMetaTags();
       }
     });
@@ -271,7 +270,7 @@ describe('ConnectClient', () => {
           [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
         });
       } finally {
-        clearCookie('csrfToken');
+        deleteCookie('csrfToken');
       }
     });
 
