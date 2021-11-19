@@ -1,62 +1,50 @@
 package com.vaadin.fusion.maven;
 
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.fusion.parser.core.Parser;
-import com.vaadin.fusion.parser.core.ParserConfig;
-
 /**
- * Fusion plugin for Maven. Handles loading the parser and its plugins.
+ * Fusion plugin for Maven. Handles loading the parser and its
+ * pluginSpecifications.
  */
 @Mojo(name = "fusion-generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class FusionGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
-    private String configPath;
+    private final ParserConfiguration parser = new ParserConfiguration();
 
     @Parameter(readonly = true)
-    private String openAPITemplatePath;
+    private final GeneratorConfiguration generator = new GeneratorConfiguration();
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
     public void execute() {
-        var classPath = ((List<String>) project.getCompileClasspathElements())
-                .stream().collect(Collectors.joining(";"));
+        var openAPI = parseJavaCode();
+        generateTypeScriptCode(openAPI);
+    }
 
-        var configBuilder = new ParserConfig.Builder();
+    private String parseJavaCode() {
+        var executor = new ParserExecutor(project);
 
-        if (configPath != null) {
-            configBuilder.configFile(Paths.get(configPath).toFile());
-        }
+        parser.getClassPath().ifPresentOrElse(executor::useClassPath,
+            executor::useClassPath);
+        parser.getEndpointAnnotation().ifPresent(executor::useEndpointAnnotation);
+        parser.getOpenAPIPath().ifPresent(executor::useOpenAPIBase);
+        parser.getPlugins().ifPresentOrElse(executor::usePlugins, executor::usePlugins);
 
-        if (openAPITemplatePath != null) {
-            configBuilder
-                    .openAPITemplate(Paths.get(openAPITemplatePath).toFile());
-        }
+        return executor.execute();
+    }
 
-        var config = configBuilder.classPath(classPath, false)
-                .adjustOpenAPI(openAPI -> {
-                    var info = openAPI.getInfo();
+    private void generateTypeScriptCode(String openAPI) {
+        var executor = new GeneratorExecutor(project);
 
-                    if (openAPITemplatePath == null
-                            || info.getTitle() == null) {
-                        info.setTitle(project.getName());
-                    }
+        executor.useInput(openAPI);
+        generator.getOutputDir().ifPresentOrElse(executor::useOutputDir, executor::useOutputDir);
+        generator.getPlugins().ifPresentOrElse(executor::usePlugins, executor::usePlugins);
 
-                    if (openAPITemplatePath == null
-                            || info.getVersion() == null) {
-                        info.setVersion(project.getVersion());
-                    }
-                }).finish();
-
-        new Parser(config).execute();
+        executor.execute();
     }
 }
