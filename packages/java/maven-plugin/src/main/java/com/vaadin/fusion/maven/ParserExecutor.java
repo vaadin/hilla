@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
@@ -23,11 +24,15 @@ import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 class ParserExecutor {
     private static final List<ParserConfiguration.Plugin> defaultPlugins = List
             .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
+    private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
+
     private final ParserConfig.Builder builder = new ParserConfig.Builder();
     private final MavenProject project;
+    private final Log logger;
 
-    public ParserExecutor(MavenProject project) {
+    public ParserExecutor(MavenProject project, Log logger) {
         this.project = project;
+        this.logger = logger;
     }
 
     public String execute() {
@@ -36,7 +41,8 @@ class ParserExecutor {
             return new OpenAPIPrinter().writeAsString(api);
         } catch (IOException e) {
             throw new GeneratorMavenPluginException(
-                    "Failed processing OpenAPI generated from parsed Java code", e);
+                    "Failed processing OpenAPI generated from parsed Java code",
+                    e);
         }
     }
 
@@ -60,8 +66,13 @@ class ParserExecutor {
             builder.classPath(
                     String.join(";", project.getCompileClasspathElements()));
         } catch (DependencyResolutionRequiredException e) {
-            throw new GeneratorMavenPluginException("Failed collecting class path", e);
+            throw new GeneratorMavenPluginException(
+                    "Failed collecting class path", e);
         }
+    }
+
+    public void useEndpointAnnotation() {
+        builder.endpointAnnotation(defaultAnnotationName);
     }
 
     public void useEndpointAnnotation(@Nonnull String endpointAnnotation) {
@@ -76,8 +87,8 @@ class ParserExecutor {
             builder.openAPISpec(Files.readString(path),
                     FilenameUtils.getExtension(path.toString()));
         } catch (IOException e) {
-            throw new GeneratorMavenPluginException("Failed loading OpenAPI spec file",
-                    e);
+            throw new GeneratorMavenPluginException(
+                    "Failed loading OpenAPI spec file", e);
         }
     }
 

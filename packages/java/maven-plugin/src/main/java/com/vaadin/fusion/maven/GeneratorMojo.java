@@ -10,7 +10,7 @@ import org.apache.maven.project.MavenProject;
  * Fusion plugin for Maven. Handles loading the parser and its
  * pluginSpecifications.
  */
-@Mojo(name = "fusion-generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
+@Mojo(name = "generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class GeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
@@ -27,12 +27,13 @@ public class GeneratorMojo extends AbstractMojo {
     }
 
     private String parseJavaCode() {
-        var executor = new ParserExecutor(project);
+        var executor = new ParserExecutor(project, getLog());
 
         parser.getClassPath().ifPresentOrElse(executor::useClassPath,
                 executor::useClassPath);
-        parser.getEndpointAnnotation()
-                .ifPresent(executor::useEndpointAnnotation);
+        parser.getEndpointAnnotation().ifPresentOrElse(
+                executor::useEndpointAnnotation,
+                executor::useEndpointAnnotation);
         parser.getOpenAPIPath().ifPresent(executor::useOpenAPIBase);
         parser.getPlugins().ifPresentOrElse(executor::usePlugins,
                 executor::usePlugins);
@@ -41,7 +42,7 @@ public class GeneratorMojo extends AbstractMojo {
     }
 
     private void generateTypeScriptCode(String openAPI) {
-        var executor = new GeneratorExecutor(project);
+        var executor = new GeneratorExecutor(project, getLog());
 
         executor.useInput(openAPI);
         generator.getOutputDir().ifPresentOrElse(executor::useOutputDir,
