@@ -50,5 +50,5 @@ const generator = new Generator(
   }),
 );
 
-const files = await generator.process(input.startsWith('{') ? input : await io.read(input));
+const files = await generator.process(input.startsWith('{') ? input : await io.read(io.resolve(input)));
 await io.write(files);

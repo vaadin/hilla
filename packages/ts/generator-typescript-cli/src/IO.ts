@@ -1,13 +1,15 @@
-import { readFile, writeFile } from 'fs/promises';
-import { fileURLToPath, URL } from 'url';
 import type File from '@vaadin/generator-typescript/File.js';
 import Plugin, { PluginConstructor } from '@vaadin/generator-typescript/Plugin.js';
+import { mkdir, readFile, writeFile } from 'fs/promises';
+import { dirname, isAbsolute, join, resolve as _resolve } from 'path';
+import { fileURLToPath, pathToFileURL, URL } from 'url';
 import IOException from './IOException.js';
 
-const cwd = process.cwd();
+// We have to use the specific file URL; otherwise, the dirname(process.cwd()) will be used.
+const cwd = pathToFileURL(_resolve(process.cwd(), 'dummy.txt'));
 
 async function load(path: URL): Promise<PluginConstructor> {
-  const cls: PluginConstructor = (await import(fileURLToPath(path as URL))).default;
+  const cls: PluginConstructor = (await import(path.toString())).default;
 
   if (!Object.prototype.isPrototypeOf.call(Plugin, cls)) {
     throw new IOException(`Plugin '${path}' is not an instance of a Plugin class`);
@@ -17,14 +19,14 @@ async function load(path: URL): Promise<PluginConstructor> {
 }
 
 function resolve(path: string): URL {
-  return new URL(path, cwd);
+  return isAbsolute(path) ? pathToFileURL(path) : new URL(path, cwd);
 }
 
 export default class IO {
   readonly #outputDir: URL;
 
   public constructor(outputDir: string) {
-    this.#outputDir = new URL(outputDir, cwd);
+    this.#outputDir = new URL(join(outputDir, 'dummy.txt'), cwd);
   }
 
   public async load(path: URL): Promise<PluginConstructor>;
@@ -47,15 +49,18 @@ export default class IO {
     return resolve(pathOrPaths as string);
   }
 
-  public async read(path: string): Promise<string> {
-    return readFile(resolve(path), 'utf8');
+  public async read(path: URL): Promise<string> {
+    return readFile(path, 'utf8');
   }
 
   public async write(files: readonly File[]): Promise<void> {
     await Promise.all(
-      files.map(async (file) =>
-        writeFile(new URL(file.name, this.#outputDir), new Uint8Array(await file.arrayBuffer())),
-      ),
+      files.map(async (file) => {
+        const url = new URL(file.name, this.#outputDir);
+        const dir = dirname(fileURLToPath(url));
+        await mkdir(dir, { recursive: true });
+        return writeFile(url, new Uint8Array(await file.arrayBuffer()));
+      }),
     );
   }
 }

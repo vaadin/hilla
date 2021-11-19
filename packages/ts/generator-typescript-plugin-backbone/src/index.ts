@@ -36,6 +36,7 @@ export default class BackbonePlugin extends Plugin {
 
     for (const [path, pathItem] of Object.entries(storage.api.paths)) {
       if (!pathItem) {
+        // eslint-disable-next-line no-continue
         continue;
       }
 

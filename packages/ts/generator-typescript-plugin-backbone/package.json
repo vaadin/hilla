@@ -8,7 +8,11 @@
     "node": ">= 16.13"
   },
   "scripts": {
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs"
+    "build": "concurrently npm:build:*",
+    "build:transpile": "tsc --isolatedModules",
+    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
