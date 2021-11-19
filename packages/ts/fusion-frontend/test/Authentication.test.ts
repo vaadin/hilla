@@ -11,10 +11,13 @@ import {
   TEST_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test.js';
+import { cookieExists, deleteCookie, setCookie } from '../src/CookieUtils.js';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
+
+const jwtCookieName = 'jwt.headerAndPayload';
 
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
@@ -131,7 +134,10 @@ describe('Authentication', () => {
   });
 
   describe('logout', () => {
-    afterEach(() => fetchMock.restore());
+    afterEach(() => {
+      fetchMock.restore();
+      deleteCookie(jwtCookieName);
+    });
 
     it('should set the csrf token on logout', async () => {
       fetchMock.post(
@@ -169,6 +175,20 @@ describe('Authentication', () => {
       expect(thrownError).to.equal(fakeError);
       expect(fetchMock.calls()).to.have.lengthOf(3);
       verifySpringCsrfTokenIsCleared();
+    });
+
+    it('should clear the JWT cookie on failed server logout', async () => {
+      setCookie(jwtCookieName, 'mock value');
+      const fakeError = new Error('unable to connect');
+      fetchMock.post('/logout', () => {
+        throw fakeError;
+      });
+      fetchMock.get('?nocache', () => {
+        throw fakeError;
+      });
+
+      await logout();
+      expect(cookieExists(jwtCookieName)).to.be.false;
     });
 
     // when started the app offline, the spring csrf meta tags are not available
