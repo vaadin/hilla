@@ -1,7 +1,15 @@
 import { expect } from '@open-wc/testing';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
+import {
+  ConnectClient,
+  InvalidSessionMiddleware,
+  login,
+  LoginResult,
+  logout,
+  OnInvalidSessionCallback,
+  _removeTrailingSlashFromPath,
+} from '../src';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   clearSpringCsrfMetaTags,
@@ -311,6 +319,15 @@ describe('Authentication', () => {
       await client.call('FooEndpoint', 'fooMethod');
 
       expect(invalidSessionCallback.called).to.be.false;
+    });
+  });
+
+  describe('helpers', () => {
+    it('should remove trailing slash from path', async () => {
+      expect(_removeTrailingSlashFromPath('')).to.equal('');
+      expect(_removeTrailingSlashFromPath('/')).to.equal('/');
+      expect(_removeTrailingSlashFromPath('/foo')).to.equal('/foo');
+      expect(_removeTrailingSlashFromPath('/foo/')).to.equal('/foo');
     });
   });
 });
