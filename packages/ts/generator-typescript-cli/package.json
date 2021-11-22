@@ -36,9 +36,11 @@
   "bin": {
     "tsgen": "bin/index.js"
   },
+  "peerDependencies": {
+    "@vaadin/generator-typescript-core": "^0.1.0"
+  },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
-    "@vaadin/generator-typescript": "^0.1.0",
     "meow": "^10.1.1",
     "openapi-types": "^9.3.0",
     "pino": "^7.0.5",

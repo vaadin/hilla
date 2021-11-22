@@ -11,7 +11,7 @@
 
   <modules>
     <module>packages/java/maven-plugin</module>
-    <module>packages/java/parser-jvm</module>
+    <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
   </modules>
 

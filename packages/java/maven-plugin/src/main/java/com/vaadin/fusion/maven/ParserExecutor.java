@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -85,7 +85,7 @@ class ParserExecutor {
                     openAPIPath);
 
             builder.openAPISpec(Files.readString(path),
-                    FilenameUtils.getExtension(path.toString()));
+                    FileUtils.getExtension(path.toString()));
         } catch (IOException e) {
             throw new GeneratorMavenPluginException(
                     "Failed loading OpenAPI spec file", e);

@@ -8,15 +8,15 @@ const {
   flags: { outputDir, plugin: plugins, verbose },
 } = meow(
   `
-  Usage:
-    tsgen <OpenAPI JSON string>
-    tsgen <OpenAPI file path>
+Usage:
+  tsgen <OpenAPI JSON string>
+  tsgen <OpenAPI file path>
 
-  Options:
-    -h, --help             Show this screen
-    -o, --output-dir       Output directory
-    -p, --plugin <path>    Use the plugin loadable by <path>.
-    --version              Show the app version
+Options:
+  -h, --help             Show this screen
+  -o, --output-dir       Output directory
+  -p, --plugin <path>    Use the plugin loadable by <path>.
+  --version              Show the app version
 `,
   {
     importMeta: import.meta,
