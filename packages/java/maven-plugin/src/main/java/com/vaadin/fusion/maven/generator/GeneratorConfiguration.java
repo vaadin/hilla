@@ -1,25 +1,19 @@
-package com.vaadin.fusion.maven;
+package com.vaadin.fusion.maven.generator;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ParserConfiguration {
-    private ClassPathConfiguration classPath;
-    private String endpointAnnotation;
-    private String openAPIPath;
+import org.apache.maven.project.MavenProject;
+
+public class GeneratorConfiguration {
     private PluginList plugins;
+    private String outputDir;
 
-    public Optional<ClassPathConfiguration> getClassPath() {
-        return Optional.ofNullable(classPath);
-    }
-
-    public Optional<String> getEndpointAnnotation() {
-        return Optional.ofNullable(endpointAnnotation);
-    }
-
-    public Optional<String> getOpenAPIPath() {
-        return Optional.ofNullable(openAPIPath);
+    public Optional<String> getOutputDir() {
+        return Optional.ofNullable(outputDir);
     }
 
     public Optional<PluginList> getPlugins() {
@@ -48,6 +42,11 @@ public class ParserConfiguration {
 
         public String getName() {
             return name;
+        }
+
+        public Path resolveWithin(MavenProject project) {
+            return Paths.get(project.getBasedir().getAbsolutePath(),
+                    "node_modules", "@vaadin/" + name, "index.js");
         }
     }
 

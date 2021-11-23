@@ -1,6 +1,6 @@
-package com.vaadin.fusion.maven;
+package com.vaadin.fusion.maven.parser;
 
-public class ClassPathConfiguration {
+public class ParserClassPathConfiguration {
     private String value;
     private final boolean override = false;
 

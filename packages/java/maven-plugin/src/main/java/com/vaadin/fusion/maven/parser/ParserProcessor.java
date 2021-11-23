@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven;
+package com.vaadin.fusion.maven.parser;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
-class ParserExecutor {
+public class ParserProcessor {
     private static final List<ParserConfiguration.Plugin> defaultPlugins = List
             .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
     private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
@@ -30,7 +30,7 @@ class ParserExecutor {
     private final MavenProject project;
     private final Log logger;
 
-    public ParserExecutor(MavenProject project, Log logger) {
+    public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
         this.logger = logger;
     }
@@ -40,13 +40,13 @@ class ParserExecutor {
             var api = new Parser(builder.finish()).execute();
             return new OpenAPIPrinter().writeAsString(api);
         } catch (IOException e) {
-            throw new GeneratorMavenPluginException(
+            throw new ParserException(
                     "Failed processing OpenAPI generated from parsed Java code",
                     e);
         }
     }
 
-    public void useClassPath(@Nonnull ClassPathConfiguration classPath) {
+    public void useClassPath(@Nonnull ParserClassPathConfiguration classPath) {
         try {
             var result = classPath.isOverride() ? classPath.getValue()
                     : Stream.concat(
@@ -56,7 +56,7 @@ class ParserExecutor {
 
             builder.classPath(result);
         } catch (DependencyResolutionRequiredException e) {
-            throw new GeneratorMavenPluginException(
+            throw new ParserException(
                     "Failed collecting class path", e);
         }
     }
@@ -66,7 +66,7 @@ class ParserExecutor {
             builder.classPath(
                     String.join(";", project.getCompileClasspathElements()));
         } catch (DependencyResolutionRequiredException e) {
-            throw new GeneratorMavenPluginException(
+            throw new ParserException(
                     "Failed collecting class path", e);
         }
     }
@@ -87,7 +87,7 @@ class ParserExecutor {
             builder.openAPISpec(Files.readString(path),
                     FileUtils.getExtension(path.toString()));
         } catch (IOException e) {
-            throw new GeneratorMavenPluginException(
+            throw new ParserException(
                     "Failed loading OpenAPI spec file", e);
         }
     }

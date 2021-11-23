@@ -1,15 +1,25 @@
-package com.vaadin.fusion.maven;
+package com.vaadin.fusion.maven.parser;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class GeneratorConfiguration {
+public class ParserConfiguration {
+    private ParserClassPathConfiguration classPath;
+    private String endpointAnnotation;
+    private String openAPIPath;
     private PluginList plugins;
-    private String outputDir;
 
-    public Optional<String> getOutputDir() {
-        return Optional.ofNullable(outputDir);
+    public Optional<ParserClassPathConfiguration> getClassPath() {
+        return Optional.ofNullable(classPath);
+    }
+
+    public Optional<String> getEndpointAnnotation() {
+        return Optional.ofNullable(endpointAnnotation);
+    }
+
+    public Optional<String> getOpenAPIPath() {
+        return Optional.ofNullable(openAPIPath);
     }
 
     public Optional<PluginList> getPlugins() {
