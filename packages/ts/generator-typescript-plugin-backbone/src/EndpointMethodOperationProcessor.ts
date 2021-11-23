@@ -19,23 +19,58 @@ function wrapCallExpression(callExpression: CallExpression, responseType: TypeNo
   return ts.factory.createExpressionStatement(callExpression);
 }
 
-class EndpointPOSTMethodProcessor {
+export default abstract class EndpointMethodOperationProcessor {
+  public static createProcessor(
+    httpMethod: OpenAPIV3.HttpMethods,
+    endpointName: string,
+    endpointMethodName: string,
+    operation: EndpointMethodOperation,
+    dependencies: DependencyManager,
+    context: BackbonePluginContext,
+  ): EndpointMethodOperationProcessor | undefined {
+    switch (httpMethod) {
+      case OpenAPIV3.HttpMethods.POST:
+        // eslint-disable-next-line no-use-before-define
+        return new EndpointMethodOperationPOSTProcessor(
+          endpointName,
+          endpointMethodName,
+          operation,
+          dependencies,
+          context,
+        );
+      default:
+        context.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
+        return undefined;
+    }
+  }
+
+  public abstract process(): Statement | undefined;
+}
+
+class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
   readonly #context: BackbonePluginContext;
   readonly #dependencies: DependencyManager;
+  readonly #endpointName: string;
+  readonly #endpointMethodName: string;
   readonly #operation: EndpointMethodOperation;
 
   public constructor(
+    endpointName: string,
+    endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
     context: BackbonePluginContext,
   ) {
-    this.#dependencies = dependencies;
+    super();
     this.#context = context;
+    this.#dependencies = dependencies;
+    this.#endpointName = endpointName;
+    this.#endpointMethodName = endpointMethodName;
     this.#operation = operation;
   }
 
-  public process(endpointName: string, endpointMethodName: string): Statement | undefined {
-    this.#context.logger.info('Processing POST method');
+  public process(): Statement | undefined {
+    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} — processing POST method`);
 
     const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
@@ -43,15 +78,15 @@ class EndpointPOSTMethodProcessor {
       this.#context,
     ).process();
 
-    const methodIdentifier = this.#dependencies.exports.register(endpointMethodName);
+    const methodIdentifier = this.#dependencies.exports.register(this.#endpointMethodName);
     const clientLibIdentifier = this.#dependencies.imports.getIdentifier(clientLib.specifier, clientLib.path)!;
 
     const callExpression = ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),
       undefined,
       [
-        ts.factory.createStringLiteral(endpointName),
-        ts.factory.createStringLiteral(endpointMethodName),
+        ts.factory.createStringLiteral(this.#endpointName),
+        ts.factory.createStringLiteral(this.#endpointMethodName),
         packedParameters,
       ].filter(Boolean) as readonly Expression[],
     );
@@ -71,6 +106,8 @@ class EndpointPOSTMethodProcessor {
   }
 
   #prepareResponseType(): TypeNode {
+    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} POST — processing response type`);
+
     const responseTypes = Object.entries(this.#operation.responses)
       .flatMap(([code, response]) =>
         new EndpointMethodResponseProcessor(code, response, this.#dependencies, this.#context).process(),
@@ -82,37 +119,5 @@ class EndpointPOSTMethodProcessor {
     }
 
     return ts.factory.createUnionTypeNode(responseTypes);
-  }
-}
-
-export default class EndpointMethodOperationProcessor {
-  readonly #context: BackbonePluginContext;
-  readonly #dependencies: DependencyManager;
-  readonly #method: OpenAPIV3.HttpMethods;
-  readonly #operation: EndpointMethodOperation;
-
-  public constructor(
-    method: OpenAPIV3.HttpMethods,
-    operation: EndpointMethodOperation,
-    dependencies: DependencyManager,
-    context: BackbonePluginContext,
-  ) {
-    this.#context = context;
-    this.#dependencies = dependencies;
-    this.#method = method;
-    this.#operation = operation;
-  }
-
-  public process(endpointName: string, endpointMethodName: string): Statement | undefined {
-    switch (this.#method) {
-      case OpenAPIV3.HttpMethods.POST:
-        return new EndpointPOSTMethodProcessor(this.#operation, this.#dependencies, this.#context).process(
-          endpointName,
-          endpointMethodName,
-        );
-      default:
-        this.#context.logger.warn(`Processing ${this.#method.toUpperCase()} currently is not supported`);
-        return undefined;
-    }
   }
 }

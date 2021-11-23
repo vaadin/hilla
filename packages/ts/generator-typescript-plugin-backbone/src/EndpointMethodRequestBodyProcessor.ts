@@ -2,7 +2,12 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
 import ts from 'typescript';
-import { isEmptyObject, isObjectSchema, NonEmptyObjectSchema, Schema } from '@vaadin/generator-typescript/Schema.js';
+import {
+  isEmptyObject,
+  isObjectSchema,
+  NonEmptyObjectSchema,
+  Schema,
+} from '@vaadin/generator-typescript-core/Schema.js';
 import type DependencyManager from './DependencyManager.js';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';

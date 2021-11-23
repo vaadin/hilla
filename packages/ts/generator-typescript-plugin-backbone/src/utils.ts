@@ -2,7 +2,7 @@ import type Pino from 'pino';
 import type { SourceFile, Statement } from 'typescript';
 import ts from 'typescript';
 import { posix, parse } from 'path';
-import type ReferenceResolver from '@vaadin/generator-typescript/ReferenceResolver.js';
+import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver.js';
 
 export type BackbonePluginContext = Readonly<{
   logger: Pino.Logger;

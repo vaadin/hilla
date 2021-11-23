@@ -23,7 +23,7 @@ export default class EndpointProcessor {
   }
 
   public process(): SourceFile {
-    this.#context.logger.info(`Processing endpoint: ${this.#name}`);
+    this.#context.logger.debug(`Processing endpoint: ${this.#name}`);
 
     const statements = Array.from(this.#methods, ([method, pathItem]) => this.#processMethod(method, pathItem)).flatMap(
       (item) => item,
@@ -41,17 +41,19 @@ export default class EndpointProcessor {
   }
 
   #processMethod(method: string, pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>): readonly Statement[] {
-    this.#context.logger.info(`Processing endpoint method: ${method}`);
+    this.#context.logger.debug(`Processing endpoint method: ${this.#name}.${method}`);
 
     return Object.values(OpenAPIV3.HttpMethods)
       .filter((httpMethod) => pathItem[httpMethod])
       .map((httpMethod) =>
-        new EndpointMethodOperationProcessor(
+        EndpointMethodOperationProcessor.createProcessor(
           httpMethod,
+          this.#name,
+          method,
           pathItem[httpMethod] as EndpointMethodOperation,
           this.#dependencies,
           this.#context,
-        ).process(this.#name, method),
+        )?.process(),
       )
       .filter(Boolean) as readonly Statement[];
   }

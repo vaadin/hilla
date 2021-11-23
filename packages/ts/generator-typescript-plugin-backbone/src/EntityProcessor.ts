@@ -1,6 +1,6 @@
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
-import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript/Schema.js';
+import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -12,11 +12,11 @@ import {
   isObjectSchema,
   isReferenceSchema,
   NonEmptyObjectSchema,
-} from '@vaadin/generator-typescript/Schema.js';
+} from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
-} from '@vaadin/generator-typescript/utils.js';
+} from '@vaadin/generator-typescript-core/utils.js';
 import DependencyManager from './DependencyManager.js';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
@@ -44,7 +44,7 @@ export class EntityProcessor {
   }
 
   public process(): SourceFile {
-    this.#context.logger.info(`Processing entity: ${this.#name}`);
+    this.#context.logger.debug(`Processing entity: ${this.#name}`);
     const declaration = isEnumSchema(this.#component)
       ? this.#processEnum(this.#component)
       : this.#processExtendedClass(this.#component);

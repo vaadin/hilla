@@ -13,10 +13,7 @@ export default class PluginManager {
     this.#logger = logger;
     this.#resolver = resolver;
 
-    this.#logger.info(
-      plugins.map(({ name }) => name),
-      'Used plugins',
-    );
+    this.#logger.info(`Plugins: ${plugins.map(({ name }) => name).join(', ')}`);
 
     this.#plugins = plugins.map((PluginClass) => new PluginClass(this.#resolver, this.#logger));
   }
@@ -25,7 +22,7 @@ export default class PluginManager {
     // We need to run plugins sequentially
     for (const plugin of this.#plugins) {
       const { name, path } = plugin;
-      this.#logger.info({ name, path }, `Executing plugin '${plugin.name}'`);
+      this.#logger.debug({ name, path }, `Executing plugin '${plugin.name}'`);
       // eslint-disable-next-line no-await-in-loop
       await plugin.execute(storage);
     }

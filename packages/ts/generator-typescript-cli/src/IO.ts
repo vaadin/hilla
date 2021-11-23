@@ -1,7 +1,8 @@
-import type File from '@vaadin/generator-typescript/File.js';
-import Plugin, { PluginConstructor } from '@vaadin/generator-typescript/Plugin.js';
+import type File from '@vaadin/generator-typescript-core/File.js';
+import Plugin, { PluginConstructor } from '@vaadin/generator-typescript-core/Plugin.js';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { dirname, isAbsolute, join, resolve as _resolve } from 'path';
+import type Pino from 'pino';
 import { fileURLToPath, pathToFileURL, URL } from 'url';
 import IOException from './IOException.js';
 
@@ -24,16 +25,19 @@ function resolve(path: string): URL {
 
 export default class IO {
   readonly #outputDir: URL;
+  readonly #logger: Pino.Logger;
 
-  public constructor(outputDir: string) {
-    this.#outputDir = new URL(join(outputDir, 'dummy.txt'), cwd);
+  public constructor(outputDir: string, logger: Pino.Logger) {
+    this.#outputDir = resolve(join(outputDir, 'dummy.txt'));
+    this.#logger = logger;
+    logger.info(`Output directory: ${dirname(fileURLToPath(this.#outputDir))}`);
   }
 
   public async load(path: URL): Promise<PluginConstructor>;
   public async load(paths: readonly URL[]): Promise<readonly PluginConstructor[]>;
   public async load(pathOrPaths: URL | readonly URL[]): Promise<PluginConstructor | readonly PluginConstructor[]> {
     if (Array.isArray(pathOrPaths)) {
-      return Promise.all(pathOrPaths.map(async (path) => load(path)));
+      return Promise.all(pathOrPaths.map(load));
     }
 
     return load(pathOrPaths as URL);
@@ -43,7 +47,7 @@ export default class IO {
   public resolve(paths: readonly string[]): readonly URL[];
   public resolve(pathOrPaths: string | readonly string[]): URL | readonly URL[] {
     if (Array.isArray(pathOrPaths)) {
-      return pathOrPaths.map((path) => resolve(path));
+      return pathOrPaths.map(resolve);
     }
 
     return resolve(pathOrPaths as string);
@@ -57,6 +61,7 @@ export default class IO {
     await Promise.all(
       files.map(async (file) => {
         const url = new URL(file.name, this.#outputDir);
+        this.#logger.debug(`Writing file ${fileURLToPath(url)}`);
         const dir = dirname(fileURLToPath(url));
         await mkdir(dir, { recursive: true });
         return writeFile(url, new Uint8Array(await file.arrayBuffer()));

@@ -1,7 +1,7 @@
-import Generator from '@vaadin/generator-typescript/Generator.js';
+import Generator from '@vaadin/generator-typescript-core/Generator.js';
 import meow from 'meow';
-import Pino from 'pino';
 import IO from './IO.js';
+import { createLogger, processInput } from './utils.js';
 
 const {
   input: [input],
@@ -40,15 +40,11 @@ Options:
   },
 );
 
-const io = new IO(outputDir);
+const logger = createLogger({ verbose });
 
-const generator = new Generator(
-  await io.load(Array.from(new Set(plugins), (path) => io.resolve(path))),
-  Pino({
-    name: 'tsgen',
-    level: verbose ? 'debug' : 'info',
-  }),
-);
+const io = new IO(outputDir, logger);
 
-const files = await generator.process(input.startsWith('{') ? input : await io.read(io.resolve(input)));
+const generator = new Generator(await io.load(Array.from(new Set(plugins), (path) => io.resolve(path))), logger);
+
+const files = await generator.process(await processInput(input, io));
 await io.write(files);

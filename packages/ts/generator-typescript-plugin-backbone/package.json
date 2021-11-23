@@ -8,6 +8,7 @@
     "node": ">= 16.13"
   },
   "scripts": {
+    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
     "build:copy": "copyfiles -f src/**/*.d.ts .",

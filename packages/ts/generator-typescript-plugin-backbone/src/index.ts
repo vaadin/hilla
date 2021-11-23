@@ -1,8 +1,8 @@
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
-import Plugin from '@vaadin/generator-typescript/Plugin.js';
-import type ReferenceResolver from '@vaadin/generator-typescript/ReferenceResolver';
-import type SharedStorage from '@vaadin/generator-typescript/SharedStorage';
+import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
+import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver';
+import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
 import BarrelProcessor from './BarrelProcessor.js';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
@@ -32,6 +32,7 @@ export default class BackbonePlugin extends Plugin {
   }
 
   #processEndpoints(storage: SharedStorage): readonly SourceFile[] {
+    this.logger.debug('Processing endpoints');
     const endpoints = new Map<string, EndpointProcessor>();
 
     for (const [path, pathItem] of Object.entries(storage.api.paths)) {
@@ -58,6 +59,8 @@ export default class BackbonePlugin extends Plugin {
   }
 
   #processEntities(storage: SharedStorage): readonly SourceFile[] {
+    this.logger.debug('Processing entities');
+
     return storage.api.components?.schemas
       ? Object.entries(storage.api.components?.schemas).map(([name, component]) =>
           new EntityProcessor(name, component, this.#context).process(),
