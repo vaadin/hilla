@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -83,9 +82,15 @@ public class ParserProcessor {
         try {
             var path = Paths.get(project.getBasedir().getAbsolutePath(),
                     openAPIPath);
+            var fileName = path.getFileName().toString();
+            var dotLastIndex = fileName.lastIndexOf('.');
 
-            builder.openAPISpec(Files.readString(path),
-                    FileUtils.getExtension(path.toString()));
+            if (dotLastIndex == -1) {
+                throw new IOException("No OpenAPI base file found");
+            }
+
+            // dotLastIndex + 1 because we want to get extension without the dot.
+            builder.openAPISpec(Files.readString(path), fileName.substring(dotLastIndex + 1));
         } catch (IOException e) {
             throw new ParserException(
                     "Failed loading OpenAPI spec file", e);

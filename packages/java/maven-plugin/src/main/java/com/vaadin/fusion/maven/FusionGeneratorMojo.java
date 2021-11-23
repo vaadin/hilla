@@ -33,15 +33,18 @@ public class FusionGeneratorMojo extends AbstractMojo {
         generateTypeScriptCode(openAPI);
     }
 
-    private void generateTypeScriptCode(String openAPI) throws FusionGeneratorMojoException {
+    private void generateTypeScriptCode(String openAPI)
+            throws FusionGeneratorMojoException {
+        var logger = getLog();
         try {
-            var executor = new GeneratorProcessor(project, getLog());
+            var executor = new GeneratorProcessor(project, logger);
 
             executor.useInput(openAPI);
             generator.getOutputDir().ifPresentOrElse(executor::useOutputDir,
                     executor::useOutputDir);
             generator.getPlugins().ifPresentOrElse(executor::usePlugins,
                     executor::usePlugins);
+            executor.useVerbose(logger.isDebugEnabled());
 
             executor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
@@ -65,7 +68,8 @@ public class FusionGeneratorMojo extends AbstractMojo {
 
             return executor.execute();
         } catch (ParserException e) {
-            throw new FusionGeneratorMojoException("Java code parsing failed", e);
+            throw new FusionGeneratorMojoException("Java code parsing failed",
+                    e);
         }
     }
 }

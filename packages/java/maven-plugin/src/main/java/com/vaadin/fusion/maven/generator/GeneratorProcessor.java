@@ -3,6 +3,7 @@ package com.vaadin.fusion.maven.generator;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -11,6 +12,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 public class GeneratorProcessor {
+    private static final Pattern jsonEscapePattern = Pattern.compile("[\r\n\b\f\t\"']");
     private static final String defaultOutputDir = "frontend/generated";
     private static final List<GeneratorConfiguration.Plugin> defaultPlugins = List
             .of(new GeneratorConfiguration.Plugin(
@@ -28,7 +30,18 @@ public class GeneratorProcessor {
     }
 
     public void useInput(@Nonnull String input) {
-        runner.add("'" + input + "'");
+        var result = jsonEscapePattern.matcher(input).replaceAll(match -> "\\\\" + match.group(0));
+        runner.add("'" + result + "'");
+    }
+
+    public void useVerbose() {
+        useVerbose(false);
+    }
+
+    public void useVerbose(boolean verbose) {
+        if (verbose) {
+            runner.add("-v");
+        }
     }
 
     public void useOutputDir() {
