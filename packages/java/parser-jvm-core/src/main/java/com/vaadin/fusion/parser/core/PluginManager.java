@@ -26,6 +26,7 @@ final class PluginManager {
     public void execute(List<RelativeClassInfo> endpoints,
                         List<RelativeClassInfo> entities, SharedStorage storage) {
         for (var plugin : plugins) {
+            logger.debug("Executing plugin " + plugin.getClass().getName());
             plugin.execute(endpoints, entities, storage);
         }
     }
@@ -34,12 +35,8 @@ final class PluginManager {
         try {
             return loader.loadClass(className);
         } catch (ClassNotFoundException e) {
-            var message = String.format(
-                "Plugin '%s' is not found in the classpath", className);
-
-            logger.error(message, e);
-
-            throw new ParserException(message, e);
+            throw new ParserException(String.format(
+                "Plugin '%s' is not found in the classpath", className), e);
         }
     }
 
@@ -48,13 +45,9 @@ final class PluginManager {
             return (Class<? extends Plugin>) cls;
         }
 
-        var message = String.format(
+        throw new ParserException(String.format(
             "Plugin '%s' is not an instance of '%s' interface",
-            cls.getName(), Plugin.class.getName());
-
-        logger.error(message);
-
-        throw new ParserException(message);
+            cls.getName(), Plugin.class.getName()));
     }
 
     private Plugin instantiatePlugin(Class<? extends Plugin> pluginClass) {
@@ -62,12 +55,8 @@ final class PluginManager {
             return pluginClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException
             | InvocationTargetException | NoSuchMethodException e) {
-            var message = String.format("Cannot instantiate plugin '%s'",
-                pluginClass.getName());
-
-            logger.error(message, e);
-
-            throw new ParserException(message, e);
+            throw new ParserException(String.format("Cannot instantiate plugin '%s'",
+                pluginClass.getName()), e);
         }
     }
 }

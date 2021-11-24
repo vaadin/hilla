@@ -16,8 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParserConfig {
+
     private String classPath;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
@@ -61,6 +64,8 @@ public class ParserConfig {
     }
 
     public static class Builder {
+        private static final Logger logger = LoggerFactory.getLogger(Builder.class);
+
         private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
         private FileSpec openAPISpec;
 
@@ -143,10 +148,13 @@ public class ParserConfig {
         }
 
         public ParserConfig finish() {
+            logger.debug("Building JVM Parser config");
             var config = new ParserConfig();
 
+            logger.debug("Loading OpenAPI configuration");
             config.openAPI = prepareOpenAPI();
 
+            logger.debug("Applying configuration changed defined by the user");
             actions.forEach(action -> action.accept(config));
 
             Objects.requireNonNull(config.classPath, "[JVM Parser] classPath is not provided");

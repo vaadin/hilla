@@ -34,8 +34,9 @@ public class ParserProcessor {
         this.logger = logger;
     }
 
-    public String execute() {
+    public String process() {
         try {
+            logger.debug("Starting JVM Parser");
             var api = new Parser(builder.finish()).execute();
             return new OpenAPIPrinter().writeAsString(api);
         } catch (IOException e) {

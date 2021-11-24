@@ -66,7 +66,7 @@ public class FusionGeneratorMojo extends AbstractMojo {
             parser.getPlugins().ifPresentOrElse(executor::usePlugins,
                     executor::usePlugins);
 
-            return executor.execute();
+            return executor.process();
         } catch (ParserException e) {
             throw new FusionGeneratorMojoException("Java code parsing failed",
                     e);

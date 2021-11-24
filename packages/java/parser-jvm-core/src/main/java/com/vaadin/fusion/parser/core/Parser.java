@@ -6,11 +6,16 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public class Parser {
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
     private final ParserConfig config;
     private final SharedStorage storage;
 
@@ -32,18 +37,23 @@ public class Parser {
     }
 
     public OpenAPI execute() {
+        logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config);
 
+        logger.debug("Scanning JVM classpath: " + config.getClassPath());
         var result = new ClassGraph().enableAllInfo()
                 .overrideClasspath(config.getClassPath()).scan();
 
-        var collector = new EntitiesCollector(result);
+        var collector = new EntitiesCollector(result, logger);
 
+        logger.debug("Checking if the compiler is run with -parameters option enabled");
         checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
 
+        logger.debug("Executing parser plugins");
         pluginManager.execute(collector.getEndpoints(), collector.getEntities(),
                 storage);
 
+        logger.debug("Parsing process successfully finished");
         return storage.getOpenAPI();
     }
 
@@ -56,17 +66,20 @@ public class Parser {
         private final List<RelativeClassInfo> endpoints;
         private final List<RelativeClassInfo> entities;
 
-        public EntitiesCollector(ScanResult result) {
+        public EntitiesCollector(ScanResult result, Logger logger) {
+            logger.debug("Collecting project endpoints");
             endpoints = result
                     .getClassesWithAnnotation(
                             config.getEndpointAnnotationName())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
 
+            logger.debug("Collecting project data entities");
             entities = endpoints.stream().flatMap(
                     cls -> cls.getInheritanceChain().getDependenciesStream())
                     .distinct().collect(Collectors.toList());
 
+            logger.debug("Collecting entities dependencies");
             // ATTENTION: This loop mutates the collection during processing!
             // It is necessary to collect all endpoint dependencies +
             // dependencies of dependencies.
