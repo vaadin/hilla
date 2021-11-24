@@ -52,10 +52,17 @@ public class CsrfChecker {
      *            the servlet context
      */
     public CsrfChecker(ServletContext servletContext) {
-        ApplicationConfiguration cfg = ApplicationConfiguration
-                .get(new VaadinServletContext(servletContext));
-        if (cfg != null) {
-            setCsrfProtection(cfg.isXsrfProtectionEnabled());
+        try {
+            ApplicationConfiguration cfg = ApplicationConfiguration
+                    .get(new VaadinServletContext(servletContext));
+            if (cfg != null) {
+                setCsrfProtection(cfg.isXsrfProtectionEnabled());
+            }
+        } catch (Exception e) {
+            // In tests, an ApplicationConfiguration might not available but
+            // that should not
+            // fail the test
+            getLogger().debug("Failed to fetch ApplicationConfiguration", e);
         }
 
     }
