@@ -1,5 +1,5 @@
 import { expect } from '@open-wc/testing';
-import { cookieExists, deleteCookie, getCookie, setCookie } from '../src/CookieUtils.js';
+import { cookieExists, deleteCookie, getCookie, removeTrailingSlashFromPath, setCookie } from '../src/CookieUtils.js';
 
 function setTestCookie() {
   document.cookie = `testCookie=test value`;
@@ -41,5 +41,14 @@ describe('CookieUtils', () => {
     setTestCookie();
 
     expect(cookieExists('testCookie')).to.be.true;
+  });
+});
+
+describe('Related helpers', () => {
+  it('should remove trailing slash from path', async () => {
+    expect(removeTrailingSlashFromPath('')).to.equal('');
+    expect(removeTrailingSlashFromPath('/')).to.equal('/');
+    expect(removeTrailingSlashFromPath('/foo')).to.equal('/foo');
+    expect(removeTrailingSlashFromPath('/foo/')).to.equal('/foo');
   });
 });

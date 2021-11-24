@@ -1,6 +1,6 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
-import { cookieExists, deleteCookie } from './CookieUtils.js';
+import { cookieExists, deleteCookie, removeTrailingSlashFromPath } from './CookieUtils.js';
 
 const jwtCookieName = 'jwt.headerAndPayload';
 
@@ -50,20 +50,8 @@ async function doLogout(logoutUrl: string, headers: Record<string, string>) {
   await updateCsrfTokensBasedOnResponse(response);
 }
 
-/**
- * Remove trailing '/' if the path is not exactly '/'.
- * Exported for testing purposes only.
- * @internal
- */
-export function _removeTrailingSlashFromPath(path: string) {
-  if (path.length > 1 && path.substr(-1, 1) === '/') {
-    path = path.substr(0, path.length - 1);
-  }
-  return path;
-}
-
 function deleteJWTCookie() {
-  const cookiePath = _removeTrailingSlashFromPath(new URL(document.baseURI).pathname);
+  const cookiePath = removeTrailingSlashFromPath(new URL(document.baseURI).pathname);
   deleteCookie(jwtCookieName, { Path: cookiePath });
 }
 

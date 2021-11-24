@@ -27,3 +27,14 @@ export function deleteCookie(name: string, options?: Record<string, string>): vo
 export function cookieExists(name: string): boolean {
   return getCookie(name) !== undefined;
 }
+
+/**
+ * Remove trailing '/' if the path is not exactly '/'.
+ * @internal
+ */
+export function removeTrailingSlashFromPath(path: string) {
+  if (path.length > 1 && path.substr(-1, 1) === '/') {
+    path = path.substr(0, path.length - 1);
+  }
+  return path;
+}
