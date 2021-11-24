@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -20,53 +21,41 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public final class ParserConfig {
-
+public final class ParserConfig extends AbstractParserConfig {
     private String classPath;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
     private Set<String> plugins = new LinkedHashSet<>();
 
+    private ParserConfig() {
+    }
+
     @Nonnull
+    @Override
     public String getClassPath() {
         return classPath;
     }
 
     @Nonnull
+    @Override
     public String getEndpointAnnotationName() {
         return endpointAnnotationName;
     }
 
     @Nonnull
+    @Override
     public OpenAPI getOpenAPI() {
         return openAPI;
     }
 
     @Nonnull
-    public Set<String> getPlugins() {
-        return plugins;
-    }
-
     @Override
-    public boolean equals(Object another) {
-        if (this == another) {
-            return true;
-        }
-
-        if (!(another instanceof ParserConfig)) {
-            return false;
-        }
-
-        return Objects.equals(classPath, ((ParserConfig) another).classPath)
-                && Objects.equals(endpointAnnotationName,
-                        ((ParserConfig) another).endpointAnnotationName)
-                && Objects.equals(openAPI, ((ParserConfig) another).openAPI)
-                && Objects.equals(plugins, ((ParserConfig) another).plugins);
+    public Set<String> getPlugins() {
+        return Collections.unmodifiableSet(plugins);
     }
 
     public enum OpenAPIFileType {
-        JSON(Json.mapper()),
-        YAML(Yaml.mapper());
+        JSON(Json.mapper()), YAML(Yaml.mapper());
 
         private final ObjectMapper mapper;
 
@@ -84,7 +73,7 @@ public final class ParserConfig {
                 .getLogger(Builder.class);
 
         private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
-        private FileSpec openAPISpec;
+        private FileSource openAPISpec;
 
         @Nonnull
         public Builder addPlugin(@Nonnull String plugin) {
@@ -140,45 +129,34 @@ public final class ParserConfig {
         }
 
         @Nonnull
-        public Builder openAPISpec(@Nonnull String src,
+        public Builder openAPISource(@Nonnull String src,
                 @Nonnull OpenAPIFileType type) {
-            openAPISpec = new FileSpec(Objects.requireNonNull(src),
+            openAPISpec = new FileSource(Objects.requireNonNull(src),
                     Objects.requireNonNull(type));
             return this;
         }
 
         @Nonnull
-        public Builder plugins(@Nonnull Collection<String> plugins,
-                boolean override) {
+        public Builder plugins(@Nonnull Collection<String> plugins) {
             Objects.requireNonNull(plugins);
-
-            actions.add(config -> {
-                if (override || config.plugins == null) {
-                    config.plugins = new LinkedHashSet<>(plugins);
-                }
-            });
+            actions.add(config -> config.plugins = new LinkedHashSet<>(plugins));
             return this;
         }
 
-        @Nonnull
-        public Builder plugins(@Nonnull Collection<String> plugins) {
-            return plugins(plugins, true);
-        }
-
         public ParserConfig finish() {
-            logger.debug("Building JVM Parser config");
+            logger.debug("Building JVM Parser config.");
             var config = new ParserConfig();
 
-            logger.debug("Loading OpenAPI configuration");
+            logger.debug("Loading OpenAPI configuration.");
             config.openAPI = prepareOpenAPI();
 
-            logger.debug("Applying configuration changed defined by the user");
+            logger.debug("Applying configuration changed defined by the user.");
             actions.forEach(action -> action.accept(config));
 
             Objects.requireNonNull(config.classPath,
-                    "[JVM Parser] classPath is not provided");
+                    "[JVM Parser] classPath is not provided.");
             Objects.requireNonNull(config.endpointAnnotationName,
-                    "[JVM Parser] endpointAnnotationName is not provided");
+                    "[JVM Parser] endpointAnnotationName is not provided.");
 
             return config;
         }
@@ -189,10 +167,10 @@ public final class ParserConfig {
 
                 var src = new String(Objects
                         .requireNonNull(getClass()
-                                .getResourceAsStream("OpenAPIStub.json"))
+                                .getResourceAsStream("OpenAPIBase.json"))
                         .readAllBytes());
 
-                parser.parse(new FileSpec(src, OpenAPIFileType.JSON));
+                parser.parse(new FileSource(src, OpenAPIFileType.JSON));
 
                 if (openAPISpec != null) {
                     parser.parse(openAPISpec);
@@ -206,11 +184,11 @@ public final class ParserConfig {
         }
     }
 
-    private static final class FileSpec {
+    private static final class FileSource {
         private final String src;
         private final OpenAPIFileType type;
 
-        public FileSpec(String src, OpenAPIFileType type) {
+        public FileSource(String src, OpenAPIFileType type) {
             this.src = src;
             this.type = type;
         }
@@ -231,7 +209,7 @@ public final class ParserConfig {
             return value;
         }
 
-        public void parse(FileSpec spec) throws IOException {
+        public void parse(FileSource spec) throws IOException {
             var mapper = spec.getType().getMapper();
             var reader = value != null ? mapper.readerForUpdating(value)
                     : mapper.reader();

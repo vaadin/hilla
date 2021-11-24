@@ -9,28 +9,30 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
+import com.vaadin.fusion.parser.core.RelativeFieldInfo;
+import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
-import com.vaadin.fusion.parser.testutils.PluginElementsFilter;
+
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.FieldInfo;
+import io.github.classgraph.MethodInfo;
 
 public class BasicPlugin implements Plugin {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
-    protected final PluginElementsFilter filter = new PluginElementsFilter(
-            "Basic");
-
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,
             @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
-        storage.getPluginStorage().put(STORAGE_KEY, filter.apply(endpoints)
-                .stream()
-                .flatMap(endpoint -> Stream
-                        .of(endpoint.getFieldsStream()
-                                .map(field -> field.get().getName()),
-                                endpoint.getMethodsStream()
-                                        .map(method -> method.get().getName()),
-                                endpoint.getInnerClassesStream()
-                                        .map(cls -> cls.get().getName()))
+        storage.getPluginStorage().put(STORAGE_KEY,
+                endpoints.stream().flatMap(endpoint -> Stream.of(
+                        endpoint.getFieldsStream().map(RelativeFieldInfo::get)
+                                .map(FieldInfo::getName),
+                        endpoint.getMethodsStream().map(RelativeMethodInfo::get)
+                                .map(MethodInfo::getName),
+                        endpoint.getInnerClassesStream()
+                                .map(RelativeClassInfo::get)
+                                .map(ClassInfo::getName))
                         .flatMap(Function.identity()))
-                .collect(Collectors.toList()));
+                        .collect(Collectors.toList()));
     }
 }

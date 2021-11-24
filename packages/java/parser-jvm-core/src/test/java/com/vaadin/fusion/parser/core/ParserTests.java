@@ -4,32 +4,37 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.fusion.parser.core.basic.BasicPlugin;
 import com.vaadin.fusion.parser.core.dependency.DependencyPlugin;
-import com.vaadin.fusion.parser.testutils.Endpoint;
+import com.vaadin.fusion.parser.testutils.ResourceLoader;
 
 public class ParserTests {
+    private final ResourceLoader resourceLoader = new ResourceLoader(
+            getClass());
+    private String basicPluginEndpointName;
+    private String dependencyPluginEndpointName;
     private Path targetDirPath;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        targetDirPath = Paths.get(
-                Objects.requireNonNull(getClass().getResource("/")).toURI())
-                .getParent();
+        basicPluginEndpointName = com.vaadin.fusion.parser.core.basic.Endpoint.class
+                .getName();
+        dependencyPluginEndpointName = com.vaadin.fusion.parser.core.dependency.Endpoint.class
+                .getName();
+
+        targetDirPath = resourceLoader.findTargetDirPath();
     }
 
     @Test
     public void should_RunBasicPlugin() {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(targetDirPath.toString())
-                        .endpointAnnotation(Endpoint.class.getName())
+                        .endpointAnnotation(basicPluginEndpointName)
                         .addPlugin(BasicPlugin.class.getName()).finish());
 
         parser.execute();
@@ -48,7 +53,7 @@ public class ParserTests {
     public void should_ResolveDependenciesCorrectly_When_ReceiveDependenciesInPlugin() {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(targetDirPath.toString())
-                        .endpointAnnotation(Endpoint.class.getName())
+                        .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();
@@ -68,7 +73,7 @@ public class ParserTests {
     public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(targetDirPath.toString())
-                        .endpointAnnotation(Endpoint.class.getName())
+                        .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();
@@ -87,7 +92,7 @@ public class ParserTests {
     public void should_ResolveDependencyMembersCorrectly() {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(targetDirPath.toString())
-                        .endpointAnnotation(Endpoint.class.getName())
+                        .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 
         parser.execute();

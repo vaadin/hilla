@@ -1,7 +1,5 @@
 package com.vaadin.fusion.parser.core.dependency;
 
-import com.vaadin.fusion.parser.testutils.Endpoint;
-
 @Endpoint
 public class DependencyEndpoint {
     private final DependencyEntityOne entityOne = new DependencyEntityOne();

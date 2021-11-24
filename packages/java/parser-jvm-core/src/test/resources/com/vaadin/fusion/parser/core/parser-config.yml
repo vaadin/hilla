@@ -1,8 +1,0 @@
-application:
-  endpointAnnotation: com.example.Endpoint
-plugins:
-  disable:
-    - backbone
-  use:
-    - com.vaadin.fusion.parser.BasicPlugin
-    - com.vaadin.fusion.parser.DependencyPlugin

@@ -88,7 +88,7 @@ final class ParserProcessor {
                 throw new IOException("No OpenAPI base file found");
             }
 
-            builder.openAPISpec(Files.readString(path),
+            builder.openAPISource(Files.readString(path),
                     fileName.endsWith("json")
                             ? ParserConfig.OpenAPIFileType.JSON
                             : ParserConfig.OpenAPIFileType.YAML);

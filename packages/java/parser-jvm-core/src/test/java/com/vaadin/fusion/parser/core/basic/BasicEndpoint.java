@@ -1,7 +1,5 @@
 package com.vaadin.fusion.parser.core.basic;
 
-import com.vaadin.fusion.parser.testutils.Endpoint;
-
 @Endpoint
 public class BasicEndpoint {
     public final String foo = "FOO";

@@ -8,5 +8,6 @@
       "url": "https://app.cool.my/connect",
       "description": "My Cool Backend"
     }
-  ]
+  ],
+  "paths": {}
 }

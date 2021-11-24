@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.testutils;
+package com.vaadin.fusion.parser.core.dependency;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
