@@ -17,20 +17,20 @@ export class EndpointError extends Error {
   /**
    * The optional name of the exception that was thrown on a backend
    */
-  type?: string;
+  public type?: string;
 
   /**
    * The optional detail object, containing additional information sent
    * from a backend
    */
-  detail?: any;
+  public detail?: any;
 
   /**
    * @param message the `message` property value
    * @param type the `type` property value
    * @param detail the `detail` property value
    */
-  constructor(message: string, type?: string, detail?: any) {
+  public constructor(message: string, type?: string, detail?: any) {
     super(message);
     this.type = type;
     this.detail = detail;
@@ -46,19 +46,19 @@ export class EndpointValidationError extends EndpointError {
   /**
    * An original validation error message.
    */
-  validationErrorMessage: string;
+  public validationErrorMessage: string;
 
   /**
    * An array of the validation errors.
    */
-  validationErrorData: ValidationErrorData[];
+  public validationErrorData: ValidationErrorData[];
 
   /**
    * @param message the `message` property value
    * @param validationErrorData the `validationErrorData` property value
    * @param type the `type` property value
    */
-  constructor(message: string, validationErrorData: ValidationErrorData[], type?: string) {
+  public constructor(message: string, validationErrorData: ValidationErrorData[], type?: string) {
     super(message, type, validationErrorData);
     this.validationErrorMessage = message;
     this.detail = null;
@@ -73,13 +73,13 @@ export class EndpointResponseError extends Error {
   /**
    * The optional response object, containing the HTTP response error
    */
-  response: Response;
+  public response: Response;
 
   /**
    * @param message the `message` property value
    * @param response the `response` property value
    */
-  constructor(message: string, response: Response) {
+  public constructor(message: string, response: Response) {
     super(message);
     this.response = response;
   }
@@ -133,18 +133,18 @@ export class ValidationErrorData {
   /**
    * The validation error message.
    */
-  message: string;
+  public message: string;
 
   /**
    * The parameter name that caused the validation error.
    */
-  parameterName?: string;
+  public parameterName?: string;
 
   /**
    * @param message the `message` property value
    * @param parameterName the `parameterName` property value
    */
-  constructor(message: string, parameterName?: string) {
+  public constructor(message: string, parameterName?: string) {
     this.message = message;
     this.parameterName = parameterName;
   }
@@ -223,6 +223,10 @@ type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => 
  */
 export type Middleware = MiddlewareClass | MiddlewareFunction;
 
+function isFlowLoaded(): boolean {
+  return $wnd.Vaadin.Flow?.clients?.TypeScript !== undefined;
+}
+
 /**
  * Vaadin Connect client class is a low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
@@ -249,17 +253,17 @@ export class ConnectClient {
   /**
    * The Vaadin endpoint prefix
    */
-  prefix = '/connect';
+  public prefix = '/connect';
 
   /**
    * The array of middlewares that are invoked during a call.
    */
-  middlewares: Middleware[] = [];
+  public middlewares: Middleware[] = [];
 
   /**
    * @param options Constructor options.
    */
-  constructor(options: ConnectClientOptions = {}) {
+  public constructor(options: ConnectClientOptions = {}) {
     if (options.prefix) {
       this.prefix = options.prefix;
     }
@@ -274,12 +278,12 @@ export class ConnectClient {
     // Listen to browser online/offline events and update the loading indicator accordingly.
     // Note: if Flow.ts is loaded, it instead handles the state transitions.
     $wnd.addEventListener('online', () => {
-      if (!this.isFlowLoaded()) {
+      if (!isFlowLoaded()) {
         $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
       }
     });
     $wnd.addEventListener('offline', () => {
-      if (!this.isFlowLoaded()) {
+      if (!isFlowLoaded()) {
         $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
       }
     });
@@ -296,7 +300,7 @@ export class ConnectClient {
    * @param options Optional client options for this call.
    * @returns {} Decoded JSON response data.
    */
-  async call(endpoint: string, method: string, params?: any): Promise<any> {
+  public async call(endpoint: string, method: string, params?: any): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -339,7 +343,7 @@ export class ConnectClient {
     // in the final middlewares array.
     const responseHandlerMiddleware: Middleware = async (
       context: MiddlewareContext,
-      next: MiddlewareNext
+      next: MiddlewareNext,
     ): Promise<Response> => {
       const response = await next(context);
       await assertResponseIsOk(response);
@@ -381,14 +385,10 @@ export class ConnectClient {
         }) as MiddlewareNext;
       },
       // Initialize reduceRight the accumulator with `fetchNext`
-      fetchNext
+      fetchNext,
     );
 
     // Invoke all the folded async middlewares and return
     return chain(initialContext);
-  }
-
-  private isFlowLoaded(): boolean {
-    return $wnd.Vaadin.Flow?.clients?.TypeScript !== undefined;
   }
 }

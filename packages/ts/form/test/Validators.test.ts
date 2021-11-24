@@ -30,12 +30,12 @@ describe('form/Validators', () => {
     assert.equal(
       new Size({ min: 1, max: 2 }).message,
       'size must be between 1 and 2',
-      'when no custom error message is provided, the default error message should be used'
+      'when no custom error message is provided, the default error message should be used',
     );
     assert.equal(
       new Size({ min: 1, max: 2, message: 'Please enter something with the size between 1 and 2' }).message,
       'Please enter something with the size between 1 and 2',
-      'when a custom error message is provided, it should be used instead of the default one'
+      'when a custom error message is provided, it should be used instead of the default one',
     );
   });
 
