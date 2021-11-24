@@ -15,7 +15,6 @@
  */
 package com.vaadin.fusion.typeconversion;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BooleanConversionTest extends BaseTypeConversionTest {

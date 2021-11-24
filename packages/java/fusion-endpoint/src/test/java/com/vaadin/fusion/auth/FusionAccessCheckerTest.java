@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
