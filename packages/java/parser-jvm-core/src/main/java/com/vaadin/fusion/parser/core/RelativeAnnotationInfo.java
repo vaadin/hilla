@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-public class RelativeAnnotationInfo
+public final class RelativeAnnotationInfo
         extends AbstractRelative<AnnotationInfo, Relative<?>> {
 
     public RelativeAnnotationInfo(@Nonnull AnnotationInfo origin,

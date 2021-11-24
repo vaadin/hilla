@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven.parser;
+package com.vaadin.fusion.maven;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +20,7 @@ import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
-public class ParserProcessor {
+final class ParserProcessor {
     private static final List<ParserConfiguration.Plugin> defaultPlugins = List
             .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
     private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
@@ -56,8 +56,7 @@ public class ParserProcessor {
 
             builder.classPath(result);
         } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException(
-                    "Failed collecting class path", e);
+            throw new ParserException("Failed collecting class path", e);
         }
     }
 
@@ -66,8 +65,7 @@ public class ParserProcessor {
             builder.classPath(
                     String.join(";", project.getCompileClasspathElements()));
         } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException(
-                    "Failed collecting class path", e);
+            throw new ParserException("Failed collecting class path", e);
         }
     }
 
@@ -84,17 +82,18 @@ public class ParserProcessor {
             var path = Paths.get(project.getBasedir().getAbsolutePath(),
                     openAPIPath);
             var fileName = path.getFileName().toString();
-            var dotLastIndex = fileName.lastIndexOf('.');
 
-            if (dotLastIndex == -1) {
+            if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")
+                    && !fileName.endsWith("json")) {
                 throw new IOException("No OpenAPI base file found");
             }
 
-            // dotLastIndex + 1 because we want to get extension without the dot.
-            builder.openAPISpec(Files.readString(path), fileName.substring(dotLastIndex + 1));
+            builder.openAPISpec(Files.readString(path),
+                    fileName.endsWith("json")
+                            ? ParserConfig.OpenAPIFileType.JSON
+                            : ParserConfig.OpenAPIFileType.YAML);
         } catch (IOException e) {
-            throw new ParserException(
-                    "Failed loading OpenAPI spec file", e);
+            throw new ParserException("Failed loading OpenAPI spec file", e);
         }
     }
 

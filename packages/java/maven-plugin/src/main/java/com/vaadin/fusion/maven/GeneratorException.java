@@ -1,6 +1,6 @@
-package com.vaadin.fusion.maven.generator;
+package com.vaadin.fusion.maven;
 
-public class GeneratorException extends RuntimeException {
+public final class GeneratorException extends RuntimeException {
     GeneratorException(String message) {
         super(message);
     }

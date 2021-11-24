@@ -11,15 +11,16 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class ParserConfig {
+public final class ParserConfig {
 
     private String classPath;
     private String endpointAnnotationName;
@@ -63,8 +64,24 @@ public class ParserConfig {
                 && Objects.equals(plugins, ((ParserConfig) another).plugins);
     }
 
-    public static class Builder {
-        private static final Logger logger = LoggerFactory.getLogger(Builder.class);
+    public enum OpenAPIFileType {
+        JSON(Json.mapper()),
+        YAML(Yaml.mapper());
+
+        private final ObjectMapper mapper;
+
+        OpenAPIFileType(ObjectMapper mapper) {
+            this.mapper = mapper;
+        }
+
+        public ObjectMapper getMapper() {
+            return mapper;
+        }
+    }
+
+    public static final class Builder {
+        private static final Logger logger = LoggerFactory
+                .getLogger(Builder.class);
 
         private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
         private FileSpec openAPISpec;
@@ -123,9 +140,10 @@ public class ParserConfig {
         }
 
         @Nonnull
-        public Builder openAPISpec(@Nonnull String src, @Nonnull String ext) {
+        public Builder openAPISpec(@Nonnull String src,
+                @Nonnull OpenAPIFileType type) {
             openAPISpec = new FileSpec(Objects.requireNonNull(src),
-                    Objects.requireNonNull(ext));
+                    Objects.requireNonNull(type));
             return this;
         }
 
@@ -157,8 +175,10 @@ public class ParserConfig {
             logger.debug("Applying configuration changed defined by the user");
             actions.forEach(action -> action.accept(config));
 
-            Objects.requireNonNull(config.classPath, "[JVM Parser] classPath is not provided");
-            Objects.requireNonNull(config.endpointAnnotationName, "[JVM Parser] endpointAnnotationName is not provided");
+            Objects.requireNonNull(config.classPath,
+                    "[JVM Parser] classPath is not provided");
+            Objects.requireNonNull(config.endpointAnnotationName,
+                    "[JVM Parser] endpointAnnotationName is not provided");
 
             return config;
         }
@@ -168,11 +188,11 @@ public class ParserConfig {
                 var parser = new OpenAPIParser();
 
                 var src = new String(Objects
-                    .requireNonNull(getClass()
-                        .getResourceAsStream("OpenAPIStub.json"))
-                    .readAllBytes());
+                        .requireNonNull(getClass()
+                                .getResourceAsStream("OpenAPIStub.json"))
+                        .readAllBytes());
 
-                parser.parse(new FileSpec(src, "json"));
+                parser.parse(new FileSpec(src, OpenAPIFileType.JSON));
 
                 if (openAPISpec != null) {
                     parser.parse(openAPISpec);
@@ -181,22 +201,22 @@ public class ParserConfig {
                 return parser.getValue();
             } catch (IOException e) {
                 throw new ParserException(
-                    "Failed to parse openAPI specification", e);
+                        "Failed to parse openAPI specification", e);
             }
         }
     }
 
-    private static class FileSpec {
+    private static final class FileSpec {
         private final String src;
-        private final String extension;
+        private final OpenAPIFileType type;
 
-        public FileSpec(String src, String extension) {
+        public FileSpec(String src, OpenAPIFileType type) {
             this.src = src;
-            this.extension = extension;
+            this.type = type;
         }
 
-        public String getExtension() {
-            return extension;
+        public OpenAPIFileType getType() {
+            return type;
         }
 
         public String getSrc() {
@@ -212,23 +232,10 @@ public class ParserConfig {
         }
 
         public void parse(FileSpec spec) throws IOException {
-            var mapper = createMapper(spec.getExtension());
+            var mapper = spec.getType().getMapper();
             var reader = value != null ? mapper.readerForUpdating(value)
                     : mapper.reader();
             value = reader.readValue(spec.getSrc(), OpenAPI.class);
-        }
-
-        private ObjectMapper createMapper(String extension) {
-            switch (extension) {
-            case "yml":
-            case "yaml":
-                return Yaml.mapper();
-            case "json":
-                return Json.mapper();
-            default:
-                throw new ParserException(String.format(
-                        "The file format '.%s' is not supported", extension));
-            }
         }
     }
 }

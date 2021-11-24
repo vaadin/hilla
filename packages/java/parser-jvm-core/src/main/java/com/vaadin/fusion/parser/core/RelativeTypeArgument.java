@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.TypeArgument;
 
-public class RelativeTypeArgument
+public final class RelativeTypeArgument
         extends AbstractRelative<TypeArgument, Relative<?>>
         implements RelativeTypeSignature {
     private final RelativeTypeSignature wildcardAssociatedType;

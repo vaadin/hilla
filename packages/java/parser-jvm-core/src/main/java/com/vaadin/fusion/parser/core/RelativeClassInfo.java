@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 
-public class RelativeClassInfo
+public final class RelativeClassInfo
         extends AbstractRelative<ClassInfo, RelativeClassInfo> {
     private final List<RelativeAnnotationInfo> annotations;
     private final InheritanceChain chain;

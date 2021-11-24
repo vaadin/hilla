@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public class OpenAPIPrinter {
+public final class OpenAPIPrinter {
     private final ObjectMapper mapper = Json.mapper();
     private final Pretty pretty;
 
@@ -27,7 +27,7 @@ public class OpenAPIPrinter {
         return pretty;
     }
 
-    public class Pretty {
+    public final class Pretty {
         private final ObjectWriter writer;
 
         private Pretty() {

@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 
-class EndpointProcessor extends Processor {
+final class EndpointProcessor extends Processor {
     public EndpointProcessor(@Nonnull List<RelativeClassInfo> classes,
             @Nonnull OpenAPI model) {
         super(classes, model);

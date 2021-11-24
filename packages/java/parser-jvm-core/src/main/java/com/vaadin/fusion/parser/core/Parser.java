@@ -13,7 +13,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public class Parser {
+public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private final ParserConfig config;

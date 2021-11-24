@@ -9,8 +9,9 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeParameter;
 
-public class RelativeTypeParameter
-        extends AbstractRelative<TypeParameter, Relative<?>> {
+public final class RelativeTypeParameter
+        extends AbstractRelative<TypeParameter, Relative<?>>
+        implements RelativeTypeSignature {
     private final RelativeTypeSignature classBound;
     private final List<RelativeTypeSignature> interfaceBounds;
 

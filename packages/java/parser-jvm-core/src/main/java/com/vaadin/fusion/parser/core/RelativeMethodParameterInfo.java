@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodParameterInfo;
 
-public class RelativeMethodParameterInfo
+public final class RelativeMethodParameterInfo
         extends AbstractRelative<MethodParameterInfo, RelativeMethodInfo> {
     private final RelativeTypeSignature type;
 

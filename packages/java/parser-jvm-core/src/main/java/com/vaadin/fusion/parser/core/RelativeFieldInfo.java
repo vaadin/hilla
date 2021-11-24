@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public class RelativeFieldInfo
+public final class RelativeFieldInfo
         extends AbstractRelative<FieldInfo, RelativeClassInfo> {
     private final RelativeTypeSignature type;
 

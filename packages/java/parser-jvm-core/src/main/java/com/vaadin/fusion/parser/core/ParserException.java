@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
-public class ParserException extends RuntimeException {
+public final class ParserException extends RuntimeException {
     ParserException(String message) {
         super(message);
     }

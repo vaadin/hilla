@@ -12,7 +12,7 @@ import java.util.Optional;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
-public class ReflectedClass {
+public final class ReflectedClass {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
         LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,

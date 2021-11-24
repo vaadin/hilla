@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven.generator;
+package com.vaadin.fusion.maven;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
-public class GeneratorProcessor {
+final class GeneratorProcessor {
     private static final Pattern jsonEscapePattern = Pattern.compile("[\r\n\b\f\t\"']");
     private static final String defaultOutputDir = "frontend/generated";
     private static final List<GeneratorConfiguration.Plugin> defaultPlugins = List

@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven.generator;
+package com.vaadin.fusion.maven;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.apache.maven.project.MavenProject;
 
-public class GeneratorConfiguration {
+final class GeneratorConfiguration {
     private PluginList plugins;
     private String outputDir;
 

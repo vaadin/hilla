@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven.generator;
+package com.vaadin.fusion.maven;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
 
-public class GeneratorShellRunner {
+final class GeneratorShellRunner {
     private final List<String> arguments = new ArrayList<>();
     private final Log logger;
 

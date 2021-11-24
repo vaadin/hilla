@@ -9,7 +9,7 @@ import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 
-public class BackbonePlugin implements Plugin {
+public final class BackbonePlugin implements Plugin {
     @Override
     public void execute(@Nonnull List<RelativeClassInfo> endpoints,
             @Nonnull List<RelativeClassInfo> entities,

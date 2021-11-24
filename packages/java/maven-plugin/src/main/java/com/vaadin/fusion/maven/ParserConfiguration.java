@@ -1,10 +1,10 @@
-package com.vaadin.fusion.maven.parser;
+package com.vaadin.fusion.maven;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ParserConfiguration {
+final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String openAPIPath;

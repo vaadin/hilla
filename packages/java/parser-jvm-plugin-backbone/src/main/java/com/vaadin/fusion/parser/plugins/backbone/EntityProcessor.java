@@ -19,7 +19,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
-class EntityProcessor extends Processor {
+final class EntityProcessor extends Processor {
     private static String decapitalize(String string) {
         var c = string.toCharArray();
         c[0] = Character.toLowerCase(c[0]);

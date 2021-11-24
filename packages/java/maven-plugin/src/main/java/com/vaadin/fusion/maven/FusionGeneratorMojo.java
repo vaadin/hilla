@@ -8,19 +8,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.fusion.maven.generator.GeneratorConfiguration;
-import com.vaadin.fusion.maven.generator.GeneratorException;
-import com.vaadin.fusion.maven.generator.GeneratorProcessor;
-import com.vaadin.fusion.maven.parser.ParserConfiguration;
-import com.vaadin.fusion.maven.parser.ParserException;
-import com.vaadin.fusion.maven.parser.ParserProcessor;
-
 /**
  * Fusion plugin for Maven. Handles loading the parser and its
  * pluginSpecifications.
  */
 @Mojo(name = "generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-public class FusionGeneratorMojo extends AbstractMojo {
+public final class FusionGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
     @Parameter(readonly = true)

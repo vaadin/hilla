@@ -5,7 +5,7 @@ import java.util.Map;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
-public class SharedStorage {
+public final class SharedStorage {
     private final ParserConfig parserConfig;
     private final Map<String, Object> pluginStorage = new HashMap<>();
 
