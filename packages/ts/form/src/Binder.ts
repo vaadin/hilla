@@ -59,7 +59,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(public context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
+  public constructor(public context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
     super(new Model({ value: undefined }, 'value', false));
     this[_emptyValue] = (this.model[_parent] as { value: T }).value;
     // @ts-ignore
@@ -76,22 +76,22 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * The initial value of the form, before any fields are edited by the user.
    */
-  get defaultValue() {
+  public override get defaultValue() {
     return this[_defaultValue];
   }
 
-  set defaultValue(newValue) {
+  public override set defaultValue(newValue) {
     this[_defaultValue] = newValue;
   }
 
   /**
    * The current value of the form.
    */
-  get value() {
+  public override get value() {
     return this[_value];
   }
 
-  set value(newValue) {
+  public override set value(newValue) {
     if (newValue === this[_value]) {
       return;
     }
@@ -108,7 +108,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * @param value Sets the argument as the new default
    * value before resetting, otherwise the previous default is used.
    */
-  read(value: T) {
+  public read(value: T) {
     this.defaultValue = value;
     if (
       // Skip when no value is set yet (e. g., invoked from constructor)
@@ -128,14 +128,14 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * Reset the form to the previous value
    */
-  reset() {
+  public reset() {
     this.read(this[_defaultValue]);
   }
 
   /**
    * Sets the form to empty value, as defined in the Model.
    */
-  clear() {
+  public clear() {
     this.read(this[_emptyValue]);
   }
 
@@ -145,7 +145,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * It's a no-op if the onSubmit callback is undefined.
    */
-  async submit(): Promise<T | void> {
+  public async submit(): Promise<T | void> {
     if (this[_onSubmit] !== undefined) {
       return this.submitTo(this[_onSubmit]);
     }
@@ -157,7 +157,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * @param endpointMethod the callback function
    */
-  async submitTo<V>(endpointMethod: (value: T) => Promise<V>): Promise<V> {
+  public async submitTo<V>(endpointMethod: (value: T) => Promise<V>): Promise<V> {
     const errors = await this.validate();
     if (errors.length) {
       throw new ValidationError(errors);
@@ -173,7 +173,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
         error.validationErrorData.forEach((data: any) => {
           const res =
             /Object of type '(.+)' has invalid property '(.+)' with value '(.+)', validation error: '(.+)'/.exec(
-              data.message
+              data.message,
             );
           const [property, value, message] = res ? res.splice(2) : [data.parameterName, undefined, data.message];
           valueErrors.push({ property, value, validator: new ServerValidator(message), message });
@@ -190,9 +190,9 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     }
   }
 
-  async requestValidation<NT, NM extends AbstractModel<NT>>(
+  public async requestValidation<NT, NM extends AbstractModel<NT>>(
     model: NM,
-    validator: Validator<NT>
+    validator: Validator<NT>,
   ): Promise<ReadonlyArray<ValueError<NT>>> {
     let modelValidations: Map<Validator<NT>, Promise<ReadonlyArray<ValueError<NT>>>>;
     if (this[_validations].has(model)) {
@@ -230,7 +230,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * @param elm the bound element
    */
-  getFieldStrategy(elm: any): FieldStrategy {
+  public getFieldStrategy(elm: any): FieldStrategy {
     return getDefaultFieldStrategy(elm);
   }
 
@@ -238,7 +238,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * Indicates the submitting status of the form.
    * True if the form was submitted, but the submit promise is not resolved yet.
    */
-  get submitting() {
+  public get submitting() {
     return this[_submitting];
   }
 
@@ -246,7 +246,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * Indicates the validating status of the form.
    * True when there is an ongoing validation.
    */
-  get validating() {
+  public get validating() {
     return this[_validating];
   }
 
@@ -264,7 +264,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     this[_validating] = false;
   }
 
-  protected update(oldValue: T) {
+  protected override update(oldValue: T) {
     if (this[_onChange]) {
       this[_onChange].call(this.context, oldValue);
     }

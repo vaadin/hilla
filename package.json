@@ -41,6 +41,6 @@
     "micromatch": "^4.0.4",
     "prettier": "^2.3.2",
     "simple-git-hooks": "^2.6.1",
-    "typescript": "^4.5.1-rc"
+    "typescript": "^4.5.2"
   }
 }

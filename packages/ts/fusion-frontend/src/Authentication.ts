@@ -8,7 +8,7 @@ function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string
 
 function clearSpringCsrfMetaTags() {
   Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
-    el.remove()
+    el.remove(),
   );
 }
 
@@ -167,11 +167,11 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
 
-  constructor(onInvalidSessionCallback: OnInvalidSessionCallback) {
+  public constructor(onInvalidSessionCallback: OnInvalidSessionCallback) {
     this.onInvalidSessionCallback = onInvalidSessionCallback;
   }
 
-  async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
+  public async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
     const clonedContext = { ...context };
     clonedContext.request = context.request.clone();
     const response = await next(context);

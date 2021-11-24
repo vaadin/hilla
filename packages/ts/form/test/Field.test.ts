@@ -25,59 +25,59 @@ describe('form/Field', () => {
     @customElement('mock-text-field')
     class MockTextFieldElement extends HTMLElement {
       // pretend it’s a Vaadin component to use VaadinFieldStrategy
-      static get version() {
+      public static get version() {
         return '0.0.0';
       }
 
-      __value = '';
+      public __value = '';
 
-      get value() {
+      public get value() {
         return this.__value;
       }
 
-      set value(value) {
+      public set value(value) {
         // Native inputs stringify incoming values
         this.__value = String(value);
       }
 
-      valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+      public valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-      __required = false;
+      public __required = false;
 
-      get required() {
+      public get required() {
         return this.__required;
       }
 
-      set required(value) {
+      public set required(value) {
         this.__required = value;
       }
 
-      requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
+      public requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
 
-      setAttributeSpy = sinon.spy(this, 'setAttribute');
+      public setAttributeSpy = sinon.spy(this, 'setAttribute');
     }
 
     let orderViewWithTextField: OrderViewWithTextField;
 
     @customElement('order-view-with-text-field')
     class OrderViewWithTextField extends LitElement {
-      requestUpdateSpy = sinon.spy(this, 'requestUpdate');
+      public requestUpdateSpy = sinon.spy(this, 'requestUpdate');
 
-      binder = new Binder(this, OrderModel);
+      public binder = new Binder(this, OrderModel);
 
       @query('#notesField')
-      notesField?: MockTextFieldElement;
+      public notesField?: MockTextFieldElement;
 
       @query('#customerFullNameField')
-      customerFullNameField?: MockTextFieldElement;
+      public customerFullNameField?: MockTextFieldElement;
 
       @query('#customerNickNameField')
-      customerNickNameField?: MockTextFieldElement;
+      public customerNickNameField?: MockTextFieldElement;
 
       @query('#priorityField')
-      priorityField?: MockTextFieldElement;
+      public priorityField?: MockTextFieldElement;
 
-      render() {
+      public override render() {
         return html`
           <mock-text-field id="notesField" ...="${field(this.binder.model.notes)}"></mock-text-field>
 
@@ -110,7 +110,7 @@ describe('form/Field', () => {
       expect(orderViewWithTextField.notesField!.setAttributeSpy).to.be.calledOnceWithExactly('name', 'notes');
       expect(orderViewWithTextField.customerFullNameField!.setAttributeSpy).to.be.calledOnceWithExactly(
         'name',
-        'customer.fullName'
+        'customer.fullName',
       );
     });
 
@@ -200,7 +200,7 @@ describe('form/Field', () => {
       orderViewWithTextField.requestUpdateSpy.resetHistory();
       orderViewWithTextField.notesField!.value = 'foo';
       orderViewWithTextField.notesField!.dispatchEvent(
-        new CustomEvent('input', { bubbles: true, composed: true, cancelable: false })
+        new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }),
       );
       await orderViewWithTextField.updateComplete;
 
@@ -212,7 +212,7 @@ describe('form/Field', () => {
       orderViewWithTextField.requestUpdateSpy.resetHistory();
       orderViewWithTextField.notesField!.value = 'foo';
       orderViewWithTextField.notesField!.dispatchEvent(
-        new CustomEvent('change', { bubbles: true, composed: true, cancelable: false })
+        new CustomEvent('change', { bubbles: true, composed: true, cancelable: false }),
       );
       await orderViewWithTextField.updateComplete;
 
@@ -224,7 +224,7 @@ describe('form/Field', () => {
       orderViewWithTextField.requestUpdateSpy.resetHistory();
       orderViewWithTextField.notesField!.value = 'foo';
       orderViewWithTextField.notesField!.dispatchEvent(
-        new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false })
+        new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false }),
       );
       await orderViewWithTextField.updateComplete;
 
@@ -238,7 +238,7 @@ describe('form/Field', () => {
       expect(binderNode.visited).to.be.false;
 
       orderViewWithTextField.notesField!.dispatchEvent(
-        new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false })
+        new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false }),
       );
       await orderViewWithTextField.updateComplete;
 
@@ -292,7 +292,7 @@ describe('form/Field', () => {
             priorityField.valueSpy.get.resetHistory();
             priorityField.valueSpy.set.resetHistory();
             priorityField.dispatchEvent(
-              new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false })
+              new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false }),
             );
             await view.updateComplete; // eslint-disable-line no-await-in-loop
 
@@ -318,41 +318,41 @@ describe('form/Field', () => {
   describe('field with input', () => {
     @customElement('mock-input')
     class MockInputElement extends HTMLElement {
-      __value = '';
+      public __value = '';
 
-      get value() {
+      public get value() {
         return this.__value;
       }
 
-      set value(value) {
+      public set value(value) {
         // Native inputs stringify incoming values
         this.__value = String(value);
       }
 
-      valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+      public valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-      setAttributeSpy = sinon.spy(this, 'setAttribute');
+      public setAttributeSpy = sinon.spy(this, 'setAttribute');
     }
 
     @customElement('order-view-with-input')
     class OrderViewWithInput extends LitElement {
-      requestUpdateSpy = sinon.spy(this, 'requestUpdate');
+      public requestUpdateSpy = sinon.spy(this, 'requestUpdate');
 
-      binder = new Binder(this, OrderModel);
+      public binder = new Binder(this, OrderModel);
 
       @query('#notesField')
-      notesField?: MockInputElement;
+      public notesField?: MockInputElement;
 
       @query('#customerFullNameField')
-      customerFullNameField?: MockInputElement;
+      public customerFullNameField?: MockInputElement;
 
       @query('#customerNickNameField')
-      customerNickNameField?: MockInputElement;
+      public customerNickNameField?: MockInputElement;
 
       @query('#priorityField')
-      priorityField?: MockInputElement;
+      public priorityField?: MockInputElement;
 
-      render() {
+      public override render() {
         return html`
           <mock-input id="notesField" ...="${field(this.binder.model.notes)}"></mock-input>
           <mock-input id="customerFullNameField" ...="${field(this.binder.model.customer.fullName)}"></mock-input>
@@ -442,7 +442,7 @@ describe('form/Field', () => {
             priorityField.valueSpy.get.resetHistory();
             priorityField.valueSpy.set.resetHistory();
             priorityField.dispatchEvent(
-              new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false })
+              new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false }),
             );
             await view.updateComplete; // eslint-disable-line no-await-in-loop
 
@@ -469,7 +469,7 @@ describe('form/Field', () => {
     const div = document.createElement('div');
     let currentStrategy: FieldStrategy;
     const binder = new (class StrategySpyBinder<T, M extends AbstractModel<T>> extends Binder<T, M> {
-      getFieldStrategy(elm: any): FieldStrategy {
+      public override getFieldStrategy(elm: any): FieldStrategy {
         currentStrategy = super.getFieldStrategy(elm);
         return currentStrategy;
       }
@@ -483,11 +483,11 @@ describe('form/Field', () => {
     @customElement('any-vaadin-element-tag')
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     class AnyVaadinElement extends LitElement {
-      static get version() {
+      public static get version() {
         return '1.0';
       }
 
-      render() {
+      public override render() {
         return html``;
       }
     }
@@ -642,19 +642,19 @@ describe('form/Field', () => {
     it(`Strategy can be overridden in binder`, async () => {
       const element = document.createElement('div');
       class MyStrategy extends AbstractFieldStrategy {
-        invalid = true;
+        public invalid = true;
 
-        required = true;
+        public required = true;
       }
 
       class MyBinder extends Binder<TestEntity, TestModel> {
-        getFieldStrategy(elm: any): FieldStrategy {
-          currentStrategy = new MyStrategy(elm);
-          return currentStrategy;
+        public constructor(elm: Element) {
+          super(elm, TestModel);
         }
 
-        constructor(elm: Element) {
-          super(elm, TestModel);
+        public override getFieldStrategy(elm: any): FieldStrategy {
+          currentStrategy = new MyStrategy(elm);
+          return currentStrategy;
         }
       }
 
