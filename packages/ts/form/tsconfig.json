@@ -1,8 +1,9 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "importHelpers": true,
     "outDir": ".",
+    "rootDir": "src",
     "skipLibCheck": true
   },
   "include": ["src"],
