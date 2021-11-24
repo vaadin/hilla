@@ -19,12 +19,12 @@ export interface ValidationResult {
 }
 
 export class ValidationError extends Error {
-  constructor(public errors: ReadonlyArray<ValueError<any>>) {
+  public constructor(public errors: ReadonlyArray<ValueError<any>>) {
     super(
       [
         'There are validation errors in the form.',
         ...errors.map((e) => `${e.property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`),
-      ].join('\n - ')
+      ].join('\n - '),
     );
     this.name = this.constructor.name;
   }
@@ -32,7 +32,7 @@ export class ValidationError extends Error {
 
 export type ValidationCallback<T> = (
   value: T,
-  binder: Binder<any, AbstractModel<T>>
+  binder: Binder<any, AbstractModel<T>>,
 ) =>
   | boolean
   | ValidationResult
@@ -46,18 +46,18 @@ export interface Validator<T> {
 }
 
 export class ServerValidator implements Validator<any> {
-  message: string;
+  public message: string;
 
-  constructor(message: string) {
+  public constructor(message: string) {
     this.message = message;
   }
 
-  validate = () => false;
+  public validate = () => false;
 }
 
 export async function runValidator<T>(
   model: AbstractModel<T>,
-  validator: Validator<T>
+  validator: Validator<T>,
 ): Promise<ReadonlyArray<ValueError<T>>> {
   const { value } = getBinderNode(model);
   // If model is not required and value empty, do not run any validator. Except

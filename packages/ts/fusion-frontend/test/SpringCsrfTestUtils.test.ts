@@ -25,7 +25,7 @@ export function setupSpringCsrfMetaTags(csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE
 
 export function clearSpringCsrfMetaTags() {
   Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
-    el.remove()
+    el.remove(),
   );
 }
 

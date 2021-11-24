@@ -18,9 +18,9 @@ export interface IdEntity {
   idString: string;
 }
 export class IdEntityModel<T extends IdEntity = IdEntity> extends ObjectModel<T> {
-  static createEmptyValue: () => IdEntity;
+  public static override createEmptyValue: () => IdEntity;
 
-  get idString(): StringModel {
+  public get idString(): StringModel {
     return this[_getPropertyModel]('idString', StringModel, [false]);
   }
 }
@@ -31,17 +31,17 @@ export interface Product extends IdEntity {
   isInStock: boolean;
 }
 export class ProductModel<T extends Product = Product> extends IdEntityModel<T> {
-  static createEmptyValue: () => Product;
+  public static override createEmptyValue: () => Product;
 
-  get description() {
+  public get description() {
     return this[_getPropertyModel]('description', StringModel, [false, new Required()]);
   }
 
-  get price() {
+  public get price() {
     return this[_getPropertyModel]('price', NumberModel, [false, new Positive()]);
   }
 
-  get isInStock() {
+  public get isInStock() {
     return this[_getPropertyModel]('isInStock', BooleanModel, [false]);
   }
 }
@@ -51,9 +51,9 @@ interface Customer extends IdEntity {
   nickName: string;
 }
 export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<T> {
-  static createEmptyValue: () => Customer;
+  public static override createEmptyValue: () => Customer;
 
-  get fullName() {
+  public get fullName() {
     return this[_getPropertyModel]('fullName', StringModel, [
       false,
       new Size({ min: 4 }),
@@ -61,7 +61,7 @@ export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<
     ]) as StringModel;
   }
 
-  get nickName() {
+  public get nickName() {
     return this[_getPropertyModel]('nickName', StringModel, [false, new Pattern('....*')]) as StringModel;
   }
 }
@@ -73,25 +73,25 @@ export interface Order extends IdEntity {
   products: ReadonlyArray<Product>;
 }
 export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
-  static createEmptyValue: () => Order;
+  public static override createEmptyValue: () => Order;
 
-  get customer(): CustomerModel {
+  public get customer(): CustomerModel {
     return this[_getPropertyModel]('customer', CustomerModel, [false, new Required()]);
   }
 
-  get notes(): StringModel {
+  public get notes(): StringModel {
     return this[_getPropertyModel]('notes', StringModel, [false, new Required()]);
   }
 
-  get priority(): NumberModel {
+  public get priority(): NumberModel {
     return this[_getPropertyModel]('priority', NumberModel, [false]);
   }
 
-  get products(): ArrayModel<Product, ProductModel> {
+  public get products(): ArrayModel<Product, ProductModel> {
     return this[_getPropertyModel](
       'products',
       ArrayModel as ModelConstructor<ReadonlyArray<Product>, ArrayModel<Product, ProductModel>>,
-      [false, ProductModel, [false]]
+      [false, ProductModel, [false]],
     );
   }
 }
@@ -107,39 +107,39 @@ export interface TestEntity {
   fieldAny: any;
 }
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
-  static createEmptyValue: () => TestEntity;
+  public static override createEmptyValue: () => TestEntity;
 
-  get fieldString() {
+  public get fieldString() {
     return this[_getPropertyModel]('fieldString', StringModel, [false]) as StringModel;
   }
 
-  get fieldNumber() {
+  public get fieldNumber() {
     return this[_getPropertyModel]('fieldNumber', NumberModel, [false]) as NumberModel;
   }
 
-  get fieldBoolean() {
+  public get fieldBoolean() {
     return this[_getPropertyModel]('fieldBoolean', BooleanModel, [false]) as BooleanModel;
   }
 
-  get fieldObject() {
+  public get fieldObject() {
     return this[_getPropertyModel]('fieldObject', ObjectModel, [false]) as ObjectModel<Record<string, unknown>>;
   }
 
-  get fieldArrayString() {
+  public get fieldArrayString() {
     return this[_getPropertyModel]('fieldArrayString', ArrayModel, [false, StringModel, [false]]) as ArrayModel<
       string,
       StringModel
     >;
   }
 
-  get fieldArrayModel() {
+  public get fieldArrayModel() {
     return this[_getPropertyModel]('fieldArrayModel', ArrayModel, [false, IdEntityModel, [false]]) as ArrayModel<
       IdEntity,
       IdEntityModel
     >;
   }
 
-  get fieldMatrixNumber() {
+  public get fieldMatrixNumber() {
     return this[_getPropertyModel]('fieldMatrixNumber', ArrayModel, [
       false,
       ArrayModel,
@@ -147,7 +147,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
     ]) as ArrayModel<ReadonlyArray<number>, ArrayModel<number, NumberModel>>;
   }
 
-  get fieldAny() {
+  public get fieldAny() {
     return this[_getPropertyModel]('fieldAny', ObjectModel, [false]) as ObjectModel<any>;
   }
 }
@@ -158,17 +158,17 @@ export interface Employee extends IdEntity {
   colleagues?: Employee[];
 }
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
-  static createEmptyValue: () => Employee;
+  public static override createEmptyValue: () => Employee;
 
-  get fullName() {
+  public get fullName() {
     return this[_getPropertyModel]('fullName', StringModel, [false]) as StringModel;
   }
 
-  get supervisor(): EmployeeModel {
+  public get supervisor(): EmployeeModel {
     return this[_getPropertyModel]('supervisor', EmployeeModel, [true]);
   }
 
-  get colleagues() {
+  public get colleagues() {
     return this[_getPropertyModel]('colleagues', ArrayModel, [true, EmployeeModel, [false]]);
   }
 }
