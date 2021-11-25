@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename, dirname, posix } from 'path';
 import type { SourceFile, Statement } from 'typescript';
 import DependencyManager from './DependencyManager.js';
 import { createSourceFile } from './utils.js';
@@ -13,8 +13,9 @@ export default class BarrelProcessor {
   public process(): SourceFile {
     const { imports, exports } = this.#endpoints.reduce((acc, { fileName }) => {
       const specifier = basename(fileName, '.ts');
+      const path = `./${posix.join(dirname(fileName), `${specifier}.js`)}`;
 
-      const identifier = acc.imports.register(specifier, fileName);
+      const identifier = acc.imports.register(specifier, path);
       acc.exports.register(specifier, identifier);
 
       return acc;

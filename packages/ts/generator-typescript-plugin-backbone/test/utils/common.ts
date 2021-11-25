@@ -1,5 +1,5 @@
-import Generator from '@vaadin/generator-typescript/Generator.js';
-import type { PluginConstructor } from '@vaadin/generator-typescript/Plugin.js';
+import Generator from '@vaadin/generator-typescript-core/Generator.js';
+import type { PluginConstructor } from '@vaadin/generator-typescript-core/Plugin.js';
 import { readFile } from 'fs/promises';
 import Pino from 'pino';
 import { URL } from 'url';
