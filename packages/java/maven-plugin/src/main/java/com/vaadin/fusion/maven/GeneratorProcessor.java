@@ -3,7 +3,6 @@ package com.vaadin.fusion.maven;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -12,7 +11,6 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 final class GeneratorProcessor {
-    private static final Pattern jsonEscapePattern = Pattern.compile("[\r\n\b\f\t\"']");
     private static final String defaultOutputDir = "frontend/generated";
     private static final List<GeneratorConfiguration.Plugin> defaultPlugins = List
             .of(new GeneratorConfiguration.Plugin(
@@ -21,7 +19,7 @@ final class GeneratorProcessor {
     private final MavenProject project;
 
     public GeneratorProcessor(MavenProject project, Log logger) {
-        runner = new GeneratorShellRunner(List.of("npx", "tsgen"), logger);
+        runner = new GeneratorShellRunner(project.getBasedir(), logger);
         this.project = project;
     }
 
@@ -30,8 +28,7 @@ final class GeneratorProcessor {
     }
 
     public void useInput(@Nonnull String input) {
-        var result = jsonEscapePattern.matcher(input).replaceAll(match -> "\\\\" + match.group(0));
-        runner.add("'" + result + "'");
+        runner.add("'" + GeneratorShellRunner.prepareJSONForCLI(input) + "'");
     }
 
     public void useVerbose() {
@@ -52,7 +49,7 @@ final class GeneratorProcessor {
         var userDefinedOutputDirPath = Paths.get(outputDir);
         var outputDirPath = userDefinedOutputDirPath.isAbsolute()
                 ? userDefinedOutputDirPath
-                : Paths.get(project.getBasedir().getAbsolutePath(), outputDir);
+                : project.getBasedir().toPath().resolve(outputDir);
         runner.add("-o", outputDirPath.toString());
     }
 
