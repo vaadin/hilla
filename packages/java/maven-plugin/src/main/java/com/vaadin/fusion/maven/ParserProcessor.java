@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,9 +50,10 @@ final class ParserProcessor {
     public void useClassPath(@Nonnull ParserClassPathConfiguration classPath) {
         try {
             var result = classPath.isOverride() ? classPath.getValue()
-                    : Stream.concat(
-                            project.getCompileClasspathElements().stream(),
+                    : Stream.of(project.getCompileClasspathElements().stream(),
+                            project.getRuntimeClasspathElements().stream(),
                             Stream.of(classPath.getValue()))
+                            .flatMap(Function.identity())
                             .collect(Collectors.joining(";"));
 
             builder.classPath(result);
@@ -62,8 +64,11 @@ final class ParserProcessor {
 
     public void useClassPath() {
         try {
-            builder.classPath(
-                    String.join(";", project.getCompileClasspathElements()));
+            builder.classPath(Stream
+                    .of(project.getCompileClasspathElements().stream(),
+                            project.getRuntimeClasspathElements().stream())
+                    .flatMap(Function.identity())
+                    .collect(Collectors.joining(";")));
         } catch (DependencyResolutionRequiredException e) {
             throw new ParserException("Failed collecting class path", e);
         }
