@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -46,7 +47,8 @@ public final class Parser {
 
         var collector = new EntitiesCollector(result, logger);
 
-        logger.debug("Checking if the compiler is run with -parameters option enabled");
+        logger.debug(
+                "Checking if the compiler is run with -parameters option enabled");
         checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
 
         logger.debug("Executing parser plugins");
@@ -67,17 +69,22 @@ public final class Parser {
         private final List<RelativeClassInfo> entities;
 
         public EntitiesCollector(ScanResult result, Logger logger) {
-            logger.debug("Collecting project endpoints");
             endpoints = result
                     .getClassesWithAnnotation(
                             config.getEndpointAnnotationName())
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
+            logger.debug("Collected project endpoints: " + endpoints.stream()
+                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
+                    .collect(Collectors.joining(", ")));
 
-            logger.debug("Collecting project data entities");
             entities = endpoints.stream().flatMap(
                     cls -> cls.getInheritanceChain().getDependenciesStream())
                     .distinct().collect(Collectors.toList());
+
+            logger.debug("Collected project data entities: " + entities.stream()
+                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
+                    .collect(Collectors.joining(", ")));
 
             logger.debug("Collecting entities dependencies");
             // ATTENTION: This loop mutates the collection during processing!

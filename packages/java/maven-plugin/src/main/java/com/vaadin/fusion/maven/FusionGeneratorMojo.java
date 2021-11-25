@@ -23,8 +23,9 @@ public final class FusionGeneratorMojo extends AbstractMojo {
     private MavenProject project;
 
     public void execute() throws FusionGeneratorMojoException {
-        var openAPI = parseJavaCode();
-        generateTypeScriptCode(openAPI);
+        var result = parseJavaCode();
+        getLog().debug("OpenAPI: " + result);
+        generateTypeScriptCode(result);
     }
 
     private void generateTypeScriptCode(String openAPI)
