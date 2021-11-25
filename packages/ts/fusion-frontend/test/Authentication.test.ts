@@ -177,8 +177,24 @@ describe('Authentication', () => {
       verifySpringCsrfTokenIsCleared();
     });
 
-    it('should clear the JWT cookie on failed server logout', async () => {
+    it('should clear the JWT cookie on logout', async () => {
+      fetchMock.post(
+        '/logout',
+        {
+          body: happyCaseLogoutResponseText,
+          redirectUrl: '/logout?login',
+        },
+        { headers: requestHeaders }
+      );
+
       setCookie(jwtCookieName, 'mock value');
+      await logout();
+
+      expect(fetchMock.calls()).to.have.lengthOf(1);
+      expect(cookieExists(jwtCookieName)).to.be.false;
+    });
+
+    it('should clear the JWT cookie on failed server logout', async () => {
       const fakeError = new Error('unable to connect');
       fetchMock.post('/logout', () => {
         throw fakeError;
@@ -187,7 +203,14 @@ describe('Authentication', () => {
         throw fakeError;
       });
 
-      await logout();
+      setCookie(jwtCookieName, 'mock value');
+      let thrownError;
+      try {
+        await logout();
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).to.equal(fakeError);
       expect(cookieExists(jwtCookieName)).to.be.false;
     });
 

@@ -1,6 +1,6 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
-import { cookieExists, deleteCookie, removeTrailingSlashFromPath } from './CookieUtils.js';
+import { deleteCookie, removeTrailingSlashFromPath } from './CookieUtils.js';
 
 const jwtCookieName = 'jwt.headerAndPayload';
 
@@ -154,13 +154,10 @@ export async function logout(options?: LogoutOptions) {
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
-
-      if (cookieExists(jwtCookieName)) {
-        deleteJWTCookie();
-      } else {
-        throw error;
-      }
+      throw error;
     }
+  } finally {
+    deleteJWTCookie();
   }
 }
 
