@@ -3,6 +3,7 @@ import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 
 const $wnd = window as any;
+/* c8 ignore next 2 */
 $wnd.Vaadin = $wnd.Vaadin || {};
 $wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
 $wnd.Vaadin.registrations.push({

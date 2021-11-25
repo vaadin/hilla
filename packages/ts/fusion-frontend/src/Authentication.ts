@@ -1,5 +1,8 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import { deleteCookie, removeTrailingSlashFromPath } from './CookieUtils.js';
+
+const jwtCookieName = 'jwt.headerAndPayload';
 
 function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
@@ -45,6 +48,11 @@ async function doLogout(logoutUrl: string, headers: Record<string, string>) {
   }
 
   await updateCsrfTokensBasedOnResponse(response);
+}
+
+function deleteJWTCookie() {
+  const cookiePath = removeTrailingSlashFromPath(new URL(document.baseURI).pathname);
+  deleteCookie(jwtCookieName, { Path: cookiePath });
 }
 
 export interface LoginResult {
@@ -148,6 +156,8 @@ export async function logout(options?: LogoutOptions) {
       clearSpringCsrfMetaTags();
       throw error;
     }
+  } finally {
+    deleteJWTCookie();
   }
 }
 
