@@ -37,8 +37,13 @@ final class ParserProcessor {
     public String process() {
         try {
             logger.debug("Starting JVM Parser");
-            var api = new Parser(builder.finish()).execute();
-            return new OpenAPIPrinter().writeAsString(api);
+
+            var openAPI = new Parser(builder.finish()).execute();
+            var openAPIJSONString = new OpenAPIPrinter().writeAsString(openAPI);
+
+            logger.debug("OpenAPI (JSON): " + openAPIJSONString);
+
+            return openAPIJSONString;
         } catch (IOException e) {
             throw new ParserException(
                     "Failed processing OpenAPI generated from parsed Java code",
@@ -47,16 +52,21 @@ final class ParserProcessor {
     }
 
     public void useClassPath(@Nonnull ParserClassPathConfiguration classPath) {
-        builder.classPath(classPath.isOverride() ? classPath.getValue()
+        var value = classPath.getValue();
+        var delimiter = classPath.getDelimiter();
+
+        var userDefinedClassPathElements = List.of(value.split(delimiter));
+
+        builder.classPath(classPath.isOverride() ? userDefinedClassPathElements
                 : Stream.of(getDefaultMavenClassPathElementsStream(),
-                        Stream.of(classPath.getValue()))
+                        userDefinedClassPathElements.stream())
                         .flatMap(Function.identity()).distinct()
-                        .collect(Collectors.joining(";")));
+                        .collect(Collectors.toList()));
     }
 
     public void useClassPath() {
         builder.classPath(getDefaultMavenClassPathElementsStream()
-                .collect(Collectors.joining(";")));
+                .collect(Collectors.toList()));
     }
 
     public void useEndpointAnnotation() {

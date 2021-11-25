@@ -41,9 +41,11 @@ public final class Parser {
         logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config);
 
-        logger.debug("Scanning JVM classpath: " + config.getClassPath());
+        var classPathElements = config.getClassPathElements();
+        logger.debug("Scanning JVM classpath: "
+                + String.join(";", classPathElements));
         var result = new ClassGraph().enableAllInfo()
-                .overrideClasspath(config.getClassPath()).scan();
+                .overrideClasspath(classPathElements).scan();
 
         var collector = new EntitiesCollector(result, logger);
 
@@ -69,9 +71,6 @@ public final class Parser {
         private final List<RelativeClassInfo> entities;
 
         public EntitiesCollector(ScanResult result, Logger logger) {
-            logger.debug("Classes in the classpath: " + result.getAllClasses().stream()
-                    .map(ClassInfo::getName).collect(Collectors.joining(", ")));
-
             var endpointAnnotationName = config.getEndpointAnnotationName();
 
             logger.debug(

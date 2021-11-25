@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.plugins.backbone.simpletype;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
@@ -33,7 +34,7 @@ public class SimpleTypeTest {
     public void should_UseAppropriateSchema_When_SimpleTypesAreUsed()
         throws IOException, URISyntaxException {
         var config = new ParserConfig.Builder()
-            .classPath(targetDir.toString())
+            .classPath(Set.of(targetDir.toString()))
             .endpointAnnotation(Endpoint.class.getName())
             .addPlugin(BackbonePlugin.class.getName()).finish();
 

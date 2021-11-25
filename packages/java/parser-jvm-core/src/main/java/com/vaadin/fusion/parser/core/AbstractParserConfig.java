@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class AbstractParserConfig {
     @Nonnull
-    public abstract String getClassPath();
+    public abstract Set<String> getClassPathElements();
 
     @Nonnull
     public abstract String getEndpointAnnotationName();
@@ -30,7 +31,7 @@ public abstract class AbstractParserConfig {
             return false;
         }
 
-        return Objects.equals(getClassPath(), ((AbstractParserConfig) another).getClassPath())
+        return Objects.equals(getClassPathElements(), ((AbstractParserConfig) another).getClassPathElements())
             && Objects.equals(getEndpointAnnotationName(),
             ((AbstractParserConfig) another).getEndpointAnnotationName())
             && Objects.equals(getOpenAPI(), ((AbstractParserConfig) another).getOpenAPI())
@@ -39,6 +40,6 @@ public abstract class AbstractParserConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getClassPath(), getEndpointAnnotationName(), getOpenAPI(), getPlugins());
+        return Objects.hash(getClassPathElements(), getEndpointAnnotationName(), getOpenAPI(), getPlugins());
     }
 }

@@ -24,7 +24,6 @@ public final class FusionGeneratorMojo extends AbstractMojo {
 
     public void execute() throws FusionGeneratorMojoException {
         var result = parseJavaCode();
-        getLog().debug("OpenAPI: " + result);
         generateTypeScriptCode(result);
     }
 

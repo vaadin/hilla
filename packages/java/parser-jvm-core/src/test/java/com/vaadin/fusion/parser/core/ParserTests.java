@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,8 @@ public class ParserTests {
             getClass());
     private String basicPluginEndpointName;
     private String dependencyPluginEndpointName;
-    private Path targetDirPath;
+    private Path targetDir;
+    private Set<String> defaultClassPathElements;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
@@ -27,13 +29,14 @@ public class ParserTests {
         dependencyPluginEndpointName = com.vaadin.fusion.parser.core.dependency.Endpoint.class
                 .getName();
 
-        targetDirPath = resourceLoader.findTargetDirPath();
+        targetDir = resourceLoader.findTargetDirPath();
+        defaultClassPathElements = Set.of(targetDir.toString());
     }
 
     @Test
     public void should_RunBasicPlugin() {
         var parser = new Parser(
-                new ParserConfig.Builder().classPath(targetDirPath.toString())
+                new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(basicPluginEndpointName)
                         .addPlugin(BasicPlugin.class.getName()).finish());
 
@@ -52,7 +55,7 @@ public class ParserTests {
     @Test
     public void should_ResolveDependenciesCorrectly_When_ReceiveDependenciesInPlugin() {
         var parser = new Parser(
-                new ParserConfig.Builder().classPath(targetDirPath.toString())
+                new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 
@@ -72,7 +75,7 @@ public class ParserTests {
     @Test
     public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
         var parser = new Parser(
-                new ParserConfig.Builder().classPath(targetDirPath.toString())
+                new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 
@@ -91,7 +94,7 @@ public class ParserTests {
     @Test
     public void should_ResolveDependencyMembersCorrectly() {
         var parser = new Parser(
-                new ParserConfig.Builder().classPath(targetDirPath.toString())
+                new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
                         .addPlugin(DependencyPlugin.class.getName()).finish());
 

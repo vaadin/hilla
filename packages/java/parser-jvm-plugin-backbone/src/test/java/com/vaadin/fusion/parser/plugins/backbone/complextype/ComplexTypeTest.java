@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.plugins.backbone.complextype;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
@@ -32,7 +33,7 @@ public class ComplexTypeTest {
     public void should_CorrectlyHandleComplexTypes()
         throws IOException, URISyntaxException {
         var config = new ParserConfig.Builder()
-            .classPath(targetDir.toString())
+            .classPath(Set.of(targetDir.toString()))
             .endpointAnnotation(Endpoint.class.getName())
             .addPlugin(BackbonePlugin.class.getName()).finish();
 

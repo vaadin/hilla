@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +23,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig extends AbstractParserConfig {
-    private String classPath;
+    private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
     private Set<String> plugins = new LinkedHashSet<>();
@@ -32,8 +33,8 @@ public final class ParserConfig extends AbstractParserConfig {
 
     @Nonnull
     @Override
-    public String getClassPath() {
-        return classPath;
+    public Set<String> getClassPathElements() {
+        return classPathElements;
     }
 
     @Nonnull
@@ -91,12 +92,12 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder classPath(@Nonnull String classPath, boolean override) {
-            Objects.requireNonNull(classPath);
+        public Builder classPath(@Nonnull Collection<String> classPathElements, boolean override) {
+            Objects.requireNonNull(classPathElements);
 
             actions.add(config -> {
-                if (override || config.classPath == null) {
-                    config.classPath = classPath;
+                if (override || config.classPathElements == null) {
+                    config.classPathElements = new HashSet<>(classPathElements);
                 }
             });
 
@@ -104,8 +105,8 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder classPath(@Nonnull String classPath) {
-            return classPath(classPath, true);
+        public Builder classPath(@Nonnull Collection<String> classPathElements) {
+            return classPath(classPathElements, true);
         }
 
         @Nonnull
@@ -153,7 +154,7 @@ public final class ParserConfig extends AbstractParserConfig {
             logger.debug("Applying configuration changed defined by the user.");
             actions.forEach(action -> action.accept(config));
 
-            Objects.requireNonNull(config.classPath,
+            Objects.requireNonNull(config.classPathElements,
                     "[JVM Parser] classPath is not provided.");
             Objects.requireNonNull(config.endpointAnnotationName,
                     "[JVM Parser] endpointAnnotationName is not provided.");

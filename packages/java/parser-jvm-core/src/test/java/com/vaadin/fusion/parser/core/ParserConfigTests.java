@@ -27,6 +27,7 @@ public class ParserConfigTests {
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
     private Path targetDir;
+    private Set<String> defaultClassPathElements;
     private String defaultEndpointAnnotationName;
     private OpenAPI defaultOpenAPI;
     private ParserConfig.Builder defaultBuilder;
@@ -34,6 +35,7 @@ public class ParserConfigTests {
     @BeforeEach
     public void setup() throws URISyntaxException {
         targetDir = resourceLoader.findTargetDirPath();
+        defaultClassPathElements = Set.of(targetDir.toString());
         defaultEndpointAnnotationName = "com.vaadin.fusion.Endpoint";
         defaultOpenAPI = new OpenAPI()
                 .info(new Info().title("Vaadin Application").version("1.0.0"))
@@ -42,13 +44,13 @@ public class ParserConfigTests {
                                 .description("Vaadin Backend")))
                 .paths(new Paths());
         defaultBuilder = new ParserConfig.Builder()
-                .classPath(targetDir.toString())
+                .classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName);
     }
 
     @Test
     public void should_CreateConfigWithDefaultParameters() {
-        var expected = new TestParserConfig(targetDir.toString(),
+        var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
         var actual = defaultBuilder.finish();
 
@@ -71,9 +73,9 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowPreservingAlreadySetProperties() {
-        var actual = defaultBuilder.classPath("somepath", false)
+        var actual = defaultBuilder.classPath(List.of("somepath"), false)
                 .endpointAnnotation("com.example.Endpoint", false).finish();
-        var expected = new TestParserConfig(targetDir.toString(),
+        var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
 
         assertEquals(expected, actual);
@@ -85,7 +87,7 @@ public class ParserConfigTests {
         var barPlugin = "com.example.BarPlugin";
         var actual = defaultBuilder.addPlugin(fooPlugin).addPlugin(barPlugin)
                 .finish();
-        var expected = new TestParserConfig(targetDir.toString(),
+        var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI,
                 Set.of(fooPlugin, barPlugin));
 
@@ -96,7 +98,7 @@ public class ParserConfigTests {
     public void should_AllowAddingPluginsAsCollection() {
         var plugins = List.of("com.example.FooPlugin", "com.example.BarPlugin");
         var actual = defaultBuilder.plugins(plugins).finish();
-        var expected = new TestParserConfig(targetDir.toString(),
+        var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI,
                 new HashSet<>(plugins));
 
@@ -105,12 +107,13 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAdjustingOpenAPI() {
-        Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo().setTitle("My Application");
+        Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo()
+                .setTitle("My Application");
         var actual = defaultBuilder.adjustOpenAPI(adjuster).finish();
 
         adjuster.accept(defaultOpenAPI);
-        var expected = new TestParserConfig(targetDir.toString(),
-            defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+        var expected = new TestParserConfig(defaultClassPathElements,
+                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
 
         assertEquals(expected, actual);
     }
@@ -125,8 +128,8 @@ public class ParserConfigTests {
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
         assertThrows(NullPointerException.class,
-                () -> new ParserConfig.Builder().classPath(targetDir.toString())
-                        .finish(),
+                () -> new ParserConfig.Builder()
+                        .classPath(defaultClassPathElements).finish(),
                 "[JVM Parser] endpointAnnotationName is not provided.");
     }
 
@@ -138,21 +141,22 @@ public class ParserConfigTests {
         var actual = defaultBuilder.openAPISource(openAPISource, type).finish();
 
         var openAPI = type.getMapper().readValue(openAPISource, OpenAPI.class);
-        var expected = new TestParserConfig(targetDir.toString(),
+        var expected = new TestParserConfig(Set.of(targetDir.toString()),
                 defaultEndpointAnnotationName, openAPI, Set.of());
 
         assertEquals(expected, actual);
     }
 
     private static class TestParserConfig extends AbstractParserConfig {
-        private final String classPath;
+        private final Set<String> classPathElements;
         private final String endpointAnnotationName;
         private final OpenAPI openAPI;
         private final Set<String> plugins;
 
-        public TestParserConfig(String classPath, String endpointAnnotationName,
-                OpenAPI openAPI, Set<String> plugins) {
-            this.classPath = classPath;
+        public TestParserConfig(Set<String> classPathElements,
+                String endpointAnnotationName, OpenAPI openAPI,
+                Set<String> plugins) {
+            this.classPathElements = classPathElements;
             this.endpointAnnotationName = endpointAnnotationName;
             this.openAPI = openAPI;
             this.plugins = plugins;
@@ -160,8 +164,8 @@ public class ParserConfigTests {
 
         @Nonnull
         @Override
-        public String getClassPath() {
-            return classPath;
+        public Set<String> getClassPathElements() {
+            return classPathElements;
         }
 
         @Nonnull
