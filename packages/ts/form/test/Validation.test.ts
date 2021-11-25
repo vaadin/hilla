@@ -10,25 +10,33 @@ import { IdEntity, IdEntityModel, Order, OrderModel, TestEntity, TestModel } fro
 
 @customElement('order-view')
 class OrderView extends LitElement {
-  binder = new Binder(this, OrderModel);
+  public binder = new Binder(this, OrderModel);
 
-  @query('#submitting') submitting!: HTMLInputElement;
+  @query('#submitting')
+  public submitting!: HTMLInputElement;
 
-  @query('#notes') notes!: HTMLInputElement;
+  @query('#notes')
+  public notes!: HTMLInputElement;
 
-  @query('#fullName') fullName!: HTMLInputElement;
+  @query('#fullName')
+  public fullName!: HTMLInputElement;
 
-  @query('#nickName') nickName!: HTMLInputElement;
+  @query('#nickName')
+  public nickName!: HTMLInputElement;
 
-  @query('#add') add!: Element;
+  @query('#add')
+  public add!: Element;
 
-  @query('#description0') description!: HTMLInputElement;
+  @query('#description0')
+  public description!: HTMLInputElement;
 
-  @query('#price0') price!: HTMLInputElement;
+  @query('#price0')
+  public price!: HTMLInputElement;
 
-  @query('#priceError0') priceError!: HTMLOutputElement;
+  @query('#priceError0')
+  public priceError!: HTMLOutputElement;
 
-  static get styles() {
+  public static override get styles() {
     return css`
       input[invalid] {
         border: 2px solid red;
@@ -36,7 +44,7 @@ class OrderView extends LitElement {
     `;
   }
 
-  render() {
+  public override render() {
     const {
       notes,
       products,
@@ -59,7 +67,7 @@ class OrderView extends LitElement {
               .errors.map((error) => error.message)
               .join('\n')}
           </output>
-        </div>`
+        </div>`,
       )}
       <div id="submitting">${this.binder.submitting}</div>
     `;
@@ -282,12 +290,12 @@ describe('form/Validation', () => {
 
     it('should fail validation after adding an asynchronous validator to the model', async () => {
       class AsyncValidator implements Validator<Order> {
-        message = 'bar';
+        public message = 'bar';
 
-        validate = async () => {
+        public async validate() {
           await sleep(10);
           return false;
-        };
+        }
       }
       binder.addValidator(new AsyncValidator());
       return binder.validate().then((errors) => {

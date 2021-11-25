@@ -35,7 +35,7 @@ describe('Authentication', () => {
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
     expect(document.head.querySelector('meta[name="_csrf_header"]')!.getAttribute('content')).to.equal(
-      TEST_SPRING_CSRF_HEADER_NAME
+      TEST_SPRING_CSRF_HEADER_NAME,
     );
   }
 
@@ -74,7 +74,7 @@ describe('Authentication', () => {
           body: happyCaseLoginResponseText,
           headers: happyCaseResponseHeaders,
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
       const result = await login('valid-username', 'valid-password');
       const expectedResult: LoginResult = {
@@ -100,7 +100,7 @@ describe('Authentication', () => {
             'Spring-CSRF-token': 'some-new-spring-token',
           },
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
       await login('valid-username', 'valid-password');
       verifySpringCsrfToken('some-new-spring-token');
@@ -118,7 +118,7 @@ describe('Authentication', () => {
           // saved by the default request cache
           headers: { ...happyCaseResponseHeaders, 'Saved-url': '/protected-view' },
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
       const result = await login('valid-username', 'valid-password');
       const expectedResult: LoginResult = {
@@ -146,7 +146,7 @@ describe('Authentication', () => {
           body: happyCaseLogoutResponseText,
           redirectUrl: '/logout?login',
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(1);
@@ -160,7 +160,7 @@ describe('Authentication', () => {
         () => {
           throw fakeError;
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
       fetchMock.get('?nocache', {
         body: happyCaseLogoutResponseText,
@@ -184,7 +184,7 @@ describe('Authentication', () => {
           body: happyCaseLogoutResponseText,
           redirectUrl: '/logout?login',
         },
-        { headers: requestHeaders }
+        { headers: requestHeaders },
       );
 
       setCookie(jwtCookieName, 'mock value');
@@ -229,7 +229,7 @@ describe('Authentication', () => {
           body: happyCaseLogoutResponseText,
           redirectUrl: '/logout?login',
         },
-        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 }
+        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
@@ -252,7 +252,7 @@ describe('Authentication', () => {
         () => {
           throw fakeError;
         },
-        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 }
+        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
       );
 
       let thrownError;
@@ -286,7 +286,7 @@ describe('Authentication', () => {
           body: happyCaseLogoutResponseText,
           redirectUrl: '/logout?login',
         },
-        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 }
+        { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(3);
