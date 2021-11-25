@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.apache.maven.project.MavenProject;
 
-final class GeneratorConfiguration {
+public final class GeneratorConfiguration {
     private PluginList plugins;
     private String outputDir;
 

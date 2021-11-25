@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-final class ParserConfiguration {
+public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String openAPIPath;
