@@ -2,7 +2,6 @@ package com.vaadin.fusion;
 
 import static org.mockito.Mockito.mock;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.fusion.auth.CsrfChecker;
 import com.vaadin.fusion.auth.FusionAccessChecker;
