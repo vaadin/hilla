@@ -22,13 +22,12 @@ import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
 final class ParserProcessor {
+    private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
     private static final List<ParserConfiguration.Plugin> defaultPlugins = List
             .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
-    private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
-
     private final ParserConfig.Builder builder = new ParserConfig.Builder();
-    private final MavenProject project;
     private final Log logger;
+    private final MavenProject project;
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
@@ -48,30 +47,16 @@ final class ParserProcessor {
     }
 
     public void useClassPath(@Nonnull ParserClassPathConfiguration classPath) {
-        try {
-            var result = classPath.isOverride() ? classPath.getValue()
-                    : Stream.of(project.getCompileClasspathElements().stream(),
-                            project.getRuntimeClasspathElements().stream(),
-                            Stream.of(classPath.getValue()))
-                            .flatMap(Function.identity())
-                            .collect(Collectors.joining(";"));
-
-            builder.classPath(result);
-        } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException("Failed collecting class path", e);
-        }
+        builder.classPath(classPath.isOverride() ? classPath.getValue()
+                : Stream.of(getDefaultMavenClassPathElementsStream(),
+                        Stream.of(classPath.getValue()))
+                        .flatMap(Function.identity()).distinct()
+                        .collect(Collectors.joining(";")));
     }
 
     public void useClassPath() {
-        try {
-            builder.classPath(Stream
-                    .of(project.getCompileClasspathElements().stream(),
-                            project.getRuntimeClasspathElements().stream())
-                    .flatMap(Function.identity())
-                    .collect(Collectors.joining(";")));
-        } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException("Failed collecting class path", e);
-        }
+        builder.classPath(getDefaultMavenClassPathElementsStream()
+                .collect(Collectors.joining(";")));
     }
 
     public void useEndpointAnnotation() {
@@ -117,6 +102,17 @@ final class ParserProcessor {
 
     public void usePlugins() {
         builder.plugins(processPlugins(defaultPlugins.stream()));
+    }
+
+    private Stream<String> getDefaultMavenClassPathElementsStream() {
+        try {
+            return Stream
+                    .of(project.getCompileClasspathElements().stream(),
+                            project.getRuntimeClasspathElements().stream())
+                    .flatMap(Function.identity()).distinct();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new ParserException("Failed collecting Maven class path", e);
+        }
     }
 
     private Set<String> processPlugins(
