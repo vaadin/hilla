@@ -69,6 +69,9 @@ public final class Parser {
         private final List<RelativeClassInfo> entities;
 
         public EntitiesCollector(ScanResult result, Logger logger) {
+            logger.debug("Classes in the classpath: " + result.getAllClasses().stream()
+                    .map(ClassInfo::getName).collect(Collectors.joining(", ")));
+
             var endpointAnnotationName = config.getEndpointAnnotationName();
 
             logger.debug(
@@ -78,6 +81,7 @@ public final class Parser {
             endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
+
             logger.debug("Collected project endpoints: " + endpoints.stream()
                     .map(RelativeClassInfo::get).map(ClassInfo::getName)
                     .collect(Collectors.joining(", ")));
