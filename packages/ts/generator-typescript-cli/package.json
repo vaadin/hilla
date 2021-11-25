@@ -54,6 +54,7 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
+    "@vaadin/generator-typescript-core": "^0.1.0",
     "chai": "^4.3.4",
     "concurrently": "^6.3.0",
     "copyfiles": "^2.4.1",
