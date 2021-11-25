@@ -69,9 +69,13 @@ public final class Parser {
         private final List<RelativeClassInfo> entities;
 
         public EntitiesCollector(ScanResult result, Logger logger) {
-            endpoints = result
-                    .getClassesWithAnnotation(
-                            config.getEndpointAnnotationName())
+            var endpointAnnotationName = config.getEndpointAnnotationName();
+
+            logger.debug(
+                    "Collecting project endpoints with the endpoint annotation: "
+                            + endpointAnnotationName);
+
+            endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
                     .stream().map(RelativeClassInfo::new)
                     .collect(Collectors.toList());
             logger.debug("Collected project endpoints: " + endpoints.stream()
@@ -82,11 +86,6 @@ public final class Parser {
                     cls -> cls.getInheritanceChain().getDependenciesStream())
                     .distinct().collect(Collectors.toList());
 
-            logger.debug("Collected project data entities: " + entities.stream()
-                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
-                    .collect(Collectors.joining(", ")));
-
-            logger.debug("Collecting entities dependencies");
             // ATTENTION: This loop mutates the collection during processing!
             // It is necessary to collect all endpoint dependencies +
             // dependencies of dependencies.
@@ -98,6 +97,10 @@ public final class Parser {
                         .filter(e -> !entities.contains(e))
                         .forEach(entities::add);
             }
+
+            logger.debug("Collected project data entities: " + entities.stream()
+                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
+                    .collect(Collectors.joining(", ")));
         }
 
         public List<RelativeClassInfo> getEndpoints() {
