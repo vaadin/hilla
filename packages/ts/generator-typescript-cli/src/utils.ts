@@ -1,5 +1,5 @@
 import Pino from 'pino';
-import type IO from './IO.js';
+import type GeneratorIO from './GeneratorIO.js';
 
 export type LoggerOptions = Readonly<{
   verbose?: boolean;
@@ -18,7 +18,7 @@ export function createLogger({ verbose }: LoggerOptions) {
   });
 }
 
-export async function processInput(raw: string, io: IO): Promise<string> {
+export async function processInput(raw: string, io: GeneratorIO): Promise<string> {
   let result = raw;
 
   if (result.startsWith("'") || result.startsWith('"')) {

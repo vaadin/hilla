@@ -1,6 +1,6 @@
 import Generator from '@vaadin/generator-typescript-core/Generator.js';
 import meow from 'meow';
-import IO from './IO.js';
+import GeneratorIO from './GeneratorIO.js';
 import { createLogger, processInput } from './utils.js';
 
 const {
@@ -42,9 +42,10 @@ Options:
 
 const logger = createLogger({ verbose });
 
-const io = new IO(outputDir, logger);
+const io = new GeneratorIO(outputDir, logger);
 
-const generator = new Generator(await io.load(Array.from(new Set(plugins), (path) => io.resolve(path))), logger);
+const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (path) => io.loadPlugin(io.resolve(path))));
+const generator = new Generator(resolvedPlugins, logger);
 
 const files = await generator.process(await processInput(input, io));
-await io.write(files);
+await Promise.all(files.map((file) => io.write(file)));

@@ -10,10 +10,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Fusion plugin for Maven. Handles loading the parser and its
- * pluginSpecifications.
+ * Fusion plugin for Maven. Handles parsing Java bytecode and generating
+ * TypeScript code from it.
  */
-@Mojo(name = "generator", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public final class FusionGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();

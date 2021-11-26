@@ -133,8 +133,7 @@ export function convertReferenceSchemaToSpecifier({ $ref }: ReferenceSchema): st
   return simplifyFullyQualifiedName($ref);
 }
 
-// The length of `#/components/schemas/` string
-const COMPONENTS_SCHEMAS_REF_LENGTH = 21;
+const COMPONENTS_SCHEMAS_REF_LENGTH = '#/components/schemas/'.length;
 
 export function convertReferenceSchemaToPath({ $ref }: ReferenceSchema): string {
   return convertFullyQualifiedNameToRelativePath($ref.substring(COMPONENTS_SCHEMAS_REF_LENGTH));
