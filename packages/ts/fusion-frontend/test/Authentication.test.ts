@@ -8,37 +8,40 @@ import {
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_TOKEN_VALUE,
   TEST_VAADIN_CSRF_TOKEN_VALUE,
-  TET_SPRING_CSRF_HEADER_NAME,
+  TEST_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test.js';
+import { cookieExists, deleteCookie, setCookie } from '../src/CookieUtils.js';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
 
+const jwtCookieName = 'jwt.headerAndPayload';
+
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
   const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
-  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TET_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
+  const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TEST_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
     'Vaadin-CSRF': vaadinCsrfToken,
     Result: 'success',
     'Default-url': '/',
-    'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
+    'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
     'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
   };
 
   function verifySpringCsrfToken(token: string) {
     expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
     expect(document.head.querySelector('meta[name="_csrf_header"]')!.getAttribute('content')).to.equal(
-      TET_SPRING_CSRF_HEADER_NAME,
+      TEST_SPRING_CSRF_HEADER_NAME,
     );
   }
 
   beforeEach(() => {
     setupSpringCsrfMetaTags();
-    requestHeaders[TET_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
+    requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
   });
   afterEach(() => {
     // @ts-ignore
@@ -93,7 +96,7 @@ describe('Authentication', () => {
           headers: {
             ...happyCaseResponseHeaders,
             'Vaadin-CSRF': 'some-new-token',
-            'Spring-CSRF-header': TET_SPRING_CSRF_HEADER_NAME,
+            'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
             'Spring-CSRF-token': 'some-new-spring-token',
           },
         },
@@ -131,7 +134,10 @@ describe('Authentication', () => {
   });
 
   describe('logout', () => {
-    afterEach(() => fetchMock.restore());
+    afterEach(() => {
+      fetchMock.restore();
+      deleteCookie(jwtCookieName);
+    });
 
     it('should set the csrf token on logout', async () => {
       fetchMock.post(
@@ -144,6 +150,7 @@ describe('Authentication', () => {
       );
       await logout();
       expect(fetchMock.calls()).to.have.lengthOf(1);
+      verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
     });
 
     it('should clear the csrf tokens on failed server logout', async () => {
@@ -158,13 +165,53 @@ describe('Authentication', () => {
       fetchMock.get('?nocache', {
         body: happyCaseLogoutResponseText,
       });
+
+      let thrownError;
       try {
         await logout();
       } catch (err) {
-        expect(err).to.equal(fakeError);
+        thrownError = err;
       }
+      expect(thrownError).to.equal(fakeError);
       expect(fetchMock.calls()).to.have.lengthOf(3);
       verifySpringCsrfTokenIsCleared();
+    });
+
+    it('should clear the JWT cookie on logout', async () => {
+      fetchMock.post(
+        '/logout',
+        {
+          body: happyCaseLogoutResponseText,
+          redirectUrl: '/logout?login',
+        },
+        { headers: requestHeaders },
+      );
+
+      setCookie(jwtCookieName, 'mock value');
+      await logout();
+
+      expect(fetchMock.calls()).to.have.lengthOf(1);
+      expect(cookieExists(jwtCookieName)).to.be.false;
+    });
+
+    it('should clear the JWT cookie on failed server logout', async () => {
+      const fakeError = new Error('unable to connect');
+      fetchMock.post('/logout', () => {
+        throw fakeError;
+      });
+      fetchMock.get('?nocache', () => {
+        throw fakeError;
+      });
+
+      setCookie(jwtCookieName, 'mock value');
+      let thrownError;
+      try {
+        await logout();
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).to.equal(fakeError);
+      expect(cookieExists(jwtCookieName)).to.be.false;
     });
 
     // when started the app offline, the spring csrf meta tags are not available
@@ -208,11 +255,13 @@ describe('Authentication', () => {
         { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
       );
 
+      let thrownError;
       try {
         await logout();
       } catch (err) {
-        expect(err).to.equal(fakeError);
+        thrownError = err;
       }
+      expect(thrownError).to.equal(fakeError);
       expect(fetchMock.calls()).to.have.lengthOf(3);
 
       setupSpringCsrfMetaTags();
@@ -225,7 +274,7 @@ describe('Authentication', () => {
       setupSpringCsrfMetaTags(expiredSpringCsrfToken);
 
       const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
-      headersWithExpiredSpringCsrfToken[TET_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
+      headersWithExpiredSpringCsrfToken[TEST_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
 
       fetchMock.post('/logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
       fetchMock.get('?nocache', {
