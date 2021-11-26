@@ -1,6 +1,7 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "experimentalDecorators": true,
     "importHelpers": true,
     "outDir": ".",
     "rootDir": "src",
