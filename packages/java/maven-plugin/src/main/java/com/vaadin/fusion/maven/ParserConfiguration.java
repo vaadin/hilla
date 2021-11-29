@@ -49,6 +49,11 @@ public final class ParserConfiguration {
         public String getName() {
             return name;
         }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
     }
 
     public static class PluginList {

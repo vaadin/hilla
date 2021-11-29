@@ -9,8 +9,8 @@ import java.util.Optional;
 import org.apache.maven.project.MavenProject;
 
 public final class GeneratorConfiguration {
-    private PluginList plugins;
     private String outputDir;
+    private PluginList plugins;
 
     public Optional<String> getOutputDir() {
         return Optional.ofNullable(outputDir);
@@ -42,6 +42,11 @@ public final class GeneratorConfiguration {
 
         public String getName() {
             return name;
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
         }
 
         public Path resolveWithin(MavenProject project) {
