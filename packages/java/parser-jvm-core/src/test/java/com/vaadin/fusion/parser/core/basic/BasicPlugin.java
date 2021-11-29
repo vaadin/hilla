@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.core.basic;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,8 +21,8 @@ public class BasicPlugin implements Plugin {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
     @Override
-    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
-            @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
+    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+                        @Nonnull Collection<RelativeClassInfo> entities, SharedStorage storage) {
         storage.getPluginStorage().put(STORAGE_KEY,
                 endpoints.stream().flatMap(endpoint -> Stream.of(
                         endpoint.getFieldsStream().map(RelativeFieldInfo::get)

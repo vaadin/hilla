@@ -1,7 +1,9 @@
 package com.vaadin.fusion.parser.core;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -26,7 +28,7 @@ public final class Parser {
     }
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
-            List<RelativeClassInfo> endpoints) {
+            Collection<RelativeClassInfo> endpoints) {
         endpoints.stream().flatMap(endpoint -> endpoint.getMethods().stream())
                 .flatMap(RelativeMethodInfo::getParametersStream).findFirst()
                 .ifPresent((parameter) -> {
@@ -67,8 +69,8 @@ public final class Parser {
     }
 
     private class EntitiesCollector {
-        private final List<RelativeClassInfo> endpoints;
-        private final List<RelativeClassInfo> entities;
+        private final Set<RelativeClassInfo> endpoints;
+        private final Set<RelativeClassInfo> entities;
 
         public EntitiesCollector(ScanResult result, Logger logger) {
             var endpointAnnotationName = config.getEndpointAnnotationName();
@@ -79,7 +81,7 @@ public final class Parser {
 
             endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
                     .stream().map(RelativeClassInfo::new)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             logger.debug("Collected project endpoints: " + endpoints.stream()
                     .map(RelativeClassInfo::get).map(ClassInfo::getName)
@@ -87,18 +89,14 @@ public final class Parser {
 
             entities = endpoints.stream().flatMap(
                     cls -> cls.getInheritanceChain().getDependenciesStream())
-                    .distinct().collect(Collectors.toList());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             // ATTENTION: This loop mutates the collection during processing!
             // It is necessary to collect all endpoint dependencies +
             // dependencies of dependencies.
             // Be careful changing it: the endless loop could happen.
-            for (var i = 0; i < entities.size(); i++) {
-                var entity = entities.get(i);
-
-                entity.getDependenciesStream()
-                        .filter(e -> !entities.contains(e))
-                        .forEach(entities::add);
+            for (var entity : entities) {
+                entity.getDependenciesStream().forEach(entities::add);
             }
 
             logger.debug("Collected project data entities: " + entities.stream()
@@ -106,11 +104,11 @@ public final class Parser {
                     .collect(Collectors.joining(", ")));
         }
 
-        public List<RelativeClassInfo> getEndpoints() {
+        public Collection<RelativeClassInfo> getEndpoints() {
             return endpoints;
         }
 
-        public List<RelativeClassInfo> getEntities() {
+        public Collection<RelativeClassInfo> getEntities() {
             return entities;
         }
     }

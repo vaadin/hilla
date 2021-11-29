@@ -1,11 +1,11 @@
 package com.vaadin.fusion.parser.core;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
 public interface Plugin {
-    void execute(@Nonnull List<RelativeClassInfo> endpoints,
-            @Nonnull List<RelativeClassInfo> entities,
+    void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage);
 }

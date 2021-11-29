@@ -1,6 +1,7 @@
 package com.vaadin.fusion.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,8 +24,8 @@ final class PluginManager {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public void execute(List<RelativeClassInfo> endpoints,
-                        List<RelativeClassInfo> entities, SharedStorage storage) {
+    public void execute(Collection<RelativeClassInfo> endpoints,
+                        Collection<RelativeClassInfo> entities, SharedStorage storage) {
         for (var plugin : plugins) {
             logger.debug("Executing plugin " + plugin.getClass().getName());
             plugin.execute(endpoints, entities, storage);

@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core.dependency;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,8 +24,9 @@ public class DependencyPlugin implements Plugin {
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
 
     @Override
-    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
-            @Nonnull List<RelativeClassInfo> entities, SharedStorage storage) {
+    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities,
+            SharedStorage storage) {
         var collector = new DependencyCollector(endpoints, entities);
 
         storage.getPluginStorage().put(ALL_DEPS_STORAGE_KEY,
@@ -38,11 +40,11 @@ public class DependencyPlugin implements Plugin {
     }
 
     private static class DependencyCollector {
-        private final List<RelativeClassInfo> endpoints;
-        private final List<RelativeClassInfo> entities;
+        private final Collection<RelativeClassInfo> endpoints;
+        private final Collection<RelativeClassInfo> entities;
 
-        public DependencyCollector(List<RelativeClassInfo> endpoints,
-                List<RelativeClassInfo> entities) {
+        public DependencyCollector(Collection<RelativeClassInfo> endpoints,
+                Collection<RelativeClassInfo> entities) {
             this.endpoints = endpoints;
             this.entities = entities;
         }
