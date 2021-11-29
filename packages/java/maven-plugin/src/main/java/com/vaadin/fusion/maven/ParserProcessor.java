@@ -3,10 +3,10 @@ package com.vaadin.fusion.maven;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,19 +22,79 @@ import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
 final class ParserProcessor {
-    private static final String defaultAnnotationName = "com.vaadin.fusion.Endpoint";
-    private static final List<ParserConfiguration.Plugin> defaultPlugins = List
-            .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
-    private final ParserConfig.Builder builder = new ParserConfig.Builder();
     private final Log logger;
     private final MavenProject project;
+    private Set<String> classPath;
+    private String endpointAnnotationName = "com.vaadin.fusion.Endpoint";
+    private String openAPIPath;
+    private Set<ParserConfiguration.Plugin> plugins = Set
+            .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
         this.logger = logger;
+
+        try {
+            classPath = Stream
+                    .of(project.getCompileClasspathElements(),
+                            project.getRuntimeClasspathElements())
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+        } catch (DependencyResolutionRequiredException e) {
+            throw new ParserException("Failed collecting Maven class path", e);
+        }
+    }
+
+    public ParserProcessor classPath(
+            @Nonnull ParserClassPathConfiguration classPath) {
+        var value = Objects.requireNonNull(classPath).getValue();
+        var delimiter = classPath.getDelimiter();
+
+        var userDefinedClassPathElements = Set.of(value.split(delimiter));
+
+        this.classPath = classPath.isOverride() ? userDefinedClassPathElements
+                : Stream.of(this.classPath, userDefinedClassPathElements)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet());
+
+        return this;
+    }
+
+    public ParserProcessor endpointAnnotation(
+            @Nonnull String endpointAnnotationName) {
+        this.endpointAnnotationName = Objects
+                .requireNonNull(endpointAnnotationName);
+        return this;
+    }
+
+    public ParserProcessor openAPIBase(@Nonnull String openAPIPath) {
+        this.openAPIPath = Objects.requireNonNull(openAPIPath);
+        return this;
+    }
+
+    public ParserProcessor plugins(
+            @Nonnull ParserConfiguration.PluginList plugins) {
+        var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
+
+        if (!plugins.isDisableAllDefaults()) {
+            pluginStream = Stream.concat(
+                    this.plugins.stream().filter(
+                            plugin -> !plugins.getDisable().contains(plugin)),
+                    pluginStream);
+        }
+
+        this.plugins = pluginStream
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return this;
     }
 
     public String process() {
+        var builder = new ParserConfig.Builder().classPath(classPath)
+                .endpointAnnotation(endpointAnnotationName);
+
+        preparePlugins(builder);
+        prepareOpenAPIBase(builder);
+
         try {
             logger.debug("Starting JVM Parser");
 
@@ -51,33 +111,11 @@ final class ParserProcessor {
         }
     }
 
-    public void useClassPath(@Nonnull ParserClassPathConfiguration classPath) {
-        var value = classPath.getValue();
-        var delimiter = classPath.getDelimiter();
+    private void prepareOpenAPIBase(ParserConfig.Builder builder) {
+        if (openAPIPath == null) {
+            return;
+        }
 
-        var userDefinedClassPathElements = List.of(value.split(delimiter));
-
-        builder.classPath(classPath.isOverride() ? userDefinedClassPathElements
-                : Stream.of(getDefaultMavenClassPathElementsStream(),
-                        userDefinedClassPathElements.stream())
-                        .flatMap(Function.identity()).distinct()
-                        .collect(Collectors.toList()));
-    }
-
-    public void useClassPath() {
-        builder.classPath(getDefaultMavenClassPathElementsStream()
-                .collect(Collectors.toList()));
-    }
-
-    public void useEndpointAnnotation() {
-        builder.endpointAnnotation(defaultAnnotationName);
-    }
-
-    public void useEndpointAnnotation(@Nonnull String endpointAnnotation) {
-        builder.endpointAnnotation(endpointAnnotation);
-    }
-
-    public void useOpenAPIBase(@Nonnull String openAPIPath) {
         try {
             var path = Paths.get(project.getBasedir().getAbsolutePath(),
                     openAPIPath);
@@ -97,37 +135,10 @@ final class ParserProcessor {
         }
     }
 
-    public void usePlugins(@Nonnull ParserConfiguration.PluginList plugins) {
-        var pluginStream = plugins.getUse().stream();
-
-        if (!plugins.isDisableAllDefaults()) {
-            pluginStream = Stream.concat(
-                    defaultPlugins.stream().filter(
-                            plugin -> !plugins.getDisable().contains(plugin)),
-                    pluginStream);
-        }
-
-        builder.plugins(processPlugins(pluginStream));
-    }
-
-    public void usePlugins() {
-        builder.plugins(processPlugins(defaultPlugins.stream()));
-    }
-
-    private Stream<String> getDefaultMavenClassPathElementsStream() {
-        try {
-            return Stream
-                    .of(project.getCompileClasspathElements().stream(),
-                            project.getRuntimeClasspathElements().stream())
-                    .flatMap(Function.identity()).distinct();
-        } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException("Failed collecting Maven class path", e);
-        }
-    }
-
-    private Set<String> processPlugins(
-            Stream<ParserConfiguration.Plugin> stream) {
-        return stream.map(ParserConfiguration.Plugin::getName)
+    private void preparePlugins(ParserConfig.Builder builder) {
+        var result = plugins.stream().map(ParserConfiguration.Plugin::getName)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        builder.plugins(result);
     }
 }

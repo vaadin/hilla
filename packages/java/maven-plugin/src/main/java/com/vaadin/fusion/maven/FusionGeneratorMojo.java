@@ -31,14 +31,11 @@ public final class FusionGeneratorMojo extends AbstractMojo {
             throws FusionGeneratorMojoException {
         var logger = getLog();
         try {
-            var executor = new GeneratorProcessor(project, logger);
+            var executor = new GeneratorProcessor(project, logger)
+                    .input(openAPI).verbose(logger.isDebugEnabled());
 
-            executor.useInput(openAPI);
-            generator.getOutputDir().ifPresentOrElse(executor::useOutputDir,
-                    executor::useOutputDir);
-            generator.getPlugins().ifPresentOrElse(executor::usePlugins,
-                    executor::usePlugins);
-            executor.useVerbose(logger.isDebugEnabled());
+            generator.getOutputDir().ifPresent(executor::outputDir);
+            generator.getPlugins().ifPresent(executor::plugins);
 
             executor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
@@ -51,14 +48,10 @@ public final class FusionGeneratorMojo extends AbstractMojo {
         try {
             var executor = new ParserProcessor(project, getLog());
 
-            parser.getClassPath().ifPresentOrElse(executor::useClassPath,
-                    executor::useClassPath);
-            parser.getEndpointAnnotation().ifPresentOrElse(
-                    executor::useEndpointAnnotation,
-                    executor::useEndpointAnnotation);
-            parser.getOpenAPIPath().ifPresent(executor::useOpenAPIBase);
-            parser.getPlugins().ifPresentOrElse(executor::usePlugins,
-                    executor::usePlugins);
+            parser.getClassPath().ifPresent(executor::classPath);
+            parser.getEndpointAnnotation().ifPresent(executor::endpointAnnotation);
+            parser.getPlugins().ifPresent(executor::plugins);
+            parser.getOpenAPIPath().ifPresent(executor::openAPIBase);
 
             return executor.process();
         } catch (ParserException e) {
