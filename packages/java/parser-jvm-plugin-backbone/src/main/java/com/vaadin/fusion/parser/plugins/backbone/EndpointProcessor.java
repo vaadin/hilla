@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 
 final class EndpointProcessor extends Processor {
-    public EndpointProcessor(@Nonnull List<RelativeClassInfo> classes,
+    public EndpointProcessor(@Nonnull Collection<RelativeClassInfo> classes,
             @Nonnull OpenAPI model) {
         super(classes, model);
     }

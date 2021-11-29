@@ -1,7 +1,7 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Collection;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -11,8 +11,8 @@ import com.vaadin.fusion.parser.core.SharedStorage;
 
 public final class BackbonePlugin implements Plugin {
     @Override
-    public void execute(@Nonnull List<RelativeClassInfo> endpoints,
-            @Nonnull List<RelativeClassInfo> entities,
+    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
         OpenAPI model = storage.getOpenAPI();
 

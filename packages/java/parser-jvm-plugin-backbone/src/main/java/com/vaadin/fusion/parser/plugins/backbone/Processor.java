@@ -1,17 +1,18 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Collection;
 
-import io.swagger.v3.oas.models.OpenAPI;
+import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 
+import io.swagger.v3.oas.models.OpenAPI;
+
 abstract class Processor {
-    protected final List<RelativeClassInfo> classes;
+    protected final Collection<RelativeClassInfo> classes;
     protected final OpenAPI model;
 
-    public Processor(@Nonnull List<RelativeClassInfo> classes,
+    public Processor(@Nonnull Collection<RelativeClassInfo> classes,
             @Nonnull OpenAPI model) {
         this.classes = classes;
         this.model = model;

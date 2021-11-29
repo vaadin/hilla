@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.plugins.backbone;
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ final class EntityProcessor extends Processor {
         return new String(c);
     }
 
-    public EntityProcessor(@Nonnull List<RelativeClassInfo> classes,
+    public EntityProcessor(@Nonnull Collection<RelativeClassInfo> classes,
             @Nonnull OpenAPI model) {
         super(classes, model);
     }
