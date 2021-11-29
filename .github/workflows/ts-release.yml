@@ -1,4 +1,4 @@
-name: Frontend Release
+name: TypeScript Release
 
 on:
   release:

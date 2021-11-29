@@ -1,10 +1,10 @@
-name: Frontend CI
+name: TypeScript CI
 
 on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/frontend.yml'
+      - '.github/workflows/ts.yml'
       - 'packages/ts/**/*'
       - 'scripts/**/*'
       - '.eslintignore'
@@ -19,7 +19,7 @@ on:
       - 'web-test-runner.config.js'
   pull_request:
     paths:
-      - '.github/workflows/frontend.yml'
+      - '.github/workflows/ts.yml'
       - 'packages/ts/**/*'
       - 'scripts/**/*'
       - '.eslintignore'
