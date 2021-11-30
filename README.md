@@ -37,5 +37,5 @@ $ npm test
 
 To work with this project as a developer, you need the following versions of `node` and `npm`:
 
-- **NodeJS**: `>= 16.13.0` (native support for ES Modules and NodeJS execution hooks of the newest hooks),
+- **NodeJS**: `>= 16.13.0` (native support for ES Modules and NodeJS execution of the newest hooks),
 - **npm**: `^7` (`package-lock.json` is of version 2; also, `lerna` is unable to bootstrap this project correctly with lower `npm`)

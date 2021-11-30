@@ -1,0 +1,1 @@
+# Fusion TypeScript Generator

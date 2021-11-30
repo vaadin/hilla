@@ -1,0 +1,13 @@
+{
+  "info": {
+    "title": "My Cool Application",
+    "version": "2.5.9-SNAPSHOT"
+  },
+  "servers": [
+    {
+      "url": "https://app.cool.my/connect",
+      "description": "My Cool Backend"
+    }
+  ],
+  "paths": {}
+}

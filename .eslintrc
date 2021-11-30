@@ -6,7 +6,6 @@
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/explicit-member-accessibility": "error",
     // https://github.com/import-js/eslint-plugin-import/issues/2170#issuecomment-889657579
     "import/no-unresolved": "off",
     "max-classes-per-file": "off",
@@ -26,7 +25,7 @@
         "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
       }
     ],
-
+    "lines-between-class-members": "off",
     "no-unused-expressions": "off",
     "chai-friendly/no-unused-expressions": "error",
     "lit/quoted-expressions": "off" // Needs to be off for element expressions, but would be nice to have on for other kind of expressions

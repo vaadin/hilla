@@ -1,0 +1,83 @@
+{
+  "name": "@vaadin/generator-typescript-core",
+  "version": "0.1.0",
+  "description": "A Fusion tool to generate TypeScript code from the OpenAPI document",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">= 16.13"
+  },
+  "scripts": {
+    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "build": "concurrently npm:build:*",
+    "build:transpile": "tsc --isolatedModules",
+    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./Generator.js": {
+      "default": "./Generator.js"
+    },
+    "./GeneratorException.js": {
+      "default": "./GeneratorException.js"
+    },
+    "./index.js": {
+      "default": "./index.js"
+    },
+    "./Plugin.js": {
+      "default": "./Plugin.js"
+    },
+    "./Schema.js": {
+      "default": "./Schema.js"
+    },
+    "./utils.js": {
+      "default": "./utils.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/fusion.git",
+    "directory": "packages/ts/generator-typescript-core"
+  },
+  "keywords": [
+    "fusion",
+    "typescript",
+    "generator"
+  ],
+  "author": "Vaadin Ltd.",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/fusion/issues"
+  },
+  "homepage": "https://vaadin.com/fusion",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.0.3",
+    "meow": "^10.1.1",
+    "openapi-types": "^9.3.0",
+    "pino": "^7.0.5",
+    "pino-pretty": "^7.1.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.0-beta"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.1",
+    "@types/sinon": "^10.0.6",
+    "@types/sinon-chai": "^3.2.5",
+    "chai": "^4.3.4",
+    "concurrently": "^6.3.0",
+    "copyfiles": "^2.4.1",
+    "mocha": "^9.1.3",
+    "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
+    "type-fest": "^2.5.1"
+  }
+}

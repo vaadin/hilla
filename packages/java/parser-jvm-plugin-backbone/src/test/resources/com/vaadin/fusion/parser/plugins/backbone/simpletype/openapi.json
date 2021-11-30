@@ -1,0 +1,416 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Vaadin Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Vaadin Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "SimpleTypeEndpoint"
+    }
+  ],
+  "paths" : {
+    "/SimpleTypeEndpoint/getBoolean" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getBoolean_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getBooleanWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getBooleanWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getByte" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getByte_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getByteWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getByteWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getShort" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getShort_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getShortWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getShortWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getInteger" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getInteger_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getIntegerWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getIntegerWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getLong" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getLong_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getLongWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getLongWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int64",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getFloat" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getFloat_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "number",
+                  "format" : "float",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getFloatWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getFloatWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "number",
+                  "format" : "float",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getDouble" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getDouble_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getDoubleWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getDoubleWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getChar" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getChar_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "nullable" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getCharWrapper" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getCharWrapper_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getString" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getString_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getArray" : {
+      "post" : {
+        "tags" : [
+          "SimpleTypeEndpoint"
+        ],
+        "operationId" : "SimpleTypeEndpoint_getArray_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "nullable" : true,
+                  "items" : {
+                    "type" : "integer",
+                    "format" : "int32",
+                    "nullable" : false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : { }
+}
