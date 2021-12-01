@@ -10,6 +10,7 @@ on:
       - '.eslintignore'
       - '.eslintrc'
       - '.gitignore'
+      - '.eslintrc'
       - '.prettierignore'
       - '.prettierrc'
       - 'lerna.json'
