@@ -1,7 +1,8 @@
 import Generator from '@vaadin/generator-typescript-core/Generator.js';
+import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
 import meow from 'meow';
 import GeneratorIO from './GeneratorIO.js';
-import { createLogger, processInput } from './utils.js';
+import { processInput } from './utils.js';
 
 const {
   input: [input],
