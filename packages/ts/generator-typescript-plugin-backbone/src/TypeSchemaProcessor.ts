@@ -19,7 +19,7 @@ import {
   ReferenceSchema,
   Schema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from './DependencyManager.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -52,7 +52,7 @@ function unwrapPossiblyNullableSchema(schema: Schema): NonComposedSchema {
 }
 
 export default class TypeSchemaProcessor {
-  public ['constructor']: typeof TypeSchemaProcessor;
+  public declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
 
@@ -112,8 +112,8 @@ export default class TypeSchemaProcessor {
     const path = convertReferenceSchemaToPath(schema);
 
     const identifier =
-      this.#dependencies.imports.getIdentifier(specifier, path) ??
-      this.#dependencies.imports.register(specifier, path, true);
+      this.#dependencies.imports.default.getIdentifier(path) ??
+      this.#dependencies.imports.default.add(path, specifier, true);
 
     return ts.factory.createTypeReferenceNode(identifier);
   }

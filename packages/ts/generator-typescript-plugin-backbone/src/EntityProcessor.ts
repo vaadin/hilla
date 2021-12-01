@@ -1,3 +1,5 @@
+import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
 import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
@@ -17,10 +19,8 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@vaadin/generator-typescript-core/utils.js';
-import DependencyManager from './DependencyManager.js';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
-import { createSourceFile } from './utils.js';
 
 const exportDefaultModifiers = [
   ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
@@ -45,19 +45,16 @@ export class EntityProcessor {
 
   public process(): SourceFile {
     this.#context.logger.debug(`Processing entity: ${this.#name}`);
+
     const declaration = isEnumSchema(this.#component)
       ? this.#processEnum(this.#component)
       : this.#processExtendedClass(this.#component);
 
+    const statements = declaration ? [declaration] : [];
+
     const { imports, exports } = this.#dependencies;
 
-    const importStatements = imports.toTS();
-    const exportStatement = exports.toTS();
-
-    return createSourceFile(
-      [...importStatements, declaration, exportStatement].filter(Boolean) as readonly Statement[],
-      this.#path,
-    );
+    return createSourceFile([...imports.toCode(), ...statements, ...exports.toCode()], this.#path);
   }
 
   #processExtendedClass(schema: Schema): Statement | undefined {
@@ -149,6 +146,6 @@ export class EntityProcessor {
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = convertReferenceSchemaToPath(schema);
 
-    return this.#dependencies.imports.register(specifier, path, true);
+    return this.#dependencies.imports.default.add(path, specifier, true);
   }
 }
