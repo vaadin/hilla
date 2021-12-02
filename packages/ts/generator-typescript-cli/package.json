@@ -11,6 +11,7 @@
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
     "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"

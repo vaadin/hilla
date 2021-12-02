@@ -1,6 +1,7 @@
 {
   "extends": ["vaadin"],
   "plugins": ["chai-friendly"],
+  "ignorePatterns": ["packages/ts/*/*.js", "packages/ts/*/*.d.ts", "packages/ts/*/test/**/*.snap.ts"],
   "rules": {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
