@@ -37,8 +37,8 @@
     "./ImportManager.js": {
       "default": "./ImportManager.js"
     },
-    "./PathProcessor.js": {
-      "default": "./PathProcessor.js"
+    "./PathManager.js": {
+      "default": "./PathManager.js"
     },
     "./PluginError.js": {
       "default": "./PluginError.js"

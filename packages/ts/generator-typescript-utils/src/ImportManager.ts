@@ -1,27 +1,23 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
 import ts from 'typescript';
-import type PathProcessor from './PathProcessor.js';
 import { createDependencyRecord, createPathRecordComparator, PathRecord } from './utils.js';
 import type { DependencyRecord } from './utils.js';
 
 export class NamedImportManager {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
-  readonly #path: PathProcessor;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
+  public constructor(collator: Intl.Collator) {
     this.#collator = collator;
-    this.#path = path;
   }
 
   public add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const processedPath = this.#path.process(path);
     const record = createDependencyRecord(uniqueId ?? ts.factory.createUniqueName(specifier), isType);
 
-    if (this.#map.has(processedPath)) {
-      this.#map.get(processedPath)!.set(specifier, record);
+    if (this.#map.has(path)) {
+      this.#map.get(path)!.set(specifier, record);
     } else {
-      this.#map.set(processedPath, new Map([[specifier, record]]));
+      this.#map.set(path, new Map([[specifier, record]]));
     }
 
     return record.id;
@@ -54,7 +50,7 @@ export class NamedImportManager {
   }
 
   public getIdentifier(path: string, specifier: string): Identifier | undefined {
-    return this.#map.get(this.#path.process(path))?.get(specifier)?.id;
+    return this.#map.get(path)?.get(specifier)?.id;
   }
 
   public *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
@@ -66,7 +62,7 @@ export class NamedImportManager {
   }
 
   public isType(path: string, specifier: string): boolean | undefined {
-    return this.#map.get(this.#path.process(path))?.get(specifier)?.isType;
+    return this.#map.get(path)?.get(specifier)?.isType;
   }
 
   public paths(): IterableIterator<string> {
@@ -92,16 +88,14 @@ export class NamedImportManager {
 export class NamespaceImportManager {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Identifier>();
-  readonly #path: PathProcessor;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
+  public constructor(collator: Intl.Collator) {
     this.#collator = collator;
-    this.#path = path;
   }
 
   public add(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
-    this.#map.set(this.#path.process(path), id);
+    this.#map.set(path, id);
     return id;
   }
 
@@ -120,7 +114,7 @@ export class NamespaceImportManager {
   }
 
   public getIdentifier(path: string): Identifier | undefined {
-    return this.#map.get(this.#path.process(path));
+    return this.#map.get(path);
   }
 
   public *identifiers(): IterableIterator<Identifier> {
@@ -144,16 +138,14 @@ export class NamespaceImportManager {
 export class DefaultImportManager {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, DependencyRecord>();
-  readonly #path: PathProcessor;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
+  public constructor(collator: Intl.Collator) {
     this.#collator = collator;
-    this.#path = path;
   }
 
   public add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
-    this.#map.set(this.#path.process(path), createDependencyRecord(id, isType));
+    this.#map.set(path, createDependencyRecord(id, isType));
     return id;
   }
 
@@ -172,7 +164,7 @@ export class DefaultImportManager {
   }
 
   public getIdentifier(path: string): Identifier | undefined {
-    return this.#map.get(this.#path.process(path))?.id;
+    return this.#map.get(path)?.id;
   }
 
   public *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
@@ -182,7 +174,7 @@ export class DefaultImportManager {
   }
 
   public isType(path: string): boolean | undefined {
-    return this.#map.get(this.#path.process(path))?.isType;
+    return this.#map.get(path)?.isType;
   }
 
   public paths(): IterableIterator<string> {
@@ -204,10 +196,10 @@ export default class ImportManager {
 
   readonly #collator: Intl.Collator;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
-    this.default = new DefaultImportManager(path, collator);
-    this.named = new NamedImportManager(path, collator);
-    this.namespace = new NamespaceImportManager(path, collator);
+  public constructor(collator: Intl.Collator) {
+    this.default = new DefaultImportManager(collator);
+    this.named = new NamedImportManager(collator);
+    this.namespace = new NamespaceImportManager(collator);
     this.#collator = collator;
   }
 

@@ -1,5 +1,4 @@
 import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
-import type PathProcessor from './PathProcessor.js';
 import type { DependencyRecord, PathRecord } from './utils.js';
 import { createDependencyRecord, createPathRecordComparator } from './utils.js';
 
@@ -61,21 +60,19 @@ export class NamedExportManager {
 export class NamespaceExportManager {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Identifier | null>();
-  readonly #path: PathProcessor;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
+  public constructor(collator: Intl.Collator) {
     this.#collator = collator;
-    this.#path = path;
   }
 
   public addCombined(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
-    this.#map.set(this.#path.process(path), id);
+    this.#map.set(path, id);
     return id;
   }
 
   public addSpread(path: string) {
-    this.#map.set(this.#path.process(path), null);
+    this.#map.set(path, null);
   }
 
   public *codeRecords(): IterableIterator<PathRecord<ExportDeclaration>> {
@@ -94,7 +91,7 @@ export class NamespaceExportManager {
   }
 
   public getIdentifier(path: string): Identifier | null | undefined {
-    return this.#map.get(this.#path.process(path));
+    return this.#map.get(path);
   }
 
   public identifiers(): IterableIterator<Identifier | null> {
@@ -102,13 +99,11 @@ export class NamespaceExportManager {
   }
 
   public isCombined(path: string): boolean | undefined {
-    const processedPath = this.#path.process(path);
-    return this.#map.has(processedPath) ? this.#map.get(processedPath) !== null : undefined;
+    return this.#map.has(path) ? this.#map.get(path) !== null : undefined;
   }
 
   public isSpread(path: string): boolean | undefined {
-    const processedPath = this.#path.process(path);
-    return this.#map.has(processedPath) ? this.#map.get(processedPath) === null : undefined;
+    return this.#map.has(path) ? this.#map.get(path) === null : undefined;
   }
 
   public paths(): IterableIterator<string> {
@@ -140,9 +135,9 @@ export default class ExportManager {
   public readonly named: NamedExportManager;
   public readonly namespace: NamespaceExportManager;
 
-  public constructor(path: PathProcessor, collator: Intl.Collator) {
+  public constructor(collator: Intl.Collator) {
     this.named = new NamedExportManager(collator);
-    this.namespace = new NamespaceExportManager(path, collator);
+    this.namespace = new NamespaceExportManager(collator);
   }
 
   public toCode(): readonly Statement[] {
