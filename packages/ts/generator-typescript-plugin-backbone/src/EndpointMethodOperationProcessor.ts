@@ -70,6 +70,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   }
 
   public process(): Statement | undefined {
+    const { exports, imports, paths } = this.#dependencies;
     this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
 
     const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
@@ -78,8 +79,8 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       this.#context,
     ).process();
 
-    const methodIdentifier = this.#dependencies.exports.named.add(this.#endpointMethodName);
-    const clientLibIdentifier = this.#dependencies.imports.default.getIdentifier(clientLib.path)!;
+    const methodIdentifier = exports.named.add(this.#endpointMethodName);
+    const clientLibIdentifier = imports.default.getIdentifier(paths.createRelativePath(clientLib.path))!;
 
     const callExpression = ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),

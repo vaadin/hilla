@@ -108,12 +108,12 @@ export default class TypeSchemaProcessor {
   }
 
   #processReference(schema: ReferenceSchema): TypeNode {
-    const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = convertReferenceSchemaToPath(schema);
+    const { imports, paths } = this.#dependencies;
 
-    const identifier =
-      this.#dependencies.imports.default.getIdentifier(path) ??
-      this.#dependencies.imports.default.add(path, specifier, true);
+    const specifier = convertReferenceSchemaToSpecifier(schema);
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+
+    const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
 
     return ts.factory.createTypeReferenceNode(identifier);
   }
