@@ -3,6 +3,7 @@ package com.vaadin.fusion.maven;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,11 +19,11 @@ final class GeneratorProcessor {
     private final MavenProject project;
     private String input;
     private String outputDir = "frontend/generated";
-    private Set<GeneratorConfiguration.Plugin> plugins = Set.of(
-            new GeneratorConfiguration.Plugin(
+    private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
+            List.of(new GeneratorConfiguration.Plugin(
                     "generator-typescript-plugin-backbone"),
-            new GeneratorConfiguration.Plugin(
-                    "generator-typescript-plugin-barrel"));
+                    new GeneratorConfiguration.Plugin(
+                            "generator-typescript-plugin-barrel")));
     private boolean verbose = false;
 
     public GeneratorProcessor(MavenProject project, Log logger) {
