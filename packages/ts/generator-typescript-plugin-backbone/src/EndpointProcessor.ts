@@ -1,5 +1,6 @@
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
+import PathProcessor from '@vaadin/generator-typescript-utils/PathProcessor.js';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
@@ -9,9 +10,10 @@ import { clientLib } from './utils.js';
 
 export default class EndpointProcessor {
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager();
+  readonly #dependencies = new DependencyManager(new PathProcessor('.'));
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
+  readonly #sourcePathProcessor = new PathProcessor('.', 'ts');
 
   public constructor(name: string, context: BackbonePluginContext) {
     this.#context = context;
@@ -32,7 +34,10 @@ export default class EndpointProcessor {
 
     const { imports, exports } = this.#dependencies;
 
-    return createSourceFile([...imports.toCode(), ...statements, ...exports.toCode()], this.#name);
+    return createSourceFile(
+      [...imports.toCode(), ...statements, ...exports.toCode()],
+      this.#sourcePathProcessor.process(this.#name),
+    );
   }
 
   #processMethod(method: string, pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>): readonly Statement[] {

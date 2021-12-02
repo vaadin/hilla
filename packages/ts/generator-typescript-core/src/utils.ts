@@ -7,5 +7,5 @@ export function simplifyFullyQualifiedName(name: string): string {
 const QUALIFIED_NAME_DELIMITER = /[$.]/g;
 
 export function convertFullyQualifiedNameToRelativePath(name: string): string {
-  return `./${name.replace(QUALIFIED_NAME_DELIMITER, '/')}.js`;
+  return name.replace(QUALIFIED_NAME_DELIMITER, '/');
 }

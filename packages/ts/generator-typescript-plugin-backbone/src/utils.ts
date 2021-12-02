@@ -10,5 +10,5 @@ export const defaultMediaType = 'application/json';
 
 export const clientLib = {
   specifier: 'client',
-  path: './connect-client.default.js',
+  path: './connect-client.default',
 } as const;

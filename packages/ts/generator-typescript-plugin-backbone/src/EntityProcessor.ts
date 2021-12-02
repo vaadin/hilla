@@ -1,5 +1,6 @@
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
+import PathProcessor from '@vaadin/generator-typescript-utils/PathProcessor.js';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
 import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
@@ -30,10 +31,11 @@ const exportDefaultModifiers = [
 export class EntityProcessor {
   readonly #component: Schema;
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager();
+  readonly #dependencies = new DependencyManager(new PathProcessor('.'));
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #path: string;
+  readonly #sourcePathProcessor = new PathProcessor('.', 'ts');
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
     this.#component = component;
@@ -54,7 +56,10 @@ export class EntityProcessor {
 
     const { imports, exports } = this.#dependencies;
 
-    return createSourceFile([...imports.toCode(), ...statements, ...exports.toCode()], this.#path);
+    return createSourceFile(
+      [...imports.toCode(), ...statements, ...exports.toCode()],
+      this.#sourcePathProcessor.process(this.#path),
+    );
   }
 
   #processExtendedClass(schema: Schema): Statement | undefined {

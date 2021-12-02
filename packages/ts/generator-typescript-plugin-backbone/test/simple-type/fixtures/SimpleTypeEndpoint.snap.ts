@@ -1,4 +1,4 @@
-import client_1 from "./connect-client.default.js";
+import client_1 from "./connect-client.default";
 async function getBoolean_1(): Promise<boolean> { return client_1.call("SimpleTypeEndpoint", "getBoolean"); }
 async function getBooleanWrapper_1(): Promise<boolean | undefined> { return client_1.call("SimpleTypeEndpoint", "getBooleanWrapper"); }
 async function getByte_1(): Promise<number> { return client_1.call("SimpleTypeEndpoint", "getByte"); }

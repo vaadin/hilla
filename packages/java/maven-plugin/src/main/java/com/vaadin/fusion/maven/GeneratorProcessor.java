@@ -3,7 +3,6 @@ package com.vaadin.fusion.maven;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,9 +18,11 @@ final class GeneratorProcessor {
     private final MavenProject project;
     private String input;
     private String outputDir = "frontend/generated";
-    private Set<GeneratorConfiguration.Plugin> plugins = Set
-            .of(new GeneratorConfiguration.Plugin(
-                    "generator-typescript-plugin-backbone"));
+    private Set<GeneratorConfiguration.Plugin> plugins = Set.of(
+            new GeneratorConfiguration.Plugin(
+                    "generator-typescript-plugin-backbone"),
+            new GeneratorConfiguration.Plugin(
+                    "generator-typescript-plugin-barrel"));
     private boolean verbose = false;
 
     public GeneratorProcessor(MavenProject project, Log logger) {
@@ -48,7 +49,8 @@ final class GeneratorProcessor {
         return this;
     }
 
-    public GeneratorProcessor plugins(@Nonnull GeneratorConfiguration.PluginList plugins) {
+    public GeneratorProcessor plugins(
+            @Nonnull GeneratorConfiguration.PluginList plugins) {
         var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
 
         if (!plugins.isDisableAllDefaults()) {
@@ -58,7 +60,8 @@ final class GeneratorProcessor {
                     pluginStream);
         }
 
-        this.plugins = pluginStream.collect(Collectors.toCollection(LinkedHashSet::new));
+        this.plugins = pluginStream
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return this;
     }
@@ -69,7 +72,8 @@ final class GeneratorProcessor {
     }
 
     private void prepareInput(GeneratorShellRunner runner) {
-        runner.add("'" + GeneratorShellRunner.prepareJSONForCLI(Objects.requireNonNull(input)) + "'");
+        runner.add("'" + GeneratorShellRunner
+                .prepareJSONForCLI(Objects.requireNonNull(input)) + "'");
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {

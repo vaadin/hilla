@@ -1,6 +1,6 @@
 import type File from '@vaadin/generator-typescript-core/File.js';
 import Plugin, { PluginConstructor } from '@vaadin/generator-typescript-core/Plugin.js';
-import { mkdir, readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { dirname, isAbsolute, join } from 'path';
 import type Pino from 'pino';
 import { fileURLToPath, pathToFileURL, URL } from 'url';
@@ -39,9 +39,16 @@ export default class GeneratorIO {
     return isAbsolute(path) ? pathToFileURL(path) : new URL(path, this.#cwd);
   }
 
+  public async cleanOutputDir() {
+    const dir = dirname(fileURLToPath(this.#outputDir));
+    this.#logger.debug(`Cleaning ${dir} up.`);
+    await rm(dir, { recursive: true, force: true });
+    await mkdir(dir, { recursive: true });
+  }
+
   public async write(file: File): Promise<void> {
     const url = new URL(file.name, this.#outputDir);
-    this.#logger.debug(`Writing file ${fileURLToPath(url)}`);
+    this.#logger.debug(`Writing file ${fileURLToPath(url)}.`);
     const dir = dirname(fileURLToPath(url));
     await mkdir(dir, { recursive: true });
     return writeFile(url, new Uint8Array(await file.arrayBuffer()));

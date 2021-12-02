@@ -19,7 +19,7 @@ import {
   ReferenceSchema,
   Schema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager';
+import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);

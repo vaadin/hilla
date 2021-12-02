@@ -1,5 +1,6 @@
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
+import PathProcessor from '@vaadin/generator-typescript-utils/PathProcessor.js';
 import { basename, dirname } from 'path';
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
@@ -9,6 +10,7 @@ export default class BarrelProcessor {
 
   readonly #endpoints: readonly SourceFile[];
   readonly #logger: Pino.Logger;
+  readonly #sourcePathProcessor = new PathProcessor('.', 'ts');
 
   public declare ['constructor']: typeof BarrelProcessor;
 
@@ -22,14 +24,14 @@ export default class BarrelProcessor {
 
     const { exports, imports } = this.#endpoints.reduce((acc, { fileName }) => {
       const specifier = basename(fileName, '.ts');
-      const path = `${dirname(fileName)}/${specifier}.js`;
+      const path = `${dirname(fileName)}/${specifier}`;
 
       const id = acc.imports.namespace.add(path, specifier);
       acc.exports.named.add(specifier, false, id);
 
       return acc;
-    }, new DependencyManager());
+    }, new DependencyManager(new PathProcessor('.')));
 
-    return createSourceFile([...imports.toCode(), ...exports.toCode()], 'endpoints');
+    return createSourceFile([...imports.toCode(), ...exports.toCode()], this.#sourcePathProcessor.process('endpoints'));
   }
 }
