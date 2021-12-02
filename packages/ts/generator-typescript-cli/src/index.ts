@@ -49,4 +49,5 @@ const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (path) =>
 const generator = new Generator(resolvedPlugins, logger);
 
 const files = await generator.process(await processInput(input, io));
+await io.cleanOutputDir();
 await Promise.all(files.map((file) => io.write(file)));
