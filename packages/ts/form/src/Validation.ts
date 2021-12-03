@@ -1,6 +1,7 @@
 // TODO: Fix dependency cycle
 
 import type { Binder } from './Binder.js';
+import type { BinderNode } from './BinderNode.js';
 // eslint-disable-next-line import/no-cycle
 import { AbstractModel, getBinderNode, NumberModel } from './Models.js';
 // eslint-disable-next-line import/no-cycle
@@ -39,6 +40,12 @@ export type ValidationCallback<T> = (
   | ReadonlyArray<ValidationResult>
   | Promise<boolean | ValidationResult | ReadonlyArray<ValidationResult>>;
 
+export type InterpolateMessageCallback<T> = (
+  message: string,
+  validator: Validator<T>,
+  binderNode: BinderNode<T, AbstractModel<T>>,
+) => string;
+
 export interface Validator<T> {
   validate: ValidationCallback<T>;
   message: string;
@@ -58,8 +65,18 @@ export class ServerValidator implements Validator<any> {
 export async function runValidator<T>(
   model: AbstractModel<T>,
   validator: Validator<T>,
+  interpolateMessageCallback?: InterpolateMessageCallback<T>,
 ): Promise<ReadonlyArray<ValueError<T>>> {
-  const { value } = getBinderNode(model);
+  const binderNode = getBinderNode(model);
+  const { value } = binderNode;
+
+  const interpolateMessage = (message: string) => {
+    if (!interpolateMessageCallback) {
+      return message;
+    }
+    return interpolateMessageCallback(message, validator, binderNode);
+  };
+
   // If model is not required and value empty, do not run any validator. Except
   // always validate NumberModel, which has a mandatory builtin validator
   // to indicate NaN input.
@@ -68,14 +85,21 @@ export async function runValidator<T>(
   }
   return (async () => validator.validate(value!, getBinderNode(model).binder))().then((result) => {
     if (result === false) {
-      return [{ property: getBinderNode(model).name, value, validator, message: validator.message }];
+      return [
+        { property: getBinderNode(model).name, value, validator, message: interpolateMessage(validator.message) },
+      ];
     }
     if (result === true || (Array.isArray(result) && result.length === 0)) {
       return [];
     }
     if (Array.isArray(result)) {
-      return result.map((result2) => ({ message: validator.message, ...result2, value, validator }));
+      return result.map((result2) => ({
+        message: interpolateMessage(validator.message),
+        ...result2,
+        value,
+        validator,
+      }));
     }
-    return [{ message: validator.message, ...result, value, validator }];
+    return [{ message: interpolateMessage(validator.message), ...result, value, validator }];
   });
 }
