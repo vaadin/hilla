@@ -1,5 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -49,15 +50,17 @@ public final class Parser {
         var result = new ClassGraph().enableAllInfo()
                 .overrideClasspath(classPathElements).scan();
 
-        var collector = new EntitiesCollector(result, logger);
+        var collector = new ElementsCollector(result, logger);
+        var endpoints = collector
+                .collectEndpoints(config.getEndpointAnnotationName());
+        var entities = collector.collectEntities(endpoints);
 
         logger.debug(
                 "Checking if the compiler is run with -parameters option enabled");
-        checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
+        checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
 
         logger.debug("Executing parser plugins");
-        pluginManager.execute(collector.getEndpoints(), collector.getEntities(),
-                storage);
+        pluginManager.execute(endpoints, entities, storage);
 
         logger.debug("Parsing process successfully finished");
         return storage.getOpenAPI();
@@ -110,6 +113,59 @@ public final class Parser {
 
         public Collection<RelativeClassInfo> getEntities() {
             return entities;
+        }
+    }
+
+    private static class ElementsCollector {
+        private final ScanResult result;
+        private final Logger logger;
+
+        public ElementsCollector(ScanResult result, Logger logger) {
+            this.result = result;
+            this.logger = logger;
+        }
+
+        public Collection<RelativeClassInfo> collectEndpoints(
+                String endpointAnnotationName) {
+            logger.debug(
+                    "Collecting project endpoints with the endpoint annotation: "
+                            + endpointAnnotationName);
+
+            var endpoints = result
+                    .getClassesWithAnnotation(endpointAnnotationName).stream()
+                    .map(RelativeClassInfo::new)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            logger.debug("Collected project endpoints: " + endpoints.stream()
+                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
+                    .collect(Collectors.joining(", ")));
+
+            return endpoints;
+        }
+
+        public Collection<RelativeClassInfo> collectEntities(
+                Collection<RelativeClassInfo> endpoints) {
+            var entities = endpoints.stream().flatMap(
+                    cls -> cls.getInheritanceChain().getDependenciesStream())
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            // ATTENTION: This loop mutates the collection during processing!
+            // It is necessary to collect all endpoint dependencies +
+            // dependencies of dependencies.
+            // Be careful changing it: the endless loop could happen.
+            for (var i = 0; i < entities.size(); i++) {
+                var entity = entities.get(i);
+
+                entity.getDependenciesStream()
+                        .filter(e -> !entities.contains(e))
+                        .forEach(entities::add);
+            }
+
+            logger.debug("Collected project data entities: " + entities.stream()
+                .map(RelativeClassInfo::get).map(ClassInfo::getName)
+                .collect(Collectors.joining(", ")));
+
+            return new LinkedHashSet<>(entities);
         }
     }
 }
