@@ -23,11 +23,11 @@ final class GeneratorProcessor {
 
     {
         plugins.add(new GeneratorConfiguration.Plugin(
-                "generator-typescript-plugin-client"));
+                "@vaadin/generator-typescript-plugin-client"));
         plugins.add(new GeneratorConfiguration.Plugin(
-                "generator-typescript-plugin-backbone"));
+                "@vaadin/generator-typescript-plugin-backbone"));
         plugins.add(new GeneratorConfiguration.Plugin(
-                "generator-typescript-plugin-barrel"));
+                "@vaadin/generator-typescript-plugin-barrel"));
     }
 
     public GeneratorProcessor(MavenProject project, Log logger) {
@@ -89,7 +89,7 @@ final class GeneratorProcessor {
     }
 
     private void preparePlugins(GeneratorShellRunner runner) {
-        plugins.stream().map(plugin -> plugin.resolveWithin(project).toString())
+        plugins.stream().map(GeneratorConfiguration.Plugin::getPath)
                 .distinct().forEach(path -> runner.add("-p", path));
     }
 
