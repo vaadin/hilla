@@ -6,18 +6,17 @@ import type { SourceFile } from 'typescript';
 import ts from 'typescript';
 
 export default class ClientProcessor {
-  public static readonly CLIENT_FILE_NAME = 'connect-client.default';
-
+  readonly #filePath: string;
   readonly #logger: Pino.Logger;
-  readonly #sourcePaths = new PathManager('ts');
 
-  public declare ['constructor']: typeof ClientProcessor;
-
-  public constructor(logger: Pino.Logger) {
+  public constructor(fileName: string, logger: Pino.Logger) {
+    this.#filePath = new PathManager('ts').createRelativePath(fileName);
     this.#logger = logger;
   }
 
   public process(): SourceFile {
+    this.#logger.debug(`Generating ${this.#filePath}`);
+
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientImportId = imports.named.add(
       paths.createBareModulePath('@vaadin/flow-frontend/Connect', true),
@@ -52,10 +51,7 @@ export default class ClientProcessor {
       ),
     );
 
-    return createSourceFile(
-      [...imports.toCode(), declaration, ...exports.toCode()],
-      this.#sourcePaths.createRelativePath(this.constructor.CLIENT_FILE_NAME),
-    );
+    return createSourceFile([...imports.toCode(), declaration, ...exports.toCode()], this.#filePath);
   }
 }
 

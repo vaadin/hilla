@@ -7,8 +7,3 @@ export type BackbonePluginContext = Readonly<{
 }>;
 
 export const defaultMediaType = 'application/json';
-
-export const clientLib = {
-  specifier: 'client',
-  path: 'connect-client.default',
-} as const;

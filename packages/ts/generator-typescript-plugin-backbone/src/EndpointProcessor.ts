@@ -1,3 +1,4 @@
+import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
 import PathManager from '@vaadin/generator-typescript-utils/PathManager.js';
@@ -6,7 +7,6 @@ import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
-import { clientLib } from './utils.js';
 
 export default class EndpointProcessor {
   readonly #context: BackbonePluginContext;
@@ -19,8 +19,8 @@ export default class EndpointProcessor {
     this.#context = context;
     this.#name = name;
     this.#dependencies.imports.default.add(
-      this.#dependencies.paths.createRelativePath(clientLib.path),
-      clientLib.specifier,
+      this.#dependencies.paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME),
+      'client',
     );
   }
 

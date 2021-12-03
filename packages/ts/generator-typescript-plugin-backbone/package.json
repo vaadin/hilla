@@ -18,6 +18,14 @@
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "default": "./index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vaadin/fusion.git",

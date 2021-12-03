@@ -1,3 +1,4 @@
+import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
@@ -7,7 +8,6 @@ import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
-import { clientLib } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -80,7 +80,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
-    const clientLibIdentifier = imports.default.getIdentifier(paths.createRelativePath(clientLib.path))!;
+    const clientLibIdentifier = imports.default.getIdentifier(paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME))!;
 
     const callExpression = ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),
