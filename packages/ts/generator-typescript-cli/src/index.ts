@@ -45,7 +45,7 @@ const logger = createLogger({ verbose });
 
 const io = new GeneratorIO(outputDir, logger);
 
-const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (path) => io.loadPlugin(io.resolve(path))));
+const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (pluginPath) => io.loadPlugin(pluginPath)));
 const generator = new Generator(resolvedPlugins, logger);
 
 const files = await generator.process(await processInput(input, io));

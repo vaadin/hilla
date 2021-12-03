@@ -1,3 +1,4 @@
+import { isAbsolute, resolve } from 'path';
 import type GeneratorIO from './GeneratorIO.js';
 
 export async function processInput(raw: string, io: GeneratorIO): Promise<string> {
@@ -11,5 +12,5 @@ export async function processInput(raw: string, io: GeneratorIO): Promise<string
     return result;
   }
 
-  return io.read(io.resolve(result));
+  return io.read(isAbsolute(result) ? result : resolve(io.cwd, result));
 }
