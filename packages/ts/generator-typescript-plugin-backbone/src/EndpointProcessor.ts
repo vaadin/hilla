@@ -1,7 +1,7 @@
 import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/PathManager.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';

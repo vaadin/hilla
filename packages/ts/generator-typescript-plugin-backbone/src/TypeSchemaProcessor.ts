@@ -1,5 +1,3 @@
-import type { TypeNode } from 'typescript';
-import ts from 'typescript';
 import {
   ArraySchema,
   convertReferenceSchemaToPath,
@@ -19,7 +17,9 @@ import {
   ReferenceSchema,
   Schema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import type { TypeNode } from 'typescript';
+import ts from 'typescript';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);

@@ -1,8 +1,8 @@
-import type Pino from 'pino';
-import type { SourceFile } from 'typescript';
 import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver';
 import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
+import type Pino from 'pino';
+import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
 import type { BackbonePluginContext } from './utils.js';

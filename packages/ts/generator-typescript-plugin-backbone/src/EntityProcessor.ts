@@ -1,8 +1,3 @@
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/PathManager.js';
-import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { TypeElement } from 'typescript';
 import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
@@ -20,6 +15,11 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@vaadin/generator-typescript-core/utils.js';
+import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
+import ts, { TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 

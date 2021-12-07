@@ -1,5 +1,5 @@
 import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
-import type DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';

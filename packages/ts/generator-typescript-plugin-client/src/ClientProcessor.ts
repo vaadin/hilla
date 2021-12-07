@@ -1,6 +1,6 @@
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/PathManager.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
 import ts from 'typescript';
