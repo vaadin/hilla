@@ -1,9 +1,10 @@
 import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
+import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 
-export class NamedExportManager {
+export class NamedExportManager implements CodeConvertable<ExportDeclaration | undefined> {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, DependencyRecord>();
 
@@ -107,7 +108,7 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
   }
 }
 
-export class DefaultExportManager {
+export class DefaultExportManager implements CodeConvertable<ExportAssignment | undefined> {
   #id?: Identifier;
 
   public set(id: Identifier) {
@@ -119,7 +120,7 @@ export class DefaultExportManager {
   }
 }
 
-export default class ExportManager {
+export default class ExportManager implements CodeConvertable<readonly Statement[]> {
   public readonly default = new DefaultExportManager();
   public readonly named: NamedExportManager;
   public readonly namespace: NamespaceExportManager;

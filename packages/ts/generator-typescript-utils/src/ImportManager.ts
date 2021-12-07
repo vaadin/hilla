@@ -1,5 +1,6 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
 import ts from 'typescript';
+import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
@@ -160,7 +161,7 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
   }
 }
 
-export default class ImportManager {
+export default class ImportManager implements CodeConvertable<readonly Statement[]> {
   public readonly default: DefaultImportManager;
   public readonly named: NamedImportManager;
   public readonly namespace: NamespaceImportManager;
