@@ -1,6 +1,7 @@
 import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
-import type { DependencyRecord, PathRecord } from './utils.js';
-import { createDependencyRecord, convertPathRecordsToCode } from './utils.js';
+import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
+import type { DependencyRecord } from './utils.js';
+import { createDependencyRecord } from './utils.js';
 
 export class NamedExportManager {
   readonly #collator: Intl.Collator;
@@ -57,13 +58,8 @@ export class NamedExportManager {
   }
 }
 
-export class NamespaceExportManager {
-  readonly #collator: Intl.Collator;
+export class NamespaceExportManager extends StatementRecordManager<ExportDeclaration> {
   readonly #map = new Map<string, Identifier | null>();
-
-  public constructor(collator: Intl.Collator) {
-    this.#collator = collator;
-  }
 
   public addCombined(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
@@ -75,7 +71,7 @@ export class NamespaceExportManager {
     this.#map.set(path, null);
   }
 
-  public *codeRecords(): IterableIterator<PathRecord<ExportDeclaration>> {
+  public override *statementRecords(): IterableIterator<StatementRecord<ExportDeclaration>> {
     for (const [path, id] of this.#map) {
       yield [
         path,
@@ -108,10 +104,6 @@ export class NamespaceExportManager {
 
   public paths(): IterableIterator<string> {
     return this.#map.keys();
-  }
-
-  public toCode(): readonly ExportDeclaration[] {
-    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
   }
 }
 

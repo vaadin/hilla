@@ -1,13 +1,15 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
 import ts from 'typescript';
+import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
-import { createDependencyRecord, PathRecord, convertPathRecordsToCode, createPathRecordComparator } from './utils.js';
+import { createDependencyRecord } from './utils.js';
 
-export class NamedImportManager {
+export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
 
   public constructor(collator: Intl.Collator) {
+    super(collator);
     this.#collator = collator;
   }
 
@@ -23,7 +25,7 @@ export class NamedImportManager {
     return record.id;
   }
 
-  public *codeRecords(): IterableIterator<PathRecord<ImportDeclaration>> {
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, specifiers] of this.#map) {
       const names = [...specifiers.keys()];
       names.sort(this.#collator.compare);
@@ -76,19 +78,10 @@ export class NamedImportManager {
       }
     }
   }
-
-  public toCode(): readonly ImportDeclaration[] {
-    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
-  }
 }
 
-export class NamespaceImportManager {
-  readonly #collator: Intl.Collator;
+export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Identifier>();
-
-  public constructor(collator: Intl.Collator) {
-    this.#collator = collator;
-  }
 
   public add(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
@@ -96,7 +89,7 @@ export class NamespaceImportManager {
     return id;
   }
 
-  public *codeRecords(): IterableIterator<PathRecord<ImportDeclaration>> {
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, id] of this.#map) {
       yield [
         path,
@@ -123,19 +116,10 @@ export class NamespaceImportManager {
   public paths(): IterableIterator<string> {
     return this.#map.keys();
   }
-
-  public toCode(): readonly ImportDeclaration[] {
-    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
-  }
 }
 
-export class DefaultImportManager {
-  readonly #collator: Intl.Collator;
+export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, DependencyRecord>();
-
-  public constructor(collator: Intl.Collator) {
-    this.#collator = collator;
-  }
 
   public add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? ts.factory.createUniqueName(name);
@@ -143,7 +127,7 @@ export class DefaultImportManager {
     return id;
   }
 
-  public *codeRecords(): IterableIterator<PathRecord<ImportDeclaration>> {
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, { id, isType }] of this.#map) {
       yield [
         path,
@@ -174,10 +158,6 @@ export class DefaultImportManager {
   public paths(): IterableIterator<string> {
     return this.#map.keys();
   }
-
-  public toCode(): readonly ImportDeclaration[] {
-    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
-  }
 }
 
 export default class ImportManager {
@@ -195,8 +175,12 @@ export default class ImportManager {
   }
 
   public toCode(): readonly Statement[] {
-    const records = [...this.default.codeRecords(), ...this.named.codeRecords(), ...this.namespace.codeRecords()];
-    records.sort(createPathRecordComparator(this.#collator));
+    const records = [
+      ...this.default.statementRecords(),
+      ...this.named.statementRecords(),
+      ...this.namespace.statementRecords(),
+    ];
+    records.sort(StatementRecordManager.createComparator(this.#collator));
 
     return records.map(([, statement]) => statement);
   }
