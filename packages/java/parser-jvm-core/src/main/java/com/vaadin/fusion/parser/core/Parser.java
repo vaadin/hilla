@@ -71,51 +71,6 @@ public final class Parser {
         return storage;
     }
 
-    private class EntitiesCollector {
-        private final Set<RelativeClassInfo> endpoints;
-        private final Set<RelativeClassInfo> entities;
-
-        public EntitiesCollector(ScanResult result, Logger logger) {
-            var endpointAnnotationName = config.getEndpointAnnotationName();
-
-            logger.debug(
-                    "Collecting project endpoints with the endpoint annotation: "
-                            + endpointAnnotationName);
-
-            endpoints = result.getClassesWithAnnotation(endpointAnnotationName)
-                    .stream().map(RelativeClassInfo::new)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            logger.debug("Collected project endpoints: " + endpoints.stream()
-                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
-                    .collect(Collectors.joining(", ")));
-
-            entities = endpoints.stream().flatMap(
-                    cls -> cls.getInheritanceChain().getDependenciesStream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            // ATTENTION: This loop mutates the collection during processing!
-            // It is necessary to collect all endpoint dependencies +
-            // dependencies of dependencies.
-            // Be careful changing it: the endless loop could happen.
-            for (var entity : entities) {
-                entity.getDependenciesStream().forEach(entities::add);
-            }
-
-            logger.debug("Collected project data entities: " + entities.stream()
-                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
-                    .collect(Collectors.joining(", ")));
-        }
-
-        public Collection<RelativeClassInfo> getEndpoints() {
-            return endpoints;
-        }
-
-        public Collection<RelativeClassInfo> getEntities() {
-            return entities;
-        }
-    }
-
     private static class ElementsCollector {
         private final ScanResult result;
         private final Logger logger;
