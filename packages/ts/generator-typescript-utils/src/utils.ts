@@ -29,3 +29,13 @@ export function createPathRecordComparator<T extends Statement>(
     return collator.compare(pathA, pathB);
   };
 }
+
+export function convertPathRecordsToCode<T extends Statement>(
+  codeRecords: IterableIterator<PathRecord<T>>,
+  collator: Intl.Collator,
+): readonly T[] {
+  const records = [...codeRecords];
+  records.sort(createPathRecordComparator(collator));
+
+  return records.map(([, statement]) => statement);
+}

@@ -1,7 +1,7 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
 import ts from 'typescript';
-import { createDependencyRecord, createPathRecordComparator, PathRecord } from './utils.js';
 import type { DependencyRecord } from './utils.js';
+import { createDependencyRecord, PathRecord, convertPathRecordsToCode, createPathRecordComparator } from './utils.js';
 
 export class NamedImportManager {
   readonly #collator: Intl.Collator;
@@ -78,10 +78,7 @@ export class NamedImportManager {
   }
 
   public toCode(): readonly ImportDeclaration[] {
-    const records = [...this.codeRecords()];
-    records.sort(createPathRecordComparator(this.#collator));
-
-    return records.map(([, statement]) => statement);
+    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
   }
 }
 
@@ -128,10 +125,7 @@ export class NamespaceImportManager {
   }
 
   public toCode(): readonly ImportDeclaration[] {
-    const statements = [...this.codeRecords()];
-    statements.sort(createPathRecordComparator(this.#collator));
-
-    return statements.map(([, statement]) => statement);
+    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
   }
 }
 
@@ -182,10 +176,7 @@ export class DefaultImportManager {
   }
 
   public toCode(): readonly ImportDeclaration[] {
-    const records = [...this.codeRecords()];
-    records.sort(createPathRecordComparator(this.#collator));
-
-    return records.map(([, statement]) => statement);
+    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
   }
 }
 

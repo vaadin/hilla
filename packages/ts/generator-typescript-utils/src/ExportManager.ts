@@ -1,6 +1,6 @@
 import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
 import type { DependencyRecord, PathRecord } from './utils.js';
-import { createDependencyRecord, createPathRecordComparator } from './utils.js';
+import { createDependencyRecord, convertPathRecordsToCode } from './utils.js';
 
 export class NamedExportManager {
   readonly #collator: Intl.Collator;
@@ -111,10 +111,7 @@ export class NamespaceExportManager {
   }
 
   public toCode(): readonly ExportDeclaration[] {
-    const records = [...this.codeRecords()];
-    records.sort(createPathRecordComparator(this.#collator));
-
-    return records.map(([, statement]) => statement);
+    return convertPathRecordsToCode(this.codeRecords(), this.#collator);
   }
 }
 
