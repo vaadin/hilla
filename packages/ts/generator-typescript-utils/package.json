@@ -8,10 +8,10 @@
     "node": ">= 16.13"
   },
   "scripts": {
-    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js} testing dependencies",
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
-    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "test:update": "npm test -- --update",
@@ -19,6 +19,18 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
+    "./dependencies/DependencyManager.js": {
+      "default": "./dependencies/DependencyManager.js"
+    },
+    "./dependencies/ExportManager.js": {
+      "default": "./dependencies/ExportManager.js"
+    },
+    "./dependencies/ImportManager.js": {
+      "default": "./dependencies/ImportManager.js"
+    },
+    "./dependencies/PathManager.js": {
+      "default": "./dependencies/PathManager.js"
+    },
     "./testing/snapshotMatcher.js": {
       "default": "./testing/snapshotMatcher.js"
     },
@@ -27,18 +39,6 @@
     },
     "./createSourceFile.js": {
       "default": "./createSourceFile.js"
-    },
-    "./DependencyManager.js": {
-      "default": "./DependencyManager.js"
-    },
-    "./ExportManager.js": {
-      "default": "./ExportManager.js"
-    },
-    "./ImportManager.js": {
-      "default": "./ImportManager.js"
-    },
-    "./PathManager.js": {
-      "default": "./PathManager.js"
     },
     "./PluginError.js": {
       "default": "./PluginError.js"
@@ -62,6 +62,7 @@
   "homepage": "https://vaadin.com/fusion",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}",
+    "dependencies/*.{d.ts.map,d.ts,js.map,js}",
     "testing/*.{d.ts.map,d.ts,js.map,js}"
   ],
   "peerDependencies": {
