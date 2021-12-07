@@ -54,9 +54,3 @@ export default class ClientProcessor {
     return createSourceFile([...imports.toCode(), declaration, ...exports.toCode()], this.#filePath);
   }
 }
-
-/*
-import {ConnectClient} from '@vaadin/flow-frontend/Connect';
-const client = new ConnectClient({prefix: 'connect'});
-export default client;
-*/
