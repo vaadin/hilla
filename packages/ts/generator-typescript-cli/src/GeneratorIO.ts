@@ -21,6 +21,12 @@ export default class GeneratorIO {
     logger.info(`Output directory: ${this.#outputDir}`);
   }
 
+  public async cleanOutputDir() {
+    this.#logger.debug(`Cleaning ${this.#outputDir} up.`);
+    await rm(this.#outputDir, { recursive: true, force: true });
+    await mkdir(this.#outputDir, { recursive: true });
+  }
+
   public async loadPlugin(modulePath: string) {
     this.#logger.debug(`Loading plugin: ${modulePath}`);
     const resolved = this.#require.resolve(modulePath);
@@ -36,12 +42,6 @@ export default class GeneratorIO {
   public async read(path: string): Promise<string> {
     this.#logger.debug(`Reading file: ${path}`);
     return readFile(path, 'utf8');
-  }
-
-  public async cleanOutputDir() {
-    this.#logger.debug(`Cleaning ${this.#outputDir} up.`);
-    await rm(this.#outputDir, { recursive: true, force: true });
-    await mkdir(this.#outputDir, { recursive: true });
   }
 
   public async write(file: File): Promise<void> {
