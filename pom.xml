@@ -19,6 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    <formatter.basedir>${project.basedir}</formatter.basedir>
   </properties>
 
   <organization>
@@ -100,9 +101,9 @@
         <artifactId>formatter-maven-plugin</artifactId>
         <version>2.16.0</version>
         <configuration>
-          <configFile>../.config/VaadinJavaConventions.xml</configFile>
+          <configFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configFile>
           <!-- Provide a dummy JS config file to avoid errors -->
-          <configJsFile>../.config/VaadinJavaConventions.xml</configJsFile>
+          <configJsFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configJsFile>
           <lineEnding>LF</lineEnding>
         </configuration>
       </plugin>
