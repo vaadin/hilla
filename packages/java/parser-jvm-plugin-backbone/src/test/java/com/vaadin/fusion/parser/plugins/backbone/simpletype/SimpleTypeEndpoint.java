@@ -2,6 +2,10 @@ package com.vaadin.fusion.parser.plugins.backbone.simpletype;
 
 @Endpoint
 public class SimpleTypeEndpoint {
+    public int[] getArray() {
+        return new int[] { 1, 2, 3 };
+    }
+
     public boolean getBoolean() {
         return true;
     }
@@ -18,12 +22,28 @@ public class SimpleTypeEndpoint {
         return getByte();
     }
 
-    public short getShort() {
-        return 0;
+    public char getChar() {
+        return 'a';
     }
 
-    public Short getShortWrapper() {
-        return getShort();
+    public Character getCharWrapper() {
+        return getChar();
+    }
+
+    public double getDouble() {
+        return 0.0;
+    }
+
+    public Double getDoubleWrapper() {
+        return getDouble();
+    }
+
+    public float getFloat() {
+        return (float) 0.0;
+    }
+
+    public Float getFloatWrapper() {
+        return getFloat();
     }
 
     public int getInteger() {
@@ -42,35 +62,15 @@ public class SimpleTypeEndpoint {
         return getLong();
     }
 
-    public float getFloat() {
-        return (float) 0.0;
+    public short getShort() {
+        return 0;
     }
 
-    public Float getFloatWrapper() {
-        return getFloat();
-    }
-
-    public double getDouble() {
-        return 0.0;
-    }
-
-    public Double getDoubleWrapper() {
-        return getDouble();
-    }
-
-    public char getChar() {
-        return 'a';
-    }
-
-    public Character getCharWrapper() {
-        return getChar();
+    public Short getShortWrapper() {
+        return getShort();
     }
 
     public String getString() {
         return "test";
-    }
-
-    public int[] getArray() {
-        return new int[]{1, 2, 3};
     }
 }

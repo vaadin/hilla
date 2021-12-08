@@ -15,16 +15,16 @@ public final class ResourceLoader {
         this.targetClass = targetClass;
     }
 
-    public Path findTargetDirPath() throws URISyntaxException {
-        return Paths.get(
-                Objects.requireNonNull(targetClass.getProtectionDomain().getCodeSource().getLocation()).toURI())
-                .getParent();
-    }
-
     public File find(String resourceName) throws URISyntaxException {
         return Paths.get(Objects
                 .requireNonNull(targetClass.getResource(resourceName)).toURI())
                 .toFile();
+    }
+
+    public Path findTargetDirPath() throws URISyntaxException {
+        return Paths.get(Objects.requireNonNull(
+                targetClass.getProtectionDomain().getCodeSource().getLocation())
+                .toURI()).getParent();
     }
 
     public String readToString(String resourceName)

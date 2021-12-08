@@ -10,12 +10,21 @@ import java.util.Map;
 
 @Endpoint
 public class DateTimeEndpoint {
-    public Instant echoInstant(Instant instant) {
-        return instant;
+    public CustomDate echoCustomDate() {
+        return new CustomDate();
     }
 
     public Date echoDate(Date date) {
         return date;
+    }
+
+    public Instant echoInstant(Instant instant) {
+        return instant;
+    }
+
+    public List<LocalDateTime> echoListLocalDateTime(
+            List<LocalDateTime> localDateTimeList) {
+        return localDateTimeList;
     }
 
     public LocalDate echoLocalDate(LocalDate localDate) {
@@ -28,15 +37,6 @@ public class DateTimeEndpoint {
 
     public LocalTime echoLocalTime(LocalTime localTime) {
         return localTime;
-    }
-
-    public CustomDate echoCustomDate() {
-        return new CustomDate();
-    }
-
-    public List<LocalDateTime> echoListLocalDateTime(
-            List<LocalDateTime> localDateTimeList) {
-        return localDateTimeList;
     }
 
     public Map<String, Instant> echoMapInstant(

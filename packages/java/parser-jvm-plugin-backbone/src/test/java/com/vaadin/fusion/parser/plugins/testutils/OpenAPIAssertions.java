@@ -1,10 +1,12 @@
 package com.vaadin.fusion.parser.plugins.testutils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Assertions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
+
+import io.swagger.v3.oas.models.OpenAPI;
 
 public final class OpenAPIAssertions {
     private final static OpenAPIPrinter printer = new OpenAPIPrinter();

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Collection<T> {
-    public String getName() {
-        return "";
-    }
-
     public List<T> getItems() {
         return new ArrayList<>();
+    }
+
+    public String getName() {
+        return "";
     }
 }

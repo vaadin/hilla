@@ -1,13 +1,14 @@
 package com.vaadin.fusion.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 
-import io.swagger.v3.oas.models.OpenAPI;
+import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
+
+import io.swagger.v3.oas.models.OpenAPI;
 
 public final class BackbonePlugin implements Plugin {
     @Override

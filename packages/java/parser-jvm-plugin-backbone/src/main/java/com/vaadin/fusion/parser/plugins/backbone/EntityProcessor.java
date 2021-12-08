@@ -4,7 +4,6 @@ import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -21,15 +20,15 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 final class EntityProcessor extends Processor {
+    public EntityProcessor(@Nonnull Collection<RelativeClassInfo> classes,
+            @Nonnull OpenAPI model) {
+        super(classes, model);
+    }
+
     private static String decapitalize(String string) {
         var c = string.toCharArray();
         c[0] = Character.toLowerCase(c[0]);
         return new String(c);
-    }
-
-    public EntityProcessor(@Nonnull Collection<RelativeClassInfo> classes,
-            @Nonnull OpenAPI model) {
-        super(classes, model);
     }
 
     @Override
@@ -76,6 +75,22 @@ final class EntityProcessor extends Processor {
                     : processExtendedClass();
         }
 
+        private Schema<?> processClass() {
+            var schema = new ObjectSchema();
+
+            entity.getMethodsStream().filter(method -> method.get().isPublic())
+                    .filter(method -> method.get().getName().startsWith("get"))
+                    .forEach(method -> {
+                        var processor = new ComponentSchemaPropertyProcessor(
+                                method);
+
+                        schema.addProperties(processor.getKey(),
+                                processor.getValue());
+                    });
+
+            return schema;
+        }
+
         private Schema<?> processEnum() {
             var schema = new StringSchema();
 
@@ -95,22 +110,6 @@ final class EntityProcessor extends Processor {
                             .asList(new Schema<>().$ref(COMPONENTS_SCHEMAS_REF
                                     + cls.get().getName()), processed)))
                     .orElse(processed);
-        }
-
-        private Schema<?> processClass() {
-            var schema = new ObjectSchema();
-
-            entity.getMethodsStream().filter(method -> method.get().isPublic())
-                    .filter(method -> method.get().getName().startsWith("get"))
-                    .forEach(method -> {
-                        var processor = new ComponentSchemaPropertyProcessor(
-                                method);
-
-                        schema.addProperties(processor.getKey(),
-                                processor.getValue());
-                    });
-
-            return schema;
         }
     }
 
