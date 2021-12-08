@@ -35,15 +35,6 @@ final class GeneratorProcessor {
         this.project = project;
     }
 
-    public void process() throws IOException, InterruptedException {
-        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
-        prepareOutputDir(runner);
-        preparePlugins(runner);
-        prepareVerbose(runner);
-        prepareInput(runner);
-        runner.run();
-    }
-
     public GeneratorProcessor input(@Nonnull String input) {
         this.input = Objects.requireNonNull(input);
         return this;
@@ -71,6 +62,15 @@ final class GeneratorProcessor {
         return this;
     }
 
+    public void process() throws IOException, InterruptedException {
+        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
+        prepareOutputDir(runner);
+        preparePlugins(runner);
+        prepareVerbose(runner);
+        prepareInput(runner);
+        runner.run();
+    }
+
     public GeneratorProcessor verbose(boolean verbose) {
         this.verbose = verbose;
         return this;
@@ -89,8 +89,8 @@ final class GeneratorProcessor {
     }
 
     private void preparePlugins(GeneratorShellRunner runner) {
-        plugins.stream().map(GeneratorConfiguration.Plugin::getPath)
-                .distinct().forEach(path -> runner.add("-p", path));
+        plugins.stream().map(GeneratorConfiguration.Plugin::getPath).distinct()
+                .forEach(path -> runner.add("-p", path));
     }
 
     private void prepareVerbose(GeneratorShellRunner runner) {

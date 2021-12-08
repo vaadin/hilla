@@ -49,7 +49,8 @@ public final class FusionGeneratorMojo extends AbstractMojo {
             var executor = new ParserProcessor(project, getLog());
 
             parser.getClassPath().ifPresent(executor::classPath);
-            parser.getEndpointAnnotation().ifPresent(executor::endpointAnnotation);
+            parser.getEndpointAnnotation()
+                    .ifPresent(executor::endpointAnnotation);
             parser.getPlugins().ifPresent(executor::plugins);
             parser.getOpenAPIPath().ifPresent(executor::openAPIBase);
 
