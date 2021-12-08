@@ -7,12 +7,10 @@ import type { SourceFile } from 'typescript';
 
 export default class BarrelProcessor {
   public static readonly BARREL_FILE_NAME = 'endpoints.ts';
-
+  public declare ['constructor']: typeof BarrelProcessor;
   readonly #endpoints: readonly SourceFile[];
   readonly #logger: Pino.Logger;
   readonly #sourcePaths = new PathManager('ts');
-
-  public declare ['constructor']: typeof BarrelProcessor;
 
   public constructor(endpoints: readonly SourceFile[], logger: Pino.Logger) {
     this.#endpoints = endpoints;
