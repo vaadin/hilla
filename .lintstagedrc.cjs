@@ -3,7 +3,7 @@ const micromatch = require('micromatch');
 function exclude(files) {
   const matched = micromatch.not(files, ['node_modules/**/*', 'packages/java/**/*', '**/*.snap.{ts,js}']);
 
-  return [`prettier --write ${matched.join(' ')}`];
+  return matched.length > 0 ? [`prettier --write ${matched.join(' ')}`] : [];
 }
 
 module.exports = {
