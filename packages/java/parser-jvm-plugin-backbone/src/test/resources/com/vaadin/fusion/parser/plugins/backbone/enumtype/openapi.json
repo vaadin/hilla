@@ -1,37 +1,54 @@
 {
-  "openapi" : "3.0.1",
-  "info" : {
-    "title" : "Vaadin Application",
-    "version" : "1.0.0"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
   },
-  "servers" : [
+  "servers": [
     {
-      "url" : "http://localhost:8080/connect",
-      "description" : "Vaadin Backend"
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
     }
   ],
-  "tags" : [
+  "tags": [
     {
-      "name" : "EnumTypeEndpoint"
+      "name": "EnumTypeEndpoint"
     }
   ],
-  "paths" : {
-    "/EnumTypeEndpoint/getEnum" : {
-      "post" : {
-        "tags" : [
-          "EnumTypeEndpoint"
-        ],
-        "operationId" : "EnumTypeEndpoint_getEnum_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "nullable" : true,
-                  "anyOf" : [
+  "paths": {
+    "/EnumTypeEndpoint/echoEnum": {
+      "post": {
+        "tags": ["EnumTypeEndpoint"],
+        "operationId": "EnumTypeEndpoint_echoEnum_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                     }
                   ]
                 }
@@ -41,103 +58,24 @@
         }
       }
     },
-    "/EnumTypeEndpoint/setEnum" : {
-      "post" : {
-        "tags" : [
-          "EnumTypeEndpoint"
-        ],
-        "operationId" : "EnumTypeEndpoint_setEnum_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "value" : {
-                    "nullable" : true,
-                    "anyOf" : [
-                      {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : { }
-          }
-        }
-      }
-    },
-    "/EnumTypeEndpoint/echoEnum" : {
-      "post" : {
-        "tags" : [
-          "EnumTypeEndpoint"
-        ],
-        "operationId" : "EnumTypeEndpoint_echoEnum_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "value" : {
-                    "nullable" : true,
-                    "anyOf" : [
-                      {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "nullable" : true,
-                  "anyOf" : [
-                    {
-                      "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/EnumTypeEndpoint/echoListEnum" : {
-      "post" : {
-        "tags" : [
-          "EnumTypeEndpoint"
-        ],
-        "operationId" : "EnumTypeEndpoint_echoListEnum_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "enumList" : {
-                    "type" : "array",
-                    "nullable" : true,
-                    "items" : {
-                      "nullable" : true,
-                      "anyOf" : [
+    "/EnumTypeEndpoint/echoListEnum": {
+      "post": {
+        "tags": ["EnumTypeEndpoint"],
+        "operationId": "EnumTypeEndpoint_echoListEnum_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enumList": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "nullable": true,
+                      "anyOf": [
                         {
-                          "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                          "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                         }
                       ]
                     }
@@ -147,19 +85,19 @@
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
                     ]
                   }
@@ -169,20 +107,67 @@
           }
         }
       }
+    },
+    "/EnumTypeEndpoint/getEnum": {
+      "post": {
+        "tags": ["EnumTypeEndpoint"],
+        "operationId": "EnumTypeEndpoint_getEnum_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/EnumTypeEndpoint/setEnum": {
+      "post": {
+        "tags": ["EnumTypeEndpoint"],
+        "operationId": "EnumTypeEndpoint_setEnum_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {}
+          }
+        }
+      }
     }
   },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity" : {
-        "type" : "string",
-        "enum" : [
-          "ENUM1",
-          "ENUM2",
-          "ENUM_2",
-          "HELLO_WORLD",
-          "_HELLO",
-          "MANY_MANY_WORDS"
-        ]
+  "components": {
+    "schemas": {
+      "com.vaadin.fusion.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity": {
+        "type": "string",
+        "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
       }
     }
   }
