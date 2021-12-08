@@ -37,15 +37,19 @@ public final class RelativeClassInfo
 
         annotations = getMembers(ClassInfo::getAnnotationInfo,
                 RelativeAnnotationInfo::new);
-        fields = getMembers(ClassInfo::getDeclaredFieldInfo, RelativeFieldInfo::new);
+        fields = getMembers(ClassInfo::getDeclaredFieldInfo,
+                RelativeFieldInfo::new);
         innerClasses = getMembers(ClassInfo::getInnerClasses,
                 RelativeClassInfo::new);
-        methods = getMembers(ClassInfo::getDeclaredMethodInfo, RelativeMethodInfo::new);
+        methods = getMembers(ClassInfo::getDeclaredMethodInfo,
+                RelativeMethodInfo::new);
         superClasses = getMembers(ClassInfo::getSuperclasses,
                 (member) -> !isJDKClass(member), RelativeClassInfo::new);
 
         var originSuperClass = origin.getSuperclass();
-        superClass = originSuperClass != null ? new RelativeClassInfo(originSuperClass) : null;
+        superClass = originSuperClass != null
+                ? new RelativeClassInfo(originSuperClass)
+                : null;
 
         // Should be the latest
         chain = new InheritanceChain();
@@ -267,7 +271,8 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getInnerClassesStream() {
-            return chain.stream().flatMap(RelativeClassInfo::getInnerClassesStream)
+            return chain.stream()
+                    .flatMap(RelativeClassInfo::getInnerClassesStream)
                     .distinct();
         }
 

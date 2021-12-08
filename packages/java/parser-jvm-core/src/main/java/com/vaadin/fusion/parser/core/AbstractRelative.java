@@ -16,16 +16,6 @@ abstract class AbstractRelative<T, P extends Relative<?>>
     }
 
     @Override
-    public T get() {
-        return origin;
-    }
-
-    @Override
-    public Optional<P> getParent() {
-        return Optional.of(parent);
-    }
-
-    @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
@@ -36,6 +26,16 @@ abstract class AbstractRelative<T, P extends Relative<?>>
         }
 
         return Objects.equals(origin, ((AbstractRelative<?, ?>) other).origin);
+    }
+
+    @Override
+    public T get() {
+        return origin;
+    }
+
+    @Override
+    public Optional<P> getParent() {
+        return Optional.of(parent);
     }
 
     @Override

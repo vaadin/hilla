@@ -26,11 +26,11 @@ import io.swagger.v3.oas.models.servers.Server;
 public class ParserConfigTests {
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
-    private Path targetDir;
+    private ParserConfig.Builder defaultBuilder;
     private Set<String> defaultClassPathElements;
     private String defaultEndpointAnnotationName;
     private OpenAPI defaultOpenAPI;
-    private ParserConfig.Builder defaultBuilder;
+    private Path targetDir;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
@@ -46,6 +46,53 @@ public class ParserConfigTests {
         defaultBuilder = new ParserConfig.Builder()
                 .classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName);
+    }
+
+    @Test
+    public void should_AllowAddingPluginsAsCollection() {
+        var plugins = List.of("com.example.FooPlugin", "com.example.BarPlugin");
+        var actual = defaultBuilder.plugins(plugins).finish();
+        var expected = new TestParserConfig(defaultClassPathElements,
+                defaultEndpointAnnotationName, defaultOpenAPI,
+                new HashSet<>(plugins));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_AllowAddingPluginsOneByOne() {
+        var fooPlugin = "com.example.FooPlugin";
+        var barPlugin = "com.example.BarPlugin";
+        var actual = defaultBuilder.addPlugin(fooPlugin).addPlugin(barPlugin)
+                .finish();
+        var expected = new TestParserConfig(defaultClassPathElements,
+                defaultEndpointAnnotationName, defaultOpenAPI,
+                Set.of(fooPlugin, barPlugin));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_AllowAdjustingOpenAPI() {
+        Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo()
+                .setTitle("My Application");
+        var actual = defaultBuilder.adjustOpenAPI(adjuster).finish();
+
+        adjuster.accept(defaultOpenAPI);
+        var expected = new TestParserConfig(defaultClassPathElements,
+                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_AllowPreservingAlreadySetProperties() {
+        var actual = defaultBuilder.classPath(List.of("somepath"), false)
+                .endpointAnnotation("com.example.Endpoint", false).finish();
+        var expected = new TestParserConfig(defaultClassPathElements,
+                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -69,53 +116,6 @@ public class ParserConfigTests {
             throws URISyntaxException, IOException {
         testOpenAPISourceFile("openapi-base.yml",
                 ParserConfig.OpenAPIFileType.YAML);
-    }
-
-    @Test
-    public void should_AllowPreservingAlreadySetProperties() {
-        var actual = defaultBuilder.classPath(List.of("somepath"), false)
-                .endpointAnnotation("com.example.Endpoint", false).finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void should_AllowAddingPluginsOneByOne() {
-        var fooPlugin = "com.example.FooPlugin";
-        var barPlugin = "com.example.BarPlugin";
-        var actual = defaultBuilder.addPlugin(fooPlugin).addPlugin(barPlugin)
-                .finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI,
-                Set.of(fooPlugin, barPlugin));
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void should_AllowAddingPluginsAsCollection() {
-        var plugins = List.of("com.example.FooPlugin", "com.example.BarPlugin");
-        var actual = defaultBuilder.plugins(plugins).finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI,
-                new HashSet<>(plugins));
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void should_AllowAdjustingOpenAPI() {
-        Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo()
-                .setTitle("My Application");
-        var actual = defaultBuilder.adjustOpenAPI(adjuster).finish();
-
-        adjuster.accept(defaultOpenAPI);
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
-
-        assertEquals(expected, actual);
     }
 
     @Test

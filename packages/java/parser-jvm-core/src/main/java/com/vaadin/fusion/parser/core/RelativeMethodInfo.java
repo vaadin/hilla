@@ -13,8 +13,8 @@ import io.github.classgraph.MethodInfo;
 
 public final class RelativeMethodInfo
         extends AbstractRelative<MethodInfo, RelativeClassInfo> {
-    private final RelativeTypeSignature resultType;
     private final List<RelativeMethodParameterInfo> parameters;
+    private final RelativeTypeSignature resultType;
 
     public RelativeMethodInfo(@Nonnull MethodInfo origin,
             @Nonnull RelativeClassInfo parent) {
@@ -30,7 +30,9 @@ public final class RelativeMethodInfo
 
     @Override
     public Stream<RelativeClassInfo> getDependenciesStream() {
-        return Stream.of(getResultDependenciesStream(), getParameterDependenciesStream())
+        return Stream
+                .of(getResultDependenciesStream(),
+                        getParameterDependenciesStream())
                 .flatMap(Function.identity()).distinct();
     }
 

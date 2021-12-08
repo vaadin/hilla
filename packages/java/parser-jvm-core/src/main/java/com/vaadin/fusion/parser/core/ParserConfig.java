@@ -92,7 +92,8 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder classPath(@Nonnull Collection<String> classPathElements, boolean override) {
+        public Builder classPath(@Nonnull Collection<String> classPathElements,
+                boolean override) {
             Objects.requireNonNull(classPathElements);
 
             actions.add(config -> {
@@ -105,7 +106,8 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder classPath(@Nonnull Collection<String> classPathElements) {
+        public Builder classPath(
+                @Nonnull Collection<String> classPathElements) {
             return classPath(classPathElements, true);
         }
 
@@ -129,21 +131,6 @@ public final class ParserConfig extends AbstractParserConfig {
             return endpointAnnotation(annotationQualifiedName, true);
         }
 
-        @Nonnull
-        public Builder openAPISource(@Nonnull String src,
-                @Nonnull OpenAPIFileType type) {
-            openAPISpec = new FileSource(Objects.requireNonNull(src),
-                    Objects.requireNonNull(type));
-            return this;
-        }
-
-        @Nonnull
-        public Builder plugins(@Nonnull Collection<String> plugins) {
-            Objects.requireNonNull(plugins);
-            actions.add(config -> config.plugins = new LinkedHashSet<>(plugins));
-            return this;
-        }
-
         public ParserConfig finish() {
             logger.debug("Building JVM Parser config.");
             var config = new ParserConfig();
@@ -160,6 +147,22 @@ public final class ParserConfig extends AbstractParserConfig {
                     "[JVM Parser] endpointAnnotationName is not provided.");
 
             return config;
+        }
+
+        @Nonnull
+        public Builder openAPISource(@Nonnull String src,
+                @Nonnull OpenAPIFileType type) {
+            openAPISpec = new FileSource(Objects.requireNonNull(src),
+                    Objects.requireNonNull(type));
+            return this;
+        }
+
+        @Nonnull
+        public Builder plugins(@Nonnull Collection<String> plugins) {
+            Objects.requireNonNull(plugins);
+            actions.add(
+                    config -> config.plugins = new LinkedHashSet<>(plugins));
+            return this;
         }
 
         private OpenAPI prepareOpenAPI() {
@@ -194,12 +197,12 @@ public final class ParserConfig extends AbstractParserConfig {
             this.type = type;
         }
 
-        public OpenAPIFileType getType() {
-            return type;
-        }
-
         public String getSrc() {
             return src;
+        }
+
+        public OpenAPIFileType getType() {
+            return type;
         }
     }
 
