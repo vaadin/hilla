@@ -50,8 +50,8 @@ export default abstract class EndpointMethodOperationProcessor {
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
   readonly #context: BackbonePluginContext;
   readonly #dependencies: DependencyManager;
-  readonly #endpointName: string;
   readonly #endpointMethodName: string;
+  readonly #endpointName: string;
   readonly #operation: EndpointMethodOperation;
 
   public constructor(

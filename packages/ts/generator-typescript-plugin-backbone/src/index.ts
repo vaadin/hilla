@@ -14,11 +14,9 @@ export enum BackbonePluginSourceType {
 
 export default class BackbonePlugin extends Plugin {
   public static readonly BACKBONE_PLUGIN_FILE_TAGS = 'BACKBONE_PLUGIN_FILE_TAGS';
-
+  public declare ['constructor']: typeof BackbonePlugin;
   readonly #context: BackbonePluginContext;
   readonly #tags = new WeakMap<SourceFile, BackbonePluginSourceType>();
-
-  public declare ['constructor']: typeof BackbonePlugin;
 
   public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
     super(resolver, logger);
