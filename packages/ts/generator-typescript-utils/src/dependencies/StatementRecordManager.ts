@@ -20,9 +20,8 @@ export default abstract class StatementRecordManager<T extends Statement> implem
     };
   }
 
-  readonly #collator: Intl.Collator;
-
   public declare ['constructor']: typeof StatementRecordManager;
+  readonly #collator: Intl.Collator;
 
   public constructor(collator: Intl.Collator) {
     this.#collator = collator;

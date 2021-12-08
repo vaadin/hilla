@@ -72,21 +72,6 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
     this.#map.set(path, null);
   }
 
-  public override *statementRecords(): IterableIterator<StatementRecord<ExportDeclaration>> {
-    for (const [path, id] of this.#map) {
-      yield [
-        path,
-        ts.factory.createExportDeclaration(
-          undefined,
-          undefined,
-          false,
-          id !== null ? ts.factory.createNamespaceExport(id) : undefined,
-          ts.factory.createStringLiteral(path),
-        ),
-      ];
-    }
-  }
-
   public getIdentifier(path: string): Identifier | null | undefined {
     return this.#map.get(path);
   }
@@ -105,6 +90,21 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
 
   public paths(): IterableIterator<string> {
     return this.#map.keys();
+  }
+
+  public override *statementRecords(): IterableIterator<StatementRecord<ExportDeclaration>> {
+    for (const [path, id] of this.#map) {
+      yield [
+        path,
+        ts.factory.createExportDeclaration(
+          undefined,
+          undefined,
+          false,
+          id !== null ? ts.factory.createNamespaceExport(id) : undefined,
+          ts.factory.createStringLiteral(path),
+        ),
+      ];
+    }
   }
 }
 

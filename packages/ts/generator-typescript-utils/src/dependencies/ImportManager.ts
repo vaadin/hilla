@@ -26,32 +26,6 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
-    for (const [path, specifiers] of this.#map) {
-      const names = [...specifiers.keys()];
-      names.sort(this.#collator.compare);
-
-      yield [
-        path,
-        ts.factory.createImportDeclaration(
-          undefined,
-          undefined,
-          ts.factory.createImportClause(
-            false,
-            undefined,
-            ts.factory.createNamedImports(
-              names.map((name) => {
-                const { id, isType } = specifiers.get(name)!;
-                return ts.factory.createImportSpecifier(isType, ts.factory.createIdentifier(name), id);
-              }),
-            ),
-          ),
-          ts.factory.createStringLiteral(path),
-        ),
-      ];
-    }
-  }
-
   public getIdentifier(path: string, specifier: string): Identifier | undefined {
     return this.#map.get(path)?.get(specifier)?.id;
   }
@@ -79,6 +53,32 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
       }
     }
   }
+
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+    for (const [path, specifiers] of this.#map) {
+      const names = [...specifiers.keys()];
+      names.sort(this.#collator.compare);
+
+      yield [
+        path,
+        ts.factory.createImportDeclaration(
+          undefined,
+          undefined,
+          ts.factory.createImportClause(
+            false,
+            undefined,
+            ts.factory.createNamedImports(
+              names.map((name) => {
+                const { id, isType } = specifiers.get(name)!;
+                return ts.factory.createImportSpecifier(isType, ts.factory.createIdentifier(name), id);
+              }),
+            ),
+          ),
+          ts.factory.createStringLiteral(path),
+        ),
+      ];
+    }
+  }
 }
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
@@ -88,20 +88,6 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     const id = uniqueId ?? ts.factory.createUniqueName(name);
     this.#map.set(path, id);
     return id;
-  }
-
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
-    for (const [path, id] of this.#map) {
-      yield [
-        path,
-        ts.factory.createImportDeclaration(
-          undefined,
-          undefined,
-          ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
-          ts.factory.createStringLiteral(path),
-        ),
-      ];
-    }
   }
 
   public getIdentifier(path: string): Identifier | undefined {
@@ -117,6 +103,20 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
   public paths(): IterableIterator<string> {
     return this.#map.keys();
   }
+
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+    for (const [path, id] of this.#map) {
+      yield [
+        path,
+        ts.factory.createImportDeclaration(
+          undefined,
+          undefined,
+          ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
+          ts.factory.createStringLiteral(path),
+        ),
+      ];
+    }
+  }
 }
 
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
@@ -126,20 +126,6 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
     const id = uniqueId ?? ts.factory.createUniqueName(name);
     this.#map.set(path, createDependencyRecord(id, isType));
     return id;
-  }
-
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
-    for (const [path, { id, isType }] of this.#map) {
-      yield [
-        path,
-        ts.factory.createImportDeclaration(
-          undefined,
-          undefined,
-          ts.factory.createImportClause(isType, id, undefined),
-          ts.factory.createStringLiteral(path),
-        ),
-      ];
-    }
   }
 
   public getIdentifier(path: string): Identifier | undefined {
@@ -158,6 +144,20 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   public paths(): IterableIterator<string> {
     return this.#map.keys();
+  }
+
+  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+    for (const [path, { id, isType }] of this.#map) {
+      yield [
+        path,
+        ts.factory.createImportDeclaration(
+          undefined,
+          undefined,
+          ts.factory.createImportClause(isType, id, undefined),
+          ts.factory.createStringLiteral(path),
+        ),
+      ];
+    }
   }
 }
 

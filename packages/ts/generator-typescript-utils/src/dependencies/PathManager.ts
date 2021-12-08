@@ -20,10 +20,6 @@ export default class PathManager {
     return path;
   }
 
-  public createTSAliasModulePath(path: string, root = this.aliasRoot) {
-    return root ? `${root}/${path}` : path;
-  }
-
   public createRelativePath(path: string, relativeTo = '.') {
     let result = path;
 
@@ -33,5 +29,9 @@ export default class PathManager {
 
     result = posix.relative(relativeTo, result);
     return result.startsWith('.') ? result : `./${result}`;
+  }
+
+  public createTSAliasModulePath(path: string, root = this.aliasRoot) {
+    return root ? `${root}/${path}` : path;
   }
 }
