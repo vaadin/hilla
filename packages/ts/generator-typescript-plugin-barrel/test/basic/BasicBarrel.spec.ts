@@ -26,6 +26,6 @@ describe('BarrelPlugin', () => {
     const barrelFile = files[files.length - 1];
 
     await expect(await barrelFile.text()).toMatchSnapshot(`barrel`, import.meta.url);
-    expect(barrelFile.name).to.equal(`./endpoints.ts`);
+    expect(barrelFile.name).to.equal(`endpoints.ts`);
   });
 });
