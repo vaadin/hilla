@@ -4,6 +4,7 @@ import { mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { createRequire } from 'module';
 import { dirname, isAbsolute, join, resolve } from 'path';
 import type Pino from 'pino';
+import { pathToFileURL } from 'url';
 import GeneratorIOException from './GeneratorIOException.js';
 
 export default class GeneratorIO {
@@ -29,8 +30,8 @@ export default class GeneratorIO {
 
   public async loadPlugin(modulePath: string) {
     this.#logger.debug(`Loading plugin: ${modulePath}`);
-    const resolved = this.#require.resolve(modulePath);
-    const cls: PluginConstructor = (await import(resolved)).default;
+    const resolved = pathToFileURL(this.#require.resolve(modulePath));
+    const cls: PluginConstructor = (await import(resolved.toString())).default;
 
     if (!Object.prototype.isPrototypeOf.call(Plugin, cls)) {
       throw new GeneratorIOException(`Plugin '${modulePath}' is not an instance of a Plugin class`);
