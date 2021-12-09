@@ -18,10 +18,7 @@ export default class ClientProcessor {
     this.#logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
-    const clientImportId = imports.named.add(
-      paths.createBareModulePath('@vaadin/flow-frontend', true),
-      'ConnectClient',
-    );
+    const clientClassId = imports.named.add(paths.createBareModulePath('@vaadin/flow-frontend', true), 'ConnectClient');
 
     const clientVarId = ts.factory.createUniqueName('client');
     exports.default.set(clientVarId);
@@ -34,7 +31,7 @@ export default class ClientProcessor {
             clientVarId,
             undefined,
             undefined,
-            ts.factory.createNewExpression(clientImportId, undefined, [
+            ts.factory.createNewExpression(clientClassId, undefined, [
               ts.factory.createObjectLiteralExpression(
                 [
                   ts.factory.createPropertyAssignment(
