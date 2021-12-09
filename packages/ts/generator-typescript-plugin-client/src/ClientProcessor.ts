@@ -19,7 +19,10 @@ export default class ClientProcessor {
     this.#logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
-    const clientClassId = imports.named.add(paths.createBareModulePath('@vaadin/flow-frontend', true), 'ConnectClient');
+    const clientClassId = imports.named.add(
+      paths.createBareModulePath('@vaadin/fusion-frontend', true),
+      'ConnectClient',
+    );
 
     const clientVarId = createFullyUniqueIdentifier('client');
     exports.default.set(clientVarId);
