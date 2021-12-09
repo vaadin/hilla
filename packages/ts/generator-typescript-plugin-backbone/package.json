@@ -11,7 +11,7 @@
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
-    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "test:update": "npm run test -- --update",
