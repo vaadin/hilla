@@ -24,7 +24,7 @@ describe('BackbonePlugin', () => {
       await expect(await modelEntityFile.text()).toMatchSnapshot('Model.entity', import.meta.url);
       await expect(await parentModelEntityFile.text()).toMatchSnapshot('ParentModel.entity', import.meta.url);
       await expect(await grandParentModelEntityFile.text()).toMatchSnapshot('GrandParentModel.entity', import.meta.url);
-      expect(endpointFile.name).to.equal(`./${sectionName}Endpoint.ts`);
+      expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
       expect(modelEntityFile.name).to.equal(`${modelSectionPath}/ComplexHierarchyModel.ts`);
       expect(parentModelEntityFile.name).to.equal(`${modelSectionPath}/ComplexHierarchyParentModel.ts`);
       expect(grandParentModelEntityFile.name).to.equal(`${modelSectionPath}/ComplexHierarchyGrandParentModel.ts`);

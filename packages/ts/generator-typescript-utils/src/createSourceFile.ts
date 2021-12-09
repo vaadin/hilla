@@ -1,19 +1,7 @@
 import ts, { SourceFile, Statement } from 'typescript';
 
 export default function createSourceFile(statements: readonly Statement[], fileName: string): SourceFile {
-  const sourceFile = ts.factory.createSourceFile(
-    statements,
-    ts.factory.createToken(ts.SyntaxKind.EndOfFileToken),
-    ts.NodeFlags.None,
-  );
+  const sourceFile = ts.createSourceFile(fileName, '', ts.ScriptTarget.ES2019, undefined, ts.ScriptKind.TS);
 
-  sourceFile.fileName = fileName;
-
-  // Fixes the `createUniqueName` bug that causes the following error:
-  //
-  // TypeError: Cannot read properties of undefined (reading 'has')
-  //   at Object.isFileLevelUniqueName
-  (sourceFile as any).identifiers = new Map();
-
-  return sourceFile;
+  return ts.factory.updateSourceFile(sourceFile, statements);
 }

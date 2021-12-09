@@ -20,7 +20,7 @@ describe('BackbonePlugin', () => {
 
       const [endpointFile] = files;
       await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
-      expect(endpointFile.name).to.equal(`./${sectionName}Endpoint.ts`);
+      expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });
 });
