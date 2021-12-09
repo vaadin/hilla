@@ -34,6 +34,9 @@
     "./testing/snapshotMatcher.js": {
       "default": "./testing/snapshotMatcher.js"
     },
+    "./createFullyUniqueIdentifier.js": {
+      "default": "./createFullyUniqueIdentifier.js"
+    },
     "./createLogger.js": {
       "default": "./createLogger.js"
     },

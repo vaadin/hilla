@@ -1,5 +1,6 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
 import ts from 'typescript';
+import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
@@ -15,7 +16,7 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
   }
 
   public add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const record = createDependencyRecord(uniqueId ?? ts.factory.createUniqueName(specifier), isType);
+    const record = createDependencyRecord(uniqueId ?? createFullyUniqueIdentifier(specifier), isType);
 
     if (this.#map.has(path)) {
       this.#map.get(path)!.set(specifier, record);
@@ -85,7 +86,7 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
   readonly #map = new Map<string, Identifier>();
 
   public add(path: string, name: string, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? ts.factory.createUniqueName(name);
+    const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, id);
     return id;
   }
@@ -123,7 +124,7 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
   readonly #map = new Map<string, DependencyRecord>();
 
   public add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? ts.factory.createUniqueName(name);
+    const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, createDependencyRecord(id, isType));
     return id;
   }

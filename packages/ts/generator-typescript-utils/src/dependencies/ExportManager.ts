@@ -1,4 +1,5 @@
 import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
+import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
@@ -13,7 +14,7 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
   }
 
   public add(name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? ts.factory.createUniqueName(name);
+    const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(name, createDependencyRecord(id, isType));
     return id;
   }
@@ -63,7 +64,7 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
   readonly #map = new Map<string, Identifier | null>();
 
   public addCombined(path: string, name: string, uniqueId?: Identifier): Identifier {
-    const id = uniqueId ?? ts.factory.createUniqueName(name);
+    const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, id);
     return id;
   }

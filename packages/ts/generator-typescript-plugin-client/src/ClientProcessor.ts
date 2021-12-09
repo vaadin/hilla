@@ -1,3 +1,4 @@
+import createFullyUniqueIdentifier from '@vaadin/generator-typescript-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
@@ -20,7 +21,7 @@ export default class ClientProcessor {
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientClassId = imports.named.add(paths.createBareModulePath('@vaadin/flow-frontend', true), 'ConnectClient');
 
-    const clientVarId = ts.factory.createUniqueName('client');
+    const clientVarId = createFullyUniqueIdentifier('client');
     exports.default.set(clientVarId);
 
     const declaration = ts.factory.createVariableStatement(
