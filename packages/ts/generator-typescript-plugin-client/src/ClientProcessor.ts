@@ -19,7 +19,7 @@ export default class ClientProcessor {
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientImportId = imports.named.add(
-      paths.createBareModulePath('@vaadin/flow-frontend/Connect', true),
+      paths.createBareModulePath('@vaadin/flow-frontend', true),
       'ConnectClient',
     );
 
