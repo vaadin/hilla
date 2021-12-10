@@ -6,6 +6,7 @@ import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
+import { FormEntityProcessor } from './FormEntityProcessor.js';
 
 export enum BackbonePluginSourceType {
   Endpoint = 'endpoint',
@@ -72,9 +73,10 @@ export default class BackbonePlugin extends Plugin {
     this.logger.debug('Processing entities');
 
     return storage.api.components?.schemas
-      ? Object.entries(storage.api.components?.schemas).map(([name, component]) =>
+      ? Object.entries(storage.api.components?.schemas).flatMap(([name, component]) => [
           new EntityProcessor(name, component, this.#context).process(),
-        )
+          new FormEntityProcessor(name, component, this.#context).process(),
+        ])
       : [];
   }
 }

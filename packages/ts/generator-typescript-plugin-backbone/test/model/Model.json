@@ -1,0 +1,398 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Vaadin application",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:8080/connect",
+    "description" : "Vaadin backend"
+  } ],
+  "tags" : [ {
+    "name" : "TsFormEndpoint",
+    "description" : "",
+    "x-vaadin-file-path" : "file:///Users/antonplatonov/Work/2019/flow/fusion-endpoint/src/test/java/com/vaadin/fusion/generator/tsmodel/TsFormEndpoint.java"
+  } ],
+  "paths" : {
+    "/TsFormEndpoint/getEntity" : {
+      "post" : {
+        "tags" : [ "TsFormEndpoint" ],
+        "operationId" : "TsFormEndpoint_getEntity_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "description" : "",
+                  "nullable" : true,
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+                  } ]
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "vaadin-connect-oauth2" : [ ]
+        } ]
+      }
+    },
+    "/TsFormEndpoint/stringNullable" : {
+      "post" : {
+        "tags" : [ "TsFormEndpoint" ],
+        "operationId" : "TsFormEndpoint_stringNullable_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "description" : "",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "vaadin-connect-oauth2" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntityId"
+        }, {
+          "required" : [ "bool", "decimalMax", "decimalMin", "negative", "negativeOrZero", "nonNullableList", "nonNullableMatrix", "nonNullableString", "positive", "positiveOrZero" ],
+          "type" : "object",
+          "properties" : {
+            "myId" : {
+              "type" : "number"
+            },
+            "foo" : {
+              "type" : "string"
+            },
+            "bar" : {
+              "allOf" : [ {
+                "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyBaz"
+              } ]
+            },
+            "baz" : {
+              "type" : "array",
+              "items" : {
+                "nullable" : true,
+                "allOf" : [ {
+                  "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyBaz"
+                } ]
+              }
+            },
+            "boolWrapper" : {
+              "type" : "boolean"
+            },
+            "bool" : {
+              "type" : "boolean"
+            },
+            "list" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "nullable" : true
+              },
+              "x-annotations" : [ "NotEmpty()" ]
+            },
+            "email" : {
+              "type" : "string",
+              "x-annotations" : [ "Email({message:\"foo\"})" ]
+            },
+            "isNull" : {
+              "type" : "string",
+              "x-annotations" : [ "Null()" ]
+            },
+            "notNull" : {
+              "type" : "string",
+              "x-annotations" : [ "NotNull()" ]
+            },
+            "notEmpty" : {
+              "type" : "string",
+              "x-annotations" : [ "NotEmpty()", "NotNull()" ]
+            },
+            "notNullEntity" : {
+              "allOf" : [ {
+                "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+              } ],
+              "x-annotations" : [ "NotNull()" ]
+            },
+            "notBlank" : {
+              "type" : "string",
+              "x-annotations" : [ "NotBlank()" ]
+            },
+            "assertTrue" : {
+              "type" : "string",
+              "x-annotations" : [ "AssertTrue()" ]
+            },
+            "assertFalse" : {
+              "type" : "string",
+              "x-annotations" : [ "AssertFalse()" ]
+            },
+            "min" : {
+              "type" : "number",
+              "x-annotations" : [ "Min({value:1, message:\"foo\"})" ]
+            },
+            "max" : {
+              "type" : "number",
+              "x-annotations" : [ "Max(2)" ]
+            },
+            "decimalMin" : {
+              "type" : "number",
+              "x-annotations" : [ "DecimalMin(\"0.01\")" ]
+            },
+            "decimalMax" : {
+              "type" : "number",
+              "x-annotations" : [ "DecimalMax({value:\"0.01\", inclusive:false})" ]
+            },
+            "negative" : {
+              "type" : "number",
+              "x-annotations" : [ "Negative()" ]
+            },
+            "negativeOrZero" : {
+              "type" : "number",
+              "x-annotations" : [ "NegativeOrZero()" ]
+            },
+            "positive" : {
+              "type" : "number",
+              "x-annotations" : [ "Positive()" ]
+            },
+            "positiveOrZero" : {
+              "type" : "number",
+              "x-annotations" : [ "PositiveOrZero()" ]
+            },
+            "size" : {
+              "type" : "string",
+              "x-annotations" : [ "Size()" ]
+            },
+            "size1" : {
+              "type" : "string",
+              "x-annotations" : [ "Size({min:1})" ]
+            },
+            "digits" : {
+              "type" : "string",
+              "x-annotations" : [ "Digits({integer:5, fraction:2})" ]
+            },
+            "past" : {
+              "type" : "string",
+              "format" : "date",
+              "x-annotations" : [ "Past()" ]
+            },
+            "future" : {
+              "type" : "string",
+              "format" : "date",
+              "x-annotations" : [ "Future()" ]
+            },
+            "localTime" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "pattern" : {
+              "type" : "string",
+              "x-annotations" : [ "Pattern({regexp:\"\\\\d+\\\\..+\"})" ]
+            },
+            "children" : {
+              "type" : "array",
+              "items" : {
+                "nullable" : true,
+                "allOf" : [ {
+                  "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+                } ]
+              }
+            },
+            "stringArray" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "nullable" : true
+              }
+            },
+            "numberMatrix" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "number",
+                  "nullable" : true
+                }
+              }
+            },
+            "entityMatrix" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "nullable" : true,
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+                  } ]
+                }
+              }
+            },
+            "stringMap" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "string",
+                "nullable" : true
+              }
+            },
+            "entityMap" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "nullable" : true,
+                "allOf" : [ {
+                  "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyBaz"
+                } ]
+              }
+            },
+            "optionalString" : {
+              "type" : "string"
+            },
+            "optionalEntity" : {
+              "allOf" : [ {
+                "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+              } ]
+            },
+            "optionalList" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "nullable" : true
+              }
+            },
+            "optionalMatrix" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              }
+            },
+            "nonNullableString" : {
+              "type" : "string"
+            },
+            "nonNullableList" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "nullable" : true
+              }
+            },
+            "nonNullableMatrix" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              }
+            },
+            "mapWithList" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "string",
+                  "nullable" : true
+                }
+              }
+            },
+            "complexMap" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "array",
+                  "nullable" : true,
+                  "items" : {
+                    "nullable" : true,
+                    "allOf" : [ {
+                      "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntity"
+                    } ]
+                  }
+                },
+                "nullable" : true
+              }
+            },
+            "nestedArrays" : {
+              "type" : "array",
+              "items" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "array",
+                    "nullable" : true,
+                    "items" : {
+                      "type" : "string",
+                      "nullable" : true
+                    }
+                  },
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        } ],
+        "x-vaadin-file-path" : "file:///Users/antonplatonov/Work/2019/flow/fusion-endpoint/src/test/java/com/vaadin/fusion/generator/tsmodel/TsFormEndpoint.java"
+      },
+      "com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntityId" : {
+        "type" : "object",
+        "properties" : {
+          "Id" : {
+            "type" : "number",
+            "x-annotations" : [ "NotNull()" ]
+          }
+        },
+        "x-vaadin-file-path" : "file:///Users/antonplatonov/Work/2019/flow/fusion-endpoint/src/test/java/com/vaadin/fusion/generator/tsmodel/TsFormEndpoint.java"
+      },
+      "com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyBaz" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/com.vaadin.fusion.generator.tsmodel.TsFormEndpoint.MyEntityId"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "lorem" : {
+              "type" : "string"
+            },
+            "ipsum" : {
+              "type" : "number"
+            }
+          }
+        } ],
+        "x-vaadin-file-path" : "file:///Users/antonplatonov/Work/2019/flow/fusion-endpoint/src/test/java/com/vaadin/fusion/generator/tsmodel/TsFormEndpoint.java"
+      }
+    },
+    "securitySchemes" : {
+      "vaadin-connect-oauth2" : {
+        "type" : "oauth2",
+        "flows" : {
+          "password" : {
+            "tokenUrl" : "/oauth/token",
+            "scopes" : { }
+          }
+        }
+      }
+    }
+  }
+}
