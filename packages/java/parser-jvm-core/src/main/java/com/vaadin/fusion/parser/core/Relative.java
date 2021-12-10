@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 public interface Relative<T extends Relative<?>> {
     Object get();
 
-    Optional<T> getParent();
-
     default List<RelativeClassInfo> getDependencies() {
         return getDependenciesStream().collect(Collectors.toList());
     }
@@ -17,4 +15,6 @@ public interface Relative<T extends Relative<?>> {
     default Stream<RelativeClassInfo> getDependenciesStream() {
         return Stream.empty();
     }
+
+    Optional<T> getParent();
 }

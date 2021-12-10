@@ -1,5 +1,3 @@
-import type { TypeNode } from 'typescript';
-import ts from 'typescript';
 import {
   ArraySchema,
   convertReferenceSchemaToPath,
@@ -19,7 +17,9 @@ import {
   ReferenceSchema,
   Schema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from './DependencyManager.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import type { TypeNode } from 'typescript';
+import ts from 'typescript';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -52,7 +52,7 @@ function unwrapPossiblyNullableSchema(schema: Schema): NonComposedSchema {
 }
 
 export default class TypeSchemaProcessor {
-  public ['constructor']: typeof TypeSchemaProcessor;
+  public declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
 
@@ -108,12 +108,12 @@ export default class TypeSchemaProcessor {
   }
 
   #processReference(schema: ReferenceSchema): TypeNode {
-    const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = convertReferenceSchemaToPath(schema);
+    const { imports, paths } = this.#dependencies;
 
-    const identifier =
-      this.#dependencies.imports.getIdentifier(specifier, path) ??
-      this.#dependencies.imports.register(specifier, path, true);
+    const specifier = convertReferenceSchemaToSpecifier(schema);
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+
+    const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
 
     return ts.factory.createTypeReferenceNode(identifier);
   }

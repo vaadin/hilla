@@ -8,8 +8,8 @@ export type FileOptions = Readonly<
 >;
 
 export default class File extends Blob {
-  readonly #name: string;
   readonly #lastModified?: number;
+  readonly #name: string;
 
   public constructor(fileBits: Array<BinaryLike | Blob>, fileName: string, options?: FileOptions) {
     super(fileBits, options);

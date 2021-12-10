@@ -19,6 +19,24 @@ import java.util.List;
 
 @Endpoint
 public class EnumTypeEndpoint {
+    private EnumEntity value = EnumEntity.ENUM1;
+
+    public EnumEntity echoEnum(EnumEntity value) {
+        return value;
+    }
+
+    public List<EnumEntity> echoListEnum(List<EnumEntity> enumList) {
+        return enumList;
+    }
+
+    public EnumEntity getEnum() {
+        return value;
+    }
+
+    public void setEnum(EnumEntity value) {
+        this.value = value;
+    }
+
     public enum EnumEntity {
         ENUM1(1), ENUM2(2), ENUM_2(2), HELLO_WORLD(3), _HELLO(
                 4), MANY_MANY_WORDS(5);
@@ -32,23 +50,5 @@ public class EnumTypeEndpoint {
         public int getValue() {
             return value;
         }
-    }
-
-    private EnumEntity value = EnumEntity.ENUM1;
-
-    public EnumEntity getEnum() {
-        return value;
-    }
-
-    public void setEnum(EnumEntity value) {
-        this.value = value;
-    }
-
-    public EnumEntity echoEnum(EnumEntity value) {
-        return value;
-    }
-
-    public List<EnumEntity> echoListEnum(List<EnumEntity> enumList) {
-        return enumList;
     }
 }

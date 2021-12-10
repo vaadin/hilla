@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules",
-    "lint": "eslint --fix src/**/*.ts test/**/*.ts",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "web-test-runner \"test/**/*.test.ts\" --config ../../../web-test-runner.config.js",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",

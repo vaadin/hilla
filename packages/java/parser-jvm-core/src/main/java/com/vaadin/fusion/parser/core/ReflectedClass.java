@@ -14,9 +14,9 @@ import io.github.classgraph.ClassRefTypeSignature;
 
 public final class ReflectedClass {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
-        LocalDate.class };
+            LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-        Instant.class, LocalTime.class };
+            Instant.class, LocalTime.class };
 
     private final Class<?> origin;
 
@@ -62,12 +62,12 @@ public final class ReflectedClass {
 
     public boolean isDate() {
         return Arrays.stream(DATE_CLASSES)
-            .anyMatch(cls -> cls.isAssignableFrom(origin));
+                .anyMatch(cls -> cls.isAssignableFrom(origin));
     }
 
     public boolean isDateTime() {
         return Arrays.stream(DATE_TIME_CLASSES)
-            .anyMatch(cls -> cls.isAssignableFrom(origin));
+                .anyMatch(cls -> cls.isAssignableFrom(origin));
     }
 
     public boolean isDouble() {

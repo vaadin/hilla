@@ -14,6 +14,10 @@
   <name>Fusion JVM Parser Core</name>
   <packaging>jar</packaging>
 
+  <properties>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -35,7 +39,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.132</version>
+      <version>4.8.137</version>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>

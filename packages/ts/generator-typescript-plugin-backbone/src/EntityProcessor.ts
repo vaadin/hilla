@@ -1,5 +1,3 @@
-import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { TypeElement } from 'typescript';
 import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
@@ -17,10 +15,13 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@vaadin/generator-typescript-core/utils.js';
-import DependencyManager from './DependencyManager.js';
+import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
+import ts, { TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
-import { createSourceFile } from './utils.js';
 
 const exportDefaultModifiers = [
   ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
@@ -30,10 +31,11 @@ const exportDefaultModifiers = [
 export class EntityProcessor {
   readonly #component: Schema;
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager();
+  readonly #dependencies = new DependencyManager(new PathManager());
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #path: string;
+  readonly #sourcePaths = new PathManager('ts');
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
     this.#component = component;
@@ -45,18 +47,48 @@ export class EntityProcessor {
 
   public process(): SourceFile {
     this.#context.logger.debug(`Processing entity: ${this.#name}`);
+
     const declaration = isEnumSchema(this.#component)
       ? this.#processEnum(this.#component)
       : this.#processExtendedClass(this.#component);
 
+    const statements = declaration ? [declaration] : [];
+
     const { imports, exports } = this.#dependencies;
 
-    const importStatements = imports.toTS();
-    const exportStatement = exports.toTS();
-
     return createSourceFile(
-      [...importStatements, declaration, exportStatement].filter(Boolean) as readonly Statement[],
-      this.#path,
+      [...imports.toCode(), ...statements, ...exports.toCode()],
+      this.#sourcePaths.createRelativePath(this.#path),
+    );
+  }
+
+  #processClass(schema: Schema): InterfaceDeclaration | undefined {
+    if (!isObjectSchema(schema)) {
+      this.#context.logger.error(schema, `The component is not an object: ${this.#fullyQualifiedName}`);
+      return undefined;
+    }
+
+    if (isEmptyObject(schema)) {
+      this.#context.logger.error(`The component has no properties: ${this.#fullyQualifiedName}`);
+      return undefined;
+    }
+
+    return ts.factory.createInterfaceDeclaration(
+      undefined,
+      exportDefaultModifiers,
+      this.#name,
+      undefined,
+      undefined,
+      this.#processTypeElements(schema as NonEmptyObjectSchema),
+    );
+  }
+
+  #processEnum({ enum: members }: EnumSchema): Statement {
+    return ts.factory.createEnumDeclaration(
+      undefined,
+      exportDefaultModifiers,
+      this.#name,
+      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
     );
   }
 
@@ -102,34 +134,13 @@ export class EntityProcessor {
     return this.#processClass(schema);
   }
 
-  #processClass(schema: Schema): InterfaceDeclaration | undefined {
-    if (!isObjectSchema(schema)) {
-      this.#context.logger.error(schema, `The component is not an object: ${this.#fullyQualifiedName}`);
-      return undefined;
-    }
+  #processParentClass(schema: ReferenceSchema): Identifier {
+    const { imports, paths } = this.#dependencies;
 
-    if (isEmptyObject(schema)) {
-      this.#context.logger.error(`The component has no properties: ${this.#fullyQualifiedName}`);
-      return undefined;
-    }
+    const specifier = convertReferenceSchemaToSpecifier(schema);
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
 
-    return ts.factory.createInterfaceDeclaration(
-      undefined,
-      exportDefaultModifiers,
-      this.#name,
-      undefined,
-      undefined,
-      this.#processTypeElements(schema as NonEmptyObjectSchema),
-    );
-  }
-
-  #processEnum({ enum: members }: EnumSchema): Statement {
-    return ts.factory.createEnumDeclaration(
-      undefined,
-      exportDefaultModifiers,
-      this.#name,
-      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
-    );
+    return imports.default.add(path, specifier, true);
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
@@ -143,12 +154,5 @@ export class EntityProcessor {
         type,
       );
     });
-  }
-
-  #processParentClass(schema: ReferenceSchema): Identifier {
-    const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = convertReferenceSchemaToPath(schema);
-
-    return this.#dependencies.imports.register(specifier, path, true);
   }
 }

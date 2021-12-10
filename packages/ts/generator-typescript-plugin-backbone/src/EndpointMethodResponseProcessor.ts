@@ -1,7 +1,7 @@
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
-import type DependencyManager from './DependencyManager.js';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';

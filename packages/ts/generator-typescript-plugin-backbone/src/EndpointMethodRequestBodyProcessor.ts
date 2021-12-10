@@ -1,14 +1,14 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
-import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
-import ts from 'typescript';
 import {
   isEmptyObject,
   isObjectSchema,
   NonEmptyObjectSchema,
   Schema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from './DependencyManager.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ReadonlyDeep } from 'type-fest';
+import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
+import ts from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';

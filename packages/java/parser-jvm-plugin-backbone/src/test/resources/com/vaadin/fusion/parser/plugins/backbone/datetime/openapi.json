@@ -1,50 +1,67 @@
 {
-  "openapi" : "3.0.1",
-  "info" : {
-    "title" : "Vaadin Application",
-    "version" : "1.0.0"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
   },
-  "servers" : [
+  "servers": [
     {
-      "url" : "http://localhost:8080/connect",
-      "description" : "Vaadin Backend"
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
     }
   ],
-  "tags" : [
+  "tags": [
     {
-      "name" : "DateTimeEndpoint"
+      "name": "DateTimeEndpoint"
     }
   ],
-  "paths" : {
-    "/DateTimeEndpoint/echoInstant" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoInstant_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "instant" : {
-                    "type" : "string",
-                    "format" : "date-time"
+  "paths": {
+    "/DateTimeEndpoint/echoCustomDate": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoCustomDate_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DateTimeEndpoint/echoDate": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoDate_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date"
                   }
                 }
               }
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date-time"
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date"
                 }
               }
             }
@@ -52,35 +69,33 @@
         }
       }
     },
-    "/DateTimeEndpoint/echoDate" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoDate_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "date" : {
-                    "type" : "string",
-                    "format" : "date"
+    "/DateTimeEndpoint/echoInstant": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoInstant_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instant": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               }
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date"
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               }
             }
@@ -88,153 +103,22 @@
         }
       }
     },
-    "/DateTimeEndpoint/echoLocalDate" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoLocalDate_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "localDate" : {
-                    "type" : "string",
-                    "format" : "date"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/DateTimeEndpoint/echoLocalDateTime" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoLocalDateTime_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "localDateTime" : {
-                    "type" : "string",
-                    "format" : "date-time"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date-time"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/DateTimeEndpoint/echoLocalTime" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoLocalTime_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "localTime" : {
-                    "type" : "string",
-                    "format" : "date-time"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date-time"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/DateTimeEndpoint/echoCustomDate" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoCustomDate_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "date"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/DateTimeEndpoint/echoListLocalDateTime" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoListLocalDateTime_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "localDateTimeList" : {
-                    "type" : "array",
-                    "nullable" : true,
-                    "items" : {
-                      "type" : "string",
-                      "format" : "date-time"
+    "/DateTimeEndpoint/echoListLocalDateTime": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoListLocalDateTime_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "localDateTimeList": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
                     }
                   }
                 }
@@ -242,17 +126,17 @@
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "type" : "string",
-                    "format" : "date-time"
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               }
@@ -261,43 +145,143 @@
         }
       }
     },
-    "/DateTimeEndpoint/echoMapInstant" : {
-      "post" : {
-        "tags" : [
-          "DateTimeEndpoint"
-        ],
-        "operationId" : "DateTimeEndpoint_echoMapInstant_POST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "properties" : {
-                  "mapInstant" : {
-                    "type" : "object",
-                    "additionalProperties" : {
-                      "type" : "string",
-                      "format" : "date-time"
-                    },
-                    "nullable" : true
+    "/DateTimeEndpoint/echoLocalDate": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoLocalDate_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "localDate": {
+                    "type": "string",
+                    "format": "date"
                   }
                 }
               }
             }
           }
         },
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "string",
-                    "format" : "date-time"
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DateTimeEndpoint/echoLocalDateTime": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoLocalDateTime_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "localDateTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DateTimeEndpoint/echoLocalTime": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoLocalTime_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "localTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DateTimeEndpoint/echoMapInstant": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoMapInstant_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mapInstant": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "date-time"
                   },
-                  "nullable" : true
+                  "nullable": true
                 }
               }
             }
@@ -306,5 +290,5 @@
       }
     }
   },
-  "components" : { }
+  "components": {}
 }

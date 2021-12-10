@@ -22,7 +22,8 @@ public class BasicPlugin implements Plugin {
 
     @Override
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-                        @Nonnull Collection<RelativeClassInfo> entities, SharedStorage storage) {
+            @Nonnull Collection<RelativeClassInfo> entities,
+            SharedStorage storage) {
         storage.getPluginStorage().put(STORAGE_KEY,
                 endpoints.stream().flatMap(endpoint -> Stream.of(
                         endpoint.getFieldsStream().map(RelativeFieldInfo::get)

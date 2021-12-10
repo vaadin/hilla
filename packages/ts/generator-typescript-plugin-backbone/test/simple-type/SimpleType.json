@@ -16,6 +16,30 @@
     }
   ],
   "paths": {
+    "/SimpleTypeEndpoint/getArray": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getArray_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/SimpleTypeEndpoint/getBoolean": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
@@ -94,18 +118,17 @@
         }
       }
     },
-    "/SimpleTypeEndpoint/getShort": {
+    "/SimpleTypeEndpoint/getChar": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getShort_POST",
+        "operationId": "SimpleTypeEndpoint_getChar_POST",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "integer",
-                  "format": "int32",
+                  "type": "string",
                   "nullable": false
                 }
               }
@@ -114,18 +137,97 @@
         }
       }
     },
-    "/SimpleTypeEndpoint/getShortWrapper": {
+    "/SimpleTypeEndpoint/getCharWrapper": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getShortWrapper_POST",
+        "operationId": "SimpleTypeEndpoint_getCharWrapper_POST",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "integer",
-                  "format": "int32",
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getDouble": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getDouble_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double",
+                  "nullable": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getDoubleWrapper": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getDoubleWrapper_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getFloat": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getFloat_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "float",
+                  "nullable": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getFloatWrapper": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getFloatWrapper_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "float",
                   "nullable": true
                 }
               }
@@ -214,18 +316,18 @@
         }
       }
     },
-    "/SimpleTypeEndpoint/getFloat": {
+    "/SimpleTypeEndpoint/getShort": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getFloat_POST",
+        "operationId": "SimpleTypeEndpoint_getShort_POST",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "number",
-                  "format": "float",
+                  "type": "integer",
+                  "format": "int32",
                   "nullable": false
                 }
               }
@@ -234,96 +336,18 @@
         }
       }
     },
-    "/SimpleTypeEndpoint/getFloatWrapper": {
+    "/SimpleTypeEndpoint/getShortWrapper": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getFloatWrapper_POST",
+        "operationId": "SimpleTypeEndpoint_getShortWrapper_POST",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "number",
-                  "format": "float",
-                  "nullable": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/getDouble": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getDouble_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "number",
-                  "format": "double",
-                  "nullable": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/getDoubleWrapper": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getDoubleWrapper_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "number",
-                  "format": "double",
-                  "nullable": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/getChar": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getChar_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "nullable": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/getCharWrapper": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getCharWrapper_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
+                  "type": "integer",
+                  "format": "int32",
                   "nullable": true
                 }
               }
@@ -344,30 +368,6 @@
                 "schema": {
                   "type": "string",
                   "nullable": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/getArray": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_getArray_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "type": "integer",
-                    "format": "int32",
-                    "nullable": false
-                  }
                 }
               }
             }

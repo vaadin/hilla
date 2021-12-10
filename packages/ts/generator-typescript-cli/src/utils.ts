@@ -1,22 +1,5 @@
-import Pino from 'pino';
+import { isAbsolute, resolve } from 'path';
 import type GeneratorIO from './GeneratorIO.js';
-
-export type LoggerOptions = Readonly<{
-  verbose?: boolean;
-}>;
-
-export function createLogger({ verbose }: LoggerOptions) {
-  return Pino({
-    name: 'tsgen',
-    level: verbose ? 'debug' : 'info',
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        ignore: 'time,hostname,pid',
-      },
-    },
-  });
-}
 
 export async function processInput(raw: string, io: GeneratorIO): Promise<string> {
   let result = raw;
@@ -29,5 +12,5 @@ export async function processInput(raw: string, io: GeneratorIO): Promise<string
     return result;
   }
 
-  return io.read(io.resolve(result));
+  return io.read(isAbsolute(result) ? result : resolve(io.cwd, result));
 }

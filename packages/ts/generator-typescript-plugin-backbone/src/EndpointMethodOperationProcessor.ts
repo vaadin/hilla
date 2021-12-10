@@ -1,13 +1,13 @@
+import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { CallExpression, Expression, Statement, TypeNode } from 'typescript';
 import ts from 'typescript';
-import type DependencyManager from './DependencyManager.js';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
-import { clientLib } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -50,8 +50,8 @@ export default abstract class EndpointMethodOperationProcessor {
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
   readonly #context: BackbonePluginContext;
   readonly #dependencies: DependencyManager;
-  readonly #endpointName: string;
   readonly #endpointMethodName: string;
+  readonly #endpointName: string;
   readonly #operation: EndpointMethodOperation;
 
   public constructor(
@@ -70,7 +70,8 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   }
 
   public process(): Statement | undefined {
-    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} — processing POST method`);
+    const { exports, imports, paths } = this.#dependencies;
+    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
 
     const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
@@ -78,8 +79,8 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       this.#context,
     ).process();
 
-    const methodIdentifier = this.#dependencies.exports.register(this.#endpointMethodName);
-    const clientLibIdentifier = this.#dependencies.imports.getIdentifier(clientLib.specifier, clientLib.path)!;
+    const methodIdentifier = exports.named.add(this.#endpointMethodName);
+    const clientLibIdentifier = imports.default.getIdentifier(paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME))!;
 
     const callExpression = ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),
@@ -106,7 +107,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   }
 
   #prepareResponseType(): TypeNode {
-    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} POST — processing response type`);
+    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} POST - processing response type`);
 
     const responseTypes = Object.entries(this.#operation.responses)
       .flatMap(([code, response]) =>

@@ -3,7 +3,6 @@ package com.vaadin.fusion.parser.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,23 +11,35 @@ import org.slf4j.LoggerFactory;
 
 final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
-        .getClassLoader();
+            .getClassLoader();
     private static final Logger logger = LoggerFactory
-        .getLogger(PluginManager.class);
+            .getLogger(PluginManager.class);
 
     private final Set<Plugin> plugins;
 
     PluginManager(ParserConfig config) {
-        plugins = config.getPlugins().stream()
-            .map(this::loadClass).map(this::processClass).map(this::instantiatePlugin)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        plugins = config.getPlugins().stream().map(this::loadClass)
+                .map(this::processClass).map(this::instantiatePlugin)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public void execute(Collection<RelativeClassInfo> endpoints,
-                        Collection<RelativeClassInfo> entities, SharedStorage storage) {
+            Collection<RelativeClassInfo> entities, SharedStorage storage) {
         for (var plugin : plugins) {
             logger.debug("Executing plugin " + plugin.getClass().getName());
             plugin.execute(endpoints, entities, storage);
+        }
+    }
+
+    private Plugin instantiatePlugin(Class<? extends Plugin> pluginClass) {
+        try {
+            return pluginClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException
+                | InvocationTargetException | NoSuchMethodException e) {
+            throw new ParserException(
+                    String.format("Cannot instantiate plugin '%s'",
+                            pluginClass.getName()),
+                    e);
         }
     }
 
@@ -37,7 +48,7 @@ final class PluginManager {
             return loader.loadClass(className);
         } catch (ClassNotFoundException e) {
             throw new ParserException(String.format(
-                "Plugin '%s' is not found in the classpath", className), e);
+                    "Plugin '%s' is not found in the classpath", className), e);
         }
     }
 
@@ -47,17 +58,7 @@ final class PluginManager {
         }
 
         throw new ParserException(String.format(
-            "Plugin '%s' is not an instance of '%s' interface",
-            cls.getName(), Plugin.class.getName()));
-    }
-
-    private Plugin instantiatePlugin(Class<? extends Plugin> pluginClass) {
-        try {
-            return pluginClass.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException
-            | InvocationTargetException | NoSuchMethodException e) {
-            throw new ParserException(String.format("Cannot instantiate plugin '%s'",
-                pluginClass.getName()), e);
-        }
+                "Plugin '%s' is not an instance of '%s' interface",
+                cls.getName(), Plugin.class.getName()));
     }
 }

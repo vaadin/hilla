@@ -19,12 +19,12 @@ public final class OpenAPIPrinter {
         pretty = new Pretty();
     }
 
-    public String writeAsString(OpenAPI value) throws JsonProcessingException {
-        return mapper.writeValueAsString(value);
-    }
-
     public Pretty pretty() {
         return pretty;
+    }
+
+    public String writeAsString(OpenAPI value) throws JsonProcessingException {
+        return mapper.writeValueAsString(value);
     }
 
     public final class Pretty {

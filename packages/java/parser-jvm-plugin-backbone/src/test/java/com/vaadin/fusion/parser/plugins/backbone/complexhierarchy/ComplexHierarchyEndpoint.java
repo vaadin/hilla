@@ -19,7 +19,8 @@ import com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.Complex
 
 @Endpoint
 public class ComplexHierarchyEndpoint {
-    // Using ComplexHierarchyModel from another package is intentional here to verify the
+    // Using ComplexHierarchyModel from another package is intentional here to
+    // verify the
     // generator's parsing logic for that case
     public ComplexHierarchyModel getModel() {
         return new ComplexHierarchyModel();

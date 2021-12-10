@@ -21,12 +21,12 @@ public final class ArrayRelativeTypeSignature
                 Objects.requireNonNull(signature).getElementTypeSignature());
     }
 
+    public RelativeTypeSignature getNestedType() {
+        return RelativeTypeSignature.of(origin.getNestedType(), this);
+    }
+
     @Override
     public boolean isArray() {
         return true;
-    }
-
-    public RelativeTypeSignature getNestedType() {
-        return RelativeTypeSignature.of(origin.getNestedType(), this);
     }
 }

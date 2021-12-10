@@ -32,12 +32,6 @@ final class EndpointProcessor extends Processor {
         model.tags(prepareTags()).paths(preparePaths());
     }
 
-    private List<Tag> prepareTags() {
-        return classes.stream()
-                .map(cls -> new Tag().name(cls.get().getSimpleName()))
-                .collect(Collectors.toList());
-    }
-
     private Paths preparePaths() {
         return classes.stream()
                 .flatMap(cls -> cls.getInheritanceChain().getMethodsStream())
@@ -48,11 +42,21 @@ final class EndpointProcessor extends Processor {
                         Paths::new));
     }
 
+    private List<Tag> prepareTags() {
+        return classes.stream()
+                .map(cls -> new Tag().name(cls.get().getSimpleName()))
+                .collect(Collectors.toList());
+    }
+
     private static class MethodProcessor {
         private final RelativeMethodInfo method;
 
         public MethodProcessor(RelativeMethodInfo method) {
             this.method = method;
+        }
+
+        public PathItem getPathItem() {
+            return new PathItem().post(createOperation());
         }
 
         public String getPathKey() {
@@ -61,10 +65,6 @@ final class EndpointProcessor extends Processor {
             var methodName = method.get().getName();
 
             return "/" + endpointName + "/" + methodName;
-        }
-
-        public PathItem getPathItem() {
-            return new PathItem().post(createOperation());
         }
 
         private Operation createOperation() {

@@ -9,8 +9,20 @@ import java.util.Set;
 
 @Endpoint
 public class IterableEndpoint {
+    public AnotherCustomIterable<Foo> getFooAnotherCustomIterable() {
+        return new AnotherCustomIterable<>();
+    }
+
     public Foo[] getFooArray() {
-        return new Foo[]{};
+        return new Foo[] {};
+    }
+
+    public CustomIterable<Foo> getFooCustomIterable() {
+        return new CustomIterable<>();
+    }
+
+    public Iterable<Foo> getFooIterable() {
+        return Arrays.asList(new Foo(), new Foo());
     }
 
     public List<Foo> getFooList() {
@@ -21,20 +33,13 @@ public class IterableEndpoint {
         return new HashSet<>();
     }
 
-    public Iterable<Foo> getFooIterable() {
-        return Arrays.asList(new Foo(), new Foo());
-    }
+    public static class AnotherCustomIterable<T> implements Iterable<T> {
+        private final List<T> list = new ArrayList<>();
 
-    public CustomIterable<Foo> getFooCustomIterable() {
-        return new CustomIterable<>();
-    }
-
-    public AnotherCustomIterable<Foo> getFooAnotherCustomIterable() {
-        return new AnotherCustomIterable<>();
-    }
-
-    public static class Foo {
-        public String bar = "bar";
+        @Override
+        public Iterator<T> iterator() {
+            return list.iterator();
+        }
     }
 
     public static class CustomIterable<T> implements Iterable<T> {
@@ -46,12 +51,7 @@ public class IterableEndpoint {
         }
     }
 
-    public static class AnotherCustomIterable<T> implements Iterable<T> {
-        private final List<T> list = new ArrayList<>();
-
-        @Override
-        public Iterator<T> iterator() {
-            return list.iterator();
-        }
+    public static class Foo {
+        public String bar = "bar";
     }
 }

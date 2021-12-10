@@ -1,15 +1,22 @@
-import type Pino from 'pino';
-import type { SourceFile } from 'typescript';
 import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver';
 import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
-import BarrelProcessor from './BarrelProcessor.js';
+import type Pino from 'pino';
+import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
 import type { BackbonePluginContext } from './utils.js';
 
+export enum BackbonePluginSourceType {
+  Endpoint = 'endpoint',
+  Entity = 'entity',
+}
+
 export default class BackbonePlugin extends Plugin {
+  public static readonly BACKBONE_PLUGIN_FILE_TAGS = 'BACKBONE_PLUGIN_FILE_TAGS';
+  public declare ['constructor']: typeof BackbonePlugin;
   readonly #context: BackbonePluginContext;
+  readonly #tags = new WeakMap<SourceFile, BackbonePluginSourceType>();
 
   public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
     super(resolver, logger);
@@ -19,16 +26,19 @@ export default class BackbonePlugin extends Plugin {
     };
   }
 
-  public get path(): string {
+  public override get path(): string {
     return import.meta.url;
   }
 
   public async execute(storage: SharedStorage): Promise<void> {
     const endpointSourceFiles = this.#processEndpoints(storage);
     const entitySourceFiles = this.#processEntities(storage);
-    const barrelFile = new BarrelProcessor(endpointSourceFiles).process();
 
-    storage.sources.push(barrelFile, ...endpointSourceFiles, ...entitySourceFiles);
+    endpointSourceFiles.forEach((file) => this.#tags.set(file, BackbonePluginSourceType.Endpoint));
+    entitySourceFiles.forEach((file) => this.#tags.set(file, BackbonePluginSourceType.Entity));
+
+    storage.sources.push(...endpointSourceFiles, ...entitySourceFiles);
+    storage.pluginStorage.set(this.constructor.BACKBONE_PLUGIN_FILE_TAGS, this.#tags);
   }
 
   #processEndpoints(storage: SharedStorage): readonly SourceFile[] {

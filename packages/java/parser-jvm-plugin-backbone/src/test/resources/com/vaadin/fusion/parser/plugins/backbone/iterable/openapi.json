@@ -1,40 +1,38 @@
 {
-  "openapi" : "3.0.1",
-  "info" : {
-    "title" : "Vaadin Application",
-    "version" : "1.0.0"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
   },
-  "servers" : [
+  "servers": [
     {
-      "url" : "http://localhost:8080/connect",
-      "description" : "Vaadin Backend"
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
     }
   ],
-  "tags" : [
+  "tags": [
     {
-      "name" : "IterableEndpoint"
+      "name": "IterableEndpoint"
     }
   ],
-  "paths" : {
-    "/IterableEndpoint/getFooArray" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooArray_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+  "paths": {
+    "/IterableEndpoint/getFooAnotherCustomIterable": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooAnotherCustomIterable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -45,25 +43,23 @@
         }
       }
     },
-    "/IterableEndpoint/getFooList" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooList_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+    "/IterableEndpoint/getFooArray": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooArray_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -74,25 +70,23 @@
         }
       }
     },
-    "/IterableEndpoint/getFooSet" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooSet_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+    "/IterableEndpoint/getFooCustomIterable": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooCustomIterable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -103,25 +97,23 @@
         }
       }
     },
-    "/IterableEndpoint/getFooIterable" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooIterable_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+    "/IterableEndpoint/getFooIterable": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooIterable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -132,25 +124,23 @@
         }
       }
     },
-    "/IterableEndpoint/getFooCustomIterable" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooCustomIterable_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+    "/IterableEndpoint/getFooList": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -161,25 +151,23 @@
         }
       }
     },
-    "/IterableEndpoint/getFooAnotherCustomIterable" : {
-      "post" : {
-        "tags" : [
-          "IterableEndpoint"
-        ],
-        "operationId" : "IterableEndpoint_getFooAnotherCustomIterable_POST",
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "nullable" : true,
-                  "items" : {
-                    "nullable" : true,
-                    "anyOf" : [
+    "/IterableEndpoint/getFooSet": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getFooSet_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -191,10 +179,10 @@
       }
     }
   },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo" : {
-        "type" : "object"
+  "components": {
+    "schemas": {
+      "com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo": {
+        "type": "object"
       }
     }
   }

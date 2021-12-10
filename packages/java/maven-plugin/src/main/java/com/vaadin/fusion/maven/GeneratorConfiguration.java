@@ -1,12 +1,8 @@
 package com.vaadin.fusion.maven;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import org.apache.maven.project.MavenProject;
 
 public final class GeneratorConfiguration {
     private String outputDir;
@@ -21,10 +17,10 @@ public final class GeneratorConfiguration {
     }
 
     public static class Plugin {
-        private final String name;
+        private final String path;
 
-        public Plugin(String name) {
-            this.name = name;
+        public Plugin(String path) {
+            this.path = path;
         }
 
         @Override
@@ -37,21 +33,16 @@ public final class GeneratorConfiguration {
                 return false;
             }
 
-            return Objects.equals(name, ((Plugin) other).name);
+            return Objects.equals(path, ((Plugin) other).path);
         }
 
-        public String getName() {
-            return name;
+        public String getPath() {
+            return path;
         }
 
         @Override
         public int hashCode() {
-            return name.hashCode();
-        }
-
-        public Path resolveWithin(MavenProject project) {
-            return Paths.get(project.getBasedir().getAbsolutePath(),
-                    "node_modules", "@vaadin/" + name, "index.js");
+            return path.hashCode();
         }
     }
 

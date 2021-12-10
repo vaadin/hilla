@@ -31,8 +31,10 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-      - name: Verify & Test
-        run: mvn -B -am verify test
+      - name: Validate format
+        run: mvn -B -am formatter:validate
+      - name: Verify
+        run: mvn -B -am verify
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')

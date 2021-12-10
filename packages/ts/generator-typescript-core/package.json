@@ -11,8 +11,10 @@
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
     "build:transpile": "tsc --isolatedModules",
-    "build:copy": "copyfiles -f src/**/*.d.ts .",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -63,7 +65,6 @@
     "openapi-types": "^9.3.0",
     "pino": "^7.0.5",
     "pino-pretty": "^7.1.0",
-    "rimraf": "^3.0.2",
     "typescript": "^4.5.0-beta"
   },
   "devDependencies": {
@@ -72,10 +73,12 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
+    "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.3.0",
     "copyfiles": "^2.4.1",
     "mocha": "^9.1.3",
+    "rimraf": "^3.0.2",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
     "type-fest": "^2.5.1"

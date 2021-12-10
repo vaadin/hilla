@@ -3,7 +3,6 @@ package com.vaadin.fusion.maven;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,23 +18,21 @@ final class GeneratorProcessor {
     private final MavenProject project;
     private String input;
     private String outputDir = "frontend/generated";
-    private Set<GeneratorConfiguration.Plugin> plugins = Set
-            .of(new GeneratorConfiguration.Plugin(
-                    "generator-typescript-plugin-backbone"));
+    private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(3);
     private boolean verbose = false;
+
+    {
+        plugins.add(new GeneratorConfiguration.Plugin(
+                "@vaadin/generator-typescript-plugin-client"));
+        plugins.add(new GeneratorConfiguration.Plugin(
+                "@vaadin/generator-typescript-plugin-backbone"));
+        plugins.add(new GeneratorConfiguration.Plugin(
+                "@vaadin/generator-typescript-plugin-barrel"));
+    }
 
     public GeneratorProcessor(MavenProject project, Log logger) {
         this.logger = logger;
         this.project = project;
-    }
-
-    public void process() throws IOException, InterruptedException {
-        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
-        prepareOutputDir(runner);
-        preparePlugins(runner);
-        prepareVerbose(runner);
-        prepareInput(runner);
-        runner.run();
     }
 
     public GeneratorProcessor input(@Nonnull String input) {
@@ -48,7 +45,8 @@ final class GeneratorProcessor {
         return this;
     }
 
-    public GeneratorProcessor plugins(@Nonnull GeneratorConfiguration.PluginList plugins) {
+    public GeneratorProcessor plugins(
+            @Nonnull GeneratorConfiguration.PluginList plugins) {
         var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
 
         if (!plugins.isDisableAllDefaults()) {
@@ -58,9 +56,19 @@ final class GeneratorProcessor {
                     pluginStream);
         }
 
-        this.plugins = pluginStream.collect(Collectors.toCollection(LinkedHashSet::new));
+        this.plugins = pluginStream
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return this;
+    }
+
+    public void process() throws IOException, InterruptedException {
+        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
+        prepareOutputDir(runner);
+        preparePlugins(runner);
+        prepareVerbose(runner);
+        prepareInput(runner);
+        runner.run();
     }
 
     public GeneratorProcessor verbose(boolean verbose) {
@@ -69,7 +77,8 @@ final class GeneratorProcessor {
     }
 
     private void prepareInput(GeneratorShellRunner runner) {
-        runner.add("'" + GeneratorShellRunner.prepareJSONForCLI(Objects.requireNonNull(input)) + "'");
+        runner.add("'" + GeneratorShellRunner
+                .prepareJSONForCLI(Objects.requireNonNull(input)) + "'");
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {
@@ -80,8 +89,8 @@ final class GeneratorProcessor {
     }
 
     private void preparePlugins(GeneratorShellRunner runner) {
-        plugins.stream().map(plugin -> plugin.resolveWithin(project).toString())
-                .distinct().forEach(path -> runner.add("-p", path));
+        plugins.stream().map(GeneratorConfiguration.Plugin::getPath).distinct()
+                .forEach(path -> runner.add("-p", path));
     }
 
     private void prepareVerbose(GeneratorShellRunner runner) {
