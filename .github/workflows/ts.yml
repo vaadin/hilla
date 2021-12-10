@@ -49,10 +49,10 @@ jobs:
           node-version: 16.x
       - name: Install
         run: npm ci
-      - name: Lint
-        run: npm run check
       - name: Build
         run: npm run build
+      - name: Lint
+        run: npm run check
       - name: Test
         run: npm run test:coverage
         env:
