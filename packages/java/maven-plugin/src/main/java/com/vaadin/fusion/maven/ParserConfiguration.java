@@ -1,5 +1,6 @@
 package com.vaadin.fusion.maven;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,10 +50,11 @@ public final class ParserConfiguration {
             return Objects.equals(name, ((Plugin) other).name);
         }
 
-        public Optional<PluginConfiguration> getConfiguration() {
-            return Optional.ofNullable(configuration);
+        public PluginConfiguration getConfiguration() {
+            return configuration;
         }
 
+        @Nonnull
         public String getName() {
             return name;
         }

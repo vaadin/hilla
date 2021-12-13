@@ -86,8 +86,6 @@ final class ParserProcessor {
         this.plugins = pluginStream
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        this.plugins.forEach(p -> System.out.println(p.getConfiguration()));
-
         return this;
     }
 
@@ -141,7 +139,7 @@ final class ParserProcessor {
     private void preparePlugins(ParserConfig.Builder builder) {
         var loadedPlugins = plugins.stream()
                 .map((plugin) -> new PluginLoader(plugin.getName(),
-                        plugin.getConfiguration().orElse(null)))
+                        plugin.getConfiguration()))
                 .map(PluginLoader::load)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
