@@ -96,7 +96,7 @@ public class ParserTests {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(basicPluginEndpointName)
-                        .addPlugin(new DependencyPlugin()).finish());
+                        .addPlugin(new BasicPlugin()).finish());
 
         parser.execute();
 
