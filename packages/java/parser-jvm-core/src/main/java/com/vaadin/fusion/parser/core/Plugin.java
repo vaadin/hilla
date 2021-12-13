@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 
 public interface Plugin {
-    default void setConfig(Object config) {
+    default void setConfig(PluginConfiguration config) {
         if (config != null) {
             throw new IllegalArgumentException(String.format(
                     "The '%s' plugin does not expect configuration set", getClass().getName()));

@@ -7,9 +7,9 @@ public final class PluginLoader {
             .getClassLoader();
 
     private final String name;
-    private final Object config;
+    private final PluginConfiguration config;
 
-    public PluginLoader(String name, Object config) {
+    public PluginLoader(String name, PluginConfiguration config) {
         this.name = name;
         this.config = config;
     }

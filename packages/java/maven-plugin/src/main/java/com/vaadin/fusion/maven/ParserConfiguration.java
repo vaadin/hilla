@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.fusion.parser.core.PluginConfiguration;
+
 public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
@@ -28,7 +30,7 @@ public final class ParserConfiguration {
     }
 
     public static class Plugin {
-        private Object configuration;
+        private PluginConfiguration configuration;
         private final String name;
 
         public Plugin(String name) {
@@ -48,7 +50,7 @@ public final class ParserConfiguration {
             return Objects.equals(name, ((Plugin) other).name);
         }
 
-        public Optional<Object> getConfiguration() {
+        public Optional<PluginConfiguration> getConfiguration() {
             return Optional.ofNullable(configuration);
         }
 

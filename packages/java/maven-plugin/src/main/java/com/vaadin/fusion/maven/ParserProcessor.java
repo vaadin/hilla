@@ -141,7 +141,7 @@ final class ParserProcessor {
     private void preparePlugins(ParserConfig.Builder builder) {
         var loadedPlugins = plugins.stream()
                 .map((plugin) -> new PluginLoader(plugin.getName(),
-                        plugin.getConfiguration()))
+                        plugin.getConfiguration().orElse(null)))
                 .map(PluginLoader::load)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
