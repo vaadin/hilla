@@ -1,7 +1,6 @@
 package com.vaadin.fusion.maven;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,8 +29,8 @@ public final class ParserConfiguration {
     }
 
     public static class Plugin {
-        private PluginConfiguration configuration;
         private final String name;
+        private PluginConfiguration configuration;
 
         public Plugin(String name) {
             this.name = name;
