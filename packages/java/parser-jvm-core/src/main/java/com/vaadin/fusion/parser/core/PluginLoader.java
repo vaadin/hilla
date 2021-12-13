@@ -5,9 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 public final class PluginLoader {
     private static final ClassLoader loader = PluginLoader.class
             .getClassLoader();
-
-    private final String name;
     private final PluginConfiguration config;
+    private final String name;
 
     public PluginLoader(String name, PluginConfiguration config) {
         this.name = name;

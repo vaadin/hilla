@@ -148,6 +148,22 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
+    private static class BarPlugin implements Plugin {
+        @Override
+        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities,
+                @Nonnull SharedStorage storage) {
+        }
+    }
+
+    private static class FooPlugin implements Plugin {
+        @Override
+        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities,
+                @Nonnull SharedStorage storage) {
+        }
+    }
+
     private static class TestParserConfig extends AbstractParserConfig {
         private final Set<String> classPathElements;
         private final String endpointAnnotationName;
@@ -185,22 +201,6 @@ public class ParserConfigTests {
         @Override
         public Set<Plugin> getPlugins() {
             return plugins;
-        }
-    }
-
-    private static class FooPlugin implements Plugin {
-        @Override
-        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities,
-                @Nonnull SharedStorage storage) {
-        }
-    }
-
-    private static class BarPlugin implements Plugin {
-        @Override
-        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities,
-                @Nonnull SharedStorage storage) {
         }
     }
 }
