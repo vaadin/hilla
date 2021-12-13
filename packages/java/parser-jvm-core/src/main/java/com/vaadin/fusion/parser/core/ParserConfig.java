@@ -26,7 +26,7 @@ public final class ParserConfig extends AbstractParserConfig {
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
-    private Set<String> plugins = new LinkedHashSet<>();
+    private Set<Plugin> plugins = new LinkedHashSet<>();
 
     private ParserConfig() {
     }
@@ -51,7 +51,7 @@ public final class ParserConfig extends AbstractParserConfig {
 
     @Nonnull
     @Override
-    public Set<String> getPlugins() {
+    public Set<Plugin> getPlugins() {
         return Collections.unmodifiableSet(plugins);
     }
 
@@ -77,7 +77,7 @@ public final class ParserConfig extends AbstractParserConfig {
         private FileSource openAPISpec;
 
         @Nonnull
-        public Builder addPlugin(@Nonnull String plugin) {
+        public Builder addPlugin(@Nonnull Plugin plugin) {
             Objects.requireNonNull(plugin);
             actions.add(config -> config.plugins.add(plugin));
             return this;
@@ -158,7 +158,7 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder plugins(@Nonnull Collection<String> plugins) {
+        public Builder plugins(@Nonnull Collection<Plugin> plugins) {
             Objects.requireNonNull(plugins);
             actions.add(
                     config -> config.plugins = new LinkedHashSet<>(plugins));

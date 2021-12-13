@@ -19,6 +19,7 @@ import org.apache.maven.project.MavenProject;
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
+import com.vaadin.fusion.parser.core.PluginLoader;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
 final class ParserProcessor {
@@ -85,6 +86,8 @@ final class ParserProcessor {
         this.plugins = pluginStream
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
+        this.plugins.forEach(p -> System.out.println(p.getConfiguration()));
+
         return this;
     }
 
@@ -136,9 +139,12 @@ final class ParserProcessor {
     }
 
     private void preparePlugins(ParserConfig.Builder builder) {
-        var result = plugins.stream().map(ParserConfiguration.Plugin::getName)
+        var loadedPlugins = plugins.stream()
+                .map((plugin) -> new PluginLoader(plugin.getName(),
+                        plugin.getConfiguration()))
+                .map(PluginLoader::load)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        builder.plugins(result);
+        builder.plugins(loadedPlugins);
     }
 }

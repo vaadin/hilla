@@ -1,6 +1,7 @@
 package com.vaadin.fusion.maven;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,6 +28,7 @@ public final class ParserConfiguration {
     }
 
     public static class Plugin {
+        private Object configuration;
         private final String name;
 
         public Plugin(String name) {
@@ -44,6 +46,10 @@ public final class ParserConfiguration {
             }
 
             return Objects.equals(name, ((Plugin) other).name);
+        }
+
+        public Optional<Object> getConfiguration() {
+            return Optional.ofNullable(configuration);
         }
 
         public String getName() {
