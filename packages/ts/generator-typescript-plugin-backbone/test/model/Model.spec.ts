@@ -1,9 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
-import snapshotMatcher from '../utils/snapshotMatcher.js';
 
 use(sinonChai);
 use(snapshotMatcher);

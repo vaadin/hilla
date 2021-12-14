@@ -15,9 +15,11 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@vaadin/generator-typescript-core/utils.js';
-import DependencyManager from './DependencyManager.js';
+import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
+import { dirname } from 'path/posix';
 import type { BackbonePluginContext } from './utils.js';
-import { createSourceFile } from './utils.js';
 import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 const exportDefaultModifiers = [
@@ -28,11 +30,12 @@ const exportDefaultModifiers = [
 export class FormEntityProcessor {
   readonly #component: Schema;
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager();
+  readonly #dependencies = new DependencyManager(new PathManager());
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #entityName: string;
   readonly #path: string;
+  readonly #cwd: string;
   #getPropertyModelSymbol?: Identifier = undefined;
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
@@ -41,25 +44,30 @@ export class FormEntityProcessor {
     this.#fullyQualifiedName = name;
     this.#entityName = simplifyFullyQualifiedName(name);
     this.#name = `${this.#entityName}Model`;
-    this.#path = convertFullyQualifiedNameToRelativePath(`${name}Model`);
+    this.#path = new PathManager('ts').createRelativePath(convertFullyQualifiedNameToRelativePath(`${name}Model`));
+    this.#cwd = dirname(this.#path);
   }
 
   public process(): SourceFile {
     this.#context.logger.debug(`Processing model for entity: ${this.#entityName}`);
 
-    const entity = this.#dependencies.imports.register(
+    const entity = this.#dependencies.imports.default.add(
+      this.#dependencies.paths.createRelativePath(
+        convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName),
+        this.#cwd,
+      ),
       this.#entityName,
-      convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName),
+      true,
     );
 
     const declaration = this.#processExtendedModelClass(this.#component, entity);
 
     const { imports, exports } = this.#dependencies;
-    const importStatements = imports.toTS();
-    const exportStatement = exports.toTS();
+    const importStatements = imports.toCode();
+    const exportStatement = exports.toCode();
 
     return createSourceFile(
-      [...importStatements, declaration, exportStatement].filter(Boolean) as readonly Statement[],
+      [...importStatements, declaration, ...exportStatement].filter(Boolean) as readonly Statement[],
       this.#path,
     );
   }
@@ -88,9 +96,7 @@ export class FormEntityProcessor {
       entitySchema = childSchema;
       parent = this.#processParentClass(parentSchema);
     } else {
-      const parentSpecifier = 'ObjectModel';
-      const parentPath = '@vaadin/form';
-      parent = this.#dependencies.imports.register(parentSpecifier, parentPath);
+      parent = this.#dependencies.imports.named.add('@vaadin/form', 'ObjectModel');
     }
 
     return this.#processModelClass(entitySchema, entity, parent);
@@ -141,7 +147,7 @@ export class FormEntityProcessor {
 
   #processClassElements({ properties }: NonEmptyObjectSchema): readonly ClassElement[] {
     return Object.entries(properties).map(([name, schema]) => {
-      const [model, , argsArray] = new ModelSchemaProcessor(schema, this.#dependencies).process();
+      const [, model, argsArray] = new ModelSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
@@ -163,16 +169,18 @@ export class FormEntityProcessor {
   }
 
   #processParentClass(schema: ReferenceSchema): Identifier {
+    const { imports, paths } = this.#dependencies;
+
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = convertReferenceSchemaToPath(schema);
-    const modelPath = `${path}Model`;
+    const modelPath = paths.createRelativePath(`${path}Model`, this.#cwd);
     const modelSpecifier = `${specifier}Model`;
 
-    return this.#dependencies.imports.register(modelSpecifier, modelPath, true);
+    return imports.default.add(modelPath, modelSpecifier, false);
   }
 
   #getGetPropertyModelSymbol(): Identifier {
-    this.#getPropertyModelSymbol ||= this.#dependencies.imports.register('_getPropertyModel', '@vaadin/form');
-    return this.#getPropertyModelSymbol;
+    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@vaadin/form', '_getPropertyModel');
+    return this.#getPropertyModelSymbol!;
   }
 }

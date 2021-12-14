@@ -55,10 +55,12 @@ export default class TypeSchemaProcessor {
   public declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
+  readonly #cwd: string;
 
-  public constructor(schema: Schema, dependencies: DependencyManager) {
+  public constructor(schema: Schema, dependencies: DependencyManager, cwd = '.') {
     this.#schema = schema;
     this.#dependencies = dependencies;
+    this.#cwd = cwd;
   }
 
   public process(): readonly TypeNode[] {
@@ -86,7 +88,7 @@ export default class TypeSchemaProcessor {
   }
 
   #processArray(schema: ArraySchema): TypeNode {
-    const nodes = new TypeSchemaProcessor(schema.items, this.#dependencies).process();
+    const nodes = new TypeSchemaProcessor(schema.items, this.#dependencies, this.#cwd).process();
 
     return ts.factory.createTypeReferenceNode('Array', [ts.factory.createUnionTypeNode(nodes)]);
   }
@@ -95,7 +97,7 @@ export default class TypeSchemaProcessor {
     let valuesTypeNode: TypeNode;
 
     if (typeof valuesType !== 'boolean') {
-      const nodes = new TypeSchemaProcessor(valuesType, this.#dependencies).process();
+      const nodes = new TypeSchemaProcessor(valuesType, this.#dependencies, this.#cwd).process();
       valuesTypeNode = ts.factory.createUnionTypeNode(nodes);
     } else {
       valuesTypeNode = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
@@ -111,7 +113,7 @@ export default class TypeSchemaProcessor {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema), this.#cwd);
 
     const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
 

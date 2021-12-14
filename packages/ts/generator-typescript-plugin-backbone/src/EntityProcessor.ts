@@ -18,6 +18,7 @@ import {
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import { dirname } from 'path/posix';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
@@ -35,6 +36,7 @@ export class EntityProcessor {
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #path: string;
+  readonly #cwd: string;
   readonly #sourcePaths = new PathManager('ts');
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
@@ -43,6 +45,7 @@ export class EntityProcessor {
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
+    this.#cwd = dirname(this.#path);
   }
 
   public process(): SourceFile {
@@ -118,7 +121,7 @@ export class EntityProcessor {
         ts.factory.updateInterfaceDeclaration(
           declaration,
           undefined,
-          undefined,
+          declaration.modifiers,
           declaration.name,
           undefined,
           [
@@ -138,14 +141,14 @@ export class EntityProcessor {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema), this.#cwd);
 
     return imports.default.add(path, specifier, true);
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
     return Object.entries(properties).map(([name, schema]) => {
-      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
 
       return ts.factory.createPropertySignature(
         undefined,

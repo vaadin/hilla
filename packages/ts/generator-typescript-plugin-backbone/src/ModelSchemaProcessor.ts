@@ -14,36 +14,43 @@ import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
 } from '@vaadin/generator-typescript-core/Schema.js';
+import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { ArrayLiteralExpression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
-import type DependencyManager from './DependencyManager';
 
 export default class ModelSchemaProcessor {
-  #schema: Schema;
-  #dependencies: DependencyManager;
+  readonly #schema: Schema;
+  readonly #dependencies: DependencyManager;
+  readonly #cwd: string;
 
-  public constructor(schema: Schema, dependencies: DependencyManager) {
+  public constructor(schema: Schema, dependencies: DependencyManager, cwd: string) {
     this.#schema = schema;
     this.#dependencies = dependencies;
+    this.#cwd = cwd;
   }
 
-  public process(): [Identifier, TypeNode, ArrayLiteralExpression] {
+  public process(): [TypeNode, Identifier, ArrayLiteralExpression] {
     const unwrappedSchema = (
       isComposedSchema(this.#schema) ? decomposeSchema(this.#schema)[0] : this.#schema
     ) as NonComposedSchema;
 
+    let model: Identifier;
     let type: TypeNode;
     let modelPath: string;
     let modelName: string;
     if (isReferenceSchema(unwrappedSchema)) {
-      const typePath = convertReferenceSchemaToPath(unwrappedSchema);
+      const schemaPath = convertReferenceSchemaToPath(unwrappedSchema);
       const typeName = convertReferenceSchemaToSpecifier(unwrappedSchema);
-      modelPath = `${typePath}Model`;
+      const typePath = this.#dependencies.paths.createRelativePath(schemaPath, this.#cwd);
+      modelPath = this.#dependencies.paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
       modelName = `${typeName}Model`;
       const refType =
-        this.#dependencies.imports.getIdentifier(typeName, typePath) ??
-        this.#dependencies.imports.register(typeName, typePath);
+        this.#dependencies.imports.default.getIdentifier(typePath) ??
+        this.#dependencies.imports.default.add(typePath, typeName, true);
       type = ts.factory.createTypeReferenceNode(refType);
+      model =
+        this.#dependencies.imports.default.getIdentifier(modelPath) ??
+        this.#dependencies.imports.default.add(modelPath, modelName);
     } else {
       modelPath = '@vaadin/form';
       if (isArraySchema(unwrappedSchema)) {
@@ -68,20 +75,13 @@ export default class ModelSchemaProcessor {
         type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
         modelName = 'ObjectModel';
       }
+      model =
+        this.#dependencies.imports.named.getIdentifier(modelPath, modelName) ??
+        this.#dependencies.imports.named.add(modelPath, modelName);
     }
-
-    const model =
-      this.#dependencies.imports.getIdentifier(modelName, modelPath) ??
-      this.#dependencies.imports.register(modelName, modelPath);
 
     const optionalArg = isNullableSchema(this.#schema) ? ts.factory.createTrue() : ts.factory.createFalse();
 
-    return [model, type, ts.factory.createArrayLiteralExpression([optionalArg])];
-  }
-
-  #getOrRegisterImport(specifier: string, path: string) {
-    return (
-      this.#dependencies.imports.getIdentifier(specifier, path) ?? this.#dependencies.imports.register(specifier, path)
-    );
+    return [type, model, ts.factory.createArrayLiteralExpression([optionalArg])];
   }
 }
