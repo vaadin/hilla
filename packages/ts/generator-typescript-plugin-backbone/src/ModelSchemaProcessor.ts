@@ -15,6 +15,7 @@ import {
   convertReferenceSchemaToSpecifier,
   ReferenceSchema,
   ArraySchema,
+  MapSchema,
 } from '@vaadin/generator-typescript-core/Schema.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { ArrayLiteralExpression, Expression, Identifier, TypeNode } from 'typescript';
@@ -45,9 +46,7 @@ export default class ModelSchemaProcessor {
     } else if (isArraySchema(unwrappedSchema)) {
       [type, modelType, model, args] = this.#processArray(unwrappedSchema);
     } else if (isMapSchema(unwrappedSchema)) {
-      type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'));
-      model = this.#getBuiltinModel('ObjectModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
+      [type, modelType, model, args] = this.#processRecord(unwrappedSchema);
     } else if (isStringSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
       model = this.#getBuiltinModel('StringModel');
@@ -102,6 +101,21 @@ export default class ModelSchemaProcessor {
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [itemType]);
     const modelType = ts.factory.createTypeReferenceNode(model, [itemType, itemModelType]);
     return [type, modelType, model, [itemModel, itemArgs]];
+  }
+
+  #processRecord(schema: MapSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+    const model = this.#getBuiltinModel('ObjectModel');
+    const [valueType] = new ModelSchemaProcessor(
+      schema.additionalProperties as Schema,
+      this.#dependencies,
+      this.#cwd,
+    ).process();
+    const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
+      ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+      valueType,
+    ]);
+    const modelType = ts.factory.createTypeReferenceNode(model, [type]);
+    return [type, modelType, model, []];
   }
 
   #getBuiltinModel(specifier: string): Identifier {
