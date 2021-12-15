@@ -13,9 +13,11 @@ import {
   isBooleanSchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
+  ReferenceSchema,
+  ArraySchema,
 } from '@vaadin/generator-typescript-core/Schema.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
-import type { ArrayLiteralExpression, Identifier, TypeNode } from 'typescript';
+import type { ArrayLiteralExpression, Expression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
 
 export default class ModelSchemaProcessor {
@@ -29,59 +31,84 @@ export default class ModelSchemaProcessor {
     this.#cwd = cwd;
   }
 
-  public process(): [TypeNode, Identifier, ArrayLiteralExpression] {
+  public process(): [TypeNode, TypeNode, Identifier, ArrayLiteralExpression] {
     const unwrappedSchema = (
       isComposedSchema(this.#schema) ? decomposeSchema(this.#schema)[0] : this.#schema
     ) as NonComposedSchema;
 
-    let model: Identifier;
     let type: TypeNode;
-    let modelPath: string;
-    let modelName: string;
+    let modelType: TypeNode;
+    let model: Identifier;
+    let args: Expression[] = [];
     if (isReferenceSchema(unwrappedSchema)) {
-      const schemaPath = convertReferenceSchemaToPath(unwrappedSchema);
-      const typeName = convertReferenceSchemaToSpecifier(unwrappedSchema);
-      const typePath = this.#dependencies.paths.createRelativePath(schemaPath, this.#cwd);
-      modelPath = this.#dependencies.paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
-      modelName = `${typeName}Model`;
-      const refType =
-        this.#dependencies.imports.default.getIdentifier(typePath) ??
-        this.#dependencies.imports.default.add(typePath, typeName, true);
-      type = ts.factory.createTypeReferenceNode(refType);
-      model =
-        this.#dependencies.imports.default.getIdentifier(modelPath) ??
-        this.#dependencies.imports.default.add(modelPath, modelName);
+      [type, modelType, model, args] = this.#processReference(unwrappedSchema);
+    } else if (isArraySchema(unwrappedSchema)) {
+      [type, modelType, model, args] = this.#processArray(unwrappedSchema);
+    } else if (isMapSchema(unwrappedSchema)) {
+      type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'));
+      model = this.#getBuiltinModel('ObjectModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
+    } else if (isStringSchema(unwrappedSchema)) {
+      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+      model = this.#getBuiltinModel('StringModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
+    } else if (isNumberSchema(unwrappedSchema)) {
+      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      model = this.#getBuiltinModel('NumberModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
+    } else if (isIntegerSchema(unwrappedSchema)) {
+      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      model = this.#getBuiltinModel('NumberModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
+    } else if (isBooleanSchema(unwrappedSchema)) {
+      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
+      model = this.#getBuiltinModel('BooleanModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
     } else {
-      modelPath = '@vaadin/form';
-      if (isArraySchema(unwrappedSchema)) {
-        type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'));
-        modelName = 'ArrayModel';
-      } else if (isMapSchema(unwrappedSchema)) {
-        type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'));
-        modelName = 'ObjectModel';
-      } else if (isStringSchema(unwrappedSchema)) {
-        type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
-        modelName = 'StringModel';
-      } else if (isNumberSchema(unwrappedSchema)) {
-        type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-        modelName = 'NumberModel';
-      } else if (isIntegerSchema(unwrappedSchema)) {
-        type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-        modelName = 'NumberModel';
-      } else if (isBooleanSchema(unwrappedSchema)) {
-        type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
-        modelName = 'BooleanModel';
-      } else {
-        type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
-        modelName = 'ObjectModel';
-      }
-      model =
-        this.#dependencies.imports.named.getIdentifier(modelPath, modelName) ??
-        this.#dependencies.imports.named.add(modelPath, modelName);
+      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+      model = this.#getBuiltinModel('ObjectModel');
+      modelType = ts.factory.createTypeReferenceNode(model);
     }
 
     const optionalArg = isNullableSchema(this.#schema) ? ts.factory.createTrue() : ts.factory.createFalse();
 
-    return [type, model, ts.factory.createArrayLiteralExpression([optionalArg])];
+    return [type, modelType, model, ts.factory.createArrayLiteralExpression([optionalArg, ...args])];
+  }
+
+  #processReference(schema: ReferenceSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+    const schemaPath = convertReferenceSchemaToPath(schema);
+    const typeName = convertReferenceSchemaToSpecifier(schema);
+    const typePath = this.#dependencies.paths.createRelativePath(schemaPath, this.#cwd);
+    const modelPath = this.#dependencies.paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
+    const modelName = `${typeName}Model`;
+    const refType =
+      this.#dependencies.imports.default.getIdentifier(typePath) ??
+      this.#dependencies.imports.default.add(typePath, typeName, true);
+    const type = ts.factory.createTypeReferenceNode(refType);
+    const model =
+      this.#dependencies.imports.default.getIdentifier(modelPath) ??
+      this.#dependencies.imports.default.add(modelPath, modelName);
+    const modelType = ts.factory.createTypeReferenceNode(model);
+    return [type, modelType, model, []];
+  }
+
+  #processArray(schema: ArraySchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+    const model = this.#getBuiltinModel('ArrayModel');
+    const [itemType, itemModelType, itemModel, itemArgs] = new ModelSchemaProcessor(
+      schema.items,
+      this.#dependencies,
+      this.#cwd,
+    ).process();
+    const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [itemType]);
+    const modelType = ts.factory.createTypeReferenceNode(model, [itemType, itemModelType]);
+    return [type, modelType, model, [itemModel, itemArgs]];
+  }
+
+  #getBuiltinModel(specifier: string): Identifier {
+    const modelPath = this.#dependencies.paths.createBareModulePath('@vaadin/form', false);
+    return (
+      this.#dependencies.imports.named.getIdentifier(modelPath, specifier) ??
+      this.#dependencies.imports.named.add(modelPath, specifier)
+    );
   }
 }

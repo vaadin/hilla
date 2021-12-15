@@ -20,7 +20,7 @@ export default class ClientProcessor {
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientClassId = imports.named.add(
-      paths.createBareModulePath('@vaadin/fusion-frontend', true),
+      paths.createBareModulePath('@vaadin/fusion-frontend', false),
       'ConnectClient',
     );
 

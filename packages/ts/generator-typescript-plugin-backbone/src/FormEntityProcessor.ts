@@ -147,20 +147,23 @@ export class FormEntityProcessor {
 
   #processClassElements({ properties }: NonEmptyObjectSchema): readonly ClassElement[] {
     return Object.entries(properties).map(([name, schema]) => {
-      const [, model, argsArray] = new ModelSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
+      const [, modelType, model, argsArray] = new ModelSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
         undefined,
         ts.factory.createIdentifier(name),
         [],
-        ts.factory.createTypeReferenceNode(model),
+        modelType,
         ts.factory.createBlock([
           ts.factory.createReturnStatement(
-            ts.factory.createCallExpression(
-              ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
-              undefined,
-              [ts.factory.createStringLiteral(name), model, argsArray],
+            ts.factory.createAsExpression(
+              ts.factory.createCallExpression(
+                ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
+                undefined,
+                [ts.factory.createStringLiteral(name), model, argsArray],
+              ),
+              modelType,
             ),
           ),
         ]),
