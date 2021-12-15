@@ -145,9 +145,22 @@ export class FormEntityProcessor {
     );
   }
 
-  #processClassElements({ properties }: NonEmptyObjectSchema): readonly ClassElement[] {
+  #processClassElements({ required, properties }: NonEmptyObjectSchema): readonly ClassElement[] {
+    const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
-      const [, modelType, model, argsArray] = new ModelSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
+      const [
+        ,
+        modelType,
+        model,
+        {
+          elements: [, ...modelVariableArgs],
+        },
+      ] = new ModelSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
+      const optional = !requiredSet.has(name);
+      const argsArray = ts.factory.createArrayLiteralExpression([
+        optional ? ts.factory.createTrue() : ts.factory.createFalse(),
+        ...modelVariableArgs,
+      ]);
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
