@@ -329,8 +329,10 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertForbiddenPage() {
-        assertPageContains(
-                "There was an unexpected error (type=Forbidden, status=403).");
+        String source = getDriver().getPageSource();
+        Assert.assertTrue(source.contains(
+                "There was an unexpected error (type=Forbidden, status=403).")
+                || source.contains("HTTP Status 403"));
     }
 
     private void assertPageContains(String contents) {
