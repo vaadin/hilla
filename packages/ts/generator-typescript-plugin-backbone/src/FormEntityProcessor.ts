@@ -168,18 +168,21 @@ export class FormEntityProcessor {
         ts.factory.createIdentifier(name),
         [],
         modelType,
-        ts.factory.createBlock([
-          ts.factory.createReturnStatement(
-            ts.factory.createAsExpression(
-              ts.factory.createCallExpression(
-                ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
-                undefined,
-                [ts.factory.createStringLiteral(name), model, argsArray],
+        ts.factory.createBlock(
+          [
+            ts.factory.createReturnStatement(
+              ts.factory.createAsExpression(
+                ts.factory.createCallExpression(
+                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
+                  undefined,
+                  [ts.factory.createStringLiteral(name), model, argsArray],
+                ),
+                modelType,
               ),
-              modelType,
             ),
-          ),
-        ]),
+          ],
+          true,
+        ),
       );
     });
   }
