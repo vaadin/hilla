@@ -1,18 +1,21 @@
 package com.vaadin.fusion.maven;
 
-import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import com.vaadin.fusion.parser.core.PluginConfiguration;
+import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.fusion.parser.utils.ConfigurationList;
 
 public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String openAPIPath;
-    private PluginList plugins;
+    private Plugins plugins;
 
     public Optional<ParserClassPathConfiguration> getClassPath() {
         return Optional.ofNullable(classPath);
@@ -26,7 +29,7 @@ public final class ParserConfiguration {
         return Optional.ofNullable(openAPIPath);
     }
 
-    public Optional<PluginList> getPlugins() {
+    public Optional<Plugins> getPlugins() {
         return Optional.ofNullable(plugins);
     }
 
@@ -35,7 +38,8 @@ public final class ParserConfiguration {
         private PluginConfiguration configuration;
         private Integer order;
 
-        public Plugin() {}
+        public Plugin() {
+        }
 
         public Plugin(String name) {
             this.name = name;
@@ -73,21 +77,18 @@ public final class ParserConfiguration {
         }
     }
 
-    public static class PluginList {
-        private final Set<Plugin> disable = Set.of();
-        private final boolean disableAllDefaults = false;
-        private final Set<Plugin> use = Set.of();
-
-        public Set<Plugin> getDisable() {
-            return disable;
+    public static class Plugins extends ConfigurationList<Plugin> {
+        public Plugins(Collection<Plugin> use, Collection<Plugin> disable) {
+            super(use, disable);
         }
+    }
 
-        public Set<Plugin> getUse() {
-            return use;
-        }
+    static class PluginsProcessor extends ConfigurationList.Processor<Plugin> {
+        private static final Set<Plugin> defaults = Set.of(
+                new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
 
-        public boolean isDisableAllDefaults() {
-            return disableAllDefaults;
+        public PluginsProcessor(ConfigurationList<Plugin> config) {
+            super(config, defaults);
         }
     }
 }
