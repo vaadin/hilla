@@ -14,6 +14,7 @@
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-nonnull</module>
+    <module>packages/java/parser-jvm-utils</module>
   </modules>
 
   <properties>
