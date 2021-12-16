@@ -16,6 +16,8 @@ public interface Plugin extends Comparable<Plugin> {
 
     int getOrder();
 
+    void setOrder(int order);
+
     default void setConfig(PluginConfiguration config) {
         if (config != null) {
             throw new IllegalArgumentException(String.format(
@@ -23,6 +25,4 @@ public interface Plugin extends Comparable<Plugin> {
                     getClass().getName()));
         }
     }
-
-    void setOrder(int order);
 }
