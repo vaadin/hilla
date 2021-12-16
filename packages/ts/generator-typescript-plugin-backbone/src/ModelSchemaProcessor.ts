@@ -16,10 +16,67 @@ import {
   ReferenceSchema,
   ArraySchema,
   MapSchema,
+  NonComposedRegularSchema,
+  isNonComposedRegularSchema,
 } from '@vaadin/generator-typescript-core/Schema.js';
+import PluginError from '@vaadin/generator-typescript-utils/PluginError.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { ArrayLiteralExpression, Expression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
+
+type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
+
+function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
+  return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
+}
+
+type AnnotationPrimitiveArgument = boolean | number | string;
+type AnnotationArgument = AnnotationPrimitiveArgument | AnnotationNamedArguments;
+interface AnnotationNamedArguments {
+  readonly [name: string]: AnnotationArgument;
+}
+
+interface Annotation {
+  simpleName: string;
+  arguments: ReadonlyArray<AnnotationArgument>;
+}
+
+function parseAnnotation(annotationText: string): Annotation {
+  const [, simpleName, argumentsText] = /^(\w+)\((.*)\)$/.exec(annotationText) || [];
+  if (simpleName === undefined) {
+    throw new PluginError(`Unknown annotation format when processing "${annotationText}"`);
+  }
+  let args: ReadonlyArray<AnnotationArgument> = [];
+  if (argumentsText !== undefined) {
+    const argumentsTextWithQuotedKeys = argumentsText.replace(/(\w+)\s*:/g, '"$1":');
+    args = JSON.parse(`[${argumentsTextWithQuotedKeys}]`);
+  }
+  return { simpleName, arguments: args };
+}
+
+function convertAnnotationArgumentToExpression(arg: AnnotationArgument): Expression {
+  switch (typeof arg) {
+    case 'boolean':
+      return arg ? ts.factory.createTrue() : ts.factory.createFalse();
+      break;
+    case 'number':
+      return ts.factory.createNumericLiteral(arg);
+      break;
+    case 'string':
+      return ts.factory.createStringLiteral(arg);
+      break;
+    case 'object':
+      return ts.factory.createObjectLiteralExpression(
+        Object.entries(arg).map(([key, value]) =>
+          ts.factory.createPropertyAssignment(key, convertAnnotationArgumentToExpression(value)),
+        ),
+        false,
+      );
+      break;
+    default:
+      return ts.factory.createOmittedExpression();
+  }
+}
 
 export default class ModelSchemaProcessor {
   readonly #schema: Schema;
@@ -49,27 +106,31 @@ export default class ModelSchemaProcessor {
       [type, modelType, model, args] = this.#processRecord(unwrappedSchema);
     } else if (isStringSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
-      model = this.#getBuiltinModel('StringModel');
+      model = this.#getBuiltinFormExport('StringModel');
       modelType = ts.factory.createTypeReferenceNode(model);
     } else if (isNumberSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-      model = this.#getBuiltinModel('NumberModel');
+      model = this.#getBuiltinFormExport('NumberModel');
       modelType = ts.factory.createTypeReferenceNode(model);
     } else if (isIntegerSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-      model = this.#getBuiltinModel('NumberModel');
+      model = this.#getBuiltinFormExport('NumberModel');
       modelType = ts.factory.createTypeReferenceNode(model);
     } else if (isBooleanSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
-      model = this.#getBuiltinModel('BooleanModel');
+      model = this.#getBuiltinFormExport('BooleanModel');
       modelType = ts.factory.createTypeReferenceNode(model);
     } else {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
-      model = this.#getBuiltinModel('ObjectModel');
+      model = this.#getBuiltinFormExport('ObjectModel');
       modelType = ts.factory.createTypeReferenceNode(model);
     }
 
     const optionalArg = isNullableSchema(this.#schema) ? ts.factory.createTrue() : ts.factory.createFalse();
+
+    if (isAnnotatedSchema(unwrappedSchema)) {
+      args = [...args, ...this.#getValidators(unwrappedSchema)];
+    }
 
     return [type, modelType, model, ts.factory.createArrayLiteralExpression([optionalArg, ...args])];
   }
@@ -92,7 +153,7 @@ export default class ModelSchemaProcessor {
   }
 
   #processArray(schema: ArraySchema): [TypeNode, TypeNode, Identifier, Expression[]] {
-    const model = this.#getBuiltinModel('ArrayModel');
+    const model = this.#getBuiltinFormExport('ArrayModel');
     const [itemType, itemModelType, itemModel, itemArgs] = new ModelSchemaProcessor(
       schema.items,
       this.#dependencies,
@@ -104,7 +165,7 @@ export default class ModelSchemaProcessor {
   }
 
   #processRecord(schema: MapSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
-    const model = this.#getBuiltinModel('ObjectModel');
+    const model = this.#getBuiltinFormExport('ObjectModel');
     const [valueType] = new ModelSchemaProcessor(
       schema.additionalProperties as Schema,
       this.#dependencies,
@@ -118,7 +179,22 @@ export default class ModelSchemaProcessor {
     return [type, modelType, model, []];
   }
 
-  #getBuiltinModel(specifier: string): Identifier {
+  #getValidators(schema: AnnotatedSchema): Expression[] {
+    const validators: Expression[] = [];
+    schema['x-annotations'].forEach((annotationText: string) => {
+      const annotation = parseAnnotation(annotationText);
+      const validator = this.#getBuiltinFormExport(annotation.simpleName);
+      const newValidator = ts.factory.createNewExpression(
+        validator,
+        undefined,
+        annotation.arguments.map(convertAnnotationArgumentToExpression),
+      );
+      validators.push(newValidator);
+    });
+    return validators;
+  }
+
+  #getBuiltinFormExport(specifier: string): Identifier {
     const modelPath = this.#dependencies.paths.createBareModulePath('@vaadin/form', false);
     return (
       this.#dependencies.imports.named.getIdentifier(modelPath, specifier) ??
