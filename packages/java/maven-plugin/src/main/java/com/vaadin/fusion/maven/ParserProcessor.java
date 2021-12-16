@@ -72,7 +72,8 @@ final class ParserProcessor {
 
     public ParserProcessor plugins(
             @Nonnull ParserConfiguration.Plugins plugins) {
-        this.plugins = new ParserConfiguration.PluginsProcessor(plugins).process();
+        this.plugins = new ParserConfiguration.PluginsProcessor(plugins)
+                .process();
 
         return this;
     }

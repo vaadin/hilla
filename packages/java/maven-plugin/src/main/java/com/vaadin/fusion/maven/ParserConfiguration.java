@@ -34,8 +34,8 @@ public final class ParserConfiguration {
     }
 
     public static class Plugin {
-        private String name;
         private PluginConfiguration configuration;
+        private String name;
         private Integer order;
 
         public Plugin() {
