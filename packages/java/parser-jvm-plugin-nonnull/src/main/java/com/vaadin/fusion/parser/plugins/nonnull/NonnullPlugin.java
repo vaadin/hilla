@@ -10,14 +10,14 @@ import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 
 public class NonnullPlugin implements Plugin {
-    private NonnullPluginConfig config;
+    private Collection<String> annotations;
     private int order = 100;
 
     @Override
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
-        System.out.println(config);
+        new NonnullProcessor(annotations).process();
     }
 
     @Override
@@ -42,9 +42,6 @@ public class NonnullPlugin implements Plugin {
                     getClass().getName(), NonnullPluginConfig.class.getName()));
         }
 
-        this.config = (NonnullPluginConfig) config;
-
-        // TODO: remove testing code
-        System.out.println(this.config);
+        annotations = new NonnullPluginConfig.Processor((NonnullPluginConfig) config).process();
     }
 }
