@@ -73,6 +73,11 @@
       <artifactId>parser-jvm-plugin-backbone</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.vaadin.fusion</groupId>
+      <artifactId>parser-jvm-utils</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

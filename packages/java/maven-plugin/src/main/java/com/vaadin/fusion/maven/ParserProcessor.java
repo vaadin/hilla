@@ -20,7 +20,6 @@ import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.core.PluginManager;
-import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
 final class ParserProcessor {
     private final Log logger;
@@ -28,8 +27,7 @@ final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "com.vaadin.fusion.Endpoint";
     private String openAPIPath;
-    private Set<ParserConfiguration.Plugin> plugins = Set
-            .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
+    private Collection<ParserConfiguration.Plugin> plugins;
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
@@ -73,21 +71,8 @@ final class ParserProcessor {
     }
 
     public ParserProcessor plugins(
-            @Nonnull ParserConfiguration.PluginList plugins) {
-        var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
-
-        if (!plugins.isDisableAllDefaults()) {
-            // We put user-defined plugins first. So, if the user re-defines any
-            // default plugin, we consider it more important and ignore default
-            // plugin
-            pluginStream = Stream.concat(
-                    this.plugins.stream().filter(
-                            plugin -> !plugins.getDisable().contains(plugin)),
-                    pluginStream);
-        }
-
-        this.plugins = pluginStream
-                .collect(Collectors.toCollection(OverridableHashSet::new));
+            @Nonnull ParserConfiguration.Plugins plugins) {
+        this.plugins = new ParserConfiguration.PluginsProcessor(plugins).process();
 
         return this;
     }
