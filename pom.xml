@@ -10,6 +10,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>packages/java/generator</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
