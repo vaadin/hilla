@@ -149,18 +149,42 @@ public class ParserConfigTests {
     }
 
     private static class BarPlugin implements Plugin {
+        private int order = 1;
+
         @Override
         public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
                 @Nonnull Collection<RelativeClassInfo> entities,
                 @Nonnull SharedStorage storage) {
         }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public void setOrder(int order) {
+            this.order = order;
+        }
     }
 
     private static class FooPlugin implements Plugin {
+        private int order = 0;
+
         @Override
         public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
                 @Nonnull Collection<RelativeClassInfo> entities,
                 @Nonnull SharedStorage storage) {
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public void setOrder(int order) {
+            this.order = order;
         }
     }
 

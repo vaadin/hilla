@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import com.vaadin.fusion.parser.core.PluginConfiguration;
 
@@ -30,8 +31,11 @@ public final class ParserConfiguration {
     }
 
     public static class Plugin {
-        private final String name;
+        private String name;
         private PluginConfiguration configuration;
+        private Integer order;
+
+        public Plugin() {}
 
         public Plugin(String name) {
             this.name = name;
@@ -59,6 +63,10 @@ public final class ParserConfiguration {
             return name;
         }
 
+        public Integer getOrder() {
+            return order;
+        }
+
         @Override
         public int hashCode() {
             return name.hashCode();
@@ -66,15 +74,15 @@ public final class ParserConfiguration {
     }
 
     public static class PluginList {
-        private final List<Plugin> disable = List.of();
+        private final Set<Plugin> disable = Set.of();
         private final boolean disableAllDefaults = false;
-        private final List<Plugin> use = List.of();
+        private final Set<Plugin> use = Set.of();
 
-        public List<Plugin> getDisable() {
+        public Set<Plugin> getDisable() {
             return disable;
         }
 
-        public List<Plugin> getUse() {
+        public Set<Plugin> getUse() {
             return use;
         }
 

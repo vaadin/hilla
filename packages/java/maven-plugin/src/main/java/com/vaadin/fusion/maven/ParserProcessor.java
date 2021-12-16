@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,7 +19,7 @@ import org.apache.maven.project.MavenProject;
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
-import com.vaadin.fusion.parser.core.PluginLoader;
+import com.vaadin.fusion.parser.core.PluginManager;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 
 final class ParserProcessor {
@@ -77,6 +77,9 @@ final class ParserProcessor {
         var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
 
         if (!plugins.isDisableAllDefaults()) {
+            // We put user-defined plugins first. So, if the user re-defines any
+            // default plugin, we consider it more important and ignore default
+            // plugin
             pluginStream = Stream.concat(
                     this.plugins.stream().filter(
                             plugin -> !plugins.getDisable().contains(plugin)),
@@ -84,7 +87,7 @@ final class ParserProcessor {
         }
 
         this.plugins = pluginStream
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toCollection(OverridableHashSet::new));
 
         return this;
     }
@@ -137,11 +140,12 @@ final class ParserProcessor {
     }
 
     private void preparePlugins(ParserConfig.Builder builder) {
+        // For loaded plugins we use SortedSet to have them sorted in order the
+        // user defined.
         var loadedPlugins = plugins.stream()
-                .map((plugin) -> new PluginLoader(plugin.getName(),
-                        plugin.getConfiguration()))
-                .map(PluginLoader::load)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .map((plugin) -> PluginManager.load(plugin.getName(),
+                        plugin.getOrder(), plugin.getConfiguration()))
+                .collect(Collectors.toCollection(TreeSet::new));
 
         builder.plugins(loadedPlugins);
     }
