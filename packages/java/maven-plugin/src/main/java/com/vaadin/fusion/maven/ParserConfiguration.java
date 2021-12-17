@@ -78,14 +78,18 @@ public final class ParserConfiguration {
     }
 
     public static class Plugins extends ConfigurationList<Plugin> {
+        public Plugins() {
+            super();
+        }
+
         public Plugins(Collection<Plugin> use, Collection<Plugin> disable) {
             super(use, disable);
         }
     }
 
     static class PluginsProcessor extends ConfigurationList.Processor<Plugin> {
-        private static final Set<Plugin> defaults = Set.of(
-                new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
+        private static final Set<Plugin> defaults = Set
+                .of(new Plugin(BackbonePlugin.class.getName()));
 
         public PluginsProcessor(ConfigurationList<Plugin> config) {
             super(config, defaults);
