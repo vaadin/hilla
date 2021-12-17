@@ -38,12 +38,13 @@ public interface ConfigList<Item> {
             if (!config.isDisableAllDefaults()) {
                 stream = Stream.concat(defaults.stream().filter(
                         plugin -> !config.getDisable().contains(plugin)),
-                    stream);
+                        stream);
             }
 
-            return Collections.unmodifiableCollection(stream.collect(
-                    Collectors.toMap(Object::hashCode, Function.identity()))
-                .values());
+            return Collections.unmodifiableCollection(stream
+                    .collect(Collectors.toMap(Object::hashCode,
+                            Function.identity(), (oldValue, value) -> value))
+                    .values());
         }
     }
 }
