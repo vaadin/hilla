@@ -1,6 +1,7 @@
 package com.vaadin.fusion.maven;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -9,7 +10,7 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.PluginConfiguration;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.fusion.parser.utils.ConfigurationList;
+import com.vaadin.fusion.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
@@ -77,21 +78,41 @@ public final class ParserConfiguration {
         }
     }
 
-    public static class Plugins extends ConfigurationList<Plugin> {
+    public static class Plugins implements ConfigList<Plugin> {
+        private final Set<Plugin> disable = new HashSet<>();
+        private final boolean disableAllDefaults = false;
+        private final Set<Plugin> use = new HashSet<>();
+
         public Plugins() {
-            super();
         }
 
-        public Plugins(Collection<Plugin> use, Collection<Plugin> disable) {
-            super(use, disable);
+        public Plugins(@Nonnull Collection<Plugin> use,
+                @Nonnull Collection<Plugin> disable) {
+            this.disable.addAll(disable);
+            this.use.addAll(use);
+        }
+
+        @Override
+        public Set<Plugin> getDisable() {
+            return disable;
+        }
+
+        @Override
+        public Set<Plugin> getUse() {
+            return use;
+        }
+
+        @Override
+        public boolean isDisableAllDefaults() {
+            return disableAllDefaults;
         }
     }
 
-    static class PluginsProcessor extends ConfigurationList.Processor<Plugin> {
+    static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         private static final Set<Plugin> defaults = Set
                 .of(new Plugin(BackbonePlugin.class.getName()));
 
-        public PluginsProcessor(ConfigurationList<Plugin> config) {
+        public PluginsProcessor(ConfigList<Plugin> config) {
             super(config, defaults);
         }
     }
