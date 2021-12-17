@@ -1,4 +1,4 @@
-import type ComplexHierarchyParentModel_1 from "./com/vaadin/fusion/parser/plugins/backbone/complexhierarchy/models/ComplexHierarchyParentModel";
-interface ComplexHierarchyModel extends ComplexHierarchyParentModel_1 {
+import type ComplexHierarchyParentModel_1 from "./ComplexHierarchyParentModel";
+export default interface ComplexHierarchyModel extends ComplexHierarchyParentModel_1 {
     name?: string;
 }

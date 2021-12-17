@@ -1,9 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
+import Generator from '@vaadin/generator-typescript-core/Generator.js';
+import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
 import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
+import { readFile } from 'fs/promises';
 import sinonChai from 'sinon-chai';
-import BackbonePlugin from '../../src/index.js';
-import { createGenerator, loadInput } from '../utils/common.js';
+import ModelPlugin from '../../src/index.js';
 
 use(sinonChai);
 use(snapshotMatcher);
@@ -11,16 +12,15 @@ use(snapshotMatcher);
 describe('FormPlugin', () => {
   context('models', () => {
     it('correctly generates code', async () => {
-      const generator = createGenerator([BackbonePlugin]);
-      const input = await loadInput('Model', import.meta.url);
+      const generator = new Generator([ModelPlugin], createLogger({ name: 'model-plugin-test', verbose: true }));
+      const input = await readFile(new URL('./Model.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
-      const modelFiles = files.filter((file) => file.name.endsWith('Model.ts'));
-      expect(modelFiles.length).to.equal(10);
+      expect(files.length).to.equal(10);
 
-      const filesByName = modelFiles.reduce((r, file) => {
+      const filesByName = files.reduce((r, file) => {
         r[file.name] = file;
         return r;
-      }, {} as Record<string, typeof modelFiles[0]>);
+      }, {} as Record<string, typeof files[0]>);
       [
         'FormArrayTypesModel',
         'FormDataPrimitivesModel',

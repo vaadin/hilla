@@ -19,7 +19,7 @@ import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/D
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
-import type { BackbonePluginContext } from './utils.js';
+import type { ModelPluginContext } from './utils.js';
 import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 const exportDefaultModifiers = [
@@ -27,9 +27,9 @@ const exportDefaultModifiers = [
   ts.factory.createModifier(ts.SyntaxKind.DefaultKeyword),
 ];
 
-export class FormEntityProcessor {
+export class ModelEntityProcessor {
   readonly #component: Schema;
-  readonly #context: BackbonePluginContext;
+  readonly #context: ModelPluginContext;
   readonly #dependencies = new DependencyManager(new PathManager());
   readonly #fullyQualifiedName: string;
   readonly #name: string;
@@ -38,7 +38,7 @@ export class FormEntityProcessor {
   readonly #cwd: string;
   #getPropertyModelSymbol?: Identifier = undefined;
 
-  public constructor(name: string, component: Schema, context: BackbonePluginContext) {
+  public constructor(name: string, component: Schema, context: ModelPluginContext) {
     this.#component = component;
     this.#context = context;
     this.#fullyQualifiedName = name;
