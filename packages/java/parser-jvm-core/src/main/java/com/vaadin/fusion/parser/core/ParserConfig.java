@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -162,8 +161,9 @@ public final class ParserConfig extends AbstractParserConfig {
         @Nonnull
         public Builder plugins(@Nonnull Collection<Plugin> plugins) {
             Objects.requireNonNull(plugins);
-            actions.add(
-                    config -> config.plugins = plugins instanceof TreeSet ? ((TreeSet<Plugin>) plugins) : new TreeSet<>(plugins));
+            actions.add(config -> config.plugins = plugins instanceof TreeSet
+                    ? ((TreeSet<Plugin>) plugins)
+                    : new TreeSet<>(plugins));
             return this;
         }
 

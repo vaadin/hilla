@@ -9,12 +9,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 public abstract class ConfigurationList<Item> {
     private final Set<Item> disable = new HashSet<>();
     private final boolean disableAllDefaults = false;
     private final Set<Item> use = new HashSet<>();
 
-    public ConfigurationList(Collection<Item> use, Collection<Item> disable) {
+    public ConfigurationList() {
+    }
+
+    public ConfigurationList(@Nonnull Collection<Item> use,
+            @Nonnull Collection<Item> disable) {
         this.disable.addAll(disable);
         this.use.addAll(use);
     }
