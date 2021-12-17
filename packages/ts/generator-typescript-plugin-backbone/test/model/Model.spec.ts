@@ -15,16 +15,29 @@ describe('FormPlugin', () => {
       const input = await loadInput('Model', import.meta.url);
       const files = await generator.process(input);
       const modelFiles = files.filter((file) => file.name.endsWith('Model.ts'));
-      expect(modelFiles.length).to.equal(3);
+      expect(modelFiles.length).to.equal(10);
 
-      const [myEntityModelFile, myEntityIdModelFile, myBazModelFile] = modelFiles;
-
-      expect(myEntityModelFile.name).to.equal('./MyEntityModel.ts');
-      // await expect(myEntityModelFile.text()).toMatchSnapshot('MyEntityModel', import.meta.url);
-      expect(myEntityIdModelFile.name).to.equal('./MyEntityIdModel.ts');
-      // await expect(myEntityIdModelFile.text()).toMatchSnapshot('MyEntityIdModel', import.meta.url);
-      expect(myBazModelFile.name).to.equal('./MyBazModel.ts');
-      // await expect(myBazModelFile.text()).toMatchSnapshot('MyBazModel', import.meta.url);
+      const filesByName = modelFiles.reduce((r, file) => {
+        r[file.name] = file;
+        return r;
+      }, {} as Record<string, typeof modelFiles[0]>);
+      [
+        'FormArrayTypesModel',
+        'FormDataPrimitivesModel',
+        'FormEntityHierarchyModel',
+        'FormEntityIdModel',
+        'FormEntityModel',
+        'FormNonnullTypesModel',
+        'FormOptionalTypesModel',
+        'FormRecordTypesModel',
+        'FormTemporalTypesModel',
+        'FormValidatorsModel',
+      ].forEach(async (modelName) => {
+        const modelFile = filesByName[modelName];
+        expect(modelFile).to.not.be.undefined;
+        expect(modelFile.name).to.equal(`./${modelName}.ts`);
+        await expect(modelFile.text()).toMatchSnapshot(modelName, import.meta.url);
+      });
     });
   });
 });
