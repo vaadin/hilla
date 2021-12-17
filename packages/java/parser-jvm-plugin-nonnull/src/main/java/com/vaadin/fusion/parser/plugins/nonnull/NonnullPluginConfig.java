@@ -15,6 +15,9 @@ public class NonnullPluginConfig
     private final boolean disableAllDefaults = false;
     private final Set<String> use = new HashSet<>();
 
+    public NonnullPluginConfig() {
+    }
+
     public NonnullPluginConfig(@Nonnull Collection<String> use,
             @Nonnull Collection<String> disable) {
         this.disable.addAll(disable);
