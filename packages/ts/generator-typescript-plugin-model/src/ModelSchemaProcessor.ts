@@ -158,7 +158,15 @@ export default class ModelSchemaProcessor {
 
   #processRecord(schema: MapSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
     const model = this.#getBuiltinFormExport('ObjectModel');
-    const [valueType] = new ModelSchemaProcessor(schema.additionalProperties, this.#dependencies, this.#cwd).process();
+
+    let valueType: TypeNode;
+    if (typeof schema.additionalProperties === 'boolean') {
+      valueType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
+    } else {
+      const valueSchema: Schema = schema.additionalProperties;
+      [valueType] = new ModelSchemaProcessor(valueSchema, this.#dependencies, this.#cwd).process();
+    }
+
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
       valueType,

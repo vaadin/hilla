@@ -22,4 +22,7 @@ export default class FormRecordTypesModel<T extends FormRecordTypes_1 = FormReco
     get complexMap(): ObjectModel_1<Record<string, Record<string, ReadonlyArray<FormOptionalTypes_1>>>> {
         return this[_getPropertyModel_1]("complexMap", ObjectModel_1, [true]) as ObjectModel_1<Record<string, Record<string, ReadonlyArray<FormOptionalTypes_1>>>>;
     }
+    get objectMap(): ObjectModel_1<Record<string, any>> {
+        return this[_getPropertyModel_1]("complexMap", ObjectModel_1, [true]) as ObjectModel_1<Record<string, any>>;
+    }
 }

@@ -9,7 +9,7 @@ import {
   isEmptyObject,
   isObjectSchema,
   isReferenceSchema,
-  NonEmptyObjectSchema,
+  ObjectSchema,
 } from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -145,9 +145,9 @@ export class ModelEntityProcessor {
     );
   }
 
-  #processClassElements({ required, properties }: NonEmptyObjectSchema): readonly ClassElement[] {
+  #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
     const requiredSet = new Set(required);
-    return Object.entries(properties).map(([name, schema]) => {
+    return Object.entries(properties || []).map(([name, schema]) => {
       const [
         ,
         modelType,
