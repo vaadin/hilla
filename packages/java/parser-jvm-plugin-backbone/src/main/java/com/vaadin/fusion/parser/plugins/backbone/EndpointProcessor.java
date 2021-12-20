@@ -23,8 +23,8 @@ import io.swagger.v3.oas.models.tags.Tag;
 
 final class EndpointProcessor extends Processor {
     public EndpointProcessor(@Nonnull Collection<RelativeClassInfo> classes,
-            @Nonnull OpenAPI model) {
-        super(classes, model);
+            @Nonnull OpenAPI model, @Nonnull AssociationMap associationMap) {
+        super(classes, model, associationMap);
     }
 
     @Override
@@ -48,23 +48,30 @@ final class EndpointProcessor extends Processor {
                 .collect(Collectors.toList());
     }
 
-    private static class MethodProcessor {
+    private class MethodProcessor {
         private final RelativeMethodInfo method;
+        private final PathItem pathItem;
+        private final String pathKey;
 
         public MethodProcessor(RelativeMethodInfo method) {
             this.method = method;
-        }
+            this.pathItem = new PathItem().post(createOperation());
 
-        public PathItem getPathItem() {
-            return new PathItem().post(createOperation());
-        }
-
-        public String getPathKey() {
             var endpointName = method.getParent()
                     .map(cls -> cls.get().getSimpleName()).orElse("Unknown");
             var methodName = method.get().getName();
 
-            return "/" + endpointName + "/" + methodName;
+            this.pathKey = "/" + endpointName + "/" + methodName;
+
+            associationMap.put(pathItem, method);
+        }
+
+        public PathItem getPathItem() {
+            return pathItem;
+        }
+
+        public String getPathKey() {
+            return pathKey;
         }
 
         private Operation createOperation() {
@@ -90,7 +97,8 @@ final class EndpointProcessor extends Processor {
 
             method.getParameters().forEach(parameter -> {
                 requestMap.addProperties(parameter.get().getName(),
-                        new SchemaProcessor(parameter.getType()).process());
+                        new SchemaProcessor(parameter.getType(), associationMap)
+                                .process());
             });
 
             return new RequestBody().content(new Content().addMediaType(
@@ -103,8 +111,11 @@ final class EndpointProcessor extends Processor {
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                content.addMediaType("application/json", new MediaType()
-                        .schema(new SchemaProcessor(resultType).process()));
+                var resultTypeSchema = new SchemaProcessor(resultType,
+                        associationMap).process();
+
+                content.addMediaType("application/json",
+                        new MediaType().schema(resultTypeSchema));
             }
 
             return new ApiResponses().addApiResponse("200",

@@ -8,19 +8,20 @@ import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 
-import io.swagger.v3.oas.models.OpenAPI;
-
 public final class BackbonePlugin implements Plugin {
+    public static final String ASSOCIATION_MAP = "BackbonePlugin/AssociationMap";
     private int order = 0;
 
     @Override
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
-        OpenAPI model = storage.getOpenAPI();
+        var model = storage.getOpenAPI();
+        var map = new AssociationMap();
 
-        new EndpointProcessor(endpoints, model).process();
-        new EntityProcessor(entities, model).process();
+        new EndpointProcessor(endpoints, model, map).process();
+        new EntityProcessor(entities, model, map).process();
+        storage.getPluginStorage().put(ASSOCIATION_MAP, map);
     }
 
     @Override

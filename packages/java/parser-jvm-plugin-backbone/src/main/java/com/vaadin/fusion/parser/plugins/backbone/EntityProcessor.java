@@ -21,8 +21,8 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class EntityProcessor extends Processor {
     public EntityProcessor(@Nonnull Collection<RelativeClassInfo> classes,
-            @Nonnull OpenAPI model) {
-        super(classes, model);
+            @Nonnull OpenAPI model, @Nonnull AssociationMap associationMap) {
+        super(classes, model, associationMap);
     }
 
     private static String decapitalize(String string) {
@@ -59,7 +59,7 @@ final class EntityProcessor extends Processor {
         return components;
     }
 
-    private static class ComponentSchemaProcessor {
+    private class ComponentSchemaProcessor {
         private final RelativeClassInfo entity;
 
         public ComponentSchemaProcessor(RelativeClassInfo entity) {
@@ -113,7 +113,7 @@ final class EntityProcessor extends Processor {
         }
     }
 
-    private static class ComponentSchemaPropertyProcessor {
+    private class ComponentSchemaPropertyProcessor {
         private final RelativeMethodInfo method;
 
         public ComponentSchemaPropertyProcessor(RelativeMethodInfo method) {
@@ -125,7 +125,8 @@ final class EntityProcessor extends Processor {
         }
 
         public Schema<?> getValue() {
-            return new SchemaProcessor(method.getResultType()).process();
+            return new SchemaProcessor(method.getResultType(), associationMap)
+                    .process();
         }
     }
 }

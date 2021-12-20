@@ -5,6 +5,7 @@ module com.vaadin.fusion.parser.plugins.backbone {
     requires jsr305;
     requires com.vaadin.fusion.parser.core;
     requires com.fasterxml.jackson.databind;
+    requires com.vaadin.fusion.parser.utils;
 
     opens com.vaadin.fusion.parser.plugins.backbone to com.vaadin.fusion.parser.core;
     exports com.vaadin.fusion.parser.plugins.backbone;

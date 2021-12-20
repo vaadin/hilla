@@ -62,5 +62,10 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>com.vaadin.fusion</groupId>
+          <artifactId>parser-jvm-utils</artifactId>
+          <version>1.0-SNAPSHOT</version>
+      </dependency>
   </dependencies>
 </project>
