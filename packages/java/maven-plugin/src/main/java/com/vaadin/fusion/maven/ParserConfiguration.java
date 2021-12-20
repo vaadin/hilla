@@ -12,7 +12,7 @@ import com.vaadin.fusion.parser.core.PluginConfiguration;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.utils.ConfigList;
 
-public final class ParserConfiguration {
+final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String openAPIPath;
