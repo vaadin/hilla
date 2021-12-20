@@ -129,7 +129,7 @@ export class ModelEntityProcessor {
       undefined,
     );
 
-    const fields = this.#processClassElements(schema as NonEmptyObjectSchema);
+    const fields = this.#processClassElements(schema);
 
     return ts.factory.createClassDeclaration(
       undefined,
@@ -200,6 +200,6 @@ export class ModelEntityProcessor {
 
   #getGetPropertyModelSymbol(): Identifier {
     this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@vaadin/form', '_getPropertyModel');
-    return this.#getPropertyModelSymbol!;
+    return this.#getPropertyModelSymbol;
   }
 }

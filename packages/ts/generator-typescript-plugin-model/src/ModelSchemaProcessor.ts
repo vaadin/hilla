@@ -48,7 +48,7 @@ function parseAnnotation(annotationText: string): Annotation {
   }
   let args: ReadonlyArray<AnnotationArgument> = [];
   if (argumentsText !== undefined) {
-    const argumentsTextWithQuotedKeys = argumentsText.replace(/(\w+)\s*:/g, '"$1":');
+    const argumentsTextWithQuotedKeys = argumentsText.replace(/(\w+)\s?:/g, '"$1":');
     args = JSON.parse(`[${argumentsTextWithQuotedKeys}]`);
   }
   return { simpleName, arguments: args };
@@ -58,13 +58,10 @@ function convertAnnotationArgumentToExpression(arg: AnnotationArgument): Express
   switch (typeof arg) {
     case 'boolean':
       return arg ? ts.factory.createTrue() : ts.factory.createFalse();
-      break;
     case 'number':
       return ts.factory.createNumericLiteral(arg);
-      break;
     case 'string':
       return ts.factory.createStringLiteral(arg);
-      break;
     case 'object':
       return ts.factory.createObjectLiteralExpression(
         Object.entries(arg).map(([key, value]) =>
@@ -72,7 +69,6 @@ function convertAnnotationArgumentToExpression(arg: AnnotationArgument): Express
         ),
         false,
       );
-      break;
     default:
       return ts.factory.createOmittedExpression();
   }
@@ -108,11 +104,7 @@ export default class ModelSchemaProcessor {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
       model = this.#getBuiltinFormExport('StringModel');
       modelType = ts.factory.createTypeReferenceNode(model);
-    } else if (isNumberSchema(unwrappedSchema)) {
-      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-      model = this.#getBuiltinFormExport('NumberModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
-    } else if (isIntegerSchema(unwrappedSchema)) {
+    } else if (isNumberSchema(unwrappedSchema) || isIntegerSchema(unwrappedSchema)) {
       type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
       model = this.#getBuiltinFormExport('NumberModel');
       modelType = ts.factory.createTypeReferenceNode(model);
@@ -166,11 +158,7 @@ export default class ModelSchemaProcessor {
 
   #processRecord(schema: MapSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
     const model = this.#getBuiltinFormExport('ObjectModel');
-    const [valueType] = new ModelSchemaProcessor(
-      schema.additionalProperties as Schema,
-      this.#dependencies,
-      this.#cwd,
-    ).process();
+    const [valueType] = new ModelSchemaProcessor(schema.additionalProperties, this.#dependencies, this.#cwd).process();
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
       valueType,
