@@ -227,6 +227,14 @@ describe('form/Validators', () => {
     assert.isNotTrue(noMinValidator.impliesRequired);
     const minZeroValidator = new Size({ min: 0, max: 3 });
     assert.isNotTrue(minZeroValidator.impliesRequired);
+    const noValueSizeValidator = new Size({});
+    assert.isNotTrue(noValueSizeValidator.impliesRequired);
+    assert.isTrue(noValueSizeValidator.validate(''));
+    assert.isTrue(noValueSizeValidator.validate('aaa'));
+    const noArgSizeValidator = new Size();
+    assert.isNotTrue(noArgSizeValidator.impliesRequired);
+    assert.isTrue(noArgSizeValidator.validate(''));
+    assert.isTrue(noArgSizeValidator.validate('aaa'));
   });
 
   it('Digits', () => {
