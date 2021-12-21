@@ -5,6 +5,7 @@ import {
   ArrayModel,
   BooleanModel,
   ModelConstructor,
+  NotBlank,
   NumberModel,
   ObjectModel,
   Pattern,
@@ -170,5 +171,31 @@ export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<
 
   public get colleagues() {
     return this[_getPropertyModel]('colleagues', ArrayModel, [true, EmployeeModel, [false]]);
+  }
+}
+
+export interface TestMessageInterpolationEntity {
+  stringMinSize: string;
+  stringNotBlank: string;
+}
+export class TestMessageInterpolationModel<
+  T extends TestMessageInterpolationEntity = TestMessageInterpolationEntity,
+> extends ObjectModel<T> {
+  public static override createEmptyValue: () => TestMessageInterpolationEntity;
+
+  public get stringMinSize() {
+    return this[_getPropertyModel]('stringMinSize', StringModel, [
+      false,
+      new Size({ min: 4 }),
+      new Required(),
+    ]) as StringModel;
+  }
+
+  public get stringNotBlank() {
+    return this[_getPropertyModel]('stringNotBlank', StringModel, [
+      false,
+      new NotBlank(),
+      new Required(),
+    ]) as StringModel;
   }
 }
