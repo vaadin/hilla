@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/generator-typescript-utils",
-  "version": "0.1.0",
+  "version": "0.0.16",
   "description": "A set of utils for developing Fusion generator plugins",
   "main": "index.js",
   "type": "module",
@@ -84,7 +84,7 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
-    "@vaadin/generator-typescript-core": "^0.1.0",
+    "@vaadin/generator-typescript-core": "^0.0.16",
     "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.4.0",
