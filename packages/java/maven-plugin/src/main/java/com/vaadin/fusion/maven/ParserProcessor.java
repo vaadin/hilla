@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,7 +19,7 @@ import org.apache.maven.project.MavenProject;
 import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
-import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.fusion.parser.core.PluginManager;
 
 final class ParserProcessor {
     private final Log logger;
@@ -27,8 +27,7 @@ final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "com.vaadin.fusion.Endpoint";
     private String openAPIPath;
-    private Set<ParserConfiguration.Plugin> plugins = Set
-            .of(new ParserConfiguration.Plugin(BackbonePlugin.class.getName()));
+    private Collection<ParserConfiguration.Plugin> plugins;
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
@@ -72,18 +71,9 @@ final class ParserProcessor {
     }
 
     public ParserProcessor plugins(
-            @Nonnull ParserConfiguration.PluginList plugins) {
-        var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
-
-        if (!plugins.isDisableAllDefaults()) {
-            pluginStream = Stream.concat(
-                    this.plugins.stream().filter(
-                            plugin -> !plugins.getDisable().contains(plugin)),
-                    pluginStream);
-        }
-
-        this.plugins = pluginStream
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            @Nonnull ParserConfiguration.Plugins plugins) {
+        this.plugins = new ParserConfiguration.PluginsProcessor(plugins)
+                .process();
 
         return this;
     }
@@ -136,9 +126,13 @@ final class ParserProcessor {
     }
 
     private void preparePlugins(ParserConfig.Builder builder) {
-        var result = plugins.stream().map(ParserConfiguration.Plugin::getName)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        // For loaded plugins we use SortedSet to have them sorted in order the
+        // user defined.
+        var loadedPlugins = plugins.stream()
+                .map((plugin) -> PluginManager.load(plugin.getName(),
+                        plugin.getOrder(), plugin.getConfiguration()))
+                .collect(Collectors.toCollection(TreeSet::new));
 
-        builder.plugins(result);
+        builder.plugins(loadedPlugins);
     }
 }

@@ -39,7 +39,7 @@ public abstract class AbstractParserConfig {
     public abstract OpenAPI getOpenAPI();
 
     @Nonnull
-    public abstract Set<String> getPlugins();
+    public abstract Set<Plugin> getPlugins();
 
     @Override
     public int hashCode() {

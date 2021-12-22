@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -26,7 +27,7 @@ public final class ParserConfig extends AbstractParserConfig {
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
-    private Set<String> plugins = new LinkedHashSet<>();
+    private final SortedSet<Plugin> plugins = new TreeSet<>();
 
     private ParserConfig() {
     }
@@ -51,8 +52,8 @@ public final class ParserConfig extends AbstractParserConfig {
 
     @Nonnull
     @Override
-    public Set<String> getPlugins() {
-        return Collections.unmodifiableSet(plugins);
+    public SortedSet<Plugin> getPlugins() {
+        return Collections.unmodifiableSortedSet(plugins);
     }
 
     public enum OpenAPIFileType {
@@ -77,7 +78,7 @@ public final class ParserConfig extends AbstractParserConfig {
         private FileSource openAPISpec;
 
         @Nonnull
-        public Builder addPlugin(@Nonnull String plugin) {
+        public Builder addPlugin(@Nonnull Plugin plugin) {
             Objects.requireNonNull(plugin);
             actions.add(config -> config.plugins.add(plugin));
             return this;
@@ -158,10 +159,12 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder plugins(@Nonnull Collection<String> plugins) {
+        public Builder plugins(@Nonnull Collection<Plugin> plugins) {
             Objects.requireNonNull(plugins);
-            actions.add(
-                    config -> config.plugins = new LinkedHashSet<>(plugins));
+            actions.add(config -> {
+                config.plugins.clear();
+                config.plugins.addAll(plugins);
+            });
             return this;
         }
 

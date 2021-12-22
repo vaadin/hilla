@@ -20,6 +20,8 @@ import io.github.classgraph.MethodInfo;
 public class BasicPlugin implements Plugin {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
+    private int order = 0;
+
     @Override
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
@@ -35,5 +37,15 @@ public class BasicPlugin implements Plugin {
                                 .map(ClassInfo::getName))
                         .flatMap(Function.identity()))
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

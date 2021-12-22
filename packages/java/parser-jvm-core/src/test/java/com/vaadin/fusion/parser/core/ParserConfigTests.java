@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsAsCollection() {
-        var plugins = List.of("com.example.FooPlugin", "com.example.BarPlugin");
+        var plugins = List.of(new FooPlugin(), new BarPlugin());
         var actual = defaultBuilder.plugins(plugins).finish();
         var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI,
@@ -61,8 +62,8 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsOneByOne() {
-        var fooPlugin = "com.example.FooPlugin";
-        var barPlugin = "com.example.BarPlugin";
+        var fooPlugin = new FooPlugin();
+        var barPlugin = new BarPlugin();
         var actual = defaultBuilder.addPlugin(fooPlugin).addPlugin(barPlugin)
                 .finish();
         var expected = new TestParserConfig(defaultClassPathElements,
@@ -147,15 +148,55 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
+    private static class BarPlugin implements Plugin {
+        private int order = 1;
+
+        @Override
+        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities,
+                @Nonnull SharedStorage storage) {
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public void setOrder(int order) {
+            this.order = order;
+        }
+    }
+
+    private static class FooPlugin implements Plugin {
+        private int order = 0;
+
+        @Override
+        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities,
+                @Nonnull SharedStorage storage) {
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+
+        @Override
+        public void setOrder(int order) {
+            this.order = order;
+        }
+    }
+
     private static class TestParserConfig extends AbstractParserConfig {
         private final Set<String> classPathElements;
         private final String endpointAnnotationName;
         private final OpenAPI openAPI;
-        private final Set<String> plugins;
+        private final Set<Plugin> plugins;
 
         public TestParserConfig(Set<String> classPathElements,
                 String endpointAnnotationName, OpenAPI openAPI,
-                Set<String> plugins) {
+                Set<Plugin> plugins) {
             this.classPathElements = classPathElements;
             this.endpointAnnotationName = endpointAnnotationName;
             this.openAPI = openAPI;
@@ -182,7 +223,7 @@ public class ParserConfigTests {
 
         @Nonnull
         @Override
-        public Set<String> getPlugins() {
+        public Set<Plugin> getPlugins() {
             return plugins;
         }
     }

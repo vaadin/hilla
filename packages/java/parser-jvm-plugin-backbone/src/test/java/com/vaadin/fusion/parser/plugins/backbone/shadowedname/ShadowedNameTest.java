@@ -37,7 +37,7 @@ public class ShadowedNameTest {
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(targetDir.toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(BackbonePlugin.class.getName()).finish();
+                .addPlugin(new BackbonePlugin()).finish();
 
         var parser = new Parser(config);
         parser.execute();
