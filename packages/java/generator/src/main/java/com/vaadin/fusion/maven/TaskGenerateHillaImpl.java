@@ -64,8 +64,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     }
 
     private List<String> prepareGradleCommand() {
-        List<String> command = new ArrayList<>();
-        return command;
+        throw new UnsupportedOperationException("Gradle is not supported yet");
     }
     
 }
