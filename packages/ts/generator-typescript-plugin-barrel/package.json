@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/generator-typescript-plugin-barrel",
-  "version": "0.1.0",
+  "version": "0.0.16",
   "description": "A Fusion TypeScript Generator plugin to generate barrel file",
   "main": "index.js",
   "type": "module",
@@ -50,7 +50,7 @@
     "@vaadin/generator-typescript-plugin-backbone": "^0.1.0"
   },
   "dependencies": {
-    "@vaadin/generator-typescript-utils": "^0.1.0",
+    "@vaadin/generator-typescript-utils": "^0.0.16",
     "typescript": "^4.5.2"
   },
   "devDependencies": {
@@ -59,8 +59,8 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
-    "@vaadin/generator-typescript-core": "^0.1.0",
-    "@vaadin/generator-typescript-plugin-backbone": "^0.1.0",
+    "@vaadin/generator-typescript-core": "^0.0.16",
+    "@vaadin/generator-typescript-plugin-backbone": "^0.0.16",
     "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.4.0",
