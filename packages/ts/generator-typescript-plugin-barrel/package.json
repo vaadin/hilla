@@ -45,6 +45,9 @@
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@vaadin/generator-typescript-core": "^0.1.0",
     "@vaadin/generator-typescript-plugin-backbone": "^0.1.0"
