@@ -68,15 +68,6 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <systemProperties>
-                        <systemProperty>
-                            <!-- make sure we do not leave webpack-dev-server running after IT -->
-                            <name>vaadin.reuseDevServer</name>
-                            <value>false</value>
-                        </systemProperty>
-                    </systemProperties>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.vaadin</groupId>
