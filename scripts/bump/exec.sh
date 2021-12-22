@@ -14,7 +14,7 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -s"
 
 # Updating the registration version for all packages
-find "$packages_dir/*/src/index.ts" -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
+find "$packages_dir"/*/src/index.ts -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
 
 npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
 
