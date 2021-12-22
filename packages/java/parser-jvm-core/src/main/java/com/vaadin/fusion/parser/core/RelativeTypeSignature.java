@@ -136,6 +136,10 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         return false;
     }
 
+    default boolean isNativeObject() {
+        return false;
+    }
+
     default boolean isOptional() {
         return false;
     }

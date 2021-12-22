@@ -12,6 +12,7 @@ import com.vaadin.fusion.parser.core.ClassRefRelativeTypeSignature;
 import com.vaadin.fusion.parser.core.RelativeTypeArgument;
 import com.vaadin.fusion.parser.core.RelativeTypeParameter;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
+import com.vaadin.fusion.parser.core.TypeVariableRelativeTypeSignature;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -62,6 +63,8 @@ final class SchemaProcessor {
             result = dateTimeSchema();
         } else if (signature.isClassRef()) {
             result = refSchema();
+        } else if (signature.isTypeVariable()) {
+            result = typeVariableSchema();
         } else {
             result = anySchema();
         }
@@ -88,11 +91,11 @@ final class SchemaProcessor {
     }
 
     private Schema<?> dateSchema() {
-        return new DateSchema();
+        return new DateSchema().nullable(true);
     }
 
     private Schema<?> dateTimeSchema() {
-        return new DateTimeSchema();
+        return new DateTimeSchema().nullable(true);
     }
 
     private Schema<?> integerSchema() {
@@ -164,21 +167,25 @@ final class SchemaProcessor {
     }
 
     private Schema<?> typeParameterSchema() {
-        var classBound = ((RelativeTypeParameter) signature).getClassBound();
+        var anySchemaSample = anySchema();
 
-        if (classBound != null) {
-            return new SchemaProcessor(classBound, associationMap).process();
-        }
-
-        var interfaceBounds = ((RelativeTypeParameter) signature)
-                .getInterfaceBounds();
-
-        return interfaceBounds.stream()
-                .filter(bound -> bound.isMap() || bound.isIterable())
-                .findFirst()
-                .<Schema<?>> map(
-                        bound -> new SchemaProcessor(bound, associationMap)
+        return ((RelativeTypeParameter) signature).getClassBound()
+                .filter(classBound -> !classBound.isNativeObject())
+                .<Schema<?>> map(classBound -> new SchemaProcessor(classBound,
+                        associationMap).process())
+                .or(() -> ((RelativeTypeParameter) signature)
+                        .getInterfaceBounds().stream()
+                        .map(bound -> new SchemaProcessor(bound, associationMap)
                                 .process())
+                        .filter(schema -> !Objects.equals(schema,
+                                anySchemaSample))
+                        .findFirst())
                 .orElseGet(this::anySchema);
+    }
+
+    private Schema<?> typeVariableSchema() {
+        return new SchemaProcessor(
+                ((TypeVariableRelativeTypeSignature) signature).resolve(),
+                associationMap).process();
     }
 }
