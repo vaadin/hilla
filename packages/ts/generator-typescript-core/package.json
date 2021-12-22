@@ -59,6 +59,9 @@
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
     "meow": "^10.1.1",

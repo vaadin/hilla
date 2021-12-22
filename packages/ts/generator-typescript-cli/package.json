@@ -35,6 +35,9 @@
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "tsgen": "bin/index.js"
   },

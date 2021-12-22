@@ -68,6 +68,9 @@
     "dependencies/*.{d.ts.map,d.ts,js.map,js}",
     "testing/*.{d.ts.map,d.ts,js.map,js}"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@vaadin/generator-typescript-core": "^0.1.0"
   },
