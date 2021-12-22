@@ -27,7 +27,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date"
+                  "format": "date",
+                  "nullable": true
                 }
               }
             }
@@ -47,7 +48,8 @@
                 "properties": {
                   "date": {
                     "type": "string",
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   }
                 }
               }
@@ -61,7 +63,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date"
+                  "format": "date",
+                  "nullable": true
                 }
               }
             }
@@ -81,7 +84,8 @@
                 "properties": {
                   "instant": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   }
                 }
               }
@@ -95,7 +99,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date-time"
+                  "format": "date-time",
+                  "nullable": true
                 }
               }
             }
@@ -118,7 +123,8 @@
                     "nullable": true,
                     "items": {
                       "type": "string",
-                      "format": "date-time"
+                      "format": "date-time",
+                      "nullable": true
                     }
                   }
                 }
@@ -136,7 +142,8 @@
                   "nullable": true,
                   "items": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   }
                 }
               }
@@ -157,7 +164,8 @@
                 "properties": {
                   "localDate": {
                     "type": "string",
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   }
                 }
               }
@@ -171,7 +179,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date"
+                  "format": "date",
+                  "nullable": true
                 }
               }
             }
@@ -191,7 +200,8 @@
                 "properties": {
                   "localDateTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   }
                 }
               }
@@ -205,7 +215,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date-time"
+                  "format": "date-time",
+                  "nullable": true
                 }
               }
             }
@@ -225,7 +236,8 @@
                 "properties": {
                   "localTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   }
                 }
               }
@@ -239,7 +251,8 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "format": "date-time"
+                  "format": "date-time",
+                  "nullable": true
                 }
               }
             }
@@ -261,7 +274,8 @@
                     "type": "object",
                     "additionalProperties": {
                       "type": "string",
-                      "format": "date-time"
+                      "format": "date-time",
+                      "nullable": true
                     },
                     "nullable": true
                   }
@@ -279,7 +293,8 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   },
                   "nullable": true
                 }
