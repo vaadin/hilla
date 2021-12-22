@@ -27,7 +27,7 @@ public final class ParserConfig extends AbstractParserConfig {
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
-    private SortedSet<Plugin> plugins = new TreeSet<>();
+    private final SortedSet<Plugin> plugins = new TreeSet<>();
 
     private ParserConfig() {
     }
@@ -161,9 +161,10 @@ public final class ParserConfig extends AbstractParserConfig {
         @Nonnull
         public Builder plugins(@Nonnull Collection<Plugin> plugins) {
             Objects.requireNonNull(plugins);
-            actions.add(config -> config.plugins = plugins instanceof TreeSet
-                    ? ((TreeSet<Plugin>) plugins)
-                    : new TreeSet<>(plugins));
+            actions.add(config -> {
+                config.plugins.clear();
+                config.plugins.addAll(plugins);
+            });
             return this;
         }
 

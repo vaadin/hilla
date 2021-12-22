@@ -5,7 +5,14 @@ import { BinderNode } from './BinderNode.js';
 // eslint-disable-next-line import/no-cycle
 import { _parent, AbstractModel, ModelConstructor } from './Models.js';
 // eslint-disable-next-line import/no-cycle
-import { runValidator, ServerValidator, ValidationError, Validator, ValueError } from './Validation.js';
+import {
+  InterpolateMessageCallback,
+  runValidator,
+  ServerValidator,
+  ValidationError,
+  Validator,
+  ValueError,
+} from './Validation.js';
 // eslint-disable-next-line import/no-cycle
 import { FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 
@@ -46,6 +53,8 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 
   private [_validations]: Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>> =
     new Map();
+
+  public static interpolateMessageCallback?: InterpolateMessageCallback<any>;
 
   /**
    *
@@ -208,7 +217,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
       return modelValidations.get(validator) as Promise<ReadonlyArray<ValueError<NT>>>;
     }
 
-    const promise = runValidator(model, validator);
+    const promise = runValidator(model, validator, Binder.interpolateMessageCallback);
     modelValidations.set(validator, promise);
     const valueErrors = await promise;
 

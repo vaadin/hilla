@@ -5,8 +5,27 @@ import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { customElement, query } from 'lit/decorators.js';
 // API to test
-import { Binder, field, Required, ValidationError, Validator, ValueError } from '../src';
-import { IdEntity, IdEntityModel, Order, OrderModel, TestEntity, TestModel } from './TestModels';
+import {
+  Binder,
+  field,
+  InterpolateMessageCallback,
+  NotBlank,
+  Required,
+  Size,
+  ValidationError,
+  Validator,
+  ValueError,
+} from '../src';
+import {
+  IdEntity,
+  IdEntityModel,
+  Order,
+  OrderModel,
+  TestEntity,
+  TestModel,
+  TestMessageInterpolationEntity,
+  TestMessageInterpolationModel,
+} from './TestModels';
 
 @customElement('order-view')
 class OrderView extends LitElement {
@@ -619,6 +638,64 @@ describe('form/Validation', () => {
       await fireEvent(orderView.price, 'change');
 
       expect(String(orderView.priceError.textContent)).to.contain('must be a number');
+    });
+  });
+
+  describe('message interpolation', () => {
+    let binder: Binder<TestMessageInterpolationEntity, TestMessageInterpolationModel>;
+
+    beforeEach(async () => {
+      binder = new Binder(view, TestMessageInterpolationModel);
+    });
+
+    afterEach(async () => {
+      Binder.interpolateMessageCallback = undefined;
+    });
+
+    it('should interpolate message', async () => {
+      const callback: InterpolateMessageCallback<any> = (_message, _validator, _binderNode) => {
+        // Interpolates all error messages as 'custom message'
+        return 'custom message';
+      };
+      Binder.interpolateMessageCallback = sinon.spy(callback);
+
+      const errors = await binder.validate();
+      expect(Binder.interpolateMessageCallback).to.be.called;
+      expect(errors).to.have.lengthOf.at.least(1);
+      for (const [i, error] of errors.entries()) {
+        expect(error.message).to.equal('custom message', `errors[${i}]`);
+      }
+    });
+
+    it('should have access to message and validator', async () => {
+      const callback: InterpolateMessageCallback<any> = (message, validator, _binderNode) => {
+        expect(message).to.be.a('string');
+        expect(validator).to.have.property('validate').that.is.a('function');
+        if (validator instanceof NotBlank) {
+          return message.replace('not be', '*NOT BE*');
+        }
+        return message;
+      };
+      Binder.interpolateMessageCallback = sinon.spy(callback);
+
+      const errors = await binder.validate();
+      expect(Binder.interpolateMessageCallback).to.be.called;
+      const error = errors.find((e) => e.validator instanceof NotBlank);
+      expect(error?.message).to.equal('must *NOT BE* blank');
+    });
+
+    it('should have access to BinderNode', async () => {
+      binder.read({ stringMinSize: '123', stringNotBlank: 'not blank' });
+      const callback: InterpolateMessageCallback<any> = (message, _validator, binderNode) => {
+        expect(binderNode).to.have.property('model');
+        return `[value: ${binderNode.value}] ${message}`;
+      };
+      Binder.interpolateMessageCallback = sinon.spy(callback);
+
+      const errors = await binder.validate();
+      expect(Binder.interpolateMessageCallback).to.be.called;
+      const error = errors.find((e) => e.validator instanceof Size);
+      expect(error?.message || '').to.include('[value: 123]');
     });
   });
 });

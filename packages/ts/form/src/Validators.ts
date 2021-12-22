@@ -274,7 +274,7 @@ export class Size extends AbstractValidator<string> {
 
   public max: number;
 
-  public constructor(attrs: SizeAttributes) {
+  public constructor(attrs: SizeAttributes = {}) {
     super({ message: `size must be between ${_min(attrs)} and ${_max(attrs)}`, ...attrs });
     this.min = _min(attrs);
     this.max = _max(attrs);

@@ -21,7 +21,9 @@ public final class RelativeTypeParameter
             @Nonnull Relative<?> parent) {
         super(origin, Objects.requireNonNull(parent));
         var classBound = origin.getClassBound();
-        this.classBound = classBound != null ? RelativeTypeSignature.of(classBound, this) : null;
+        this.classBound = classBound != null
+                ? RelativeTypeSignature.of(classBound, this)
+                : null;
         interfaceBounds = origin.getInterfaceBounds().stream()
                 .map(signature -> RelativeTypeSignature.of(signature, this))
                 .collect(Collectors.toList());
