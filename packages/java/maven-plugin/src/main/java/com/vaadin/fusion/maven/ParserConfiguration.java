@@ -93,17 +93,17 @@ final class ParserConfiguration {
         }
 
         @Override
-        public Set<Plugin> getDisable() {
+        public Set<Plugin> getDisabledOptions() {
             return disable;
         }
 
         @Override
-        public Set<Plugin> getUse() {
+        public Set<Plugin> getUsedOptions() {
             return use;
         }
 
         @Override
-        public boolean isDisableAllDefaults() {
+        public boolean shouldAllDefaultsBeDisabled() {
             return disableAllDefaults;
         }
     }
