@@ -13,7 +13,7 @@ export default class EndpointProcessor {
   readonly #dependencies = new DependencyManager(new PathManager());
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
-  readonly #sourcePaths = new PathManager('ts');
+  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(name: string, context: BackbonePluginContext) {
     this.#context = context;
