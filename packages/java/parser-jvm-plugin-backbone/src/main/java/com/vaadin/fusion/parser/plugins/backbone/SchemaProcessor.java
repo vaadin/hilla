@@ -27,6 +27,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
+    private static final Schema<?> anySchemaSample = new ObjectSchema();
+
     private final AssociationMap associationMap;
     private final RelativeTypeSignature signature;
 
@@ -34,6 +36,11 @@ final class SchemaProcessor {
             @Nonnull AssociationMap associationMap) {
         this.associationMap = associationMap;
         this.signature = Objects.requireNonNull(signature);
+    }
+
+    private static <T extends Schema<?>> T nullify(T schema,
+            boolean condition) {
+        return (T) schema.nullable(condition ? true : null);
     }
 
     public Schema<?> process() {
@@ -69,7 +76,7 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
-        associationMap.put(result, signature);
+        associationMap.addType(result, signature);
 
         return result;
     }
@@ -83,28 +90,28 @@ final class SchemaProcessor {
                 .getNestedType();
         var items = new SchemaProcessor(nestedType, associationMap).process();
 
-        return new ArraySchema().items(items).nullable(true);
+        return nullify(new ArraySchema().items(items), true);
     }
 
     private Schema<?> booleanSchema() {
-        return new BooleanSchema().nullable(!signature.isPrimitive());
+        return nullify(new BooleanSchema(), !signature.isPrimitive());
     }
 
     private Schema<?> dateSchema() {
-        return new DateSchema().nullable(true);
+        return nullify(new DateSchema(), true);
     }
 
     private Schema<?> dateTimeSchema() {
-        return new DateTimeSchema().nullable(true);
+        return nullify(new DateTimeSchema(), true);
     }
 
     private Schema<?> integerSchema() {
-        return new IntegerSchema().nullable(!signature.isPrimitive())
+        return nullify(new IntegerSchema(), !signature.isPrimitive())
                 .format(signature.isLong() ? "int64" : "int32");
     }
 
     private Schema<?> iterableSchema() {
-        var schema = (ArraySchema) new ArraySchema().nullable(true);
+        var schema = nullify(new ArraySchema(), true);
         var typeArguments = ((ClassRefRelativeTypeSignature) signature)
                 .getTypeArguments();
 
@@ -136,11 +143,11 @@ final class SchemaProcessor {
         var values = new SchemaProcessor(typeArguments.get(1), associationMap)
                 .process();
 
-        return new MapSchema().additionalProperties(values).nullable(true);
+        return nullify(new MapSchema(), true).additionalProperties(values);
     }
 
     private Schema<?> numberSchema() {
-        return new NumberSchema().nullable(!signature.isPrimitive())
+        return nullify(new NumberSchema(), !signature.isPrimitive())
                 .format(signature.isDouble() ? "double" : "float");
     }
 
@@ -148,14 +155,13 @@ final class SchemaProcessor {
         var fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
                 .get().getFullyQualifiedClassName();
 
-        return new ComposedSchema()
+        return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
-                .nullable(true);
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)));
     }
 
     private Schema<?> stringSchema() {
-        return new StringSchema().nullable(!signature.isPrimitive());
+        return nullify(new StringSchema(), !signature.isPrimitive());
     }
 
     private Schema<?> typeArgumentSchema() {
@@ -167,8 +173,6 @@ final class SchemaProcessor {
     }
 
     private Schema<?> typeParameterSchema() {
-        var anySchemaSample = anySchema();
-
         return ((RelativeTypeParameter) signature).getClassBound()
                 .filter(classBound -> !classBound.isNativeObject())
                 .<Schema<?>> map(classBound -> new SchemaProcessor(classBound,

@@ -62,8 +62,6 @@ final class EndpointProcessor extends Processor {
             var methodName = method.get().getName();
 
             this.pathKey = "/" + endpointName + "/" + methodName;
-
-            associationMap.put(pathItem, method);
         }
 
         public PathItem getPathItem() {
@@ -95,11 +93,12 @@ final class EndpointProcessor extends Processor {
         private RequestBody createRequestBody() {
             var requestMap = new ObjectSchema();
 
-            method.getParameters().forEach(parameter -> {
-                requestMap.addProperties(parameter.get().getName(),
-                        new SchemaProcessor(parameter.getType(), associationMap)
-                                .process());
-            });
+            for (var parameter : method.getParameters()) {
+                var schema = new SchemaProcessor(parameter.getType(), associationMap)
+                    .process();
+                requestMap.addProperties(parameter.get().getName(), schema);
+                associationMap.addParameter(schema, parameter);
+            }
 
             return new RequestBody().content(new Content().addMediaType(
                     "application/json", new MediaType().schema(requestMap)));
@@ -111,11 +110,12 @@ final class EndpointProcessor extends Processor {
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                var resultTypeSchema = new SchemaProcessor(resultType,
+                var schema = new SchemaProcessor(resultType,
                         associationMap).process();
 
                 content.addMediaType("application/json",
-                        new MediaType().schema(resultTypeSchema));
+                        new MediaType().schema(schema));
+                associationMap.addMethod(schema, method);
             }
 
             return new ApiResponses().addApiResponse("200",

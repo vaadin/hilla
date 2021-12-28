@@ -8,8 +8,11 @@ import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.PluginConfiguration;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
+import com.vaadin.fusion.parser.plugins.backbone.AssociationMap;
+import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.fusion.parser.utils.PluginException;
 
-public class NonnullPlugin implements Plugin {
+public final class NonnullPlugin implements Plugin {
     private Collection<String> annotations;
     private int order = 100;
 
@@ -17,7 +20,15 @@ public class NonnullPlugin implements Plugin {
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
-        new NonnullProcessor(annotations).process();
+        var associationMap = (AssociationMap) storage.getPluginStorage()
+                .get(BackbonePlugin.ASSOCIATION_MAP);
+
+        if (associationMap == null) {
+            throw new PluginException(
+                    "NonnullPlugin should be run after BackbonePlugin");
+        }
+
+        new NonnullProcessor(annotations, associationMap).process();
     }
 
     @Override
@@ -42,6 +53,7 @@ public class NonnullPlugin implements Plugin {
                     getClass().getName(), NonnullPluginConfig.class.getName()));
         }
 
-        annotations = new NonnullPluginConfig.Processor((NonnullPluginConfig) config).process();
+        annotations = new NonnullPluginConfig.Processor(
+                (NonnullPluginConfig) config).process();
     }
 }

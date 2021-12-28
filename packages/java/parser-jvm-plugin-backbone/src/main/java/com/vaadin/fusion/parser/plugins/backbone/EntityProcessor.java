@@ -53,6 +53,8 @@ final class EntityProcessor extends Processor {
 
                         components.addSchemas(processor.getKey(),
                                 processor.getValue());
+
+                        associationMap.addEntity(processor.getValue(), entity);
                     }
                 });
 
@@ -61,18 +63,22 @@ final class EntityProcessor extends Processor {
 
     private class ComponentSchemaProcessor {
         private final RelativeClassInfo entity;
+        private final String key;
+        private final Schema<?> value;
 
         public ComponentSchemaProcessor(RelativeClassInfo entity) {
             this.entity = entity;
+            this.key = entity.get().getName();
+            this.value = entity.get().isEnum() ? processEnum()
+                    : processExtendedClass();
         }
 
         public String getKey() {
-            return entity.get().getName();
+            return key;
         }
 
         public Schema<?> getValue() {
-            return entity.get().isEnum() ? processEnum()
-                    : processExtendedClass();
+            return value;
         }
 
         private Schema<?> processClass() {
@@ -86,6 +92,8 @@ final class EntityProcessor extends Processor {
 
                         schema.addProperties(processor.getKey(),
                                 processor.getValue());
+
+                        associationMap.addMethod(processor.getValue(), method);
                     });
 
             return schema;
@@ -114,19 +122,21 @@ final class EntityProcessor extends Processor {
     }
 
     private class ComponentSchemaPropertyProcessor {
-        private final RelativeMethodInfo method;
+        private final String key;
+        private final Schema<?> value;
 
         public ComponentSchemaPropertyProcessor(RelativeMethodInfo method) {
-            this.method = method;
+            this.key = decapitalize(method.get().getName().substring(3));
+            this.value = new SchemaProcessor(method.getResultType(),
+                    associationMap).process();
         }
 
         public String getKey() {
-            return decapitalize(method.get().getName().substring(3));
+            return key;
         }
 
         public Schema<?> getValue() {
-            return new SchemaProcessor(method.getResultType(), associationMap)
-                    .process();
+            return value;
         }
     }
 }

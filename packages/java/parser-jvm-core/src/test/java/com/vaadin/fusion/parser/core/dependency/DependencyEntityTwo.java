@@ -1,8 +1,11 @@
 package com.vaadin.fusion.parser.core.dependency;
 
+import javax.annotation.Nonnull;
+
 public class DependencyEntityTwo {
     public DependencyEntityOne foo;
 
+    @Nonnull
     public DependencyEntityOne circular() {
         return foo;
     }
