@@ -16,80 +16,20 @@ import {
   ReferenceSchema,
   ArraySchema,
   MapSchema,
-  NonComposedRegularSchema,
-  isNonComposedRegularSchema,
 } from '@vaadin/generator-typescript-core/Schema.js';
-import PluginError from '@vaadin/generator-typescript-utils/PluginError.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { Expression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
-
-type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
-
-function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
-  return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
-}
-
-type AnnotationPrimitiveAttribute = boolean | number | string;
-type AnnotationNamedAttributes = Readonly<{
-  [name: string]: AnnotationPrimitiveAttribute;
-}>;
-type Annotation = Readonly<{
-  simpleName: string;
-  attributes?: AnnotationNamedAttributes;
-}>;
-
-export type ModelSchemaProcessorResult = Readonly<
-  [type: TypeNode, modelType: TypeNode, model: Identifier, args: readonly Expression[]]
->;
-
-const keywords: Record<string, AnnotationPrimitiveAttribute> = { true: true, false: false };
-
-function parseAttribute(attributeText: string): AnnotationPrimitiveAttribute {
-  if (attributeText in keywords) {
-    return keywords[attributeText];
-  }
-
-  if (attributeText.startsWith('"') && attributeText.endsWith('"')) {
-    return attributeText.slice(1, attributeText.length - 1).replace(/\\\\/g, '\\');
-  }
-
-  const number = Number(attributeText);
-  if (!Number.isNaN(number) || attributeText.toLowerCase() === 'nan') {
-    return number;
-  }
-
-  throw new PluginError(`Unable to parse annotation argument "${attributeText}"`);
-}
-
-function parseAttributes(attributesText: string): AnnotationNamedAttributes {
-  attributesText = attributesText.trim();
-  if (attributesText.startsWith('{') && attributesText.endsWith('}')) {
-    const namedList = attributesText.slice(1, attributesText.length - 1);
-    const attributes: AnnotationNamedAttributes = namedList.split(',').reduce((record, pairText) => {
-      const [key, valueText] = pairText.split(':');
-      record[key.trim()] = parseAttribute(valueText);
-      return record;
-    }, {} as Record<string, AnnotationPrimitiveAttribute>);
-    return attributes;
-  }
-
-  return { value: parseAttribute(attributesText) };
-}
-
-function parseAnnotation(annotationText: string): Annotation {
-  const [, simpleName, argumentsText] = /^(\w+)\((.*)\)$/.exec(annotationText) || [];
-  if (simpleName === undefined) {
-    throw new PluginError(`Unknown annotation format when processing "${annotationText}"`);
-  }
-
-  if (argumentsText !== undefined && argumentsText.trim() !== '') {
-    const attributes = parseAttributes(argumentsText);
-    return { simpleName, attributes };
-  }
-
-  return { simpleName };
-}
+import {
+  AnnotatedSchema,
+  Annotation,
+  AnnotationNamedAttributes,
+  AnnotationPrimitiveAttribute,
+  isAnnotatedSchema,
+  isValidationConstrainedSchema,
+  ValidationConstrainedSchema,
+} from './Annotation.js';
+import parseAnnotation from './parseAnnotation.js';
 
 function convertAttribute(attribute: AnnotationPrimitiveAttribute): Expression {
   switch (typeof attribute) {
@@ -115,6 +55,10 @@ function convertNamedAttributes(attributes: AnnotationNamedAttributes): Expressi
     false,
   );
 }
+
+export type ModelSchemaProcessorResult = Readonly<
+  [type: TypeNode, modelType: TypeNode, model: Identifier, args: readonly Expression[]]
+>;
 
 export default class ModelSchemaProcessor {
   readonly #schema: Schema;
@@ -161,7 +105,11 @@ export default class ModelSchemaProcessor {
     const optionalArg = isNullableSchema(this.#schema) ? ts.factory.createTrue() : ts.factory.createFalse();
 
     if (isAnnotatedSchema(unwrappedSchema)) {
-      args = [...args, ...this.#getValidators(unwrappedSchema)];
+      args = [...args, ...this.#getValidatorsFromAnnotations(unwrappedSchema)];
+    }
+
+    if (isValidationConstrainedSchema(unwrappedSchema)) {
+      args = [...args, ...this.#getValidatorsFromValidationConstraints(unwrappedSchema)];
     }
 
     return [type, modelType, model, [optionalArg, ...args]];
@@ -211,8 +159,12 @@ export default class ModelSchemaProcessor {
     return [type, modelType, model, []];
   }
 
-  #getValidators(schema: AnnotatedSchema): readonly Expression[] {
+  #getValidatorsFromAnnotations(schema: AnnotatedSchema): readonly Expression[] {
     return schema['x-annotations'].map((annotationText: string) => this.#getValidator(parseAnnotation(annotationText)));
+  }
+
+  #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
+    return schema['x-validation-constraints'].map((annotation: Annotation) => this.#getValidator(annotation));
   }
 
   #getValidator(annotation: Annotation): Expression {

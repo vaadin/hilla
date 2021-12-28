@@ -15,11 +15,6 @@
       "name": "TsFormEndpoint",
       "description": "",
       "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
-    },
-    {
-      "name": "HelloEndpoint",
-      "description": "",
-      "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/HelloEndpoint.java"
     }
   ],
   "paths": {
@@ -165,10 +160,17 @@
                   }
                 ]
               },
-              "validators": {
+              "annotations": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormValidators"
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormAnnotations"
+                  }
+                ]
+              },
+              "validationConstraints": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormValidationConstraints"
                   }
                 ]
               },
@@ -307,7 +309,7 @@
         },
         "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
-      "com.example.application.endpoints.TsFormEndpoint.FormValidators": {
+      "com.example.application.endpoints.TsFormEndpoint.FormAnnotations": {
         "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
         "type": "object",
         "properties": {
@@ -412,6 +414,237 @@
           "pattern": {
             "type": "string",
             "x-annotations": ["Pattern({regexp:\"\\\\d+\\\\..+\"})"]
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormValidationConstraints": {
+        "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Email",
+                "attributes": {
+                  "message": "foo"
+                }
+              }
+            ]
+          },
+          "isNull": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Null"
+              }
+            ]
+          },
+          "notNull": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notEmpty": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotEmpty"
+              },
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notNullEntity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+              }
+            ],
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notBlank": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
+          },
+          "assertTrue": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ]
+          },
+          "assertFalse": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertFalse"
+              }
+            ]
+          },
+          "min": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Min",
+                "attributes": {
+                  "value": 1,
+                  "message": "foo"
+                }
+              }
+            ]
+          },
+          "max": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Max",
+                "attributes": {
+                  "value": 2
+                }
+              }
+            ]
+          },
+          "decimalMin": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "DecimalMin",
+                "attributes": {
+                  "value": "0.01"
+                }
+              }
+            ]
+          },
+          "decimalMax": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "DecimalMax",
+                "attributes": {
+                  "value": "0.01",
+                  "inclusive": false
+                }
+              }
+            ]
+          },
+          "negative": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Negative"
+              }
+            ]
+          },
+          "negativeOrZero": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NegativeOrZero"
+              }
+            ]
+          },
+          "positive": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Positive"
+              }
+            ]
+          },
+          "positiveOrZero": {
+            "type": "number",
+            "x-validation-constraints": [
+              {
+                "simpleName": "PositiveOrZero"
+              }
+            ]
+          },
+          "size": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size"
+              }
+            ]
+          },
+          "size1": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size",
+                "attributes": {
+                  "min": 1
+                }
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Digits",
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                }
+              }
+            ]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ]
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ]
+          },
+          "pattern": {
+            "type": "string",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Pattern",
+                "attributes": {
+                  "regexp": "\\d+\\..+"
+                }
+              }
+            ]
           }
         },
         "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"

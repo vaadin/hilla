@@ -55,14 +55,6 @@ public final class RelativeClassInfo
         chain = new InheritanceChain();
     }
 
-    public List<RelativeAnnotationInfo> getAnnotations() {
-        return annotations;
-    }
-
-    public Stream<RelativeAnnotationInfo> getAnnotationsStream() {
-        return annotations.stream();
-    }
-
     @Override
     public Stream<RelativeClassInfo> getDependenciesStream() {
         return Stream

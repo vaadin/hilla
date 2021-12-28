@@ -1,0 +1,302 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ValidationEndpoint"
+    }
+  ],
+  "paths": {
+    "/ValidationEndpoint/getValidationData": {
+      "post": {
+        "tags": ["ValidationEndpoint"],
+        "operationId": "ValidationEndpoint_getValidationData_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Email",
+                "attributes": {
+                  "message": "foo"
+                }
+              }
+            ]
+          },
+          "isNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Null"
+              }
+            ]
+          },
+          "notNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notEmpty": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "notNullEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData"
+              }
+            ]
+          },
+          "notBlank": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
+          },
+          "assertTrue": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ]
+          },
+          "assertFalse": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertFalse"
+              }
+            ]
+          },
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Min",
+                "attributes": {
+                  "message": "foo",
+                  "value": 1
+                }
+              }
+            ]
+          },
+          "max": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Max",
+                "attributes": {
+                  "value": 2
+                }
+              }
+            ]
+          },
+          "decimalMin": {
+            "type": "number",
+            "format": "double",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "DecimalMin",
+                "attributes": {
+                  "value": "0.01"
+                }
+              }
+            ]
+          },
+          "decimalMax": {
+            "type": "number",
+            "format": "double",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "DecimalMax",
+                "attributes": {
+                  "inclusive": false,
+                  "value": "0.01"
+                }
+              }
+            ]
+          },
+          "negative": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Negative"
+              }
+            ]
+          },
+          "negativeOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NegativeOrZero"
+              }
+            ]
+          },
+          "positive": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Positive"
+              }
+            ]
+          },
+          "positiveOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": false,
+            "x-validation-constraints": [
+              {
+                "simpleName": "PositiveOrZero"
+              }
+            ]
+          },
+          "size": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size"
+              }
+            ]
+          },
+          "size1": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size",
+                "attributes": {
+                  "min": 1
+                }
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Digits",
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                }
+              }
+            ]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ]
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ]
+          },
+          "pattern": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Pattern",
+                "attributes": {
+                  "regexp": "\\d+\\..+"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,6 @@
 import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1 } from "@vaadin/form";
+import type FormAnnotations_1 from "./FormAnnotations";
+import FormAnnotationsModel_1 from "./FormAnnotationsModel";
 import type FormArrayTypes_1 from "./FormArrayTypes";
 import FormArrayTypesModel_1 from "./FormArrayTypesModel";
 import type FormDataPrimitives_1 from "./FormDataPrimitives";
@@ -15,8 +17,8 @@ import type FormRecordTypes_1 from "./FormRecordTypes";
 import FormRecordTypesModel_1 from "./FormRecordTypesModel";
 import type FormTemporalTypes_1 from "./FormTemporalTypes";
 import FormTemporalTypesModel_1 from "./FormTemporalTypesModel";
-import type FormValidators_1 from "./FormValidators";
-import FormValidatorsModel_1 from "./FormValidatorsModel";
+import type FormValidationConstraints_1 from "./FormValidationConstraints";
+import FormValidationConstraintsModel_1 from "./FormValidationConstraintsModel";
 export default class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityIdModel_1<T> {
     static createEmptyValue: () => FormEntity_1;
     get myId(): NumberModel_1 {
@@ -37,8 +39,11 @@ export default class FormEntityModel<T extends FormEntity_1 = FormEntity_1> exte
     get recordTypes(): FormRecordTypesModel_1 {
         return this[_getPropertyModel_1]("recordTypes", FormRecordTypesModel_1, [true]) as FormRecordTypesModel_1;
     }
-    get validators(): FormValidatorsModel_1 {
-        return this[_getPropertyModel_1]("validators", FormValidatorsModel_1, [true]) as FormValidatorsModel_1;
+    get annotations(): FormAnnotationsModel_1 {
+        return this[_getPropertyModel_1]("annotations", FormAnnotationsModel_1, [true]) as FormAnnotationsModel_1;
+    }
+    get validationConstraints(): FormValidationConstraintsModel_1 {
+        return this[_getPropertyModel_1]("validationConstraints", FormValidationConstraintsModel_1, [true]) as FormValidationConstraintsModel_1;
     }
     get myOptionalTypes(): FormOptionalTypesModel_1 {
         return this[_getPropertyModel_1]("myOptionalTypes", FormOptionalTypesModel_1, [true]) as FormOptionalTypesModel_1;
