@@ -39,7 +39,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.137</version>
+      <version>4.8.138</version>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
@@ -67,9 +67,16 @@
       <version>2.13.0</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.13.0</version>
+      <groupId>com.vaadin.fusion</groupId>
+      <artifactId>parser-jvm-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin.fusion</groupId>
+      <artifactId>parser-jvm-test-utils</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

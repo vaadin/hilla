@@ -1,6 +1,6 @@
 package com.vaadin.fusion.parser.plugins.backbone.simpletype;
 
-import static com.vaadin.fusion.parser.plugins.testutils.OpenAPIAssertions.assertEquals;
+import static com.vaadin.fusion.parser.testutils.OpenAPIAssertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.fusion.parser.plugins.testutils.ResourceLoader;
+import com.vaadin.fusion.parser.testutils.ResourceLoader;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
