@@ -32,12 +32,11 @@ const exportDefaultModifiers = [
 export class EntityProcessor {
   readonly #component: Schema;
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager(new PathManager());
+  readonly #dependencies;
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #path: string;
-  readonly #cwd: string;
-  readonly #sourcePaths = new PathManager('ts');
+  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
     this.#component = component;
@@ -45,7 +44,7 @@ export class EntityProcessor {
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
-    this.#cwd = dirname(this.#path);
+    this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
   }
 
   public process(): SourceFile {
@@ -141,14 +140,14 @@ export class EntityProcessor {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema), this.#cwd);
+    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
 
     return imports.default.add(path, specifier, true);
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
     return Object.entries(properties).map(([name, schema]) => {
-      const [type] = new TypeSchemaProcessor(schema, this.#dependencies, this.#cwd).process();
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
       return ts.factory.createPropertySignature(
         undefined,
