@@ -12,32 +12,36 @@ use(snapshotMatcher);
 describe('FormPlugin', () => {
   context('models', () => {
     it('correctly generates code', async () => {
+      const modelNames = [
+        'FormEntityModel',
+        'FormArrayTypesModel',
+        'FormEntityHierarchyModel',
+        'FormEntityIdModel',
+        'FormValidatorsModel',
+        'FormDataPrimitivesModel',
+        'FormTemporalTypesModel',
+        'FormRecordTypesModel',
+        'FormOptionalTypesModel',
+        'FormNonnullTypesModel',
+      ];
+
       const generator = new Generator([ModelPlugin], createLogger({ name: 'model-plugin-test', verbose: true }));
       const input = await readFile(new URL('./Model.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
-      expect(files.length).to.equal(10);
+      expect(files.length).to.equal(modelNames.length);
 
-      const filesByName = files.reduce((r, file) => {
+      const filesByName = files.reduce<Record<string, typeof files[0]>>((r, file) => {
         r[file.name] = file;
         return r;
-      }, {} as Record<string, typeof files[0]>);
-      [
-        'FormArrayTypesModel',
-        'FormDataPrimitivesModel',
-        'FormEntityHierarchyModel',
-        'FormEntityIdModel',
-        'FormEntityModel',
-        'FormNonnullTypesModel',
-        'FormOptionalTypesModel',
-        'FormRecordTypesModel',
-        'FormTemporalTypesModel',
-        'FormValidatorsModel',
-      ].forEach(async (modelName) => {
-        const modelFile = filesByName[modelName];
-        expect(modelFile).to.not.be.undefined;
-        expect(modelFile.name).to.equal(`./${modelName}.ts`);
-        await expect(modelFile.text()).toMatchSnapshot(modelName, import.meta.url);
-      });
+      }, {});
+      await Promise.all(
+        modelNames.map(async (modelName) => {
+          const fileName = `com/example/application/endpoints/TsFormEndpoint/${modelName}.ts`;
+          const modelFile = filesByName[fileName];
+          expect(modelFile).to.not.be.undefined;
+          await expect(await modelFile.text()).toMatchSnapshot(modelName, import.meta.url);
+        }),
+      );
     });
   });
 });

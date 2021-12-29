@@ -21,7 +21,7 @@ import {
 } from '@vaadin/generator-typescript-core/Schema.js';
 import PluginError from '@vaadin/generator-typescript-utils/PluginError.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
-import type { ArrayLiteralExpression, Expression, Identifier, TypeNode } from 'typescript';
+import type { Expression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
 
 type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
@@ -32,14 +32,17 @@ function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
 
 type AnnotationPrimitiveArgument = boolean | number | string;
 type AnnotationArgument = AnnotationPrimitiveArgument | AnnotationNamedArguments;
-interface AnnotationNamedArguments {
-  readonly [name: string]: AnnotationArgument;
-}
-
-interface Annotation {
+type AnnotationNamedArguments = Readonly<{
+  [name: string]: AnnotationArgument;
+}>;
+type Annotation = Readonly<{
   simpleName: string;
   arguments: ReadonlyArray<AnnotationArgument>;
-}
+}>;
+
+export type ModelSchemaProcessorResult = Readonly<
+  [type: TypeNode, modelType: TypeNode, model: Identifier, args: Expression[]]
+>;
 
 function parseAnnotation(annotationText: string): Annotation {
   const [, simpleName, argumentsText] = /^(\w+)\((.*)\)$/.exec(annotationText) || [];
@@ -85,7 +88,7 @@ export default class ModelSchemaProcessor {
     this.#cwd = cwd;
   }
 
-  public process(): [TypeNode, TypeNode, Identifier, ArrayLiteralExpression] {
+  public process(): ModelSchemaProcessorResult {
     const unwrappedSchema = (
       isComposedSchema(this.#schema) ? decomposeSchema(this.#schema)[0] : this.#schema
     ) as NonComposedSchema;
@@ -124,27 +127,24 @@ export default class ModelSchemaProcessor {
       args = [...args, ...this.#getValidators(unwrappedSchema)];
     }
 
-    return [type, modelType, model, ts.factory.createArrayLiteralExpression([optionalArg, ...args])];
+    return [type, modelType, model, [optionalArg, ...args]];
   }
 
-  #processReference(schema: ReferenceSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+  #processReference(schema: ReferenceSchema): ModelSchemaProcessorResult {
     const schemaPath = convertReferenceSchemaToPath(schema);
     const typeName = convertReferenceSchemaToSpecifier(schema);
-    const typePath = this.#dependencies.paths.createRelativePath(schemaPath, this.#cwd);
-    const modelPath = this.#dependencies.paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
+    const { paths, imports } = this.#dependencies;
+    const typePath = paths.createRelativePath(schemaPath, this.#cwd);
+    const modelPath = paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
     const modelName = `${typeName}Model`;
-    const refType =
-      this.#dependencies.imports.default.getIdentifier(typePath) ??
-      this.#dependencies.imports.default.add(typePath, typeName, true);
+    const refType = imports.default.getIdentifier(typePath) ?? imports.default.add(typePath, typeName, true);
     const type = ts.factory.createTypeReferenceNode(refType);
-    const model =
-      this.#dependencies.imports.default.getIdentifier(modelPath) ??
-      this.#dependencies.imports.default.add(modelPath, modelName);
+    const model = imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
     const modelType = ts.factory.createTypeReferenceNode(model);
     return [type, modelType, model, []];
   }
 
-  #processArray(schema: ArraySchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+  #processArray(schema: ArraySchema): ModelSchemaProcessorResult {
     const model = this.#getBuiltinFormExport('ArrayModel');
     const [itemType, itemModelType, itemModel, itemArgs] = new ModelSchemaProcessor(
       schema.items,
@@ -153,10 +153,10 @@ export default class ModelSchemaProcessor {
     ).process();
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [itemType]);
     const modelType = ts.factory.createTypeReferenceNode(model, [itemType, itemModelType]);
-    return [type, modelType, model, [itemModel, itemArgs]];
+    return [type, modelType, model, [itemModel, ts.factory.createArrayLiteralExpression(itemArgs)]];
   }
 
-  #processRecord(schema: MapSchema): [TypeNode, TypeNode, Identifier, Expression[]] {
+  #processRecord(schema: MapSchema): ModelSchemaProcessorResult {
     const model = this.#getBuiltinFormExport('ObjectModel');
 
     let valueType: TypeNode;
