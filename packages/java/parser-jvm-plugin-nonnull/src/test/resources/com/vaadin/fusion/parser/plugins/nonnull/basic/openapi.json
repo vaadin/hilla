@@ -96,7 +96,6 @@
                     "type": "array",
                     "nullable": true,
                     "items": {
-                      "nullable": true,
                       "anyOf": [
                         {
                           "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
@@ -118,7 +117,6 @@
                   "type": "array",
                   "nullable": true,
                   "items": {
-                    "nullable": true,
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
@@ -147,7 +145,6 @@
                     "additionalProperties": {
                       "type": "array",
                       "items": {
-                        "nullable": true,
                         "anyOf": [
                           {
                             "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
@@ -171,7 +168,6 @@
                   "additionalProperties": {
                     "type": "array",
                     "items": {
-                      "nullable": true,
                       "anyOf": [
                         {
                           "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
@@ -278,7 +274,6 @@
             "additionalProperties": {
               "type": "array",
               "items": {
-                "nullable": true,
                 "anyOf": [
                   {
                     "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"

@@ -9,6 +9,8 @@ import com.vaadin.fusion.parser.core.RelativeTypeSignature;
 import com.vaadin.fusion.parser.plugins.backbone.AssociationMap;
 
 import io.github.classgraph.AnnotationInfoList;
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.HierarchicalTypeSignature;
 import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeSignature;
 import io.swagger.v3.oas.models.media.Schema;
@@ -42,19 +44,33 @@ final class NonnullProcessor {
         return isNonNull(parameter.get().getAnnotationInfo());
     }
 
-    private boolean isNonNull(RelativeTypeSignature signature) {
-        AnnotationInfoList infos = null;
-
-        var origin = signature.get();
-
-        if (origin instanceof TypeSignature) {
-            infos = ((TypeSignature) signature.get()).getTypeAnnotationInfo();
-        } else if (origin instanceof TypeArgument) {
-            infos = ((TypeArgument) origin).getTypeSignature()
+    private boolean isNonNull(HierarchicalTypeSignature signature) {
+        if (signature instanceof ClassRefTypeSignature) {
+            var infos = ((ClassRefTypeSignature) signature)
                     .getTypeAnnotationInfo();
+
+            if (infos == null) {
+                var suffixTypeAnnotations = ((ClassRefTypeSignature) signature)
+                        .getSuffixTypeAnnotationInfo();
+
+                // Having more than 1 suffix (like List<X.@X.B Y>) is some kind
+                // of edge case for @Nonnull, so here we just get the
+                // annotations for the latest one.
+                infos = suffixTypeAnnotations != null
+                        ? suffixTypeAnnotations
+                                .get(suffixTypeAnnotations.size() - 1)
+                        : null;
+            }
+
+            return isNonNull(infos);
+        } else if (signature instanceof TypeSignature) {
+            return isNonNull(
+                    ((TypeSignature) signature).getTypeAnnotationInfo());
+        } else if (signature instanceof TypeArgument) {
+            return isNonNull(((TypeArgument) signature).getTypeSignature());
         }
 
-        return isNonNull(infos);
+        return false;
     }
 
     private void processMethod(Schema<?> schema, RelativeMethodInfo method) {
@@ -75,7 +91,7 @@ final class NonnullProcessor {
     private void processSchema(Schema<?> schema,
             RelativeTypeSignature signature) {
         if (Objects.equals(schema.getNullable(), Boolean.TRUE)
-                && isNonNull(signature)) {
+                && isNonNull(signature.get())) {
             schema.setNullable(null);
         }
     }

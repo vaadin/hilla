@@ -1,5 +1,10 @@
 package com.vaadin.fusion.parser.plugins.nonnull.basic;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
@@ -37,19 +42,19 @@ public class BasicEndpoint {
     }
 
     public static class NonNullableModel {
-//        public String getNullableType(String nullableParameter) {
-//            return nullableParameter;
-//        }
-//
-//        @Nonnull
-//        public String getSimpleType(@Nonnull String str) {
-//            return str;
-//        }
-//
-//        public List<@Nonnull String> getTypeWithTypeArgument(
-//                List<@Nonnull String> list) {
-//            return list;
-//        }
+        public String getNullableType(String nullableParameter) {
+            return nullableParameter;
+        }
+
+        @Nonnull
+        public String getSimpleType(@Nonnull String str) {
+            return str;
+        }
+
+        public List<@Nonnull String> getTypeWithTypeArgument(
+                List<@Nonnull String> list) {
+            return list;
+        }
 
         @Nonnull
         public Map<String, @Nonnull List<@Nonnull NonNullableModel>> getComplexType(
