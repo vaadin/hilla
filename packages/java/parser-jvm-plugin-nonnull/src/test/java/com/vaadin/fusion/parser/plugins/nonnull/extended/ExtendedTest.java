@@ -37,7 +37,8 @@ public class ExtendedTest {
     public void should_ApplyNonNullAnnotation()
             throws IOException, URISyntaxException {
         var plugin = new NonnullPlugin();
-        plugin.setConfig(new NonnullPluginConfig(Set.of(Nonnull.class.getName()), null));
+        plugin.setConfig(
+                new NonnullPluginConfig(Set.of(Nonnull.class.getName()), null));
 
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(targetDir.toString()))
