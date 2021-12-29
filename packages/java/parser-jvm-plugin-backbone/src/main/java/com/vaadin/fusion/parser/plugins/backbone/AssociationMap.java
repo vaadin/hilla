@@ -76,7 +76,8 @@ public class AssociationMap {
         private final Map<RelativeMethodParameterInfo, Schema<?>> parameters = new IdentityHashMap<>();
         private final Map<RelativeTypeSignature, Schema<?>> types = new IdentityHashMap<>();
 
-        private Reversed() {}
+        private Reversed() {
+        }
 
         public Map<RelativeClassInfo, Schema<?>> getEntities() {
             return Collections.unmodifiableMap(entities);
