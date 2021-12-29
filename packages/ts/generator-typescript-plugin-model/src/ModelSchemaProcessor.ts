@@ -80,12 +80,10 @@ function convertAnnotationArgumentToExpression(arg: AnnotationArgument): Express
 export default class ModelSchemaProcessor {
   readonly #schema: Schema;
   readonly #dependencies: DependencyManager;
-  readonly #cwd: string;
 
-  public constructor(schema: Schema, dependencies: DependencyManager, cwd: string) {
+  public constructor(schema: Schema, dependencies: DependencyManager) {
     this.#schema = schema;
     this.#dependencies = dependencies;
-    this.#cwd = cwd;
   }
 
   public process(): ModelSchemaProcessorResult {
@@ -134,8 +132,8 @@ export default class ModelSchemaProcessor {
     const schemaPath = convertReferenceSchemaToPath(schema);
     const typeName = convertReferenceSchemaToSpecifier(schema);
     const { paths, imports } = this.#dependencies;
-    const typePath = paths.createRelativePath(schemaPath, this.#cwd);
-    const modelPath = paths.createRelativePath(`${schemaPath}Model`, this.#cwd);
+    const typePath = paths.createRelativePath(schemaPath);
+    const modelPath = paths.createRelativePath(`${schemaPath}Model`);
     const modelName = `${typeName}Model`;
     const refType = imports.default.getIdentifier(typePath) ?? imports.default.add(typePath, typeName, true);
     const type = ts.factory.createTypeReferenceNode(refType);
@@ -149,7 +147,6 @@ export default class ModelSchemaProcessor {
     const [itemType, itemModelType, itemModel, itemArgs] = new ModelSchemaProcessor(
       schema.items,
       this.#dependencies,
-      this.#cwd,
     ).process();
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [itemType]);
     const modelType = ts.factory.createTypeReferenceNode(model, [itemType, itemModelType]);
@@ -164,7 +161,7 @@ export default class ModelSchemaProcessor {
       valueType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
     } else {
       const valueSchema: Schema = schema.additionalProperties;
-      [valueType] = new ModelSchemaProcessor(valueSchema, this.#dependencies, this.#cwd).process();
+      [valueType] = new ModelSchemaProcessor(valueSchema, this.#dependencies).process();
     }
 
     const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [

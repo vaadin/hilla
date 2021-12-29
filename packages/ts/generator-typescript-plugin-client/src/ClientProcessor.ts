@@ -11,7 +11,7 @@ export default class ClientProcessor {
   readonly #logger: Pino.Logger;
 
   public constructor(fileName: string, logger: Pino.Logger) {
-    this.#filePath = new PathManager('ts').createRelativePath(fileName);
+    this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
     this.#logger = logger;
   }
 

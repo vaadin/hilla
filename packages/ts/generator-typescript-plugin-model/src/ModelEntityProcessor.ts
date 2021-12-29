@@ -30,12 +30,12 @@ const exportDefaultModifiers = [
 export class ModelEntityProcessor {
   readonly #component: Schema;
   readonly #context: ModelPluginContext;
-  readonly #dependencies = new DependencyManager(new PathManager());
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #entityName: string;
   readonly #path: string;
-  readonly #cwd: string;
+  readonly #dependencies: DependencyManager;
+  readonly #sourcePaths = new PathManager({ extension: 'ts' });
   #getPropertyModelSymbol?: Identifier = undefined;
 
   public constructor(name: string, component: Schema, context: ModelPluginContext) {
@@ -44,18 +44,15 @@ export class ModelEntityProcessor {
     this.#fullyQualifiedName = name;
     this.#entityName = simplifyFullyQualifiedName(name);
     this.#name = `${this.#entityName}Model`;
-    this.#path = new PathManager('ts').createRelativePath(convertFullyQualifiedNameToRelativePath(`${name}Model`));
-    this.#cwd = dirname(this.#path);
+    this.#path = convertFullyQualifiedNameToRelativePath(`${name}Model`);
+    this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
   }
 
   public process(): SourceFile {
     this.#context.logger.debug(`Processing model for entity: ${this.#entityName}`);
 
     const entity = this.#dependencies.imports.default.add(
-      this.#dependencies.paths.createRelativePath(
-        convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName),
-        this.#cwd,
-      ),
+      this.#dependencies.paths.createRelativePath(convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName)),
       this.#entityName,
       true,
     );
@@ -68,7 +65,7 @@ export class ModelEntityProcessor {
 
     return createSourceFile(
       [...importStatements, declaration, ...exportStatement].filter(Boolean) as readonly Statement[],
-      this.#path,
+      this.#sourcePaths.createRelativePath(this.#path),
     );
   }
 
@@ -151,7 +148,6 @@ export class ModelEntityProcessor {
       const [, modelType, model, [, ...modelVariableArgs]] = new ModelSchemaProcessor(
         schema,
         this.#dependencies,
-        this.#cwd,
       ).process();
       const optional = !requiredSet.has(name);
       const argsArray = ts.factory.createArrayLiteralExpression([
@@ -189,7 +185,7 @@ export class ModelEntityProcessor {
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = convertReferenceSchemaToPath(schema);
-    const modelPath = paths.createRelativePath(`${path}Model`, this.#cwd);
+    const modelPath = paths.createRelativePath(`${path}Model`);
     const modelSpecifier = `${specifier}Model`;
 
     return imports.default.add(modelPath, modelSpecifier, false);
