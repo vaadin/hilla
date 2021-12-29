@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import io.github.classgraph.ClassInfo;
@@ -96,6 +97,10 @@ public final class ReflectedClass {
 
     public boolean isMap() {
         return Map.class.isAssignableFrom(origin);
+    }
+
+    public boolean isNativeObject() {
+        return Objects.equals(origin, Object.class);
     }
 
     public boolean isOptional() {

@@ -1,14 +1,22 @@
 package com.vaadin.fusion.maven;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
-public final class ParserConfiguration {
+import javax.annotation.Nonnull;
+
+import com.vaadin.fusion.parser.core.PluginConfiguration;
+import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.fusion.parser.utils.ConfigList;
+
+final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String openAPIPath;
-    private PluginList plugins;
+    private Plugins plugins;
 
     public Optional<ParserClassPathConfiguration> getClassPath() {
         return Optional.ofNullable(classPath);
@@ -22,12 +30,17 @@ public final class ParserConfiguration {
         return Optional.ofNullable(openAPIPath);
     }
 
-    public Optional<PluginList> getPlugins() {
+    public Optional<Plugins> getPlugins() {
         return Optional.ofNullable(plugins);
     }
 
     public static class Plugin {
-        private final String name;
+        private PluginConfiguration configuration;
+        private String name;
+        private Integer order;
+
+        public Plugin() {
+        }
 
         public Plugin(String name) {
             this.name = name;
@@ -46,8 +59,17 @@ public final class ParserConfiguration {
             return Objects.equals(name, ((Plugin) other).name);
         }
 
+        public PluginConfiguration getConfiguration() {
+            return configuration;
+        }
+
+        @Nonnull
         public String getName() {
             return name;
+        }
+
+        public Integer getOrder() {
+            return order;
         }
 
         @Override
@@ -56,21 +78,42 @@ public final class ParserConfiguration {
         }
     }
 
-    public static class PluginList {
-        private final List<Plugin> disable = List.of();
+    public static class Plugins implements ConfigList<Plugin> {
+        private final Set<Plugin> disable = new HashSet<>();
         private final boolean disableAllDefaults = false;
-        private final List<Plugin> use = List.of();
+        private final Set<Plugin> use = new HashSet<>();
 
-        public List<Plugin> getDisable() {
+        public Plugins() {
+        }
+
+        public Plugins(@Nonnull Collection<Plugin> use,
+                @Nonnull Collection<Plugin> disable) {
+            this.disable.addAll(disable);
+            this.use.addAll(use);
+        }
+
+        @Override
+        public Set<Plugin> getDisabledOptions() {
             return disable;
         }
 
-        public List<Plugin> getUse() {
+        @Override
+        public Set<Plugin> getUsedOptions() {
             return use;
         }
 
-        public boolean isDisableAllDefaults() {
+        @Override
+        public boolean shouldAllDefaultsBeDisabled() {
             return disableAllDefaults;
+        }
+    }
+
+    static class PluginsProcessor extends ConfigList.Processor<Plugin> {
+        private static final Set<Plugin> defaults = Set
+                .of(new Plugin(BackbonePlugin.class.getName()));
+
+        public PluginsProcessor(ConfigList<Plugin> config) {
+            super(config, defaults);
         }
     }
 }

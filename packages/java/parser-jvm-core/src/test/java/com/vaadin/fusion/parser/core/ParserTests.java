@@ -38,7 +38,7 @@ public class ParserTests {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
-                        .addPlugin(DependencyPlugin.class.getName()).finish());
+                        .addPlugin(new DependencyPlugin()).finish());
 
         parser.execute();
 
@@ -57,7 +57,7 @@ public class ParserTests {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
-                        .addPlugin(DependencyPlugin.class.getName()).finish());
+                        .addPlugin(new DependencyPlugin()).finish());
 
         parser.execute();
 
@@ -77,7 +77,7 @@ public class ParserTests {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
-                        .addPlugin(DependencyPlugin.class.getName()).finish());
+                        .addPlugin(new DependencyPlugin()).finish());
 
         parser.execute();
 
@@ -96,7 +96,7 @@ public class ParserTests {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(basicPluginEndpointName)
-                        .addPlugin(BasicPlugin.class.getName()).finish());
+                        .addPlugin(new BasicPlugin()).finish());
 
         parser.execute();
 

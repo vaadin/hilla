@@ -118,6 +118,11 @@ public final class ClassRefRelativeTypeSignature
     }
 
     @Override
+    public boolean isNativeObject() {
+        return reflectedClass.isNativeObject();
+    }
+
+    @Override
     public boolean isOptional() {
         return reflectedClass.isOptional();
     }
