@@ -49,7 +49,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/generator-typescript-core": "^0.1.0"
+    "@vaadin/generator-typescript-core": "^0.0.16"
   },
   "dependencies": {
     "@vaadin/generator-typescript-utils": "^0.0.16",
