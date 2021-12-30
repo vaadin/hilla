@@ -40,7 +40,7 @@ type Annotation = Readonly<{
 }>;
 
 export type ModelSchemaProcessorResult = Readonly<
-  [type: TypeNode, modelType: TypeNode, model: Identifier, args: Expression[]]
+  [type: TypeNode, modelType: TypeNode, model: Identifier, args: readonly Expression[]]
 >;
 
 function parseAttribute(attributeText: string): AnnotationPrimitiveAttribute {
@@ -132,7 +132,7 @@ export default class ModelSchemaProcessor {
     let type: TypeNode;
     let modelType: TypeNode;
     let model: Identifier;
-    let args: Expression[] = [];
+    let args: readonly Expression[] = [];
     if (isReferenceSchema(unwrappedSchema)) {
       [type, modelType, model, args] = this.#processReference(unwrappedSchema);
     } else if (isArraySchema(unwrappedSchema)) {
@@ -210,7 +210,7 @@ export default class ModelSchemaProcessor {
     return [type, modelType, model, []];
   }
 
-  #getValidators(schema: AnnotatedSchema): Expression[] {
+  #getValidators(schema: AnnotatedSchema): readonly Expression[] {
     return schema['x-annotations'].map((annotationText: string) => this.#getValidator(parseAnnotation(annotationText)));
   }
 
@@ -221,10 +221,8 @@ export default class ModelSchemaProcessor {
   }
 
   #getBuiltinFormExport(specifier: string): Identifier {
-    const modelPath = this.#dependencies.paths.createBareModulePath('@vaadin/form', false);
-    return (
-      this.#dependencies.imports.named.getIdentifier(modelPath, specifier) ??
-      this.#dependencies.imports.named.add(modelPath, specifier)
-    );
+    const { imports, paths } = this.#dependencies;
+    const modelPath = paths.createBareModulePath('@vaadin/form', false);
+    return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
   }
 }
