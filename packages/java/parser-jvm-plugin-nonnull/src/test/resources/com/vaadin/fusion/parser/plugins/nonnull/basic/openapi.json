@@ -16,6 +16,125 @@
     }
   ],
   "paths": {
+    "/BasicEndpoint/complexType": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_complexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/mixedAnnotations": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_mixedAnnotations_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parameter": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/nonTypeAnnotation": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_nonTypeAnnotation_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nonTypeParameter": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/BasicEndpoint/nullableType": {
       "post": {
         "tags": ["BasicEndpoint"],
@@ -129,132 +248,47 @@
           }
         }
       }
-    },
-    "/BasicEndpoint/complexType": {
-      "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_complexType_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "map": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "array",
-                    "items": {
-                      "anyOf": [
-                        {
-                          "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/BasicEndpoint/nonTypeAnnotation": {
-      "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_nonTypeAnnotation_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "nonTypeParameter": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/BasicEndpoint/mixedAnnotations": {
-      "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_mixedAnnotations_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "parameter": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "mixedAnnotations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "nonTypeAnnotation": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
       "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",
         "properties": {
+          "complexType": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                  }
+                ]
+              }
+            }
+          },
           "nullableType": {
             "type": "string",
             "nullable": true
@@ -268,42 +302,8 @@
             "items": {
               "type": "string"
             }
-          },
-          "complexType": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
-                  }
-                ]
-              }
-            }
           }
         }
-      },
-      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "nonTypeAnnotation": {
-                "type": "string"
-              },
-              "mixedAnnotations": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ]
       }
     }
   }
