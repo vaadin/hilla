@@ -64,30 +64,25 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- This module is mapped to default web context -->
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
-                <configuration>
-                    <productionMode>false</productionMode>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <profiles>
         <profile>
-            <id>local-run</id>
+            <id>run-tests</id>
             <activation>
                 <property>
-                    <name>!test.use.hub</name>
+                    <name>!skipTests</name>
                 </property>
             </activation>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <productionMode>false</productionMode>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>com.lazerycode.selenium</groupId>
                         <artifactId>driver-binary-downloader-maven-plugin
@@ -117,6 +112,20 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <!-- This module is mapped to default web context -->
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <!-- make sure we do not leave webpack-dev-server running after IT -->
+                                    <name>vaadin.reuseDevServer</name>
+                                    <value>false</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>                    
                 </plugins>
             </build>
         </profile>
