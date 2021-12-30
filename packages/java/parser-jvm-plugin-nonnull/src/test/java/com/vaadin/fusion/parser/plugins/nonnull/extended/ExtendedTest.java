@@ -30,7 +30,7 @@ public class ExtendedTest {
     {
         var target = getClass();
         resourceLoader = new ResourceLoader(target::getResource,
-            target::getProtectionDomain);
+                target::getProtectionDomain);
     }
 
     @BeforeEach

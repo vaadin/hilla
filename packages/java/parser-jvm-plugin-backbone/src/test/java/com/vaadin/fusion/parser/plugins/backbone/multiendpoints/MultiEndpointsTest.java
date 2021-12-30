@@ -28,7 +28,7 @@ public class MultiEndpointsTest {
     {
         var target = getClass();
         resourceLoader = new ResourceLoader(target::getResource,
-            target::getProtectionDomain);
+                target::getProtectionDomain);
     }
 
     @BeforeEach

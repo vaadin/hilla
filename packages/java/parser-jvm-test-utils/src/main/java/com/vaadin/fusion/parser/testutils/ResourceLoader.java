@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ResourceLoader {
-    private final Function<String, URL> getResource;
     private final Supplier<ProtectionDomain> getProtectionDomain;
+    private final Function<String, URL> getResource;
 
     public ResourceLoader(Function<String, URL> getResource,
             Supplier<ProtectionDomain> getProtectionDomain) {
