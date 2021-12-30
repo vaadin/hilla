@@ -43,8 +43,9 @@ export type ModelSchemaProcessorResult = Readonly<
   [type: TypeNode, modelType: TypeNode, model: Identifier, args: readonly Expression[]]
 >;
 
+const keywords: Record<string, AnnotationPrimitiveAttribute> = { true: true, false: false };
+
 function parseAttribute(attributeText: string): AnnotationPrimitiveAttribute {
-  const keywords: Record<string, AnnotationPrimitiveAttribute> = { true: true, false: false };
   if (attributeText in keywords) {
     return keywords[attributeText];
   }
