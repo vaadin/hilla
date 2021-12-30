@@ -30,51 +30,89 @@ function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
   return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
 }
 
-type AnnotationPrimitiveArgument = boolean | number | string;
-type AnnotationArgument = AnnotationPrimitiveArgument | AnnotationNamedArguments;
-type AnnotationNamedArguments = Readonly<{
-  [name: string]: AnnotationArgument;
+type AnnotationPrimitiveAttribute = boolean | number | string;
+type AnnotationNamedAttributes = Readonly<{
+  [name: string]: AnnotationPrimitiveAttribute;
 }>;
 type Annotation = Readonly<{
   simpleName: string;
-  arguments: ReadonlyArray<AnnotationArgument>;
+  attributes?: AnnotationNamedAttributes;
 }>;
 
 export type ModelSchemaProcessorResult = Readonly<
   [type: TypeNode, modelType: TypeNode, model: Identifier, args: Expression[]]
 >;
 
+function parseAttribute(attributeText: string): AnnotationPrimitiveAttribute {
+  const keywords: Record<string, AnnotationPrimitiveAttribute> = { true: true, false: false };
+  if (attributeText in keywords) {
+    return keywords[attributeText];
+  }
+
+  if (attributeText.startsWith('"') && attributeText.endsWith('"')) {
+    return attributeText.slice(1, attributeText.length - 1).replace(/\\\\/g, '\\');
+  }
+
+  const number = Number(attributeText);
+  if (!Number.isNaN(number) || attributeText.toLowerCase() === 'nan') {
+    return number;
+  }
+
+  throw new PluginError(`Unable to parse annotation argument "${attributeText}"`);
+}
+
+function parseAttributes(attributesText: string): AnnotationNamedAttributes {
+  attributesText = attributesText.trim();
+  if (attributesText.startsWith('{') && attributesText.endsWith('}')) {
+    const namedList = attributesText.slice(1, attributesText.length - 1);
+    const attributes: AnnotationNamedAttributes = namedList.split(',').reduce((record, pairText) => {
+      const [key, valueText] = pairText.split(':');
+      record[key.trim()] = parseAttribute(valueText);
+      return record;
+    }, {} as Record<string, AnnotationPrimitiveAttribute>);
+    return attributes;
+  }
+
+  return { value: parseAttribute(attributesText) };
+}
+
 function parseAnnotation(annotationText: string): Annotation {
   const [, simpleName, argumentsText] = /^(\w+)\((.*)\)$/.exec(annotationText) || [];
   if (simpleName === undefined) {
     throw new PluginError(`Unknown annotation format when processing "${annotationText}"`);
   }
-  let args: ReadonlyArray<AnnotationArgument> = [];
-  if (argumentsText !== undefined) {
-    const argumentsTextWithQuotedKeys = argumentsText.replace(/(\w+)\s?:/g, '"$1":');
-    args = JSON.parse(`[${argumentsTextWithQuotedKeys}]`);
+
+  if (argumentsText !== undefined && argumentsText.trim() !== '') {
+    const attributes = parseAttributes(argumentsText);
+    return { simpleName, attributes };
   }
-  return { simpleName, arguments: args };
+
+  return { simpleName };
 }
 
-function convertAnnotationArgumentToExpression(arg: AnnotationArgument): Expression {
-  switch (typeof arg) {
+function convertAttribute(attribute: AnnotationPrimitiveAttribute): Expression {
+  switch (typeof attribute) {
     case 'boolean':
-      return arg ? ts.factory.createTrue() : ts.factory.createFalse();
+      return attribute ? ts.factory.createTrue() : ts.factory.createFalse();
     case 'number':
-      return ts.factory.createNumericLiteral(arg);
+      return ts.factory.createNumericLiteral(attribute);
     case 'string':
-      return ts.factory.createStringLiteral(arg);
-    case 'object':
-      return ts.factory.createObjectLiteralExpression(
-        Object.entries(arg).map(([key, value]) =>
-          ts.factory.createPropertyAssignment(key, convertAnnotationArgumentToExpression(value)),
-        ),
-        false,
-      );
+      return ts.factory.createStringLiteral(attribute);
     default:
       return ts.factory.createOmittedExpression();
   }
+}
+
+function convertNamedAttributes(attributes: AnnotationNamedAttributes): Expression {
+  const attributeEntries = Object.entries(attributes);
+  if (attributeEntries.length === 1 && attributeEntries[0][0] === 'value') {
+    return convertAttribute(attributeEntries[0][1]);
+  }
+
+  return ts.factory.createObjectLiteralExpression(
+    attributeEntries.map(([key, value]) => ts.factory.createPropertyAssignment(key, convertAttribute(value))),
+    false,
+  );
 }
 
 export default class ModelSchemaProcessor {
@@ -173,18 +211,13 @@ export default class ModelSchemaProcessor {
   }
 
   #getValidators(schema: AnnotatedSchema): Expression[] {
-    const validators: Expression[] = [];
-    schema['x-annotations'].forEach((annotationText: string) => {
-      const annotation = parseAnnotation(annotationText);
-      const validator = this.#getBuiltinFormExport(annotation.simpleName);
-      const newValidator = ts.factory.createNewExpression(
-        validator,
-        undefined,
-        annotation.arguments.map(convertAnnotationArgumentToExpression),
-      );
-      validators.push(newValidator);
-    });
-    return validators;
+    return schema['x-annotations'].map((annotationText: string) => this.#getValidator(parseAnnotation(annotationText)));
+  }
+
+  #getValidator(annotation: Annotation): Expression {
+    const validator = this.#getBuiltinFormExport(annotation.simpleName);
+    const attributeArgs = annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [];
+    return ts.factory.createNewExpression(validator, undefined, attributeArgs);
   }
 
   #getBuiltinFormExport(specifier: string): Identifier {
