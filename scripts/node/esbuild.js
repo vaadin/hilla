@@ -6,7 +6,11 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const cwd = pathToFileURL(process.cwd()).toString();
 
 export async function resolve(specifier, context, defaultResolve) {
-  if (specifier.startsWith('.') && context.parentURL?.startsWith(cwd)) {
+  if (
+    specifier.startsWith('.') &&
+    context.parentURL?.startsWith(cwd) &&
+    !context.parentURL?.substring(cwd.length).startsWith('/node_modules/')
+  ) {
     if (!specifier.endsWith('.js')) {
       throw new Error(
         `Local files without '.js' extensions are not supported: '${specifier}' in '${relative(
