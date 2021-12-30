@@ -24,9 +24,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public class BasicTest {
     private final ObjectMapper mapper = Json.mapper();
-    private final ResourceLoader resourceLoader = new ResourceLoader(
-            getClass());
+    private final ResourceLoader resourceLoader;
     private Path targetDir;
+
+    {
+        var target = getClass();
+        resourceLoader = new ResourceLoader(target::getResource,
+            target::getProtectionDomain);
+    }
 
     @BeforeEach
     public void setup() throws URISyntaxException {

@@ -3,27 +3,37 @@ package com.vaadin.fusion.parser.testutils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.ProtectionDomain;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class ResourceLoader {
-    private final Class<?> targetClass;
+    private final Function<String, URL> getResource;
+    private final Supplier<ProtectionDomain> getProtectionDomain;
 
-    public ResourceLoader(Class<?> targetClass) {
-        this.targetClass = targetClass;
+    public ResourceLoader(Function<String, URL> getResource,
+            Supplier<ProtectionDomain> getProtectionDomain) {
+        this.getProtectionDomain = getProtectionDomain;
+        this.getResource = getResource;
     }
 
     public File find(String resourceName) throws URISyntaxException {
-        return Paths.get(Objects
-                .requireNonNull(targetClass.getResource(resourceName)).toURI())
+        System.out.println(getResource.apply(resourceName));
+
+        return Paths.get(
+                Objects.requireNonNull(getResource.apply(resourceName)).toURI())
                 .toFile();
     }
 
     public Path findTargetDirPath() throws URISyntaxException {
-        return Paths.get(Objects.requireNonNull(
-                targetClass.getProtectionDomain().getCodeSource().getLocation())
+        return Paths.get(Objects
+                .requireNonNull(
+                        getProtectionDomain.get().getCodeSource().getLocation())
                 .toURI()).getParent();
     }
 
