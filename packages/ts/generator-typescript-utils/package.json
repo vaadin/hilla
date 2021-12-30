@@ -72,7 +72,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/generator-typescript-core": "^0.1.0"
+    "@vaadin/generator-typescript-core": "^0.0.16"
   },
   "dependencies": {
     "pino": "^7.0.5",

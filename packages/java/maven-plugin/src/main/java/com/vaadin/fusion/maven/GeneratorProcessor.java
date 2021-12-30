@@ -28,6 +28,8 @@ final class GeneratorProcessor {
                 "@vaadin/generator-typescript-plugin-backbone"));
         plugins.add(new GeneratorConfiguration.Plugin(
                 "@vaadin/generator-typescript-plugin-barrel"));
+        plugins.add(new GeneratorConfiguration.Plugin(
+                "@vaadin/generator-typescript-plugin-model"));
     }
 
     public GeneratorProcessor(MavenProject project, Log logger) {

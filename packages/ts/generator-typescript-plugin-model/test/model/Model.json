@@ -1,0 +1,620 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin application",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "TsFormEndpoint",
+      "description": "",
+      "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+    },
+    {
+      "name": "HelloEndpoint",
+      "description": "",
+      "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/HelloEndpoint.java"
+    }
+  ],
+  "paths": {
+    "/HelloEndpoint/getGreeting": {
+      "post": {
+        "tags": ["HelloEndpoint"],
+        "operationId": "HelloEndpoint_getGreeting_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["name"],
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": ""
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/TsFormEndpoint/getEntity": {
+      "post": {
+        "tags": ["TsFormEndpoint"],
+        "operationId": "TsFormEndpoint_getEntity_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/TsFormEndpoint/stringNullable": {
+      "post": {
+        "tags": ["TsFormEndpoint"],
+        "operationId": "TsFormEndpoint_stringNullable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.example.application.endpoints.TsFormEndpoint.FormEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntityId"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "myId": {
+                "type": "number"
+              },
+              "dataPrimitives": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormDataPrimitives"
+                  }
+                ]
+              },
+              "entityHierarchy": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntityHierarchy"
+                  }
+                ]
+              },
+              "temporalTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormTemporalTypes"
+                  }
+                ]
+              },
+              "arrayTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormArrayTypes"
+                  }
+                ]
+              },
+              "recordTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormRecordTypes"
+                  }
+                ]
+              },
+              "validators": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormValidators"
+                  }
+                ]
+              },
+              "myOptionalTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormOptionalTypes"
+                  }
+                ]
+              },
+              "nonnullTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormNonnullTypes"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormArrayTypes": {
+        "type": "object",
+        "properties": {
+          "stringList": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "entityHierarchyList": {
+            "type": "array",
+            "items": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntityHierarchy"
+                }
+              ]
+            }
+          },
+          "selfReferenceList": {
+            "type": "array",
+            "items": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormArrayTypes"
+                }
+              ]
+            }
+          },
+          "stringArray": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "numberMatrix": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "number",
+                "nullable": true
+              }
+            }
+          },
+          "entityMatrix": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+                  }
+                ]
+              }
+            }
+          },
+          "nestedArrays": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "nullable": true
+              }
+            }
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormEntityHierarchy": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntityId"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "lorem": {
+                "type": "string"
+              },
+              "ipsum": {
+                "type": "number"
+              }
+            }
+          }
+        ],
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormEntityId": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "number",
+            "x-annotations": ["NotNull()"]
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormValidators": {
+        "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-annotations": ["NotEmpty()"]
+          },
+          "email": {
+            "type": "string",
+            "x-annotations": ["Email({message:\"foo\"})"]
+          },
+          "isNull": {
+            "type": "string",
+            "x-annotations": ["Null()"]
+          },
+          "notNull": {
+            "type": "string",
+            "x-annotations": ["NotNull()"]
+          },
+          "notEmpty": {
+            "type": "string",
+            "x-annotations": ["NotEmpty()", "NotNull()"]
+          },
+          "notNullEntity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+              }
+            ],
+            "x-annotations": ["NotNull()"]
+          },
+          "notBlank": {
+            "type": "string",
+            "x-annotations": ["NotBlank()"]
+          },
+          "assertTrue": {
+            "type": "string",
+            "x-annotations": ["AssertTrue()"]
+          },
+          "assertFalse": {
+            "type": "string",
+            "x-annotations": ["AssertFalse()"]
+          },
+          "min": {
+            "type": "number",
+            "x-annotations": ["Min({value:1, message:\"foo\"})"]
+          },
+          "max": {
+            "type": "number",
+            "x-annotations": ["Max(2)"]
+          },
+          "decimalMin": {
+            "type": "number",
+            "x-annotations": ["DecimalMin(\"0.01\")"]
+          },
+          "decimalMax": {
+            "type": "number",
+            "x-annotations": ["DecimalMax({value:\"0.01\", inclusive:false})"]
+          },
+          "negative": {
+            "type": "number",
+            "x-annotations": ["Negative()"]
+          },
+          "negativeOrZero": {
+            "type": "number",
+            "x-annotations": ["NegativeOrZero()"]
+          },
+          "positive": {
+            "type": "number",
+            "x-annotations": ["Positive()"]
+          },
+          "positiveOrZero": {
+            "type": "number",
+            "x-annotations": ["PositiveOrZero()"]
+          },
+          "size": {
+            "type": "string",
+            "x-annotations": ["Size()"]
+          },
+          "size1": {
+            "type": "string",
+            "x-annotations": ["Size({min:1})"]
+          },
+          "digits": {
+            "type": "string",
+            "x-annotations": ["Digits({integer:5, fraction:2})"]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "x-annotations": ["Past()"]
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "x-annotations": ["Future()"]
+          },
+          "pattern": {
+            "type": "string",
+            "x-annotations": ["Pattern({regexp:\"\\\\d+\\\\..+\"})"]
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormDataPrimitives": {
+        "required": ["booleanProp", "doubleProp", "floatProp", "integerProp", "longProp"],
+        "type": "object",
+        "properties": {
+          "stringProp": {
+            "type": "string"
+          },
+          "longWrapperProp": {
+            "type": "number"
+          },
+          "longProp": {
+            "type": "number"
+          },
+          "integerWrapperProp": {
+            "type": "number"
+          },
+          "integerProp": {
+            "type": "number"
+          },
+          "doubleWrapperProp": {
+            "type": "number"
+          },
+          "doubleProp": {
+            "type": "number"
+          },
+          "floatWrapperProp": {
+            "type": "number"
+          },
+          "floatProp": {
+            "type": "number"
+          },
+          "booleanWrapperProp": {
+            "type": "boolean"
+          },
+          "booleanProp": {
+            "type": "boolean"
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormTemporalTypes": {
+        "type": "object",
+        "properties": {
+          "localDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "localTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormRecordTypes": {
+        "type": "object",
+        "properties": {
+          "stringMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "entityHierarchyMap": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntityHierarchy"
+                }
+              ]
+            }
+          },
+          "stringListMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "selfReferenceMap": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormRecordTypes"
+                }
+              ]
+            }
+          },
+          "complexMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormOptionalTypes"
+                    }
+                  ]
+                }
+              },
+              "nullable": true
+            }
+          },
+          "objectMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "nullable": true
+            }
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormOptionalTypes": {
+        "type": "object",
+        "properties": {
+          "optionalString": {
+            "type": "string"
+          },
+          "optionalEntity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+              }
+            ]
+          },
+          "optionalList": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "optionalMatrix": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormNonnullTypes": {
+        "required": ["nonNullableList", "nonNullableMatrix", "nonNullableString"],
+        "type": "object",
+        "properties": {
+          "nonNullableString": {
+            "type": "string"
+          },
+          "nonNullableList": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "nonNullableMatrix": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        },
+        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      }
+    },
+    "securitySchemes": {
+      "vaadin-connect-oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "tokenUrl": "/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}
