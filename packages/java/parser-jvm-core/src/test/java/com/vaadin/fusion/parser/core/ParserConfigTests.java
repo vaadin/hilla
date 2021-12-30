@@ -142,7 +142,6 @@ public class ParserConfigTests {
     private void testOpenAPISourceFile(String fileName,
             ParserConfig.OpenAPIFileType type)
             throws URISyntaxException, IOException {
-        System.out.println("Resource: " + getClass().getResource(fileName));
         var openAPISource = resourceLoader.readToString(fileName);
 
         var actual = defaultBuilder.openAPISource(openAPISource, type).finish();

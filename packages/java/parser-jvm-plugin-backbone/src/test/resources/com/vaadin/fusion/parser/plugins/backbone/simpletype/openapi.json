@@ -30,8 +30,7 @@
                   "nullable": true,
                   "items": {
                     "type": "integer",
-                    "format": "int32",
-                    "nullable": false
+                    "format": "int32"
                   }
                 }
               }
@@ -50,8 +49,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean",
-                  "nullable": false
+                  "type": "boolean"
                 }
               }
             }
@@ -89,8 +87,7 @@
               "application/json": {
                 "schema": {
                   "type": "integer",
-                  "format": "int32",
-                  "nullable": false
+                  "format": "int32"
                 }
               }
             }
@@ -128,8 +125,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "nullable": false
+                  "type": "string"
                 }
               }
             }
@@ -167,8 +163,7 @@
               "application/json": {
                 "schema": {
                   "type": "number",
-                  "format": "double",
-                  "nullable": false
+                  "format": "double"
                 }
               }
             }
@@ -207,8 +202,7 @@
               "application/json": {
                 "schema": {
                   "type": "number",
-                  "format": "float",
-                  "nullable": false
+                  "format": "float"
                 }
               }
             }
@@ -247,8 +241,7 @@
               "application/json": {
                 "schema": {
                   "type": "integer",
-                  "format": "int32",
-                  "nullable": false
+                  "format": "int32"
                 }
               }
             }
@@ -287,8 +280,7 @@
               "application/json": {
                 "schema": {
                   "type": "integer",
-                  "format": "int64",
-                  "nullable": false
+                  "format": "int64"
                 }
               }
             }
@@ -327,8 +319,7 @@
               "application/json": {
                 "schema": {
                   "type": "integer",
-                  "format": "int32",
-                  "nullable": false
+                  "format": "int32"
                 }
               }
             }

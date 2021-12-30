@@ -23,8 +23,6 @@ public final class ResourceLoader {
     }
 
     public File find(String resourceName) throws URISyntaxException {
-        System.out.println(getResource.apply(resourceName));
-
         return Paths.get(
                 Objects.requireNonNull(getResource.apply(resourceName)).toURI())
                 .toFile();
