@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.fusion.auth.CsrfChecker;
@@ -95,9 +96,27 @@ public class FusionControllerConfiguration {
      */
     private RequestMappingInfo prependEndpointPrefixUrl(
             RequestMappingInfo mapping) {
-        return mapping.mutate()
-                .paths(fusionEndpointProperties.getVaadinEndpointPrefix())
-                .build().combine(mapping);
+        RequestMappingInfo.Builder prefixMappingBuilder = RequestMappingInfo
+                .paths(fusionEndpointProperties.getVaadinEndpointPrefix());
+        if (mapping.getPatternsCondition() == null) {
+            // `getPatternsCondition()` and `getPathPatternsCondition()` are
+            // mutually exclusive: only one of them is active, the other
+            // returns null. Since patterns condition is null here, let us
+            // assume `mapping` uses parsed PathPatterns condition (default
+            // since Spring Boot 2.6).
+            //
+            // However, `prefixMappingBuilder` uses non-parsed patterns
+            // condition by default, which does not combine with parsed
+            // PathPatterns condition in `RequestMappingInfo.combine()`.
+            //
+            // Set the pattern parser option for `prefixMappingBuilder`
+            // to make it use parsed PathPatterns condition, so that
+            // `.combine(mapping)` below works.
+            RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
+            options.setPatternParser(PathPatternParser.defaultInstance);
+            prefixMappingBuilder.options(options);
+        }
+        return prefixMappingBuilder.build().combine(mapping);
     }
 
     /**
