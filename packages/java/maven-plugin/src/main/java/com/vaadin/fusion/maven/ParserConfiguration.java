@@ -109,7 +109,7 @@ final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        private static final Set<Plugin> defaults = Set
+        static final Set<Plugin> defaults = Set
                 .of(new Plugin(BackbonePlugin.class.getName()));
 
         public PluginsProcessor(ConfigList<Plugin> config) {
