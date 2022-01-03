@@ -2,7 +2,9 @@ package com.vaadin.fusion.maven;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,23 +16,23 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 final class GeneratorProcessor {
+    private static final List<GeneratorConfiguration.Plugin> DEFAULT_PLUGINS = Arrays
+            .asList(new GeneratorConfiguration.Plugin(
+                    "@vaadin/generator-typescript-plugin-client"),
+                    new GeneratorConfiguration.Plugin(
+                            "@vaadin/generator-typescript-plugin-backbone"),
+                    new GeneratorConfiguration.Plugin(
+                            "@vaadin/generator-typescript-plugin-barrel"),
+                    new GeneratorConfiguration.Plugin(
+                            "@vaadin/generator-typescript-plugin-model"));
+
     private final Log logger;
     private final MavenProject project;
     private String input;
     private String outputDir = "frontend/generated";
-    private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(3);
+    private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
+            DEFAULT_PLUGINS);
     private boolean verbose = false;
-
-    {
-        plugins.add(new GeneratorConfiguration.Plugin(
-                "@vaadin/generator-typescript-plugin-client"));
-        plugins.add(new GeneratorConfiguration.Plugin(
-                "@vaadin/generator-typescript-plugin-backbone"));
-        plugins.add(new GeneratorConfiguration.Plugin(
-                "@vaadin/generator-typescript-plugin-barrel"));
-        plugins.add(new GeneratorConfiguration.Plugin(
-                "@vaadin/generator-typescript-plugin-model"));
-    }
 
     public GeneratorProcessor(MavenProject project, Log logger) {
         this.logger = logger;

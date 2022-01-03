@@ -34,6 +34,12 @@ final class SchemaProcessor {
     }
 
     public Schema<?> process() {
+        var schema = processType();
+        new ValidationSchemaProcessor(signature, schema).process();
+        return schema;
+    }
+
+    private Schema<?> processType() {
         if (signature.isString()) {
             return stringSchema();
         } else if (signature.isBoolean()) {
