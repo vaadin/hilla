@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Fusion plugin for Maven. Handles parsing Java bytecode and generating
+ * Hilla plugin for Maven. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)

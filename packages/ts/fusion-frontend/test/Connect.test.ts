@@ -269,7 +269,7 @@ describe('ConnectClient', () => {
       }
     });
 
-    it('should set header for preventing CSRF using Fusion csrfToken cookie when no Spring csrf token presents', async () => {
+    it('should set header for preventing CSRF using Hilla csrfToken cookie when no Spring csrf token presents', async () => {
       try {
         const csrfToken = 'foo';
         setCookie('csrfToken', csrfToken);
