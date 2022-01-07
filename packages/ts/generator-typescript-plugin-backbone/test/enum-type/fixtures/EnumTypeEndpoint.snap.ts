@@ -1,4 +1,4 @@
-import type EnumEntity_1 from "./com/vaadin/fusion/parser/plugins/backbone/enumtype/EnumTypeEndpoint/EnumEntity";
+import type EnumEntity_1 from "./dev/hilla/parser/plugins/backbone/enumtype/EnumTypeEndpoint/EnumEntity";
 import client_1 from "./connect-client.default";
 async function echoEnum_1(value: EnumEntity_1 | undefined): Promise<EnumEntity_1 | undefined> { return client_1.call("EnumTypeEndpoint", "echoEnum", { value }); }
 async function echoListEnum_1(enumList: Array<EnumEntity_1 | undefined> | undefined): Promise<Array<EnumEntity_1 | undefined> | undefined> { return client_1.call("EnumTypeEndpoint", "echoListEnum", { enumList }); }

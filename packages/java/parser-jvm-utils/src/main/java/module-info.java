@@ -1,5 +1,5 @@
-module com.vaadin.fusion.parser.utils {
+module dev.hilla.parser.utils {
     requires jsr305;
 
-    exports com.vaadin.fusion.parser.utils;
+    exports dev.hilla.parser.utils;
 }
