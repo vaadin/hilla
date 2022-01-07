@@ -14,7 +14,7 @@
     {
       "name": "TsFormEndpoint",
       "description": "",
-      "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+      "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
     }
   ],
   "paths": {
@@ -191,7 +191,7 @@
             }
           }
         ],
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormArrayTypes": {
         "type": "object",
@@ -278,7 +278,7 @@
             }
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormEntityHierarchy": {
         "allOf": [
@@ -297,7 +297,7 @@
             }
           }
         ],
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormEntityId": {
         "type": "object",
@@ -307,7 +307,7 @@
             "x-annotations": ["NotNull()"]
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormAnnotations": {
         "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
@@ -416,7 +416,7 @@
             "x-annotations": ["Pattern({regexp:\"\\\\d+\\\\..+\"})"]
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormValidationConstraints": {
         "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
@@ -647,7 +647,7 @@
             ]
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormDataPrimitives": {
         "required": ["booleanProp", "doubleProp", "floatProp", "integerProp", "longProp"],
@@ -687,7 +687,7 @@
             "type": "boolean"
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormTemporalTypes": {
         "type": "object",
@@ -701,7 +701,7 @@
             "format": "date-time"
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormRecordTypes": {
         "type": "object",
@@ -773,7 +773,7 @@
             }
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormOptionalTypes": {
         "type": "object",
@@ -807,7 +807,7 @@
             }
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       },
       "com.example.application.endpoints.TsFormEndpoint.FormNonnullTypes": {
         "required": ["nonNullableList", "nonNullableMatrix", "nonNullableString"],
@@ -835,7 +835,7 @@
             }
           }
         },
-        "x-vaadin-file-path": "fiile:///.../fusion-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
+        "x-vaadin-file-path": "fiile:///.../hilla-endpoint/src/main/java/com/example/application/endpoints/TsFormEndpoint.java"
       }
     },
     "securitySchemes": {

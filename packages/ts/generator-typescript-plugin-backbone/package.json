@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/generator-typescript-plugin-backbone",
   "version": "0.0.16",
-  "description": "A Fusion TypeScript Generator plugin to generate basic code",
+  "description": "A Hilla TypeScript Generator plugin to generate basic code",
   "main": "index.js",
   "type": "module",
   "engines": {

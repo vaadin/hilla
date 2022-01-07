@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/fusion",
   "private": true,
-  "description": "Fusion frontend & NodeJS code",
+  "description": "Hilla frontend & NodeJS code",
   "main": "index.js",
   "type": "module",
   "engines": {

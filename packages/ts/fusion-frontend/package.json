@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/fusion-frontend",
   "version": "0.0.16",
-  "description": "Fusion frontend utils",
+  "description": "Hilla frontend utils",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "keywords": [
     "Vaadin",
-    "Fusion"
+    "Hilla"
   ],
   "scripts": {
     "build": "tsc --isolatedModules",

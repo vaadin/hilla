@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/generator-typescript-plugin-model",
   "version": "0.0.16",
-  "description": "A Fusion TypeScript Generator plugin to generate form models",
+  "description": "A Hilla TypeScript Generator plugin to generate form models",
   "main": "index.js",
   "type": "module",
   "engines": {

@@ -1,1 +1,1 @@
-# Fusion TypeScript Generator Backbone Plugin
+# Hilla TypeScript Generator Backbone Plugin

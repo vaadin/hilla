@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/generator-typescript-plugin-client",
   "version": "0.0.16",
-  "description": "A Fusion TypeScript Generator plugin to generate default client implementation",
+  "description": "A Hilla TypeScript Generator plugin to generate default client implementation",
   "main": "index.js",
   "type": "module",
   "engines": {

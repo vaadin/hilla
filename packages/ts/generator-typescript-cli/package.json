@@ -1,7 +1,7 @@
 {
   "name": "@vaadin/generator-typescript-cli",
   "version": "0.0.16",
-  "description": "A Fusion tool to generate TypeScript code from the OpenAPI document",
+  "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
   "engines": {
