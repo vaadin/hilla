@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.validation;
+package com.vaadin.fusion.parser.plugins.model.basic;
 
 import java.time.LocalDate;
 import java.util.List;
