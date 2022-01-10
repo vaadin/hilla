@@ -18,6 +18,7 @@ import {
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import { dirname } from 'path/posix';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
@@ -31,11 +32,11 @@ const exportDefaultModifiers = [
 export class EntityProcessor {
   readonly #component: Schema;
   readonly #context: BackbonePluginContext;
-  readonly #dependencies = new DependencyManager(new PathManager());
+  readonly #dependencies;
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #path: string;
-  readonly #sourcePaths = new PathManager('ts');
+  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(name: string, component: Schema, context: BackbonePluginContext) {
     this.#component = component;
@@ -43,6 +44,7 @@ export class EntityProcessor {
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
+    this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
   }
 
   public process(): SourceFile {
@@ -118,7 +120,7 @@ export class EntityProcessor {
         ts.factory.updateInterfaceDeclaration(
           declaration,
           undefined,
-          undefined,
+          declaration.modifiers,
           declaration.name,
           undefined,
           [

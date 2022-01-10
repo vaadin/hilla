@@ -27,7 +27,7 @@ final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "com.vaadin.fusion.Endpoint";
     private String openAPIPath;
-    private Collection<ParserConfiguration.Plugin> plugins;
+    private Collection<ParserConfiguration.Plugin> plugins = ParserConfiguration.PluginsProcessor.defaults;
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;

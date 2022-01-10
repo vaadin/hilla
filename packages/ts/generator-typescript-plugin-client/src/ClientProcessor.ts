@@ -11,7 +11,7 @@ export default class ClientProcessor {
   readonly #logger: Pino.Logger;
 
   public constructor(fileName: string, logger: Pino.Logger) {
-    this.#filePath = new PathManager('ts').createRelativePath(fileName);
+    this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
     this.#logger = logger;
   }
 
@@ -20,7 +20,7 @@ export default class ClientProcessor {
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientClassId = imports.named.add(
-      paths.createBareModulePath('@vaadin/fusion-frontend', true),
+      paths.createBareModulePath('@vaadin/fusion-frontend', false),
       'ConnectClient',
     );
 

@@ -10,7 +10,7 @@ export default class BarrelProcessor {
   public declare ['constructor']: typeof BarrelProcessor;
   readonly #endpoints: readonly SourceFile[];
   readonly #logger: Pino.Logger;
-  readonly #sourcePaths = new PathManager('ts');
+  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(endpoints: readonly SourceFile[], logger: Pino.Logger) {
     this.#endpoints = endpoints;

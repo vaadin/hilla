@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/generator-typescript-plugin-backbone",
+  "name": "@vaadin/generator-typescript-plugin-model",
   "version": "0.0.16",
-  "description": "A Fusion TypeScript Generator plugin to generate basic code",
+  "description": "A Fusion TypeScript Generator plugin to generate form models",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -29,7 +29,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/vaadin/fusion.git",
-    "directory": "packages/ts/generator-typescript-plugin-backbone"
+    "directory": "packages/ts/generator-typescript-plugin-model"
   },
   "keywords": [
     "fusion",
@@ -45,12 +45,10 @@
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "peerDependencies": {
+    "@vaadin/form": "^0.0.16",
     "@vaadin/generator-typescript-core": "^0.0.16",
-    "@vaadin/generator-typescript-plugin-client": "^0.0.16"
+    "@vaadin/generator-typescript-plugin-backbone": "^0.0.16"
   },
   "dependencies": {
     "@vaadin/generator-typescript-utils": "^0.0.16",
