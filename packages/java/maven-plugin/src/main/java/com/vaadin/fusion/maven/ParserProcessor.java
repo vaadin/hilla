@@ -23,11 +23,11 @@ import com.vaadin.fusion.parser.utils.OpenAPIPrinter;
 
 final class ParserProcessor {
     private final Log logger;
+    private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
     private final MavenProject project;
     private Set<String> classPath;
     private String endpointAnnotationName = "com.vaadin.fusion.Endpoint";
     private String openAPIPath;
-    private Collection<ParserConfiguration.Plugin> plugins = ParserConfiguration.PluginsProcessor.defaults;
 
     public ParserProcessor(MavenProject project, Log logger) {
         this.project = project;
@@ -72,8 +72,7 @@ final class ParserProcessor {
 
     public ParserProcessor plugins(
             @Nonnull ParserConfiguration.Plugins plugins) {
-        this.plugins = new ParserConfiguration.PluginsProcessor(plugins)
-                .process();
+        this.pluginsProcessor.setConfig(plugins);
 
         return this;
     }
@@ -128,7 +127,7 @@ final class ParserProcessor {
     private void preparePlugins(ParserConfig.Builder builder) {
         // For loaded plugins we use SortedSet to have them sorted in order the
         // user defined.
-        var loadedPlugins = plugins.stream()
+        var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getOrder(), plugin.getConfiguration()))
                 .collect(Collectors.toCollection(TreeSet::new));

@@ -3,7 +3,6 @@ package com.vaadin.fusion.parser.utils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,10 +64,14 @@ public interface ConfigList<Item> {
      *            a type of option
      */
     abstract class Processor<Item> {
-        private final ConfigList<Item> config;
-        private final Set<Item> defaults;
+        private final Collection<Item> defaults;
+        private ConfigList<Item> config;
 
-        public Processor(ConfigList<Item> config, Set<Item> defaults) {
+        public Processor(Collection<Item> defaults) {
+            this(null, defaults);
+        }
+
+        public Processor(ConfigList<Item> config, Collection<Item> defaults) {
             this.config = config;
             this.defaults = defaults;
         }
@@ -77,11 +80,19 @@ public interface ConfigList<Item> {
             return config;
         }
 
-        public Set<Item> getDefaults() {
+        public void setConfig(ConfigList<Item> config) {
+            this.config = config;
+        }
+
+        public Collection<Item> getDefaults() {
             return defaults;
         }
 
         public Collection<Item> process() {
+            if (config == null) {
+                return defaults;
+            }
+
             var stream = Objects.requireNonNull(config).getUsedOptions()
                     .stream();
 

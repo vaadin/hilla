@@ -82,7 +82,11 @@
         <groupId>com.vaadin.fusion</groupId>
         <artifactId>parser-jvm-plugin-nonnull</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin.fusion</groupId>
+      <artifactId>parser-jvm-plugin-model</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
