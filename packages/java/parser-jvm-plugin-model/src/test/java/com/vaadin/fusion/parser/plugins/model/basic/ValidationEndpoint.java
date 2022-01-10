@@ -31,39 +31,8 @@ public class ValidationEndpoint {
     }
 
     public static class ValidationData {
-        @NotEmpty
-        public List<String> getList() {
-            return null;
-        }
-
-        @Email(message = "foo")
-        public String getEmail() {
-            return null;
-        }
-
-        @Null
-        public String getIsNull() {
-            return null;
-        }
-
-        @NotNull
-        public String getNotNull() {
-            return null;
-        }
-
-        @NotNull
-        @NotEmpty
-        public String getNotEmpty() {
-            return null;
-        }
-
-        @NotNull
-        public ValidationData getNotNullEntity() {
-            return null;
-        }
-
-        @NotBlank
-        public String getNotBlank() {
+        @AssertFalse
+        public String getAssertFalse() {
             return null;
         }
 
@@ -72,13 +41,38 @@ public class ValidationEndpoint {
             return null;
         }
 
-        @AssertFalse
-        public String getAssertFalse() {
+        @DecimalMax(value = "0.01", inclusive = false)
+        public double getDecimalMax() {
+            return 0;
+        }
+
+        @DecimalMin("0.01")
+        public double getDecimalMin() {
+            return 0;
+        }
+
+        @Digits(integer = 5, fraction = 2)
+        public String getDigits() {
             return null;
         }
 
-        @Min(value = 1, message = "foo")
-        public Integer getMin() {
+        @Email(message = "foo")
+        public String getEmail() {
+            return null;
+        }
+
+        @Future
+        public LocalDate getFuture() {
+            return null;
+        }
+
+        @Null
+        public String getIsNull() {
+            return null;
+        }
+
+        @NotEmpty
+        public List<String> getList() {
             return null;
         }
 
@@ -87,14 +81,9 @@ public class ValidationEndpoint {
             return null;
         }
 
-        @DecimalMin("0.01")
-        public double getDecimalMin() {
-            return 0;
-        }
-
-        @DecimalMax(value = "0.01", inclusive = false)
-        public double getDecimalMax() {
-            return 0;
+        @Min(value = 1, message = "foo")
+        public Integer getMin() {
+            return null;
         }
 
         @Negative
@@ -105,6 +94,37 @@ public class ValidationEndpoint {
         @NegativeOrZero
         public int getNegativeOrZero() {
             return 0;
+        }
+
+        @NotBlank
+        public String getNotBlank() {
+            return null;
+        }
+
+        @NotNull
+        @NotEmpty
+        public String getNotEmpty() {
+            return null;
+        }
+
+        @NotNull
+        public String getNotNull() {
+            return null;
+        }
+
+        @NotNull
+        public ValidationData getNotNullEntity() {
+            return null;
+        }
+
+        @Past
+        public LocalDate getPast() {
+            return null;
+        }
+
+        @Pattern(regexp = "\\d+\\..+")
+        public String getPattern() {
+            return null;
         }
 
         @Positive
@@ -124,26 +144,6 @@ public class ValidationEndpoint {
 
         @Size(min = 1)
         public String getSize1() {
-            return null;
-        }
-
-        @Digits(integer = 5, fraction = 2)
-        public String getDigits() {
-            return null;
-        }
-
-        @Past
-        public LocalDate getPast() {
-            return null;
-        }
-
-        @Future
-        public LocalDate getFuture() {
-            return null;
-        }
-
-        @Pattern(regexp = "\\d+\\..+")
-        public String getPattern() {
             return null;
         }
     }

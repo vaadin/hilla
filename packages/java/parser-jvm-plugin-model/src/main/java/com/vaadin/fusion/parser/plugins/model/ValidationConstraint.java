@@ -46,28 +46,6 @@ public final class ValidationConstraint {
             map.getTypes().forEach(this::processSchema);
         }
 
-        private void processSchema(Schema<?> schema,
-                RelativeTypeSignature signature) {
-            if (!(signature.get() instanceof TypeSignature)) {
-                return;
-            }
-
-            var annotationInfoList = ((TypeSignature) signature.get())
-                    .getTypeAnnotationInfo();
-
-            if (annotationInfoList != null) {
-                var constraints = annotationInfoList.stream()
-                        .filter(this::isValidationConstraintAnnotation)
-                        .map(this::convertAnnotation)
-                        .collect(Collectors.toList());
-
-                if (!constraints.isEmpty()) {
-                    schema.addExtension(VALIDATION_CONSTRAINTS_KEY,
-                            constraints);
-                }
-            }
-        }
-
         private ValidationConstraint convertAnnotation(
                 AnnotationInfo annotationInfo) {
             var simpleName = extractSimpleName(annotationInfo.getName());
@@ -93,6 +71,28 @@ public final class ValidationConstraint {
                 AnnotationInfo annotationInfo) {
             return extractPackageName(annotationInfo.getName())
                     .equals(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
+        }
+
+        private void processSchema(Schema<?> schema,
+                RelativeTypeSignature signature) {
+            if (!(signature.get() instanceof TypeSignature)) {
+                return;
+            }
+
+            var annotationInfoList = ((TypeSignature) signature.get())
+                    .getTypeAnnotationInfo();
+
+            if (annotationInfoList != null) {
+                var constraints = annotationInfoList.stream()
+                        .filter(this::isValidationConstraintAnnotation)
+                        .map(this::convertAnnotation)
+                        .collect(Collectors.toList());
+
+                if (!constraints.isEmpty()) {
+                    schema.addExtension(VALIDATION_CONSTRAINTS_KEY,
+                            constraints);
+                }
+            }
         }
     }
 }
