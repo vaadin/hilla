@@ -1,0 +1,71 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "My super application",
+    "version" : "1.1.1"
+  },
+  "servers" : [ {
+    "url" : "https://myhost.com/myprefix",
+    "description" : "Vaadin backend server"
+  } ],
+  "tags" : [ {
+    "name" : "GeneratorTestClass",
+    "description" : "This class is used\n<h1>for OpenApi generator test</h1>"
+  } ],
+  "paths" : {
+    "/GeneratorTestClass/getAllUsers" : {
+      "post" : {
+        "tags": [ "GeneratorTestClass" ],
+        "description" : "Get all users",
+        "responses" : {
+          "200" : {
+            "description" : "Return list of users",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "allOf": [{
+                      "$ref" : "#/components/schemas/User"
+                    }],
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Role" : {
+        "type" : "object",
+        "properties" : {
+          "roleName" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Role bean"
+      },
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          },
+          "roles" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/Role"
+            }
+          }
+        }
+      }
+    }
+  }
+}

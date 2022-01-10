@@ -1,0 +1,116 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "My super application",
+    "version" : "1.1.1"
+  },
+  "servers" : [ {
+    "url" : "https://myhost.com/myprefix",
+    "description" : "Vaadin backend server"
+  } ],
+  "tags" : [ {
+    "name" : "GeneratorTestClass",
+    "description" : "This class is used for OpenApi generator test"
+  } ],
+  "paths" : {
+    "/GeneratorTestClass/complexEntitiesTest" : {
+      "post" : {
+        "tags" : [ "GeneratorTestClass" ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "request" : {
+                    "$ref" : "#/components/schemas/ComplexRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description": "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ComplexResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [{
+          "vaadin-connect-oauth2" : [ ]
+        }]
+      }
+    }
+  },
+  "components" : {
+      "schemas" : {
+        "Role" : {
+          "type" : "object",
+          "properties" : {
+            "roleName" : {
+              "type" : "string"
+            }
+          },
+          "description" : "Role bean"
+        },
+        "User" : {
+          "type" : "object",
+          "properties" : {
+            "name" : {
+              "type" : "string"
+            },
+            "password" : {
+              "type" : "string"
+            },
+            "roles" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/components/schemas/Role"
+              }
+            }
+          }
+        },
+        "ComplexRequest" : {
+          "type" : "object",
+          "properties" : {
+            "valueA" : {
+              "type" : "string"
+            },
+            "valueB" : {
+              "type" : "string"
+            }
+          },
+          "description" : "ComplexRequest bean"
+        },
+        "ComplexResponse" : {
+          "type" : "object",
+          "properties" : {
+            "valueC" : {
+              "type" : "string"
+            },
+            "valueD" : {
+              "type" : "string"
+            }
+          },
+          "description" : "ComplexResponse bean"
+        }
+      },
+      "securitySchemes" : {
+        "vaadin-connect-oauth2" : {
+          "type" : "oauth2",
+          "flows" : {
+            "password" : {
+              "tokenUrl" : "/oauth/token",
+              "scopes" : { }
+            }
+          }
+        }
+      }
+    }
+}
