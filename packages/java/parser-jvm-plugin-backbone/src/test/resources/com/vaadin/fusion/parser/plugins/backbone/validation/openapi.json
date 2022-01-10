@@ -63,10 +63,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Email",
                 "attributes": {
                   "message": "foo"
-                }
+                },
+                "simpleName": "Email"
               }
             ]
           },
@@ -141,11 +141,11 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Min",
                 "attributes": {
                   "message": "foo",
                   "value": 1
-                }
+                },
+                "simpleName": "Min"
               }
             ]
           },
@@ -155,44 +155,41 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Max",
                 "attributes": {
                   "value": 2
-                }
+                },
+                "simpleName": "Max"
               }
             ]
           },
           "decimalMin": {
             "type": "number",
             "format": "double",
-            "nullable": false,
             "x-validation-constraints": [
               {
-                "simpleName": "DecimalMin",
                 "attributes": {
                   "value": "0.01"
-                }
+                },
+                "simpleName": "DecimalMin"
               }
             ]
           },
           "decimalMax": {
             "type": "number",
             "format": "double",
-            "nullable": false,
             "x-validation-constraints": [
               {
-                "simpleName": "DecimalMax",
                 "attributes": {
                   "inclusive": false,
                   "value": "0.01"
-                }
+                },
+                "simpleName": "DecimalMax"
               }
             ]
           },
           "negative": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "Negative"
@@ -202,7 +199,6 @@
           "negativeOrZero": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "NegativeOrZero"
@@ -212,7 +208,6 @@
           "positive": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "Positive"
@@ -222,7 +217,6 @@
           "positiveOrZero": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "PositiveOrZero"
@@ -243,10 +237,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Size",
                 "attributes": {
                   "min": 1
-                }
+                },
+                "simpleName": "Size"
               }
             ]
           },
@@ -255,11 +249,11 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Digits",
                 "attributes": {
                   "integer": 5,
                   "fraction": 2
-                }
+                },
+                "simpleName": "Digits"
               }
             ]
           },
@@ -288,10 +282,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Pattern",
                 "attributes": {
                   "regexp": "\\d+\\..+"
-                }
+                },
+                "simpleName": "Pattern"
               }
             ]
           }
