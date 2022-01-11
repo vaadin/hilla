@@ -277,10 +277,10 @@
               }
             ]
           },
-          "valueWithGenericType": {
+          "valueWithAnotherGenericType": {
             "type": "object"
           },
-          "valueWithAnotherGenericType": {
+          "valueWithGenericType": {
             "type": "object"
           }
         }
