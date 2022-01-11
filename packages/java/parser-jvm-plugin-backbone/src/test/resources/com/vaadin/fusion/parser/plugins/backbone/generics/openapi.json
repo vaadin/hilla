@@ -181,10 +181,10 @@
         }
       }
     },
-    "/GenericsMethodsEndpoint/getSomething": {
+    "/GenericsMethodsEndpoint/getValueWithGenericType": {
       "post": {
         "tags": ["GenericsMethodsEndpoint"],
-        "operationId": "GenericsMethodsEndpoint_getSomething_POST",
+        "operationId": "GenericsMethodsEndpoint_getValueWithGenericType_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -277,10 +277,10 @@
               }
             ]
           },
-          "something": {
+          "valueWithGenericType": {
             "type": "object"
           },
-          "somethingElse": {
+          "valueWithAnotherGenericType": {
             "type": "object"
           }
         }

@@ -14,11 +14,11 @@ public class GenericsRefEntity<T> {
         return (U) new GenericsRefEntity<String>();
     }
 
-    public T getSomething() {
+    public T getValueWithGenericType() {
         return property;
     }
 
-    public <U> U getSomethingElse() {
+    public <U> U getValueWithAnotherGenericType() {
         return (U) new Object();
     }
 }
