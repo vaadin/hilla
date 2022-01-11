@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.model.basic;
+package com.vaadin.fusion.parser.plugins.model.validation;
 
 import static com.vaadin.fusion.parser.testutils.OpenAPIAssertions.assertEquals;
 

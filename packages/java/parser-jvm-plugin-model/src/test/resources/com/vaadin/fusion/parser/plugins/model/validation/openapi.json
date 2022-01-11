@@ -29,7 +29,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.basic.ValidationEndpoint$ValidationData"
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
                     }
                   ]
                 }
@@ -42,19 +42,62 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.model.basic.ValidationEndpoint$ValidationData": {
+      "com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData": {
         "type": "object",
         "properties": {
-          "list": {
-            "type": "array",
+          "assertFalse": {
+            "type": "string",
             "nullable": true,
-            "items": {
-              "type": "string",
-              "nullable": true
-            },
             "x-validation-constraints": [
               {
-                "simpleName": "NotEmpty"
+                "simpleName": "AssertFalse"
+              }
+            ]
+          },
+          "assertTrue": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ]
+          },
+          "decimalMax": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "inclusive": false,
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMax"
+              }
+            ]
+          },
+          "decimalMin": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMin"
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                },
+                "simpleName": "Digits"
               }
             ]
           },
@@ -70,6 +113,16 @@
               }
             ]
           },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ]
+          },
           "isNull": {
             "type": "string",
             "nullable": true,
@@ -79,73 +132,16 @@
               }
             ]
           },
-          "notNull": {
-            "type": "string",
+          "list": {
+            "type": "array",
             "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            },
             "x-validation-constraints": [
-              {
-                "simpleName": "NotNull"
-              }
-            ]
-          },
-          "notEmpty": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "NotNull"
-              },
               {
                 "simpleName": "NotEmpty"
-              }
-            ]
-          },
-          "notNullEntity": {
-            "nullable": true,
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.basic.ValidationEndpoint$ValidationData"
-              }
-            ]
-          },
-          "notBlank": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "NotBlank"
-              }
-            ]
-          },
-          "assertTrue": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "AssertTrue"
-              }
-            ]
-          },
-          "assertFalse": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "AssertFalse"
-              }
-            ]
-          },
-          "min": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "attributes": {
-                  "message": "foo",
-                  "value": 1
-                },
-                "simpleName": "Min"
               }
             ]
           },
@@ -162,28 +158,17 @@
               }
             ]
           },
-          "decimalMin": {
-            "type": "number",
-            "format": "double",
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
             "x-validation-constraints": [
               {
                 "attributes": {
-                  "value": "0.01"
+                  "message": "foo",
+                  "value": 1
                 },
-                "simpleName": "DecimalMin"
-              }
-            ]
-          },
-          "decimalMax": {
-            "type": "number",
-            "format": "double",
-            "x-validation-constraints": [
-              {
-                "attributes": {
-                  "inclusive": false,
-                  "value": "0.01"
-                },
-                "simpleName": "DecimalMax"
+                "simpleName": "Min"
               }
             ]
           },
@@ -202,6 +187,66 @@
             "x-validation-constraints": [
               {
                 "simpleName": "NegativeOrZero"
+              }
+            ]
+          },
+          "notBlank": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
+          },
+          "notEmpty": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "notNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notNullEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+              }
+            ]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ]
+          },
+          "pattern": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "regexp": "\\d+\\..+"
+                },
+                "simpleName": "Pattern"
               }
             ]
           },
@@ -241,51 +286,6 @@
                   "min": 1
                 },
                 "simpleName": "Size"
-              }
-            ]
-          },
-          "digits": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "attributes": {
-                  "integer": 5,
-                  "fraction": 2
-                },
-                "simpleName": "Digits"
-              }
-            ]
-          },
-          "past": {
-            "type": "string",
-            "format": "date",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Past"
-              }
-            ]
-          },
-          "future": {
-            "type": "string",
-            "format": "date",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Future"
-              }
-            ]
-          },
-          "pattern": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "attributes": {
-                  "regexp": "\\d+\\..+"
-                },
-                "simpleName": "Pattern"
               }
             ]
           }
