@@ -59,8 +59,7 @@
     <dependency>
       <groupId>com.vaadin.fusion</groupId>
       <artifactId>parser-jvm-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>compile</scope>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>
