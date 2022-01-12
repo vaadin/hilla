@@ -12,7 +12,7 @@ public class GenericsMethodsEndpoint {
         return ref;
     }
 
-    public <T> T getSomething(T something) {
+    public <T> T getValueWithGenericType(T something) {
         return something;
     }
 }

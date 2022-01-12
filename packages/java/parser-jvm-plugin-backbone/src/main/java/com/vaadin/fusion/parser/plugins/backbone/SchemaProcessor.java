@@ -78,6 +78,8 @@ final class SchemaProcessor {
 
         associationMap.addType(result, signature);
 
+        new ValidationSchemaProcessor(signature, result).process();
+
         return result;
     }
 
