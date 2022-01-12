@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.core;
+package com.vaadin.fusion.parser.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultIndenter;

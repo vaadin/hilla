@@ -24,10 +24,10 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig extends AbstractParserConfig {
+    private final SortedSet<Plugin> plugins = new TreeSet<>();
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
-    private final SortedSet<Plugin> plugins = new TreeSet<>();
 
     private ParserConfig() {
     }

@@ -6,19 +6,19 @@ import java.util.List;
 public class GenericsRefEntity<T> {
     private T property;
 
-    public T getSomething() {
-        return property;
-    }
-
-    public <U> U getSomethingElse() {
-        return (U) new Object();
-    }
-
     public <U extends List<String>> U getList() {
         return (U) new ArrayList<String>();
     }
 
     public <U extends GenericsRefEntity<String>> U getRef() {
         return (U) new GenericsRefEntity<String>();
+    }
+
+    public <U> U getValueWithAnotherGenericType() {
+        return (U) new Object();
+    }
+
+    public T getValueWithGenericType() {
+        return property;
     }
 }

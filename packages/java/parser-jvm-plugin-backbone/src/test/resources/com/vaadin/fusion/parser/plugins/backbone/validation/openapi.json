@@ -45,6 +45,93 @@
       "com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData": {
         "type": "object",
         "properties": {
+          "assertFalse": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertFalse"
+              }
+            ]
+          },
+          "assertTrue": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ]
+          },
+          "decimalMax": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "inclusive": false,
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMax"
+              }
+            ]
+          },
+          "decimalMin": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMin"
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                },
+                "simpleName": "Digits"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo"
+                },
+                "simpleName": "Email"
+              }
+            ]
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ]
+          },
+          "isNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Null"
+              }
+            ]
+          },
           "list": {
             "type": "array",
             "nullable": true,
@@ -58,33 +145,57 @@
               }
             ]
           },
-          "email": {
-            "type": "string",
+          "max": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Email",
                 "attributes": {
-                  "message": "foo"
-                }
+                  "value": 2
+                },
+                "simpleName": "Max"
               }
             ]
           },
-          "isNull": {
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo",
+                  "value": 1
+                },
+                "simpleName": "Min"
+              }
+            ]
+          },
+          "negative": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Negative"
+              }
+            ]
+          },
+          "negativeOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NegativeOrZero"
+              }
+            ]
+          },
+          "notBlank": {
             "type": "string",
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Null"
-              }
-            ]
-          },
-          "notNull": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "NotNull"
+                "simpleName": "NotBlank"
               }
             ]
           },
@@ -100,6 +211,15 @@
               }
             ]
           },
+          "notNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
           "notNullEntity": {
             "nullable": true,
             "anyOf": [
@@ -108,111 +228,31 @@
               }
             ]
           },
-          "notBlank": {
+          "past": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ]
+          },
+          "pattern": {
             "type": "string",
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "NotBlank"
-              }
-            ]
-          },
-          "assertTrue": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "AssertTrue"
-              }
-            ]
-          },
-          "assertFalse": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "AssertFalse"
-              }
-            ]
-          },
-          "min": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Min",
                 "attributes": {
-                  "message": "foo",
-                  "value": 1
-                }
-              }
-            ]
-          },
-          "max": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Max",
-                "attributes": {
-                  "value": 2
-                }
-              }
-            ]
-          },
-          "decimalMin": {
-            "type": "number",
-            "format": "double",
-            "nullable": false,
-            "x-validation-constraints": [
-              {
-                "simpleName": "DecimalMin",
-                "attributes": {
-                  "value": "0.01"
-                }
-              }
-            ]
-          },
-          "decimalMax": {
-            "type": "number",
-            "format": "double",
-            "nullable": false,
-            "x-validation-constraints": [
-              {
-                "simpleName": "DecimalMax",
-                "attributes": {
-                  "inclusive": false,
-                  "value": "0.01"
-                }
-              }
-            ]
-          },
-          "negative": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": false,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Negative"
-              }
-            ]
-          },
-          "negativeOrZero": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": false,
-            "x-validation-constraints": [
-              {
-                "simpleName": "NegativeOrZero"
+                  "regexp": "\\d+\\..+"
+                },
+                "simpleName": "Pattern"
               }
             ]
           },
           "positive": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "Positive"
@@ -222,7 +262,6 @@
           "positiveOrZero": {
             "type": "integer",
             "format": "int32",
-            "nullable": false,
             "x-validation-constraints": [
               {
                 "simpleName": "PositiveOrZero"
@@ -243,55 +282,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
-                "simpleName": "Size",
                 "attributes": {
                   "min": 1
-                }
-              }
-            ]
-          },
-          "digits": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Digits",
-                "attributes": {
-                  "integer": 5,
-                  "fraction": 2
-                }
-              }
-            ]
-          },
-          "past": {
-            "type": "string",
-            "format": "date",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Past"
-              }
-            ]
-          },
-          "future": {
-            "type": "string",
-            "format": "date",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Future"
-              }
-            ]
-          },
-          "pattern": {
-            "type": "string",
-            "nullable": true,
-            "x-validation-constraints": [
-              {
-                "simpleName": "Pattern",
-                "attributes": {
-                  "regexp": "\\d+\\..+"
-                }
+                },
+                "simpleName": "Size"
               }
             ]
           }

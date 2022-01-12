@@ -27,48 +27,60 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
+    private static final Schema<?> anySchemaSample = new ObjectSchema();
+
+    private final AssociationMap associationMap;
     private final RelativeTypeSignature signature;
 
-    public SchemaProcessor(@Nonnull RelativeTypeSignature signature) {
+    public SchemaProcessor(@Nonnull RelativeTypeSignature signature,
+            @Nonnull AssociationMap associationMap) {
+        this.associationMap = associationMap;
         this.signature = Objects.requireNonNull(signature);
     }
 
-    public Schema<?> process() {
-        var schema = processType();
-        new ValidationSchemaProcessor(signature, schema).process();
-        return schema;
+    private static <T extends Schema<?>> T nullify(T schema,
+            boolean condition) {
+        return (T) schema.nullable(condition ? true : null);
     }
 
-    private Schema<?> processType() {
+    public Schema<?> process() {
+        Schema<?> result;
+
         if (signature.isString()) {
-            return stringSchema();
+            result = stringSchema();
         } else if (signature.isBoolean()) {
-            return booleanSchema();
+            result = booleanSchema();
         } else if (signature.hasIntegerType()) {
-            return integerSchema();
+            result = integerSchema();
         } else if (signature.hasFloatType()) {
-            return numberSchema();
+            result = numberSchema();
         } else if (signature.isArray()) {
-            return arraySchema();
+            result = arraySchema();
         } else if (signature.isIterable()) {
-            return iterableSchema();
+            result = iterableSchema();
         } else if (signature.isMap()) {
-            return mapSchema();
+            result = mapSchema();
         } else if (signature.isTypeArgument()) {
-            return typeArgumentSchema();
+            result = typeArgumentSchema();
         } else if (signature.isTypeParameter()) {
-            return typeParameterSchema();
+            result = typeParameterSchema();
         } else if (signature.isDate()) {
-            return dateSchema();
+            result = dateSchema();
         } else if (signature.isDateTime()) {
-            return dateTimeSchema();
+            result = dateTimeSchema();
         } else if (signature.isClassRef()) {
-            return refSchema();
+            result = refSchema();
         } else if (signature.isTypeVariable()) {
-            return typeVariableSchema();
+            result = typeVariableSchema();
+        } else {
+            result = anySchema();
         }
 
-        return anySchema();
+        associationMap.addType(result, signature);
+
+        new ValidationSchemaProcessor(signature, result).process();
+
+        return result;
     }
 
     private Schema<?> anySchema() {
@@ -78,36 +90,37 @@ final class SchemaProcessor {
     private Schema<?> arraySchema() {
         var nestedType = ((ArrayRelativeTypeSignature) signature)
                 .getNestedType();
-        var items = new SchemaProcessor(nestedType).process();
+        var items = new SchemaProcessor(nestedType, associationMap).process();
 
-        return new ArraySchema().items(items).nullable(true);
+        return nullify(new ArraySchema().items(items), true);
     }
 
     private Schema<?> booleanSchema() {
-        return new BooleanSchema().nullable(!signature.isPrimitive());
+        return nullify(new BooleanSchema(), !signature.isPrimitive());
     }
 
     private Schema<?> dateSchema() {
-        return new DateSchema().nullable(true);
+        return nullify(new DateSchema(), true);
     }
 
     private Schema<?> dateTimeSchema() {
-        return new DateTimeSchema().nullable(true);
+        return nullify(new DateTimeSchema(), true);
     }
 
     private Schema<?> integerSchema() {
-        return new IntegerSchema().nullable(!signature.isPrimitive())
+        return nullify(new IntegerSchema(), !signature.isPrimitive())
                 .format(signature.isLong() ? "int64" : "int32");
     }
 
     private Schema<?> iterableSchema() {
-        var schema = (ArraySchema) new ArraySchema().nullable(true);
+        var schema = nullify(new ArraySchema(), true);
         var typeArguments = ((ClassRefRelativeTypeSignature) signature)
                 .getTypeArguments();
 
         if (typeArguments.size() > 0) {
-            return schema
-                    .items(new SchemaProcessor(typeArguments.get(0)).process());
+            return schema.items(
+                    new SchemaProcessor(typeArguments.get(0), associationMap)
+                            .process());
         }
 
         // If it is a nested class with generic parameters, we have to look
@@ -119,8 +132,8 @@ final class SchemaProcessor {
         if (suffixTypeArguments.size() > 0
                 && suffixTypeArguments.get(0).size() > 0) {
             return schema.items(
-                    new SchemaProcessor(suffixTypeArguments.get(0).get(0))
-                            .process());
+                    new SchemaProcessor(suffixTypeArguments.get(0).get(0),
+                            associationMap).process());
         }
 
         return schema;
@@ -129,13 +142,14 @@ final class SchemaProcessor {
     private Schema<?> mapSchema() {
         var typeArguments = ((ClassRefRelativeTypeSignature) signature)
                 .getTypeArguments();
-        var values = new SchemaProcessor(typeArguments.get(1)).process();
+        var values = new SchemaProcessor(typeArguments.get(1), associationMap)
+                .process();
 
-        return new MapSchema().additionalProperties(values).nullable(true);
+        return nullify(new MapSchema(), true).additionalProperties(values);
     }
 
     private Schema<?> numberSchema() {
-        return new NumberSchema().nullable(!signature.isPrimitive())
+        return nullify(new NumberSchema(), !signature.isPrimitive())
                 .format(signature.isDouble() ? "double" : "float");
     }
 
@@ -143,32 +157,32 @@ final class SchemaProcessor {
         var fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
                 .get().getFullyQualifiedClassName();
 
-        return new ComposedSchema()
+        return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)))
-                .nullable(true);
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)));
     }
 
     private Schema<?> stringSchema() {
-        return new StringSchema().nullable(!signature.isPrimitive());
+        return nullify(new StringSchema(), !signature.isPrimitive());
     }
 
     private Schema<?> typeArgumentSchema() {
         return ((RelativeTypeArgument) signature).getWildcardAssociatedType()
-                .<Schema<?>> map(value -> new SchemaProcessor(value).process())
+                .<Schema<?>> map(
+                        value -> new SchemaProcessor(value, associationMap)
+                                .process())
                 .orElseGet(this::anySchema);
     }
 
     private Schema<?> typeParameterSchema() {
-        var anySchemaSample = anySchema();
-
         return ((RelativeTypeParameter) signature).getClassBound()
                 .filter(classBound -> !classBound.isNativeObject())
-                .<Schema<?>> map(
-                        classBound -> new SchemaProcessor(classBound).process())
+                .<Schema<?>> map(classBound -> new SchemaProcessor(classBound,
+                        associationMap).process())
                 .or(() -> ((RelativeTypeParameter) signature)
                         .getInterfaceBounds().stream()
-                        .map(bound -> new SchemaProcessor(bound).process())
+                        .map(bound -> new SchemaProcessor(bound, associationMap)
+                                .process())
                         .filter(schema -> !Objects.equals(schema,
                                 anySchemaSample))
                         .findFirst())
@@ -177,7 +191,7 @@ final class SchemaProcessor {
 
     private Schema<?> typeVariableSchema() {
         return new SchemaProcessor(
-                ((TypeVariableRelativeTypeSignature) signature).resolve())
-                        .process();
+                ((TypeVariableRelativeTypeSignature) signature).resolve(),
+                associationMap).process();
     }
 }

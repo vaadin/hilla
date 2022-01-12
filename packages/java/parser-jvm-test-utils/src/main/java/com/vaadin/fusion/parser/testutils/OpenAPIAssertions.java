@@ -1,10 +1,10 @@
-package com.vaadin.fusion.parser.plugins.testutils;
+package com.vaadin.fusion.parser.testutils;
 
 import org.junit.jupiter.api.Assertions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import com.vaadin.fusion.parser.core.OpenAPIPrinter;
+import com.vaadin.fusion.parser.utils.OpenAPIPrinter;
 
 import io.swagger.v3.oas.models.OpenAPI;
 

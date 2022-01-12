@@ -15,12 +15,17 @@ import com.vaadin.fusion.parser.core.dependency.DependencyPlugin;
 import com.vaadin.fusion.parser.testutils.ResourceLoader;
 
 public class ParserTests {
-    private final ResourceLoader resourceLoader = new ResourceLoader(
-            getClass());
+    private final ResourceLoader resourceLoader;
     private String basicPluginEndpointName;
     private Set<String> defaultClassPathElements;
     private String dependencyPluginEndpointName;
     private Path targetDir;
+
+    {
+        var target = getClass();
+        resourceLoader = new ResourceLoader(target::getResource,
+                target::getProtectionDomain);
+    }
 
     @BeforeEach
     public void setup() throws URISyntaxException {

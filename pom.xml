@@ -13,6 +13,8 @@
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
+    <module>packages/java/parser-jvm-plugin-nonnull</module>
+    <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
   </modules>
 
@@ -21,6 +23,11 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
+    <classgraph.version>4.8.138</classgraph.version>
+    <jsr305.version>3.0.2</jsr305.version>
+    <swagger.version>2.1.11</swagger.version>
+    <jackson.version>2.13.0</jackson.version>
+    <junit.version>5.8.0</junit.version>
   </properties>
 
   <organization>
@@ -60,6 +67,52 @@
     </pluginRepository>
   </pluginRepositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.classgraph</groupId>
+        <artifactId>classgraph</artifactId>
+        <version>${classgraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-models</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <plugins>
       <plugin>

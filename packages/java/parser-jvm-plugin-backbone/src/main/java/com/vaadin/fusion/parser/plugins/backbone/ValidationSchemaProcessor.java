@@ -13,11 +13,10 @@ import io.github.classgraph.TypeSignature;
 import io.swagger.v3.oas.models.media.Schema;
 
 final class ValidationSchemaProcessor {
-    static private final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
     static private final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
-
-    private final RelativeTypeSignature signature;
+    static private final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
     private final Schema<?> schema;
+    private final RelativeTypeSignature signature;
 
     ValidationSchemaProcessor(@Nonnull RelativeTypeSignature signature,
             @Nonnull Schema<?> schema) {
@@ -46,6 +45,17 @@ final class ValidationSchemaProcessor {
         schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
     }
 
+    private ValidationConstraint convertAnnotation(
+            AnnotationInfo annotationInfo) {
+        return new ValidationConstraint.Builder()
+                .withSimpleName(extractSimpleName(annotationInfo.getName()))
+                .withAttributes(annotationInfo.getParameterValues().stream()
+                        .collect(Collectors.toMap(
+                                AnnotationParameterValue::getName,
+                                AnnotationParameterValue::getValue)))
+                .build();
+    }
+
     private String extractPackageName(String fqn) {
         return fqn.substring(0, fqn.lastIndexOf("."));
     }
@@ -58,16 +68,5 @@ final class ValidationSchemaProcessor {
             AnnotationInfo annotationInfo) {
         return extractPackageName(annotationInfo.getName())
                 .equals(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
-    }
-
-    private ValidationConstraint convertAnnotation(
-            AnnotationInfo annotationInfo) {
-        return new ValidationConstraint.Builder()
-                .withSimpleName(extractSimpleName(annotationInfo.getName()))
-                .withAttributes(annotationInfo.getParameterValues().stream()
-                        .collect(Collectors.toMap(
-                                AnnotationParameterValue::getName,
-                                AnnotationParameterValue::getValue)))
-                .build();
     }
 }

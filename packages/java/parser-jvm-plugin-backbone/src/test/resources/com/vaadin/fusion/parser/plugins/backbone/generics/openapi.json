@@ -97,38 +97,6 @@
         }
       }
     },
-    "/GenericsMethodsEndpoint/getSomething": {
-      "post": {
-        "tags": ["GenericsMethodsEndpoint"],
-        "operationId": "GenericsMethodsEndpoint_getSomething_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "something": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/GenericsMethodsEndpoint/getList": {
       "post": {
         "tags": ["GenericsMethodsEndpoint"],
@@ -213,6 +181,38 @@
         }
       }
     },
+    "/GenericsMethodsEndpoint/getValueWithGenericType": {
+      "post": {
+        "tags": ["GenericsMethodsEndpoint"],
+        "operationId": "GenericsMethodsEndpoint_getValueWithGenericType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "something": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GenericsRefEndpoint/getReference": {
       "post": {
         "tags": ["GenericsRefEndpoint"],
@@ -261,12 +261,6 @@
       "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity": {
         "type": "object",
         "properties": {
-          "something": {
-            "type": "object"
-          },
-          "somethingElse": {
-            "type": "object"
-          },
           "list": {
             "type": "array",
             "nullable": true,
@@ -282,6 +276,12 @@
                 "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
               }
             ]
+          },
+          "valueWithAnotherGenericType": {
+            "type": "object"
+          },
+          "valueWithGenericType": {
+            "type": "object"
           }
         }
       }

@@ -19,11 +19,10 @@ import io.github.classgraph.FieldInfo;
 import io.github.classgraph.MethodInfo;
 
 public class DependencyPlugin implements Plugin {
-    private int order = 0;
-
     public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
+    private int order = 0;
 
     @Override
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,

@@ -47,8 +47,7 @@
         "properties": {
           "build": {
             "type": "integer",
-            "format": "int32",
-            "nullable": false
+            "format": "int32"
           }
         }
       },

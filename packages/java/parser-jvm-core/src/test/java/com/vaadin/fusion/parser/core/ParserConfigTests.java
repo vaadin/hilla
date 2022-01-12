@@ -25,13 +25,18 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 
 public class ParserConfigTests {
-    private final ResourceLoader resourceLoader = new ResourceLoader(
-            getClass());
+    private final ResourceLoader resourceLoader;
     private ParserConfig.Builder defaultBuilder;
     private Set<String> defaultClassPathElements;
     private String defaultEndpointAnnotationName;
     private OpenAPI defaultOpenAPI;
     private Path targetDir;
+
+    {
+        var target = getClass();
+        resourceLoader = new ResourceLoader(target::getResource,
+                target::getProtectionDomain);
+    }
 
     @BeforeEach
     public void setup() throws URISyntaxException {

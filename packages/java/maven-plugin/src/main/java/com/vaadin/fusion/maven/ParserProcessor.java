@@ -16,10 +16,10 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.fusion.parser.core.OpenAPIPrinter;
 import com.vaadin.fusion.parser.core.Parser;
 import com.vaadin.fusion.parser.core.ParserConfig;
 import com.vaadin.fusion.parser.core.PluginManager;
+import com.vaadin.fusion.parser.utils.OpenAPIPrinter;
 
 final class ParserProcessor {
     private final Log logger;
