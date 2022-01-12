@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.ReflectedClass;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
-import com.vaadin.fusion.parser.core.RelativeMethodInfo;
+import com.vaadin.fusion.parser.core.RelativeFieldInfo;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -84,17 +84,13 @@ final class EntityProcessor extends Processor {
         private Schema<?> processClass() {
             var schema = new ObjectSchema();
 
-            entity.getMethodsStream().filter(method -> method.get().isPublic())
-                    .filter(method -> method.get().getName().startsWith("get"))
-                    .forEach(method -> {
-                        var processor = new ComponentSchemaPropertyProcessor(
-                                method);
+            entity.getFieldsStream().forEach(field -> {
+                var processor = new ComponentSchemaPropertyProcessor(field);
 
-                        schema.addProperties(processor.getKey(),
-                                processor.getValue());
+                schema.addProperties(processor.getKey(), processor.getValue());
 
-                        associationMap.addMethod(processor.getValue(), method);
-                    });
+                associationMap.addField(processor.getValue(), field);
+            });
 
             return schema;
         }
@@ -125,9 +121,9 @@ final class EntityProcessor extends Processor {
         private final String key;
         private final Schema<?> value;
 
-        public ComponentSchemaPropertyProcessor(RelativeMethodInfo method) {
-            this.key = decapitalize(method.get().getName().substring(3));
-            this.value = new SchemaProcessor(method.getResultType(),
+        public ComponentSchemaPropertyProcessor(RelativeFieldInfo method) {
+            this.key = method.get().getName();
+            this.value = new SchemaProcessor(method.getType(),
                     associationMap).process();
         }
 
