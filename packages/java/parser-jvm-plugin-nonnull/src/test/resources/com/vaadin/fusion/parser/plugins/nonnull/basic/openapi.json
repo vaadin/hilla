@@ -276,7 +276,13 @@
       "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",
         "properties": {
-          "complexType": {
+          "publicField": {
+            "type": "string"
+          },
+          "protectedField": {
+            "type": "string"
+          },
+          "complexTypeField": {
             "type": "object",
             "additionalProperties": {
               "type": "array",
@@ -289,12 +295,9 @@
               }
             }
           },
-          "nullableType": {
+          "nullableField": {
             "type": "string",
             "nullable": true
-          },
-          "simpleType": {
-            "type": "string"
           },
           "typeWithTypeArgument": {
             "type": "array",
