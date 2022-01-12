@@ -80,7 +80,8 @@ final class NonnullProcessor {
     }
 
     private void processField(Schema<?> schema, RelativeFieldInfo field) {
-        if (Objects.equals(schema.getNullable(), Boolean.TRUE) && isNonNull(field)) {
+        if (Objects.equals(schema.getNullable(), Boolean.TRUE)
+                && isNonNull(field)) {
             schema.setNullable(null);
         }
     }

@@ -123,8 +123,8 @@ final class EntityProcessor extends Processor {
 
         public ComponentSchemaPropertyProcessor(RelativeFieldInfo method) {
             this.key = method.get().getName();
-            this.value = new SchemaProcessor(method.getType(),
-                    associationMap).process();
+            this.value = new SchemaProcessor(method.getType(), associationMap)
+                    .process();
         }
 
         public String getKey() {
