@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.PluginConfiguration;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.fusion.parser.plugins.model.ModelPlugin;
 import com.vaadin.fusion.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.fusion.parser.utils.ConfigList;
 
@@ -110,12 +111,13 @@ public final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        static final Set<Plugin> defaults = Set.of(
+        private static final Set<Plugin> defaults = Set.of(
                 new Plugin(BackbonePlugin.class.getName()),
-                new Plugin(NonnullPlugin.class.getName()));
+                new Plugin(NonnullPlugin.class.getName()),
+                new Plugin(ModelPlugin.class.getName()));
 
-        public PluginsProcessor(ConfigList<Plugin> config) {
-            super(config, defaults);
+        public PluginsProcessor() {
+            super(defaults);
         }
     }
 }
