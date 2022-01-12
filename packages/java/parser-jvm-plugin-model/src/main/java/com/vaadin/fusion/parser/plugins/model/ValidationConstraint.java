@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.vaadin.fusion.parser.core.AssociationMap;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
-import com.vaadin.fusion.parser.plugins.backbone.AssociationMap;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.AnnotationParameterValue;

@@ -6,9 +6,9 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.Plugin;
 import com.vaadin.fusion.parser.core.PluginConfiguration;
+import com.vaadin.fusion.parser.core.PluginsToolset;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
-import com.vaadin.fusion.parser.plugins.backbone.AssociationMap;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.utils.PluginException;
 
@@ -20,15 +20,16 @@ public final class NonnullPlugin implements Plugin {
     public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
-        var associationMap = (AssociationMap) storage.getPluginStorage()
-                .get(BackbonePlugin.ASSOCIATION_MAP);
+        var toolset = new PluginsToolset(
+                storage.getParserConfig().getPlugins());
 
-        if (associationMap == null) {
+        if (!toolset.hasPluginBefore(this, BackbonePlugin.class)) {
             throw new PluginException(
                     "NonnullPlugin should be run after BackbonePlugin");
         }
 
-        new NonnullProcessor(annotations, associationMap).process();
+        new NonnullProcessor(annotations, storage.getAssociationMap())
+                .process();
     }
 
     @Override
