@@ -11,11 +11,16 @@ public final class RelativeFieldInfo
         extends AbstractRelative<FieldInfo, RelativeClassInfo> {
     private final RelativeTypeSignature type;
 
-    public RelativeFieldInfo(@Nonnull FieldInfo origin,
-            @Nonnull RelativeClassInfo parent) {
-        super(origin, Objects.requireNonNull(parent));
+    private RelativeFieldInfo(FieldInfo origin, RelativeClassInfo parent) {
+        super(origin, parent);
         type = RelativeTypeSignature
                 .of(origin.getTypeSignatureOrTypeDescriptor(), this);
+    }
+
+    public static RelativeFieldInfo of(@Nonnull FieldInfo origin,
+            @Nonnull RelativeClassInfo parent) {
+        return Pool.createInstance(origin, Objects.requireNonNull(parent),
+                RelativeFieldInfo::new);
     }
 
     @Override

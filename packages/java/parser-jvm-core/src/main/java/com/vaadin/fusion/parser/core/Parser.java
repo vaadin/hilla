@@ -2,7 +2,9 @@ package com.vaadin.fusion.parser.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private final ParserConfig config;
+    private final Map<Object, Relative<?>> pool = new HashMap<>();
     private final SharedStorage storage;
 
     public Parser(@Nonnull ParserConfig config) {
@@ -40,6 +43,8 @@ public final class Parser {
     }
 
     public OpenAPI execute() {
+        Pool.clear();
+
         logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config);
 
@@ -87,7 +92,7 @@ public final class Parser {
 
             var endpoints = result
                     .getClassesWithAnnotation(endpointAnnotationName).stream()
-                    .map(RelativeClassInfo::new)
+                    .map(RelativeClassInfo::of)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
             logger.debug("Collected project endpoints: " + endpoints.stream()

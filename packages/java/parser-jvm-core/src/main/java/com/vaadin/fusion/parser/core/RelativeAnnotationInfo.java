@@ -9,8 +9,13 @@ import io.github.classgraph.AnnotationInfo;
 public final class RelativeAnnotationInfo
         extends AbstractRelative<AnnotationInfo, Relative<?>> {
 
-    public RelativeAnnotationInfo(@Nonnull AnnotationInfo origin,
+    private RelativeAnnotationInfo(@Nonnull AnnotationInfo origin,
             @Nonnull Relative<?> parent) {
         super(origin, Objects.requireNonNull(parent));
+    }
+
+    public static RelativeAnnotationInfo of(@Nonnull AnnotationInfo origin,
+            Relative<?> parent) {
+        return Pool.createInstance(origin, parent, RelativeAnnotationInfo::new);
     }
 }

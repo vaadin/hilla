@@ -17,7 +17,7 @@ public final class RelativeTypeParameter
     private final RelativeTypeSignature classBound;
     private final List<RelativeTypeSignature> interfaceBounds;
 
-    public RelativeTypeParameter(@Nonnull TypeParameter origin,
+    private RelativeTypeParameter(@Nonnull TypeParameter origin,
             @Nonnull Relative<?> parent) {
         super(origin, Objects.requireNonNull(parent));
         var classBound = origin.getClassBound();
@@ -27,6 +27,11 @@ public final class RelativeTypeParameter
         interfaceBounds = origin.getInterfaceBounds().stream()
                 .map(signature -> RelativeTypeSignature.of(signature, this))
                 .collect(Collectors.toList());
+    }
+
+    static RelativeTypeParameter of(@Nonnull TypeParameter origin,
+            @Nonnull Relative<?> parent) {
+        return Pool.createInstance(origin, parent, RelativeTypeParameter::new);
     }
 
     public Stream<RelativeTypeSignature> getAllBoundsStream() {

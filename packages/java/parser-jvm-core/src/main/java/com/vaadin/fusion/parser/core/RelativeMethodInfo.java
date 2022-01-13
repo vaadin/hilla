@@ -16,16 +16,20 @@ public final class RelativeMethodInfo
     private final List<RelativeMethodParameterInfo> parameters;
     private final RelativeTypeSignature resultType;
 
-    public RelativeMethodInfo(@Nonnull MethodInfo origin,
-            @Nonnull RelativeClassInfo parent) {
-        super(origin, Objects.requireNonNull(parent));
+    private RelativeMethodInfo(MethodInfo origin, RelativeClassInfo parent) {
+        super(origin, parent);
 
         parameters = Arrays.stream(origin.getParameterInfo()).map(
-                parameter -> new RelativeMethodParameterInfo(parameter, this))
+                parameter -> RelativeMethodParameterInfo.of(parameter, this))
                 .collect(Collectors.toList());
         resultType = RelativeTypeSignature.of(
                 origin.getTypeSignatureOrTypeDescriptor().getResultType(),
                 this);
+    }
+
+    public static RelativeMethodInfo of(@Nonnull MethodInfo origin,
+            @Nonnull RelativeClassInfo parent) {
+        return Pool.createInstance(origin, Objects.requireNonNull(parent), RelativeMethodInfo::new);
     }
 
     @Override
