@@ -121,9 +121,9 @@ final class EntityProcessor extends Processor {
         private final String key;
         private final Schema<?> value;
 
-        public ComponentSchemaPropertyProcessor(RelativeFieldInfo method) {
-            this.key = method.get().getName();
-            this.value = new SchemaProcessor(method.getType(), associationMap)
+        public ComponentSchemaPropertyProcessor(RelativeFieldInfo field) {
+            this.key = field.get().getName();
+            this.value = new SchemaProcessor(field.getType(), associationMap)
                     .process();
         }
 
