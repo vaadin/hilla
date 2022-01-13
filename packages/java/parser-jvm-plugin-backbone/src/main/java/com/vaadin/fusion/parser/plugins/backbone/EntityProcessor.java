@@ -12,6 +12,7 @@ import com.vaadin.fusion.parser.core.ReflectedClass;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeFieldInfo;
 
+import io.github.classgraph.FieldInfo;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -68,8 +69,10 @@ final class EntityProcessor extends Processor {
 
         public ComponentSchemaProcessor(RelativeClassInfo entity) {
             this.entity = entity;
-            this.key = entity.get().getName();
-            this.value = entity.get().isEnum() ? processEnum()
+
+            var info = entity.get();
+            this.key = info.getName();
+            this.value = info.isEnum() ? processEnum()
                     : processExtendedClass();
         }
 
@@ -99,8 +102,9 @@ final class EntityProcessor extends Processor {
             var schema = new StringSchema();
 
             schema.setEnum(entity.getFieldsStream()
-                    .filter(field -> field.get().isPublic())
-                    .map(field -> field.get().getName())
+                    .map(RelativeFieldInfo::get)
+                    .filter(FieldInfo::isPublic)
+                    .map(FieldInfo::getName)
                     .collect(Collectors.toList()));
 
             return schema;
