@@ -72,8 +72,7 @@ final class EntityProcessor extends Processor {
 
             var info = entity.get();
             this.key = info.getName();
-            this.value = info.isEnum() ? processEnum()
-                    : processExtendedClass();
+            this.value = info.isEnum() ? processEnum() : processExtendedClass();
         }
 
         public String getKey() {
@@ -101,10 +100,8 @@ final class EntityProcessor extends Processor {
         private Schema<?> processEnum() {
             var schema = new StringSchema();
 
-            schema.setEnum(entity.getFieldsStream()
-                    .map(RelativeFieldInfo::get)
-                    .filter(FieldInfo::isPublic)
-                    .map(FieldInfo::getName)
+            schema.setEnum(entity.getFieldsStream().map(RelativeFieldInfo::get)
+                    .filter(FieldInfo::isPublic).map(FieldInfo::getName)
                     .collect(Collectors.toList()));
 
             return schema;
