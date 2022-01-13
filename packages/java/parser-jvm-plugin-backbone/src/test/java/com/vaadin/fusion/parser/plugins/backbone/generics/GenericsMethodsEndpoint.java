@@ -8,7 +8,7 @@ public class GenericsMethodsEndpoint {
         return list;
     }
 
-    public <T extends GenericsRefEntity<String>> T getRef(T ref) {
+    public <T extends GenericsBareRefEntity<String>> T getRef(T ref) {
         return ref;
     }
 
