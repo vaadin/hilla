@@ -38,37 +38,24 @@ public class BasicEndpoint {
 
     public static class ExtendedNonNullableModel extends NonNullableModel {
         @javax.annotation.Nonnull
-        public List<@Nonnull String> getMixedAnnotations(
-                @Nonnull String parameter) {
-            return List.of(parameter);
-        }
+        public List<@Nonnull String> mixedAnnotations;
 
         @javax.annotation.Nonnull
-        public String getNonTypeAnnotation(
-                @javax.annotation.Nonnull String nonTypeParameter) {
-            return nonTypeParameter;
-        }
+        private String nonTypeAnnotation;
     }
 
     public static class NonNullableModel {
         @Nonnull
-        public Map<String, @Nonnull List<@Nonnull NonNullableModel>> getComplexType(
-                @Nonnull Map<String, @Nonnull List<@Nonnull NonNullableModel>> map) {
-            return map;
-        }
-
-        public String getNullableType(String nullableParameter) {
-            return nullableParameter;
-        }
+        public String publicField;
 
         @Nonnull
-        public String getSimpleType(@Nonnull String str) {
-            return str;
-        }
+        protected String protectedField;
 
-        public List<@Nonnull String> getTypeWithTypeArgument(
-                List<@Nonnull String> list) {
-            return list;
-        }
+        @Nonnull
+        private Map<String, @Nonnull List<@Nonnull NonNullableModel>> complexTypeField;
+
+        private String nullableField;
+
+        private List<@Nonnull String> typeWithTypeArgument;
     }
 }

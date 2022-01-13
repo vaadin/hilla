@@ -153,7 +153,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
                     ]
                   }
@@ -171,7 +171,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
                     }
                   ]
                 }
@@ -213,10 +213,10 @@
         }
       }
     },
-    "/GenericsRefEndpoint/getReference": {
+    "/GenericsRefEndpoint/getBareReference": {
       "post": {
         "tags": ["GenericsRefEndpoint"],
-        "operationId": "GenericsRefEndpoint_getReference_POST",
+        "operationId": "GenericsRefEndpoint_getBareReference_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -227,7 +227,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
                     ]
                   }
@@ -245,7 +245,49 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsRefEndpoint/getExtendedReference": {
+      "post": {
+        "tags": ["GenericsRefEndpoint"],
+        "operationId": "GenericsRefEndpoint_getExtendedReference_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
                     }
                   ]
                 }
@@ -258,30 +300,24 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity": {
+      "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity": {
         "type": "object",
         "properties": {
-          "list": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          "ref": {
+          "bareGenericTypeProperty": {
+            "type": "object"
+          }
+        }
+      },
+      "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
+        "type": "object",
+        "properties": {
+          "extendedGenericTypeReference": {
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsRefEntity"
+                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
               }
             ]
-          },
-          "valueWithAnotherGenericType": {
-            "type": "object"
-          },
-          "valueWithGenericType": {
-            "type": "object"
           }
         }
       }
