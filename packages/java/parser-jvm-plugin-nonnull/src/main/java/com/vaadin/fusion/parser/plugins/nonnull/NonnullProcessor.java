@@ -3,6 +3,7 @@ package com.vaadin.fusion.parser.plugins.nonnull;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.vaadin.fusion.parser.core.RelativeFieldInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodParameterInfo;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
@@ -26,6 +27,7 @@ final class NonnullProcessor {
     }
 
     public void process() {
+        map.getFields().forEach(this::processField);
         map.getMethods().forEach(this::processMethod);
         map.getParameters().forEach(this::processParameter);
         map.getTypes().forEach(this::processSchema);
@@ -34,6 +36,10 @@ final class NonnullProcessor {
     private boolean isNonNull(AnnotationInfoList annotationInfos) {
         return annotationInfos != null && annotationInfos.stream().anyMatch(
                 annotation -> annotations.contains(annotation.getName()));
+    }
+
+    private boolean isNonNull(RelativeFieldInfo field) {
+        return isNonNull(field.get().getAnnotationInfo());
     }
 
     private boolean isNonNull(RelativeMethodInfo method) {
@@ -71,6 +77,13 @@ final class NonnullProcessor {
         }
 
         return false;
+    }
+
+    private void processField(Schema<?> schema, RelativeFieldInfo field) {
+        if (Objects.equals(schema.getNullable(), Boolean.TRUE)
+                && isNonNull(field)) {
+            schema.setNullable(null);
+        }
     }
 
     private void processMethod(Schema<?> schema, RelativeMethodInfo method) {

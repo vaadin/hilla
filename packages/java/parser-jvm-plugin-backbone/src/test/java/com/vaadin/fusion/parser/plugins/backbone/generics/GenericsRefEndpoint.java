@@ -1,8 +1,12 @@
 package com.vaadin.fusion.parser.plugins.backbone.generics;
 
 @Endpoint
-public class GenericsRefEndpoint<T extends GenericsRefEntity<String>> {
-    public T getReference(T ref) {
+public class GenericsRefEndpoint<T extends GenericsBareRefEntity<String>, U extends GenericsExtendedRefEntity<GenericsBareRefEntity<String>>> {
+    public T getBareReference(T ref) {
+        return ref;
+    }
+
+    public U getExtendedReference(U ref) {
         return ref;
     }
 }

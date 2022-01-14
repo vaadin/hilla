@@ -10,8 +10,9 @@ import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.ReflectedClass;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
-import com.vaadin.fusion.parser.core.RelativeMethodInfo;
+import com.vaadin.fusion.parser.core.RelativeFieldInfo;
 
+import io.github.classgraph.FieldInfo;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -68,9 +69,10 @@ final class EntityProcessor extends Processor {
 
         public ComponentSchemaProcessor(RelativeClassInfo entity) {
             this.entity = entity;
-            this.key = entity.get().getName();
-            this.value = entity.get().isEnum() ? processEnum()
-                    : processExtendedClass();
+
+            var info = entity.get();
+            this.key = info.getName();
+            this.value = info.isEnum() ? processEnum() : processExtendedClass();
         }
 
         public String getKey() {
@@ -84,17 +86,13 @@ final class EntityProcessor extends Processor {
         private Schema<?> processClass() {
             var schema = new ObjectSchema();
 
-            entity.getMethodsStream().filter(method -> method.get().isPublic())
-                    .filter(method -> method.get().getName().startsWith("get"))
-                    .forEach(method -> {
-                        var processor = new ComponentSchemaPropertyProcessor(
-                                method);
+            entity.getFieldsStream().forEach(field -> {
+                var processor = new ComponentSchemaPropertyProcessor(field);
 
-                        schema.addProperties(processor.getKey(),
-                                processor.getValue());
+                schema.addProperties(processor.getKey(), processor.getValue());
 
-                        associationMap.addMethod(processor.getValue(), method);
-                    });
+                associationMap.addField(processor.getValue(), field);
+            });
 
             return schema;
         }
@@ -102,9 +100,8 @@ final class EntityProcessor extends Processor {
         private Schema<?> processEnum() {
             var schema = new StringSchema();
 
-            schema.setEnum(entity.getFieldsStream()
-                    .filter(field -> field.get().isPublic())
-                    .map(field -> field.get().getName())
+            schema.setEnum(entity.getFieldsStream().map(RelativeFieldInfo::get)
+                    .filter(FieldInfo::isPublic).map(FieldInfo::getName)
                     .collect(Collectors.toList()));
 
             return schema;
@@ -125,10 +122,10 @@ final class EntityProcessor extends Processor {
         private final String key;
         private final Schema<?> value;
 
-        public ComponentSchemaPropertyProcessor(RelativeMethodInfo method) {
-            this.key = decapitalize(method.get().getName().substring(3));
-            this.value = new SchemaProcessor(method.getResultType(),
-                    associationMap).process();
+        public ComponentSchemaPropertyProcessor(RelativeFieldInfo field) {
+            this.key = field.get().getName();
+            this.value = new SchemaProcessor(field.getType(), associationMap)
+                    .process();
         }
 
         public String getKey() {
