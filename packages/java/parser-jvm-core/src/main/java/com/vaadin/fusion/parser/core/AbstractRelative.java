@@ -10,7 +10,7 @@ abstract class AbstractRelative<T, P extends Relative<?>>
     protected final T origin;
     protected final P parent;
 
-    protected AbstractRelative(@Nonnull T origin, P parent) {
+    public AbstractRelative(@Nonnull T origin, P parent) {
         this.origin = Objects.requireNonNull(origin);
         this.parent = parent;
     }

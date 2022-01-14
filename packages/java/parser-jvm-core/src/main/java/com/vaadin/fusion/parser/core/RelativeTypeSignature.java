@@ -21,19 +21,19 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
         Objects.requireNonNull(parent);
 
         if (signature instanceof BaseTypeSignature) {
-            return BaseRelativeTypeSignature.of((BaseTypeSignature) signature,
+            return new BaseRelativeTypeSignature((BaseTypeSignature) signature,
                     parent);
         } else if (signature instanceof ArrayTypeSignature) {
-            return ArrayRelativeTypeSignature.of((ArrayTypeSignature) signature,
-                    parent);
+            return new ArrayRelativeTypeSignature(
+                    (ArrayTypeSignature) signature, parent);
         } else if (signature instanceof TypeVariableSignature) {
-            return TypeVariableRelativeTypeSignature
-                    .of((TypeVariableSignature) signature, parent);
+            return new TypeVariableRelativeTypeSignature(
+                    (TypeVariableSignature) signature, parent);
         } else if (signature instanceof TypeArgument) {
-            return RelativeTypeArgument.of((TypeArgument) signature, parent);
+            return new RelativeTypeArgument((TypeArgument) signature, parent);
         } else {
-            return ClassRefRelativeTypeSignature
-                    .of((ClassRefTypeSignature) signature, parent);
+            return new ClassRefRelativeTypeSignature(
+                    (ClassRefTypeSignature) signature, parent);
         }
     }
 
@@ -69,7 +69,7 @@ public interface RelativeTypeSignature extends Relative<Relative<?>> {
 
     @Override
     default Stream<RelativeClassInfo> getDependenciesStream() {
-        return resolve(get()).map(RelativeClassInfo::of);
+        return resolve(get()).map(RelativeClassInfo::new);
     }
 
     default boolean hasFloatType() {

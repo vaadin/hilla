@@ -1,6 +1,5 @@
 package com.vaadin.fusion.parser.core;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -11,14 +10,8 @@ import io.github.classgraph.ClassInfo;
 public final class BaseRelativeTypeSignature
         extends AbstractRelative<BaseTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
-    private BaseRelativeTypeSignature(BaseTypeSignature origin, Relative<?> parent) {
+    BaseRelativeTypeSignature(BaseTypeSignature origin, Relative<?> parent) {
         super(origin, parent);
-    }
-
-    static BaseRelativeTypeSignature of(
-            @Nonnull BaseTypeSignature origin, @Nonnull Relative<?> parent) {
-        return Pool.createInstance(origin, Objects.requireNonNull(parent),
-                BaseRelativeTypeSignature::new);
     }
 
     public static Stream<ClassInfo> resolve(

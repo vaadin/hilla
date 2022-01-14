@@ -1,9 +1,6 @@
 package com.vaadin.fusion.parser.core;
 
-import java.util.Objects;
 import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.TypeVariableSignature;
@@ -13,17 +10,10 @@ public final class TypeVariableRelativeTypeSignature
         implements RelativeTypeSignature {
     private final RelativeTypeParameter typeParameter;
 
-    private TypeVariableRelativeTypeSignature(TypeVariableSignature origin,
+    TypeVariableRelativeTypeSignature(TypeVariableSignature origin,
             Relative<?> parent) {
         super(origin, parent);
-        typeParameter = RelativeTypeParameter.of(origin.resolve(), this);
-    }
-
-    static TypeVariableRelativeTypeSignature of(
-            @Nonnull TypeVariableSignature origin,
-            @Nonnull Relative<?> parent) {
-        return Pool.createInstance(origin, Objects.requireNonNull(parent),
-                TypeVariableRelativeTypeSignature::new);
+        typeParameter = new RelativeTypeParameter(origin.resolve(), this);
     }
 
     public static Stream<ClassInfo> resolve(TypeVariableSignature signature) {

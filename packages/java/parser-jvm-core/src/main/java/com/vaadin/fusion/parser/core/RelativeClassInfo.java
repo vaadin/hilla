@@ -27,41 +27,32 @@ public final class RelativeClassInfo
     private final RelativeClassInfo superClass;
     private final List<RelativeClassInfo> superClasses;
 
-    private RelativeClassInfo(@Nonnull ClassInfo origin) {
+    public RelativeClassInfo(@Nonnull ClassInfo origin) {
         this(origin, null);
     }
 
-    private RelativeClassInfo(@Nonnull ClassInfo origin,
+    public RelativeClassInfo(@Nonnull ClassInfo origin,
             RelativeClassInfo parent) {
         super(origin, parent);
 
         annotations = getMembers(ClassInfo::getAnnotationInfo,
-                RelativeAnnotationInfo::of);
+                RelativeAnnotationInfo::new);
         fields = getMembers(ClassInfo::getDeclaredFieldInfo,
-                RelativeFieldInfo::of);
+                RelativeFieldInfo::new);
         innerClasses = getMembers(ClassInfo::getInnerClasses,
-                RelativeClassInfo::of);
+                RelativeClassInfo::new);
         methods = getMembers(ClassInfo::getDeclaredMethodInfo,
-                RelativeMethodInfo::of);
+                RelativeMethodInfo::new);
         superClasses = getMembers(ClassInfo::getSuperclasses,
-                (member) -> !isJDKClass(member), RelativeClassInfo::of);
+                (member) -> !isJDKClass(member), RelativeClassInfo::new);
 
         var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null
-                ? RelativeClassInfo.of(originSuperClass)
+                ? new RelativeClassInfo(originSuperClass)
                 : null;
 
         // Should be the latest
         chain = new InheritanceChain();
-    }
-
-    public static RelativeClassInfo of(@Nonnull ClassInfo classInfo) {
-        return of(classInfo, null);
-    }
-
-    public static RelativeClassInfo of(@Nonnull ClassInfo origin,
-            RelativeClassInfo parent) {
-        return Pool.createInstance(origin, parent, RelativeClassInfo::new);
     }
 
     @Override

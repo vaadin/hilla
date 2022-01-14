@@ -11,14 +11,8 @@ import io.github.classgraph.ClassInfo;
 public final class ArrayRelativeTypeSignature
         extends AbstractRelative<ArrayTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
-    private ArrayRelativeTypeSignature(ArrayTypeSignature origin, Relative<?> parent) {
+    ArrayRelativeTypeSignature(ArrayTypeSignature origin, Relative<?> parent) {
         super(origin, parent);
-    }
-
-    static ArrayRelativeTypeSignature of(
-            @Nonnull ArrayTypeSignature origin, @Nonnull Relative<?> parent) {
-        return Pool.createInstance(origin, Objects.requireNonNull(parent),
-                ArrayRelativeTypeSignature::new);
     }
 
     public static Stream<ClassInfo> resolve(

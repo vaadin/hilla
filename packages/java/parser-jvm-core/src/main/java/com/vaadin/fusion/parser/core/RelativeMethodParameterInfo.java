@@ -11,18 +11,12 @@ public final class RelativeMethodParameterInfo
         extends AbstractRelative<MethodParameterInfo, RelativeMethodInfo> {
     private final RelativeTypeSignature type;
 
-    private RelativeMethodParameterInfo(@Nonnull MethodParameterInfo origin,
+    public RelativeMethodParameterInfo(@Nonnull MethodParameterInfo origin,
             @Nonnull RelativeMethodInfo parent) {
-        super(origin, parent);
+        super(origin, Objects.requireNonNull(parent));
+
         type = RelativeTypeSignature
                 .of(origin.getTypeSignatureOrTypeDescriptor(), this);
-    }
-
-    public static RelativeMethodParameterInfo of(
-            @Nonnull MethodParameterInfo origin,
-            @Nonnull RelativeMethodInfo parent) {
-        return Pool.createInstance(origin, Objects.requireNonNull(parent),
-                RelativeMethodParameterInfo::new);
     }
 
     @Override

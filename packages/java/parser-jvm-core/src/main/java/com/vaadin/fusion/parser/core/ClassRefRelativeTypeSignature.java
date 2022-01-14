@@ -20,24 +20,18 @@ public final class ClassRefRelativeTypeSignature
     private final List<List<RelativeTypeArgument>> suffixTypeArguments;
     private final List<RelativeTypeArgument> typeArguments;
 
-    private ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
+    ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
             Relative<?> parent) {
         super(origin, parent);
         reflectedClass = new ReflectedClass(origin);
         typeArguments = origin.getTypeArguments().stream()
-                .map(arg -> RelativeTypeArgument.of(arg, this))
+                .map(arg -> new RelativeTypeArgument(arg, this))
                 .collect(Collectors.toList());
         suffixTypeArguments = origin.getSuffixTypeArguments().stream()
                 .map(list -> list.stream()
-                        .map(arg -> RelativeTypeArgument.of(arg, this))
+                        .map(arg -> new RelativeTypeArgument(arg, this))
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList());
-    }
-
-    static ClassRefRelativeTypeSignature of(ClassRefTypeSignature origin,
-            Relative<?> parent) {
-        return Pool.createInstance(origin, Objects.requireNonNull(parent),
-                ClassRefRelativeTypeSignature::new);
     }
 
     public static Stream<ClassInfo> resolve(
