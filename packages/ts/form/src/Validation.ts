@@ -1,9 +1,10 @@
 // TODO: Fix dependency cycle
 
+// eslint-disable-next-line import/no-cycle
+import { AbstractModel, NumberModel, getBinderNode } from './Models.js';
+
 import type { Binder } from './Binder.js';
 import type { BinderNode } from './BinderNode.js';
-// eslint-disable-next-line import/no-cycle
-import { AbstractModel, getBinderNode, NumberModel } from './Models.js';
 // eslint-disable-next-line import/no-cycle
 import { Required } from './Validators.js';
 
@@ -62,13 +63,21 @@ export class ServerValidator implements Validator<any> {
   public validate = () => false;
 }
 
+// The `property` field of `ValidationResult`s is a path relative to the parent.
+function setPropertyAbsolutePath<T>(binderNodeName: string, result: ValidationResult): ValidationResult {
+  if (typeof result.property === 'string' && binderNodeName.length > 0) {
+    result.property = `${binderNodeName}.${result.property}`;
+  }
+  return result;
+}
+
 export async function runValidator<T>(
   model: AbstractModel<T>,
   validator: Validator<T>,
   interpolateMessageCallback?: InterpolateMessageCallback<T>,
 ): Promise<ReadonlyArray<ValueError<T>>> {
   const binderNode = getBinderNode(model);
-  const { value } = binderNode;
+  const value = binderNode.value!;
 
   const interpolateMessage = (message: string) => {
     if (!interpolateMessageCallback) {
@@ -80,14 +89,12 @@ export async function runValidator<T>(
   // If model is not required and value empty, do not run any validator. Except
   // always validate NumberModel, which has a mandatory builtin validator
   // to indicate NaN input.
-  if (!getBinderNode(model).required && !new Required().validate(value!) && !(model instanceof NumberModel)) {
+  if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
     return [];
   }
-  return (async () => validator.validate(value!, getBinderNode(model).binder))().then((result) => {
+  return (async () => validator.validate(value, binderNode.binder))().then((result) => {
     if (result === false) {
-      return [
-        { property: getBinderNode(model).name, value, validator, message: interpolateMessage(validator.message) },
-      ];
+      return [{ property: binderNode.name, value, validator, message: interpolateMessage(validator.message) }];
     }
     if (result === true || (Array.isArray(result) && result.length === 0)) {
       return [];
@@ -95,11 +102,18 @@ export async function runValidator<T>(
     if (Array.isArray(result)) {
       return result.map((result2) => ({
         message: interpolateMessage(validator.message),
-        ...result2,
+        ...setPropertyAbsolutePath(binderNode.name, result2),
         value,
         validator,
       }));
     }
-    return [{ message: interpolateMessage(validator.message), ...result, value, validator }];
+    return [
+      {
+        message: interpolateMessage(validator.message),
+        ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
+        value,
+        validator,
+      },
+    ];
   });
 }
