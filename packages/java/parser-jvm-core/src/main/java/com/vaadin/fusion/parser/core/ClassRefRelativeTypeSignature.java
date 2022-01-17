@@ -145,6 +145,6 @@ public final class ClassRefRelativeTypeSignature
 
     @Override
     public boolean isSystem() {
-        return origin.getClassInfo() == null;
+        return origin.getClassInfo() == null || reflectedClass.isJDKClass();
     }
 }

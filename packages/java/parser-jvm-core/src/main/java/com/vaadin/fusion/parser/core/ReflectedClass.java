@@ -99,6 +99,10 @@ public final class ReflectedClass {
         return Map.class.isAssignableFrom(origin);
     }
 
+    public boolean isJDKClass() {
+        return ParserUtils.isJDKClass(origin.getName());
+    }
+
     public boolean isNativeObject() {
         return Objects.equals(origin, Object.class);
     }
