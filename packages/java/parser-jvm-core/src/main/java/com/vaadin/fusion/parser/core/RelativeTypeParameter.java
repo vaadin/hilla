@@ -15,7 +15,7 @@ public final class RelativeTypeParameter
         extends AbstractRelative<TypeParameter, Relative<?>>
         implements RelativeTypeSignature {
     private final RelativeTypeSignature classBound;
-    private final List<RelativeTypeSignature> interfaceBounds;
+    private List<RelativeTypeSignature> interfaceBounds;
 
     public RelativeTypeParameter(@Nonnull TypeParameter origin,
             @Nonnull Relative<?> parent) {
@@ -24,13 +24,10 @@ public final class RelativeTypeParameter
         this.classBound = classBound != null
                 ? RelativeTypeSignature.of(classBound, this)
                 : null;
-        interfaceBounds = origin.getInterfaceBounds().stream()
-                .map(signature -> RelativeTypeSignature.of(signature, this))
-                .collect(Collectors.toList());
     }
 
     public Stream<RelativeTypeSignature> getAllBoundsStream() {
-        return Stream.of(Stream.of(classBound), interfaceBounds.stream())
+        return Stream.of(Stream.of(classBound), getInterfaceBounds().stream())
                 .flatMap(Function.identity());
     }
 
@@ -39,11 +36,17 @@ public final class RelativeTypeParameter
     }
 
     public List<RelativeTypeSignature> getInterfaceBounds() {
+        if (interfaceBounds == null) {
+            interfaceBounds = origin.getInterfaceBounds().stream()
+                    .map(signature -> RelativeTypeSignature.of(signature, this))
+                    .collect(Collectors.toList());
+        }
+
         return interfaceBounds;
     }
 
     public Stream<RelativeTypeSignature> getInterfaceBoundsStream() {
-        return interfaceBounds.stream();
+        return getInterfaceBounds().stream();
     }
 
     @Override
