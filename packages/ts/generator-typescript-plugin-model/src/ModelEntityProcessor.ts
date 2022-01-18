@@ -19,7 +19,7 @@ import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/D
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
-import type { ModelPluginContext } from './utils.js';
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 const exportDefaultModifiers = [
@@ -29,7 +29,7 @@ const exportDefaultModifiers = [
 
 export class ModelEntityProcessor {
   readonly #component: Schema;
-  readonly #context: ModelPluginContext;
+  readonly #context: Plugin;
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #entityName: string;
@@ -38,7 +38,7 @@ export class ModelEntityProcessor {
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
   #getPropertyModelSymbol?: Identifier = undefined;
 
-  public constructor(name: string, component: Schema, context: ModelPluginContext) {
+  public constructor(name: string, component: Schema, context: Plugin) {
     this.#component = component;
     this.#context = context;
     this.#fullyQualifiedName = name;

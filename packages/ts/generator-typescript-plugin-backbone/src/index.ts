@@ -1,11 +1,8 @@
 import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver';
 import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
-import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 
 export enum BackbonePluginSourceType {
   Endpoint = 'endpoint',
@@ -15,16 +12,7 @@ export enum BackbonePluginSourceType {
 export default class BackbonePlugin extends Plugin {
   public static readonly BACKBONE_PLUGIN_FILE_TAGS = 'BACKBONE_PLUGIN_FILE_TAGS';
   public declare ['constructor']: typeof BackbonePlugin;
-  readonly #context: BackbonePluginContext;
   readonly #tags = new WeakMap<SourceFile, BackbonePluginSourceType>();
-
-  public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
-    super(resolver, logger);
-    this.#context = {
-      logger,
-      resolver,
-    };
-  }
 
   public override get path(): string {
     return import.meta.url;
@@ -58,7 +46,7 @@ export default class BackbonePlugin extends Plugin {
       if (endpoints.has(endpointName)) {
         endpointProcessor = endpoints.get(endpointName)!;
       } else {
-        endpointProcessor = new EndpointProcessor(endpointName, this.#context);
+        endpointProcessor = new EndpointProcessor(endpointName, this);
         endpoints.set(endpointName, endpointProcessor);
       }
 
@@ -73,7 +61,7 @@ export default class BackbonePlugin extends Plugin {
 
     return storage.api.components?.schemas
       ? Object.entries(storage.api.components?.schemas).map(([name, component]) =>
-          new EntityProcessor(name, component, this.#context).process(),
+          new EntityProcessor(name, component, this).process(),
         )
       : [];
   }

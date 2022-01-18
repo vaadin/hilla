@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
@@ -7,7 +8,6 @@ import type { CallExpression, Expression, Statement, TypeNode } from 'typescript
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -26,7 +26,7 @@ export default abstract class EndpointMethodOperationProcessor {
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    context: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST:
@@ -48,7 +48,7 @@ export default abstract class EndpointMethodOperationProcessor {
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
-  readonly #context: BackbonePluginContext;
+  readonly #context: Plugin;
   readonly #dependencies: DependencyManager;
   readonly #endpointMethodName: string;
   readonly #endpointName: string;
@@ -59,7 +59,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    context: Plugin,
   ) {
     super();
     this.#context = context;

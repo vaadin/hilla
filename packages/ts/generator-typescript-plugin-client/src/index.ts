@@ -12,7 +12,7 @@ export default class ClientPlugin extends Plugin {
   }
 
   public override async execute({ sources }: SharedStorage): Promise<void> {
-    const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this.logger).process();
+    const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this).process();
     sources.push(clientFile);
   }
 }

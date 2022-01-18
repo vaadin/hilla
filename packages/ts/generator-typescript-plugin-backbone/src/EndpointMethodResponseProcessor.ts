@@ -1,9 +1,9 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';
 
 export type EndpointMethodResponses = ReadonlyDeep<OpenAPIV3.ResponsesObject>;
@@ -11,7 +11,7 @@ export type EndpointMethodResponse = ReadonlyDeep<OpenAPIV3.ResponseObject>;
 
 export default class EndpointMethodResponseProcessor {
   readonly #code: string;
-  readonly #context: BackbonePluginContext;
+  readonly #context: Plugin;
   readonly #dependencies: DependencyManager;
   readonly #response: EndpointMethodResponse;
 
@@ -19,7 +19,7 @@ export default class EndpointMethodResponseProcessor {
     code: string,
     response: EndpointMethodResponses[string],
     dependencyManager: DependencyManager,
-    context: BackbonePluginContext,
+    context: Plugin,
   ) {
     this.#code = code;
     this.#context = context;

@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
@@ -10,7 +11,6 @@ import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
 import ts from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';
 
 export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject>;
@@ -21,14 +21,14 @@ export type EndpointMethodRequestBodyProcessingResult = Readonly<{
 }>;
 
 export default class EndpointMethodRequestBodyProcessor {
-  readonly #context: BackbonePluginContext;
+  readonly #context: Plugin;
   readonly #dependencies: DependencyManager;
   readonly #requestBody?: EndpointMethodRequestBody;
 
   public constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    context: Plugin,
   ) {
     this.#context = context;
     this.#dependencies = dependencies;

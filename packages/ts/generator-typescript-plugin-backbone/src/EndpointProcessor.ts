@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
@@ -6,16 +7,15 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 
 export default class EndpointProcessor {
-  readonly #context: BackbonePluginContext;
+  readonly #context: Plugin;
   readonly #dependencies = new DependencyManager(new PathManager());
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(name: string, context: BackbonePluginContext) {
+  public constructor(name: string, context: Plugin) {
     this.#context = context;
     this.#name = name;
     this.#dependencies.imports.default.add(
