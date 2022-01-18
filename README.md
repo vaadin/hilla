@@ -1,21 +1,21 @@
-<a target="_blank" href="https://vaad.in/fusion"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Vaadin Fusion Discord"></img></a>
+<a target="_blank" href="https://vaad.in/fusion"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Hilla Discord"></img></a>
 
 ![Frontend CI](https://github.com/vaadin/fusion/actions/workflows/frontend.yml/badge.svg)
 [![codecov](https://codecov.io/gh/vaadin/fusion/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/fusion)
 
-Vaadin Fusion
+Hilla
 ======
-*[Vaadin Fusion](https://vaadin.com/fusion) is a TypeScript and Java web framework for building modern web applications. You can create UIs in TypeScript and connect to any backend through endpoints written in Java.*
+*[Hilla](https://vaadin.com/fusion) is a TypeScript and Java web framework for building modern web applications. You can create UIs in TypeScript and connect to any backend through endpoints written in Java.*
 
-**For instructions about developing web applications with Vaadin Fusion**, please refer to our [documentation site](https://vaadin.com/docs/latest/fusion/overview).
+**For instructions about developing web applications with Hilla**, please refer to our [documentation site](https://vaadin.com/docs/latest/fusion/overview).
 
-Join the Vaadin Fusion community chat in https://vaad.in/fusion
+Join the Hilla community chat in https://vaad.in/fusion
 
-**Note**: Currently the code of Vaadin Fusion is hosted at https://github.com/vaadin/flow together with the Flow framework. The Fusion-only code will be ported to this repository in the near future. Tickets can already be created in this repository.
+**Note**: Currently the code of Hilla is hosted at https://github.com/vaadin/flow together with the Flow framework. The Hilla-only code will be ported to this repository in the near future. Tickets can already be created in this repository.
 
 ## TypeScript
 
-The collection of frontend and NodeJS utilities used by Fusion.
+The collection of frontend and NodeJS utilities used by Hilla.
 
 | Package                 | Status |
 |-------------------------|--------|
@@ -26,8 +26,7 @@ The collection of frontend and NodeJS utilities used by Fusion.
 
 You can download the project and run tests using the following commands:
 ```bash
-$ git clone https://github.com/vaadin/fusion.git
-$ cd fusion
+$ git clone https://github.com/vaadin/hilla.git
 $ npm install
 $ npm run build
 $ npm test
