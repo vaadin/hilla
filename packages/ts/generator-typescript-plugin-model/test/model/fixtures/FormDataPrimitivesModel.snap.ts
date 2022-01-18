@@ -1,6 +1,6 @@
 import { _getPropertyModel as _getPropertyModel_1, BooleanModel as BooleanModel_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@vaadin/form";
 import type FormDataPrimitives_1 from "./FormDataPrimitives";
-export default class FormDataPrimitivesModel<T extends FormDataPrimitives_1 = FormDataPrimitives_1> extends ObjectModel_1<T> {
+class FormDataPrimitivesModel<T extends FormDataPrimitives_1 = FormDataPrimitives_1> extends ObjectModel_1<T> {
     static createEmptyValue: () => FormDataPrimitives_1;
     get stringProp(): StringModel_1 {
         return this[_getPropertyModel_1]("stringProp", StringModel_1, [true]) as StringModel_1;
@@ -36,3 +36,4 @@ export default class FormDataPrimitivesModel<T extends FormDataPrimitives_1 = Fo
         return this[_getPropertyModel_1]("booleanProp", BooleanModel_1, [false]) as BooleanModel_1;
     }
 }
+export default FormDataPrimitivesModel;

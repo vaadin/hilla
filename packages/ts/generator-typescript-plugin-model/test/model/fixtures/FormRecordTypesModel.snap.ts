@@ -5,7 +5,7 @@ import type FormOptionalTypes_1 from "./FormOptionalTypes";
 import FormOptionalTypesModel_1 from "./FormOptionalTypesModel";
 import type FormRecordTypes_1 from "./FormRecordTypes";
 import FormRecordTypesModel_1 from "./FormRecordTypesModel";
-export default class FormRecordTypesModel<T extends FormRecordTypes_1 = FormRecordTypes_1> extends ObjectModel_1<T> {
+class FormRecordTypesModel<T extends FormRecordTypes_1 = FormRecordTypes_1> extends ObjectModel_1<T> {
     static createEmptyValue: () => FormRecordTypes_1;
     get stringMap(): ObjectModel_1<Record<string, string>> {
         return this[_getPropertyModel_1]("stringMap", ObjectModel_1, [true]) as ObjectModel_1<Record<string, string>>;
@@ -26,3 +26,4 @@ export default class FormRecordTypesModel<T extends FormRecordTypes_1 = FormReco
         return this[_getPropertyModel_1]("objectMap", ObjectModel_1, [true]) as ObjectModel_1<Record<string, unknown>>;
     }
 }
+export default FormRecordTypesModel;
