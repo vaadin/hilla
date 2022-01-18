@@ -1,4 +1,4 @@
-import com.vaadin.fusion.Endpoint;
+import dev.hilla.Endpoint;
 
 /**
  * A test class.
