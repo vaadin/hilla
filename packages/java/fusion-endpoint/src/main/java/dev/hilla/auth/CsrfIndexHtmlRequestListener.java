@@ -32,7 +32,7 @@ import com.vaadin.flow.shared.ApplicationConstants;
 /**
  * An index HTML request listener that generates and sends a token for
  * Cross-Site Request Forgery protection (Double Submit Cookie pattern) of
- * Fusion endpoints.
+ * endpoints.
  *
  * Sets a JS readable cookie in the response with the CSRF token, if such a
  * cookie was not present in request.

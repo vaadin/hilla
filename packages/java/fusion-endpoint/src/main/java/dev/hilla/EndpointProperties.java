@@ -24,19 +24,19 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties("vaadin.endpoint")
-public class FusionEndpointProperties {
+public class EndpointProperties {
 
     @Value("${vaadin.endpoint.prefix:/connect}")
-    private String vaadinEndpointPrefix;
+    private String endpointPrefix;
 
     /**
      * Customize the prefix for all Vaadin endpoints. See default value in the
-     * {@link FusionEndpointProperties#vaadinEndpointPrefix} field annotation.
+     * {@link EndpointProperties#endpointPrefix} field annotation.
      *
      * @return prefix that should be used to access any Vaadin endpoint
      */
-    public String getVaadinEndpointPrefix() {
-        return vaadinEndpointPrefix;
+    public String getEndpointPrefix() {
+        return endpointPrefix;
     }
 
 }

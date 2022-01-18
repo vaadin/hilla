@@ -21,7 +21,7 @@ import java.time.ZonedDateTime;
 import dev.hilla.Endpoint;
 
 @Endpoint
-public class FusionEndpoints {
+public class TestEndpoints {
 
     public BeanWithZonedDateTimeField getBeanWithZonedDateTimeField() {
         return new BeanWithZonedDateTimeField();

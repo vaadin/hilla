@@ -34,8 +34,8 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import dev.hilla.FusionController;
-import dev.hilla.FusionControllerMockBuilder;
+import dev.hilla.EndpointController;
+import dev.hilla.EndpointControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-@Import({ FusionEndpoints.class, MyRestController.class })
+@Import({ TestEndpoints.class, MyRestController.class })
 public class EndpointWithRestControllerTest {
 
     private MockMvc mockMvcForEndpoint;
@@ -64,8 +64,8 @@ public class EndpointWithRestControllerTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
-        FusionControllerMockBuilder controllerMockBuilder = new FusionControllerMockBuilder();
-        FusionController controller = controllerMockBuilder
+        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+        EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
         mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
                 .build();
@@ -133,7 +133,7 @@ public class EndpointWithRestControllerTest {
     }
 
     private String callEndpointMethod(String methodName) throws Exception {
-        String endpointName = FusionEndpoints.class.getSimpleName();
+        String endpointName = TestEndpoints.class.getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)

@@ -55,13 +55,13 @@ public class NodeTasksEndpointTest {
         builder = new Builder(mockLookup, dir, TARGET)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
-                .withFusionJavaSourceFolder(src)
-                .withFusionGeneratedOpenAPIJson(json)
-                .withFusionClientAPIFolder(new File(dir, "api"));
+                .withEndpointSourceFolder(src)
+                .withEndpointGeneratedOpenAPIFile(json)
+                .withFrontendGeneratedFolder(new File(dir, "api"));
     }
 
     @Test
-    public void should_GenerateFusionFiles() throws Exception {
+    public void should_GenerateEndpointFiles() throws Exception {
         builder.build().execute();
 
         Arrays.asList(

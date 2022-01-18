@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.server.frontend.FallibleCommand;
 
 /**
- * Abstract class for Vaadin Fusion related generators.
+ * Abstract class for endpoint related generators.
  */
-abstract class AbstractTaskFusionGenerator implements FallibleCommand {
+abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private final File applicationProperties;
 
-    AbstractTaskFusionGenerator(File applicationProperties) {
+    AbstractTaskEndpointGenerator(File applicationProperties) {
         this.applicationProperties = applicationProperties;
     }
 
@@ -58,6 +58,6 @@ abstract class AbstractTaskFusionGenerator implements FallibleCommand {
     }
 
     Logger log() {
-        return LoggerFactory.getLogger(AbstractTaskFusionGenerator.class);
+        return LoggerFactory.getLogger(AbstractTaskEndpointGenerator.class);
     }
 }

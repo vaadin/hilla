@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 
-import dev.hilla.auth.FusionAccessChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -37,13 +37,13 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public class EndpointUtil {
 
     @Autowired
-    private FusionEndpointProperties endpointProperties;
+    private EndpointProperties endpointProperties;
 
     @Autowired
     private EndpointRegistry registry;
 
     @Autowired
-    private FusionAccessChecker accessChecker;
+    private EndpointAccessChecker accessChecker;
 
     /**
      * Checks if the request is for an endpoint.
@@ -64,8 +64,8 @@ public class EndpointUtil {
     private Optional<Method> getEndpoint(HttpServletRequest request) {
         PathPatternParser pathParser = new PathPatternParser();
         PathPattern pathPattern = pathParser
-                .parse(endpointProperties.getVaadinEndpointPrefix()
-                        + FusionController.ENDPOINT_METHODS);
+                .parse(endpointProperties.getEndpointPrefix()
+                        + EndpointController.ENDPOINT_METHODS);
         RequestPath requestPath = ServletRequestPathUtils
                 .parseAndCache(request);
         PathContainer pathWithinApplication = requestPath

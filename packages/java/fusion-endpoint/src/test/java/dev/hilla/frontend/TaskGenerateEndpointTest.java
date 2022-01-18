@@ -3,7 +3,7 @@ package dev.hilla.frontend;
 import java.io.File;
 import java.io.IOException;
 
-import com.vaadin.flow.server.frontend.TaskGenerateFusion;
+import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -16,12 +16,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TaskGenerateFusionTest {
+public class TaskGenerateEndpointTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private TaskGenerateFusion taskGenerateFusion;
+    private TaskGenerateEndpoint taskGenerateFusion;
     private File properties;
     private File outputDirectory;
     private File openApiJson;
@@ -46,8 +46,8 @@ public class TaskGenerateFusionTest {
         assertFalse(ts2.exists());
         assertFalse(client.exists());
 
-        taskGenerateFusion = new TaskGenerateFusionImpl(properties, openApiJson,
-                outputDirectory, frontendDirectory);
+        taskGenerateFusion = new TaskGenerateEndpointImpl(properties,
+                openApiJson, outputDirectory, frontendDirectory);
         taskGenerateFusion.execute();
 
         assertTrue(ts1.exists());
@@ -76,8 +76,8 @@ public class TaskGenerateFusionTest {
         assertFalse(client.exists());
         assertTrue(customConnectClient.exists());
 
-        taskGenerateFusion = new TaskGenerateFusionImpl(properties, openApiJson,
-                outputDirectory, frontendDirectory);
+        taskGenerateFusion = new TaskGenerateEndpointImpl(properties,
+                openApiJson, outputDirectory, frontendDirectory);
         taskGenerateFusion.execute();
 
         assertTrue(ts1.exists());

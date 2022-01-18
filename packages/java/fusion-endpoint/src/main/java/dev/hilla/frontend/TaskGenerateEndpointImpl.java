@@ -19,21 +19,21 @@ import java.io.File;
 import java.util.Objects;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateFusion;
+import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import dev.hilla.generator.MainGenerator;
 import dev.hilla.generator.ClientAPIGenerator;
 
 /**
  * Starts the generation of TS files for endpoints.
  */
-public class TaskGenerateFusionImpl extends AbstractTaskFusionGenerator
-        implements TaskGenerateFusion {
+public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
+        implements TaskGenerateEndpoint {
 
     private final File frontendDirectory;
     private final File openApi;
     private final File outputFolder;
 
-    TaskGenerateFusionImpl(File applicationProperties, File openApi,
+    TaskGenerateEndpointImpl(File applicationProperties, File openApi,
             File outputFolder, File frontendDirectory) {
         super(applicationProperties);
         Objects.requireNonNull(openApi,

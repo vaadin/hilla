@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-public class FusionEndpointsValidatorTest {
+public class EndpointsValidatorTest {
 
     @Endpoint
     public static class WithConnectEndpoint {
@@ -36,7 +36,7 @@ public class FusionEndpointsValidatorTest {
 
     @Test
     public void should_start_when_spring_in_classpath() throws Exception {
-        FusionEndpointsValidator validator = new FusionEndpointsValidator();
+        EndpointsValidator validator = new EndpointsValidator();
         classes.add(WithConnectEndpoint.class);
         validator.process(classes, servletContext);
     }
@@ -44,7 +44,7 @@ public class FusionEndpointsValidatorTest {
     @Test
     public void should_trow_when_spring_not_in_classpath() throws Exception {
         exception.expect(ServletException.class);
-        FusionEndpointsValidator validator = new FusionEndpointsValidator();
+        EndpointsValidator validator = new EndpointsValidator();
         validator.setClassToCheck("foo.bar.Baz");
         classes.add(WithConnectEndpoint.class);
         validator.process(classes, servletContext);
@@ -54,14 +54,14 @@ public class FusionEndpointsValidatorTest {
     @Test
     public void should_start_when_no_endpoints_and_spring_not_in_classpath()
             throws Exception {
-        FusionEndpointsValidator validator = new FusionEndpointsValidator();
+        EndpointsValidator validator = new EndpointsValidator();
         classes.add(WithoutConnectEndpoint.class);
         validator.process(classes, servletContext);
     }
 
     @Test
     public void should_start_when_CDI_environment() throws Exception {
-        FusionEndpointsValidator validator = new FusionEndpointsValidator();
+        EndpointsValidator validator = new EndpointsValidator();
         classes = null;
         validator.process(classes, servletContext);
     }

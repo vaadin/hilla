@@ -63,8 +63,8 @@ import dev.hilla.generator.MainGenerator;
 import dev.hilla.generator.OpenAPIObjectGenerator;
 
 /**
- * Vaadin fusion JavaScript generator implementation for swagger-codegen. Some
- * parts of the implementation are copied from
+ * Vaadin JavaScript generator implementation for swagger-codegen. Some parts of
+ * the implementation are copied from
  * {@link io.swagger.codegen.languages.JavascriptClientCodegen}
  */
 public class CodeGenerator extends AbstractTypeScriptClientCodegen {

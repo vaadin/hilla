@@ -27,7 +27,7 @@ import dev.hilla.generator.OpenAPISpecGenerator;
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
  */
-public class TaskGenerateOpenAPIImpl extends AbstractTaskFusionGenerator
+public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
 
     private final File javaSourceFolder;

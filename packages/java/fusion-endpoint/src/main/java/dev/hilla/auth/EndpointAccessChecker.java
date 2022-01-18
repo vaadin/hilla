@@ -67,7 +67,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
  * </pre>
  *
  */
-public class FusionAccessChecker {
+public class EndpointAccessChecker {
 
     public static final String ACCESS_DENIED_MSG = "Access denied";
 
@@ -82,7 +82,7 @@ public class FusionAccessChecker {
      * @param accessAnnotationChecker
      *            the access checker to use
      */
-    public FusionAccessChecker(
+    public EndpointAccessChecker(
             AccessAnnotationChecker accessAnnotationChecker) {
         this.accessAnnotationChecker = accessAnnotationChecker;
     }

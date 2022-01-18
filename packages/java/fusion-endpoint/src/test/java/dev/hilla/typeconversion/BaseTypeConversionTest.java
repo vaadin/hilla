@@ -15,8 +15,8 @@
  */
 package dev.hilla.typeconversion;
 
-import dev.hilla.FusionController;
-import dev.hilla.FusionControllerMockBuilder;
+import dev.hilla.EndpointController;
+import dev.hilla.EndpointControllerMockBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-@Import(FusionTypeConversionEndpoints.class)
+@Import(TestTypeConversionEndpoints.class)
 public abstract class BaseTypeConversionTest {
 
     private MockMvc mockMvc;
@@ -51,8 +51,8 @@ public abstract class BaseTypeConversionTest {
     public void setUp() {
         appConfig = Mockito.mock(ApplicationConfiguration.class);
 
-        FusionControllerMockBuilder controllerMockBuilder = new FusionControllerMockBuilder();
-        FusionController controller = controllerMockBuilder
+        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+        EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Assert.assertNotEquals(null, applicationContext);
@@ -83,8 +83,7 @@ public abstract class BaseTypeConversionTest {
 
     protected MockHttpServletResponse callMethod(String methodName,
             String requestValue) throws Exception {
-        String endpointName = FusionTypeConversionEndpoints.class
-                .getSimpleName();
+        String endpointName = TestTypeConversionEndpoints.class.getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         String body = String.format("{\"value\": %s}", requestValue);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)

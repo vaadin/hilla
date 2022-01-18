@@ -20,7 +20,7 @@ import javax.servlet.ServletContext;
 import java.lang.reflect.Method;
 
 import dev.hilla.auth.CsrfChecker;
-import dev.hilla.auth.FusionAccessChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
@@ -32,29 +32,29 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 
 /**
- * A configuration class for customizing the {@link FusionController} class.
+ * A configuration class for customizing the {@link EndpointController} class.
  */
 @Configuration
-public class FusionControllerConfiguration {
-    private final FusionEndpointProperties fusionEndpointProperties;
+public class EndpointControllerConfiguration {
+    private final EndpointProperties endpointProperties;
 
     /**
      * Initializes the endpoint configuration.
      *
-     * @param fusionEndpointProperties
+     * @param endpointProperties
      *            Vaadin ednpoint properties
      */
-    public FusionControllerConfiguration(
-            FusionEndpointProperties fusionEndpointProperties) {
-        this.fusionEndpointProperties = fusionEndpointProperties;
+    public EndpointControllerConfiguration(
+            EndpointProperties endpointProperties) {
+        this.endpointProperties = endpointProperties;
     }
 
     /**
-     * Registers {@link FusionController} to use
-     * {@link FusionEndpointProperties#getVaadinEndpointPrefix()} as a prefix
-     * for all Vaadin endpoints.
+     * Registers {@link EndpointController} to use
+     * {@link EndpointProperties#getEndpointPrefix()} as a prefix for all Vaadin
+     * endpoints.
      *
-     * @return updated configuration for {@link FusionController}
+     * @return updated configuration for {@link EndpointController}
      */
     @Bean
     public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
@@ -73,7 +73,7 @@ public class FusionControllerConfiguration {
                         // version in `flow-server` and in `vaadin-spring` is
                         // the same.
 
-                        if (FusionController.class
+                        if (EndpointController.class
                                 .equals(method.getDeclaringClass())) {
                             mapping = prependEndpointPrefixUrl(mapping);
                         }
@@ -97,7 +97,7 @@ public class FusionControllerConfiguration {
     private RequestMappingInfo prependEndpointPrefixUrl(
             RequestMappingInfo mapping) {
         RequestMappingInfo.Builder prefixMappingBuilder = RequestMappingInfo
-                .paths(fusionEndpointProperties.getVaadinEndpointPrefix());
+                .paths(endpointProperties.getEndpointPrefix());
         if (mapping.getPatternsCondition() == null) {
             // `getPatternsCondition()` and `getPathPatternsCondition()` are
             // mutually exclusive: only one of them is active, the other
@@ -131,16 +131,16 @@ public class FusionControllerConfiguration {
     }
 
     /**
-     * Registers a default {@link FusionAccessChecker} bean instance.
+     * Registers a default {@link EndpointAccessChecker} bean instance.
      *
      * @param accessAnnotationChecker
      *            the access controlks checker to use
      * @return the default Vaadin endpoint access checker bean
      */
     @Bean
-    public FusionAccessChecker accessChecker(
+    public EndpointAccessChecker accessChecker(
             AccessAnnotationChecker accessAnnotationChecker) {
-        return new FusionAccessChecker(accessAnnotationChecker);
+        return new EndpointAccessChecker(accessAnnotationChecker);
     }
 
     /**

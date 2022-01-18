@@ -27,15 +27,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unused")
-public class FusionAccessCheckerTest {
+public class EndpointAccessCheckerTest {
     private static final String ROLE_USER = "ROLE_USER";
 
-    private FusionAccessChecker checker;
+    private EndpointAccessChecker checker;
     private HttpServletRequest requestMock;
 
     @Before
     public void before() {
-        checker = new FusionAccessChecker(new AccessAnnotationChecker());
+        checker = new EndpointAccessChecker(new AccessAnnotationChecker());
         requestMock = mock(HttpServletRequest.class);
         when(requestMock.getUserPrincipal()).thenReturn(mock(Principal.class));
         when(requestMock.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
@@ -362,7 +362,7 @@ public class FusionAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertEquals(FusionAccessChecker.ACCESS_DENIED_MSG_DEV_MODE,
+            assertEquals(EndpointAccessChecker.ACCESS_DENIED_MSG_DEV_MODE,
                     accessDeniedMessage);
             assertTrue(accessDeniedMessage
                     .contains(PermitAll.class.getSimpleName()));
@@ -393,7 +393,7 @@ public class FusionAccessCheckerTest {
             }
             Method method = Test.class.getMethod("test");
             String accessDeniedMessage = checker.check(method, requestMock);
-            assertEquals(FusionAccessChecker.ACCESS_DENIED_MSG,
+            assertEquals(EndpointAccessChecker.ACCESS_DENIED_MSG,
                     accessDeniedMessage);
         } finally {
             CurrentInstance.clearAll();

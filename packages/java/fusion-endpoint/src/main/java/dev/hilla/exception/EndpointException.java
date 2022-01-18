@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import dev.hilla.FusionController;
+import dev.hilla.EndpointController;
 
 /**
  * An exception that is intended to be thrown by any Vaadin endpoint method to
@@ -141,7 +141,7 @@ public class EndpointException extends RuntimeException {
 
     /**
      * Creates a map with the serialization data to be sent to the client when
-     * the exception thrown is processed by {@link FusionController}. The
+     * the exception thrown is processed by {@link EndpointController}. The
      * following data will be sent to the client:
      * <ul>
      * <li>exception type: either the original exception type or

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import dev.hilla.auth.CsrfChecker;
-import dev.hilla.auth.FusionAccessChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,9 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class, EndpointUtil.class,
-        FusionEndpointProperties.class, EndpointRegistry.class,
-        EndpointNameChecker.class, FusionAccessChecker.class, CsrfChecker.class,
-        AccessAnnotationChecker.class })
+        EndpointProperties.class, EndpointRegistry.class,
+        EndpointNameChecker.class, EndpointAccessChecker.class,
+        CsrfChecker.class, AccessAnnotationChecker.class })
 @RunWith(SpringRunner.class)
 public class EndpointUtilTest {
 

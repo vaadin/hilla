@@ -156,7 +156,7 @@ public class CsrfChecker {
     }
 
     private static Logger getLogger() {
-        return LoggerFactory.getLogger(FusionAccessChecker.class);
+        return LoggerFactory.getLogger(EndpointAccessChecker.class);
     }
 
 }

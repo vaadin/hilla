@@ -55,7 +55,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.hilla.Endpoint;
 import dev.hilla.EndpointExposed;
 import dev.hilla.ExplicitNullableTypeChecker;
-import dev.hilla.auth.FusionAccessChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 import dev.hilla.endpointransfermapper.EndpointTransferMapper;
 import dev.hilla.generator.OpenAPIObjectGenerator;
 import dev.hilla.mappedtypes.Pageable;
@@ -110,7 +110,7 @@ public abstract class AbstractEndpointGenerationTest
      */
     private static final List<Class> DENY_LIST_CHECKING_ABSOLUTE_PATH = Arrays
             .asList(Model.class, ParentModel.class, GrandParentModel.class);
-    private static final FusionAccessChecker accessChecker = new FusionAccessChecker(
+    private static final EndpointAccessChecker accessChecker = new EndpointAccessChecker(
             new AccessAnnotationChecker());
     private final Set<String> schemaReferences = new HashSet<>();
 
