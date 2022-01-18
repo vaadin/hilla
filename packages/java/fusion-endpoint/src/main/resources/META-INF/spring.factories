@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=FusionController
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=dev.hilla.FusionController
