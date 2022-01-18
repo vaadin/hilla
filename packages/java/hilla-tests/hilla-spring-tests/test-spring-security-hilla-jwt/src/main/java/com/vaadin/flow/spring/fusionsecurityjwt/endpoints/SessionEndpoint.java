@@ -3,7 +3,7 @@ package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.WrappedSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.fusion.Endpoint;
+import dev.hilla.Endpoint;
 
 @Endpoint
 @AnonymousAllowed

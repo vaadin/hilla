@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.spring.fusionsecurity.service.BankService;
-import com.vaadin.fusion.Endpoint;
+import dev.hilla.Endpoint;
 
 @Endpoint
 @PermitAll
