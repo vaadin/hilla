@@ -5,20 +5,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import dev.hilla.auth.CsrfChecker;
-import dev.hilla.auth.EndpointAccessChecker;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import dev.hilla.auth.CsrfChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class, EndpointUtil.class,
         EndpointProperties.class, EndpointRegistry.class,
@@ -70,10 +69,10 @@ public class EndpointUtilTest {
 
     @Test
     public void endpointWithContextPath() {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getRequestURI()).thenReturn(
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI(
                 "/context/connect/AnonymousAllowedEndpoint/noAnnotation");
-        Mockito.when(request.getContextPath()).thenReturn("/context");
+        request.setContextPath("/context");
         Assert.assertTrue(endpointUtil.isEndpointRequest(request));
     }
 
@@ -103,8 +102,8 @@ public class EndpointUtilTest {
     }
 
     private void verifyEndpointPathIsAnonymous(String path, boolean expected) {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getRequestURI()).thenReturn(path);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI(path);
         Assert.assertTrue(endpointUtil.isEndpointRequest(request));
         Assert.assertEquals(
                 "Expected endpoint " + path + " to "
@@ -122,16 +121,15 @@ public class EndpointUtilTest {
     }
 
     private void testPath(String path, boolean expected) {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getPathInfo()).thenReturn(path);
-        Mockito.when(request.getRequestURI()).thenReturn(path);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setPathInfo(path);
+        request.setRequestURI(path);
         Assert.assertEquals(expected, endpointUtil.isEndpointRequest(request));
 
-        request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getServletPath()).thenReturn(path);
-        Mockito.when(request.getRequestURI()).thenReturn(path);
+        request = new MockHttpServletRequest();
+        request.setServletPath(path);
+        request.setRequestURI(path);
         Assert.assertEquals(expected, endpointUtil.isEndpointRequest(request));
-
     }
 
 }
