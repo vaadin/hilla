@@ -32,119 +32,73 @@ public class ValidationEndpoint {
 
     public static class ValidationData {
         @AssertFalse
-        public String getAssertFalse() {
-            return null;
-        }
+        private String assertFalse;
 
         @AssertTrue
-        public String getAssertTrue() {
-            return null;
-        }
+        private String assertTrue;
 
         @DecimalMax(value = "0.01", inclusive = false)
-        public double getDecimalMax() {
-            return 0;
-        }
+        private double decimalMax;
 
         @DecimalMin("0.01")
-        public double getDecimalMin() {
-            return 0;
-        }
+        private double decimalMin;
 
         @Digits(integer = 5, fraction = 2)
-        public String getDigits() {
-            return null;
-        }
+        private String digits;
 
         @Email(message = "foo")
-        public String getEmail() {
-            return null;
-        }
+        private String email;
 
         @Future
-        public LocalDate getFuture() {
-            return null;
-        }
+        private LocalDate future;
 
         @Null
-        public String getIsNull() {
-            return null;
-        }
+        private String isNull;
 
         @NotEmpty
-        public List<String> getList() {
-            return null;
-        }
+        private List<String> list;
 
         @Max(2)
-        public Integer getMax() {
-            return null;
-        }
+        private Integer max;
 
         @Min(value = 1, message = "foo")
-        public Integer getMin() {
-            return null;
-        }
+        private Integer min;
 
         @Negative
-        public int getNegative() {
-            return 0;
-        }
+        private int negative;
 
         @NegativeOrZero
-        public int getNegativeOrZero() {
-            return 0;
-        }
+        private int negativeOrZero;
 
         @NotBlank
-        public String getNotBlank() {
-            return null;
-        }
+        private String notBlank;
 
         @NotNull
         @NotEmpty
-        public String getNotEmpty() {
-            return null;
-        }
+        private String notEmpty;
 
         @NotNull
-        public String getNotNull() {
-            return null;
-        }
+        private String notNull;
 
         @NotNull
-        public ValidationData getNotNullEntity() {
-            return null;
-        }
+        private ValidationData notNullEntity;
 
         @Past
-        public LocalDate getPast() {
-            return null;
-        }
+        private LocalDate past;
 
         @Pattern(regexp = "\\d+\\..+")
-        public String getPattern() {
-            return null;
-        }
+        private String pattern;
 
         @Positive
-        public int getPositive() {
-            return 0;
-        }
+        private int positive;
 
         @PositiveOrZero
-        public int getPositiveOrZero() {
-            return 0;
-        }
+        private int positiveOrZero;
 
         @Size
-        public String getSize() {
-            return null;
-        }
+        private String size;
 
         @Size(min = 1)
-        public String getSize1() {
-            return null;
-        }
+        private String size1;
     }
 }

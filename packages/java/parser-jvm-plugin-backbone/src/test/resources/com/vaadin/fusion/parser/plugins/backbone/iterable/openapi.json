@@ -182,7 +182,13 @@
   "components": {
     "schemas": {
       "com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       }
     }
   }

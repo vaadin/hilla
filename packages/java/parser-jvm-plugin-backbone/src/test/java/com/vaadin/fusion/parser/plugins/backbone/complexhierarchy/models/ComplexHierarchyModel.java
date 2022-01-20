@@ -17,7 +17,5 @@
 package com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models;
 
 public class ComplexHierarchyModel extends ComplexHierarchyParentModel {
-    public String getName() {
-        return "ComplexHierarchyModel";
-    }
+    private String name;
 }
