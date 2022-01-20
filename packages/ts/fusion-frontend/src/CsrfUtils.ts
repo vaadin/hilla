@@ -7,10 +7,10 @@ export const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
 /** @internal */
 export const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
 
-function extractContentFromMetaTag(element: Element | null): string | undefined {
+function extractContentFromMetaTag(element: HTMLMetaElement | null): string | undefined {
   if (element) {
-    const value = (element as HTMLMetaElement).content;
-    if (value && value.toLocaleLowerCase() !== 'undefined') {
+    const value = element.content;
+    if (value && value.toLowerCase() !== 'undefined') {
       return value;
     }
   }
@@ -19,7 +19,7 @@ function extractContentFromMetaTag(element: Element | null): string | undefined 
 
 /** @internal */
 function getSpringCsrfHeaderFromMetaTag(doc: Document): string | undefined {
-  const csrfHeader = doc.head.querySelector('meta[name="_csrf_header"]');
+  const csrfHeader = doc.head.querySelector<HTMLMetaElement>('meta[name="_csrf_header"]');
   return extractContentFromMetaTag(csrfHeader);
 }
 
