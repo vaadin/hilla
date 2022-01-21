@@ -10,7 +10,8 @@ public class PluginsToolset {
         this.plugins = plugins;
     }
 
-    public Optional<Integer> comparePluginOrders(Plugin current, Plugin target) {
+    public Optional<Integer> comparePluginOrders(Plugin current,
+            Plugin target) {
         if (!plugins.contains(current) || !plugins.contains(target)) {
             return Optional.empty();
         }
@@ -26,13 +27,12 @@ public class PluginsToolset {
 
     public Optional<Integer> comparePluginOrders(
             Class<? extends Plugin> current, Plugin target) {
-        return findPluginByClass(current).flatMap(
-                plugin -> comparePluginOrders(plugin, target));
+        return findPluginByClass(current)
+                .flatMap(plugin -> comparePluginOrders(plugin, target));
     }
 
     public Optional<Integer> comparePluginOrders(
-            Class<? extends Plugin> current,
-            Class<? extends Plugin> target) {
+            Class<? extends Plugin> current, Class<? extends Plugin> target) {
         var currentInstance = findPluginByClass(current);
         var targetInstance = findPluginByClass(target);
 
