@@ -284,6 +284,25 @@ describe('ConnectClient', () => {
       }
     });
 
+    it('should set header for preventing CSRF using Fusion csrf when having Spring csrf meta tags with string undefined', async () => {
+      try {
+        // happens when spring csrf is disabled
+        // https://github.com/vaadin/hilla/issues/185
+        setupSpringCsrfMetaTags('undefined', 'undefined');
+
+        const csrfToken = 'foo';
+        setCookie('csrfToken', csrfToken);
+
+        await client.call('FooEndpoint', 'fooMethod');
+
+        expect(fetchMock.lastOptions()?.headers).to.deep.include({
+          [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
+        });
+      } finally {
+        clearSpringCsrfMetaTags();
+      }
+    });
+
     it('should resolve to response JSON data', async () => {
       const data = await client.call('FooEndpoint', 'fooMethod');
       expect(data).to.deep.equal({ fooData: 'foo' });
