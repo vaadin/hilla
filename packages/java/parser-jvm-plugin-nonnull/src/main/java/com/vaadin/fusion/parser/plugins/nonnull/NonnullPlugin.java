@@ -23,7 +23,8 @@ public final class NonnullPlugin implements Plugin {
         var toolset = new PluginsToolset(
                 storage.getParserConfig().getPlugins());
 
-        if (!toolset.hasPluginBefore(this, BackbonePlugin.class)) {
+        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
+                .map(result -> result <= 0).orElse(true)) {
             throw new PluginException(
                     "NonnullPlugin should be run after BackbonePlugin");
         }

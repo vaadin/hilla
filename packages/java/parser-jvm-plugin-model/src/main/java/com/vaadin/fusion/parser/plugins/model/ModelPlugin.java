@@ -21,7 +21,8 @@ public final class ModelPlugin implements Plugin {
         var toolset = new PluginsToolset(
                 storage.getParserConfig().getPlugins());
 
-        if (!toolset.hasPluginBefore(this, BackbonePlugin.class)) {
+        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
+                .map(result -> result <= 0).orElse(true)) {
             throw new PluginException(
                     "ModelPlugin should be run after BackbonePlugin");
         }

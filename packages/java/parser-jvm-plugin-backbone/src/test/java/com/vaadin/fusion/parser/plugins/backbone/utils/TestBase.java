@@ -17,7 +17,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class TestBase {
     protected final ObjectMapper mapper = Json.mapper();
-    protected final ResourceLoader resourceLoader;
+    protected ResourceLoader resourceLoader;
     protected Path targetDir;
 
     {
