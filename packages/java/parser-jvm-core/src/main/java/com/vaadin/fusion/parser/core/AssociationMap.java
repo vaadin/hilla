@@ -1,24 +1,47 @@
-package com.vaadin.fusion.parser.plugins.backbone;
+package com.vaadin.fusion.parser.core;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import com.vaadin.fusion.parser.core.RelativeClassInfo;
-import com.vaadin.fusion.parser.core.RelativeFieldInfo;
-import com.vaadin.fusion.parser.core.RelativeMethodInfo;
-import com.vaadin.fusion.parser.core.RelativeMethodParameterInfo;
-import com.vaadin.fusion.parser.core.RelativeTypeSignature;
-
 import io.swagger.v3.oas.models.media.Schema;
 
-public class AssociationMap {
+public final class AssociationMap {
     private final Map<Schema<?>, RelativeClassInfo> entities = new IdentityHashMap<>();
     private final Map<Schema<?>, RelativeFieldInfo> fields = new IdentityHashMap<>();
     private final Map<Schema<?>, RelativeMethodInfo> methods = new IdentityHashMap<>();
     private final Map<Schema<?>, RelativeMethodParameterInfo> parameters = new IdentityHashMap<>();
     private final Reversed reversed = new Reversed();
     private final Map<Schema<?>, RelativeTypeSignature> types = new IdentityHashMap<>();
+
+    AssociationMap() {
+    }
+
+    public void addEntity(Schema<?> schema, RelativeClassInfo entity) {
+        entities.put(schema, entity);
+        reversed.entities.put(entity, schema);
+    }
+
+    public void addField(Schema<?> schema, RelativeFieldInfo field) {
+        fields.put(schema, field);
+        reversed.fields.put(field, schema);
+    }
+
+    public void addMethod(Schema<?> schema, RelativeMethodInfo method) {
+        methods.put(schema, method);
+        reversed.methods.put(method, schema);
+    }
+
+    public void addParameter(Schema<?> schema,
+            RelativeMethodParameterInfo parameter) {
+        parameters.put(schema, parameter);
+        reversed.parameters.put(parameter, schema);
+    }
+
+    public void addType(Schema<?> schema, RelativeTypeSignature signature) {
+        types.put(schema, signature);
+        reversed.types.put(signature, schema);
+    }
 
     public Map<Schema<?>, RelativeClassInfo> getEntities() {
         return Collections.unmodifiableMap(entities);
@@ -42,31 +65,6 @@ public class AssociationMap {
 
     public Reversed reversed() {
         return reversed;
-    }
-
-    void addEntity(Schema<?> schema, RelativeClassInfo entity) {
-        entities.put(schema, entity);
-        reversed.entities.put(entity, schema);
-    }
-
-    void addField(Schema<?> schema, RelativeFieldInfo field) {
-        fields.put(schema, field);
-        reversed.fields.put(field, schema);
-    }
-
-    void addMethod(Schema<?> schema, RelativeMethodInfo method) {
-        methods.put(schema, method);
-        reversed.methods.put(method, schema);
-    }
-
-    void addParameter(Schema<?> schema, RelativeMethodParameterInfo parameter) {
-        parameters.put(schema, parameter);
-        reversed.parameters.put(parameter, schema);
-    }
-
-    void addType(Schema<?> schema, RelativeTypeSignature signature) {
-        types.put(schema, signature);
-        reversed.types.put(signature, schema);
     }
 
     public static class Reversed {

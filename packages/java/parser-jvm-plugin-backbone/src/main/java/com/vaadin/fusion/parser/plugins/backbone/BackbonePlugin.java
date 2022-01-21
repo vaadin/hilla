@@ -9,7 +9,6 @@ import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 
 public final class BackbonePlugin implements Plugin {
-    public static final String ASSOCIATION_MAP = "BackbonePlugin/AssociationMap";
     private int order = 0;
 
     @Override
@@ -17,11 +16,10 @@ public final class BackbonePlugin implements Plugin {
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
         var model = storage.getOpenAPI();
-        var map = new AssociationMap();
+        var map = storage.getAssociationMap();
 
         new EndpointProcessor(endpoints, model, map).process();
         new EntityProcessor(entities, model, map).process();
-        storage.getPluginStorage().put(ASSOCIATION_MAP, map);
     }
 
     @Override

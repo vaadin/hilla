@@ -3,11 +3,11 @@ package com.vaadin.fusion.parser.plugins.nonnull;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.vaadin.fusion.parser.core.AssociationMap;
 import com.vaadin.fusion.parser.core.RelativeFieldInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodInfo;
 import com.vaadin.fusion.parser.core.RelativeMethodParameterInfo;
 import com.vaadin.fusion.parser.core.RelativeTypeSignature;
-import com.vaadin.fusion.parser.plugins.backbone.AssociationMap;
 
 import io.github.classgraph.AnnotationInfoList;
 import io.github.classgraph.ClassRefTypeSignature;

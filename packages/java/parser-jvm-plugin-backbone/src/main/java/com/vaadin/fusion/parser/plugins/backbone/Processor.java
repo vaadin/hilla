@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
+import com.vaadin.fusion.parser.core.AssociationMap;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 
 import io.swagger.v3.oas.models.OpenAPI;

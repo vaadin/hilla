@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.utils;
+package com.vaadin.fusion.parser.model.utils;
 
 import static com.vaadin.fusion.parser.testutils.OpenAPIAssertions.assertEquals;
 
