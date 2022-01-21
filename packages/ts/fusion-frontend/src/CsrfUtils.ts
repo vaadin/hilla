@@ -25,7 +25,7 @@ function getSpringCsrfHeaderFromMetaTag(doc: Document): string | undefined {
 
 /** @internal */
 function getSpringCsrfTokenFromMetaTag(doc: Document): string | undefined {
-  const csrfToken = doc.head.querySelector('meta[name="_csrf"]');
+  const csrfToken = doc.head.querySelector<HTMLMetaElement>('meta[name="_csrf"]');
   return extractContentFromMetaTag(csrfToken);
 }
 
