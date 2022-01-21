@@ -1,4 +1,4 @@
-package com.vaadin.fusion.parser.plugins.backbone.validation;
+package com.vaadin.fusion.parser.plugins.model.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -70,6 +70,11 @@
         <artifactId>parser-jvm-plugin-nonnull</artifactId>
         <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.vaadin.fusion</groupId>
+      <artifactId>parser-jvm-plugin-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

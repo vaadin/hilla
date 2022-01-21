@@ -4,12 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
-public interface Plugin extends Comparable<Plugin> {
-    @Override
-    default int compareTo(@Nonnull Plugin plugin) {
-        return Integer.compare(getOrder(), plugin.getOrder());
-    }
-
+public interface Plugin {
     void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage);

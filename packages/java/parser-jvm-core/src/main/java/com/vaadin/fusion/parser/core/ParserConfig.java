@@ -3,7 +3,7 @@ package com.vaadin.fusion.parser.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +24,8 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig extends AbstractParserConfig {
-    private final SortedSet<Plugin> plugins = new TreeSet<>();
+    private final SortedSet<Plugin> plugins = new TreeSet<>(
+            Comparator.comparingInt(Plugin::getOrder));
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
@@ -53,7 +54,7 @@ public final class ParserConfig extends AbstractParserConfig {
     @Nonnull
     @Override
     public SortedSet<Plugin> getPlugins() {
-        return Collections.unmodifiableSortedSet(plugins);
+        return plugins;
     }
 
     public enum OpenAPIFileType {

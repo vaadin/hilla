@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.ArrayRelativeTypeSignature;
+import com.vaadin.fusion.parser.core.AssociationMap;
 import com.vaadin.fusion.parser.core.ClassRefRelativeTypeSignature;
 import com.vaadin.fusion.parser.core.RelativeTypeArgument;
 import com.vaadin.fusion.parser.core.RelativeTypeParameter;
@@ -77,8 +78,6 @@ final class SchemaProcessor {
         }
 
         associationMap.addType(result, signature);
-
-        new ValidationSchemaProcessor(signature, result).process();
 
         return result;
     }

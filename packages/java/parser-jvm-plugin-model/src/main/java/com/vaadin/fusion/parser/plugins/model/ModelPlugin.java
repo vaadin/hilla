@@ -1,19 +1,17 @@
-package com.vaadin.fusion.parser.plugins.nonnull;
+package com.vaadin.fusion.parser.plugins.model;
 
 import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
 import com.vaadin.fusion.parser.core.Plugin;
-import com.vaadin.fusion.parser.core.PluginConfiguration;
 import com.vaadin.fusion.parser.core.PluginsToolset;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.SharedStorage;
 import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.utils.PluginException;
 
-public final class NonnullPlugin implements Plugin {
-    private Collection<String> annotations;
+public final class ModelPlugin implements Plugin {
     private int order = 100;
 
     @Override
@@ -26,10 +24,10 @@ public final class NonnullPlugin implements Plugin {
         if (toolset.comparePluginOrders(this, BackbonePlugin.class)
                 .map(result -> result <= 0).orElse(true)) {
             throw new PluginException(
-                    "NonnullPlugin should be run after BackbonePlugin");
+                    "ModelPlugin should be run after BackbonePlugin");
         }
 
-        new NonnullProcessor(annotations, storage.getAssociationMap())
+        new ValidationConstraint.Processor(storage.getAssociationMap())
                 .process();
     }
 
@@ -41,21 +39,5 @@ public final class NonnullPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    @Override
-    public void setConfig(PluginConfiguration config) {
-        if (config == null) {
-            return;
-        }
-
-        if (!(config instanceof NonnullPluginConfig)) {
-            throw new IllegalArgumentException(String.format(
-                    "Configuration for '%s' plugin should be an instance of '%s'",
-                    getClass().getName(), NonnullPluginConfig.class.getName()));
-        }
-
-        annotations = new NonnullPluginConfig.Processor(
-                (NonnullPluginConfig) config).process();
     }
 }

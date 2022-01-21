@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.vaadin.fusion.parser.core.AssociationMap;
 import com.vaadin.fusion.parser.core.ReflectedClass;
 import com.vaadin.fusion.parser.core.RelativeClassInfo;
 import com.vaadin.fusion.parser.core.RelativeFieldInfo;

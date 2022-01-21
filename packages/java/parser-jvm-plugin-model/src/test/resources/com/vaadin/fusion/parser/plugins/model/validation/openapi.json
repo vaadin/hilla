@@ -29,7 +29,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData"
+                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
                     }
                   ]
                 }
@@ -42,7 +42,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData": {
+      "com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData": {
         "type": "object",
         "properties": {
           "assertFalse": {
@@ -224,7 +224,7 @@
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.validation.ValidationEndpoint$ValidationData"
+                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
               }
             ]
           },
