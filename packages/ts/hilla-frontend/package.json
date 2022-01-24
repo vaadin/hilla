@@ -1,18 +1,17 @@
 {
-  "name": "@vaadin/fusion-frontend",
+  "name": "@hilla/frontend",
   "version": "0.0.17",
-  "description": "Fusion frontend utils",
+  "description": "Hilla frontend utils",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaadin/fusion.git",
-    "directory": "packages/ts/fusion-frontend"
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/hilla-frontend"
   },
   "keywords": [
-    "Vaadin",
-    "Fusion"
+    "Hilla"
   ],
   "scripts": {
     "build": "tsc --isolatedModules",
@@ -39,9 +38,9 @@
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/fusion/issues"
+    "url": "https://github.com/vaadin/hilla/issues"
   },
-  "homepage": "https://vaadin.com/fusion",
+  "homepage": "https://hilla.dev",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],

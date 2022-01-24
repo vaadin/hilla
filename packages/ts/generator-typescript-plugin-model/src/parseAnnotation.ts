@@ -1,4 +1,4 @@
-import PluginError from '@vaadin/generator-typescript-utils/PluginError.js';
+import PluginError from '@hilla/generator-typescript-utils/PluginError.js';
 import type { Annotation, AnnotationNamedAttributes, AnnotationPrimitiveAttribute } from './Annotation.js';
 
 const keywords: Record<string, AnnotationPrimitiveAttribute> = { true: true, false: false };

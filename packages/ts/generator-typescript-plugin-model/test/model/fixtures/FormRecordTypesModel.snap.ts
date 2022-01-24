@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@vaadin/form";
+import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
 import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
 import FormEntityHierarchyModel_1 from "./FormEntityHierarchyModel";
 import type FormOptionalTypes_1 from "./FormOptionalTypes";

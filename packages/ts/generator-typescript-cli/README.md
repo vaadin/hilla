@@ -1,1 +1,1 @@
-# Fusion TypeScript Generator
+# Hilla TypeScript Generator

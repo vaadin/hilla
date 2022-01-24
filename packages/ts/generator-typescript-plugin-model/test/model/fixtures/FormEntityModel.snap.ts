@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1 } from "@vaadin/form";
+import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1 } from "@hilla/form";
 import type FormAnnotations_1 from "./FormAnnotations";
 import FormAnnotationsModel_1 from "./FormAnnotationsModel";
 import type FormArrayTypes_1 from "./FormArrayTypes";

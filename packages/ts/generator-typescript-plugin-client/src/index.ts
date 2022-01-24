@@ -1,5 +1,5 @@
-import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage.js';
+import Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import ClientProcessor from './ClientProcessor.js';
 
 export default class ClientPlugin extends Plugin {

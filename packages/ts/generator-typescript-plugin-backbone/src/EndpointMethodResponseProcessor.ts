@@ -1,4 +1,4 @@
-import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';

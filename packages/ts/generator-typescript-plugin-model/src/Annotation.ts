@@ -2,7 +2,7 @@ import {
   isNonComposedRegularSchema,
   NonComposedRegularSchema,
   Schema,
-} from '@vaadin/generator-typescript-core/Schema.js';
+} from '@hilla/generator-typescript-core/Schema.js';
 
 export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
 

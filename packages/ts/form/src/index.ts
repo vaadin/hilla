@@ -8,6 +8,6 @@ const $wnd = window as any;
 $wnd.Vaadin = $wnd.Vaadin || {};
 $wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
 $wnd.Vaadin.registrations.push({
-  is: '@vaadin/form',
+  is: '@hilla/form',
   version: /* updated-by-script */ '0.0.17',
 });

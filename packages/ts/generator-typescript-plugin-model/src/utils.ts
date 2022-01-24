@@ -1,4 +1,4 @@
-import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver.js';
+import type ReferenceResolver from '@hilla/generator-typescript-core/ReferenceResolver.js';
 import type Pino from 'pino';
 
 export type ModelPluginContext = Readonly<{

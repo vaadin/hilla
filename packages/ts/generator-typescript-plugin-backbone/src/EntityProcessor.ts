@@ -1,4 +1,4 @@
-import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
+import type { EnumSchema, ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -10,14 +10,14 @@ import {
   isObjectSchema,
   isReferenceSchema,
   NonEmptyObjectSchema,
-} from '@vaadin/generator-typescript-core/Schema.js';
+} from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
-} from '@vaadin/generator-typescript-core/utils.js';
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+} from '@hilla/generator-typescript-core/utils.js';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import { dirname } from 'path/posix';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';

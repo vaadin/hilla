@@ -1,18 +1,18 @@
 {
-  "name": "@vaadin/form",
+  "name": "@hilla/form",
   "version": "0.0.17",
-  "description": "Vaadin form utils",
+  "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaadin/fusion.git",
+    "url": "https://github.com/vaadin/hilla.git",
     "directory": "packages/ts/form"
   },
   "keywords": [
-    "Vaadin",
-    "Fusion"
+    "Hilla",
+    "Form"
   ],
   "scripts": {
     "build": "tsc --isolatedModules",
@@ -51,9 +51,9 @@
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/fusion/issues"
+    "url": "https://github.com/vaadin/hilla/issues"
   },
-  "homepage": "https://vaadin.com/fusion",
+  "homepage": "https://hilla.dev",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],

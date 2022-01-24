@@ -1,6 +1,6 @@
-import Generator from '@vaadin/generator-typescript-core/Generator.js';
-import type { PluginConstructor } from '@vaadin/generator-typescript-core/Plugin.js';
-import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
+import Generator from '@hilla/generator-typescript-core/Generator.js';
+import type { PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
+import createLogger from '@hilla/generator-typescript-utils/createLogger.js';
 import { readFile } from 'fs/promises';
 import { URL } from 'url';
 

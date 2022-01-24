@@ -1,6 +1,6 @@
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import { basename, dirname } from 'path';
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';

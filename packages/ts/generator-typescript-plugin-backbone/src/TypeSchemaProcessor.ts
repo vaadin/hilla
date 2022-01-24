@@ -16,8 +16,8 @@ import {
   NonComposedSchema,
   ReferenceSchema,
   Schema,
-} from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+} from '@hilla/generator-typescript-core/Schema.js';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { TypeNode } from 'typescript';
 import ts from 'typescript';
 

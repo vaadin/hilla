@@ -1,6 +1,6 @@
-import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import type ReferenceResolver from '@vaadin/generator-typescript-core/ReferenceResolver';
-import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
+import Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import type ReferenceResolver from '@hilla/generator-typescript-core/ReferenceResolver';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
 import type { ModelPluginContext } from './utils.js';

@@ -16,8 +16,8 @@ import {
   ReferenceSchema,
   ArraySchema,
   MapSchema,
-} from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager';
+} from '@hilla/generator-typescript-core/Schema.js';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
 import type { Expression, Identifier, TypeNode } from 'typescript';
 import ts from 'typescript';
 import {
@@ -175,7 +175,7 @@ export default class ModelSchemaProcessor {
 
   #getBuiltinFormExport(specifier: string): Identifier {
     const { imports, paths } = this.#dependencies;
-    const modelPath = paths.createBareModulePath('@vaadin/form', false);
+    const modelPath = paths.createBareModulePath('@hilla/form', false);
     return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
   }
 }
