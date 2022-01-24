@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/generator-typescript-core",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A Fusion tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
