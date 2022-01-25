@@ -1,5 +1,5 @@
-import type { Logger } from '@vaadin/generator-typescript-utils/LoggerFactory.js';
-import type LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
+import type { Logger } from '@hilla/generator-typescript-utils/LoggerFactory.js';
+import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import type { Constructor } from 'type-fest';
 import type ReferenceResolver from './ReferenceResolver.js';
 import type SharedStorage from './SharedStorage.js';

@@ -19,7 +19,7 @@ import DependencyManager from '@hilla/generator-typescript-utils/dependencies/De
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 export class ModelEntityProcessor {
@@ -73,7 +73,7 @@ export class ModelEntityProcessor {
   }
 
   #getGetPropertyModelSymbol(): Identifier {
-    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@vaadin/form', '_getPropertyModel');
+    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@hilla/form', '_getPropertyModel');
     return this.#getPropertyModelSymbol;
   }
 

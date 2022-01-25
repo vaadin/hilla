@@ -1,4 +1,4 @@
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
