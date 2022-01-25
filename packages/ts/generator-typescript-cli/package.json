@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/generator-typescript-cli",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A Fusion tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
@@ -45,7 +45,7 @@
     "@vaadin/generator-typescript-core": "^0.0.16"
   },
   "dependencies": {
-    "@vaadin/generator-typescript-utils": "^0.0.16",
+    "@vaadin/generator-typescript-utils": "^0.0.17",
     "meow": "^10.1.1"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
-    "@vaadin/generator-typescript-core": "^0.0.16",
+    "@vaadin/generator-typescript-core": "^0.0.17",
     "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.3.0",

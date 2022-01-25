@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/generator-typescript-utils",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A set of utils for developing Fusion generator plugins",
   "main": "index.js",
   "type": "module",
