@@ -1,7 +1,7 @@
 import {
   ConnectClient,
   InvalidSessionMiddleware,
-} from '@vaadin/fusion-frontend';
+} from '@hilla/frontend';
 
 const client = new ConnectClient({
   prefix: 'connect',

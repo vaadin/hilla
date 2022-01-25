@@ -25,7 +25,7 @@ import '@vaadin/custom-field';
 import '@vaadin/button';
 import '@vaadin/notification';
 
-import { field, Binder } from '@vaadin/form';
+import { field, Binder } from '@hilla/form';
 
 import { View } from '../view';
 import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/fusionform/ElementsModel';
