@@ -26,7 +26,7 @@ export default abstract class EndpointMethodOperationProcessor {
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
-    context: Plugin,
+    owner: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST:
@@ -36,10 +36,10 @@ export default abstract class EndpointMethodOperationProcessor {
           endpointMethodName,
           operation,
           dependencies,
-          context,
+          owner,
         );
       default:
-        context.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
+        owner.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
         return undefined;
     }
   }
