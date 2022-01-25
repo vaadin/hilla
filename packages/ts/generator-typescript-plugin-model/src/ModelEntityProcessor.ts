@@ -24,7 +24,7 @@ import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 export class ModelEntityProcessor {
   readonly #component: Schema;
-  readonly #context: Plugin;
+  readonly #owner: Plugin;
   readonly #dependencies: DependencyManager;
   readonly #entityName: string;
   readonly #fullyQualifiedName: string;
@@ -33,9 +33,9 @@ export class ModelEntityProcessor {
   readonly #path: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(name: string, component: Schema, context: Plugin) {
+  public constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
-    this.#context = context;
+    this.#owner = owner;
     this.#fullyQualifiedName = name;
     this.#entityName = simplifyFullyQualifiedName(name);
     this.#name = `${this.#entityName}Model`;
@@ -52,7 +52,7 @@ export class ModelEntityProcessor {
   }
 
   public process(): SourceFile {
-    this.#context.logger.debug(`Processing model for entity: ${this.#entityName}`);
+    this.#owner.logger.debug(`Processing model for entity: ${this.#entityName}`);
 
     const entity = this.#dependencies.imports.default.add(
       this.#dependencies.paths.createRelativePath(convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName)),
@@ -120,7 +120,7 @@ export class ModelEntityProcessor {
   }
 
   #processExtendedModelClass(schema: Schema, entity: Identifier): Statement | undefined {
-    const { logger } = this.#context;
+    const { logger } = this.#owner;
 
     let entitySchema = schema;
     let parent;
@@ -150,7 +150,7 @@ export class ModelEntityProcessor {
   }
 
   #processModelClass(schema: Schema, entity: Identifier, parent: Identifier): ClassDeclaration | undefined {
-    const { logger } = this.#context;
+    const { logger } = this.#owner;
 
     if (!isObjectSchema(schema)) {
       logger.error(schema, `Component is not an object: ${this.#fullyQualifiedName}`);

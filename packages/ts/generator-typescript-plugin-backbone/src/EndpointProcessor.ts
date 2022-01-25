@@ -9,14 +9,14 @@ import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
-  readonly #context: Plugin;
   readonly #dependencies = new DependencyManager(new PathManager());
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
+  readonly #owner: Plugin;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(name: string, context: Plugin) {
-    this.#context = context;
+  public constructor(name: string, owner: Plugin) {
+    this.#owner = owner;
     this.#name = name;
     this.#dependencies.imports.default.add(
       this.#dependencies.paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME),
@@ -29,7 +29,7 @@ export default class EndpointProcessor {
   }
 
   public process(): SourceFile {
-    this.#context.logger.debug(`Processing endpoint: ${this.#name}`);
+    this.#owner.logger.debug(`Processing endpoint: ${this.#name}`);
 
     const statements = Array.from(this.#methods, ([method, pathItem]) => this.#processMethod(method, pathItem)).flatMap(
       (item) => item,
@@ -44,7 +44,7 @@ export default class EndpointProcessor {
   }
 
   #processMethod(method: string, pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>): readonly Statement[] {
-    this.#context.logger.debug(`Processing endpoint method: ${this.#name}.${method}`);
+    this.#owner.logger.debug(`Processing endpoint method: ${this.#name}.${method}`);
 
     return Object.values(OpenAPIV3.HttpMethods)
       .filter((httpMethod) => pathItem[httpMethod])
@@ -55,7 +55,7 @@ export default class EndpointProcessor {
           method,
           pathItem[httpMethod] as EndpointMethodOperation,
           this.#dependencies,
-          this.#context,
+          this.#owner,
         )?.process(),
       )
       .filter(Boolean) as readonly Statement[];

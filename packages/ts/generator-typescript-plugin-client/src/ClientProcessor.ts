@@ -8,15 +8,15 @@ import ts from 'typescript';
 
 export default class ClientProcessor {
   readonly #filePath: string;
-  readonly #context: Plugin;
+  readonly #owner: Plugin;
 
-  public constructor(fileName: string, context: Plugin) {
+  public constructor(fileName: string, owner: Plugin) {
     this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
-    this.#context = context;
+    this.#owner = owner;
   }
 
   public process(): SourceFile {
-    this.#context.logger.debug(`Generating ${this.#filePath}`);
+    this.#owner.logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientClassId = imports.named.add(

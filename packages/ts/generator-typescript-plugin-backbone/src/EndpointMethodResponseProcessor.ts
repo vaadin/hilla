@@ -11,20 +11,20 @@ export type EndpointMethodResponse = ReadonlyDeep<OpenAPIV3.ResponseObject>;
 
 export default class EndpointMethodResponseProcessor {
   readonly #code: string;
-  readonly #context: Plugin;
   readonly #dependencies: DependencyManager;
+  readonly #owner: Plugin;
   readonly #response: EndpointMethodResponse;
 
   public constructor(
     code: string,
     response: EndpointMethodResponses[string],
     dependencyManager: DependencyManager,
-    context: Plugin,
+    owner: Plugin,
   ) {
     this.#code = code;
-    this.#context = context;
+    this.#owner = owner;
     this.#dependencies = dependencyManager;
-    this.#response = context.resolver.resolve(response);
+    this.#response = owner.resolver.resolve(response);
   }
 
   public process(): readonly TypeNode[] {
@@ -32,7 +32,7 @@ export default class EndpointMethodResponseProcessor {
       case '200':
         return this.#processOk();
       default:
-        this.#context.logger.warn(`Response code '${this.#code} is not supported'`);
+        this.#owner.logger.warn(`Response code '${this.#code} is not supported'`);
         return [];
     }
   }

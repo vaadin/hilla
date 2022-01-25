@@ -21,18 +21,18 @@ export type EndpointMethodRequestBodyProcessingResult = Readonly<{
 }>;
 
 export default class EndpointMethodRequestBodyProcessor {
-  readonly #context: Plugin;
   readonly #dependencies: DependencyManager;
+  readonly #owner: Plugin;
   readonly #requestBody?: EndpointMethodRequestBody;
 
   public constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
-    context: Plugin,
+    owner: Plugin,
   ) {
-    this.#context = context;
+    this.#owner = owner;
     this.#dependencies = dependencies;
-    this.#requestBody = requestBody ? context.resolver.resolve(requestBody) : undefined;
+    this.#requestBody = requestBody ? owner.resolver.resolve(requestBody) : undefined;
   }
 
   public process(): EndpointMethodRequestBodyProcessingResult {
@@ -70,7 +70,7 @@ export default class EndpointMethodRequestBodyProcessor {
       return [];
     }
 
-    const { resolver, logger } = this.#context;
+    const { resolver, logger } = this.#owner;
 
     const resolvedSchema = resolver.resolve(basicSchema);
 

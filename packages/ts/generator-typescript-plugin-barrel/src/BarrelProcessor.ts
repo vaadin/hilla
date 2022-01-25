@@ -9,16 +9,16 @@ export default class BarrelProcessor {
   public static readonly BARREL_FILE_NAME = 'endpoints.ts';
   public declare ['constructor']: typeof BarrelProcessor;
   readonly #endpoints: readonly SourceFile[];
-  readonly #context: Plugin;
+  readonly #owner: Plugin;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(endpoints: readonly SourceFile[], context: Plugin) {
+  public constructor(endpoints: readonly SourceFile[], owner: Plugin) {
     this.#endpoints = endpoints;
-    this.#context = context;
+    this.#owner = owner;
   }
 
   public process(): SourceFile {
-    this.#context.logger.info(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
+    this.#owner.logger.info(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
 
     const { exports, imports } = this.#endpoints.reduce((acc, { fileName }) => {
       const specifier = basename(fileName, '.ts');
