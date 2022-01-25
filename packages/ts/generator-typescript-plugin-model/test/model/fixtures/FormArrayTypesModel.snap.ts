@@ -5,7 +5,7 @@ import type FormEntity_1 from "./FormEntity";
 import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
 import FormEntityHierarchyModel_1 from "./FormEntityHierarchyModel";
 import FormEntityModel_1 from "./FormEntityModel";
-export default class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends ObjectModel_1<T> {
+class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends ObjectModel_1<T> {
     static createEmptyValue: () => FormArrayTypes_1;
     get stringList(): ArrayModel_1<string, StringModel_1> {
         return this[_getPropertyModel_1]("stringList", ArrayModel_1, [true, StringModel_1, [true]]) as ArrayModel_1<string, StringModel_1>;
@@ -29,3 +29,4 @@ export default class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayT
         return this[_getPropertyModel_1]("nestedArrays", ArrayModel_1, [true, ArrayModel_1, [true, ObjectModel_1, [true]]]) as ArrayModel_1<ReadonlyArray<Record<string, ReadonlyArray<string>>>, ArrayModel_1<Record<string, ReadonlyArray<string>>, ObjectModel_1<Record<string, ReadonlyArray<string>>>>>;
     }
 }
+export default FormArrayTypesModel;

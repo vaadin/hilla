@@ -13,19 +13,12 @@ import io.github.classgraph.MethodInfo;
 
 public final class RelativeMethodInfo
         extends AbstractRelative<MethodInfo, RelativeClassInfo> {
-    private final List<RelativeMethodParameterInfo> parameters;
-    private final RelativeTypeSignature resultType;
+    private List<RelativeMethodParameterInfo> parameters;
+    private RelativeTypeSignature resultType;
 
     public RelativeMethodInfo(@Nonnull MethodInfo origin,
             @Nonnull RelativeClassInfo parent) {
         super(origin, Objects.requireNonNull(parent));
-
-        parameters = Arrays.stream(origin.getParameterInfo()).map(
-                parameter -> new RelativeMethodParameterInfo(parameter, this))
-                .collect(Collectors.toList());
-        resultType = RelativeTypeSignature.of(
-                origin.getTypeSignatureOrTypeDescriptor().getResultType(),
-                this);
     }
 
     @Override
@@ -41,17 +34,24 @@ public final class RelativeMethodInfo
     }
 
     public Stream<RelativeClassInfo> getParameterDependenciesStream() {
-        return parameters.stream()
+        return getParameters().stream()
                 .flatMap(RelativeMethodParameterInfo::getDependenciesStream)
                 .distinct();
     }
 
     public List<RelativeMethodParameterInfo> getParameters() {
+        if (parameters == null) {
+            parameters = Arrays.stream(origin.getParameterInfo())
+                    .map(parameter -> new RelativeMethodParameterInfo(parameter,
+                            this))
+                    .collect(Collectors.toList());
+        }
+
         return parameters;
     }
 
     public Stream<RelativeMethodParameterInfo> getParametersStream() {
-        return parameters.stream();
+        return getParameters().stream();
     }
 
     public List<RelativeClassInfo> getResultDependencies() {
@@ -63,6 +63,12 @@ public final class RelativeMethodInfo
     }
 
     public RelativeTypeSignature getResultType() {
+        if (resultType == null) {
+            resultType = RelativeTypeSignature.of(
+                    origin.getTypeSignatureOrTypeDescriptor().getResultType(),
+                    this);
+        }
+
         return resultType;
     }
 }

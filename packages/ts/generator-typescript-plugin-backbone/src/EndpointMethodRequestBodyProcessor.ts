@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
@@ -10,7 +11,6 @@ import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
 import ts from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 import { defaultMediaType } from './utils.js';
 
 export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject>;
@@ -21,18 +21,18 @@ export type EndpointMethodRequestBodyProcessingResult = Readonly<{
 }>;
 
 export default class EndpointMethodRequestBodyProcessor {
-  readonly #context: BackbonePluginContext;
   readonly #dependencies: DependencyManager;
+  readonly #owner: Plugin;
   readonly #requestBody?: EndpointMethodRequestBody;
 
   public constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    owner: Plugin,
   ) {
-    this.#context = context;
+    this.#owner = owner;
     this.#dependencies = dependencies;
-    this.#requestBody = requestBody ? context.resolver.resolve(requestBody) : undefined;
+    this.#requestBody = requestBody ? owner.resolver.resolve(requestBody) : undefined;
   }
 
   public process(): EndpointMethodRequestBodyProcessingResult {
@@ -70,7 +70,7 @@ export default class EndpointMethodRequestBodyProcessor {
       return [];
     }
 
-    const { resolver, logger } = this.#context;
+    const { resolver, logger } = this.#owner;
 
     const resolvedSchema = resolver.resolve(basicSchema);
 

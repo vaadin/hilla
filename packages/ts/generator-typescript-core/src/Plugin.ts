@@ -1,14 +1,15 @@
-import type Pino from 'pino';
+import type { Logger } from '@vaadin/generator-typescript-utils/LoggerFactory.js';
+import type LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
 import type { Constructor } from 'type-fest';
 import type ReferenceResolver from './ReferenceResolver.js';
 import type SharedStorage from './SharedStorage.js';
 
 export default abstract class Plugin {
-  protected readonly logger: Pino.Logger;
-  protected readonly resolver: ReferenceResolver;
+  readonly resolver: ReferenceResolver;
+  readonly logger: Logger;
 
-  public constructor(resolver: ReferenceResolver, logger: Pino.Logger) {
-    this.logger = logger;
+  public constructor(resolver: ReferenceResolver, logger: LoggerFactory) {
+    this.logger = logger.for(this.constructor.name);
     this.resolver = resolver;
   }
 

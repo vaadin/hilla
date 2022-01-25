@@ -18,7 +18,7 @@ export default class BarrelPlugin extends Plugin {
     }
 
     const endpoints = sources.filter((file) => tags.get(file) === BackbonePluginSourceType.Endpoint);
-    const barrelFile = new BarrelProcessor(endpoints, this.logger).process();
+    const barrelFile = new BarrelProcessor(endpoints, this).process();
     sources.push(barrelFile);
   }
 }

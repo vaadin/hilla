@@ -11,6 +11,8 @@ import io.github.classgraph.ClassInfo;
 public final class ArrayRelativeTypeSignature
         extends AbstractRelative<ArrayTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
+    private RelativeTypeSignature nestedType;
+
     ArrayRelativeTypeSignature(ArrayTypeSignature origin, Relative<?> parent) {
         super(origin, parent);
     }
@@ -22,7 +24,11 @@ public final class ArrayRelativeTypeSignature
     }
 
     public RelativeTypeSignature getNestedType() {
-        return RelativeTypeSignature.of(origin.getNestedType(), this);
+        if (nestedType == null) {
+            nestedType = RelativeTypeSignature.of(origin.getNestedType(), this);
+        }
+
+        return nestedType;
     }
 
     @Override

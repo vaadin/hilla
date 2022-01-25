@@ -33,8 +33,6 @@ public final class BaseRelativeTypeSignature
 
     @Override
     public boolean isByte() {
-        var type = origin.getType();
-
         return origin.getType() == Byte.TYPE;
     }
 

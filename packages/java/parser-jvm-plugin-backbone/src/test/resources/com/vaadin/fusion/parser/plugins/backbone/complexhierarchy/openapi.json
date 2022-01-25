@@ -42,15 +42,6 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel": {
-        "type": "object",
-        "properties": {
-          "build": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel": {
         "anyOf": [
           {
@@ -82,6 +73,15 @@
             }
           }
         ]
+      },
+      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel": {
+        "type": "object",
+        "properties": {
+          "build": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       }
     }
   }

@@ -19,7 +19,7 @@ import type FormTemporalTypes_1 from "./FormTemporalTypes";
 import FormTemporalTypesModel_1 from "./FormTemporalTypesModel";
 import type FormValidationConstraints_1 from "./FormValidationConstraints";
 import FormValidationConstraintsModel_1 from "./FormValidationConstraintsModel";
-export default class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityIdModel_1<T> {
+class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityIdModel_1<T> {
     static createEmptyValue: () => FormEntity_1;
     get myId(): NumberModel_1 {
         return this[_getPropertyModel_1]("myId", NumberModel_1, [true]) as NumberModel_1;
@@ -52,3 +52,4 @@ export default class FormEntityModel<T extends FormEntity_1 = FormEntity_1> exte
         return this[_getPropertyModel_1]("nonnullTypes", FormNonnullTypesModel_1, [true]) as FormNonnullTypesModel_1;
     }
 }
+export default FormEntityModel;

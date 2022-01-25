@@ -2,7 +2,7 @@ import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, A
 import type FormEntity_1 from "./FormEntity";
 import FormEntityModel_1 from "./FormEntityModel";
 import type FormValidationConstraints_1 from "./FormValidationConstraints";
-export default class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
+class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
     static createEmptyValue: () => FormValidationConstraints_1;
     get list(): ArrayModel_1<string, StringModel_1> {
         return this[_getPropertyModel_1]("list", ArrayModel_1, [true, StringModel_1, [true], new NotEmpty_1()]) as ArrayModel_1<string, StringModel_1>;
@@ -74,3 +74,4 @@ export default class FormValidationConstraintsModel<T extends FormValidationCons
         return this[_getPropertyModel_1]("pattern", StringModel_1, [true, new Pattern_1({ regexp: "\\d+\\..+" })]) as StringModel_1;
     }
 }
+export default FormValidationConstraintsModel;
