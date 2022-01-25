@@ -16,70 +16,6 @@
     }
   ],
   "paths": {
-    "/ExtendedEndpoint/superComplexType": {
-      "post": {
-        "tags": ["ExtendedEndpoint"],
-        "operationId": "ExtendedEndpoint_superComplexType_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "list": {
-                    "type": "array",
-                    "nullable": true,
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "array",
-                        "nullable": true,
-                        "items": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "string"
-                          },
-                          "nullable": true
-                        }
-                      },
-                      "nullable": true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "nullable": true,
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": {
-                          "type": "string"
-                        },
-                        "nullable": true
-                      }
-                    },
-                    "nullable": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/BasicEndpoint/complexType": {
       "post": {
         "tags": ["BasicEndpoint"],
@@ -324,13 +260,74 @@
           }
         }
       }
+    },
+    "/ExtendedEndpoint/superComplexType": {
+      "post": {
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_superComplexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "nullable": true
+                        }
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint": {
-        "type": "object"
-      },
       "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
         "anyOf": [
           {
@@ -393,6 +390,9 @@
             }
           }
         }
+      },
+      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint": {
+        "type": "object"
       }
     }
   }
