@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,8 +37,8 @@ public final class RelativeClassInfo
 
         var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null
-            ? new RelativeClassInfo(originSuperClass)
-            : null;
+                ? new RelativeClassInfo(originSuperClass)
+                : null;
 
         // Should be the latest
         chain = new InheritanceChain();
@@ -78,7 +77,7 @@ public final class RelativeClassInfo
     public List<RelativeFieldInfo> getFields() {
         if (fields == null) {
             fields = getMembers(ClassInfo::getDeclaredFieldInfo,
-                RelativeFieldInfo::new);
+                    RelativeFieldInfo::new);
         }
 
         return fields;
@@ -104,7 +103,7 @@ public final class RelativeClassInfo
     public List<RelativeClassInfo> getInnerClasses() {
         if (innerClasses == null) {
             innerClasses = getMembers(ClassInfo::getInnerClasses,
-                RelativeClassInfo::new);
+                    RelativeClassInfo::new);
         }
 
         return innerClasses;
@@ -189,7 +188,7 @@ public final class RelativeClassInfo
     public List<RelativeMethodInfo> getMethods() {
         if (methods == null) {
             methods = getMembers(ClassInfo::getDeclaredMethodInfo,
-                RelativeMethodInfo::new);
+                    RelativeMethodInfo::new);
         }
 
         return methods;
@@ -211,7 +210,7 @@ public final class RelativeClassInfo
     public List<RelativeClassInfo> getSuperClasses() {
         if (superClasses == null) {
             superClasses = getMembers(ClassInfo::getSuperclasses,
-                (member) -> !isJDKClass(member), RelativeClassInfo::new);
+                    (member) -> !isJDKClass(member), RelativeClassInfo::new);
         }
 
         return superClasses;
@@ -271,8 +270,8 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeFieldInfo> getFieldsStream() {
-            return getClasses().stream().flatMap(RelativeClassInfo::getFieldsStream)
-                    .distinct();
+            return getClasses().stream()
+                    .flatMap(RelativeClassInfo::getFieldsStream).distinct();
         }
 
         public List<RelativeClassInfo> getInnerClassDependencies() {
@@ -347,8 +346,8 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeMethodInfo> getMethodsStream() {
-            return getClasses().stream().flatMap(RelativeClassInfo::getMethodsStream)
-                    .distinct();
+            return getClasses().stream()
+                    .flatMap(RelativeClassInfo::getMethodsStream).distinct();
         }
     }
 }

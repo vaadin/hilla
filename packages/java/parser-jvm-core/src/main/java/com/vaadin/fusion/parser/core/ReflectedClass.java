@@ -91,16 +91,16 @@ public final class ReflectedClass {
         return Iterable.class.isAssignableFrom(origin);
     }
 
+    public boolean isJDKClass() {
+        return ParserUtils.isJDKClass(origin.getName());
+    }
+
     public boolean isLong() {
         return Long.class.isAssignableFrom(origin);
     }
 
     public boolean isMap() {
         return Map.class.isAssignableFrom(origin);
-    }
-
-    public boolean isJDKClass() {
-        return ParserUtils.isJDKClass(origin.getName());
     }
 
     public boolean isNativeObject() {
