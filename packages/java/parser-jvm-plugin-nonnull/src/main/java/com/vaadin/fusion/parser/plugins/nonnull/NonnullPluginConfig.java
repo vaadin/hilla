@@ -43,9 +43,9 @@ public class NonnullPluginConfig
     }
 
     static class Processor extends ConfigList.Processor<String> {
-        private static final Set<String> defaults = Set.of(
-                "javax.annotation.Nonnull", "org.jetbrains.annotations.NotNull",
-                "lombok.NonNull", "androidx.annotation.NonNull",
+        static final Set<String> defaults = Set.of("javax.annotation.Nonnull",
+                "org.jetbrains.annotations.NotNull", "lombok.NonNull",
+                "androidx.annotation.NonNull",
                 "org.eclipse.jdt.annotation.NonNull",
                 "com.vaadin.fusion.Nonnull");
 

@@ -17,21 +17,13 @@ public final class ClassRefRelativeTypeSignature
         extends AbstractRelative<ClassRefTypeSignature, Relative<?>>
         implements RelativeTypeSignature {
     private final ReflectedClass reflectedClass;
-    private final List<List<RelativeTypeArgument>> suffixTypeArguments;
-    private final List<RelativeTypeArgument> typeArguments;
+    private List<List<RelativeTypeArgument>> suffixTypeArguments;
+    private List<RelativeTypeArgument> typeArguments;
 
     ClassRefRelativeTypeSignature(ClassRefTypeSignature origin,
             Relative<?> parent) {
         super(origin, parent);
         reflectedClass = new ReflectedClass(origin);
-        typeArguments = origin.getTypeArguments().stream()
-                .map(arg -> new RelativeTypeArgument(arg, this))
-                .collect(Collectors.toList());
-        suffixTypeArguments = origin.getSuffixTypeArguments().stream()
-                .map(list -> list.stream()
-                        .map(arg -> new RelativeTypeArgument(arg, this))
-                        .collect(Collectors.toList()))
-                .collect(Collectors.toList());
     }
 
     public static Stream<ClassInfo> resolve(
@@ -50,10 +42,24 @@ public final class ClassRefRelativeTypeSignature
     }
 
     public List<List<RelativeTypeArgument>> getSuffixTypeArguments() {
+        if (suffixTypeArguments == null) {
+            suffixTypeArguments = origin.getSuffixTypeArguments().stream()
+                    .map(list -> list.stream()
+                            .map(arg -> new RelativeTypeArgument(arg, this))
+                            .collect(Collectors.toList()))
+                    .collect(Collectors.toList());
+        }
+
         return suffixTypeArguments;
     }
 
     public List<RelativeTypeArgument> getTypeArguments() {
+        if (typeArguments == null) {
+            typeArguments = origin.getTypeArguments().stream()
+                    .map(arg -> new RelativeTypeArgument(arg, this))
+                    .collect(Collectors.toList());
+        }
+
         return typeArguments;
     }
 
@@ -139,6 +145,6 @@ public final class ClassRefRelativeTypeSignature
 
     @Override
     public boolean isSystem() {
-        return origin.getClassInfo() == null;
+        return origin.getClassInfo() == null || reflectedClass.isJDKClass();
     }
 }

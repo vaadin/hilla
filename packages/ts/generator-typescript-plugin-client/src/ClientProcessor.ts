@@ -1,22 +1,22 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import createFullyUniqueIdentifier from '@vaadin/generator-typescript-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
-import type Pino from 'pino';
 import type { SourceFile } from 'typescript';
 import ts from 'typescript';
 
 export default class ClientProcessor {
   readonly #filePath: string;
-  readonly #logger: Pino.Logger;
+  readonly #owner: Plugin;
 
-  public constructor(fileName: string, logger: Pino.Logger) {
+  public constructor(fileName: string, owner: Plugin) {
     this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
-    this.#logger = logger;
+    this.#owner = owner;
   }
 
   public process(): SourceFile {
-    this.#logger.debug(`Generating ${this.#filePath}`);
+    this.#owner.logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
     const clientClassId = imports.named.add(

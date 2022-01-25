@@ -2,11 +2,11 @@ package com.vaadin.fusion.parser.core;
 
 import static com.vaadin.fusion.parser.core.ParserUtils.isJDKClass;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -19,13 +19,13 @@ import io.github.classgraph.ClassInfo;
 
 public final class RelativeClassInfo
         extends AbstractRelative<ClassInfo, RelativeClassInfo> {
-    private final List<RelativeAnnotationInfo> annotations;
     private final InheritanceChain chain;
-    private final List<RelativeFieldInfo> fields;
-    private final List<RelativeClassInfo> innerClasses;
-    private final List<RelativeMethodInfo> methods;
     private final RelativeClassInfo superClass;
-    private final List<RelativeClassInfo> superClasses;
+    private List<RelativeAnnotationInfo> annotations;
+    private List<RelativeFieldInfo> fields;
+    private List<RelativeClassInfo> innerClasses;
+    private List<RelativeMethodInfo> methods;
+    private List<RelativeClassInfo> superClasses;
 
     public RelativeClassInfo(@Nonnull ClassInfo origin) {
         this(origin, null);
@@ -35,17 +35,6 @@ public final class RelativeClassInfo
             RelativeClassInfo parent) {
         super(origin, parent);
 
-        annotations = getMembers(ClassInfo::getAnnotationInfo,
-                RelativeAnnotationInfo::new);
-        fields = getMembers(ClassInfo::getDeclaredFieldInfo,
-                RelativeFieldInfo::new);
-        innerClasses = getMembers(ClassInfo::getInnerClasses,
-                RelativeClassInfo::new);
-        methods = getMembers(ClassInfo::getDeclaredMethodInfo,
-                RelativeMethodInfo::new);
-        superClasses = getMembers(ClassInfo::getSuperclasses,
-                (member) -> !isJDKClass(member), RelativeClassInfo::new);
-
         var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null
                 ? new RelativeClassInfo(originSuperClass)
@@ -53,6 +42,19 @@ public final class RelativeClassInfo
 
         // Should be the latest
         chain = new InheritanceChain();
+    }
+
+    public List<RelativeAnnotationInfo> getAnnotations() {
+        if (annotations == null) {
+            annotations = getMembers(ClassInfo::getAnnotationInfo,
+                    RelativeAnnotationInfo::new);
+        }
+
+        return annotations;
+    }
+
+    public Stream<RelativeAnnotationInfo> getAnnotationsStream() {
+        return getAnnotations().stream();
     }
 
     @Override
@@ -73,11 +75,16 @@ public final class RelativeClassInfo
     }
 
     public List<RelativeFieldInfo> getFields() {
+        if (fields == null) {
+            fields = getMembers(ClassInfo::getDeclaredFieldInfo,
+                    RelativeFieldInfo::new);
+        }
+
         return fields;
     }
 
     public Stream<RelativeFieldInfo> getFieldsStream() {
-        return fields.stream();
+        return getFields().stream();
     }
 
     public InheritanceChain getInheritanceChain() {
@@ -94,11 +101,16 @@ public final class RelativeClassInfo
     }
 
     public List<RelativeClassInfo> getInnerClasses() {
+        if (innerClasses == null) {
+            innerClasses = getMembers(ClassInfo::getInnerClasses,
+                    RelativeClassInfo::new);
+        }
+
         return innerClasses;
     }
 
     public Stream<RelativeClassInfo> getInnerClassesStream() {
-        return innerClasses.stream();
+        return getInnerClasses().stream();
     }
 
     public <RelativeMember extends Relative<?>> List<RelativeClassInfo> getMemberDependencies(
@@ -174,11 +186,16 @@ public final class RelativeClassInfo
     }
 
     public List<RelativeMethodInfo> getMethods() {
+        if (methods == null) {
+            methods = getMembers(ClassInfo::getDeclaredMethodInfo,
+                    RelativeMethodInfo::new);
+        }
+
         return methods;
     }
 
     public Stream<RelativeMethodInfo> getMethodsStream() {
-        return methods.stream();
+        return getMethods().stream();
     }
 
     @Override
@@ -191,11 +208,16 @@ public final class RelativeClassInfo
     }
 
     public List<RelativeClassInfo> getSuperClasses() {
+        if (superClasses == null) {
+            superClasses = getMembers(ClassInfo::getSuperclasses,
+                    (member) -> !isJDKClass(member), RelativeClassInfo::new);
+        }
+
         return superClasses;
     }
 
     public Stream<RelativeClassInfo> getSuperClassesStream() {
-        return superClasses.stream();
+        return getSuperClasses().stream();
     }
 
     private <T> boolean defaultFilter(T member) {
@@ -203,19 +225,24 @@ public final class RelativeClassInfo
     }
 
     public class InheritanceChain {
-        private final Set<RelativeClassInfo> chain = new HashSet<>();
+        private Collection<RelativeClassInfo> chain;
 
         private InheritanceChain() {
-            chain.add(RelativeClassInfo.this);
-            chain.addAll(superClasses);
         }
 
-        public Set<RelativeClassInfo> getClasses() {
+        public Collection<RelativeClassInfo> getClasses() {
+            if (chain == null) {
+                var superClasses = getSuperClasses();
+                chain = new HashSet<>(superClasses.size() + 1);
+                chain.add(RelativeClassInfo.this);
+                chain.addAll(superClasses);
+            }
+
             return chain;
         }
 
         public Stream<RelativeClassInfo> getClassesStream() {
-            return chain.stream();
+            return getClasses().stream();
         }
 
         public List<RelativeClassInfo> getDependencies() {
@@ -223,7 +250,7 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getDependenciesStream() {
-            return chain.stream()
+            return getClasses().stream()
                     .flatMap(RelativeClassInfo::getDependenciesStream)
                     .distinct();
         }
@@ -233,7 +260,7 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getFieldDependenciesStream() {
-            return chain.stream()
+            return getClasses().stream()
                     .flatMap(RelativeClassInfo::getFieldDependenciesStream)
                     .distinct();
         }
@@ -243,8 +270,8 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeFieldInfo> getFieldsStream() {
-            return chain.stream().flatMap(RelativeClassInfo::getFieldsStream)
-                    .distinct();
+            return getClasses().stream()
+                    .flatMap(RelativeClassInfo::getFieldsStream).distinct();
         }
 
         public List<RelativeClassInfo> getInnerClassDependencies() {
@@ -253,7 +280,7 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getInnerClassDependenciesStream() {
-            return chain.stream()
+            return getClasses().stream()
                     .flatMap(RelativeClassInfo::getInnerClassDependenciesStream)
                     .distinct();
         }
@@ -263,7 +290,7 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getInnerClassesStream() {
-            return chain.stream()
+            return getClasses().stream()
                     .flatMap(RelativeClassInfo::getInnerClassesStream)
                     .distinct();
         }
@@ -299,7 +326,7 @@ public final class RelativeClassInfo
             Objects.requireNonNull(filter);
             Objects.requireNonNull(selector);
 
-            return chain.stream().flatMap(
+            return getClasses().stream().flatMap(
                     cls -> cls.getMembersStream(selector, filter, wrapper))
                     .distinct();
         }
@@ -309,7 +336,7 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeClassInfo> getMethodDependenciesStream() {
-            return chain.stream()
+            return getClasses().stream()
                     .flatMap(RelativeClassInfo::getMethodDependenciesStream)
                     .distinct();
         }
@@ -319,8 +346,8 @@ public final class RelativeClassInfo
         }
 
         public Stream<RelativeMethodInfo> getMethodsStream() {
-            return chain.stream().flatMap(RelativeClassInfo::getMethodsStream)
-                    .distinct();
+            return getClasses().stream()
+                    .flatMap(RelativeClassInfo::getMethodsStream).distinct();
         }
     }
 }

@@ -9,21 +9,24 @@ import io.github.classgraph.FieldInfo;
 
 public final class RelativeFieldInfo
         extends AbstractRelative<FieldInfo, RelativeClassInfo> {
-    private final RelativeTypeSignature type;
+    private RelativeTypeSignature type;
 
     public RelativeFieldInfo(@Nonnull FieldInfo origin,
             @Nonnull RelativeClassInfo parent) {
         super(origin, Objects.requireNonNull(parent));
-        type = RelativeTypeSignature
-                .of(origin.getTypeSignatureOrTypeDescriptor(), this);
     }
 
     @Override
     public Stream<RelativeClassInfo> getDependenciesStream() {
-        return type.getDependenciesStream();
+        return getType().getDependenciesStream();
     }
 
     public RelativeTypeSignature getType() {
+        if (type == null) {
+            type = RelativeTypeSignature
+                    .of(origin.getTypeSignatureOrTypeDescriptor(), this);
+        }
+
         return type;
     }
 }

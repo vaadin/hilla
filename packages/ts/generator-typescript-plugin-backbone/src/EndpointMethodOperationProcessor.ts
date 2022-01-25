@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
 import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
@@ -7,7 +8,6 @@ import type { CallExpression, Expression, Statement, TypeNode } from 'typescript
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -26,7 +26,7 @@ export default abstract class EndpointMethodOperationProcessor {
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    owner: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST:
@@ -36,10 +36,10 @@ export default abstract class EndpointMethodOperationProcessor {
           endpointMethodName,
           operation,
           dependencies,
-          context,
+          owner,
         );
       default:
-        context.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
+        owner.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
         return undefined;
     }
   }
@@ -48,21 +48,21 @@ export default abstract class EndpointMethodOperationProcessor {
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
-  readonly #context: BackbonePluginContext;
   readonly #dependencies: DependencyManager;
   readonly #endpointMethodName: string;
   readonly #endpointName: string;
   readonly #operation: EndpointMethodOperation;
+  readonly #owner: Plugin;
 
   public constructor(
     endpointName: string,
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
-    context: BackbonePluginContext,
+    owner: Plugin,
   ) {
     super();
-    this.#context = context;
+    this.#owner = owner;
     this.#dependencies = dependencies;
     this.#endpointName = endpointName;
     this.#endpointMethodName = endpointMethodName;
@@ -71,12 +71,12 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
 
   public process(): Statement | undefined {
     const { exports, imports, paths } = this.#dependencies;
-    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
+    this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
 
     const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
-      this.#context,
+      this.#owner,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
@@ -107,11 +107,11 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   }
 
   #prepareResponseType(): TypeNode {
-    this.#context.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} POST - processing response type`);
+    this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} POST - processing response type`);
 
     const responseTypes = Object.entries(this.#operation.responses)
       .flatMap(([code, response]) =>
-        new EndpointMethodResponseProcessor(code, response, this.#dependencies, this.#context).process(),
+        new EndpointMethodResponseProcessor(code, response, this.#dependencies, this.#owner).process(),
       )
       .filter((value, index, arr) => arr.findIndex((v) => equal(v, value)) === index);
 

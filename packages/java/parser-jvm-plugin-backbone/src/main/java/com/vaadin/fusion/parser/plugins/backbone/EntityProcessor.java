@@ -41,7 +41,7 @@ final class EntityProcessor extends Processor {
     private Components prepareComponents() {
         var components = new Components();
 
-        classes.stream().filter(cls -> {
+        classes.stream().filter(cls -> !cls.get().isSynthetic()).filter(cls -> {
             var reflectedClass = new ReflectedClass(cls);
 
             return !reflectedClass.isDate() && !reflectedClass.isDateTime()

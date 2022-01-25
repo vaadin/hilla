@@ -61,6 +61,8 @@ final class SchemaProcessor {
             result = iterableSchema();
         } else if (signature.isMap()) {
             result = mapSchema();
+        } else if (signature.isOptional()) {
+            result = optionalSchema();
         } else if (signature.isTypeArgument()) {
             result = typeArgumentSchema();
         } else if (signature.isTypeParameter()) {
@@ -152,7 +154,19 @@ final class SchemaProcessor {
                 .format(signature.isDouble() ? "double" : "float");
     }
 
+    private Schema<?> optionalSchema() {
+        var typeArguments = ((ClassRefRelativeTypeSignature) signature)
+                .getTypeArguments();
+
+        return new SchemaProcessor(typeArguments.get(0), associationMap)
+                .process();
+    }
+
     private Schema<?> refSchema() {
+        if (signature.isSystem()) {
+            return anySchema();
+        }
+
         var fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
                 .get().getFullyQualifiedClassName();
 

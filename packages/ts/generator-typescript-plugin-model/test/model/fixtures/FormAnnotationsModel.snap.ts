@@ -2,7 +2,7 @@ import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, A
 import type FormAnnotations_1 from "./FormAnnotations";
 import type FormEntity_1 from "./FormEntity";
 import FormEntityModel_1 from "./FormEntityModel";
-export default class FormAnnotationsModel<T extends FormAnnotations_1 = FormAnnotations_1> extends ObjectModel_1<T> {
+class FormAnnotationsModel<T extends FormAnnotations_1 = FormAnnotations_1> extends ObjectModel_1<T> {
     static createEmptyValue: () => FormAnnotations_1;
     get list(): ArrayModel_1<string, StringModel_1> {
         return this[_getPropertyModel_1]("list", ArrayModel_1, [true, StringModel_1, [true], new NotEmpty_1()]) as ArrayModel_1<string, StringModel_1>;
@@ -74,3 +74,4 @@ export default class FormAnnotationsModel<T extends FormAnnotations_1 = FormAnno
         return this[_getPropertyModel_1]("pattern", StringModel_1, [true, new Pattern_1({ regexp: "\\d+\\..+" })]) as StringModel_1;
     }
 }
+export default FormAnnotationsModel;

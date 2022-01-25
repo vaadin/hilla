@@ -1,3 +1,4 @@
+import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
 import type { EnumSchema, ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
@@ -22,33 +23,35 @@ import { dirname } from 'path/posix';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
 import ts, { TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
-import type { BackbonePluginContext } from './utils.js';
-
-const exportDefaultModifiers = [
-  ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
-  ts.factory.createModifier(ts.SyntaxKind.DefaultKeyword),
-];
 
 export class EntityProcessor {
   readonly #component: Schema;
-  readonly #context: BackbonePluginContext;
   readonly #dependencies;
   readonly #fullyQualifiedName: string;
   readonly #name: string;
+  readonly #owner: Plugin;
   readonly #path: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(name: string, component: Schema, context: BackbonePluginContext) {
+  public constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
-    this.#context = context;
+    this.#owner = owner;
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
     this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
   }
 
+  get #id(): Identifier {
+    const id = ts.factory.createIdentifier(this.#name);
+
+    this.#dependencies.exports.default.set(id);
+
+    return id;
+  }
+
   public process(): SourceFile {
-    this.#context.logger.debug(`Processing entity: ${this.#name}`);
+    this.#owner.logger.debug(`Processing entity: ${this.#name}`);
 
     const declaration = isEnumSchema(this.#component)
       ? this.#processEnum(this.#component)
@@ -65,20 +68,21 @@ export class EntityProcessor {
   }
 
   #processClass(schema: Schema): InterfaceDeclaration | undefined {
+    const { logger } = this.#owner;
+
     if (!isObjectSchema(schema)) {
-      this.#context.logger.error(schema, `The component is not an object: ${this.#fullyQualifiedName}`);
+      logger.error(schema, `Component is not an object: '${this.#fullyQualifiedName}'`);
       return undefined;
     }
 
     if (isEmptyObject(schema)) {
-      this.#context.logger.error(`The component has no properties: ${this.#fullyQualifiedName}`);
-      return undefined;
+      logger.warn(`Component has no properties:' ${this.#fullyQualifiedName}'`);
     }
 
     return ts.factory.createInterfaceDeclaration(
       undefined,
-      exportDefaultModifiers,
-      this.#name,
+      undefined,
+      this.#id,
       undefined,
       undefined,
       this.#processTypeElements(schema as NonEmptyObjectSchema),
@@ -88,20 +92,20 @@ export class EntityProcessor {
   #processEnum({ enum: members }: EnumSchema): Statement {
     return ts.factory.createEnumDeclaration(
       undefined,
-      exportDefaultModifiers,
-      this.#name,
+      undefined,
+      this.#id,
       members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
     );
   }
 
   #processExtendedClass(schema: Schema): Statement | undefined {
-    const { logger } = this.#context;
+    const { logger } = this.#owner;
 
     if (isComposedSchema(schema)) {
       const decomposed = decomposeSchema(schema);
 
       if (decomposed.length > 2) {
-        logger.error(schema, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
+        logger.error(schema, `Schema for '${this.#fullyQualifiedName}' class component is broken.`);
         return undefined;
       }
 
@@ -146,15 +150,17 @@ export class EntityProcessor {
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
-    return Object.entries(properties).map(([name, schema]) => {
-      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
+    return properties
+      ? Object.entries(properties).map(([name, schema]) => {
+          const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
-      return ts.factory.createPropertySignature(
-        undefined,
-        name,
-        isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-        type,
-      );
-    });
+          return ts.factory.createPropertySignature(
+            undefined,
+            name,
+            isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+            type,
+          );
+        })
+      : [];
   }
 }

@@ -9,14 +9,11 @@ import io.github.classgraph.MethodParameterInfo;
 
 public final class RelativeMethodParameterInfo
         extends AbstractRelative<MethodParameterInfo, RelativeMethodInfo> {
-    private final RelativeTypeSignature type;
+    private RelativeTypeSignature type;
 
     public RelativeMethodParameterInfo(@Nonnull MethodParameterInfo origin,
             @Nonnull RelativeMethodInfo parent) {
         super(origin, Objects.requireNonNull(parent));
-
-        type = RelativeTypeSignature
-                .of(origin.getTypeSignatureOrTypeDescriptor(), this);
     }
 
     @Override
@@ -25,6 +22,11 @@ public final class RelativeMethodParameterInfo
     }
 
     public RelativeTypeSignature getType() {
+        if (type == null) {
+            type = RelativeTypeSignature
+                    .of(origin.getTypeSignatureOrTypeDescriptor(), this);
+        }
+
         return type;
     }
 }

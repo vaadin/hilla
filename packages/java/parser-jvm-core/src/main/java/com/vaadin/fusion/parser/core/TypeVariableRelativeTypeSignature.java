@@ -8,12 +8,11 @@ import io.github.classgraph.TypeVariableSignature;
 public final class TypeVariableRelativeTypeSignature
         extends AbstractRelative<TypeVariableSignature, Relative<?>>
         implements RelativeTypeSignature {
-    private final RelativeTypeParameter typeParameter;
+    private RelativeTypeParameter typeParameter;
 
     TypeVariableRelativeTypeSignature(TypeVariableSignature origin,
             Relative<?> parent) {
         super(origin, parent);
-        typeParameter = new RelativeTypeParameter(origin.resolve(), this);
     }
 
     public static Stream<ClassInfo> resolve(TypeVariableSignature signature) {
@@ -31,6 +30,10 @@ public final class TypeVariableRelativeTypeSignature
     }
 
     public RelativeTypeParameter resolve() {
+        if (typeParameter == null) {
+            typeParameter = new RelativeTypeParameter(origin.resolve(), this);
+        }
+
         return typeParameter;
     }
 }

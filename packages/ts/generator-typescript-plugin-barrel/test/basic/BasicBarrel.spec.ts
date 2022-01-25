@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import Generator from '@vaadin/generator-typescript-core/Generator.js';
 import BackbonePlugin from '@vaadin/generator-typescript-plugin-backbone';
-import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
+import LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
 import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import { readFile } from 'fs/promises';
@@ -18,7 +18,7 @@ describe('BarrelPlugin', () => {
   it('correctly generates code', async () => {
     const generator = new Generator(
       [BackbonePlugin, BarrelPlugin],
-      createLogger({ name: 'barrel-plugin-test', verbose: true }),
+      new LoggerFactory({ name: 'barrel-plugin-test', verbose: true }),
     );
     const input = await readFile(new URL(`./${sectionName}.json`, import.meta.url), 'utf8');
     const files = await generator.process(input);

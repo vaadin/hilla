@@ -1,6 +1,7 @@
 package com.vaadin.fusion.parser.plugins.nonnull;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -13,7 +14,7 @@ import com.vaadin.fusion.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.fusion.parser.utils.PluginException;
 
 public final class NonnullPlugin implements Plugin {
-    private Collection<String> annotations;
+    private Collection<String> annotations = NonnullPluginConfig.Processor.defaults;
     private int order = 100;
 
     @Override
@@ -29,8 +30,8 @@ public final class NonnullPlugin implements Plugin {
                     "NonnullPlugin should be run after BackbonePlugin");
         }
 
-        new NonnullProcessor(annotations, storage.getAssociationMap())
-                .process();
+        new NonnullProcessor(Objects.requireNonNull(annotations),
+                storage.getAssociationMap()).process();
     }
 
     @Override

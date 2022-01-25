@@ -1,5 +1,5 @@
 import Generator from '@vaadin/generator-typescript-core/Generator.js';
-import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
+import LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
 import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import { readFile } from 'fs/promises';
@@ -14,7 +14,7 @@ describe('ClientPlugin', () => {
   const sectionName = 'BasicClient';
 
   it('correctly generates code', async () => {
-    const generator = new Generator([ClientPlugin], createLogger({ name: 'client-plugin-test', verbose: true }));
+    const generator = new Generator([ClientPlugin], new LoggerFactory({ name: 'client-plugin-test', verbose: true }));
     const input = await readFile(new URL(`./${sectionName}.json`, import.meta.url), 'utf8');
     const files = await generator.process(input);
 
