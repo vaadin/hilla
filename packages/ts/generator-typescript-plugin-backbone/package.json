@@ -49,8 +49,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/generator-typescript-core": "^0.0.16",
-    "@vaadin/generator-typescript-plugin-client": "^0.0.16"
+    "@vaadin/generator-typescript-core": "^0.0.17",
+    "@vaadin/generator-typescript-plugin-client": "^0.0.17"
   },
   "dependencies": {
     "@vaadin/generator-typescript-utils": "^0.0.17",
