@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/generator-typescript-plugin-model",
+  "name": "@hilla/generator-typescript-plugin-model",
   "version": "0.0.17",
-  "description": "A Fusion TypeScript Generator plugin to generate form models",
+  "description": "A Hilla TypeScript Generator plugin to generate form models",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -28,20 +28,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaadin/fusion.git",
+    "url": "https://github.com/vaadin/hilla.git",
     "directory": "packages/ts/generator-typescript-plugin-model"
   },
   "keywords": [
-    "fusion",
+    "hilla",
     "typescript",
     "generator"
   ],
   "author": "Vaadin Ltd.",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/fusion/issues"
+    "url": "https://github.com/vaadin/hilla/issues"
   },
-  "homepage": "https://vaadin.com/fusion",
+  "homepage": "https://hilla.dev",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
@@ -49,12 +49,12 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/form": "^0.0.17",
-    "@vaadin/generator-typescript-core": "^0.0.17",
-    "@vaadin/generator-typescript-plugin-backbone": "^0.0.17"
+    "@hilla/form": "^0.0.17",
+    "@hilla/generator-typescript-core": "^0.0.17",
+    "@hilla/generator-typescript-plugin-backbone": "^0.0.17"
   },
   "dependencies": {
-    "@vaadin/generator-typescript-utils": "^0.0.17",
+    "@hilla/generator-typescript-utils": "^0.0.17",
     "fast-deep-equal": "^3.1.3",
     "openapi-types": "^9.3.0",
     "typescript": "^4.5.2"
@@ -65,8 +65,8 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
-    "@vaadin/generator-typescript-core": "^0.0.17",
-    "@vaadin/generator-typescript-plugin-client": "^0.0.17",
+    "@hilla/generator-typescript-core": "^0.0.17",
+    "@hilla/generator-typescript-plugin-client": "^0.0.17",
     "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.4.0",

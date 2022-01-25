@@ -1,5 +1,5 @@
-import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
+import Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';

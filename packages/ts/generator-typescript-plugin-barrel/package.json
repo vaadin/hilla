@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/generator-typescript-plugin-barrel",
+  "name": "@hilla/generator-typescript-plugin-barrel",
   "version": "0.0.17",
-  "description": "A Fusion TypeScript Generator plugin to generate barrel file",
+  "description": "A Hilla TypeScript Generator plugin to generate barrel file",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -28,20 +28,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaadin/fusion.git",
+    "url": "https://github.com/vaadin/hilla.git",
     "directory": "packages/ts/generator-typescript-utils"
   },
   "keywords": [
-    "fusion",
+    "hilla",
     "typescript",
     "generator"
   ],
   "author": "Vaadin Ltd.",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/fusion/issues"
+    "url": "https://github.com/vaadin/hilla/issues"
   },
-  "homepage": "https://vaadin.com/fusion",
+  "homepage": "https://hilla.dev",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}"
   ],
@@ -49,11 +49,11 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/generator-typescript-core": "^0.0.17",
-    "@vaadin/generator-typescript-plugin-backbone": "^0.0.17"
+    "@hilla/generator-typescript-core": "^0.0.17",
+    "@hilla/generator-typescript-plugin-backbone": "^0.0.17"
   },
   "dependencies": {
-    "@vaadin/generator-typescript-utils": "^0.0.17",
+    "@hilla/generator-typescript-utils": "^0.0.17",
     "typescript": "^4.5.2"
   },
   "devDependencies": {
@@ -62,8 +62,8 @@
     "@types/node": "^16.11.1",
     "@types/sinon": "^10.0.6",
     "@types/sinon-chai": "^3.2.5",
-    "@vaadin/generator-typescript-core": "^0.0.17",
-    "@vaadin/generator-typescript-plugin-backbone": "^0.0.17",
+    "@hilla/generator-typescript-core": "^0.0.17",
+    "@hilla/generator-typescript-plugin-backbone": "^0.0.17",
     "c8": "^7.10.0",
     "chai": "^4.3.4",
     "concurrently": "^6.4.0",

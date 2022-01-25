@@ -26,7 +26,7 @@ describe('form/Index', () => {
     await import('../src');
     assert.isDefined($wnd.Vaadin);
     assert.isArray($wnd.Vaadin.registrations);
-    const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@vaadin/form');
+    const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@hilla/form');
     assert.lengthOf(formRegistrations, 1);
   });
 });

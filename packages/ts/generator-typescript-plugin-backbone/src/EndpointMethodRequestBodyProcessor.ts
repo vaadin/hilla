@@ -1,11 +1,11 @@
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
   NonEmptyObjectSchema,
   Schema,
-} from '@vaadin/generator-typescript-core/Schema.js';
-import type DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
+} from '@hilla/generator-typescript-core/Schema.js';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';

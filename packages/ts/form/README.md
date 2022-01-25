@@ -1,17 +1,17 @@
-# Vaadin Form
+# Hilla Form
 
 [API documentation ↗](https://vaadin.com/docs/latest/fusion/forms/appendix-client-side-form-binding-reference)
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form)
+[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/form.svg)](https://www.npmjs.com/package/@hilla/form)
 
 A set of utilities for building forms with TypeScript and [Lit](https://lit.dev/), including data binding, validation, code generation, backend integration, Lit directives, and more.
 
-A part of the Fusion project.
+A part of the Hilla project.
 
 ## Installation
 
 ```bash
-$ npm install @vaadin/form
+$ npm install @hilla/form
 ```
 
 ## Contribution

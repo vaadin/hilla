@@ -18,13 +18,13 @@ import org.apache.maven.project.MavenProject;
 final class GeneratorProcessor {
     private static final List<GeneratorConfiguration.Plugin> DEFAULT_PLUGINS = Arrays
             .asList(new GeneratorConfiguration.Plugin(
-                    "@vaadin/generator-typescript-plugin-client"),
+                    "@hilla/generator-typescript-plugin-client"),
                     new GeneratorConfiguration.Plugin(
-                            "@vaadin/generator-typescript-plugin-backbone"),
+                            "@hilla/generator-typescript-plugin-backbone"),
                     new GeneratorConfiguration.Plugin(
-                            "@vaadin/generator-typescript-plugin-barrel"),
+                            "@hilla/generator-typescript-plugin-barrel"),
                     new GeneratorConfiguration.Plugin(
-                            "@vaadin/generator-typescript-plugin-model"));
+                            "@hilla/generator-typescript-plugin-model"));
 
     private final Log logger;
     private final MavenProject project;

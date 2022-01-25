@@ -1,8 +1,8 @@
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import createFullyUniqueIdentifier from '@vaadin/generator-typescript-utils/createFullyUniqueIdentifier.js';
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import createFullyUniqueIdentifier from '@hilla/generator-typescript-utils/createFullyUniqueIdentifier.js';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import type { SourceFile } from 'typescript';
 import ts from 'typescript';
 
@@ -19,10 +19,7 @@ export default class ClientProcessor {
     this.#owner.logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());
-    const clientClassId = imports.named.add(
-      paths.createBareModulePath('@vaadin/fusion-frontend', false),
-      'ConnectClient',
-    );
+    const clientClassId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'ConnectClient');
 
     const clientVarId = createFullyUniqueIdentifier('client');
     exports.default.set(clientVarId);

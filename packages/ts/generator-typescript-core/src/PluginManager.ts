@@ -1,4 +1,4 @@
-import type LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
+import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import type Plugin from './Plugin.js';
 import type { PluginConstructor } from './Plugin.js';
 import type ReferenceResolver from './ReferenceResolver.js';

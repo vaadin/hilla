@@ -229,9 +229,9 @@ function isFlowLoaded(): boolean {
 }
 
 /**
- * Vaadin Connect client class is a low-level network calling utility. It stores
+ * Hilla Connect client class is a low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
- * on the Vaadin backend.
+ * on the Hilla backend.
  *
  * Example usage:
  *
@@ -252,7 +252,7 @@ function isFlowLoaded(): boolean {
  */
 export class ConnectClient {
   /**
-   * The Vaadin endpoint prefix
+   * The Hilla endpoint prefix
    */
   public prefix = '/connect';
 

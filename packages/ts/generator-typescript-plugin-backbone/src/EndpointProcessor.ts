@@ -1,8 +1,8 @@
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import ClientPlugin from '@vaadin/generator-typescript-plugin-client';
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import ClientPlugin from '@hilla/generator-typescript-plugin-client';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
+import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';

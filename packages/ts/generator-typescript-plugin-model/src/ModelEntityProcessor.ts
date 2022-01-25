@@ -1,6 +1,6 @@
 import type { ClassElement, Identifier, SourceFile, Statement } from 'typescript';
 import ts, { ClassDeclaration } from 'typescript';
-import type { ReferenceSchema, Schema } from '@vaadin/generator-typescript-core/Schema.js';
+import type { ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -10,16 +10,16 @@ import {
   isObjectSchema,
   isReferenceSchema,
   ObjectSchema,
-} from '@vaadin/generator-typescript-core/Schema.js';
+} from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
-} from '@vaadin/generator-typescript-core/utils.js';
-import DependencyManager from '@vaadin/generator-typescript-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/generator-typescript-utils/dependencies/PathManager.js';
-import createSourceFile from '@vaadin/generator-typescript-utils/createSourceFile.js';
+} from '@hilla/generator-typescript-core/utils.js';
+import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
+import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
-import type Plugin from '@vaadin/generator-typescript-core/Plugin.js';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import ModelSchemaProcessor from './ModelSchemaProcessor.js';
 
 export class ModelEntityProcessor {
@@ -73,7 +73,7 @@ export class ModelEntityProcessor {
   }
 
   #getGetPropertyModelSymbol(): Identifier {
-    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@vaadin/form', '_getPropertyModel');
+    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@hilla/form', '_getPropertyModel');
     return this.#getPropertyModelSymbol;
   }
 
@@ -143,7 +143,7 @@ export class ModelEntityProcessor {
       entitySchema = childSchema;
       parent = this.#processParentClass(parentSchema);
     } else {
-      parent = this.#dependencies.imports.named.add('@vaadin/form', 'ObjectModel');
+      parent = this.#dependencies.imports.named.add('@hilla/form', 'ObjectModel');
     }
 
     return this.#processModelClass(entitySchema, entity, parent);

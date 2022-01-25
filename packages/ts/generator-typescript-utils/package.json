@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/generator-typescript-utils",
+  "name": "@hilla/generator-typescript-utils",
   "version": "0.0.17",
-  "description": "A set of utils for developing Fusion generator plugins",
+  "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -49,20 +49,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vaadin/fusion.git",
+    "url": "https://github.com/vaadin/hilla.git",
     "directory": "packages/ts/generator-typescript-utils"
   },
   "keywords": [
-    "fusion",
+    "hilla",
     "typescript",
     "generator"
   ],
   "author": "Vaadin Ltd.",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/vaadin/fusion/issues"
+    "url": "https://github.com/vaadin/hilla/issues"
   },
-  "homepage": "https://vaadin.com/fusion",
+  "homepage": "https://hilla.dev",
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}",
     "dependencies/*.{d.ts.map,d.ts,js.map,js}",

@@ -1,6 +1,6 @@
-import type File from '@vaadin/generator-typescript-core/File.js';
-import Plugin, { PluginConstructor } from '@vaadin/generator-typescript-core/Plugin.js';
-import type LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
+import type File from '@hilla/generator-typescript-core/File.js';
+import Plugin, { PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
+import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import { mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { createRequire } from 'module';
 import { dirname, isAbsolute, join, resolve } from 'path';

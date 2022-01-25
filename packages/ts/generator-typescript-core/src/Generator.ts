@@ -1,5 +1,5 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
-import type LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
+import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import ts from 'typescript';

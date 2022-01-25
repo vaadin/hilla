@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/fusion",
+  "name": "@hilla/hilla",
   "private": true,
-  "description": "Fusion frontend & NodeJS code",
+  "description": "Hilla frontend & NodeJS code",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/vaadin/fusion"
+    "url": "github.com/vaadin/hilla"
   },
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",

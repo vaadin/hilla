@@ -1,6 +1,6 @@
-import Generator from '@vaadin/generator-typescript-core/Generator.js';
-import LoggerFactory from '@vaadin/generator-typescript-utils/LoggerFactory.js';
-import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
+import Generator from '@hilla/generator-typescript-core/Generator.js';
+import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
+import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import { readFile } from 'fs/promises';
 import sinonChai from 'sinon-chai';

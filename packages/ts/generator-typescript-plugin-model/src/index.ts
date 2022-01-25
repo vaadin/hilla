@@ -1,6 +1,6 @@
-import Plugin from '@vaadin/generator-typescript-core/Plugin.js';
-import { isEnumSchema } from '@vaadin/generator-typescript-core/Schema.js';
-import type SharedStorage from '@vaadin/generator-typescript-core/SharedStorage';
+import Plugin from '@hilla/generator-typescript-core/Plugin.js';
+import { isEnumSchema } from '@hilla/generator-typescript-core/Schema.js';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
