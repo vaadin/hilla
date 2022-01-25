@@ -31,8 +31,7 @@ public final class NonnullPlugin implements Plugin {
         }
 
         new NonnullProcessor(Objects.requireNonNull(annotations),
-                storage.getAssociationMap())
-                .process();
+                storage.getAssociationMap()).process();
     }
 
     @Override
