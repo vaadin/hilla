@@ -1,24 +1,28 @@
+/* eslint-disable symbol-description */
 import {
-  isNullableSchema,
-  Schema,
-  decomposeSchema,
-  isComposedSchema,
-  NonComposedSchema,
-  isReferenceSchema,
-  isNumberSchema,
-  isIntegerSchema,
-  isStringSchema,
-  isMapSchema,
-  isArraySchema,
-  isBooleanSchema,
+  ArraySchema,
+  BooleanSchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
-  ReferenceSchema,
-  ArraySchema,
+  decomposeSchema,
+  IntegerSchema,
+  isArraySchema,
+  isBooleanSchema,
+  isComposedSchema,
+  isIntegerSchema,
+  isMapSchema,
+  isNullableSchema,
+  isNumberSchema,
+  isReferenceSchema,
+  isStringSchema,
   MapSchema,
+  NumberSchema,
+  ReferenceSchema,
+  Schema,
+  StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
-import type { Expression, Identifier, TypeNode } from 'typescript';
+import type { Expression, Identifier, TypeNode, TypeReferenceNode } from 'typescript';
 import ts from 'typescript';
 import {
   AnnotatedSchema,
@@ -60,122 +64,269 @@ export type ModelSchemaProcessorResult = Readonly<
   [type: TypeNode, modelType: TypeNode, model: Identifier, args: readonly Expression[]]
 >;
 
-export default class ModelSchemaProcessor {
-  readonly #schema: Schema;
-  readonly #dependencies: DependencyManager;
+const $dependencies = Symbol();
+const $processArray = Symbol();
+const $processRecord = Symbol();
+const $processReference = Symbol();
+const $processString = Symbol();
+const $processNumber = Symbol();
+const $processBoolean = Symbol();
+const $processUnknown = Symbol();
+const $originalSchema = Symbol();
+const $schema = Symbol();
 
-  public constructor(schema: Schema, dependencies: DependencyManager) {
-    this.#schema = schema;
-    this.#dependencies = dependencies;
+export abstract class ModelSchemaPartProcessor<T> {
+  readonly [$dependencies]: DependencyManager;
+  readonly [$originalSchema]: Schema;
+  readonly [$schema]: Schema;
+
+  constructor(schema: Schema, dependencies: DependencyManager) {
+    this[$dependencies] = dependencies;
+    this[$originalSchema] = schema;
+    this[$schema] = isComposedSchema(schema) ? decomposeSchema(schema)[0] : schema;
   }
 
-  public process(): ModelSchemaProcessorResult {
-    const unwrappedSchema = (
-      isComposedSchema(this.#schema) ? decomposeSchema(this.#schema)[0] : this.#schema
-    ) as NonComposedSchema;
+  process(): T {
+    const schema = this[$schema];
 
-    let type: TypeNode;
-    let modelType: TypeNode;
-    let model: Identifier;
-    let args: readonly Expression[] = [];
-    if (isReferenceSchema(unwrappedSchema)) {
-      [type, modelType, model, args] = this.#processReference(unwrappedSchema);
-    } else if (isArraySchema(unwrappedSchema)) {
-      [type, modelType, model, args] = this.#processArray(unwrappedSchema);
-    } else if (isMapSchema(unwrappedSchema)) {
-      [type, modelType, model, args] = this.#processRecord(unwrappedSchema);
-    } else if (isStringSchema(unwrappedSchema)) {
-      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
-      model = this.#getBuiltinFormExport('StringModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
-    } else if (isNumberSchema(unwrappedSchema) || isIntegerSchema(unwrappedSchema)) {
-      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
-      model = this.#getBuiltinFormExport('NumberModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
-    } else if (isBooleanSchema(unwrappedSchema)) {
-      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
-      model = this.#getBuiltinFormExport('BooleanModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
-    } else {
-      type = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
-      model = this.#getBuiltinFormExport('ObjectModel');
-      modelType = ts.factory.createTypeReferenceNode(model);
+    if (isReferenceSchema(schema)) {
+      return this[$processReference](schema);
     }
 
-    const optionalArg = isNullableSchema(this.#schema) ? ts.factory.createTrue() : ts.factory.createFalse();
-
-    if (isAnnotatedSchema(unwrappedSchema)) {
-      args = [...args, ...this.#getValidatorsFromAnnotations(unwrappedSchema)];
+    if (isArraySchema(schema)) {
+      return this[$processArray](schema);
     }
 
-    if (isValidationConstrainedSchema(unwrappedSchema)) {
-      args = [...args, ...this.#getValidatorsFromValidationConstraints(unwrappedSchema)];
+    if (isMapSchema(schema)) {
+      return this[$processRecord](schema);
     }
 
-    return [type, modelType, model, [optionalArg, ...args]];
+    if (isStringSchema(schema)) {
+      return this[$processString](schema);
+    }
+
+    if (isNumberSchema(schema) || isIntegerSchema(schema)) {
+      return this[$processNumber](schema);
+    }
+
+    if (isBooleanSchema(schema)) {
+      return this[$processBoolean](schema);
+    }
+
+    return this[$processUnknown](schema);
   }
 
-  #processReference(schema: ReferenceSchema): ModelSchemaProcessorResult {
-    const schemaPath = convertReferenceSchemaToPath(schema);
-    const typeName = convertReferenceSchemaToSpecifier(schema);
-    const { paths, imports } = this.#dependencies;
-    const typePath = paths.createRelativePath(schemaPath);
-    const modelPath = paths.createRelativePath(`${schemaPath}Model`);
-    const modelName = `${typeName}Model`;
-    const refType = imports.default.getIdentifier(typePath) ?? imports.default.add(typePath, typeName, true);
-    const type = ts.factory.createTypeReferenceNode(refType);
-    const model = imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
-    const modelType = ts.factory.createTypeReferenceNode(model);
-    return [type, modelType, model, []];
+  protected abstract [$processArray](schema: ArraySchema): T;
+  protected abstract [$processBoolean](schema: BooleanSchema): T;
+  protected abstract [$processNumber](schema: NumberSchema | IntegerSchema): T;
+  protected abstract [$processRecord](schema: MapSchema): T;
+  protected abstract [$processReference](schema: ReferenceSchema): T;
+  protected abstract [$processString](schema: StringSchema): T;
+  protected abstract [$processUnknown](schema: Schema): T;
+}
+
+class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode> {
+  protected override [$processArray](schema: ArraySchema): TypeNode {
+    return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [
+      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+    ]);
   }
 
-  #processArray(schema: ArraySchema): ModelSchemaProcessorResult {
-    const model = this.#getBuiltinFormExport('ArrayModel');
-    const [itemType, itemModelType, itemModel, itemArgs] = new ModelSchemaProcessor(
-      schema.items,
-      this.#dependencies,
-    ).process();
-    const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [itemType]);
-    const modelType = ts.factory.createTypeReferenceNode(model, [itemType, itemModelType]);
-    return [type, modelType, model, [itemModel, ts.factory.createArrayLiteralExpression(itemArgs)]];
+  protected override [$processBoolean](_: BooleanSchema): TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
   }
 
-  #processRecord(schema: MapSchema): ModelSchemaProcessorResult {
-    const model = this.#getBuiltinFormExport('ObjectModel');
+  protected override [$processNumber](_: NumberSchema | IntegerSchema): TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+  }
 
-    let valueType: TypeNode;
-    if (typeof schema.additionalProperties === 'boolean') {
-      valueType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
-    } else {
-      const valueSchema: Schema = schema.additionalProperties;
-      [valueType] = new ModelSchemaProcessor(valueSchema, this.#dependencies).process();
-    }
+  protected override [$processRecord]({ additionalProperties: props }: MapSchema): TypeNode {
+    const valueType =
+      typeof props === 'boolean'
+        ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+        : new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process();
 
-    const type = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
+    return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
       valueType,
     ]);
-    const modelType = ts.factory.createTypeReferenceNode(model, [type]);
-    return [type, modelType, model, []];
   }
 
+  protected override [$processReference](schema: ReferenceSchema): TypeNode {
+    const { paths, imports } = this[$dependencies];
+    const typeName = convertReferenceSchemaToSpecifier(schema);
+    const typePath = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+    return ts.factory.createTypeReferenceNode(
+      imports.default.getIdentifier(typePath) ?? imports.default.add(typePath, typeName, true),
+    );
+  }
+
+  protected override [$processString](_: StringSchema): TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+  }
+
+  protected override [$processUnknown](_: Schema): TypeNode {
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+  }
+}
+
+class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier> {
+  static importBuiltInFormModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
+    const modelPath = paths.createBareModulePath('@hilla/form', false);
+    return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
+  }
+
+  declare ['constructor']: typeof ModelSchemaIdentifierProcessor;
+
+  override [$processArray](_: ArraySchema): Identifier {
+    return this.constructor.importBuiltInFormModel('ArrayModel', this[$dependencies]);
+  }
+
+  override [$processBoolean](_: BooleanSchema): Identifier {
+    return this.constructor.importBuiltInFormModel('BooleanModel', this[$dependencies]);
+  }
+
+  override [$processNumber](_: NumberSchema | IntegerSchema): Identifier {
+    return this.constructor.importBuiltInFormModel('NumberModel', this[$dependencies]);
+  }
+
+  override [$processRecord](_: MapSchema): Identifier {
+    return this.constructor.importBuiltInFormModel('ObjectModel', this[$dependencies]);
+  }
+
+  override [$processReference](schema: ReferenceSchema): Identifier {
+    const { paths, imports } = this[$dependencies];
+    const modelName = `${convertReferenceSchemaToSpecifier(schema)}Model`;
+    const modelPath = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
+    return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
+  }
+
+  override [$processString](_: StringSchema): Identifier {
+    return this.constructor.importBuiltInFormModel('StringModel', this[$dependencies]);
+  }
+
+  override [$processUnknown](_: Schema): Identifier {
+    return this.constructor.importBuiltInFormModel('ObjectModel', this[$dependencies]);
+  }
+}
+
+export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeReferenceNode> {
+  readonly #id: ModelSchemaIdentifierProcessor;
+
+  constructor(schema: Schema, dependencies: DependencyManager) {
+    super(schema, dependencies);
+    this.#id = new ModelSchemaIdentifierProcessor(schema, dependencies);
+  }
+
+  protected override [$processArray](schema: ArraySchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processArray](schema), [
+      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+      new ModelSchemaTypeProcessor(schema.items, this[$dependencies]).process(),
+    ]);
+  }
+
+  protected override [$processBoolean](schema: BooleanSchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processBoolean](schema));
+  }
+
+  protected override [$processNumber](schema: NumberSchema | IntegerSchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processNumber](schema));
+  }
+
+  protected override [$processRecord](schema: MapSchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processRecord](schema), [
+      new ModelSchemaInternalTypeProcessor(schema, this[$dependencies]).process(),
+    ]);
+  }
+
+  protected override [$processReference](schema: ReferenceSchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processReference](schema));
+  }
+
+  protected override [$processString](schema: StringSchema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processString](schema));
+  }
+
+  protected override [$processUnknown](schema: Schema): TypeReferenceNode {
+    return ts.factory.createTypeReferenceNode(this.#id[$processUnknown](schema));
+  }
+}
+
+export type CheckOptionalCallback = (schema: Schema) => boolean;
+
+export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
+  readonly #checkOptional: CheckOptionalCallback;
+
+  constructor(
+    schema: Schema,
+    dependencies: DependencyManager,
+    checkOptional: CheckOptionalCallback = isNullableSchema,
+  ) {
+    super(schema, dependencies);
+    this.#checkOptional = checkOptional;
+  }
+
+  public override process(): readonly ts.Expression[] {
+    const schema = this[$schema];
+
+    let result = super.process();
+
+    if (isAnnotatedSchema(schema)) {
+      result = [...result, ...this.#getValidatorsFromAnnotations(schema)];
+    }
+
+    if (isValidationConstrainedSchema(schema)) {
+      result = [...result, ...this.#getValidatorsFromValidationConstraints(schema)];
+    }
+
+    return [this.#checkOptional(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
+  }
+
+  protected override [$processArray](schema: ArraySchema): readonly Expression[] {
+    return [
+      new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process(),
+      ts.factory.createArrayLiteralExpression(
+        new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
+      ),
+    ];
+  }
+
+  protected override [$processBoolean](_: BooleanSchema): readonly Expression[] {
+    return [];
+  }
+
+  protected override [$processNumber](_: NumberSchema | IntegerSchema): readonly Expression[] {
+    return [];
+  }
+
+  protected override [$processRecord](_: MapSchema): readonly Expression[] {
+    return [];
+  }
+
+  protected override [$processReference](_: ReferenceSchema): readonly Expression[] {
+    return [];
+  }
+
+  protected override [$processString](_: StringSchema): readonly Expression[] {
+    return [];
+  }
+
+  protected override [$processUnknown](_: Schema): readonly Expression[] {
+    return [];
+  }
+
+  #getValidator = (annotation: Annotation): Expression =>
+    ts.factory.createNewExpression(
+      ModelSchemaIdentifierProcessor.importBuiltInFormModel(annotation.simpleName, this[$dependencies]),
+      undefined,
+      annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [],
+    );
+
   #getValidatorsFromAnnotations(schema: AnnotatedSchema): readonly Expression[] {
-    return schema['x-annotations'].map((annotationText: string) => this.#getValidator(parseAnnotation(annotationText)));
+    return schema['x-annotations'].map(parseAnnotation).map(this.#getValidator);
   }
 
   #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
-    return schema['x-validation-constraints'].map((annotation: Annotation) => this.#getValidator(annotation));
-  }
-
-  #getValidator(annotation: Annotation): Expression {
-    const validator = this.#getBuiltinFormExport(annotation.simpleName);
-    const attributeArgs = annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [];
-    return ts.factory.createNewExpression(validator, undefined, attributeArgs);
-  }
-
-  #getBuiltinFormExport(specifier: string): Identifier {
-    const { imports, paths } = this.#dependencies;
-    const modelPath = paths.createBareModulePath('@hilla/form', false);
-    return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
+    return schema['x-validation-constraints'].map(this.#getValidator);
   }
 }
