@@ -49,7 +49,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/form": "^0.0.17",
+    "@hilla/form": "^0.0.18",
     "@hilla/generator-typescript-core": "^0.0.18",
     "@hilla/generator-typescript-plugin-backbone": "^0.0.18"
   },
