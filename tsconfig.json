@@ -12,6 +12,7 @@
     "inlineSources": true,
     "importsNotUsedAsValues": "error",
     "noImplicitOverride": true,
+    "useDefineForClassFields": true,
     "useUnknownInCatchVariables": true
   },
   "include": ["packages/ts/**/*.{ts,js}", "scripts/**/*.{ts,js}", "*.{ts,js,cjs}"],

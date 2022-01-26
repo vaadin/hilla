@@ -25,8 +25,8 @@ class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends
     get entityMatrix(): ArrayModel_1<ReadonlyArray<FormEntity_1>, ArrayModel_1<FormEntity_1, FormEntityModel_1>> {
         return this[_getPropertyModel_1]("entityMatrix", ArrayModel_1, [true, ArrayModel_1, [true, FormEntityModel_1, [true]]]) as ArrayModel_1<ReadonlyArray<FormEntity_1>, ArrayModel_1<FormEntity_1, FormEntityModel_1>>;
     }
-    get nestedArrays(): ArrayModel_1<ReadonlyArray<Record<string, ReadonlyArray<string>>>, ArrayModel_1<Record<string, ReadonlyArray<string>>, ObjectModel_1<Record<string, ReadonlyArray<string>>>>> {
-        return this[_getPropertyModel_1]("nestedArrays", ArrayModel_1, [true, ArrayModel_1, [true, ObjectModel_1, [true]]]) as ArrayModel_1<ReadonlyArray<Record<string, ReadonlyArray<string>>>, ArrayModel_1<Record<string, ReadonlyArray<string>>, ObjectModel_1<Record<string, ReadonlyArray<string>>>>>;
+    get nestedArrays(): ArrayModel_1<ReadonlyArray<Readonly<Record<string, ReadonlyArray<string>>>>, ArrayModel_1<Readonly<Record<string, ReadonlyArray<string>>>, ObjectModel_1<Readonly<Record<string, ReadonlyArray<string>>>>>> {
+        return this[_getPropertyModel_1]("nestedArrays", ArrayModel_1, [true, ArrayModel_1, [true, ObjectModel_1, [true]]]) as ArrayModel_1<ReadonlyArray<Readonly<Record<string, ReadonlyArray<string>>>>, ArrayModel_1<Readonly<Record<string, ReadonlyArray<string>>>, ObjectModel_1<Readonly<Record<string, ReadonlyArray<string>>>>>>;
     }
 }
 export default FormArrayTypesModel;

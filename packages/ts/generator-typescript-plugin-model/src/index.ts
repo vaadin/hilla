@@ -1,5 +1,4 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import { isEnumSchema } from '@hilla/generator-typescript-core/Schema.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
@@ -30,9 +29,7 @@ export default class ModelPlugin extends Plugin {
     this.logger.debug('Processing entities');
 
     return schemas
-      ? Object.entries(schemas)
-          .filter(([, component]) => !isEnumSchema(component))
-          .map(([name, component]) => new ModelEntityProcessor(name, component, this).process())
+      ? Object.entries(schemas).map(([name, component]) => new ModelEntityProcessor(name, component, this).process())
       : [];
   }
 }

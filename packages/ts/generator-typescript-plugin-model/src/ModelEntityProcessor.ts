@@ -20,7 +20,7 @@ import PathManager from '@hilla/generator-typescript-utils/dependencies/PathMana
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import ModelSchemaProcessor from './ModelSchemaProcessor.js';
+import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
 
 export class ModelEntityProcessor {
   readonly #component: Schema;
@@ -84,22 +84,19 @@ export class ModelEntityProcessor {
 
     const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
-      const [, modelType, model, [, ...modelVariableArgs]] = new ModelSchemaProcessor(
+      const type = new ModelSchemaTypeProcessor(schema, this.#dependencies).process();
+      const args = new ModelSchemaExpressionProcessor(
         schema,
         this.#dependencies,
+        (_) => !requiredSet.has(name),
       ).process();
-      const optional = !requiredSet.has(name);
-      const argsArray = ts.factory.createArrayLiteralExpression([
-        optional ? ts.factory.createTrue() : ts.factory.createFalse(),
-        ...modelVariableArgs,
-      ]);
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
         undefined,
         ts.factory.createIdentifier(name),
         [],
-        modelType,
+        type,
         ts.factory.createBlock(
           [
             ts.factory.createReturnStatement(
@@ -107,9 +104,13 @@ export class ModelEntityProcessor {
                 ts.factory.createCallExpression(
                   ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
                   undefined,
-                  [ts.factory.createStringLiteral(name), model, argsArray],
+                  [
+                    ts.factory.createStringLiteral(name),
+                    type.typeName as Identifier,
+                    ts.factory.createArrayLiteralExpression(args),
+                  ],
                 ),
-                modelType,
+                type,
               ),
             ),
           ],
