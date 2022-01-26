@@ -146,11 +146,9 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
         ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
         : new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process();
 
-    return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Readonly'), [
-      ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
-        ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-        valueType,
-      ]),
+    return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
+      ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+      valueType,
     ]);
   }
 
