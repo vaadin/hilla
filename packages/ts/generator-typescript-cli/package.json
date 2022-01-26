@@ -42,7 +42,7 @@
     "tsgen": "bin/index.js"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^0.0.17"
+    "@hilla/generator-typescript-core": "^0.0.18"
   },
   "dependencies": {
     "@hilla/generator-typescript-utils": "^0.0.18",
