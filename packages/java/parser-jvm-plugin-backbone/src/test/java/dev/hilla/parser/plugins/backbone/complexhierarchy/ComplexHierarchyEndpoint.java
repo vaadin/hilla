@@ -20,8 +20,7 @@ import dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarch
 @Endpoint
 public class ComplexHierarchyEndpoint {
     // Using ComplexHierarchyModel from another package is intentional here to
-    // verify the
-    // generator's parsing logic for that case
+    // verify the generator's parsing logic for that case
     public ComplexHierarchyModel getModel() {
         return new ComplexHierarchyModel();
     }

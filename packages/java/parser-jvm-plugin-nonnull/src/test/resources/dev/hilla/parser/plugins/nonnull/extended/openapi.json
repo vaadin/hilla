@@ -35,7 +35,7 @@
                         "nullable": true,
                         "anyOf": [
                           {
-                            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                            "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                           }
                         ]
                       }
@@ -61,7 +61,7 @@
                       "nullable": true,
                       "anyOf": [
                         {
-                          "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                         }
                       ]
                     }
@@ -228,7 +228,7 @@
                       "nullable": true,
                       "anyOf": [
                         {
-                          "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                         }
                       ]
                     }
@@ -250,7 +250,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                       }
                     ]
                   }
@@ -328,10 +328,10 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
           },
           {
             "type": "object",
@@ -350,7 +350,7 @@
           }
         ]
       },
-      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",
         "properties": {
           "publicField": {
@@ -370,7 +370,7 @@
                 "nullable": true,
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                    "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                   }
                 ]
               }
@@ -391,7 +391,7 @@
           }
         }
       },
-      "com.vaadin.fusion.parser.plugins.nonnull.basic.BasicEndpoint": {
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint": {
         "type": "object"
       }
     }

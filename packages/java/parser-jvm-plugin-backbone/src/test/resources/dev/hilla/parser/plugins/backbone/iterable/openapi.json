@@ -32,7 +32,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -59,7 +59,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -86,7 +86,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -113,7 +113,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -140,7 +140,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -167,7 +167,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
                   }
@@ -181,7 +181,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.iterable.IterableEndpoint$Foo": {
+      "dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo": {
         "type": "object",
         "properties": {
           "bar": {

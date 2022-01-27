@@ -46,7 +46,7 @@ final class EntityProcessor extends Processor {
             return !reflectedClass.isDate() && !reflectedClass.isDateTime()
                     && !reflectedClass.isIterable() && !reflectedClass.isMap();
         }).flatMap(cls -> cls.getInheritanceChain().getClassesStream())
-                .forEach(entity -> {
+                .distinct().forEach(entity -> {
                     if (components.getSchemas() == null
                             || (!components.getSchemas()
                                     .containsKey(entity.get().getName()))) {

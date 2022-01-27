@@ -67,7 +67,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection"
                     }
                   ]
                 }
@@ -90,7 +90,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.shadowedname.subpackage.Collection"
                     }
                   ]
                 }
@@ -103,7 +103,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection": {
+      "dev.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection": {
         "type": "object",
         "properties": {
           "author": {
@@ -120,7 +120,7 @@
           }
         }
       },
-      "com.vaadin.fusion.parser.plugins.backbone.shadowedname.subpackage.Collection": {
+      "dev.hilla.parser.plugins.backbone.shadowedname.subpackage.Collection": {
         "type": "object",
         "properties": {
           "items": {

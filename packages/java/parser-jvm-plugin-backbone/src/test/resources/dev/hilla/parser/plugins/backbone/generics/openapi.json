@@ -153,7 +153,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
                     ]
                   }
@@ -171,7 +171,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                     }
                   ]
                 }
@@ -227,7 +227,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
                     ]
                   }
@@ -245,7 +245,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                     }
                   ]
                 }
@@ -269,7 +269,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
                       }
                     ]
                   }
@@ -287,7 +287,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
                     }
                   ]
                 }
@@ -300,7 +300,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity": {
+      "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity": {
         "type": "object",
         "properties": {
           "bareGenericTypeProperty": {
@@ -308,14 +308,14 @@
           }
         }
       },
-      "com.vaadin.fusion.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
+      "dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
         "type": "object",
         "properties": {
           "extendedGenericTypeReference": {
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
               }
             ]
           }
