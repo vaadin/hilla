@@ -3,7 +3,7 @@ package dev.hilla.parser.core;
 import static dev.hilla.parser.core.ParserUtils.isJDKClass;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -233,7 +233,7 @@ public final class RelativeClassInfo
         public Collection<RelativeClassInfo> getClasses() {
             if (chain == null) {
                 var superClasses = getSuperClasses();
-                chain = new HashSet<>(superClasses.size() + 1);
+                chain = new LinkedHashSet<>(superClasses.size() + 1);
                 chain.add(RelativeClassInfo.this);
                 chain.addAll(superClasses);
             }
