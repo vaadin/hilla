@@ -1,0 +1,296 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ValidationEndpoint"
+    }
+  ],
+  "paths": {
+    "/ValidationEndpoint/getValidationData": {
+      "post": {
+        "tags": ["ValidationEndpoint"],
+        "operationId": "ValidationEndpoint_getValidationData_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData": {
+        "type": "object",
+        "properties": {
+          "assertFalse": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertFalse"
+              }
+            ]
+          },
+          "assertTrue": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ]
+          },
+          "decimalMax": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "inclusive": false,
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMax"
+              }
+            ]
+          },
+          "decimalMin": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMin"
+              }
+            ]
+          },
+          "digits": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                },
+                "simpleName": "Digits"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo"
+                },
+                "simpleName": "Email"
+              }
+            ]
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ]
+          },
+          "isNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Null"
+              }
+            ]
+          },
+          "list": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "max": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": 2
+                },
+                "simpleName": "Max"
+              }
+            ]
+          },
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo",
+                  "value": 1
+                },
+                "simpleName": "Min"
+              }
+            ]
+          },
+          "negative": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Negative"
+              }
+            ]
+          },
+          "negativeOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NegativeOrZero"
+              }
+            ]
+          },
+          "notBlank": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
+          },
+          "notEmpty": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotEmpty"
+              }
+            ]
+          },
+          "notNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "notNullEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+              }
+            ]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ]
+          },
+          "pattern": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "regexp": "\\d+\\..+"
+                },
+                "simpleName": "Pattern"
+              }
+            ]
+          },
+          "positive": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Positive"
+              }
+            ]
+          },
+          "positiveOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "PositiveOrZero"
+              }
+            ]
+          },
+          "size": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size"
+              }
+            ]
+          },
+          "size1": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "min": 1
+                },
+                "simpleName": "Size"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

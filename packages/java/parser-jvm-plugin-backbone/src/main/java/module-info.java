@@ -1,12 +1,12 @@
-module com.vaadin.fusion.parser.plugins.backbone {
+module dev.hilla.parser.plugins.backbone {
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires io.github.classgraph;
     requires jsr305;
-    requires com.vaadin.fusion.parser.core;
     requires com.fasterxml.jackson.databind;
-    requires com.vaadin.fusion.parser.utils;
+    requires dev.hilla.parser.utils;
+    requires dev.hilla.parser.core;
 
-    opens com.vaadin.fusion.parser.plugins.backbone to com.vaadin.fusion.parser.core;
-    exports com.vaadin.fusion.parser.plugins.backbone;
+    exports dev.hilla.parser.plugins.backbone;
+    opens dev.hilla.parser.plugins.backbone to dev.hilla.parser.core;
 }

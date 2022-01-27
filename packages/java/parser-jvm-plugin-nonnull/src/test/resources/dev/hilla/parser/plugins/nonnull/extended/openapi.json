@@ -1,0 +1,399 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ExtendedEndpoint"
+    }
+  ],
+  "paths": {
+    "/ExtendedEndpoint/superComplexType": {
+      "post": {
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_superComplexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "nullable": true
+                        }
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/complexType": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_complexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                          }
+                        ]
+                      }
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "nullable": true,
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
+                        }
+                      ]
+                    }
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/mixedAnnotations": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_mixedAnnotations_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parameter": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/nonTypeAnnotation": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_nonTypeAnnotation_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nonTypeParameter": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/nullableType": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_nullableType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nullableParameter": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/simpleType": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_simpleType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "str": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/typeWithTypeArgument": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_typeWithTypeArgument_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "nullable": true,
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint": {
+        "type": "object"
+      },
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "mixedAnnotations": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "nonTypeAnnotation": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
+        "type": "object",
+        "properties": {
+          "publicField": {
+            "type": "string",
+            "nullable": true
+          },
+          "protectedField": {
+            "type": "string",
+            "nullable": true
+          },
+          "complexTypeField": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "nullable": true,
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                  }
+                ]
+              }
+            },
+            "nullable": true
+          },
+          "nullableField": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeWithTypeArgument": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
