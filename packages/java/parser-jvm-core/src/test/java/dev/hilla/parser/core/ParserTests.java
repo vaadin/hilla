@@ -10,10 +10,9 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.testutils.ResourceLoader;
-
 import dev.hilla.parser.core.basic.BasicPlugin;
 import dev.hilla.parser.core.dependency.DependencyPlugin;
+import dev.hilla.parser.testutils.ResourceLoader;
 
 public class ParserTests {
     private final ResourceLoader resourceLoader;
@@ -30,7 +29,8 @@ public class ParserTests {
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        basicPluginEndpointName = dev.hilla.parser.core.basic.Endpoint.class.getName();
+        basicPluginEndpointName = dev.hilla.parser.core.basic.Endpoint.class
+                .getName();
         dependencyPluginEndpointName = dev.hilla.parser.core.dependency.Endpoint.class
                 .getName();
 
