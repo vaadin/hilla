@@ -1,4 +1,4 @@
-module com.vaadin.fusion.parser.core {
+module dev.hilla.parser.core {
     requires io.github.classgraph;
     requires jsr305;
     requires io.swagger.v3.oas.models;
@@ -7,6 +7,6 @@ module com.vaadin.fusion.parser.core {
     requires io.swagger.v3.core;
     requires slf4j.api;
 
-    exports com.vaadin.fusion.parser.core;
-    opens com.vaadin.fusion.parser.core to com.fasterxml.jackson.databind;
+    opens dev.hilla.parser.core to com.fasterxml.jackson.databind;
+    exports dev.hilla.parser.core;
 }
