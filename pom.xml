@@ -15,7 +15,6 @@
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
     <module>packages/java/parser-jvm-plugin-nonnull</module>
-    <module>packages/java/parser-jvm-plugin-trasfertypes</module>
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
   </modules>
