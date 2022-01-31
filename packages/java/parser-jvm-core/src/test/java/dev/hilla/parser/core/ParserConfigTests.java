@@ -41,7 +41,7 @@ public class ParserConfigTests {
     public void setup() throws URISyntaxException {
         targetDir = resourceLoader.findTargetDirPath();
         defaultClassPathElements = Set.of(targetDir.toString());
-        defaultEndpointAnnotationName = "com.vaadin.fusion.Endpoint";
+        defaultEndpointAnnotationName = "dev.hilla.Endpoint";
         defaultOpenAPI = new OpenAPI()
                 .info(new Info().title("Vaadin Application").version("1.0.0"))
                 .servers(List

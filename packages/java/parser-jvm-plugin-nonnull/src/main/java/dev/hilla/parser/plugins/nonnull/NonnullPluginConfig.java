@@ -47,7 +47,7 @@ public class NonnullPluginConfig
                 "org.jetbrains.annotations.NotNull", "lombok.NonNull",
                 "androidx.annotation.NonNull",
                 "org.eclipse.jdt.annotation.NonNull",
-                "com.vaadin.fusion.Nonnull");
+                "dev.hilla.Nonnull");
 
         public Processor(NonnullPluginConfig config) {
             super(config, defaults);
