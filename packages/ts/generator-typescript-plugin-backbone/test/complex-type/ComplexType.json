@@ -52,7 +52,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel"
                     }
                   ]
                 }
@@ -65,7 +65,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel": {
+      "dev.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel": {
         "type": "object",
         "properties": {
           "complexList": {
