@@ -39,8 +39,8 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
 
             executor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
-            throw new EndpointCodeGeneratorMojoException("TS code generation failed",
-                    e);
+            throw new EndpointCodeGeneratorMojoException(
+                    "TS code generation failed", e);
         }
     }
 
@@ -56,8 +56,8 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
 
             return executor.process();
         } catch (ParserException e) {
-            throw new EndpointCodeGeneratorMojoException("Java code parsing failed",
-                    e);
+            throw new EndpointCodeGeneratorMojoException(
+                    "Java code parsing failed", e);
         }
     }
 }
