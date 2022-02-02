@@ -12,7 +12,7 @@
 
   <artifactId>hilla-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maevn Plugin for Hilla</name>
+  <name>Maven Plugin for Hilla</name>
 
   <properties>
     <maven.version>3.8.1</maven.version>

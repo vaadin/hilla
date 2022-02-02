@@ -126,12 +126,10 @@ final class ParserProcessor {
     }
 
     private void preparePlugins(ParserConfig.Builder builder) {
-        // For loaded plugins we use SortedSet to have them sorted in order the
-        // user defined.
         var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getOrder(), plugin.getConfiguration()))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toList());
 
         builder.plugins(loadedPlugins);
     }
