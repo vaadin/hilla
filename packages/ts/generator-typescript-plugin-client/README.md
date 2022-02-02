@@ -1,1 +1,1 @@
-# Fusion TypeScript Generator Barrel Plugin
+# Hilla TypeScript Generator Barrel Plugin
