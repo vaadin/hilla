@@ -5,14 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.vaadin.fusion</groupId>
-    <artifactId>fusion-project</artifactId>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-project</artifactId>
     <version>1.0-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <artifactId>parser-jvm-plugin-backbone</artifactId>
-  <name>Fusion JVM Parser Backbone Plugin</name>
+  <name>Hilla JVM Parser Backbone Plugin</name>
   <packaging>jar</packaging>
 
   <properties>
@@ -21,8 +21,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.vaadin.fusion</groupId>
+      <groupId>dev.hilla</groupId>
       <artifactId>parser-jvm-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -47,13 +52,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.fusion</groupId>
+      <groupId>dev.hilla</groupId>
       <artifactId>parser-jvm-utils</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin.fusion</groupId>
-      <artifactId>parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

@@ -34,7 +34,7 @@ public final class Parser {
                 .ifPresent((parameter) -> {
                     if (parameter.get().getName() == null) {
                         throw new ParserException(
-                                "Fusion Parser requires running java compiler with -parameters flag enabled");
+                                "Hilla Parser requires running java compiler with -parameters flag enabled");
                     }
                 });
     }

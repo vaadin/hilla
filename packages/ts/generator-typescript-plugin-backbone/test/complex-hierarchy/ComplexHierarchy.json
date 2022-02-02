@@ -29,7 +29,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
                     }
                   ]
                 }
@@ -42,7 +42,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel": {
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel": {
         "type": "object",
         "properties": {
           "build": {
@@ -52,10 +52,10 @@
           }
         }
       },
-      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel": {
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel"
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel"
           },
           {
             "type": "object",
@@ -68,10 +68,10 @@
           }
         ]
       },
-      "com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel": {
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/com.vaadin.fusion.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel"
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel"
           },
           {
             "type": "object",

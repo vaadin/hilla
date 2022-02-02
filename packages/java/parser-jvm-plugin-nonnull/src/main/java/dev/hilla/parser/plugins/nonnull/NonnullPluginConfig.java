@@ -46,8 +46,7 @@ public class NonnullPluginConfig
         static final Set<String> defaults = Set.of("javax.annotation.Nonnull",
                 "org.jetbrains.annotations.NotNull", "lombok.NonNull",
                 "androidx.annotation.NonNull",
-                "org.eclipse.jdt.annotation.NonNull",
-                "com.vaadin.fusion.Nonnull");
+                "org.eclipse.jdt.annotation.NonNull", "dev.hilla.Nonnull");
 
         public Processor(NonnullPluginConfig config) {
             super(config, defaults);

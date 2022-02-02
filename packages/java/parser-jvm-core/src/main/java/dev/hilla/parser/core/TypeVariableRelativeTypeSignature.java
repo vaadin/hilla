@@ -17,7 +17,7 @@ public final class TypeVariableRelativeTypeSignature
 
     public static Stream<ClassInfo> resolve(TypeVariableSignature signature) {
         // We can resolve only the type variable class bound here (bound class
-        // is `com.vaadin.fusion.X` in `T extends com.vaadin.fusion.X`)
+        // is `dev.hilla.X` in `T extends dev.hilla.X`)
         var bound = signature.resolve().getClassBound();
 
         return bound != null ? RelativeTypeSignature.resolve(bound)
