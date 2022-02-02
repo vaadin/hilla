@@ -10,11 +10,11 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Fusion plugin for Maven. Handles parsing Java bytecode and generating
+ * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public final class FusionGeneratorMojo extends AbstractMojo {
+public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
     @Parameter(readonly = true)
@@ -22,13 +22,13 @@ public final class FusionGeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
-    public void execute() throws FusionGeneratorMojoException {
+    public void execute() throws EndpointCodeGeneratorMojoException {
         var result = parseJavaCode();
         generateTypeScriptCode(result);
     }
 
     private void generateTypeScriptCode(String openAPI)
-            throws FusionGeneratorMojoException {
+            throws EndpointCodeGeneratorMojoException {
         var logger = getLog();
         try {
             var executor = new GeneratorProcessor(project, logger)
@@ -39,12 +39,12 @@ public final class FusionGeneratorMojo extends AbstractMojo {
 
             executor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
-            throw new FusionGeneratorMojoException("TS code generation failed",
-                    e);
+            throw new EndpointCodeGeneratorMojoException(
+                    "TS code generation failed", e);
         }
     }
 
-    private String parseJavaCode() throws FusionGeneratorMojoException {
+    private String parseJavaCode() throws EndpointCodeGeneratorMojoException {
         try {
             var executor = new ParserProcessor(project, getLog());
 
@@ -56,8 +56,8 @@ public final class FusionGeneratorMojo extends AbstractMojo {
 
             return executor.process();
         } catch (ParserException e) {
-            throw new FusionGeneratorMojoException("Java code parsing failed",
-                    e);
+            throw new EndpointCodeGeneratorMojoException(
+                    "Java code parsing failed", e);
         }
     }
 }

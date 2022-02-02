@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug, fusion
+labels: bug, hilla
 assignees: ''
 
 ---
@@ -26,7 +26,7 @@ Good quality bug report increases the likelihood to get the bug fixed. A bad qua
 ### Actual behavior
 <!-- What actually happens, attach server/browser logs when there are errors/exceptions -->
 ### Versions:
-    - Vaadin / Fusion version:
+    - Vaadin / Hilla version:
     - Node version:
     - Java version:
     - OS version:

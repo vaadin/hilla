@@ -1,1 +1,1 @@
-# Fusion TypeScript Plugin utils
+# Hilla TypeScript Plugin utils

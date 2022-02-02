@@ -269,7 +269,7 @@ describe('ConnectClient', () => {
       }
     });
 
-    it('should set header for preventing CSRF using Fusion csrfToken cookie when no Spring csrf token presents', async () => {
+    it('should set header for preventing CSRF using Hilla csrfToken cookie when no Spring csrf token presents', async () => {
       try {
         const csrfToken = 'foo';
         setCookie('csrfToken', csrfToken);
@@ -284,7 +284,7 @@ describe('ConnectClient', () => {
       }
     });
 
-    it('should set header for preventing CSRF using Fusion csrf when having Spring csrf meta tags with string undefined', async () => {
+    it('should set header for preventing CSRF using Hilla csrf when having Spring csrf meta tags with string undefined', async () => {
       try {
         // happens when spring csrf is disabled
         // https://github.com/vaadin/hilla/issues/185

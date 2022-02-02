@@ -1,25 +1,24 @@
-# Vaadin Fusion Frontend
+# Hilla Frontend
 
 [API documentation ↗](https://vaadin.com/docs/latest/fusion/tutorials/in-depth-course/login-and-authentication#handling-login-and-logout)
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/fusion-frontend.svg)](https://www.npmjs.com/package/@vaadin/fusion-frontend)
+[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)](https://www.npmjs.com/package/@hilla/frontend)
 
-A set of utilities to interact with the Vaadin [Fusion](https://vaadin.com/docs/latest/fusion/overview) application server.
-A part of the Fusion project.
+A set of utilities to interact with the [Hilla](https://vaadin.com/docs/latest/fusion/overview) application server.
+A part of the Hilla project.
 
 ## Installation
 
-**NOTE**: This package is not supposed to used separately from the Fusion project.
-To get the Fusion project, visit https://start.vaadin.com.
+**NOTE**: This package is not supposed to used separately from the Hilla project.
 
 ```bash
-$ npm install @vaadin/fusion-frontend
+$ npm install @hilla/frontend
 ```
 
 Once installed, import it in your application:
 
 ```js
-import {login} from '@vaadin/fusion-frontend';
+import {login} from '@hilla/frontend';
 ```
 
 ## Contribution
