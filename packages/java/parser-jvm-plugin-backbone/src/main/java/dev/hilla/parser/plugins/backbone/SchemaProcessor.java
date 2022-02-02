@@ -8,12 +8,12 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.ArrayRelativeTypeSignature;
-import dev.hilla.parser.core.AssociationMap;
 import dev.hilla.parser.core.ClassRefRelativeTypeSignature;
 import dev.hilla.parser.core.RelativeTypeArgument;
 import dev.hilla.parser.core.RelativeTypeParameter;
 import dev.hilla.parser.core.RelativeTypeSignature;
 import dev.hilla.parser.core.TypeVariableRelativeTypeSignature;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -29,12 +29,12 @@ import io.swagger.v3.oas.models.media.StringSchema;
 final class SchemaProcessor {
     private static final Schema<?> anySchemaSample = new ObjectSchema();
 
-    private final AssociationMap associationMap;
+    private final Context context;
     private final RelativeTypeSignature signature;
 
     public SchemaProcessor(@Nonnull RelativeTypeSignature signature,
-            @Nonnull AssociationMap associationMap) {
-        this.associationMap = associationMap;
+            @Nonnull Context context) {
+        this.context = Objects.requireNonNull(context);
         this.signature = Objects.requireNonNull(signature);
     }
 
@@ -78,7 +78,7 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
-        associationMap.addType(result, signature);
+        context.getAssociationMap().addType(result, signature);
 
         return result;
     }
@@ -90,7 +90,7 @@ final class SchemaProcessor {
     private Schema<?> arraySchema() {
         var nestedType = ((ArrayRelativeTypeSignature) signature)
                 .getNestedType();
-        var items = new SchemaProcessor(nestedType, associationMap).process();
+        var items = new SchemaProcessor(nestedType, context).process();
 
         return nullify(new ArraySchema().items(items), true);
     }
@@ -118,8 +118,8 @@ final class SchemaProcessor {
                 .getTypeArguments();
 
         if (typeArguments.size() > 0) {
-            return schema.items(
-                    new SchemaProcessor(typeArguments.get(0), associationMap)
+            return schema
+                    .items(new SchemaProcessor(typeArguments.get(0), context)
                             .process());
         }
 
@@ -131,9 +131,8 @@ final class SchemaProcessor {
 
         if (suffixTypeArguments.size() > 0
                 && suffixTypeArguments.get(0).size() > 0) {
-            return schema.items(
-                    new SchemaProcessor(suffixTypeArguments.get(0).get(0),
-                            associationMap).process());
+            return schema.items(new SchemaProcessor(
+                    suffixTypeArguments.get(0).get(0), context).process());
         }
 
         return schema;
@@ -142,7 +141,7 @@ final class SchemaProcessor {
     private Schema<?> mapSchema() {
         var typeArguments = ((ClassRefRelativeTypeSignature) signature)
                 .getTypeArguments();
-        var values = new SchemaProcessor(typeArguments.get(1), associationMap)
+        var values = new SchemaProcessor(typeArguments.get(1), context)
                 .process();
 
         return nullify(new MapSchema(), true).additionalProperties(values);
@@ -157,8 +156,7 @@ final class SchemaProcessor {
         var typeArguments = ((ClassRefRelativeTypeSignature) signature)
                 .getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), associationMap)
-                .process();
+        return new SchemaProcessor(typeArguments.get(0), context).process();
     }
 
     private Schema<?> refSchema() {
@@ -168,6 +166,8 @@ final class SchemaProcessor {
 
         var fullyQualifiedName = ((ClassRefRelativeTypeSignature) signature)
                 .get().getFullyQualifiedClassName();
+
+        context.getRefs().add(fullyQualifiedName);
 
         return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
@@ -181,19 +181,19 @@ final class SchemaProcessor {
     private Schema<?> typeArgumentSchema() {
         return ((RelativeTypeArgument) signature).getWildcardAssociatedType()
                 .<Schema<?>> map(
-                        value -> new SchemaProcessor(value, associationMap)
-                                .process())
+                        value -> new SchemaProcessor(value, context).process())
                 .orElseGet(this::anySchema);
     }
 
     private Schema<?> typeParameterSchema() {
         return ((RelativeTypeParameter) signature).getClassBound()
                 .filter(classBound -> !classBound.isNativeObject())
-                .<Schema<?>> map(classBound -> new SchemaProcessor(classBound,
-                        associationMap).process())
+                .<Schema<?>> map(
+                        classBound -> new SchemaProcessor(classBound, context)
+                                .process())
                 .or(() -> ((RelativeTypeParameter) signature)
                         .getInterfaceBounds().stream()
-                        .map(bound -> new SchemaProcessor(bound, associationMap)
+                        .map(bound -> new SchemaProcessor(bound, context)
                                 .process())
                         .filter(schema -> !Objects.equals(schema,
                                 anySchemaSample))
@@ -204,6 +204,6 @@ final class SchemaProcessor {
     private Schema<?> typeVariableSchema() {
         return new SchemaProcessor(
                 ((TypeVariableRelativeTypeSignature) signature).resolve(),
-                associationMap).process();
+                context).process();
     }
 }

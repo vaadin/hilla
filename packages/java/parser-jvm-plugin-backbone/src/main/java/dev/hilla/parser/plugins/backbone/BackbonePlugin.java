@@ -16,10 +16,10 @@ public final class BackbonePlugin implements Plugin {
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage) {
         var model = storage.getOpenAPI();
-        var map = storage.getAssociationMap();
+        var context = new Context(storage.getAssociationMap());
 
-        new EndpointProcessor(endpoints, model, map).process();
-        new EntityProcessor(entities, model, map).process();
+        new EndpointProcessor(endpoints, model, context).process();
+        new EntityProcessor(entities, model, context).process();
     }
 
     @Override
