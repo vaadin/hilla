@@ -41,7 +41,7 @@ public final class Parser {
 
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
-        var pluginManager = new PluginManager(config);
+        var pluginManager = new PluginManager(config, storage);
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "
@@ -49,7 +49,7 @@ public final class Parser {
         var result = new ClassGraph().enableAllInfo()
                 .overrideClasspath(classPathElements).scan();
 
-        var collector = new ElementsCollector(result, logger);
+        var collector = new ElementsCollector(result, pluginManager, logger);
         var endpoints = collector
                 .collectEndpoints(config.getEndpointAnnotationName());
         var entities = collector.collectEntities(endpoints);
@@ -59,7 +59,7 @@ public final class Parser {
         checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
 
         logger.debug("Executing parser plugins");
-        pluginManager.execute(endpoints, entities, storage);
+        pluginManager.process(endpoints, entities);
 
         logger.debug("Parsing process successfully finished");
         return storage.getOpenAPI();
@@ -72,11 +72,14 @@ public final class Parser {
 
     private static class ElementsCollector {
         private final Logger logger;
+        private final PluginManager pluginManager;
         private final ScanResult result;
 
-        public ElementsCollector(ScanResult result, Logger logger) {
-            this.result = result;
+        public ElementsCollector(ScanResult result, PluginManager pluginManager,
+                Logger logger) {
             this.logger = logger;
+            this.pluginManager = pluginManager;
+            this.result = result;
         }
 
         public Collection<RelativeClassInfo> collectEndpoints(
@@ -85,9 +88,10 @@ public final class Parser {
                     "Collecting project endpoints with the endpoint annotation: "
                             + endpointAnnotationName);
 
-            var endpoints = result
-                    .getClassesWithAnnotation(endpointAnnotationName).stream()
-                    .map(RelativeClassInfo::new)
+            var endpoints = pluginManager
+                    .transform(result
+                            .getClassesWithAnnotation(endpointAnnotationName)
+                            .stream().map(RelativeClassInfo::new))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
             logger.debug("Collected project endpoints: " + endpoints.stream()
@@ -153,11 +157,14 @@ public final class Parser {
                         .forEach(entities::add);
             }
 
-            logger.debug("Collected project data entities: " + entities.stream()
+            var result = pluginManager.transform(entities.stream())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            logger.debug("Collected project data entities: " + result.stream()
                     .map(RelativeClassInfo::get).map(ClassInfo::getName)
                     .collect(Collectors.joining(", ")));
 
-            return new LinkedHashSet<>(entities);
+            return result;
         }
     }
 }

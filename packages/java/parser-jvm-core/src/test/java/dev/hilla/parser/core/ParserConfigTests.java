@@ -152,13 +152,13 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
-    private static class BarPlugin implements Plugin {
+    private static class BarPlugin implements Plugin.Processor {
         private int order = 1;
+        private SharedStorage storage;
 
         @Override
-        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities,
-                @Nonnull SharedStorage storage) {
+        public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities) {
         }
 
         @Override
@@ -169,16 +169,21 @@ public class ParserConfigTests {
         @Override
         public void setOrder(int order) {
             this.order = order;
+        }
+
+        @Override
+        public void setStorage(@Nonnull SharedStorage storage) {
+            this.storage = storage;
         }
     }
 
-    private static class FooPlugin implements Plugin {
+    private static class FooPlugin implements Plugin.Processor {
         private int order = 0;
+        private SharedStorage storage;
 
         @Override
-        public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities,
-                @Nonnull SharedStorage storage) {
+        public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+                @Nonnull Collection<RelativeClassInfo> entities) {
         }
 
         @Override
@@ -189,6 +194,11 @@ public class ParserConfigTests {
         @Override
         public void setOrder(int order) {
             this.order = order;
+        }
+
+        @Override
+        public void setStorage(@Nonnull SharedStorage storage) {
+            this.storage = storage;
         }
     }
 

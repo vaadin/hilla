@@ -17,16 +17,16 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.FieldInfo;
 import io.github.classgraph.MethodInfo;
 
-public class DependencyPlugin implements Plugin {
+public class DependencyPlugin implements Plugin.Processor {
     public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
     private int order = 0;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            SharedStorage storage) {
+    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities) {
         var collector = new DependencyCollector(endpoints, entities);
 
         storage.getPluginStorage().put(ALL_DEPS_STORAGE_KEY,
@@ -47,6 +47,11 @@ public class DependencyPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 
     private static class DependencyCollector {

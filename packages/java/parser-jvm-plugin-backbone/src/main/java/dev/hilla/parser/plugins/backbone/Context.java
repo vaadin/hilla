@@ -5,7 +5,7 @@ import java.util.Set;
 
 import dev.hilla.parser.core.AssociationMap;
 
-class Context {
+final class Context {
     private final AssociationMap associationMap;
     private final Set<String> refs = new HashSet<>();
 

@@ -8,13 +8,13 @@ import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.RelativeClassInfo;
 import dev.hilla.parser.core.SharedStorage;
 
-public final class BackbonePlugin implements Plugin {
+public final class BackbonePlugin implements Plugin.Processor {
     private int order = 0;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            @Nonnull SharedStorage storage) {
+    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities) {
         var model = storage.getOpenAPI();
         var context = new Context(storage.getAssociationMap());
 
@@ -30,5 +30,10 @@ public final class BackbonePlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 }

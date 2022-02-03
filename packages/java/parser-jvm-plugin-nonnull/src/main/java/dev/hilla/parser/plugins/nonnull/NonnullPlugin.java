@@ -13,14 +13,14 @@ import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
-public final class NonnullPlugin implements Plugin {
+public final class NonnullPlugin implements Plugin.Processor {
     private Collection<String> annotations = NonnullPluginConfig.Processor.defaults;
     private int order = 100;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            @Nonnull SharedStorage storage) {
+    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities) {
         var toolset = new PluginsToolset(
                 storage.getParserConfig().getPlugins());
 
@@ -42,6 +42,11 @@ public final class NonnullPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 
     @Override

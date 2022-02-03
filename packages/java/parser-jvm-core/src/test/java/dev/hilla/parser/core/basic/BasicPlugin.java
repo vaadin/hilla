@@ -16,15 +16,15 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.FieldInfo;
 import io.github.classgraph.MethodInfo;
 
-public class BasicPlugin implements Plugin {
+public class BasicPlugin implements Plugin.Processor {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
     private int order = 0;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            SharedStorage storage) {
+    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
+            @Nonnull Collection<RelativeClassInfo> entities) {
         storage.getPluginStorage().put(STORAGE_KEY,
                 endpoints.stream().flatMap(endpoint -> Stream.of(
                         endpoint.getFieldsStream().map(RelativeFieldInfo::get)
@@ -46,5 +46,10 @@ public class BasicPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 }
