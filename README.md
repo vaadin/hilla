@@ -1,7 +1,7 @@
 <a target="_blank" href="https://hilla.dev"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Hilla Discord"></img></a>
 
 ![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/ts.yml/badge.svg)
-[![codecov](https://codecov.io/gh/vaadin/fusion/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)
+[![codecov](https://codecov.io/gh/vaadin/hilla/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)
 
 Hilla
 ======
