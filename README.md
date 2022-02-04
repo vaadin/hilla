@@ -1,7 +1,8 @@
 <a target="_blank" href="https://hilla.dev"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Hilla Discord"></img></a>
 
-![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/frontend.yml/badge.svg)
-[![codecov](https://codecov.io/gh/vaadin/fusion/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/fusion)
+![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/ts.yml/badge.svg)
+![Java CI](https://github.com/vaadin/hilla/actions/workflows/java.yml/badge.svg)
+[![codecov](https://codecov.io/gh/vaadin/hilla/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)
 
 Hilla
 ======
@@ -17,8 +18,8 @@ The collection of frontend and NodeJS utilities used by Hilla.
 
 | Package                 | Status |
 |-------------------------|--------|
-| [@vaadin/form](./packages/ts/form) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form) |
-| [@vaadin/fusion-frontend](./packages/ts/fusion-frontend) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/fusion-frontend.svg)](https://www.npmjs.com/package/@vaadin/fusion-frontend) |
+| [@hilla/form](./packages/ts/form) | [![Latest Stable Version](https://img.shields.io/npm/v/@hilla/form.svg)](https://www.npmjs.com/package/@hilla/form) |
+| [@hilla/frontend](./packages/ts/hilla-frontend) | [![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)](https://www.npmjs.com/package/@hilla/frontend) |
 
 ### Contribution
 
