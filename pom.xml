@@ -43,6 +43,19 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <scm>
+    <connection>scm:https:https://github.com/vaadin/hilla.git</connection>
+    <developerConnection>scm:git:git@github.com:vaadin/hilla.git
+    </developerConnection>
+    <url>https://github.com/vaadin/hilla</url>
+  </scm>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub</name>
+      <url>https://maven.pkg.github.com/vaadin/hilla</url>  
+    </repository>
+  </distributionManagement>
 
   <repositories>
     <!-- The order of definitions matters. Explicitly defining central
