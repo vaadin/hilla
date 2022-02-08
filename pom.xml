@@ -29,6 +29,7 @@
     <swagger.version>2.1.11</swagger.version>
     <jackson.version>2.13.0</jackson.version>
     <junit.version>5.8.0</junit.version>
+    <project.scm.id>github</project.scm.id> 
   </properties>
 
   <organization>
