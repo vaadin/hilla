@@ -12,7 +12,7 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
 public final class ModelPlugin implements Plugin.Processor {
-    private int order = 100;
+    private int order = 200;
     private SharedStorage storage;
 
     @Override
