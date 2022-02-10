@@ -94,8 +94,8 @@ import dev.hilla.exception.EndpointValidationException.ValidationErrorData;
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
 @ConditionalOnBean(annotation = Endpoint.class)
-@NpmPackage(value = "@hilla/frontend", version = "0.0.18")
-@NpmPackage(value = "@hilla/form", version = "0.0.18")
+@NpmPackage(value = "@hilla/frontend", version = "0.0.19")
+@NpmPackage(value = "@hilla/form", version = "0.0.19")
 public class EndpointController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
