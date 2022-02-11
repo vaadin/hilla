@@ -47,7 +47,7 @@ export class ProductModel<T extends Product = Product> extends IdEntityModel<T> 
   }
 }
 
-interface Customer extends IdEntity {
+export interface Customer extends IdEntity {
   fullName: string;
   nickName: string;
 }
