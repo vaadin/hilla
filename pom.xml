@@ -21,6 +21,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.version>3.8.1</maven.version>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
@@ -174,6 +175,14 @@
           <!-- Provide a dummy JS config file to avoid errors -->
           <configJsFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configJsFile>
           <lineEnding>LF</lineEnding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${maven.version}</version>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
         </configuration>
       </plugin>
     </plugins>
