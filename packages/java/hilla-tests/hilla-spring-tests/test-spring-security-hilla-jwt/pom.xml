@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>20.0-SNAPSHOT</version>
+        <version>23.1-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-fusion-jwt</artifactId>
     <name>Integration tests for Vaadin Spring Security and Fusion With JWT</name>
@@ -23,6 +23,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>fusion-endpoint</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -129,7 +130,7 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${vaadin.flow.version}</version>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -162,30 +163,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>local-run</id>
-            <activation>
-                <property>
-                    <name>!test.use.hub</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.lazerycode.selenium</groupId>
-                        <artifactId>driver-binary-downloader-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>selenium</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
