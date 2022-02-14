@@ -183,7 +183,6 @@
         <version>3.0.0-M5</version>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <updateWorkingCopyVersions>false</updateWorkingCopyVersions>
         </configuration>
       </plugin>
     </plugins>
