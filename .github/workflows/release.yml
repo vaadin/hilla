@@ -9,7 +9,7 @@ on:
       developmentVersion:
         description: Next Development Version
         required: true
-job:
+jobs:
   releasing:
     name: Release
     runs-on: ubuntu-20.04
