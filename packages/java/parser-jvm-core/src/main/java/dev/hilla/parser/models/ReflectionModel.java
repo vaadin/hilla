@@ -1,8 +1,8 @@
 package dev.hilla.parser.models;
 
-public interface ReflectionModel extends TypeModel {
+public interface ReflectionModel extends Origin {
     @Override
-    default boolean isReflectionType() {
+    default boolean isReflection() {
         return true;
     }
 }

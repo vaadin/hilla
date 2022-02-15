@@ -1,32 +1,27 @@
 package dev.hilla.parser.models;
 
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Type;
 
 final class ArraySignatureReflectionModel
-        extends AbstractReflectionSignatureDependable<Class<?>, Dependable<?, ?>>
-        implements ArraySignatureModel, ReflectionSignatureModel {
-    private TypeModel nestedType;
+        extends AbstractReflectionSignatureModel<Type>
+        implements ArraySignatureModel, ReflectionModel {
+    static final String ILLEGAL_ARGUMENTS_EXCEPTION_MSG = "ArraySignatureReflectionModel accepts only Class<?> and GenericArrayType as an origin type";
 
-    public ArraySignatureReflectionModel(Class<?> origin, Dependable<?, ?> parent) {
+    private SignatureModel nestedType;
+
+    public ArraySignatureReflectionModel(Type origin, Model parent) {
         super(origin, parent);
     }
 
-    public static Stream<Class<?>> resolve(@Nonnull Class<?> signature) {
-        if (!Objects.requireNonNull(signature).isArray()) {
-            throw new IllegalArgumentException(
-                    "Signature for ArraySignatureReflectionModel should be an array");
-        }
-
-        return ReflectionSignatureModel.resolve(signature);
-    }
-
     @Override
-    public TypeModel getNestedType() {
+    public SignatureModel getNestedType() {
         if (nestedType == null) {
-            nestedType = ReflectionSignatureModel.of(origin.getComponentType(), this);
+            nestedType = SignatureModel
+                    .of(origin instanceof GenericArrayType
+                            ? ((GenericArrayType) origin)
+                                    .getGenericComponentType()
+                            : ((Class<?>) origin).getComponentType(), this);
         }
 
         return nestedType;

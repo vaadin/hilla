@@ -1,18 +1,12 @@
 package dev.hilla.parser.models;
 
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
 import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.ClassInfo;
 
-final class BaseSignatureSourceModel extends
-        AbstractSourceSignatureDependable<BaseTypeSignature, Dependable<?, ?>>
-        implements BaseSignatureModel, SourceSignatureModel {
+final class BaseSignatureSourceModel
+        extends AbstractSourceSignatureModel<BaseTypeSignature>
+        implements BaseSignatureModel, SourceModel {
 
-    public BaseSignatureSourceModel(BaseTypeSignature origin,
-            Dependable<?, ?> parent) {
+    public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
         super(origin, parent);
     }
 

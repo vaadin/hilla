@@ -13,9 +13,9 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
-public interface ClassRefSignatureModel extends TypeModel {
+public interface ClassRefSignatureModel extends SignatureModel {
     static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin,
-            @Nonnull Dependable<?, ?> parent) {
+            @Nonnull Model parent) {
         return new ClassRefSignatureSourceModel(Objects.requireNonNull(origin),
                 Objects.requireNonNull(parent));
     }
@@ -24,16 +24,26 @@ public interface ClassRefSignatureModel extends TypeModel {
         return of(origin, null);
     }
 
-    static ClassRefSignatureModel of(@Nonnull Class<?> origin,
-            Dependable<?, ?> parent) {
+    static ClassRefSignatureModel of(@Nonnull Class<?> origin, Model parent) {
         return new ClassRefSignatureReflectionModel(origin, parent);
     }
 
-    static Stream<ClassInfo> resolveDependencies(@Nonnull ClassRefTypeSignature signature) {
+    static ClassRefSignatureModel of(@Nonnull ParameterizedType origin) {
+        return of(origin, null);
+    }
+
+    static ClassRefSignatureModel of(@Nonnull ParameterizedType origin,
+            Model parent) {
+        return new ClassRefSignatureReflectionModel(
+                (Class<?>) origin.getRawType(), origin, parent);
+    }
+
+    static Stream<ClassInfo> resolveDependencies(
+            @Nonnull ClassRefTypeSignature signature) {
         var classInfo = Objects.requireNonNull(signature).getClassInfo();
 
         var typeArgumentsDependencies = signature.getTypeArguments().stream()
-                .flatMap(SourceSignatureModel::resolve).distinct();
+                .flatMap(SignatureModel::resolveDependencies).distinct();
 
         return classInfo != null && !ModelUtils.isJDKClass(classInfo.getName())
                 ? Stream.of(Stream.of(classInfo), typeArgumentsDependencies)
@@ -41,16 +51,18 @@ public interface ClassRefSignatureModel extends TypeModel {
                 : typeArgumentsDependencies;
     }
 
-    static Stream<Class<?>> resolveDependencies(@Nonnull Type signature) {
+    static Stream<Type> resolveDependencies(@Nonnull Type signature) {
         var typeArgumentDependencies = Objects
-                .requireNonNull(signature) instanceof ParameterizedType
-                        ? Arrays.stream(((ParameterizedType) signature)
+                .requireNonNull(signature) instanceof ParameterizedType ? Arrays
+                        .stream(((ParameterizedType) signature)
                                 .getActualTypeArguments())
-                                .flatMap(ReflectionSignatureModel::resolve)
-                                .distinct()
-                        : Stream.<Class<?>> empty();
+                        .flatMap(SignatureModel::resolveDependencies)
+                        .distinct() : Stream.<Type> empty();
 
         return ModelUtils.isJDKClass(signature)
+                ? Stream.of(Stream.of(signature), typeArgumentDependencies)
+                        .flatMap(Function.identity()).distinct()
+                : typeArgumentDependencies;
     }
 
     Collection<TypeArgumentModel> getTypeArguments();

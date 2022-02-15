@@ -8,20 +8,20 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeParameter;
 
-public interface TypeParameterModel extends TypeModel {
+public interface TypeParameterModel extends SignatureModel {
     static TypeParameterModel of(@Nonnull TypeParameter origin,
-            @Nonnull Dependable<?, ?> parent) {
+            @Nonnull Model parent) {
         return new TypeParameterSourceModel(origin, parent);
     }
 
     static TypeParameterModel of(@Nonnull TypeVariable<?> origin,
-            Dependable<?, ?> parent) {
+            Model parent) {
         return new TypeParameterReflectionModel(origin, parent);
     }
 
-    Collection<TypeModel> getBounds();
+    Collection<SignatureModel> getBounds();
 
-    default Stream<TypeModel> getBoundsStream() {
+    default Stream<SignatureModel> getBoundsStream() {
         return getBounds().stream();
     }
 

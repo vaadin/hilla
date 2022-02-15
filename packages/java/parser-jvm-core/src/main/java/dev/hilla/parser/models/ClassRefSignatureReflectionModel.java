@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,43 +12,41 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-final class ClassRefSignatureReflectionModel extends
-        AbstractReflectionSignatureDependable<Type, Dependable<?, ?>>
-        implements ClassRefSignatureModel, ReflectionSignatureModel {
+final class ClassRefSignatureReflectionModel
+        extends AbstractReflectionSignatureModel<Class<?>>
+        implements ClassRefSignatureModel, ReflectionModel {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
 
     private Collection<TypeArgumentModel> typeArguments;
+    private ParameterizedType wrapper;
 
-    public ClassRefSignatureReflectionModel(Type origin) {
-        super(origin, null);
+    public ClassRefSignatureReflectionModel(Class<?> origin) {
+        this(origin, null, null);
     }
 
-    public ClassRefSignatureReflectionModel(Type origin,
-            Dependable<?, ?> parent) {
+    public ClassRefSignatureReflectionModel(Class<?> origin, Model parent) {
+        this(origin, null, parent);
+    }
+
+    public ClassRefSignatureReflectionModel(Class<?> origin,
+            ParameterizedType wrapper, Model parent) {
         super(origin, parent);
+        this.wrapper = wrapper;
     }
 
     @Override
     public Collection<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
-            if (origin instanceof ParameterizedType) {
-                typeArguments = Stream
-                    .of(origin.getTypeArguments().stream(),
-                        origin.getSuffixTypeArguments().stream()
-                            .flatMap(Collection::stream))
-                    .flatMap(Function.identity())
-                    .map(arg -> TypeArgumentModel.of(arg, this))
-                    .collect(Collectors.toList());
-            } else if (origin instanceof Class<?>) {
-                typeArguments = Set.of();
-            }
+            typeArguments = wrapper != null
+                    ? Arrays.stream(wrapper.getActualTypeArguments())
+                            .map(arg -> TypeArgumentModel.of(arg, this))
+                            .collect(Collectors.toSet())
+                    : Set.of();
         }
 
         return typeArguments;

@@ -6,19 +6,19 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractReflectionSignatureDependable<T extends Type, P extends Dependable<?, ?>>
-    extends AbstractDependable<T, P> {
+abstract class AbstractReflectionSignatureModel<T extends Type>
+        extends AbstractModel<T> implements Dependable {
     private Collection<ClassInfoModel> dependencies;
 
-    public AbstractReflectionSignatureDependable(@Nonnull T origin, P parent) {
+    public AbstractReflectionSignatureModel(@Nonnull T origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
     public Collection<ClassInfoModel> getDependencies() {
         if (dependencies == null) {
-            dependencies = ReflectionSignatureModel.resolve(origin)
-                .map(ClassInfoModel::of).collect(Collectors.toList());
+            dependencies = SignatureModel.resolveDependencies(origin)
+                    .map(ClassInfoModel::of).collect(Collectors.toSet());
         }
 
         return dependencies;

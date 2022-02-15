@@ -7,19 +7,19 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.HierarchicalTypeSignature;
 
-abstract class AbstractSourceSignatureDependable<T extends HierarchicalTypeSignature, P extends Dependable<?, ?>>
-        extends AbstractDependable<T, P> {
+abstract class AbstractSourceSignatureModel<T extends HierarchicalTypeSignature>
+        extends AbstractModel<T> implements Dependable {
     private Collection<ClassInfoModel> dependencies;
 
-    public AbstractSourceSignatureDependable(@Nonnull T origin, P parent) {
+    public AbstractSourceSignatureModel(@Nonnull T origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
     public Collection<ClassInfoModel> getDependencies() {
         if (dependencies == null) {
-            dependencies = SourceSignatureModel.resolve(origin)
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
+            dependencies = SignatureModel.resolveDependencies(origin)
+                    .map(ClassInfoModel::of).collect(Collectors.toSet());
         }
 
         return dependencies;

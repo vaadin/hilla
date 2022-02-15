@@ -3,17 +3,16 @@ package dev.hilla.parser.models;
 import java.lang.reflect.TypeVariable;
 
 final class TypeVariableReflectionModel
-        extends AbstractReflectionSignatureDependable<TypeVariable<?>, Dependable<?, ?>>
-        implements TypeVariableModel, ReflectionSignatureModel {
+        extends AbstractReflectionSignatureModel<TypeVariable<?>>
+        implements TypeVariableModel, ReflectionModel {
     private TypeParameterModel typeParameter;
 
-    public TypeVariableReflectionModel(TypeVariable<?> origin,
-            Dependable<?, ?> parent) {
+    public TypeVariableReflectionModel(TypeVariable<?> origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
-    public TypeModel resolveDependencies() {
+    public SignatureModel resolve() {
         if (typeParameter == null) {
             typeParameter = TypeParameterModel.of(origin, parent);
         }

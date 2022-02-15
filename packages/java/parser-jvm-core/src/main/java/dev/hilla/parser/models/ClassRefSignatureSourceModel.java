@@ -1,24 +1,20 @@
 package dev.hilla.parser.models;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
-import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
-final class ClassRefSignatureSourceModel extends
-        AbstractSourceSignatureDependable<ClassRefTypeSignature, Dependable<?, ?>>
-        implements ClassRefSignatureModel, SourceSignatureModel {
+final class ClassRefSignatureSourceModel
+        extends AbstractSourceSignatureModel<ClassRefTypeSignature>
+        implements ClassRefSignatureModel, SourceModel {
     private final ClassRefSignatureReflectionModel reflected;
     private Collection<TypeArgumentModel> typeArguments;
 
     public ClassRefSignatureSourceModel(ClassRefTypeSignature origin,
-            Dependable<?, ?> parent) {
+            Model parent) {
         super(origin, parent);
         reflected = new ClassRefSignatureReflectionModel(origin.loadClass());
     }
@@ -46,6 +42,11 @@ final class ClassRefSignatureSourceModel extends
     @Override
     public boolean isByte() {
         return reflected.isByte();
+    }
+
+    @Override
+    public boolean isCharacter() {
+        return reflected.isCharacter();
     }
 
     @Override
@@ -84,6 +85,11 @@ final class ClassRefSignatureSourceModel extends
     }
 
     @Override
+    public boolean isJDKClass() {
+        return origin.getClassInfo() == null || reflected.isJDKClass();
+    }
+
+    @Override
     public boolean isLong() {
         return reflected.isLong();
     }
@@ -109,17 +115,7 @@ final class ClassRefSignatureSourceModel extends
     }
 
     @Override
-    public boolean isCharacter() {
-        return reflected.isCharacter();
-    }
-
-    @Override
     public boolean isString() {
         return reflected.isString();
-    }
-
-    @Override
-    public boolean isJDKClass() {
-        return origin.getClassInfo() == null || reflected.isJDKClass();
     }
 }

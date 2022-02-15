@@ -1,27 +1,20 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Array;
-import java.util.Objects;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
 import io.github.classgraph.ArrayTypeSignature;
-import io.github.classgraph.ClassInfo;
 
 final class ArraySignatureSourceModel
-        extends AbstractSourceSignatureDependable<ArrayTypeSignature, Dependable<?, ?>>
-        implements ArraySignatureModel, SourceSignatureModel {
-    private TypeModel nestedType;
+        extends AbstractSourceSignatureModel<ArrayTypeSignature>
+        implements ArraySignatureModel, SourceModel {
+    private SignatureModel nestedType;
 
-    public ArraySignatureSourceModel(ArrayTypeSignature origin, Dependable<?, ?> parent) {
+    public ArraySignatureSourceModel(ArrayTypeSignature origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
-    public TypeModel getNestedType() {
+    public SignatureModel getNestedType() {
         if (nestedType == null) {
-            nestedType = SourceSignatureModel.of(origin.getNestedType(), this);
+            nestedType = SignatureModel.of(origin.getNestedType(), this);
         }
 
         return nestedType;

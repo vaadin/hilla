@@ -5,12 +5,11 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractDependable<T, P extends Dependable<?, ?>>
-        implements Dependable<T, P> {
+abstract class AbstractModel<T> implements Model {
     protected final T origin;
-    protected final P parent;
+    protected final Model parent;
 
-    public AbstractDependable(@Nonnull T origin, P parent) {
+    public AbstractModel(@Nonnull T origin, Model parent) {
         this.origin = Objects.requireNonNull(origin);
         this.parent = parent;
     }
@@ -21,12 +20,11 @@ abstract class AbstractDependable<T, P extends Dependable<?, ?>>
             return true;
         }
 
-        if (!(other instanceof AbstractDependable<?, ?>)) {
+        if (!(other instanceof AbstractModel)) {
             return false;
         }
 
-        return Objects.equals(origin,
-                ((AbstractDependable<?, ?>) other).origin);
+        return Objects.equals(origin, ((AbstractModel) other).origin);
     }
 
     @Override
@@ -35,7 +33,7 @@ abstract class AbstractDependable<T, P extends Dependable<?, ?>>
     }
 
     @Override
-    public Optional<P> getParent() {
+    public Optional<Model> getParent() {
         return Optional.of(parent);
     }
 

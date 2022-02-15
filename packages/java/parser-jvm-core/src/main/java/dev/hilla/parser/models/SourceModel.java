@@ -1,8 +1,8 @@
 package dev.hilla.parser.models;
 
-public interface SourceModel extends TypeModel {
+public interface SourceModel extends Origin {
     @Override
-    default boolean isSourceType() {
+    default boolean isSource() {
         return true;
     }
 }
