@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  workflow_dispath:
+  workflow_dispatch:
     input:
       releaseVersion:
         description: Release Version
@@ -9,7 +9,7 @@ on:
       developmentVersion:
         description: Next Development Version
         required: true
-job:
+jobs:
   releasing:
     name: Release
     runs-on: ubuntu-20.04
