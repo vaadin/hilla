@@ -25,7 +25,6 @@ job:
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: github
       - name: Configure Git user
         run: |
           git config user.email "vaadin-bot@users.noreply.github.com"
