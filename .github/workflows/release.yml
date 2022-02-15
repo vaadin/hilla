@@ -4,9 +4,11 @@ on:
   workflow_dispath:
     input:
       releaseVersion:
-        description: Release version
+        description: Release Version
         required: true
-
+      developmentVersion:
+        description: Next Development Version
+        required: true
 job:
   releasing:
     name: Release
@@ -29,4 +31,6 @@ job:
           git config user.email "vaadin-bot@users.noreply.github.com"
           git config user.name "vaadin-bot"
       - name: Test release version
-        run: echo "Release Version: ${{github.event.inputs.releaseVersion}}"
+        run: | 
+          echo "Release Version: ${{github.event.inputs.releaseVersion}}"
+          echo "Next Development Version: ${{github.event.inputs.developmentVersion}}"
