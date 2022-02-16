@@ -82,20 +82,26 @@ Follow the tutorials at https://hilla.dev/docs/tutorials
 
 ## Contributing
 
-The best way to contribute is to try out Hilla and provide feedback to the development team in our Discord chat or with GitHub issues.
+The best way to contribute is to try out Hilla and provide feedback to the development team in our [Discord chat](https://discord.gg/MYFq5RTbBn) or with [GitHub issues](https://github.com/vaadin/hilla/issues).
 
 ### Development
 
 If you want to develop Hilla, you can clone the repo and run tests using the following commands:
 
-```bash
-$ git clone https://github.com/vaadin/hilla.git
-$ npm install
-$ npm run build
-$ npm test
+```sh
+git clone https://github.com/vaadin/hilla.git
+npm install
+npm run build
+npm test
 ```
 
 You need the following versions of Node.js and npm:
 
-- **Node.js**: `>= 16.13.0` (native support for ES Modules and NodeJS execution of the newest hooks),
+- **Node.js**: `>= 16.14.0` (native support for ES Modules and NodeJS execution of the newest hooks),
 - **npm**: `^7` (`package-lock.json` is of version 2; also, `lerna` is unable to bootstrap this project correctly with lower `npm`)
+
+---
+
+![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/ts.yml/badge.svg)
+![Java CI](https://github.com/vaadin/hilla/actions/workflows/java.yml/badge.svg)
+[![codecov](https://codecov.io/gh/vaadin/hilla/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)
