@@ -1,26 +1,38 @@
-name: Release workflow
+name: Release
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   workflow_dispatch:
-    # Inputs the workflow accepts.
     inputs:
-      relaseVersion:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: 'Release Version'
-        # Input has to be provided for the workflow to run
+      releaseVersion:
+        description: Release Version
         required: true
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+      developmentVersion:
+        description: Next Development Version
+        required: true
 jobs:
-  # This workflow contains a single job called "greet"
-  greet:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  releasing:
+    name: Release
+    runs-on: ubuntu-20.04
+    timeout-minutes: 5
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ github.event.inputs.relaseVersion }}"
+      - name: Checkout Project Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Configure Git user
+        run: |
+          git config user.email "vaadin-bot@users.noreply.github.com"
+          git config user.name "vaadin-bot"
+      - name: Publish JAR
+        run: |
+          echo "Release Version: ${{github.event.inputs.releaseVersion}}"
+          echo "Next Development Version: ${{github.event.inputs.developmentVersion}}"
+          mvn -B release:prepare -DreleaseVersion=${{github.event.inputs.releaseVersion}} -Dtag=${{github.event.inputs.releaseVersion}} -DdevelopmentVersion=${{github.event.inputs.developmentVersion}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
