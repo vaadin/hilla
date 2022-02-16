@@ -6,11 +6,10 @@ on:
       releaseVersion:
         description: Release Version
         required: true
-        default: "X.Y.Z"
       developmentVersion:
         description: Next Development Version
         required: true
-        default: "X.Y.Z-SNAPSHOT"
+
 jobs:
   releasing:
     name: Release
