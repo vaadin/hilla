@@ -47,9 +47,9 @@
   </licenses>
   <scm>
     <connection>scm:https:https://github.com/vaadin/hilla.git</connection>
-    <developerConnection>scm:git:git@github.com:vaadin/hilla.git
+    <developerConnection>scm:https:https://github.com/vaadin/hilla.git
     </developerConnection>
-    <url>https://github.com/vaadin/hilla</url>
+    <url>https://github.com/vaadin/hilla.git</url>
   </scm>
   <distributionManagement>
     <repository>
