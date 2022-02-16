@@ -7,6 +7,12 @@
   <name>Hilla</name>
   <packaging>pom</packaging>
 
+  <parent>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-parent</artifactId>
+      <version>2.0.4</version>
+  </parent>
+
   <modules>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
@@ -49,13 +55,6 @@
     <url>https://github.com/vaadin/hilla</url>
     <tag>HEAD</tag>
   </scm>
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub</name>
-      <url>https://maven.pkg.github.com/vaadin/hilla</url>  
-    </repository>
-  </distributionManagement>
 
   <repositories>
     <!-- The order of definitions matters. Explicitly defining central
@@ -170,13 +169,38 @@
           <lineEnding>LF</lineEnding>
         </configuration>
       </plugin>
+
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M5</version>
-        <configuration>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-        </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.1</version>
+          <executions>
+              <execution>
+                  <id>attach-sources</id>
+                  <phase>verify</phase>
+                  <goals>
+                      <goal>jar-no-fork</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.3.2</version>
+          <executions>
+              <execution>
+                  <id>attach-javadocs</id>
+                  <phase>verify</phase>
+                  <goals>
+                      <goal>jar</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <quiet>true</quiet>
+          </configuration>
       </plugin>
     </plugins>
   </build>
