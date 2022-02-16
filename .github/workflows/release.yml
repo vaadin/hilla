@@ -47,4 +47,4 @@ jobs:
           echo "Next Development Version: ${{github.event.inputs.developmentVersion}}"
           mvn -B release:prepare -DreleaseVersion=${{github.event.inputs.releaseVersion}} -Dtag=${{github.event.inputs.releaseVersion}} -DdevelopmentVersion=${{github.event.inputs.developmentVersion}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
+          GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
