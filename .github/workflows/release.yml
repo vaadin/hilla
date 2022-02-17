@@ -1,5 +1,8 @@
 name: Java Release
 
+env:
+  PROFILE: prerelease
+
 on:
   workflow_dispatch:
     inputs:
@@ -17,6 +20,12 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Set Release Profile
+        run: |
+        # If only numbers we have stable releases
+        $([[ ${{ github.event.inputs.releaseVersion }} =~ =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && PROFILE=maven-central || PROFILE=prerelease
+        echo ${{ env.PROFILE }}
+
       - name: Checkout Project Code
         uses: actions/checkout@v2
         with:
@@ -35,16 +44,3 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-
-      - name: Configure Git user
-        run: |
-          git config user.email "vaadin-bot@users.noreply.github.com"
-          git config user.name "vaadin-bot"
-
-      - name: Publish JAR
-        run: |
-          echo "Release Version: ${{github.event.inputs.releaseVersion}}"
-          echo "Next Development Version: ${{github.event.inputs.developmentVersion}}"
-          mvn -B release:prepare -DreleaseVersion=${{github.event.inputs.releaseVersion}} -Dtag=${{github.event.inputs.releaseVersion}} -DdevelopmentVersion=${{github.event.inputs.developmentVersion}}
-        env:
-          GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
