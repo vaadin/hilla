@@ -20,7 +20,6 @@ jobs:
       - name: Set Release Profile
         run: |
           echo "$PROFILE"
-          echo "$([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "maven-central" || echo "prerelease")"
 
       - name: Checkout Project Code
         uses: actions/checkout@v2
