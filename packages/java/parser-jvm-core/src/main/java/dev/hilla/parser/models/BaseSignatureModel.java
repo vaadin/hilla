@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -28,7 +28,8 @@ public interface BaseSignatureModel extends SignatureModel {
         return Stream.empty();
     }
 
-    static Stream<Type> resolveDependencies(@Nonnull Type signature) {
+    static Stream<Class<?>> resolveDependencies(
+            @Nonnull AnnotatedElement signature) {
         // BaseType is about primitive types (int, double, etc.).
         // We don't need to resolve them, so skipping.
         return Stream.empty();

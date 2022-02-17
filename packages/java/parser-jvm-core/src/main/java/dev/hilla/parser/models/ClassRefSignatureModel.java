@@ -1,14 +1,15 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+
+import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
@@ -28,14 +29,14 @@ public interface ClassRefSignatureModel extends SignatureModel {
         return new ClassRefSignatureReflectionModel(origin, parent);
     }
 
-    static ClassRefSignatureModel of(@Nonnull ParameterizedType origin) {
+    static ClassRefSignatureModel of(
+            @Nonnull AnnotatedParameterizedType origin) {
         return of(origin, null);
     }
 
-    static ClassRefSignatureModel of(@Nonnull ParameterizedType origin,
+    static ClassRefSignatureModel of(@Nonnull AnnotatedParameterizedType origin,
             Model parent) {
-        return new ClassRefSignatureReflectionModel(
-                (Class<?>) origin.getRawType(), origin, parent);
+        return new ClassRefSignatureReflectionModel(origin, parent);
     }
 
     static Stream<ClassInfo> resolveDependencies(
@@ -46,23 +47,26 @@ public interface ClassRefSignatureModel extends SignatureModel {
                 .flatMap(SignatureModel::resolveDependencies).distinct();
 
         return classInfo != null && !ModelUtils.isJDKClass(classInfo.getName())
-                ? Stream.of(Stream.of(classInfo), typeArgumentsDependencies)
-                        .flatMap(Function.identity()).distinct()
+                ? StreamUtils.combine(Stream.of(classInfo),
+                        typeArgumentsDependencies).distinct()
                 : typeArgumentsDependencies;
     }
 
-    static Stream<Type> resolveDependencies(@Nonnull Type signature) {
+    static Stream<Class<?>> resolveDependencies(
+            @Nonnull AnnotatedElement signature) {
         var typeArgumentDependencies = Objects
-                .requireNonNull(signature) instanceof ParameterizedType ? Arrays
-                        .stream(((ParameterizedType) signature)
-                                .getActualTypeArguments())
-                        .flatMap(SignatureModel::resolveDependencies)
-                        .distinct() : Stream.<Type> empty();
+                .requireNonNull(signature) instanceof AnnotatedParameterizedType
+                        ? Arrays.stream(((AnnotatedParameterizedType) signature)
+                                .getAnnotatedActualTypeArguments())
+                                .flatMap(SignatureModel::resolveDependencies)
+                                .distinct()
+                        : Stream.<Class<?>> empty();
 
-        return ModelUtils.isJDKClass(signature)
-                ? Stream.of(Stream.of(signature), typeArgumentDependencies)
-                        .flatMap(Function.identity()).distinct()
-                : typeArgumentDependencies;
+        return signature instanceof Class<?>
+                && !ModelUtils.isJDKClass(signature)
+                        ? StreamUtils.combine(Stream.of((Class<?>) signature),
+                                typeArgumentDependencies).distinct()
+                        : typeArgumentDependencies;
     }
 
     Collection<TypeArgumentModel> getTypeArguments();

@@ -4,14 +4,11 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-
-import io.github.classgraph.ClassInfo;
 
 public class ClassInfoModelInheritanceChain {
     private final ClassInfoModel model;
@@ -83,38 +80,67 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembersStream(selector,
+        return getMembersStream(members,
                 ModelUtils::defaultClassInfoMemberFilter, wrapper)
                         .collect(Collectors.toSet());
     }
 
     public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
             @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembersStream(selector, filter, wrapper)
+        return getMembersStream(members.stream(), filter, wrapper)
+                .collect(Collectors.toSet());
+    }
+
+    public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Stream<Member> members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(members,
+                ModelUtils::defaultClassInfoMemberFilter, wrapper)
+                        .collect(Collectors.toSet());
+    }
+
+    public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Stream<Member> members, @Nonnull Predicate<Member> filter,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(members, filter, wrapper)
                 .collect(Collectors.toSet());
     }
 
     public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembersStream(selector,
+        return getMembersStream(members,
                 ModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
     public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
             @Nonnull Predicate<Member> filter,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(Objects.requireNonNull(members).stream(),
+                filter, wrapper);
+    }
+
+    public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
+            @Nonnull Stream<Member> members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(members,
+                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+    }
+
+    public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
+            @Nonnull Stream<Member> members, @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         Objects.requireNonNull(wrapper);
         Objects.requireNonNull(filter);
-        Objects.requireNonNull(selector);
+        Objects.requireNonNull(members);
 
         return getClasses().stream()
-                .flatMap(cls -> cls.getMembersStream(selector, filter, wrapper))
+                .flatMap(cls -> cls.getMembersStream(members, filter, wrapper))
                 .distinct();
     }
 

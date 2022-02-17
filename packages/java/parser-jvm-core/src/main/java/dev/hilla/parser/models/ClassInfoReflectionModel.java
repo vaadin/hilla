@@ -1,17 +1,11 @@
 package dev.hilla.parser.models;
 
-import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import io.github.classgraph.ClassInfo;
-
-final class ClassInfoReflectionModel extends AbstractModel<Type>
+final class ClassInfoReflectionModel extends AbstractModel<Class<?>>
         implements ClassInfoModel, ReflectionModel {
     private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
@@ -21,57 +15,81 @@ final class ClassInfoReflectionModel extends AbstractModel<Type>
     private Collection<MethodInfoModel> methods;
     private Collection<ClassInfoModel> superClasses;
 
-    public ClassInfoReflectionModel(Type origin, Model parent) {
+    public ClassInfoReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);
+
+        var superClass = origin.getSuperclass();
+
+        this.superClass = superClass != null
+                && !Objects.equals(superClass, Object.class)
+                        ? ClassInfoModel.of(superClass)
+                        : null;
+
+        this.chain = new ClassInfoModelInheritanceChain(this);
     }
 
     @Override
     public Collection<AnnotationInfoModel> getAnnotations() {
-        return null;
-    }
+        if (annotations == null) {
+            annotations = getMembers(origin.getAnnotations(),
+                    AnnotationInfoModel::of);
+        }
 
-    @Override
-    public Collection<ClassInfoModel> getDependencies() {
-        return null;
+        return annotations;
     }
 
     @Override
     public Collection<FieldInfoModel> getFields() {
-        return null;
+        if (fields == null) {
+            fields = getMembers(origin.getDeclaredFields(), FieldInfoModel::of);
+        }
+
+        return fields;
     }
 
     @Override
     public ClassInfoModelInheritanceChain getInheritanceChain() {
-        return null;
+        return chain;
     }
 
     @Override
     public Collection<ClassInfoModel> getInnerClasses() {
-        return null;
-    }
+        if (innerClasses == null) {
+            innerClasses = getMembers(origin.getDeclaredClasses(),
+                    ClassInfoModel::of);
+        }
 
-    @Override
-    public <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(@Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector, @Nonnull Predicate<ModelMember> filter, @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
-        return null;
-    }
-
-    @Override
-    public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(@Nonnull Function<ClassInfo, Collection<Member>> selector, @Nonnull Predicate<Member> filter, @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return null;
+        return innerClasses;
     }
 
     @Override
     public Collection<MethodInfoModel> getMethods() {
-        return null;
+        if (methods == null) {
+            methods = getMembers(origin.getDeclaredMethods(),
+                    MethodInfoModel::of);
+        }
+
+        return methods;
     }
 
     @Override
     public Optional<ClassInfoModel> getSuperClass() {
-        return Optional.empty();
+        return Optional.ofNullable(superClass);
     }
 
     @Override
     public Collection<ClassInfoModel> getSuperClasses() {
-        return null;
+        if (superClasses == null) {
+            superClasses = new LinkedHashSet<>();
+
+            var cls = origin.getSuperclass();
+
+            while (cls != null && cls != Object.class) {
+                superClasses.add(ClassInfoModel.of(cls));
+                cls = cls.getSuperclass();
+            }
+        }
+
+        return superClasses;
     }
 }

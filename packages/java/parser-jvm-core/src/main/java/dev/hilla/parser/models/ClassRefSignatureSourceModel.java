@@ -1,15 +1,15 @@
 package dev.hilla.parser.models;
 
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.ClassRefTypeSignature;
 
 final class ClassRefSignatureSourceModel
-        extends AbstractSourceSignatureModel<ClassRefTypeSignature>
-        implements ClassRefSignatureModel, SourceModel {
+        extends AbstractModel<ClassRefTypeSignature>
+        implements ClassRefSignatureModel, SourceSignatureModel {
     private final ClassRefSignatureReflectionModel reflected;
     private Collection<TypeArgumentModel> typeArguments;
 
@@ -22,11 +22,10 @@ final class ClassRefSignatureSourceModel
     @Override
     public Collection<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
-            typeArguments = Stream
-                    .of(origin.getTypeArguments().stream(),
+            typeArguments = StreamUtils
+                    .combine(origin.getTypeArguments().stream(),
                             origin.getSuffixTypeArguments().stream()
                                     .flatMap(Collection::stream))
-                    .flatMap(Function.identity())
                     .map(arg -> TypeArgumentModel.of(arg, this))
                     .collect(Collectors.toList());
         }

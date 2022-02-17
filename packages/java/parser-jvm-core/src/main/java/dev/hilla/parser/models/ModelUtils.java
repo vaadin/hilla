@@ -1,24 +1,21 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 
 import io.github.classgraph.ClassInfo;
 
 final class ModelUtils {
-    public static boolean isJDKClass(Class<?> cls) {
-        return isJDKClass(cls.getName());
+    public static <T> boolean defaultClassInfoMemberFilter(T member) {
+        return true;
     }
 
-    public static boolean isJDKClass(ParameterizedType type) {
-        return isJDKClass((Class<?>) type.getRawType());
-    }
-
-    public static boolean isJDKClass(Type type) {
-        if (type instanceof ParameterizedType) {
-            return isJDKClass((ParameterizedType) type);
+    public static boolean isJDKClass(AnnotatedElement type) {
+        if (type instanceof AnnotatedType) {
+            return isJDKClass(((AnnotatedType) type).getType());
         } else if (type instanceof Class<?>) {
-            return isJDKClass((Class<?>) type);
+            return isJDKClass((Type) type);
         } else {
             return false;
         }
@@ -35,7 +32,7 @@ final class ModelUtils {
                 || className.startsWith("com.oracle");
     }
 
-    public static <T> boolean defaultClassInfoMemberFilter(T member) {
-        return true;
+    public static boolean isJDKClass(Type cls) {
+        return isJDKClass(cls.getTypeName());
     }
 }

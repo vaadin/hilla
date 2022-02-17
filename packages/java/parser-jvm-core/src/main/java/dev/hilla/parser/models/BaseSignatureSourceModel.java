@@ -2,10 +2,8 @@ package dev.hilla.parser.models;
 
 import io.github.classgraph.BaseTypeSignature;
 
-final class BaseSignatureSourceModel
-        extends AbstractSourceSignatureModel<BaseTypeSignature>
-        implements BaseSignatureModel, SourceModel {
-
+final class BaseSignatureSourceModel extends AbstractModel<BaseTypeSignature>
+        implements BaseSignatureModel, SourceSignatureModel {
     public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
         super(origin, parent);
     }

@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedArrayType;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -17,15 +16,10 @@ public interface ArraySignatureModel extends SignatureModel {
                 Objects.requireNonNull(parent));
     }
 
-    static ArraySignatureModel of(@Nonnull Type origin, Model parent) {
-        if (origin instanceof GenericArrayType || (origin instanceof Class<?>
-                && ((Class<?>) origin).isArray())) {
-            return new ArraySignatureReflectionModel(
-                    Objects.requireNonNull(origin), parent);
-        }
-
-        throw new IllegalArgumentException(
-                ArraySignatureReflectionModel.ILLEGAL_ARGUMENTS_EXCEPTION_MSG);
+    static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin,
+            Model parent) {
+        return new ArraySignatureReflectionModel(Objects.requireNonNull(origin),
+                parent);
     }
 
     static Stream<ClassInfo> resolveDependencies(
@@ -34,21 +28,10 @@ public interface ArraySignatureModel extends SignatureModel {
                 Objects.requireNonNull(signature).getElementTypeSignature());
     }
 
-    static Stream<Type> resolveDependencies(@Nonnull Type signature) {
-        Type componentType;
-
-        if (Objects.requireNonNull(signature) instanceof GenericArrayType) {
-            componentType = ((GenericArrayType) signature)
-                    .getGenericComponentType();
-        } else if ((signature instanceof Class<?>
-                && ((Class<?>) signature).isArray())) {
-            componentType = ((Class<?>) signature).getComponentType();
-        } else {
-            throw new IllegalArgumentException(
-                    ArraySignatureReflectionModel.ILLEGAL_ARGUMENTS_EXCEPTION_MSG);
-        }
-
-        return SignatureModel.resolveDependencies(componentType);
+    static Stream<Class<?>> resolveDependencies(
+            @Nonnull AnnotatedArrayType signature) {
+        return SignatureModel.resolveDependencies(
+                signature.getAnnotatedGenericComponentType());
     }
 
     SignatureModel getNestedType();

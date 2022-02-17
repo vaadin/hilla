@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.AnnotatedParameterizedType;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,28 +14,27 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class ClassRefSignatureReflectionModel
-        extends AbstractReflectionSignatureModel<Class<?>>
-        implements ClassRefSignatureModel, ReflectionModel {
+final class ClassRefSignatureReflectionModel extends AbstractModel<Class<?>>
+        implements ClassRefSignatureModel, ReflectionSignatureModel {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
 
     private Collection<TypeArgumentModel> typeArguments;
-    private ParameterizedType wrapper;
+    private AnnotatedParameterizedType wrapper;
 
     public ClassRefSignatureReflectionModel(Class<?> origin) {
-        this(origin, null, null);
+        this(origin, null);
     }
 
     public ClassRefSignatureReflectionModel(Class<?> origin, Model parent) {
-        this(origin, null, parent);
+        super(origin, parent);
     }
 
-    public ClassRefSignatureReflectionModel(Class<?> origin,
-            ParameterizedType wrapper, Model parent) {
-        super(origin, parent);
+    public ClassRefSignatureReflectionModel(AnnotatedParameterizedType wrapper,
+            Model parent) {
+        super((Class<?>) wrapper.getType(), parent);
         this.wrapper = wrapper;
     }
 
@@ -43,7 +42,7 @@ final class ClassRefSignatureReflectionModel
     public Collection<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
             typeArguments = wrapper != null
-                    ? Arrays.stream(wrapper.getActualTypeArguments())
+                    ? Arrays.stream(wrapper.getAnnotatedActualTypeArguments())
                             .map(arg -> TypeArgumentModel.of(arg, this))
                             .collect(Collectors.toSet())
                     : Set.of();

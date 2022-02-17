@@ -1,9 +1,7 @@
 package dev.hilla.parser.models;
 
-final class BaseSignatureReflectionModel
-        extends AbstractReflectionSignatureModel<Class<?>>
-        implements BaseSignatureModel, ReflectionModel {
-
+final class BaseSignatureReflectionModel extends AbstractModel<Class<?>>
+        implements BaseSignatureModel, ReflectionSignatureModel {
     public BaseSignatureReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);
     }

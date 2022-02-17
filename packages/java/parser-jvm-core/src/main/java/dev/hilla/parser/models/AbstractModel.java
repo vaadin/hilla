@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractModel<T> implements Model {
+public abstract class AbstractModel<T> implements Model {
     protected final T origin;
     protected final Model parent;
 
-    public AbstractModel(@Nonnull T origin, Model parent) {
+    AbstractModel(@Nonnull T origin, Model parent) {
         this.origin = Objects.requireNonNull(origin);
         this.parent = parent;
     }
@@ -24,7 +24,7 @@ abstract class AbstractModel<T> implements Model {
             return false;
         }
 
-        return Objects.equals(origin, ((AbstractModel) other).origin);
+        return Objects.equals(origin, ((AbstractModel<?>) other).origin);
     }
 
     @Override

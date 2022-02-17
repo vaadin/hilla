@@ -1,14 +1,14 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
-import java.util.Arrays;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedWildcardType;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+
+import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.TypeArgument;
@@ -20,21 +20,20 @@ public interface TypeArgumentModel extends SignatureModel {
                 Objects.requireNonNull(parent));
     }
 
-    static TypeArgumentModel of(@Nonnull Type origin, Model parent) {
+    static TypeArgumentModel of(@Nonnull AnnotatedType origin, Model parent) {
         return new TypeArgumentReflectionModel(Objects.requireNonNull(origin),
                 parent);
     }
 
     static Stream<ClassInfo> resolveDependencies(TypeArgument signature) {
-        return SignatureModel
-                .resolveDependencies(signature.getTypeSignature());
+        return SignatureModel.resolveDependencies(signature.getTypeSignature());
     }
 
-    static Stream<Type> resolveDependencies(WildcardType signature) {
-        return Stream
-                .of(Arrays.stream(signature.getUpperBounds()),
-                        Arrays.stream(signature.getLowerBounds()))
-                .flatMap(Function.identity())
+    static Stream<Class<?>> resolveDependencies(
+            AnnotatedWildcardType signature) {
+        return StreamUtils
+                .combine(signature.getAnnotatedUpperBounds(),
+                        signature.getAnnotatedLowerBounds())
                 .flatMap(SignatureModel::resolveDependencies);
     }
 

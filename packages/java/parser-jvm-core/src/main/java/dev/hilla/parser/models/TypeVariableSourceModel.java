@@ -2,9 +2,8 @@ package dev.hilla.parser.models;
 
 import io.github.classgraph.TypeVariableSignature;
 
-final class TypeVariableSourceModel
-        extends AbstractSourceSignatureModel<TypeVariableSignature>
-        implements TypeVariableModel, SourceModel {
+final class TypeVariableSourceModel extends AbstractModel<TypeVariableSignature>
+        implements TypeVariableModel, SourceSignatureModel {
     private TypeParameterModel typeParameter;
 
     public TypeVariableSourceModel(TypeVariableSignature origin, Model parent) {

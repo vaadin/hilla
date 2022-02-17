@@ -1,10 +1,11 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -17,9 +18,9 @@ import io.github.classgraph.HierarchicalTypeSignature;
 import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeVariableSignature;
 
-public interface SignatureModel extends Model, Dependable {
+public interface SignatureModel extends Model {
     static SignatureModel of(@Nonnull HierarchicalTypeSignature signature,
-                             Model parent) {
+            Model parent) {
         if (signature instanceof BaseTypeSignature) {
             return BaseSignatureModel.of((BaseTypeSignature) signature, parent);
         } else if (signature instanceof ArrayTypeSignature) {
@@ -37,20 +38,22 @@ public interface SignatureModel extends Model, Dependable {
         }
     }
 
-    static SignatureModel of(@Nonnull Type signature, Model parent) {
-        if (signature instanceof ParameterizedType) {
-            return ClassRefSignatureModel.of((ParameterizedType) signature,
+    static SignatureModel of(@Nonnull AnnotatedElement signature,
+            Model parent) {
+        if (signature instanceof AnnotatedParameterizedType) {
+            return ClassRefSignatureModel
+                    .of((AnnotatedParameterizedType) signature, parent);
+        } else if (signature instanceof AnnotatedTypeVariable) {
+            return TypeVariableModel.of((AnnotatedTypeVariable) signature,
                     parent);
-        } else if (signature instanceof TypeVariable<?>) {
-            return TypeVariableModel.of((TypeVariable<?>) signature, parent);
-        } else if (signature instanceof WildcardType) {
-            return TypeArgumentModel.of(signature, parent);
-        } else if (signature instanceof GenericArrayType) {
-            return ArraySignatureModel.of(signature, parent);
+        } else if (signature instanceof AnnotatedWildcardType) {
+            return TypeArgumentModel.of((AnnotatedWildcardType) signature,
+                    parent);
+        } else if (signature instanceof AnnotatedArrayType) {
+            return ArraySignatureModel.of((AnnotatedArrayType) signature,
+                    parent);
         } else if (((Class<?>) signature).isPrimitive()) {
             return BaseSignatureModel.of((Class<?>) signature, parent);
-        } else if (((Class<?>) signature).isArray()) {
-            return ArraySignatureModel.of(signature, parent);
         } else {
             return ClassRefSignatureModel.of((Class<?>) signature, parent);
         }
@@ -80,25 +83,24 @@ public interface SignatureModel extends Model, Dependable {
         }
     }
 
-    static Stream<Type> resolveDependencies(Type signature) {
+    static Stream<Class<?>> resolveDependencies(AnnotatedElement signature) {
         if (signature == null) {
             return Stream.empty();
         }
 
         if (signature instanceof ParameterizedType) {
             return ClassRefSignatureModel.resolveDependencies(signature);
-        } else if (signature instanceof TypeVariable<?>) {
+        } else if (signature instanceof AnnotatedTypeVariable) {
             return TypeVariableModel
-                    .resolveDependencies((TypeVariable<?>) signature);
-        } else if (signature instanceof WildcardType) {
+                    .resolveDependencies((AnnotatedTypeVariable) signature);
+        } else if (signature instanceof AnnotatedWildcardType) {
             return TypeArgumentModel
-                    .resolveDependencies((WildcardType) signature);
-        } else if (signature instanceof GenericArrayType) {
-            return ArraySignatureModel.resolveDependencies(signature);
+                    .resolveDependencies((AnnotatedWildcardType) signature);
+        } else if (signature instanceof AnnotatedArrayType) {
+            return ArraySignatureModel
+                    .resolveDependencies((AnnotatedArrayType) signature);
         } else if (((Class<?>) signature).isPrimitive()) {
             return BaseSignatureModel.resolveDependencies(signature);
-        } else if (((Class<?>) signature).isArray()) {
-            return ArraySignatureModel.resolveDependencies(signature);
         } else {
             return ClassRefSignatureModel.resolveDependencies(signature);
         }

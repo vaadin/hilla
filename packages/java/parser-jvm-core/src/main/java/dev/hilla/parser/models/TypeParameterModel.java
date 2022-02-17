@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -14,7 +14,7 @@ public interface TypeParameterModel extends SignatureModel {
         return new TypeParameterSourceModel(origin, parent);
     }
 
-    static TypeParameterModel of(@Nonnull TypeVariable<?> origin,
+    static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin,
             Model parent) {
         return new TypeParameterReflectionModel(origin, parent);
     }

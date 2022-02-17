@@ -6,9 +6,8 @@ import java.util.Set;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentSourceModel
-        extends AbstractSourceSignatureModel<TypeArgument>
-        implements TypeArgumentModel, SourceModel {
+final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
+        implements TypeArgumentModel, SourceSignatureModel {
     private Collection<SignatureModel> wildcardAssociatedTypes;
 
     public TypeArgumentSourceModel(TypeArgument origin, Model parent) {

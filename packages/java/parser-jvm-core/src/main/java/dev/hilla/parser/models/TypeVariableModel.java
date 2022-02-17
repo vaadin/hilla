@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -17,7 +16,8 @@ public interface TypeVariableModel extends SignatureModel {
                 Objects.requireNonNull(parent));
     }
 
-    static TypeVariableModel of(@Nonnull TypeVariable<?> origin, Model parent) {
+    static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin,
+            Model parent) {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin),
                 parent);
     }
@@ -32,13 +32,13 @@ public interface TypeVariableModel extends SignatureModel {
                 : Stream.empty();
     }
 
-    static Stream<Type> resolveDependencies(TypeVariable<?> signature) {
+    static Stream<Class<?>> resolveDependencies(
+            AnnotatedTypeVariable signature) {
         // We can resolve only the type variable class bound here (bound class
         // is `dev.hilla.X` in `T extends dev.hilla.X`)
-        var bound = signature.getBounds()[0];
+        var bound = signature.getAnnotatedBounds()[0];
 
-        return bound != null
-                ? SignatureModel.resolveDependencies(bound)
+        return bound != null ? SignatureModel.resolveDependencies(bound)
                 : Stream.empty();
     }
 

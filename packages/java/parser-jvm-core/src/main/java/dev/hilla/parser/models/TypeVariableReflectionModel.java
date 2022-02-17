@@ -1,13 +1,14 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.AnnotatedTypeVariable;
 
 final class TypeVariableReflectionModel
-        extends AbstractReflectionSignatureModel<TypeVariable<?>>
-        implements TypeVariableModel, ReflectionModel {
+        extends AbstractModel<AnnotatedTypeVariable>
+        implements TypeVariableModel, ReflectionSignatureModel {
     private TypeParameterModel typeParameter;
 
-    public TypeVariableReflectionModel(TypeVariable<?> origin, Model parent) {
+    public TypeVariableReflectionModel(AnnotatedTypeVariable origin,
+            Model parent) {
         super(origin, parent);
     }
 

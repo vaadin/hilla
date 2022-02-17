@@ -1,25 +1,26 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class TypeParameterReflectionModel
-        extends AbstractReflectionSignatureModel<TypeVariable<?>>
-        implements TypeParameterModel, ReflectionModel {
+        extends AbstractModel<AnnotatedTypeVariable>
+        implements TypeParameterModel, ReflectionSignatureModel {
     private Collection<SignatureModel> bounds;
 
-    public TypeParameterReflectionModel(TypeVariable<?> origin, Model parent) {
+    public TypeParameterReflectionModel(AnnotatedTypeVariable origin,
+            Model parent) {
         super(origin, Objects.requireNonNull(parent));
     }
 
     @Override
     public Collection<SignatureModel> getBounds() {
         if (bounds == null) {
-            bounds = Arrays.stream(origin.getBounds()).map(
-                    signature -> SignatureModel.of(signature, this))
+            bounds = Arrays.stream(origin.getAnnotatedBounds())
+                    .map(signature -> SignatureModel.of(signature, this))
                     .collect(Collectors.toList());
         }
 

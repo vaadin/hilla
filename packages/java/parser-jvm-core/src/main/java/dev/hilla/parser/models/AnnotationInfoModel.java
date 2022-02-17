@@ -1,19 +1,25 @@
 package dev.hilla.parser.models;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.util.stream.Stream;
 
-import java.util.Collection;
-import java.util.Collections;
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-public interface AnnotationInfoModel extends Model, Dependable {
-    static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation, @Nonnull Model parent) {
+public interface AnnotationInfoModel extends Model {
+    static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation,
+            @Nonnull Model parent) {
         return new AnnotationInfoSourceModel(annotation, parent);
     }
 
+    static AnnotationInfoModel of(@Nonnull Annotation annotation,
+            @Nonnull Model parent) {
+        return new AnnotationInfoReflectionModel(annotation, parent);
+    }
+
     @Override
-    default Collection<ClassInfoModel> getDependencies() {
-        return Collections.emptySet();
+    default Stream<ClassInfoModel> getDependenciesStream() {
+        return Stream.empty();
     }
 }

@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,9 +12,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.utils.StreamUtils;
+
 import io.github.classgraph.ClassInfo;
 
-public interface ClassInfoModel extends Model, Dependable {
+public interface ClassInfoModel extends Model {
     static ClassInfoModel of(@Nonnull ClassInfo origin) {
         return of(origin, null);
     }
@@ -23,11 +25,11 @@ public interface ClassInfoModel extends Model, Dependable {
         return new ClassInfoSourceModel(Objects.requireNonNull(origin), parent);
     }
 
-    static ClassInfoModel of(@Nonnull Type origin) {
+    static ClassInfoModel of(@Nonnull Class<?> origin) {
         return of(origin, null);
     }
 
-    static ClassInfoModel of(@Nonnull Type origin, Model parent) {
+    static ClassInfoModel of(@Nonnull Class<?> origin, Model parent) {
         return new ClassInfoReflectionModel(Objects.requireNonNull(origin),
                 parent);
     }
@@ -36,6 +38,13 @@ public interface ClassInfoModel extends Model, Dependable {
 
     default Stream<AnnotationInfoModel> getAnnotationsStream() {
         return getAnnotations().stream();
+    }
+
+    @Override
+    default Stream<ClassInfoModel> getDependenciesStream() {
+        return StreamUtils.combine(getFieldDependenciesStream(),
+                getMethodDependenciesStream(), getInnerClassesStream(),
+                getSuperClassesStream()).distinct();
     }
 
     default Collection<ClassInfoModel> getFieldDependencies() {
@@ -92,37 +101,90 @@ public interface ClassInfoModel extends Model, Dependable {
                 ModelUtils::defaultClassInfoMemberFilter, dependencyExtractor);
     }
 
-    <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
+    default <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
             @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
             @Nonnull Predicate<ModelMember> filter,
-            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor);
+            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
+        Objects.requireNonNull(selector);
+        return selector.apply(this).stream().filter(Objects::nonNull)
+                .filter(Objects.requireNonNull(filter))
+                .flatMap(Objects.requireNonNull(dependencyExtractor))
+                .distinct();
+    }
 
-    default <Member, DependableMember extends Model> Collection<DependableMember> getMembers(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
-            @Nonnull BiFunction<Member, ClassInfoModel, DependableMember> wrapper) {
-        return getMembers(selector, ModelUtils::defaultClassInfoMemberFilter,
+    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Member[] members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
                 wrapper);
     }
 
     default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
+                wrapper);
+    }
+
+    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Stream<Member> members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
+                wrapper);
+    }
+
+    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Member[] members, @Nonnull Predicate<Member> filter,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(Arrays.stream(Objects.requireNonNull(members)),
+                filter, wrapper).collect(Collectors.toSet());
+    }
+
+    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Collection<Member> members,
             @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembersStream(selector, filter, wrapper)
-                .collect(Collectors.toList());
+        return getMembersStream(Objects.requireNonNull(members).stream(),
+                filter, wrapper).collect(Collectors.toSet());
+    }
+
+    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+            @Nonnull Stream<Member> members, @Nonnull Predicate<Member> filter,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(members, filter, wrapper)
+                .collect(Collectors.toSet());
     }
 
     default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+            @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembersStream(selector,
+        return getMembersStream(members,
                 ModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
-    <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
-            @Nonnull Function<ClassInfo, Collection<Member>> selector,
+    default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
+            @Nonnull Stream<Member> members,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(members,
+                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+    }
+
+    default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
+            @Nonnull Collection<Member> members,
             @Nonnull Predicate<Member> filter,
-            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper);
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        return getMembersStream(Objects.requireNonNull(members).stream(),
+                filter, wrapper);
+    }
+
+    default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
+            @Nonnull Stream<Member> members, @Nonnull Predicate<Member> filter,
+            @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
+        Objects.requireNonNull(wrapper);
+        return Objects.requireNonNull(members).filter(Objects::nonNull)
+                .filter(Objects.requireNonNull(filter))
+                .map(member -> wrapper.apply(member, this));
+    }
 
     default Collection<ClassInfoModel> getMethodDependencies() {
         return getMethodDependenciesStream().collect(Collectors.toSet());

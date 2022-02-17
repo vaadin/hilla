@@ -1,21 +1,26 @@
 package dev.hilla.parser.models;
 
-import java.util.Collection;
+import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public interface FieldInfoModel extends Model, Dependable {
+public interface FieldInfoModel extends Model {
     static FieldInfoModel of(@Nonnull FieldInfo field, @Nonnull Model parent) {
         return new FieldInfoSourceModel(Objects.requireNonNull(field),
                 Objects.requireNonNull(parent));
     }
 
+    static FieldInfoModel of(@Nonnull Field field, @Nonnull Model parent) {
+        return new FieldInfoReflectionModel(field, parent);
+    }
+
     @Override
-    default Collection<ClassInfoModel> getDependencies() {
-        return getType().getDependencies();
+    default Stream<ClassInfoModel> getDependenciesStream() {
+        return getType().getDependenciesStream();
     }
 
     SignatureModel getType();

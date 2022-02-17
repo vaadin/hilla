@@ -1,37 +1,38 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dev.hilla.parser.utils.StreamUtils;
+
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentReflectionModel
-        extends AbstractReflectionSignatureModel<Type>
-        implements TypeArgumentModel, ReflectionModel {
+final class TypeArgumentReflectionModel extends AbstractModel<AnnotatedType>
+        implements TypeArgumentModel, ReflectionSignatureModel {
     private Collection<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;
 
-    public TypeArgumentReflectionModel(Type origin, Model parent) {
+    public TypeArgumentReflectionModel(AnnotatedType origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
     public Collection<SignatureModel> getAssociatedTypes() {
         if (associatedTypes == null) {
-            var stream = origin instanceof WildcardType ? Stream
-                    .of(Arrays.stream(((WildcardType) origin).getLowerBounds()),
-                            Arrays.stream(
-                                    ((WildcardType) origin).getUpperBounds()))
-                    .flatMap(Function.identity()) : Stream.of(origin);
+            var stream = origin instanceof AnnotatedWildcardType
+                    ? StreamUtils.combine(
+                            ((AnnotatedWildcardType) origin)
+                                    .getAnnotatedLowerBounds(),
+                            ((AnnotatedWildcardType) origin)
+                                    .getAnnotatedUpperBounds())
+                    : Stream.of(origin);
 
-            associatedTypes = stream
-                    .map(type -> SignatureModel.of(type, this))
+            associatedTypes = stream.map(type -> SignatureModel.of(type, this))
                     .collect(Collectors.toSet());
         }
 

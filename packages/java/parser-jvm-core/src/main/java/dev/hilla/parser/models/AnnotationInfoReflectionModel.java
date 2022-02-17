@@ -1,7 +1,10 @@
 package dev.hilla.parser.models;
 
-final class AnnotationInfoReflectionModel {
-    public AnnotationInfoReflectionModel() {
+import java.lang.annotation.Annotation;
 
+final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
+        implements AnnotationInfoModel, ReflectionModel {
+    public AnnotationInfoReflectionModel(Annotation annotation, Model parent) {
+        super(annotation, parent);
     }
 }
