@@ -8,7 +8,7 @@ on:
         required: true
 
 env:
-  PROFILE: $([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "maven-central" || echo "prerelease")
+  PROFILE: ${{ echo $([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "maven-central" || echo "prerelease") }}
 
 jobs:
   releasing:
