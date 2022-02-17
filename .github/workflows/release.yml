@@ -21,11 +21,8 @@ jobs:
 
     steps:
       - name: Set Release Profile
-        run: |
-        # If only numbers we have stable releases
-        echo "$PROFILE"
-        $([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && PROFILE=maven-central || PROFILE=prerelease)
-        echo "$PROFILE"
+        run: echo "$PROFILE"
+        
 
       - name: Checkout Project Code
         uses: actions/checkout@v2
