@@ -1,8 +1,5 @@
 name: Java Release
 
-env:
-  PROFILE: prerelease
-
 on:
   workflow_dispatch:
     inputs:
@@ -22,8 +19,8 @@ jobs:
     steps:
       - name: Set Release Profile
         run: |
-          echo "$PROFILE"
-          PROFILE = $([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "maven-central" || echo "prerelease")
+          echo $PROFILE
+          $([[ ${{ github.event.inputs.releaseVersion }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "maven-central" || echo "prerelease")
           echo "$PROFILE"
 
       - name: Checkout Project Code
