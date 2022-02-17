@@ -15,6 +15,11 @@ final class MethodInfoReflectionModel extends AbstractModel<Method>
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
     public Collection<MethodParameterInfoModel> getParameters() {
         if (parameters == null) {
             parameters = Arrays.stream(origin.getParameters()).map(

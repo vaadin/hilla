@@ -11,6 +11,11 @@ final class FieldInfoReflectionModel extends AbstractModel<Field>
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
             type = SignatureModel.of(origin.getAnnotatedType(), this);

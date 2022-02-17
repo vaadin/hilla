@@ -29,6 +29,11 @@ final class ClassInfoReflectionModel extends AbstractModel<Class<?>>
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
     public Collection<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
             annotations = getMembers(origin.getAnnotations(),

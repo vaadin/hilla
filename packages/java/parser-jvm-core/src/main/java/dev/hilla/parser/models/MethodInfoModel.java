@@ -12,7 +12,7 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.MethodInfo;
 
-public interface MethodInfoModel extends Model {
+public interface MethodInfoModel extends Model, Named {
     static MethodInfoModel of(@Nonnull MethodInfo method,
             @Nonnull Model parent) {
         return new MethodInfoSourceModel(Objects.requireNonNull(method),

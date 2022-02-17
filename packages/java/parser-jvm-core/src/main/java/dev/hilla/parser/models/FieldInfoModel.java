@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public interface FieldInfoModel extends Model {
+public interface FieldInfoModel extends Model, Named {
     static FieldInfoModel of(@Nonnull FieldInfo field, @Nonnull Model parent) {
         return new FieldInfoSourceModel(Objects.requireNonNull(field),
                 Objects.requireNonNull(parent));

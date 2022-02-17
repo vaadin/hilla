@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodParameterInfo;
 
-public interface MethodParameterInfoModel extends Model {
+public interface MethodParameterInfoModel extends Model, Named {
     static MethodParameterInfoModel of(@Nonnull MethodParameterInfo parameter,
             @Nonnull Model parent) {
         return new MethodParameterInfoSourceModel(parameter, parent);

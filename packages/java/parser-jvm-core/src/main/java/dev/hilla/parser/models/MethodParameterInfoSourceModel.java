@@ -13,6 +13,11 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
             type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor(),

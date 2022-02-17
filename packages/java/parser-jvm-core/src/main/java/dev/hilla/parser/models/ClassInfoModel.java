@@ -16,7 +16,7 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.ClassInfo;
 
-public interface ClassInfoModel extends Model {
+public interface ClassInfoModel extends Model, Named {
     static ClassInfoModel of(@Nonnull ClassInfo origin) {
         return of(origin, null);
     }

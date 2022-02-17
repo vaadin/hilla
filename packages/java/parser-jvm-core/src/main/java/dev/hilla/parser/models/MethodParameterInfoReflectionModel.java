@@ -12,6 +12,11 @@ final class MethodParameterInfoReflectionModel extends AbstractModel<Parameter>
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
             type = SignatureModel.of(origin.getAnnotatedType(), this);
