@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.hilla.parser.models.ClassInfoModel;
+
 public final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
@@ -68,8 +70,8 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
-    public void process(Collection<RelativeClassInfo> endpoints,
-            Collection<RelativeClassInfo> entities) {
+    public void process(Collection<ClassInfoModel> endpoints,
+            Collection<ClassInfoModel> entities) {
         for (var plugin : plugins) {
             if (plugin instanceof Plugin.Processor) {
                 logger.debug("Executing processor plugin "
@@ -79,8 +81,7 @@ public final class PluginManager {
         }
     }
 
-    public Stream<RelativeClassInfo> transform(
-            Stream<RelativeClassInfo> stream) {
+    public Stream<ClassInfoModel> transform(Stream<ClassInfoModel> stream) {
         for (var plugin : plugins) {
             if (plugin instanceof Plugin.Transformer) {
                 logger.debug("Executing transformer plugin "

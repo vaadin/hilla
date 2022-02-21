@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.models.ClassInfoModel;
+
 public interface Plugin {
     int getOrder();
 
@@ -22,12 +24,12 @@ public interface Plugin {
 
     interface Transformer extends Plugin {
         @Nonnull
-        Stream<RelativeClassInfo> transform(
-                @Nonnull Stream<RelativeClassInfo> stream);
+        Stream<ClassInfoModel> transform(
+                @Nonnull Stream<ClassInfoModel> stream);
     }
 
     interface Processor extends Plugin {
-        void process(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities);
+        void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities);
     }
 }
