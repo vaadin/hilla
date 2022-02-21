@@ -1,14 +1,29 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 final class MethodParameterInfoReflectionModel extends AbstractModel<Parameter>
         implements MethodParameterInfoModel, ReflectionModel {
+    private List<AnnotationInfoModel> annotations;
     private SignatureModel type;
 
     public MethodParameterInfoReflectionModel(Parameter parameter,
             Model parent) {
         super(parameter, parent);
+    }
+
+    @Override
+    public List<AnnotationInfoModel> getAnnotations() {
+        if (annotations == null) {
+            annotations = Arrays.stream(origin.getAnnotations())
+                    .map(annotation -> AnnotationInfoModel.of(annotation, this))
+                    .collect(Collectors.toList());
+        }
+
+        return annotations;
     }
 
     @Override

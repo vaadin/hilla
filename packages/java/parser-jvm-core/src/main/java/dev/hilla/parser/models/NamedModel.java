@@ -1,5 +1,5 @@
 package dev.hilla.parser.models;
 
-public interface Named {
+public interface NamedModel {
     String getName();
 }

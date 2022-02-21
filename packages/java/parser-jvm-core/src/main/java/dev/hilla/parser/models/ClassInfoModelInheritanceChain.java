@@ -83,7 +83,7 @@ public class ClassInfoModelInheritanceChain {
             @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper)
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper)
                         .collect(Collectors.toSet());
     }
 
@@ -99,7 +99,7 @@ public class ClassInfoModelInheritanceChain {
             @Nonnull Stream<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper)
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper)
                         .collect(Collectors.toSet());
     }
 
@@ -114,7 +114,7 @@ public class ClassInfoModelInheritanceChain {
             @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
     public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
@@ -129,7 +129,7 @@ public class ClassInfoModelInheritanceChain {
             @Nonnull Stream<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
     public <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(

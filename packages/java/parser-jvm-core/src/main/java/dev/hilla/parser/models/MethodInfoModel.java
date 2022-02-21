@@ -1,7 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,7 +12,7 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.MethodInfo;
 
-public interface MethodInfoModel extends Model, Named {
+public interface MethodInfoModel extends Model, NamedModel, AnnotatedModel {
     static MethodInfoModel of(@Nonnull MethodInfo method,
             @Nonnull Model parent) {
         return new MethodInfoSourceModel(Objects.requireNonNull(method),
@@ -29,8 +29,8 @@ public interface MethodInfoModel extends Model, Named {
                 getParameterDependenciesStream());
     }
 
-    default Collection<ClassInfoModel> getParameterDependencies() {
-        return getParameterDependenciesStream().collect(Collectors.toSet());
+    default List<ClassInfoModel> getParameterDependencies() {
+        return getParameterDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getParameterDependenciesStream() {
@@ -39,14 +39,14 @@ public interface MethodInfoModel extends Model, Named {
                 .distinct();
     }
 
-    Collection<MethodParameterInfoModel> getParameters();
+    List<MethodParameterInfoModel> getParameters();
 
     default Stream<MethodParameterInfoModel> getParametersStream() {
         return getParameters().stream();
     }
 
-    default Collection<ClassInfoModel> getResultDependencies() {
-        return getResultDependenciesStream().collect(Collectors.toSet());
+    default List<ClassInfoModel> getResultDependencies() {
+        return getResultDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getResultDependenciesStream() {
@@ -54,4 +54,28 @@ public interface MethodInfoModel extends Model, Named {
     }
 
     SignatureModel getResultType();
+
+    boolean isAbstract();
+
+    boolean isBridge();
+
+    boolean isFinal();
+
+    boolean isNative();
+
+    boolean isPrivate();
+
+    boolean isProtected();
+
+    boolean isPublic();
+
+    boolean isStatic();
+
+    boolean isStrict();
+
+    boolean isSynchronized();
+
+    boolean isSynthetic();
+
+    boolean isVarArgs();
 }

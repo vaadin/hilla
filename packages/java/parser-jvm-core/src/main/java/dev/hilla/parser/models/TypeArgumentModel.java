@@ -2,7 +2,7 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -37,7 +37,7 @@ public interface TypeArgumentModel extends SignatureModel {
                 .flatMap(SignatureModel::resolveDependencies);
     }
 
-    Collection<SignatureModel> getAssociatedTypes();
+    List<SignatureModel> getAssociatedTypes();
 
     TypeArgument.Wildcard getWildcard();
 

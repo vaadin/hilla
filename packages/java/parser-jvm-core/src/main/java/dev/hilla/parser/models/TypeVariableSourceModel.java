@@ -1,13 +1,26 @@
 package dev.hilla.parser.models;
 
+import java.util.List;
+
 import io.github.classgraph.TypeVariableSignature;
 
 final class TypeVariableSourceModel extends AbstractModel<TypeVariableSignature>
         implements TypeVariableModel, SourceSignatureModel {
+    private List<AnnotationInfoModel> annotations;
     private TypeParameterModel typeParameter;
 
     public TypeVariableSourceModel(TypeVariableSignature origin, Model parent) {
         super(origin, parent);
+    }
+
+    @Override
+    public List<AnnotationInfoModel> getAnnotations() {
+        if (annotations == null) {
+            annotations = AnnotationUtils.processTypeAnnotations(
+                    origin.getTypeAnnotationInfo(), this);
+        }
+
+        return annotations;
     }
 
     public TypeParameterModel resolve() {

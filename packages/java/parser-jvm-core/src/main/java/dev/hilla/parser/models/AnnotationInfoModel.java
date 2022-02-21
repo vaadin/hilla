@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-public interface AnnotationInfoModel extends Model {
+public interface AnnotationInfoModel extends Model, NamedModel {
     static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation,
             @Nonnull Model parent) {
         return new AnnotationInfoSourceModel(annotation, parent);

@@ -1,7 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -19,7 +19,7 @@ public interface TypeParameterModel extends SignatureModel {
         return new TypeParameterReflectionModel(origin, parent);
     }
 
-    Collection<SignatureModel> getBounds();
+    List<SignatureModel> getBounds();
 
     default Stream<SignatureModel> getBoundsStream() {
         return getBounds().stream();

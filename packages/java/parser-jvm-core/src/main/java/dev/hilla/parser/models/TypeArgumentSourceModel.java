@@ -1,24 +1,35 @@
 package dev.hilla.parser.models;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 import io.github.classgraph.TypeArgument;
 
 final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
         implements TypeArgumentModel, SourceSignatureModel {
-    private Collection<SignatureModel> wildcardAssociatedTypes;
+    private List<AnnotationInfoModel> annotations;
+    private List<SignatureModel> wildcardAssociatedTypes;
 
     public TypeArgumentSourceModel(TypeArgument origin, Model parent) {
         super(origin, parent);
     }
 
-    public Collection<SignatureModel> getAssociatedTypes() {
+    @Override
+    public List<AnnotationInfoModel> getAnnotations() {
+        if (annotations == null) {
+            annotations = AnnotationUtils.processTypeAnnotations(
+                    origin.getTypeSignature().getTypeAnnotationInfo(), parent);
+        }
+
+        return annotations;
+    }
+
+    public List<SignatureModel> getAssociatedTypes() {
         if (wildcardAssociatedTypes == null) {
             var signature = origin.getTypeSignature();
-            wildcardAssociatedTypes = signature == null ? Collections.emptySet()
-                    : Set.of(SignatureModel.of(signature, this));
+            wildcardAssociatedTypes = signature == null
+                    ? Collections.emptyList()
+                    : List.of(SignatureModel.of(signature, this));
         }
 
         return wildcardAssociatedTypes;

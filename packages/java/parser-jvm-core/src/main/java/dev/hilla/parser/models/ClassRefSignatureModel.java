@@ -2,9 +2,12 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -46,7 +49,7 @@ public interface ClassRefSignatureModel extends SignatureModel {
         var typeArgumentsDependencies = signature.getTypeArguments().stream()
                 .flatMap(SignatureModel::resolveDependencies).distinct();
 
-        return classInfo != null && !ModelUtils.isJDKClass(classInfo.getName())
+        return classInfo != null && !ClassInfoModelUtils.isJDKClass(classInfo.getName())
                 ? StreamUtils.combine(Stream.of(classInfo),
                         typeArgumentsDependencies).distinct()
                 : typeArgumentsDependencies;
@@ -63,20 +66,107 @@ public interface ClassRefSignatureModel extends SignatureModel {
                         : Stream.<Class<?>> empty();
 
         return signature instanceof Class<?>
-                && !ModelUtils.isJDKClass(signature)
+                && !ClassInfoModelUtils.isJDKClass(signature)
                         ? StreamUtils.combine(Stream.of((Class<?>) signature),
                                 typeArgumentDependencies).distinct()
                         : typeArgumentDependencies;
     }
 
-    Collection<TypeArgumentModel> getTypeArguments();
+    List<TypeArgumentModel> getTypeArguments();
 
     default Stream<TypeArgumentModel> getTypeArgumentsStream() {
         return getTypeArguments().stream();
     }
 
+    ClassInfoModel resolve();
+
     @Override
     default boolean isClassRef() {
         return true;
+    }
+
+    @Override
+    default boolean isBoolean() {
+        return resolve().isBoolean();
+    }
+
+    @Override
+    default boolean isByte() {
+        return resolve().isByte();
+    }
+
+    @Override
+    default boolean isCharacter() {
+        return resolve().isCharacter();
+    }
+
+    @Override
+    default boolean isDate() {
+        return resolve().isDate();
+    }
+
+    @Override
+    default boolean isDateTime() {
+        return resolve().isDateTime();
+    }
+
+    @Override
+    default boolean isDouble() {
+        return resolve().isDouble();
+    }
+
+    @Override
+    default boolean isEnum() {
+        return resolve().isEnum();
+    }
+
+    @Override
+    default boolean isFloat() {
+        return resolve().isFloat();
+    }
+
+    @Override
+    default boolean isInteger() {
+        return resolve().isInteger();
+    }
+
+    @Override
+    default boolean isIterable() {
+        return resolve().isIterable();
+    }
+
+    @Override
+    default boolean isJDKClass() {
+        return resolve().isJDKClass();
+    }
+
+    @Override
+    default boolean isLong() {
+        return resolve().isLong();
+    }
+
+    @Override
+    default boolean isMap() {
+        return resolve().isMap();
+    }
+
+    @Override
+    default boolean isNativeObject() {
+        return resolve().isNativeObject();
+    }
+
+    @Override
+    default boolean isOptional() {
+        return resolve().isOptional();
+    }
+
+    @Override
+    default boolean isShort() {
+        return resolve().isShort();
+    }
+
+    @Override
+    default boolean isString() {
+        return resolve().isString();
     }
 }

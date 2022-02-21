@@ -7,4 +7,9 @@ final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
     public AnnotationInfoSourceModel(AnnotationInfo origin, Model parent) {
         super(origin, parent);
     }
+
+    @Override
+    public String getName() {
+        return origin.getName();
+    }
 }

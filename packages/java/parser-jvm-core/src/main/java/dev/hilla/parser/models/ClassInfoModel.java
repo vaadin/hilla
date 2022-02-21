@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -16,7 +17,7 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.ClassInfo;
 
-public interface ClassInfoModel extends Model, Named {
+public interface ClassInfoModel extends Model, NamedModel, AnnotatedModel, SpecializedModel {
     static ClassInfoModel of(@Nonnull ClassInfo origin) {
         return of(origin, null);
     }
@@ -34,12 +35,6 @@ public interface ClassInfoModel extends Model, Named {
                 parent);
     }
 
-    Collection<AnnotationInfoModel> getAnnotations();
-
-    default Stream<AnnotationInfoModel> getAnnotationsStream() {
-        return getAnnotations().stream();
-    }
-
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
         return StreamUtils.combine(getFieldDependenciesStream(),
@@ -47,8 +42,8 @@ public interface ClassInfoModel extends Model, Named {
                 getSuperClassesStream()).distinct();
     }
 
-    default Collection<ClassInfoModel> getFieldDependencies() {
-        return getFieldDependenciesStream().collect(Collectors.toSet());
+    default List<ClassInfoModel> getFieldDependencies() {
+        return getFieldDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getFieldDependenciesStream() {
@@ -56,7 +51,7 @@ public interface ClassInfoModel extends Model, Named {
                 FieldInfoModel::getDependenciesStream);
     }
 
-    Collection<FieldInfoModel> getFields();
+    List<FieldInfoModel> getFields();
 
     default Stream<FieldInfoModel> getFieldsStream() {
         return getFields().stream();
@@ -64,8 +59,8 @@ public interface ClassInfoModel extends Model, Named {
 
     ClassInfoModelInheritanceChain getInheritanceChain();
 
-    default Collection<ClassInfoModel> getInnerClassDependencies() {
-        return getFieldDependenciesStream().collect(Collectors.toSet());
+    default List<ClassInfoModel> getInnerClassDependencies() {
+        return getFieldDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getInnerClassDependenciesStream() {
@@ -73,32 +68,34 @@ public interface ClassInfoModel extends Model, Named {
                 ClassInfoModel::getDependenciesStream);
     }
 
-    Collection<ClassInfoModel> getInnerClasses();
+    List<ClassInfoModel> getInnerClasses();
 
     default Stream<ClassInfoModel> getInnerClassesStream() {
         return getInnerClasses().stream();
     }
 
-    default <ModelMember extends Model> Collection<ClassInfoModel> getMemberDependencies(
+    default <ModelMember extends Model> List<ClassInfoModel> getMemberDependencies(
             @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
             @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
         return getMemberDependencies(selector,
-                ModelUtils::defaultClassInfoMemberFilter, dependencyExtractor);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter,
+                dependencyExtractor);
     }
 
-    default <ModelMember extends Model> Collection<ClassInfoModel> getMemberDependencies(
+    default <ModelMember extends Model> List<ClassInfoModel> getMemberDependencies(
             @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
             @Nonnull Predicate<ModelMember> filter,
             @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
         return getMemberDependenciesStream(selector, filter,
-                dependencyExtractor).collect(Collectors.toSet());
+                dependencyExtractor).collect(Collectors.toList());
     }
 
     default <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
             @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
             @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
         return getMemberDependenciesStream(selector,
-                ModelUtils::defaultClassInfoMemberFilter, dependencyExtractor);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter,
+                dependencyExtractor);
     }
 
     default <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
@@ -112,61 +109,61 @@ public interface ClassInfoModel extends Model, Named {
                 .distinct();
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Member[] members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
-                wrapper);
+        return getMembers(members,
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
-                wrapper);
+        return getMembers(members,
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Stream<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
-        return getMembers(members, ModelUtils::defaultClassInfoMemberFilter,
-                wrapper);
+        return getMembers(members,
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Member[] members, @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(Arrays.stream(Objects.requireNonNull(members)),
-                filter, wrapper).collect(Collectors.toSet());
+                filter, wrapper).collect(Collectors.toList());
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Collection<Member> members,
             @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(Objects.requireNonNull(members).stream(),
-                filter, wrapper).collect(Collectors.toSet());
+                filter, wrapper).collect(Collectors.toList());
     }
 
-    default <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
+    default <Member, ModelMember extends Model> List<ModelMember> getMembers(
             @Nonnull Stream<Member> members, @Nonnull Predicate<Member> filter,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members, filter, wrapper)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
             @Nonnull Collection<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
     default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
             @Nonnull Stream<Member> members,
             @Nonnull BiFunction<Member, ClassInfoModel, ModelMember> wrapper) {
         return getMembersStream(members,
-                ModelUtils::defaultClassInfoMemberFilter, wrapper);
+                ClassInfoModelUtils::defaultClassInfoMemberFilter, wrapper);
     }
 
     default <Member, ModelMember extends Model> Stream<ModelMember> getMembersStream(
@@ -186,8 +183,8 @@ public interface ClassInfoModel extends Model, Named {
                 .map(member -> wrapper.apply(member, this));
     }
 
-    default Collection<ClassInfoModel> getMethodDependencies() {
-        return getMethodDependenciesStream().collect(Collectors.toSet());
+    default List<ClassInfoModel> getMethodDependencies() {
+        return getMethodDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getMethodDependenciesStream() {
@@ -195,17 +192,45 @@ public interface ClassInfoModel extends Model, Named {
                 MethodInfoModel::getDependenciesStream);
     }
 
-    Collection<MethodInfoModel> getMethods();
+    List<MethodInfoModel> getMethods();
 
     default Stream<MethodInfoModel> getMethodsStream() {
         return getMethods().stream();
     }
 
+    String getSimpleName();
+
     Optional<ClassInfoModel> getSuperClass();
 
-    Collection<ClassInfoModel> getSuperClasses();
+    List<ClassInfoModel> getSuperClasses();
 
     default Stream<ClassInfoModel> getSuperClassesStream() {
         return getSuperClasses().stream();
     }
+
+    boolean isAbstract();
+
+    boolean isAnnotation();
+
+    boolean isArrayClass();
+
+    boolean isEnum();
+
+    boolean isFinal();
+
+    boolean isInterface();
+
+    boolean isInterfaceOrAnnotation();
+
+    boolean isPrivate();
+
+    boolean isProtected();
+
+    boolean isPublic();
+
+    boolean isStandardClass();
+
+    boolean isStatic();
+
+    boolean isSynthetic();
 }

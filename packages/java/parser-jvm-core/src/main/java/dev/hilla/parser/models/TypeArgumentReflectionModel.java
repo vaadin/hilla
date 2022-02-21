@@ -3,7 +3,8 @@ package dev.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,7 +15,8 @@ import io.github.classgraph.TypeArgument;
 
 final class TypeArgumentReflectionModel extends AbstractModel<AnnotatedType>
         implements TypeArgumentModel, ReflectionSignatureModel {
-    private Collection<SignatureModel> associatedTypes;
+    private List<AnnotationInfoModel> annotations;
+    private List<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;
 
     public TypeArgumentReflectionModel(AnnotatedType origin, Model parent) {
@@ -22,7 +24,18 @@ final class TypeArgumentReflectionModel extends AbstractModel<AnnotatedType>
     }
 
     @Override
-    public Collection<SignatureModel> getAssociatedTypes() {
+    public List<AnnotationInfoModel> getAnnotations() {
+        if (annotations == null) {
+            annotations = Arrays.stream(origin.getAnnotations())
+                .map(annotation -> AnnotationInfoModel.of(annotation, this))
+                .collect(Collectors.toList());
+        }
+
+        return annotations;
+    }
+
+    @Override
+    public List<SignatureModel> getAssociatedTypes() {
         if (associatedTypes == null) {
             var stream = origin instanceof AnnotatedWildcardType
                     ? StreamUtils.combine(
@@ -33,7 +46,7 @@ final class TypeArgumentReflectionModel extends AbstractModel<AnnotatedType>
                     : Stream.of(origin);
 
             associatedTypes = stream.map(type -> SignatureModel.of(type, this))
-                    .collect(Collectors.toSet());
+                    .distinct().collect(Collectors.toList());
         }
 
         return associatedTypes;
