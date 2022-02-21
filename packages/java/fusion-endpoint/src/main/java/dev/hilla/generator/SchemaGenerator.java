@@ -48,8 +48,6 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dev.hilla.ExplicitNullableTypeChecker.isRequired;
-
 /**
  * Methods related with creating schema declarations, used by
  * OpenAPIObjectGenerator.

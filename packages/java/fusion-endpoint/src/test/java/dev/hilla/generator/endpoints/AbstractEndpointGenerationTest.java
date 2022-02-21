@@ -90,7 +90,6 @@ import dev.hilla.generator.endpoints.complexhierarchymodel.Model;
 import dev.hilla.generator.endpoints.complexhierarchymodel.ParentModel;
 import dev.hilla.utils.TestUtils;
 
-import static dev.hilla.ExplicitNullableTypeChecker.isRequired;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
