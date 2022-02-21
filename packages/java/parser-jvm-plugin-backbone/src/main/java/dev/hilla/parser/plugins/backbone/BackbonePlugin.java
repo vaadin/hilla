@@ -5,16 +5,16 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.RelativeClassInfo;
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.models.ClassInfoModel;
 
 public final class BackbonePlugin implements Plugin.Processor {
     private int order = 0;
     private SharedStorage storage;
 
     @Override
-    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities) {
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
         var model = storage.getOpenAPI();
         var context = new Context(storage.getAssociationMap());
 

@@ -8,8 +8,8 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.PluginsToolset;
-import dev.hilla.parser.core.RelativeClassInfo;
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
@@ -19,8 +19,8 @@ public final class NonnullPlugin implements Plugin.Processor {
     private SharedStorage storage;
 
     @Override
-    public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities) {
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
         var toolset = new PluginsToolset(
                 storage.getParserConfig().getPlugins());
 

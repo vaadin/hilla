@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.RelativeClassInfo;
-import dev.hilla.parser.core.RelativeMethodInfo;
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -23,11 +23,11 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 
 final class EndpointProcessor {
-    private final Collection<RelativeClassInfo> classes;
+    private final Collection<ClassInfoModel> classes;
     private final Context context;
     private final OpenAPI model;
 
-    public EndpointProcessor(@Nonnull Collection<RelativeClassInfo> classes,
+    public EndpointProcessor(@Nonnull Collection<ClassInfoModel> classes,
             @Nonnull OpenAPI model, @Nonnull Context context) {
         this.classes = Objects.requireNonNull(classes);
         this.context = Objects.requireNonNull(context);
@@ -41,31 +41,30 @@ final class EndpointProcessor {
     private Paths preparePaths() {
         return classes.stream()
                 .flatMap(cls -> cls.getInheritanceChain().getMethodsStream())
-                .filter(method -> method.get().isPublic())
-                .map(MethodProcessor::new)
+                .filter(MethodInfoModel::isPublic).map(MethodProcessor::new)
                 .collect(Collectors.toMap(MethodProcessor::getPathKey,
                         MethodProcessor::getPathItem, (o1, o2) -> o1,
                         Paths::new));
     }
 
     private List<Tag> prepareTags() {
-        return classes.stream()
-                .map(cls -> new Tag().name(cls.get().getSimpleName()))
+        return classes.stream().map(cls -> new Tag().name(cls.getSimpleName()))
                 .collect(Collectors.toList());
     }
 
     private class MethodProcessor {
-        private final RelativeMethodInfo method;
+        private final MethodInfoModel method;
         private final PathItem pathItem;
         private final String pathKey;
 
-        public MethodProcessor(RelativeMethodInfo method) {
+        public MethodProcessor(MethodInfoModel method) {
             this.method = method;
             this.pathItem = new PathItem().post(createOperation());
 
             var endpointName = method.getParent()
-                    .map(cls -> cls.get().getSimpleName()).orElse("Unknown");
-            var methodName = method.get().getName();
+                    .map(cls -> ((ClassInfoModel) cls).getSimpleName())
+                    .orElse("Unknown");
+            var methodName = method.getName();
 
             this.pathKey = "/" + endpointName + "/" + methodName;
         }
@@ -82,10 +81,10 @@ final class EndpointProcessor {
             var operation = new Operation();
 
             var endpointName = method.getParent()
-                    .map(cls -> cls.get().getSimpleName()).orElse("Unknown");
+                    .map(cls -> ((ClassInfoModel) cls).getSimpleName()).orElse("Unknown");
 
             operation
-                    .operationId(endpointName + '_' + method.get().getName()
+                    .operationId(endpointName + '_' + method.getName()
                             + "_POST")
                     .addTagsItem(endpointName).responses(createResponses());
 
@@ -102,7 +101,7 @@ final class EndpointProcessor {
             for (var parameter : method.getParameters()) {
                 var schema = new SchemaProcessor(parameter.getType(), context)
                         .process();
-                requestMap.addProperties(parameter.get().getName(), schema);
+                requestMap.addProperties(parameter.getName(), schema);
                 context.getAssociationMap().addParameter(schema, parameter);
             }
 

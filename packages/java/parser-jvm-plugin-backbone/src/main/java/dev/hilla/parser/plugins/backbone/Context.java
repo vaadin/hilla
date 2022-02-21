@@ -16,8 +16,4 @@ final class Context {
     public AssociationMap getAssociationMap() {
         return associationMap;
     }
-
-    public Set<String> getRefs() {
-        return refs;
-    }
 }

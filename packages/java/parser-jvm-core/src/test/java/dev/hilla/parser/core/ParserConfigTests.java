@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
@@ -157,8 +158,8 @@ public class ParserConfigTests {
         private SharedStorage storage;
 
         @Override
-        public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities) {
+        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities) {
         }
 
         @Override
@@ -182,8 +183,8 @@ public class ParserConfigTests {
         private SharedStorage storage;
 
         @Override
-        public void process(@Nonnull Collection<RelativeClassInfo> endpoints,
-                @Nonnull Collection<RelativeClassInfo> entities) {
+        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities) {
         }
 
         @Override

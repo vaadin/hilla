@@ -11,3 +11,4 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE_USE })
 public @interface Nonnull {
 }
+

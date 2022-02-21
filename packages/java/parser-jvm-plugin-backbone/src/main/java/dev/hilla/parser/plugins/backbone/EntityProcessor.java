@@ -9,11 +9,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.ReflectedClass;
-import dev.hilla.parser.core.RelativeClassInfo;
-import dev.hilla.parser.core.RelativeFieldInfo;
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.FieldInfoModel;
 
-import io.github.classgraph.FieldInfo;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -22,11 +20,11 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 final class EntityProcessor {
-    private final Collection<RelativeClassInfo> classes;
+    private final Collection<ClassInfoModel> classes;
     private final Context context;
     private final OpenAPI model;
 
-    public EntityProcessor(@Nonnull Collection<RelativeClassInfo> classes,
+    public EntityProcessor(@Nonnull Collection<ClassInfoModel> classes,
             @Nonnull OpenAPI model, @Nonnull Context context) {
         this.classes = Objects.requireNonNull(classes);
         this.context = Objects.requireNonNull(context);
@@ -40,20 +38,13 @@ final class EntityProcessor {
     private Components prepareComponents() {
         var components = new Components();
 
-        classes.stream().filter(cls -> !cls.get().isSynthetic())
-                .filter(cls -> context.getRefs().contains(cls.get().getName()))
-                .filter(cls -> {
-                    var reflectedClass = new ReflectedClass(cls);
-
-                    return !reflectedClass.isDate()
-                            && !reflectedClass.isDateTime()
-                            && !reflectedClass.isIterable()
-                            && !reflectedClass.isMap();
-                }).flatMap(cls -> cls.getInheritanceChain().getClassesStream())
+        classes.stream().filter(cls -> !cls.isSynthetic())
+                .filter(cls -> !cls.isDate() && !cls.isDateTime()
+                        && !cls.isIterable() && !cls.isMap())
+                .flatMap(cls -> cls.getInheritanceChain().getClassesStream())
                 .distinct().forEach(entity -> {
-                    if (components.getSchemas() == null
-                            || (!components.getSchemas()
-                                    .containsKey(entity.get().getName()))) {
+                    if (components.getSchemas() == null || (!components
+                            .getSchemas().containsKey(entity.getName()))) {
                         var processor = new ComponentSchemaProcessor(entity);
 
                         components.addSchemas(processor.getKey(),
@@ -68,16 +59,16 @@ final class EntityProcessor {
     }
 
     private class ComponentSchemaProcessor {
-        private final RelativeClassInfo entity;
+        private final ClassInfoModel entity;
         private final String key;
         private final Schema<?> value;
 
-        public ComponentSchemaProcessor(RelativeClassInfo entity) {
+        public ComponentSchemaProcessor(ClassInfoModel entity) {
             this.entity = entity;
 
-            var info = entity.get();
-            this.key = info.getName();
-            this.value = info.isEnum() ? processEnum() : processExtendedClass();
+            this.key = entity.getName();
+            this.value = entity.isEnum() ? processEnum()
+                    : processExtendedClass();
         }
 
         public String getKey() {
@@ -106,9 +97,9 @@ final class EntityProcessor {
         private Schema<?> processEnum() {
             var schema = new StringSchema();
 
-            schema.setEnum(entity.getFieldsStream().map(RelativeFieldInfo::get)
-                    .filter(FieldInfo::isPublic).map(FieldInfo::getName)
-                    .collect(Collectors.toList()));
+            schema.setEnum(entity.getFieldsStream()
+                    .filter(FieldInfoModel::isPublic)
+                    .map(FieldInfoModel::getName).collect(Collectors.toList()));
 
             return schema;
         }
@@ -116,15 +107,12 @@ final class EntityProcessor {
         private Schema<?> processExtendedClass() {
             var processed = processClass();
 
-            return entity.getSuperClass().<Schema<?>> map(cls -> {
-                var fullyQualifiedClassName = cls.get().getName();
-
-                context.getRefs().add(fullyQualifiedClassName);
-
-                return new ComposedSchema().anyOf(Arrays.asList(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedClassName),
-                        processed));
-            }).orElse(processed);
+            return entity.getSuperClass().<Schema<?>> map(
+                    cls -> new ComposedSchema().anyOf(Arrays.asList(
+                            new Schema<>().$ref(
+                                    COMPONENTS_SCHEMAS_REF + cls.getName()),
+                            processed)))
+                    .orElse(processed);
         }
     }
 
@@ -132,8 +120,8 @@ final class EntityProcessor {
         private final String key;
         private final Schema<?> value;
 
-        public ComponentSchemaPropertyProcessor(RelativeFieldInfo field) {
-            this.key = field.get().getName();
+        public ComponentSchemaPropertyProcessor(FieldInfoModel field) {
+            this.key = field.getName();
             this.value = new SchemaProcessor(field.getType(), context)
                     .process();
         }
