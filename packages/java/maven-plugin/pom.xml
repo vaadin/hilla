@@ -10,7 +10,7 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>generagtor-maven-plugin</artifactId>
+  <artifactId>generator-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Plugin for Code Generation</name>
 
