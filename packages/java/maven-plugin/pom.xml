@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>endpoint-maven-plugin</artifactId>
+  <artifactId>generagtor-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maevn Plugin for Hilla Endpoint</name>
+  <name>Maevn Plugin for Code Generation</name>
 
   <properties>
     <maven.version>3.8.1</maven.version>
