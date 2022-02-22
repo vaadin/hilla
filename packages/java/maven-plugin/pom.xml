@@ -12,7 +12,7 @@
 
   <artifactId>generagtor-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maevn Plugin for Code Generation</name>
+  <name>Maven Plugin for Code Generation</name>
 
   <properties>
     <maven.version>3.8.1</maven.version>
