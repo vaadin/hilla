@@ -49,8 +49,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^0.0.18",
-    "@hilla/generator-typescript-plugin-client": "^0.0.18"
+    "@hilla/generator-typescript-core": "^0.0.19",
+    "@hilla/generator-typescript-plugin-client": "^0.0.19"
   },
   "dependencies": {
     "@hilla/generator-typescript-utils": "^0.0.19",
