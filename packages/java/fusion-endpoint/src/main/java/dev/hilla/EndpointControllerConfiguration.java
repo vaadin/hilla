@@ -16,20 +16,26 @@
 
 package dev.hilla;
 
-import javax.servlet.ServletContext;
 import java.lang.reflect.Method;
 
-import dev.hilla.auth.CsrfChecker;
-import dev.hilla.auth.EndpointAccessChecker;
+import javax.servlet.ServletContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import dev.hilla.auth.CsrfChecker;
+import dev.hilla.auth.EndpointAccessChecker;
 
 /**
  * A configuration class for customizing the {@link EndpointController} class.
@@ -198,5 +204,37 @@ public class EndpointControllerConfiguration {
     public EndpointRegistry endpointRegistry(
             EndpointNameChecker endpointNameChecker) {
         return new EndpointRegistry(endpointNameChecker);
+    }
+
+    /**
+     * Registers the endpoint invoker.
+     *
+     * @param applicationContext
+     *            Spring context to extract beans annotated with
+     *            {@link Endpoint} from
+     * @param vaadinEndpointMapper
+     *            optional bean to override the default {@link ObjectMapper}
+     *            that is used for serializing and deserializing request and
+     *            response bodies Use
+     *            {@link EndpointController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
+     *            qualifier to override the mapper.
+     * @param explicitNullableTypeChecker
+     *            the method parameter and return value type checker to verify
+     *            that null values are explicit
+     * @param servletContext
+     *            the servlet context
+     * @param endpointRegistry
+     *            the registry used to store endpoint information
+     * 
+     * @return the endpoint invoker
+     */
+    @Bean
+    public EndpointInvoker endpointInvoker(
+            ApplicationContext applicationContext,
+            @Autowired(required = false) @Qualifier(EndpointController.VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER) ObjectMapper vaadinEndpointMapper,
+            ExplicitNullableTypeChecker explicitNullableTypeChecker,
+            ServletContext servletContext, EndpointRegistry endpointRegistry) {
+        return new EndpointInvoker(applicationContext, vaadinEndpointMapper,
+                explicitNullableTypeChecker, endpointRegistry);
     }
 }

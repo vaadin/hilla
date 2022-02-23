@@ -797,8 +797,10 @@ public class EndpointControllerTest {
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
                 mock(EndpointNameChecker.class));
-        new EndpointController(null, mock(ExplicitNullableTypeChecker.class),
-                contextMock, registry, null);
+
+        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
+                mock(ExplicitNullableTypeChecker.class), registry);
+        new EndpointController(contextMock, registry, invoker, null);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -830,8 +832,9 @@ public class EndpointControllerTest {
                         JsonAutoDetect.Visibility.PUBLIC_ONLY));
         EndpointRegistry registry = new EndpointRegistry(
                 mock(EndpointNameChecker.class));
-        new EndpointController(null, mock(ExplicitNullableTypeChecker.class),
-                contextMock, registry, null);
+        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
+                mock(ExplicitNullableTypeChecker.class), registry);
+        new EndpointController(contextMock, registry, invoker, null);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1253,12 +1256,15 @@ public class EndpointControllerTest {
                 endpoint);
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
 
+        EndpointInvoker invoker = Mockito.spy(new EndpointInvoker(
+                mockApplicationContext, vaadinEndpointMapper,
+                explicitNullableTypeChecker, registry));
+
+        Mockito.doReturn(accessChecker).when(invoker).getAccessChecker(any());
+
         EndpointController connectController = Mockito
-                .spy(new EndpointController(vaadinEndpointMapper,
-                        explicitNullableTypeChecker, mockApplicationContext,
-                        registry, csrfChecker));
-        Mockito.doReturn(accessChecker).when(connectController)
-                .getAccessChecker(any());
+                .spy(new EndpointController(mockApplicationContext, registry,
+                        invoker, csrfChecker));
         return connectController;
     }
 
