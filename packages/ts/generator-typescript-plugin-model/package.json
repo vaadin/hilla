@@ -49,9 +49,9 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/form": "^0.0.18",
-    "@hilla/generator-typescript-core": "^0.0.18",
-    "@hilla/generator-typescript-plugin-backbone": "^0.0.18"
+    "@hilla/form": "^0.0.19",
+    "@hilla/generator-typescript-core": "^0.0.19",
+    "@hilla/generator-typescript-plugin-backbone": "^0.0.19"
   },
   "dependencies": {
     "@hilla/generator-typescript-utils": "^0.0.19",
