@@ -18,6 +18,8 @@ find "$packages_dir"/*/src/index.ts -exec sed -i "s/version:.\+\$/version: \/* u
 
 npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
 
+find "$packages_dir"/*/package.json -exec node "$bump_scripts_dir"/package-update.js -v "$VERSION_TAG" {} +
+
 git add --all
 
 git \
