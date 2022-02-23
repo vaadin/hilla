@@ -1,9 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 final class TypeVariableReflectionModel
         extends AbstractModel<AnnotatedTypeVariable>
@@ -19,9 +17,8 @@ final class TypeVariableReflectionModel
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = Arrays.stream(origin.getAnnotations())
-                .map(annotation -> AnnotationInfoModel.of(annotation, this))
-                .collect(Collectors.toList());
+            annotations = new AnnotationProcessor.Reflection(this).add(origin)
+                    .process();
         }
 
         return annotations;

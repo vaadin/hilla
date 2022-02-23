@@ -23,7 +23,9 @@ final class ClassRefSignatureSourceModel
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils.processTypeAnnotations(origin.getTypeAnnotationInfo(), this);
+            annotations = new AnnotationProcessor.Source(this)
+                    .add(origin.getTypeAnnotationInfo())
+                    .add(origin.getSuffixTypeAnnotationInfo()).process();
         }
 
         return annotations;

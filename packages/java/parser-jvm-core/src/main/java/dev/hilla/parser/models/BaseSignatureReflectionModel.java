@@ -1,8 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 final class BaseSignatureReflectionModel extends AbstractModel<Class<?>>
         implements BaseSignatureModel, ReflectionSignatureModel {
@@ -15,7 +13,8 @@ final class BaseSignatureReflectionModel extends AbstractModel<Class<?>>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils.processTypeAnnotations(origin, this);
+            annotations = new AnnotationProcessor.Reflection(this).add(origin)
+                .process();
         }
 
         return annotations;

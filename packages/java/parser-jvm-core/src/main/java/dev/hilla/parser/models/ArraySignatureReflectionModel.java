@@ -17,7 +17,8 @@ final class ArraySignatureReflectionModel
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils.processTypeAnnotations(origin, this);
+            annotations = new AnnotationProcessor.Reflection(this).add(origin)
+                    .process();
         }
 
         return annotations;

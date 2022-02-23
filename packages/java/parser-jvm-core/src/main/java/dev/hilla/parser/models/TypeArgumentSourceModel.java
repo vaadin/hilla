@@ -17,8 +17,8 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils.processTypeAnnotations(
-                    origin.getTypeSignature().getTypeAnnotationInfo(), parent);
+            annotations =  new AnnotationProcessor.Source(this).add(origin)
+                .process();
         }
 
         return annotations;

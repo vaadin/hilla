@@ -45,8 +45,8 @@ final class ClassInfoReflectionModel extends AbstractModel<Class<?>>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = getMembers(origin.getAnnotations(),
-                    AnnotationInfoModel::of);
+            annotations = new AnnotationProcessor.Reflection(this).add(origin)
+                .process();;
         }
 
         return annotations;

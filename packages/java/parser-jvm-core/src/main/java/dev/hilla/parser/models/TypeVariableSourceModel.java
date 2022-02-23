@@ -16,8 +16,8 @@ final class TypeVariableSourceModel extends AbstractModel<TypeVariableSignature>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils.processTypeAnnotations(
-                    origin.getTypeAnnotationInfo(), this);
+            annotations = new AnnotationProcessor.Source(this).add(origin)
+                    .process();
         }
 
         return annotations;

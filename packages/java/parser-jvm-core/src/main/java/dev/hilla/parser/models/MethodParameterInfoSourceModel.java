@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.github.classgraph.MethodParameterInfo;
 
@@ -19,8 +18,8 @@ final class MethodParameterInfoSourceModel
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils
-                .processTypeAnnotations(origin.getAnnotationInfo(), this);
+            annotations = new AnnotationProcessor.Source(this).add(origin)
+                .process();
         }
 
         return annotations;

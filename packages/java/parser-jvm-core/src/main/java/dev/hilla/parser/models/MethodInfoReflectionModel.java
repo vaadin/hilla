@@ -19,9 +19,8 @@ final class MethodInfoReflectionModel extends AbstractModel<Method>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = Arrays.stream(origin.getAnnotations())
-                    .map(annotation -> AnnotationInfoModel.of(annotation, this))
-                    .collect(Collectors.toList());
+            annotations = new AnnotationProcessor.Reflection(this).add(origin)
+                .process();
         }
 
         return annotations;

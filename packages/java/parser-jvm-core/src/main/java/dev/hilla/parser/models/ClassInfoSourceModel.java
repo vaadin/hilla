@@ -40,8 +40,8 @@ final class ClassInfoSourceModel extends AbstractModel<ClassInfo>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = AnnotationUtils
-                    .processTypeAnnotations(origin.getAnnotationInfo(), this);
+            annotations = new AnnotationProcessor.Source(this).add(origin)
+                .process();
         }
 
         return annotations;
