@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public abstract class AbstractAnnotatedReflectionModel<T extends AnnotatedElement>
-        extends AbstractModel<T> implements AnnotatedModel {
+        extends AbstractModel<T> implements AnnotatedModel, ReflectionModel {
     protected List<AnnotationInfoModel> annotations;
 
     AbstractAnnotatedReflectionModel(@Nonnull T origin, Model parent) {

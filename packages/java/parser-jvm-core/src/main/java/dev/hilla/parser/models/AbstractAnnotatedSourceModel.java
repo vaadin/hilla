@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.AnnotationInfo;
 
 public abstract class AbstractAnnotatedSourceModel<T> extends AbstractModel<T>
-        implements AnnotatedModel {
+        implements AnnotatedModel, SourceModel {
     protected List<AnnotationInfoModel> annotations;
 
     AbstractAnnotatedSourceModel(@Nonnull T origin, Model parent) {
