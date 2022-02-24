@@ -17,6 +17,7 @@ import {
   ValueError,
 } from '../src';
 import {
+  Customer,
   IdEntity,
   IdEntityModel,
   Order,
@@ -273,6 +274,57 @@ describe('form/Validation', () => {
         const crossFieldError = errors.find(byPropertyName('customer.nickName'));
         expect(crossFieldError).not.to.be.undefined;
         expect(crossFieldError?.message).to.equal('cannot be the same');
+      });
+    });
+
+    it('record level cross field validation when the property is a string', async () => {
+      const byPropertyName = (value: string) => (error: ValueError<any>) => {
+        const propertyName = typeof error.property === 'string' ? error.property : binder.for(error.property).name;
+        return propertyName === value;
+      };
+
+      const recordValidator = {
+        validate(value: Order) {
+          if (value.customer.fullName === value.customer.nickName) {
+            return { property: 'customer.nickName' };
+          }
+
+          return true;
+        },
+        message: 'cannot be the same',
+      };
+      binder.addValidator(recordValidator);
+
+      binder.for(binder.model.customer.fullName).value = 'foo';
+      await binder.validate().then((errors) => {
+        const crossFieldError = errors.find((error) => error.validator === recordValidator);
+        expect(crossFieldError, 'recordValidator should not cause an error').to.be.undefined;
+      });
+
+      binder.for(binder.model.customer.nickName).value = 'foo';
+      await binder.validate().then((errors) => {
+        const crossFieldError = errors.find(byPropertyName('customer.nickName'));
+        expect(crossFieldError).not.to.be.undefined;
+        expect(crossFieldError?.message).to.equal('cannot be the same');
+      });
+
+      const customerValidator = {
+        validate(value: Customer) {
+          if (Array.from(value.fullName).reverse().join('') === value.nickName) {
+            return { property: 'nickName' };
+          }
+
+          return true;
+        },
+        message: 'cannot be anagram of full name',
+      };
+      binder.for(binder.model.customer).addValidator(customerValidator);
+
+      binder.for(binder.model.customer.nickName).value = 'oof';
+      await binder.validate().then((errors) => {
+        const crossFieldError = errors.find(byPropertyName('customer.nickName'));
+        expect(crossFieldError).not.to.be.undefined;
+        expect(crossFieldError?.message).to.equal('cannot be anagram of full name');
       });
     });
   });
