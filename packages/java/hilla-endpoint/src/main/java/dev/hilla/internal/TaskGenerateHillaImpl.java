@@ -5,9 +5,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 
+@NpmPackage(value = "@hilla/generator-typescript-core", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-utils", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-cli", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "0.0.20")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "0.0.20")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
 
     @Override
