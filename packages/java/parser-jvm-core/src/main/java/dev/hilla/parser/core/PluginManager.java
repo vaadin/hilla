@@ -3,7 +3,6 @@ package dev.hilla.parser.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.SortedSet;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
