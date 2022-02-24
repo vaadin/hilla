@@ -80,16 +80,4 @@ public final class PluginManager {
             }
         }
     }
-
-    public Stream<ClassInfoModel> transform(Stream<ClassInfoModel> stream) {
-        for (var plugin : plugins) {
-            if (plugin instanceof Plugin.Transformer) {
-                logger.debug("Executing transformer plugin "
-                        + plugin.getClass().getName());
-                stream = ((Plugin.Transformer) plugin).transform(stream);
-            }
-        }
-
-        return stream;
-    }
 }
