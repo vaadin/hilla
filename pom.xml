@@ -3,17 +3,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.vaadin.fusion</groupId>
-  <artifactId>fusion-project</artifactId>
+  <groupId>dev.hilla</groupId>
+  <artifactId>hilla-project</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>Fusion</name>
+  <name>Hilla</name>
   <packaging>pom</packaging>
+
+  <parent>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-parent</artifactId>
+      <version>2.0.4</version>
+  </parent>
 
   <modules>
     <module>packages/java/generator</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
+    <module>packages/java/parser-jvm-plugin-model</module>
+    <module>packages/java/parser-jvm-plugin-nonnull</module>
+    <module>packages/java/parser-jvm-test-utils</module>
+    <module>packages/java/parser-jvm-utils</module>
   </modules>
 
   <properties>
@@ -21,6 +31,12 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
+    <classgraph.version>4.8.138</classgraph.version>
+    <jsr305.version>3.0.2</jsr305.version>
+    <swagger.version>2.1.11</swagger.version>
+    <jackson.version>2.13.0</jackson.version>
+    <junit.version>5.8.0</junit.version>
+    <project.scm.id>github</project.scm.id> 
   </properties>
 
   <organization>
@@ -35,6 +51,12 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <scm>
+    <connection>scm:https:https://github.com/vaadin/hilla.git</connection>
+    <developerConnection>scm:git:https://github.com/vaadin/hilla.git</developerConnection>
+    <url>https://github.com/vaadin/hilla</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <repositories>
     <!-- The order of definitions matters. Explicitly defining central
@@ -60,6 +82,47 @@
     </pluginRepository>
   </pluginRepositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.classgraph</groupId>
+        <artifactId>classgraph</artifactId>
+        <version>${classgraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-models</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <plugins>
       <plugin>
@@ -107,6 +170,39 @@
           <configJsFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configJsFile>
           <lineEnding>LF</lineEnding>
         </configuration>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.1</version>
+          <executions>
+              <execution>
+                  <id>attach-sources</id>
+                  <phase>verify</phase>
+                  <goals>
+                      <goal>jar-no-fork</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.3.2</version>
+          <executions>
+              <execution>
+                  <id>attach-javadocs</id>
+                  <phase>verify</phase>
+                  <goals>
+                      <goal>jar</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <quiet>true</quiet>
+          </configuration>
       </plugin>
     </plugins>
   </build>

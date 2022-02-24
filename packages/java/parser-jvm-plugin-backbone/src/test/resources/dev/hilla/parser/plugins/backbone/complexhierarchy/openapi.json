@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ComplexHierarchyEndpoint"
+    }
+  ],
+  "paths": {
+    "/ComplexHierarchyEndpoint/getModel": {
+      "post": {
+        "tags": ["ComplexHierarchyEndpoint"],
+        "operationId": "ComplexHierarchyEndpoint_getModel_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentModel": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentModel": {
+        "type": "object",
+        "properties": {
+          "build": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  }
+}

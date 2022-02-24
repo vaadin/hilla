@@ -14,9 +14,15 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -s"
 
 # Updating the registration version for all packages
-find "$packages_dir/*/src/index.ts" -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
+find "$packages_dir"/*/src/index.ts -exec sed -i "s/version:.\+\$/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/m" {} +
 
 npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
+
+# Updating the peer dependencies in packages
+find "$packages_dir"/*/package.json -exec node "$bump_scripts_dir"/package-update.js -v "$VERSION_TAG" {} +
+
+# Updating package-lock.json to reflect results of the previous command
+npm run bootstrap
 
 git add --all
 

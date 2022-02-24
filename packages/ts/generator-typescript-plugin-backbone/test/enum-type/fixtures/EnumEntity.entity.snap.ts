@@ -1,4 +1,4 @@
-export default enum EnumEntity {
+enum EnumEntity {
     ENUM1 = "ENUM1",
     ENUM2 = "ENUM2",
     ENUM_2 = "ENUM_2",
@@ -6,3 +6,4 @@ export default enum EnumEntity {
     _HELLO = "_HELLO",
     MANY_MANY_WORDS = "MANY_MANY_WORDS"
 }
+export default EnumEntity;

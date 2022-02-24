@@ -1,41 +1,108 @@
-<a target="_blank" href="https://vaad.in/fusion"><img src="https://discord.com/assets/e4923594e694a21542a489471ecffa50.svg" width="100" alt="Join the discussion in Vaadin Fusion Discord"></img></a>
+<div align="center">
+<img src="hilla-logo.svg" style="width: 6em;">
+<h1>Hilla</h1>
 
-![Frontend CI](https://github.com/vaadin/fusion/actions/workflows/frontend.yml/badge.svg)
-[![codecov](https://codecov.io/gh/vaadin/fusion/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/fusion)
+The modern web framework
+for Java
 
-Vaadin Fusion
-======
-*[Vaadin Fusion](https://vaadin.com/fusion) is a TypeScript and Java web framework for building modern web applications. You can create UIs in TypeScript and connect to any backend through endpoints written in Java.*
+![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)
+[![Releases](https://img.shields.io/badge/maven-v1.0.0.beta3-1d77e4)](https://github.com/vaadin/fusion/releases)
+  
+[hilla.dev](https://hilla.dev) · [Docs](https://hilla.dev/docs) · [Chat](https://discord.gg/MYFq5RTbBn)
 
-**For instructions about developing web applications with Vaadin Fusion**, please refer to our [documentation site](https://vaadin.com/docs/latest/fusion/overview).
+</div>
 
-Join the Vaadin Fusion community chat in https://vaad.in/fusion
+---
 
-**Note**: Currently the code of Vaadin Fusion is hosted at https://github.com/vaadin/flow together with the Flow framework. The Fusion-only code will be ported to this repository in the near future. Tickets can already be created in this repository.
+Hilla integrates a Spring Boot Java backend with a reactive TypeScript front end. It helps you build apps faster with type-safe server communication, included UI components, and integrated tooling.
 
-## TypeScript
+## Simple type-safe server communication
 
-The collection of frontend and NodeJS utilities used by Fusion.
+Hilla helps you access the backend easily with type-safe endpoints.
 
-| Package                 | Status |
-|-------------------------|--------|
-| [@vaadin/form](./packages/ts/form) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/form.svg)](https://www.npmjs.com/package/@vaadin/form) |
-| [@vaadin/fusion-frontend](./packages/ts/fusion-frontend) | [![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/fusion-frontend.svg)](https://www.npmjs.com/package/@vaadin/fusion-frontend) |
+`index.ts`
 
-### Contribution
+```ts
+// Type info is automatically generated based on Java
+import Person from 'Frontend/generated/dev/hilla/demo/entity/Person';
+import { PersonEndpoint } from 'Frontend/generated/endpoints';
 
-You can download the project and run tests using the following commands:
-```bash
-$ git clone https://github.com/vaadin/fusion.git
-$ cd fusion
-$ npm install
-$ npm run build
-$ npm test
+async function getPeopleWithPhoneNumber() {
+  const people: Person[] = await PersonEndpoint.findAll();
+
+  // Compile error: The property is 'phone', not 'phoneNumber'
+  return people.filter((person) => !!person.phoneNumber);
+}
+
+console.log('People with phone numbers: ', getPeopleWithPhoneNumber());
 ```
 
-### Requirements
+`PersonEndpoint.java`
 
-To work with this project as a developer, you need the following versions of `node` and `npm`:
+```java
+@Endpoint
+@AnonymousAllowed
+public class PersonEndpoint {
 
-- **NodeJS**: `>= 16.13.0` (native support for ES Modules and NodeJS execution of the newest hooks),
+    private PersonRepository repository;
+
+    public PersonEndpoint(PersonRepository repository) {
+        this.repository = repository;
+    }
+
+    public @Nonnull List<@Nonnull Person> findAll() {
+        return repository.findAll();
+    }
+}
+```
+
+`Person.java`
+
+```java
+@Entity
+public class Person {
+
+    @Id
+    @GeneratedValue
+    private Integer id;
+
+    @Nonnull private String firstName;
+    @Nonnull private String lastName;
+    @Email @Nonnull private String email;
+    @Nonnull private String phone;
+
+    // getters, setters
+}
+```
+
+Learn more at [hilla.dev](https://hilla.dev)
+
+## Get started
+
+Follow the tutorials at https://hilla.dev/docs/tutorials
+
+## Contributing
+
+The best way to contribute is to try out Hilla and provide feedback to the development team in our [Discord chat](https://discord.gg/MYFq5RTbBn) or with [GitHub issues](https://github.com/vaadin/hilla/issues).
+
+### Development
+
+If you want to develop Hilla, you can clone the repo and run tests using the following commands:
+
+```sh
+git clone https://github.com/vaadin/hilla.git
+npm install
+npm run build
+npm test
+```
+
+You need the following versions of Node.js and npm:
+
+- **Node.js**: `>= 16.14.0` (native support for ES Modules and NodeJS execution of the newest hooks),
 - **npm**: `^7` (`package-lock.json` is of version 2; also, `lerna` is unable to bootstrap this project correctly with lower `npm`)
+
+---
+
+![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/ts.yml/badge.svg)
+![Java CI](https://github.com/vaadin/hilla/actions/workflows/java.yml/badge.svg)
+[![codecov](https://codecov.io/gh/vaadin/hilla/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)

@@ -1,5 +1,5 @@
-import Generator from '@vaadin/generator-typescript-core/Generator.js';
-import createLogger from '@vaadin/generator-typescript-utils/createLogger.js';
+import Generator from '@hilla/generator-typescript-core/Generator.js';
+import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import meow from 'meow';
 import GeneratorIO from './GeneratorIO.js';
 import { processInput } from './utils.js';
@@ -41,7 +41,7 @@ Options:
   },
 );
 
-const logger = createLogger({ verbose });
+const logger = new LoggerFactory({ verbose });
 
 const io = new GeneratorIO(outputDir, logger);
 

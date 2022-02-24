@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@vaadin/generator-typescript-utils/testing/snapshotMatcher.js';
+import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
 import BackbonePlugin from '../../src/index.js';
