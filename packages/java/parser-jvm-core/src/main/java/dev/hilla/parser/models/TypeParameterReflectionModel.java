@@ -7,24 +7,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class TypeParameterReflectionModel
-        extends AbstractModel<AnnotatedTypeVariable>
+        extends AbstractAnnotatedReflectionModel<AnnotatedTypeVariable>
         implements TypeParameterModel, ReflectionSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> bounds;
 
     public TypeParameterReflectionModel(AnnotatedTypeVariable origin,
             Model parent) {
         super(origin, Objects.requireNonNull(parent));
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                    .process();
-        }
-
-        return annotations;
     }
 
     @Override

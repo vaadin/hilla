@@ -1,25 +1,21 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.BaseTypeSignature;
 
-final class BaseSignatureSourceModel extends AbstractModel<BaseTypeSignature>
+final class BaseSignatureSourceModel
+        extends AbstractAnnotatedSourceModel<BaseTypeSignature>
         implements BaseSignatureModel, SourceSignatureModel {
-    private List<AnnotationInfoModel> annotations;
-
     public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
         super(origin, parent);
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 
     @Override

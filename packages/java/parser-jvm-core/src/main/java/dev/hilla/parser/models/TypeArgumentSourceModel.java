@@ -2,13 +2,14 @@ package dev.hilla.parser.models;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.github.classgraph.TypeArgument;
 
 final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
         implements TypeArgumentModel, SourceSignatureModel {
     private List<AnnotationInfoModel> annotations;
-    private List<SignatureModel> wildcardAssociatedTypes;
+    private List<SignatureModel> associatedTypes;
 
     public TypeArgumentSourceModel(TypeArgument origin, Model parent) {
         super(origin, parent);
@@ -17,22 +18,22 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations =  new AnnotationProcessor.Source(this).add(origin)
-                .process();
+            annotations = getAssociatedTypes().stream()
+                    .flatMap(model -> model.getAnnotations().stream())
+                    .collect(Collectors.toList());
         }
 
         return annotations;
     }
 
     public List<SignatureModel> getAssociatedTypes() {
-        if (wildcardAssociatedTypes == null) {
+        if (associatedTypes == null) {
             var signature = origin.getTypeSignature();
-            wildcardAssociatedTypes = signature == null
-                    ? Collections.emptyList()
+            associatedTypes = signature == null ? Collections.emptyList()
                     : List.of(SignatureModel.of(signature, this));
         }
 
-        return wildcardAssociatedTypes;
+        return associatedTypes;
     }
 
     public TypeArgument.Wildcard getWildcard() {

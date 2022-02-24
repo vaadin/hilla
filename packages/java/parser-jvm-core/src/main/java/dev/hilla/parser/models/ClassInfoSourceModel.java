@@ -3,14 +3,15 @@ package dev.hilla.parser.models;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassInfo;
 
-final class ClassInfoSourceModel extends AbstractModel<ClassInfo>
+final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
         implements ClassInfoModel, SourceModel {
     private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
-    private List<AnnotationInfoModel> annotations;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
@@ -38,13 +39,8 @@ final class ClassInfoSourceModel extends AbstractModel<ClassInfo>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 
     @Override

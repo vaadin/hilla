@@ -2,11 +2,10 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-final class FieldInfoReflectionModel extends AbstractModel<Field>
+final class FieldInfoReflectionModel
+        extends AbstractAnnotatedReflectionModel<Field>
         implements FieldInfoModel, ReflectionModel {
     private List<AnnotationInfoModel> annotations;
     private SignatureModel type;
@@ -27,16 +26,6 @@ final class FieldInfoReflectionModel extends AbstractModel<Field>
         }
 
         return type;
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();
-        }
-
-        return annotations;
     }
 
     @Override

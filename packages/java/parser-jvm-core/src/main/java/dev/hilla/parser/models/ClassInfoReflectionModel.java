@@ -9,11 +9,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-final class ClassInfoReflectionModel extends AbstractModel<Class<?>>
+final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Class<?>>
         implements ClassInfoModel, ReflectionModel {
     private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
-    private List<AnnotationInfoModel> annotations;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
@@ -40,16 +39,6 @@ final class ClassInfoReflectionModel extends AbstractModel<Class<?>>
     @Override
     public String getSimpleName() {
         return origin.getSimpleName();
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();;
-        }
-
-        return annotations;
     }
 
     @Override

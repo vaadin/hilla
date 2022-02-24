@@ -1,13 +1,13 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.MethodParameterInfo;
 
 final class MethodParameterInfoSourceModel
-        extends AbstractModel<MethodParameterInfo>
+        extends AbstractAnnotatedSourceModel<MethodParameterInfo>
         implements MethodParameterInfoModel, SourceModel {
-    private List<AnnotationInfoModel> annotations;
     private SignatureModel type;
 
     public MethodParameterInfoSourceModel(MethodParameterInfo parameter,
@@ -16,13 +16,8 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 
     @Override

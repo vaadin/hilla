@@ -1,12 +1,13 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ArrayTypeSignature;
 
-final class ArraySignatureSourceModel extends AbstractModel<ArrayTypeSignature>
+final class ArraySignatureSourceModel
+        extends AbstractAnnotatedSourceModel<ArrayTypeSignature>
         implements ArraySignatureModel, SourceSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private SignatureModel nestedType;
 
     public ArraySignatureSourceModel(ArrayTypeSignature origin, Model parent) {
@@ -14,13 +15,8 @@ final class ArraySignatureSourceModel extends AbstractModel<ArrayTypeSignature>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                    .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 
     @Override

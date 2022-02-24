@@ -1,12 +1,13 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.FieldInfo;
 
-final class FieldInfoSourceModel extends AbstractModel<FieldInfo>
+final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
         implements FieldInfoModel, SourceModel {
-    private List<AnnotationInfoModel> annotations;
     private SignatureModel type;
 
     public FieldInfoSourceModel(FieldInfo field, Model parent) {
@@ -14,18 +15,13 @@ final class FieldInfoSourceModel extends AbstractModel<FieldInfo>
     }
 
     @Override
-    public String getName() {
-        return origin.getName();
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                .process();
-        }
-
-        return annotations;
+    public String getName() {
+        return origin.getName();
     }
 
     @Override

@@ -2,22 +2,10 @@ package dev.hilla.parser.models;
 
 import java.util.List;
 
-final class BaseSignatureReflectionModel extends AbstractModel<Class<?>>
+final class BaseSignatureReflectionModel extends AbstractAnnotatedReflectionModel<Class<?>>
         implements BaseSignatureModel, ReflectionSignatureModel {
-    private List<AnnotationInfoModel> annotations;
-
     public BaseSignatureReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();
-        }
-
-        return annotations;
     }
 
     @Override

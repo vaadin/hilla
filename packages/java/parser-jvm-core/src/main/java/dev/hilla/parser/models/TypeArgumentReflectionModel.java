@@ -13,24 +13,13 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentReflectionModel extends AbstractModel<AnnotatedType>
+final class TypeArgumentReflectionModel extends AbstractAnnotatedReflectionModel<AnnotatedType>
         implements TypeArgumentModel, ReflectionSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;
 
     public TypeArgumentReflectionModel(AnnotatedType origin, Model parent) {
         super(origin, parent);
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();
-        }
-
-        return annotations;
     }
 
     @Override

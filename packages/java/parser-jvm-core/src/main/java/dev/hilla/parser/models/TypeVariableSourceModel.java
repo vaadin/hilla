@@ -1,12 +1,13 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.TypeVariableSignature;
 
-final class TypeVariableSourceModel extends AbstractModel<TypeVariableSignature>
+final class TypeVariableSourceModel
+        extends AbstractAnnotatedSourceModel<TypeVariableSignature>
         implements TypeVariableModel, SourceSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private TypeParameterModel typeParameter;
 
     public TypeVariableSourceModel(TypeVariableSignature origin, Model parent) {
@@ -14,13 +15,8 @@ final class TypeVariableSourceModel extends AbstractModel<TypeVariableSignature>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                    .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 
     public TypeParameterModel resolve() {

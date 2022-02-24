@@ -3,12 +3,13 @@ package dev.hilla.parser.models;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.MethodInfo;
 
-final class MethodInfoSourceModel extends AbstractModel<MethodInfo>
+final class MethodInfoSourceModel extends AbstractAnnotatedSourceModel<MethodInfo>
         implements MethodInfoModel, SourceModel {
-    private List<AnnotationInfoModel> annotations;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
 
@@ -17,13 +18,8 @@ final class MethodInfoSourceModel extends AbstractModel<MethodInfo>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Source(this).add(origin)
-                .process();
-        }
-
-        return annotations;
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 
     @Override

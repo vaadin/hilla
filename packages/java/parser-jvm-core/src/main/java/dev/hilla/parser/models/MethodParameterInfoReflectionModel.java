@@ -5,24 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class MethodParameterInfoReflectionModel extends AbstractModel<Parameter>
+final class MethodParameterInfoReflectionModel extends AbstractAnnotatedReflectionModel<Parameter>
         implements MethodParameterInfoModel, ReflectionModel {
-    private List<AnnotationInfoModel> annotations;
     private SignatureModel type;
 
     public MethodParameterInfoReflectionModel(Parameter parameter,
             Model parent) {
         super(parameter, parent);
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();
-        }
-
-        return annotations;
     }
 
     @Override

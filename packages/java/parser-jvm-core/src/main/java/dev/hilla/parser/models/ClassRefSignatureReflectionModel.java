@@ -5,25 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class ClassRefSignatureReflectionModel extends AbstractModel<Class<?>>
+final class ClassRefSignatureReflectionModel extends AbstractAnnotatedReflectionModel<Class<?>>
         implements ClassRefSignatureModel, ReflectionSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private List<TypeArgumentModel> typeArguments;
     private AnnotatedParameterizedType wrapper;
     private ClassInfoModel resolved;
 
     public ClassRefSignatureReflectionModel(Class<?> origin) {
         this(origin, null);
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = new AnnotationProcessor.Reflection(this).add(origin)
-                .process();
-        }
-
-        return annotations;
     }
 
     public ClassRefSignatureReflectionModel(Class<?> origin, Model parent) {
