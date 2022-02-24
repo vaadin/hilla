@@ -16,7 +16,8 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         runCodeGeneration(command);
     }
 
-    private void runCodeGeneration(List<String> command) throws ExecutionFailedException {
+    private void runCodeGeneration(List<String> command)
+            throws ExecutionFailedException {
         var exitCode = 0;
         try {
             ProcessBuilder builder = new ProcessBuilder(command).inheritIO();
@@ -27,7 +28,8 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         }
         if (exitCode != 0) {
             throw new ExecutionFailedException(
-                    "Hilla Generator execution failed with exit code " + exitCode);
+                    "Hilla Generator execution failed with exit code "
+                            + exitCode);
         }
     }
 
@@ -43,17 +45,16 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         String baseDirCandidate = System.getProperty("user.dir", ".");
         Path path = Paths.get(baseDirCandidate);
         if (path.toFile().isDirectory()) {
-            if(isMavenProject(path)) {
+            if (isMavenProject(path)) {
                 return prepareMavenCommand();
-            }else if(isGradleProject(path)) {
+            } else if (isGradleProject(path)) {
                 return prepareGradleCommand();
             }
         }
-        throw new IllegalStateException(String.format(
-                    "Failed to determine project directory for dev mode. "
-                            + "Directory '%s' does not look like a Maven or "
-                            + "Gradle project.",
-                    path.toString())); 
+        throw new IllegalStateException(String
+                .format("Failed to determine project directory for dev mode. "
+                        + "Directory '%s' does not look like a Maven or "
+                        + "Gradle project.", path.toString()));
     }
 
     private List<String> prepareMavenCommand() {
@@ -66,5 +67,5 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     private List<String> prepareGradleCommand() {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
-    
+
 }

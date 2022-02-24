@@ -16,6 +16,7 @@
 
   <properties>
     <flow.version>23.1-SNAPSHOT</flow.version>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>
