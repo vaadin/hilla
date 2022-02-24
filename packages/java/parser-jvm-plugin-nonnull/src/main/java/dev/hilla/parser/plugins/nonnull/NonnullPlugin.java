@@ -19,6 +19,16 @@ public final class NonnullPlugin implements Plugin.Processor {
     private SharedStorage storage;
 
     @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
         var toolset = new PluginsToolset(
@@ -35,21 +45,6 @@ public final class NonnullPlugin implements Plugin.Processor {
     }
 
     @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    @Override
-    public void setStorage(@Nonnull SharedStorage storage) {
-        this.storage = storage;
-    }
-
-    @Override
     public void setConfig(PluginConfiguration config) {
         if (config == null) {
             return;
@@ -63,5 +58,10 @@ public final class NonnullPlugin implements Plugin.Processor {
 
         annotations = new NonnullPluginConfig.Processor(
                 (NonnullPluginConfig) config).process();
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 }

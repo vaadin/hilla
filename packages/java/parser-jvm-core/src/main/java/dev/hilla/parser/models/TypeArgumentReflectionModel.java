@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -13,7 +12,8 @@ import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentReflectionModel extends AbstractAnnotatedReflectionModel<AnnotatedType>
+final class TypeArgumentReflectionModel
+        extends AbstractAnnotatedReflectionModel<AnnotatedType>
         implements TypeArgumentModel, ReflectionSignatureModel {
     private List<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;

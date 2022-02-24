@@ -12,8 +12,6 @@ public interface Plugin {
 
     void setOrder(int order);
 
-    void setStorage(@Nonnull SharedStorage storage);
-
     default void setConfig(PluginConfiguration config) {
         if (config != null) {
             throw new IllegalArgumentException(String.format(
@@ -22,14 +20,16 @@ public interface Plugin {
         }
     }
 
-    interface Transformer extends Plugin {
-        @Nonnull
-        Stream<ClassInfoModel> transform(
-                @Nonnull Stream<ClassInfoModel> stream);
-    }
+    void setStorage(@Nonnull SharedStorage storage);
 
     interface Processor extends Plugin {
         void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities);
+    }
+
+    interface Transformer extends Plugin {
+        @Nonnull
+        Stream<ClassInfoModel> transform(
+                @Nonnull Stream<ClassInfoModel> stream);
     }
 }

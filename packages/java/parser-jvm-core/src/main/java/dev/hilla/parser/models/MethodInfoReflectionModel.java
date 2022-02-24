@@ -6,7 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class MethodInfoReflectionModel extends AbstractAnnotatedReflectionModel<Method>
+final class MethodInfoReflectionModel
+        extends AbstractAnnotatedReflectionModel<Method>
         implements MethodInfoModel, ReflectionModel {
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
@@ -18,66 +19,6 @@ final class MethodInfoReflectionModel extends AbstractAnnotatedReflectionModel<M
     @Override
     public String getName() {
         return origin.getName();
-    }
-
-    @Override
-    public boolean isPublic() {
-        return Modifier.isPublic(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isPrivate() {
-        return Modifier.isPrivate(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isProtected() {
-        return Modifier.isProtected(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isStatic() {
-        return Modifier.isStatic(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isFinal() {
-        return Modifier.isFinal(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isSynchronized() {
-        return Modifier.isSynchronized(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isBridge() {
-        return origin.isBridge();
-    }
-
-    @Override
-    public boolean isSynthetic() {
-        return origin.isSynthetic();
-    }
-
-    @Override
-    public boolean isVarArgs() {
-        return origin.isVarArgs();
-    }
-
-    @Override
-    public boolean isNative() {
-        return Modifier.isNative(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isAbstract() {
-        return Modifier.isAbstract(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isStrict() {
-        return Modifier.isStrict(origin.getModifiers());
     }
 
     @Override
@@ -99,5 +40,65 @@ final class MethodInfoReflectionModel extends AbstractAnnotatedReflectionModel<M
         }
 
         return resultType;
+    }
+
+    @Override
+    public boolean isAbstract() {
+        return Modifier.isAbstract(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isBridge() {
+        return origin.isBridge();
+    }
+
+    @Override
+    public boolean isFinal() {
+        return Modifier.isFinal(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isNative() {
+        return Modifier.isNative(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isPrivate() {
+        return Modifier.isPrivate(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isProtected() {
+        return Modifier.isProtected(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isPublic() {
+        return Modifier.isPublic(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isStrict() {
+        return Modifier.isStrict(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isSynchronized() {
+        return Modifier.isSynchronized(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isSynthetic() {
+        return origin.isSynthetic();
+    }
+
+    @Override
+    public boolean isVarArgs() {
+        return origin.isVarArgs();
     }
 }

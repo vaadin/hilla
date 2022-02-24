@@ -8,12 +8,11 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.model.ModelPlugin;
 import dev.hilla.parser.plugins.nonnull.NonnullPlugin;
 import dev.hilla.parser.utils.ConfigList;
-
-import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 
 public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;

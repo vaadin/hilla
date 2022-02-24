@@ -8,18 +8,14 @@ import java.util.stream.Stream;
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.MethodInfo;
 
-final class MethodInfoSourceModel extends AbstractAnnotatedSourceModel<MethodInfo>
+final class MethodInfoSourceModel
+        extends AbstractAnnotatedSourceModel<MethodInfo>
         implements MethodInfoModel, SourceModel {
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
 
     public MethodInfoSourceModel(MethodInfo method, Model parent) {
         super(method, parent);
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
     }
 
     @Override
@@ -107,5 +103,10 @@ final class MethodInfoSourceModel extends AbstractAnnotatedSourceModel<MethodInf
     @Override
     public boolean isVarArgs() {
         return origin.isVarArgs();
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 }

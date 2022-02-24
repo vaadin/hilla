@@ -14,16 +14,16 @@ final class TypeVariableSourceModel
         super(origin, parent);
     }
 
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getTypeAnnotationInfo().stream();
-    }
-
     public TypeParameterModel resolve() {
         if (typeParameter == null) {
             typeParameter = TypeParameterModel.of(origin.resolve(), this);
         }
 
         return typeParameter;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 }

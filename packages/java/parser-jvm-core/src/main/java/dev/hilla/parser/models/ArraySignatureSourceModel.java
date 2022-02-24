@@ -15,16 +15,16 @@ final class ArraySignatureSourceModel
     }
 
     @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getTypeAnnotationInfo().stream();
-    }
-
-    @Override
     public SignatureModel getNestedType() {
         if (nestedType == null) {
             nestedType = SignatureModel.of(origin.getNestedType(), this);
         }
 
         return nestedType;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class StreamUtils<T> {
+public final class StreamUtils {
     private StreamUtils() {
     }
 

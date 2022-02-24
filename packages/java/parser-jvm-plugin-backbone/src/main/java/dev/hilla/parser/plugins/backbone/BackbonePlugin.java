@@ -13,16 +13,6 @@ public final class BackbonePlugin implements Plugin.Processor {
     private SharedStorage storage;
 
     @Override
-    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-            @Nonnull Collection<ClassInfoModel> entities) {
-        var model = storage.getOpenAPI();
-        var context = new Context(storage.getAssociationMap());
-
-        new EndpointProcessor(endpoints, model, context).process();
-        new EntityProcessor(entities, model, context).process();
-    }
-
-    @Override
     public int getOrder() {
         return order;
     }
@@ -30,6 +20,16 @@ public final class BackbonePlugin implements Plugin.Processor {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
+        var model = storage.getOpenAPI();
+        var context = new Context(storage.getAssociationMap());
+
+        new EndpointProcessor(endpoints, model, context).process();
+        new EntityProcessor(entities, model, context).process();
     }
 
     @Override

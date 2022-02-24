@@ -15,27 +15,12 @@ import io.github.classgraph.ClassRefTypeSignature;
 final class ClassRefSignatureSourceModel
         extends AbstractAnnotatedSourceModel<ClassRefTypeSignature>
         implements ClassRefSignatureModel, SourceSignatureModel {
-    private List<TypeArgumentModel> typeArguments;
     private ClassInfoModel resolved;
+    private List<TypeArgumentModel> typeArguments;
 
     public ClassRefSignatureSourceModel(ClassRefTypeSignature origin,
             Model parent) {
         super(origin, parent);
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        List<AnnotationInfo> typeAnnotationInfo = origin
-                .getTypeAnnotationInfo() != null
-                        ? origin.getTypeAnnotationInfo()
-                        : Collections.emptyList();
-        List<AnnotationInfoList> suffixTypeAnnotations = origin
-                .getSuffixTypeAnnotationInfo() != null
-                        ? origin.getSuffixTypeAnnotationInfo()
-                        : Collections.emptyList();
-
-        return StreamUtils.combine(typeAnnotationInfo.stream(),
-                suffixTypeAnnotations.stream().flatMap(Collection::stream));
     }
 
     @Override
@@ -62,5 +47,20 @@ final class ClassRefSignatureSourceModel
         }
 
         return resolved;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        List<AnnotationInfo> typeAnnotationInfo = origin
+                .getTypeAnnotationInfo() != null
+                        ? origin.getTypeAnnotationInfo()
+                        : Collections.emptyList();
+        List<AnnotationInfoList> suffixTypeAnnotations = origin
+                .getSuffixTypeAnnotationInfo() != null
+                        ? origin.getSuffixTypeAnnotationInfo()
+                        : Collections.emptyList();
+
+        return StreamUtils.combine(typeAnnotationInfo.stream(),
+                suffixTypeAnnotations.stream().flatMap(Collection::stream));
     }
 }

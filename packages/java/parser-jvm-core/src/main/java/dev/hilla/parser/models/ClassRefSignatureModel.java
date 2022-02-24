@@ -2,12 +2,9 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -49,10 +46,11 @@ public interface ClassRefSignatureModel extends SignatureModel {
         var typeArgumentsDependencies = signature.getTypeArguments().stream()
                 .flatMap(SignatureModel::resolveDependencies).distinct();
 
-        return classInfo != null && !ClassInfoModelUtils.isJDKClass(classInfo.getName())
-                ? StreamUtils.combine(Stream.of(classInfo),
-                        typeArgumentsDependencies).distinct()
-                : typeArgumentsDependencies;
+        return classInfo != null
+                && !ClassInfoModelUtils.isJDKClass(classInfo.getName())
+                        ? StreamUtils.combine(Stream.of(classInfo),
+                                typeArgumentsDependencies).distinct()
+                        : typeArgumentsDependencies;
     }
 
     static Stream<Class<?>> resolveDependencies(
@@ -78,13 +76,6 @@ public interface ClassRefSignatureModel extends SignatureModel {
         return getTypeArguments().stream();
     }
 
-    ClassInfoModel resolve();
-
-    @Override
-    default boolean isClassRef() {
-        return true;
-    }
-
     @Override
     default boolean isBoolean() {
         return resolve().isBoolean();
@@ -98,6 +89,11 @@ public interface ClassRefSignatureModel extends SignatureModel {
     @Override
     default boolean isCharacter() {
         return resolve().isCharacter();
+    }
+
+    @Override
+    default boolean isClassRef() {
+        return true;
     }
 
     @Override
@@ -169,4 +165,6 @@ public interface ClassRefSignatureModel extends SignatureModel {
     default boolean isString() {
         return resolve().isString();
     }
+
+    ClassInfoModel resolve();
 }

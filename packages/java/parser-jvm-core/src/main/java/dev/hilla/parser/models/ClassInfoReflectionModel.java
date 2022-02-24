@@ -3,13 +3,13 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Class<?>>
+final class ClassInfoReflectionModel
+        extends AbstractAnnotatedReflectionModel<Class<?>>
         implements ClassInfoModel, ReflectionModel {
     private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
@@ -29,16 +29,6 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
                         : null;
 
         this.chain = new ClassInfoModelInheritanceChain(this);
-    }
-
-    @Override
-    public String getName() {
-        return origin.getName();
-    }
-
-    @Override
-    public String getSimpleName() {
-        return origin.getSimpleName();
     }
 
     @Override
@@ -76,6 +66,16 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
+    public String getSimpleName() {
+        return origin.getSimpleName();
+    }
+
+    @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
     }
@@ -97,63 +97,13 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
     }
 
     @Override
-    public boolean isPublic() {
-        return Modifier.isPublic(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isPrivate() {
-        return Modifier.isPrivate(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isProtected() {
-        return Modifier.isProtected(origin.getModifiers());
-    }
-
-    @Override
     public boolean isAbstract() {
         return Modifier.isAbstract(origin.getModifiers());
     }
 
     @Override
-    public boolean isSynthetic() {
-        return origin.isSynthetic();
-    }
-
-    @Override
-    public boolean isFinal() {
-        return Modifier.isFinal(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isStatic() {
-        return Modifier.isStatic(origin.getModifiers());
-    }
-
-    @Override
     public boolean isAnnotation() {
         return origin.isAnnotation();
-    }
-
-    @Override
-    public boolean isInterface() {
-        return origin.isInterface();
-    }
-
-    @Override
-    public boolean isInterfaceOrAnnotation() {
-        return this.isInterface() || this.isAnnotation();
-    }
-
-    @Override
-    public boolean isEnum() {
-        return origin.isEnum();
-    }
-
-    @Override
-    public boolean isStandardClass() {
-        return !this.isAnnotation() && !this.isInterface();
     }
 
     @Override
@@ -192,6 +142,16 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
     }
 
     @Override
+    public boolean isEnum() {
+        return origin.isEnum();
+    }
+
+    @Override
+    public boolean isFinal() {
+        return Modifier.isFinal(origin.getModifiers());
+    }
+
+    @Override
     public boolean isFloat() {
         return ClassInfoModelUtils.isAssignableFrom(Float.class, origin);
     }
@@ -199,6 +159,16 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
     @Override
     public boolean isInteger() {
         return ClassInfoModelUtils.isAssignableFrom(Integer.class, origin);
+    }
+
+    @Override
+    public boolean isInterface() {
+        return origin.isInterface();
+    }
+
+    @Override
+    public boolean isInterfaceOrAnnotation() {
+        return this.isInterface() || this.isAnnotation();
     }
 
     @Override
@@ -232,12 +202,42 @@ final class ClassInfoReflectionModel extends AbstractAnnotatedReflectionModel<Cl
     }
 
     @Override
+    public boolean isPrivate() {
+        return Modifier.isPrivate(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isProtected() {
+        return Modifier.isProtected(origin.getModifiers());
+    }
+
+    @Override
+    public boolean isPublic() {
+        return Modifier.isPublic(origin.getModifiers());
+    }
+
+    @Override
     public boolean isShort() {
         return ClassInfoModelUtils.isAssignableFrom(Short.class, origin);
     }
 
     @Override
+    public boolean isStandardClass() {
+        return !this.isAnnotation() && !this.isInterface();
+    }
+
+    @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(origin.getModifiers());
+    }
+
+    @Override
     public boolean isString() {
         return ClassInfoModelUtils.isAssignableFrom(String.class, origin);
+    }
+
+    @Override
+    public boolean isSynthetic() {
+        return origin.isSynthetic();
     }
 }

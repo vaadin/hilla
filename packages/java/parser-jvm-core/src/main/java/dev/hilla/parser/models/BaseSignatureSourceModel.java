@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -11,11 +10,6 @@ final class BaseSignatureSourceModel
         implements BaseSignatureModel, SourceSignatureModel {
     public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
         super(origin, parent);
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getTypeAnnotationInfo().stream();
     }
 
     @Override
@@ -73,5 +67,10 @@ final class BaseSignatureSourceModel
     @Override
     public boolean isVoid() {
         return origin.getType() == Void.TYPE;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 }

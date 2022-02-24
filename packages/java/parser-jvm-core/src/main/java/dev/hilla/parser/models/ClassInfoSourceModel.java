@@ -29,21 +29,6 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public String getName() {
-        return origin.getName();
-    }
-
-    @Override
-    public String getSimpleName() {
-        return origin.getSimpleName();
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
-    }
-
-    @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
             fields = getMembers(origin.getDeclaredFieldInfo(),
@@ -79,6 +64,16 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
+    public String getSimpleName() {
+        return origin.getSimpleName();
+    }
+
+    @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
     }
@@ -95,63 +90,13 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public boolean isPublic() {
-        return origin.isPublic();
-    }
-
-    @Override
-    public boolean isPrivate() {
-        return origin.isPrivate();
-    }
-
-    @Override
-    public boolean isProtected() {
-        return origin.isProtected();
-    }
-
-    @Override
     public boolean isAbstract() {
         return origin.isAbstract();
     }
 
     @Override
-    public boolean isSynthetic() {
-        return origin.isSynthetic();
-    }
-
-    @Override
-    public boolean isFinal() {
-        return origin.isFinal();
-    }
-
-    @Override
-    public boolean isStatic() {
-        return origin.isStatic();
-    }
-
-    @Override
     public boolean isAnnotation() {
         return origin.isAnnotation();
-    }
-
-    @Override
-    public boolean isInterface() {
-        return origin.isInterface();
-    }
-
-    @Override
-    public boolean isInterfaceOrAnnotation() {
-        return origin.isInterfaceOrAnnotation();
-    }
-
-    @Override
-    public boolean isEnum() {
-        return origin.isEnum();
-    }
-
-    @Override
-    public boolean isStandardClass() {
-        return origin.isStandardClass();
     }
 
     @Override
@@ -190,6 +135,16 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
+    public boolean isEnum() {
+        return origin.isEnum();
+    }
+
+    @Override
+    public boolean isFinal() {
+        return origin.isFinal();
+    }
+
+    @Override
     public boolean isFloat() {
         return ClassInfoModelUtils.isAssignableFrom(Float.class, origin);
     }
@@ -197,6 +152,16 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public boolean isInteger() {
         return ClassInfoModelUtils.isAssignableFrom(Integer.class, origin);
+    }
+
+    @Override
+    public boolean isInterface() {
+        return origin.isInterface();
+    }
+
+    @Override
+    public boolean isInterfaceOrAnnotation() {
+        return origin.isInterfaceOrAnnotation();
     }
 
     @Override
@@ -230,12 +195,47 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
+    public boolean isPrivate() {
+        return origin.isPrivate();
+    }
+
+    @Override
+    public boolean isProtected() {
+        return origin.isProtected();
+    }
+
+    @Override
+    public boolean isPublic() {
+        return origin.isPublic();
+    }
+
+    @Override
     public boolean isShort() {
         return ClassInfoModelUtils.isAssignableFrom(Short.class, origin);
     }
 
     @Override
+    public boolean isStandardClass() {
+        return origin.isStandardClass();
+    }
+
+    @Override
+    public boolean isStatic() {
+        return origin.isStatic();
+    }
+
+    @Override
     public boolean isString() {
         return ClassInfoModelUtils.isAssignableFrom(String.class, origin);
+    }
+
+    @Override
+    public boolean isSynthetic() {
+        return origin.isSynthetic();
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 }

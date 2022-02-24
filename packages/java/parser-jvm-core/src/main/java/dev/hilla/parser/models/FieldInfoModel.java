@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -26,19 +25,19 @@ public interface FieldInfoModel extends Model, NamedModel, AnnotatedModel {
 
     SignatureModel getType();
 
-    boolean isPublic();
+    boolean isEnum();
+
+    boolean isFinal();
 
     boolean isPrivate();
 
     boolean isProtected();
 
+    boolean isPublic();
+
     boolean isStatic();
-
-    boolean isFinal();
-
-    boolean isTransient();
 
     boolean isSynthetic();
 
-    boolean isEnum();
+    boolean isTransient();
 }

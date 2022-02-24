@@ -81,11 +81,12 @@ final class EndpointProcessor {
             var operation = new Operation();
 
             var endpointName = method.getParent()
-                    .map(cls -> ((ClassInfoModel) cls).getSimpleName()).orElse("Unknown");
+                    .map(cls -> ((ClassInfoModel) cls).getSimpleName())
+                    .orElse("Unknown");
 
             operation
-                    .operationId(endpointName + '_' + method.getName()
-                            + "_POST")
+                    .operationId(
+                            endpointName + '_' + method.getName() + "_POST")
                     .addTagsItem(endpointName).responses(createResponses());
 
             if (method.getParameters().size() > 0) {

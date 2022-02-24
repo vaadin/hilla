@@ -18,7 +18,8 @@ import io.github.classgraph.HierarchicalTypeSignature;
 import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeVariableSignature;
 
-public interface SignatureModel extends Model, SpecializedModel, AnnotatedModel {
+public interface SignatureModel
+        extends Model, SpecializedModel, AnnotatedModel {
     static SignatureModel of(@Nonnull HierarchicalTypeSignature signature,
             Model parent) {
         if (signature instanceof BaseTypeSignature) {

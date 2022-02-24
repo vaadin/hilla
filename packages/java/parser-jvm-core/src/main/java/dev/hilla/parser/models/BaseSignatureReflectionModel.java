@@ -1,8 +1,7 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
-
-final class BaseSignatureReflectionModel extends AbstractAnnotatedReflectionModel<Class<?>>
+final class BaseSignatureReflectionModel
+        extends AbstractAnnotatedReflectionModel<Class<?>>
         implements BaseSignatureModel, ReflectionSignatureModel {
     public BaseSignatureReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);

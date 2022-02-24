@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
-import java.util.List;
 
 final class TypeVariableReflectionModel
         extends AbstractAnnotatedReflectionModel<AnnotatedTypeVariable>

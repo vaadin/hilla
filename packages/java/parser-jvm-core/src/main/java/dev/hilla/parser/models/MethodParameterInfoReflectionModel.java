@@ -1,11 +1,9 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
-final class MethodParameterInfoReflectionModel extends AbstractAnnotatedReflectionModel<Parameter>
+final class MethodParameterInfoReflectionModel
+        extends AbstractAnnotatedReflectionModel<Parameter>
         implements MethodParameterInfoModel, ReflectionModel {
     private SignatureModel type;
 

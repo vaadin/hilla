@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -12,11 +11,6 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
 
     public FieldInfoSourceModel(FieldInfo field, Model parent) {
         super(field, parent);
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
     }
 
     @Override
@@ -72,5 +66,10 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     @Override
     public boolean isTransient() {
         return origin.isTransient();
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 }

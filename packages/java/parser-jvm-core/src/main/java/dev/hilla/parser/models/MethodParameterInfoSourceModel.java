@@ -16,11 +16,6 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
-    }
-
-    @Override
     public String getName() {
         return origin.getName();
     }
@@ -33,5 +28,10 @@ final class MethodParameterInfoSourceModel
         }
 
         return type;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getAnnotationInfo().stream();
     }
 }
