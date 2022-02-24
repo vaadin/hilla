@@ -52,7 +52,7 @@ public final class Parser {
                 .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan();
 
-        var collector = new ElementsCollector(result, pluginManager, logger);
+        var collector = new ElementsCollector(result, logger);
         var endpoints = collector
                 .collectEndpoints(config.getEndpointAnnotationName());
         var entities = collector.collectEntities(endpoints);
@@ -75,13 +75,10 @@ public final class Parser {
 
     private static class ElementsCollector {
         private final Logger logger;
-        private final PluginManager pluginManager;
         private final ScanResult result;
 
-        public ElementsCollector(ScanResult result, PluginManager pluginManager,
-                Logger logger) {
+        public ElementsCollector(ScanResult result, Logger logger) {
             this.logger = logger;
-            this.pluginManager = pluginManager;
             this.result = result;
         }
 
@@ -91,10 +88,9 @@ public final class Parser {
                     "Collecting project endpoints with the endpoint annotation: "
                             + endpointAnnotationName);
 
-            var endpoints = pluginManager
-                    .transform(result
-                            .getClassesWithAnnotation(endpointAnnotationName)
-                            .stream().map(ClassInfoModel::of))
+            var endpoints = result
+                    .getClassesWithAnnotation(endpointAnnotationName).stream()
+                    .map(ClassInfoModel::of)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
             logger.debug("Collected project endpoints: "
@@ -160,14 +156,11 @@ public final class Parser {
                         .forEach(entities::add);
             }
 
-            var result = pluginManager.transform(entities.stream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-
             logger.debug("Collected project data entities: "
-                    + result.stream().map(ClassInfoModel::getName)
+                    + entities.stream().map(ClassInfoModel::getName)
                             .collect(Collectors.joining(", ")));
 
-            return result;
+            return new LinkedHashSet<>(entities);
         }
     }
 }

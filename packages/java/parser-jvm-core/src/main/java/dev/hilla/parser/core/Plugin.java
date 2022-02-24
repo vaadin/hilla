@@ -26,10 +26,4 @@ public interface Plugin {
         void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities);
     }
-
-    interface Transformer extends Plugin {
-        @Nonnull
-        Stream<ClassInfoModel> transform(
-                @Nonnull Stream<ClassInfoModel> stream);
-    }
 }
