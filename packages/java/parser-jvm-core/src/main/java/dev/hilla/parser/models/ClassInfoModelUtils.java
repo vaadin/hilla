@@ -20,6 +20,9 @@ final class ClassInfoModelUtils {
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
 
+    private ClassInfoModelUtils() {
+    }
+
     public static <T> boolean defaultClassInfoMemberFilter(T member) {
         return true;
     }
