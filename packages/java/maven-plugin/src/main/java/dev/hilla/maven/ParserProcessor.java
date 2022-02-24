@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,6 +21,7 @@ import dev.hilla.parser.utils.OpenAPIPrinter;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginManager;
 
 final class ParserProcessor {
@@ -131,7 +133,8 @@ final class ParserProcessor {
         var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getOrder(), plugin.getConfiguration()))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(() -> new TreeSet<>(
+                        Comparator.comparingInt(Plugin::getOrder))));
 
         builder.plugins(loadedPlugins);
     }

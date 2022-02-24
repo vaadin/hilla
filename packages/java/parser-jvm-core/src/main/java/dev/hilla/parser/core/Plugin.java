@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
-public interface Plugin extends Comparable<Plugin> {
+public interface Plugin {
     void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
             @Nonnull Collection<RelativeClassInfo> entities,
             @Nonnull SharedStorage storage);
@@ -19,10 +19,5 @@ public interface Plugin extends Comparable<Plugin> {
                     "The '%s' plugin does not expect configuration set",
                     getClass().getName()));
         }
-    }
-
-    @Override
-    default int compareTo(Plugin another) {
-        return Integer.compare(getOrder(), another.getOrder());
     }
 }
