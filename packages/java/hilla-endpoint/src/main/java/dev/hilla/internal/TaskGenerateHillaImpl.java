@@ -1,4 +1,4 @@
-package com.vaadin.fusion.maven;
+package dev.hilla.internal;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
