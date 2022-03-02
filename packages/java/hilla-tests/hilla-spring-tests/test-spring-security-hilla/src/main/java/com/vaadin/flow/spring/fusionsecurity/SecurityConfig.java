@@ -1,6 +1,7 @@
 package com.vaadin.flow.spring.fusionsecurity;
 
 import javax.crypto.spec.SecretKeySpec;
+
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
+import com.vaadin.flow.spring.security.RequestUtil;
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
@@ -33,6 +35,9 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
     @Autowired
     private UserInfoRepository userInfoRepository;
 
+    @Autowired
+    protected RequestUtil requestUtil;
+
     @Value("${springSecurityTestApp.security.stateless:false}")
     private boolean stateless;
 
@@ -44,15 +49,16 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
-        http.authorizeRequests().antMatchers("/").permitAll();
-        http.authorizeRequests().antMatchers("/form").permitAll();
+        http.authorizeRequests().antMatchers(applyUrlMapping("/")).permitAll();
+        http.authorizeRequests().antMatchers(applyUrlMapping("/form"))
+                .permitAll();
         // Admin only access
         http.authorizeRequests().antMatchers("/admin-only/**")
                 .hasAnyRole(ROLE_ADMIN);
 
         super.configure(http);
-
         setLoginView(http, "/login");
+        http.logout().logoutUrl(applyUrlMapping("/logout"));
 
         if (stateless) {
             setStatelessAuthentication(http,

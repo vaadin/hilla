@@ -68,7 +68,27 @@ public class SecurityIT extends ChromeBrowserTest {
         getMainView().$(ButtonElement.class).id("logout").click();
     }
 
+    /**
+     * Base path for Vaadin Servlet URL mapping, as defined in
+     * {@literal vaadin.urlMapping} configuration property.
+     *
+     * For example, for {@code vaadin.urlMapping=/vaadin/*} return value should
+     * be {@code /vaadin}, without ending slash.
+     *
+     * Default value is {@literal blank}, relative to the default {@code /*}
+     * mapping.
+     *
+     * @return base path for Vaadin Servlet URL mapping.
+     */
+    protected String getUrlMappingBasePath() {
+        return "";
+    }
+
     protected void open(String path) {
+        getDriver().get(getRootURL() + getUrlMappingBasePath() + "/" + path);
+    }
+
+    protected void openResource(String path) {
         getDriver().get(getRootURL() + "/" + path);
     }
 
@@ -159,9 +179,9 @@ public class SecurityIT extends ChromeBrowserTest {
     public void redirect_to_resource_after_login() {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.txt";
-        open(path);
+        openResource(path);
         loginAdmin();
-        assertPathShown(path);
+        assertResourceShown(path);
         String result = getDriver().getPageSource();
         Assert.assertTrue(result.contains(contents));
     }
@@ -180,18 +200,18 @@ public class SecurityIT extends ChromeBrowserTest {
         String contents = "Secret document for all logged in users";
         String path = "all-logged-in/secret.txt";
 
-        open(path);
+        openResource(path);
         assertLoginViewShown();
         loginUser();
         assertPageContains(contents);
         logout();
 
-        open(path);
+        openResource(path);
         loginAdmin();
         assertPageContains(contents);
         logout();
 
-        open(path);
+        openResource(path);
         assertLoginViewShown();
     }
 
@@ -199,19 +219,19 @@ public class SecurityIT extends ChromeBrowserTest {
     public void access_restricted_to_admin() {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.txt";
-        open(path);
+        openResource(path);
         assertLoginViewShown();
         loginUser();
-        open(path);
+        openResource(path);
         assertForbiddenPage();
         logout();
 
-        open(path);
+        openResource(path);
         loginAdmin();
         String adminResult = getDriver().getPageSource();
         Assert.assertTrue(adminResult.contains(contents));
         logout();
-        open(path);
+        openResource(path);
         assertLoginViewShown();
     }
 
@@ -230,13 +250,13 @@ public class SecurityIT extends ChromeBrowserTest {
 
     @Test
     public void public_app_resources_available_for_all() {
-        open("public/public.txt");
+        openResource("public/public.txt");
         String shouldBeTextFile = getDriver().getPageSource();
         Assert.assertTrue(
                 shouldBeTextFile.contains("Public document for all users"));
         open("login");
         loginUser();
-        open("public/public.txt");
+        openResource("public/public.txt");
         shouldBeTextFile = getDriver().getPageSource();
         Assert.assertTrue(
                 shouldBeTextFile.contains("Public document for all users"));
@@ -301,6 +321,11 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertPathShown(String path) {
+        waitUntil(driver -> driver.getCurrentUrl()
+                .equals(getRootURL() + getUrlMappingBasePath() + "/" + path));
+    }
+
+    protected void assertResourceShown(String path) {
         waitUntil(driver -> driver.getCurrentUrl()
                 .equals(getRootURL() + "/" + path));
     }
