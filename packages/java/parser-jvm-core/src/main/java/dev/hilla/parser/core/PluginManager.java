@@ -7,6 +7,8 @@ import java.util.SortedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.hilla.parser.models.ClassInfoModel;
+
 public final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
@@ -14,8 +16,12 @@ public final class PluginManager {
             .getLogger(PluginManager.class);
     private final SortedSet<Plugin> plugins;
 
-    PluginManager(ParserConfig config) {
+    PluginManager(ParserConfig config, SharedStorage storage) {
         plugins = config.getPlugins();
+
+        for (var plugin : plugins) {
+            plugin.setStorage(storage);
+        }
     }
 
     public static Plugin load(String name, Integer order,
@@ -63,11 +69,14 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
-    public void execute(Collection<RelativeClassInfo> endpoints,
-            Collection<RelativeClassInfo> entities, SharedStorage storage) {
+    public void process(Collection<ClassInfoModel> endpoints,
+            Collection<ClassInfoModel> entities) {
         for (var plugin : plugins) {
-            logger.debug("Executing plugin " + plugin.getClass().getName());
-            plugin.execute(endpoints, entities, storage);
+            if (plugin instanceof Plugin.Processor) {
+                logger.debug("Executing processor plugin "
+                        + plugin.getClass().getName());
+                ((Plugin.Processor) plugin).process(endpoints, entities);
+            }
         }
     }
 }

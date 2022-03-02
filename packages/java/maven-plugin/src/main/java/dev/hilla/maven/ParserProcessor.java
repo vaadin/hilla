@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,11 +15,10 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
-import dev.hilla.parser.utils.OpenAPIPrinter;
-
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.core.PluginManager;
+import dev.hilla.parser.utils.OpenAPIPrinter;
 
 final class ParserProcessor {
     private final Log logger;
@@ -126,12 +124,10 @@ final class ParserProcessor {
     }
 
     private void preparePlugins(ParserConfig.Builder builder) {
-        // For loaded plugins we use SortedSet to have them sorted in order the
-        // user defined.
         var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getOrder(), plugin.getConfiguration()))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toList());
 
         builder.plugins(loadedPlugins);
     }

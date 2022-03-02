@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AssociationMap;
-import dev.hilla.parser.core.RelativeTypeSignature;
+import dev.hilla.parser.models.SignatureModel;
+
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.AnnotationParameterValue;
 import io.github.classgraph.TypeSignature;
@@ -72,8 +73,7 @@ public final class ValidationConstraint {
                     .equals(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
         }
 
-        private void processSchema(Schema<?> schema,
-                RelativeTypeSignature signature) {
+        private void processSchema(Schema<?> schema, SignatureModel signature) {
             if (!(signature.get() instanceof TypeSignature)) {
                 return;
             }

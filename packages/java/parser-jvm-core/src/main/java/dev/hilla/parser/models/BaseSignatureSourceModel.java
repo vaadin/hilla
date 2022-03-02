@@ -1,29 +1,15 @@
-package dev.hilla.parser.core;
+package dev.hilla.parser.models;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.ClassInfo;
 
-public final class BaseRelativeTypeSignature
-        extends AbstractRelative<BaseTypeSignature, Relative<?>>
-        implements RelativeTypeSignature {
-    BaseRelativeTypeSignature(BaseTypeSignature origin, Relative<?> parent) {
+final class BaseSignatureSourceModel
+        extends AbstractAnnotatedSourceModel<BaseTypeSignature>
+        implements BaseSignatureModel, SourceSignatureModel {
+    public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
         super(origin, parent);
-    }
-
-    public static Stream<ClassInfo> resolve(
-            @Nonnull BaseTypeSignature signature) {
-        // BaseTypeSignature is about primitive types (int, double, etc.).
-        // We don't need to resolve them, so skipping.
-        return Stream.empty();
-    }
-
-    @Override
-    public boolean isBase() {
-        return true;
     }
 
     @Override
@@ -34,6 +20,11 @@ public final class BaseRelativeTypeSignature
     @Override
     public boolean isByte() {
         return origin.getType() == Byte.TYPE;
+    }
+
+    @Override
+    public boolean isCharacter() {
+        return origin.getType() == Character.TYPE;
     }
 
     @Override
@@ -49,6 +40,11 @@ public final class BaseRelativeTypeSignature
     @Override
     public boolean isInteger() {
         return origin.getType() == Integer.TYPE;
+    }
+
+    @Override
+    public boolean isJDKClass() {
+        return true;
     }
 
     @Override
@@ -69,17 +65,12 @@ public final class BaseRelativeTypeSignature
     }
 
     @Override
-    public boolean isString() {
-        return origin.getType() == Character.TYPE;
-    }
-
-    @Override
-    public boolean isSystem() {
-        return true;
-    }
-
-    @Override
     public boolean isVoid() {
         return origin.getType() == Void.TYPE;
+    }
+
+    @Override
+    protected Stream<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo().stream();
     }
 }

@@ -11,8 +11,10 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+
 import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -28,11 +30,11 @@ public final class Parser {
     }
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
-            Collection<RelativeClassInfo> endpoints) {
+            Collection<ClassInfoModel> endpoints) {
         endpoints.stream().flatMap(endpoint -> endpoint.getMethods().stream())
-                .flatMap(RelativeMethodInfo::getParametersStream).findFirst()
+                .flatMap(MethodInfoModel::getParametersStream).findFirst()
                 .ifPresent((parameter) -> {
-                    if (parameter.get().getName() == null) {
+                    if (parameter.getName() == null) {
                         throw new ParserException(
                                 "Hilla Parser requires running java compiler with -parameters flag enabled");
                     }
@@ -41,12 +43,13 @@ public final class Parser {
 
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
-        var pluginManager = new PluginManager(config);
+        var pluginManager = new PluginManager(config, storage);
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "
                 + String.join(";", classPathElements));
-        var result = new ClassGraph().enableAllInfo()
+        var result = new ClassGraph().enableAllInfo().enableExternalClasses()
+                .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan();
 
         var collector = new ElementsCollector(result, logger);
@@ -59,7 +62,7 @@ public final class Parser {
         checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
 
         logger.debug("Executing parser plugins");
-        pluginManager.execute(endpoints, entities, storage);
+        pluginManager.process(endpoints, entities);
 
         logger.debug("Parsing process successfully finished");
         return storage.getOpenAPI();
@@ -75,11 +78,11 @@ public final class Parser {
         private final ScanResult result;
 
         public ElementsCollector(ScanResult result, Logger logger) {
-            this.result = result;
             this.logger = logger;
+            this.result = result;
         }
 
-        public Collection<RelativeClassInfo> collectEndpoints(
+        public Collection<ClassInfoModel> collectEndpoints(
                 String endpointAnnotationName) {
             logger.debug(
                     "Collecting project endpoints with the endpoint annotation: "
@@ -87,18 +90,18 @@ public final class Parser {
 
             var endpoints = result
                     .getClassesWithAnnotation(endpointAnnotationName).stream()
-                    .map(RelativeClassInfo::new)
+                    .map(ClassInfoModel::of)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
-            logger.debug("Collected project endpoints: " + endpoints.stream()
-                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
-                    .collect(Collectors.joining(", ")));
+            logger.debug("Collected project endpoints: "
+                    + endpoints.stream().map(ClassInfoModel::getName)
+                            .collect(Collectors.joining(", ")));
 
             return endpoints;
         }
 
-        public Collection<RelativeClassInfo> collectEntities(
-                Collection<RelativeClassInfo> endpoints) {
+        public Collection<ClassInfoModel> collectEntities(
+                Collection<ClassInfoModel> endpoints) {
             var entities = endpoints.stream().flatMap(
                     cls -> cls.getInheritanceChain().getDependenciesStream())
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -153,9 +156,9 @@ public final class Parser {
                         .forEach(entities::add);
             }
 
-            logger.debug("Collected project data entities: " + entities.stream()
-                    .map(RelativeClassInfo::get).map(ClassInfo::getName)
-                    .collect(Collectors.joining(", ")));
+            logger.debug("Collected project data entities: "
+                    + entities.stream().map(ClassInfoModel::getName)
+                            .collect(Collectors.joining(", ")));
 
             return new LinkedHashSet<>(entities);
         }

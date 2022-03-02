@@ -8,19 +8,29 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.PluginsToolset;
-import dev.hilla.parser.core.RelativeClassInfo;
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
-public final class NonnullPlugin implements Plugin {
+public final class NonnullPlugin implements Plugin.Processor {
     private Collection<String> annotations = NonnullPluginConfig.Processor.defaults;
     private int order = 100;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            @Nonnull SharedStorage storage) {
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
         var toolset = new PluginsToolset(
                 storage.getParserConfig().getPlugins());
 
@@ -32,16 +42,6 @@ public final class NonnullPlugin implements Plugin {
 
         new NonnullProcessor(Objects.requireNonNull(annotations),
                 storage.getAssociationMap()).process();
-    }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     @Override
@@ -58,5 +58,10 @@ public final class NonnullPlugin implements Plugin {
 
         annotations = new NonnullPluginConfig.Processor(
                 (NonnullPluginConfig) config).process();
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 }

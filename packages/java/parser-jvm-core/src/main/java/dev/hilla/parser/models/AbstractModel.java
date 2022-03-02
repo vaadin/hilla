@@ -1,16 +1,15 @@
-package dev.hilla.parser.core;
+package dev.hilla.parser.models;
 
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractRelative<T, P extends Relative<?>>
-        implements Relative<P> {
+public abstract class AbstractModel<T> implements Model {
     protected final T origin;
-    protected final P parent;
+    protected final Model parent;
 
-    public AbstractRelative(@Nonnull T origin, P parent) {
+    AbstractModel(@Nonnull T origin, Model parent) {
         this.origin = Objects.requireNonNull(origin);
         this.parent = parent;
     }
@@ -21,11 +20,11 @@ abstract class AbstractRelative<T, P extends Relative<?>>
             return true;
         }
 
-        if (!(other instanceof AbstractRelative<?, ?>)) {
+        if (!(other instanceof AbstractModel)) {
             return false;
         }
 
-        return Objects.equals(origin, ((AbstractRelative<?, ?>) other).origin);
+        return Objects.equals(origin, ((AbstractModel<?>) other).origin);
     }
 
     @Override
@@ -34,7 +33,7 @@ abstract class AbstractRelative<T, P extends Relative<?>>
     }
 
     @Override
-    public Optional<P> getParent() {
+    public Optional<Model> getParent() {
         return Optional.of(parent);
     }
 
