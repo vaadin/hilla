@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -257,7 +258,8 @@ public class OpenAPIObjectGenerator {
         }
         JavaSymbolSolver symbolResolver = new JavaSymbolSolver(typeSolver);
 
-        return new ParserConfiguration().setSymbolResolver(symbolResolver);
+        return new ParserConfiguration().setSymbolResolver(symbolResolver)
+                .setLanguageLevel(LanguageLevel.CURRENT);
     }
 
     private void parseSourceRoot(SourceRoot sourceRoot, Callback callback) {
@@ -316,6 +318,10 @@ public class OpenAPIObjectGenerator {
     @SuppressWarnings("squid:S1172")
     private SourceRoot.Callback.Result process(Path localPath,
             Path absolutePath, ParseResult<CompilationUnit> result) {
+        if (!result.isSuccessful()) {
+            getLogger().debug("Unable to parse Java file {}: {}", localPath,
+                    result);
+        }
         result.ifSuccessful(compilationUnit -> compilationUnit.getPrimaryType()
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
