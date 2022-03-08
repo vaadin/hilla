@@ -2,5 +2,5 @@
   "packages": ["packages/ts/*"],
   "npmClient": "npm",
   "useWorkspaces": true,
-  "version": "0.0.20"
+  "version": "1.0.1"
 }
