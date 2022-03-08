@@ -1,19 +1,22 @@
 package dev.hilla.parser.plugins.backbone;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import dev.hilla.parser.core.AssociationMap;
+import dev.hilla.parser.core.ReplaceMap;
 
 final class Context {
     private final AssociationMap associationMap;
-    private final Set<String> refs = new HashSet<>();
+    private final ReplaceMap replaceMap;
 
-    public Context(AssociationMap associationMap) {
+    public Context(AssociationMap associationMap, ReplaceMap replaceMap) {
         this.associationMap = associationMap;
+        this.replaceMap = replaceMap;
     }
 
     public AssociationMap getAssociationMap() {
         return associationMap;
+    }
+
+    public ReplaceMap getReplaceMap() {
+        return replaceMap;
     }
 }

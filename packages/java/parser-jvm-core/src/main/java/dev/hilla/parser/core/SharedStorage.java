@@ -9,6 +9,7 @@ public final class SharedStorage {
     private final AssociationMap associationMap = new AssociationMap();
     private final ParserConfig parserConfig;
     private final Map<String, Object> pluginStorage = new HashMap<>();
+    private final ReplaceMap replaceMap = new ReplaceMap();
 
     SharedStorage(ParserConfig parserConfig) {
         this.parserConfig = parserConfig;
@@ -28,5 +29,9 @@ public final class SharedStorage {
 
     public Map<String, Object> getPluginStorage() {
         return pluginStorage;
+    }
+
+    public ReplaceMap getReplaceMap() {
+        return replaceMap;
     }
 }

@@ -148,8 +148,11 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var fullyQualifiedName = ((ClassRefSignatureModel) type).resolve()
-                .getName();
+        var processedType = context.getReplaceMap()
+                .process(((ClassRefSignatureModel) type).resolve()).findFirst()
+                .get();
+
+        var fullyQualifiedName = processedType.getName();
 
         return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
@@ -165,7 +168,7 @@ final class SchemaProcessor {
 
         return types.size() > 0
                 ? new SchemaProcessor(types.get(0), context).process()
-                : this.anySchema();
+                : anySchema();
     }
 
     private Schema<?> typeParameterSchema() {

@@ -3,6 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.ParameterizedType;
@@ -44,19 +45,25 @@ public interface SignatureModel
         if (signature instanceof AnnotatedParameterizedType) {
             return ClassRefSignatureModel
                     .of((AnnotatedParameterizedType) signature, parent);
+        } else if (signature instanceof AnnotatedArrayType) {
+            return ArraySignatureModel.of((AnnotatedArrayType) signature,
+                    parent);
         } else if (signature instanceof AnnotatedTypeVariable) {
             return TypeVariableModel.of((AnnotatedTypeVariable) signature,
                     parent);
         } else if (signature instanceof AnnotatedWildcardType) {
             return TypeArgumentModel.of((AnnotatedWildcardType) signature,
                     parent);
-        } else if (signature instanceof AnnotatedArrayType) {
-            return ArraySignatureModel.of((AnnotatedArrayType) signature,
-                    parent);
-        } else if (((Class<?>) signature).isPrimitive()) {
-            return BaseSignatureModel.of((Class<?>) signature, parent);
         } else {
-            return ClassRefSignatureModel.of((Class<?>) signature, parent);
+            var type = signature instanceof AnnotatedType
+                    ? (Class<?>) ((AnnotatedType) signature).getType()
+                    : (Class<?>) signature;
+
+            if (type.isPrimitive()) {
+                return BaseSignatureModel.of(type, parent);
+            } else {
+                return ClassRefSignatureModel.of(type, parent);
+            }
         }
     }
 

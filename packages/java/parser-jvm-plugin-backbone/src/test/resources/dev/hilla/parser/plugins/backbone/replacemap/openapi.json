@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ReplaceMapEndpoint"
+    }
+  ],
+  "paths": {
+    "/ReplaceMapEndpoint/direct": {
+      "post": {
+        "tags": ["ReplaceMapEndpoint"],
+        "operationId": "ReplaceMapEndpoint_direct_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.Replace$To"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.Replace$To"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ReplaceMapEndpoint/withEntity": {
+      "post": {
+        "tags": ["ReplaceMapEndpoint"],
+        "operationId": "ReplaceMapEndpoint_withEntity_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.ReplaceMapEndpoint$ReplaceMapEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.replacemap.Replace$To": {
+        "type": "object",
+        "properties": {
+          "foo": {
+            "type": "string",
+            "nullable": true
+          },
+          "bar": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.backbone.replacemap.ReplaceMapEndpoint$ReplaceMapEntity": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.Replace$To"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

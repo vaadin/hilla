@@ -1,6 +1,7 @@
 package dev.hilla.parser.plugins.backbone;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -26,10 +27,15 @@ public final class BackbonePlugin implements Plugin.Processor {
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
         var model = storage.getOpenAPI();
-        var context = new Context(storage.getAssociationMap());
+        var replaceMap = storage.getReplaceMap();
+        var context = new Context(storage.getAssociationMap(), replaceMap);
 
-        new EndpointProcessor(endpoints, model, context).process();
-        new EntityProcessor(entities, model, context).process();
+        new EndpointProcessor(
+                replaceMap.process(endpoints).collect(Collectors.toList()),
+                model, context).process();
+        new EntityProcessor(
+                replaceMap.process(entities).collect(Collectors.toList()),
+                model, context).process();
     }
 
     @Override
