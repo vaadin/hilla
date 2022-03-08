@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Defines mappings for certain endpoint types to corresponding transfer types.
- * 
+ *
  * This allows using beans / classes in endpoints which cannot be serialized by
  * the standard bean serialization.
  * <p>
@@ -51,14 +51,14 @@ import org.slf4j.LoggerFactory;
  * public List&lt;Person&gt; list(dev.hilla.mappedtypes.Pageable pageable) {
  * }
  * </code>
- * 
+ *
  */
 public class EndpointTransferMapper {
 
     /**
      * A mapper for endpoint values that is capable of converting between the
      * given endpoint and transfer type.
-     * 
+     *
      * @param <ENDPOINTTYPE>
      *            The type used in endpoints
      * @param <TRANSFERTYPE>
@@ -67,22 +67,22 @@ public class EndpointTransferMapper {
     public interface Mapper<ENDPOINTTYPE, TRANSFERTYPE> {
         /**
          * Returns the type used in the endpoint.
-         * 
-         * 
+         *
+         *
          * @return the endpoint type
          */
         Class<? extends ENDPOINTTYPE> getEndpointType();
 
         /**
          * Returns the type used when transfering data to/from the client.
-         * 
+         *
          * @return the transfer type
          */
         Class<? extends TRANSFERTYPE> getTransferType();
 
         /**
          * Converts the given endpoint value to the transfer type.
-         * 
+         *
          * @param endpointType
          *            the value used in the endpoint
          * @return the value used in communication with the client
@@ -91,7 +91,7 @@ public class EndpointTransferMapper {
 
         /**
          * Converts the given transfer value to the endpoint type.
-         * 
+         *
          * @param transferType
          *            the value used in communication with the client
          * @return the value used in the endpoint
@@ -116,7 +116,7 @@ public class EndpointTransferMapper {
     /**
      * Register a mapper that maps all objects of the given endpoint type to the
      * given transfer type.
-     * 
+     *
      * @param mapper
      *            the mapper to register
      */
@@ -135,7 +135,7 @@ public class EndpointTransferMapper {
      * <p>
      * The returned transfer type is the same as the endpoint type if no
      * conversion is needed.
-     * 
+     *
      * @param endpointType
      *            the endpoint type
      * @return the transfer type or null if no mapping exists
@@ -157,7 +157,7 @@ public class EndpointTransferMapper {
      * <p>
      * The returned transfer type is the same as the endpoint type if no
      * conversion is needed.
-     * 
+     *
      * @param endpointType
      *            the endpoint type
      * @return the transfer type or null if no mapping exists
@@ -176,7 +176,7 @@ public class EndpointTransferMapper {
      * <p>
      * NOTE that this is intended for runtime and thus checks also the super
      * types / interfaces of the given type.
-     * 
+     *
      * @param endpointType
      *            the endpoint type
      * @param <T>
@@ -194,7 +194,7 @@ public class EndpointTransferMapper {
 
     /**
      * Converts the given object from its endpoint type to its transfer type.
-     * 
+     *
      * @param endpointValue
      *            the value returned from the endpoint
      * @return the value converted to its transfer type
@@ -224,7 +224,7 @@ public class EndpointTransferMapper {
     /**
      * Converts the given object from its transfer type to the given endpoint
      * type.
-     * 
+     *
      * @param transferValue
      *            the value transferred over the network
      * @param endpointType

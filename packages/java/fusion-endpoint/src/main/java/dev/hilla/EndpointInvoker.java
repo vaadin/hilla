@@ -76,7 +76,7 @@ public class EndpointInvoker {
 
     /**
      * Creates an instance of this bean.
-     * 
+     *
      * @param applicationContext
      *            Spring context to extract beans annotated with
      *            {@link Endpoint} from
@@ -112,7 +112,7 @@ public class EndpointInvoker {
     /**
      * Invoke the given endpoint method with the given parameters if the user
      * has access to do so.
-     * 
+     *
      * @param endpointName
      *            the name of the endpoint
      * @param methodName

@@ -24,7 +24,7 @@ import java.util.Collections;
 
 /**
  * IterableEndpointGenerationTest, created on 21/12/2020 23.00
- * 
+ *
  * @author nikolaigorokhov
  */
 public class IterableEndpointGenerationTest

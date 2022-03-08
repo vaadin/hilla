@@ -225,7 +225,7 @@ public class EndpointControllerConfiguration {
      *            the servlet context
      * @param endpointRegistry
      *            the registry used to store endpoint information
-     * 
+     *
      * @return the endpoint invoker
      */
     @Bean

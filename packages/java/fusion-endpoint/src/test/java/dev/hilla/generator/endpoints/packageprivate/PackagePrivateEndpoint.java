@@ -5,7 +5,7 @@ import dev.hilla.Endpoint;
 
 /**
  * PackagePrivateEndpoint, created on 03/12/2020 18.22
- * 
+ *
  * @author nikolaigorokhov
  */
 @Endpoint

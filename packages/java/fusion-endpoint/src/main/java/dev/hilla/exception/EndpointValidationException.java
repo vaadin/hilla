@@ -116,7 +116,7 @@ public class EndpointValidationException extends EndpointException {
 
     /**
      * Creates a validation exception from a error data list.
-     * 
+     *
      * @param message
      *            General error message.
      * @param validationErrorData

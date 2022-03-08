@@ -72,7 +72,7 @@ public class EndpointRegistry {
 
     /**
      * Creates a new registry using the given name checker.
-     * 
+     *
      * @param endpointNameChecker
      *            the endpoint name checker to verify custom Vaadin endpoint
      *            names

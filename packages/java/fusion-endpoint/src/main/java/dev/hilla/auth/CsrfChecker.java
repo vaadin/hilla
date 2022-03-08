@@ -47,7 +47,7 @@ public class CsrfChecker {
 
     /**
      * Creates a new csrf checker for the given context.
-     * 
+     *
      * @param servletContext
      *            the servlet context
      */
