@@ -55,8 +55,8 @@ import dev.hilla.auth.EndpointAccessChecker;
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
 @ConditionalOnBean(annotation = Endpoint.class)
-@NpmPackage(value = "@hilla/frontend", version = "0.0.19")
-@NpmPackage(value = "@hilla/form", version = "0.0.19")
+@NpmPackage(value = "@hilla/frontend", version = "1.0.1")
+@NpmPackage(value = "@hilla/form", version = "1.0.1")
 public class EndpointController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
