@@ -64,7 +64,7 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>${validation.api.version}</version>
+            <version>${javax.validation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
