@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +13,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -30,10 +31,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +72,8 @@ public class EndpointInvoker {
 
     private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
 
+    private ServletContext servletContext;
+
     /**
      * Creates an instance of this bean.
      *
@@ -89,14 +89,17 @@ public class EndpointInvoker {
      * @param explicitNullableTypeChecker
      *            the method parameter and return value type checker to verify
      *            that null values are explicit
+     * @param servletContext
+     *            the servlet context
      * @param endpointRegistry
      *            the registry used to store endpoint information
      */
     public EndpointInvoker(ApplicationContext applicationContext,
             ObjectMapper vaadinEndpointMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            EndpointRegistry endpointRegistry) {
+            ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
+        this.servletContext = servletContext;
         this.vaadinEndpointMapper = vaadinEndpointMapper != null
                 ? vaadinEndpointMapper
                 : createVaadinConnectObjectMapper(applicationContext);
@@ -120,13 +123,16 @@ public class EndpointInvoker {
      * @param body
      *            optional request body, that should be specified if the method
      *            called has parameters
-     * @param request
-     *            the HTTP request which should not be here in the end
+     * @param principal
+     *            the user principal object
+     * @param rolesChecker
+     *            a function for checking if a user is in a given role
      * @return the return value of the invoked endpoint method, wrapped in a
      *         response entity
      */
     public ResponseEntity<String> invoke(String endpointName, String methodName,
-            ObjectNode body, HttpServletRequest request) {
+            ObjectNode body, Principal principal,
+            Function<String, Boolean> rolesChecker) {
         VaadinEndpointData vaadinEndpointData = endpointRegistry
                 .get(endpointName);
         if (vaadinEndpointData == null) {
@@ -143,15 +149,9 @@ public class EndpointInvoker {
         }
 
         try {
-
-            // Put a VaadinRequest in the instances object so as the request is
-            // available in the end-point method
-            VaadinServletService service = (VaadinServletService) VaadinService
-                    .getCurrent();
-            CurrentInstance.set(VaadinRequest.class,
-                    new VaadinServletRequest(request, service));
             return invokeVaadinEndpointMethod(endpointName, methodName,
-                    methodToInvoke, body, vaadinEndpointData, request);
+                    methodToInvoke, body, vaadinEndpointData, principal,
+                    rolesChecker);
         } catch (JsonProcessingException e) {
             String errorMessage = String.format(
                     "Failed to serialize endpoint '%s' method '%s' response. "
@@ -184,10 +184,11 @@ public class EndpointInvoker {
     private ResponseEntity<String> invokeVaadinEndpointMethod(
             String endpointName, String methodName, Method methodToInvoke,
             ObjectNode body, VaadinEndpointData vaadinEndpointData,
-            HttpServletRequest request) throws JsonProcessingException {
-        EndpointAccessChecker accessChecker = getAccessChecker(
-                request.getServletContext());
-        String checkError = accessChecker.check(methodToInvoke, request);
+            Principal principal, Function<String, Boolean> rolesChecker)
+            throws JsonProcessingException {
+        EndpointAccessChecker accessChecker = getAccessChecker();
+        String checkError = accessChecker.check(methodToInvoke, principal,
+                rolesChecker);
         if (checkError != null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(createResponseErrorObject(String.format(
@@ -453,7 +454,7 @@ public class EndpointInvoker {
         }
     }
 
-    EndpointAccessChecker getAccessChecker(ServletContext servletContext) {
+    EndpointAccessChecker getAccessChecker() {
         VaadinServletContext vaadinServletContext = new VaadinServletContext(
                 servletContext);
         VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext

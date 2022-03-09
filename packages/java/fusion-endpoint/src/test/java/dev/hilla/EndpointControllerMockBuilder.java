@@ -2,6 +2,8 @@ package dev.hilla;
 
 import static org.mockito.Mockito.mock;
 
+import javax.servlet.ServletContext;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
@@ -47,15 +49,16 @@ public class EndpointControllerMockBuilder {
     public EndpointController build() {
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
         CsrfChecker csrfChecker = Mockito.mock(CsrfChecker.class);
+        ServletContext servletContext = Mockito.mock(ServletContext.class);
         Mockito.when(csrfChecker.validateCsrfTokenInRequest(Mockito.any()))
                 .thenReturn(true);
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(applicationContext, objectMapper,
-                        explicitNullableTypeChecker, registry));
+                        explicitNullableTypeChecker, servletContext, registry));
         EndpointController controller = Mockito.spy(new EndpointController(
                 applicationContext, registry, invoker, csrfChecker));
         Mockito.doReturn(mock(EndpointAccessChecker.class)).when(invoker)
-                .getAccessChecker(Mockito.any());
+                .getAccessChecker();
         return controller;
     }
 }

@@ -252,8 +252,8 @@ public class EndpointControllerTest {
 
         EndpointAccessChecker restrictingCheckerMock = mock(
                 EndpointAccessChecker.class);
-        when(restrictingCheckerMock.check(Mockito.any(), Mockito.any()))
-                .thenReturn(accessErrorMessage);
+        when(restrictingCheckerMock.check(Mockito.any(), Mockito.any(),
+                Mockito.any())).thenReturn(accessErrorMessage);
 
         EndpointNameChecker nameCheckerMock = mock(EndpointNameChecker.class);
         when(nameCheckerMock.check(TEST_ENDPOINT_NAME)).thenReturn(null);
@@ -273,10 +273,11 @@ public class EndpointControllerTest {
         assertTrue(String.format("Invalid response body: '%s'", responseBody),
                 responseBody.contains(accessErrorMessage));
 
-        verify(restrictingCheckerMock).check(Mockito.any(), Mockito.any());
+        verify(restrictingCheckerMock).check(Mockito.any(), Mockito.any(),
+                Mockito.any());
         Mockito.verifyNoMoreInteractions(restrictingCheckerMock);
         verify(restrictingCheckerMock, times(1)).check(Mockito.any(),
-                Mockito.any());
+                Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -799,7 +800,8 @@ public class EndpointControllerTest {
                 mock(EndpointNameChecker.class));
 
         EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class), registry);
+                mock(ExplicitNullableTypeChecker.class),
+                mock(ServletContext.class), registry);
         new EndpointController(contextMock, registry, invoker, null);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
@@ -833,7 +835,8 @@ public class EndpointControllerTest {
         EndpointRegistry registry = new EndpointRegistry(
                 mock(EndpointNameChecker.class));
         EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class), registry);
+                mock(ExplicitNullableTypeChecker.class),
+                mock(ServletContext.class), registry);
         new EndpointController(contextMock, registry, invoker, null);
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
@@ -1256,11 +1259,12 @@ public class EndpointControllerTest {
                 endpoint);
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
 
-        EndpointInvoker invoker = Mockito.spy(new EndpointInvoker(
-                mockApplicationContext, vaadinEndpointMapper,
-                explicitNullableTypeChecker, registry));
+        EndpointInvoker invoker = Mockito
+                .spy(new EndpointInvoker(mockApplicationContext,
+                        vaadinEndpointMapper, explicitNullableTypeChecker,
+                        mock(ServletContext.class), registry));
 
-        Mockito.doReturn(accessChecker).when(invoker).getAccessChecker(any());
+        Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
 
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,

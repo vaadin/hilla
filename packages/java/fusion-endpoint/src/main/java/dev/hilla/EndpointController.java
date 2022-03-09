@@ -19,6 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +144,19 @@ public class EndpointController {
                             EndpointAccessChecker.ACCESS_DENIED_MSG));
         }
 
-        return endpointInvoker.invoke(endpointName, methodName, body, request);
+        try {
+            // Put a VaadinRequest in the instances object so as the request is
+            // available in the end-point method
+            VaadinServletService service = (VaadinServletService) VaadinService
+                    .getCurrent();
+            CurrentInstance.set(VaadinRequest.class,
+                    new VaadinServletRequest(request, service));
+            return endpointInvoker.invoke(endpointName, methodName, body,
+                    request.getUserPrincipal(), request::isUserInRole);
+        } finally {
+            CurrentInstance.set(VaadinRequest.class, null);
+        }
+
     }
 
 }

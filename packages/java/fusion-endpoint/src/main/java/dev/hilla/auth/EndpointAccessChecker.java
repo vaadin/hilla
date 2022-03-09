@@ -16,11 +16,14 @@
 
 package dev.hilla.auth;
 
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.util.function.Function;
+
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
 
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
@@ -98,7 +101,25 @@ public class EndpointAccessChecker {
      *         issues occur, {@code null} otherwise
      */
     public String check(Method method, HttpServletRequest request) {
-        if (accessAnnotationChecker.hasAccess(method, request)) {
+        return check(method, request.getUserPrincipal(), request::isUserInRole);
+    }
+
+    /**
+     * Check that the endpoint is accessible for the current user.
+     *
+     * @param method
+     *            the Vaadin endpoint method to check ACL
+     * @param principal
+     *            the user principal object
+     * @param rolesChecker
+     *            a function for checking if a user is in a given role
+     * @return an error String with an issue description, if any validation
+     *         issues occur, {@code null} otherwise
+     */
+    public String check(Method method, Principal principal,
+            Function<String, Boolean> rolesChecker) {
+        if (accessAnnotationChecker.hasAccess(method, principal,
+                rolesChecker)) {
             return null;
         }
 

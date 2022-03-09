@@ -235,6 +235,6 @@ public class EndpointControllerConfiguration {
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         return new EndpointInvoker(applicationContext, vaadinEndpointMapper,
-                explicitNullableTypeChecker, endpointRegistry);
+                explicitNullableTypeChecker, servletContext, endpointRegistry);
     }
 }
