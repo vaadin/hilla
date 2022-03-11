@@ -81,6 +81,7 @@ class GenerationOutputDirectory {
         private static final List<String> filesToKeep = Arrays.asList(
                 ClientAPIGenerator.CONNECT_CLIENT_NAME,
                 FrontendUtils.BOOTSTRAP_FILE_NAME,
+                FrontendUtils.WEB_COMPONENT_BOOTSTRAP_FILE_NAME,
                 FrontendUtils.VITE_DEVMODE_TS, FrontendUtils.INDEX_TS,
                 FrontendUtils.INDEX_JS, FrontendUtils.THEME_IMPORTS_NAME,
                 FrontendUtils.THEME_IMPORTS_D_TS_NAME);
