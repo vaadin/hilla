@@ -1039,8 +1039,6 @@ public class EndpointControllerTest {
         ObjectNode jsonNodes = new ObjectMapper().readValue(response.getBody(),
                 ObjectNode.class);
 
-        assertEquals(EndpointException.class.getName(),
-                jsonNodes.get("type").asText());
         final String message = jsonNodes.get("message").asText();
         assertTrue(message.contains("Unexpected return value"));
         assertTrue(
