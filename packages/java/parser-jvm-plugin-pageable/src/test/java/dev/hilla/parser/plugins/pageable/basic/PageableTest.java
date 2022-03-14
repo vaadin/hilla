@@ -20,6 +20,7 @@ public class PageableTest extends TestBase {
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(classpath.split(";")))
                 .endpointAnnotation(Endpoint.class.getName())
+                .addPlugin(new PageablePlugin())
                 .addPlugin(new BackbonePlugin())
                 .finish();
 

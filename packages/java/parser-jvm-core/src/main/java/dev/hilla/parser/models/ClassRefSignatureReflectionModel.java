@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,8 @@ final class ClassRefSignatureReflectionModel
 
     public ClassRefSignatureReflectionModel(AnnotatedParameterizedType wrapper,
             Model parent) {
-        super((Class<?>) wrapper.getType(), parent);
+        super((Class<?>) ((ParameterizedType) wrapper.getType()).getRawType(),
+                parent);
         this.wrapper = wrapper;
     }
 

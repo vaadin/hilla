@@ -32,6 +32,24 @@ final class ClassInfoReflectionModel
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof ClassInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof ClassInfoReflectionModel) {
+            return Objects.equals(origin,
+                    ((ClassInfoReflectionModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((ClassInfoModel) other).getName());
+    }
+
+    @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
             fields = getMembers(origin.getDeclaredFields(), FieldInfoModel::of);

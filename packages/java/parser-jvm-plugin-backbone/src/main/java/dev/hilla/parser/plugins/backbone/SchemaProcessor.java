@@ -149,7 +149,7 @@ final class SchemaProcessor {
         }
 
         var processedType = context.getReplaceMap()
-                .process(((ClassRefSignatureModel) type).resolve()).findFirst()
+                .replace(((ClassRefSignatureModel) type).resolve()).findFirst()
                 .get();
 
         var fullyQualifiedName = processedType.getName();
