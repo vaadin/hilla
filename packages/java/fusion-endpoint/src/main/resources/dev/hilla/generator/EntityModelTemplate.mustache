@@ -1,0 +1,35 @@
+// @ts-nocheck
+
+{{#each imports}}
+import {{className}}Model from '{{importPath}}Model';
+{{/each}}
+{{#models}}{{#model}}
+import {{{getClassNameFromImports classname ../../imports}}} from './{{{getClassNameFromImports classname ../../imports}}}';
+{{/model}}{{/models}}
+
+import {ObjectModel,StringModel,NumberModel,ArrayModel,BooleanModel,Required,ModelValue,_getPropertyModel} from '@hilla/form';
+
+import {Email,Null,NotNull,NotEmpty,NotBlank,AssertTrue,AssertFalse,Negative,NegativeOrZero,Positive,PositiveOrZero,Size,Past,Future,Digits,Min,Max,Pattern,DecimalMin,DecimalMax} from '@hilla/form';
+
+{{#models}}
+{{#model}}
+/**
+ * This module is generated from {{classname}}.
+ * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.{{!
+ }}{{#vendorExtensions.x-vaadin-file-path}}
+ * @see {@link {{vendorExtensions.x-vaadin-file-path}}{{!}}}{{!
+ }}{{/vendorExtensions.x-vaadin-file-path}}
+ */
+export default class {{{getClassNameFromImports classname ../../imports}}}Model<T extends {{{getClassNameFromImports classname ../../imports}}} = {{{getClassNameFromImports classname ../../imports}}}>
+  {{~#parentSchema}} extends {{{getClassNameFromImports parentSchema ../../imports}}}Model<T> { {{~/parentSchema}}
+  {{~^parentSchema}} extends ObjectModel<T> { {{~/parentSchema}}
+  static createEmptyValue: () => {{{getClassNameFromImports classname ../../imports}}};
+{{#vars}}
+
+  get {{name}}(): {{{getModelFullType this ../../imports}}} {
+    return this[_getPropertyModel]('{{name}}', {{{getModelArguments this ../../imports}}});
+  }
+{{/vars}}
+}
+{{/model}}
+{{/models}}
