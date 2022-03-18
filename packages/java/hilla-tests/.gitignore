@@ -1,0 +1,9 @@
+package.json
+package-lock.json
+webpack.config.js
+webpack.generated.js
+vite.config.js
+vite.generated.js
+tsconfig.json
+types.d.ts
+**/frontend/generated/*
