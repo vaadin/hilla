@@ -12,6 +12,6 @@ export const routes: Route[] = [
   {
     path: 'hello',
     component: 'hello-world-view',
-  }
+  },
 ];
 router.setRoutes(routes);
