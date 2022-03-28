@@ -73,16 +73,6 @@ final class ClassInfoModelUtils {
         return isDateTimeAssignable(cls -> isAssignableFrom(cls, from));
     }
 
-    public static boolean isJDKClass(AnnotatedElement type) {
-        if (type instanceof AnnotatedType) {
-            return isJDKClass(((AnnotatedType) type).getType());
-        } else if (type instanceof Class<?>) {
-            return isJDKClass((Type) type);
-        } else {
-            return false;
-        }
-    }
-
     public static boolean isJDKClass(ClassInfo cls) {
         return isJDKClass(cls.getName());
     }
@@ -94,7 +84,19 @@ final class ClassInfoModelUtils {
                 || className.startsWith("com.oracle");
     }
 
-    public static boolean isJDKClass(Type cls) {
-        return isJDKClass(cls.getTypeName());
+    public static boolean isJDKClass(Class<?> cls) {
+        return isJDKClass(cls.getName());
+    }
+
+    public static boolean isNonJDKClass(String className) {
+        return !isJDKClass(className);
+    }
+
+    public static boolean isNonJDKClass(ClassInfo cls) {
+        return !isJDKClass(cls);
+    }
+
+    public static boolean isNonJDKClass(Class<?> cls) {
+        return !isJDKClass(cls);
     }
 }

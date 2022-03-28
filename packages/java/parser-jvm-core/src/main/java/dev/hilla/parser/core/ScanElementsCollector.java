@@ -13,6 +13,14 @@ import io.github.classgraph.ScanResult;
 public final class ScanElementsCollector {
     private static List<ClassInfoModel> collect(
             Stream<ClassInfoModel> endpoints, Stream<ClassInfoModel> entities) {
+        var endpointsColl = endpoints.collect(Collectors.toList());
+        var entitiesColl = entities != null
+                ? entities.collect(Collectors.toList())
+                : null;
+
+        endpoints = endpointsColl.stream();
+        entities = entitiesColl != null ? entitiesColl.stream() : null;
+
         if (entities == null) {
             entities = endpoints.flatMap(
                     cls -> cls.getInheritanceChain().getDependenciesStream());

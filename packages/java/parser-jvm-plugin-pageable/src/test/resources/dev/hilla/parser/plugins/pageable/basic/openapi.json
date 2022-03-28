@@ -155,6 +155,14 @@
             ]
           }
         }
+      },
+      "org.springframework.data.domain.Sort$Direction": {
+        "type": "string",
+        "enum": ["ASC", "DESC"]
+      },
+      "org.springframework.data.domain.Sort$NullHandling": {
+        "type": "string",
+        "enum": ["NATIVE", "NULLS_FIRST", "NULLS_LAST"]
       }
     }
   }

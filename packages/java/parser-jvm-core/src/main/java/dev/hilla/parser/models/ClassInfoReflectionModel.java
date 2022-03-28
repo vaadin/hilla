@@ -105,7 +105,7 @@ final class ClassInfoReflectionModel
 
             var cls = origin.getSuperclass();
 
-            while (cls != null && cls != Object.class) {
+            while (cls != null && ClassInfoModelUtils.isNonJDKClass(cls)) {
                 superClasses.add(ClassInfoModel.of(cls));
                 cls = cls.getSuperclass();
             }
@@ -196,7 +196,7 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isJDKClass() {
-        return ClassInfoModelUtils.isJDKClass((Type) origin);
+        return ClassInfoModelUtils.isJDKClass(origin);
     }
 
     @Override

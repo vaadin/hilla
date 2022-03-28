@@ -61,7 +61,7 @@ public interface ClassInfoModel
     ClassInfoModelInheritanceChain getInheritanceChain();
 
     default List<ClassInfoModel> getInnerClassDependencies() {
-        return getFieldDependenciesStream().collect(Collectors.toList());
+        return getInnerClassDependenciesStream().collect(Collectors.toList());
     }
 
     default Stream<ClassInfoModel> getInnerClassDependenciesStream() {
@@ -106,8 +106,7 @@ public interface ClassInfoModel
         Objects.requireNonNull(selector);
         return selector.apply(this).stream().filter(Objects::nonNull)
                 .filter(Objects.requireNonNull(filter))
-                .flatMap(Objects.requireNonNull(dependencyExtractor))
-                .distinct();
+                .flatMap(Objects.requireNonNull(dependencyExtractor)).distinct();
     }
 
     default <Member, ModelMember extends Model> List<ModelMember> getMembers(
@@ -234,4 +233,8 @@ public interface ClassInfoModel
     boolean isStatic();
 
     boolean isSynthetic();
+
+    default boolean isNative() {
+        return false;
+    }
 }

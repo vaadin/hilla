@@ -100,7 +100,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     public List<ClassInfoModel> getSuperClasses() {
         if (superClasses == null) {
             superClasses = getMembers(origin.getSuperclasses(),
-                    (member) -> !ClassInfoModelUtils.isJDKClass(member),
+                    ClassInfoModelUtils::isNonJDKClass,
                     ClassInfoModel::of);
         }
 
