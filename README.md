@@ -6,7 +6,7 @@ The modern web framework
 for Java
 
 ![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)
-[![Releases](https://img.shields.io/badge/maven-v1.0.2-1d77e4)](https://github.com/vaadin/hilla/releases)
+[![Releases](https://img.shields.io/badge/maven-v1.0.3-1d77e4)](https://github.com/vaadin/hilla/releases)
   
 [hilla.dev](https://hilla.dev) · [Docs](https://hilla.dev/docs) · [Chat](https://discord.gg/MYFq5RTbBn)
 
