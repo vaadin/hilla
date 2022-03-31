@@ -35,7 +35,12 @@ final class SchemaProcessor {
     public SchemaProcessor(@Nonnull SignatureModel type,
             @Nonnull Context context) {
         this.context = Objects.requireNonNull(context);
-        this.type = Objects.requireNonNull(type);
+
+        this.type = Objects
+                .requireNonNull(type) instanceof ClassRefSignatureModel
+                        ? context.getReplaceMap()
+                                .replace((ClassRefSignatureModel) type)
+                        : type;
     }
 
     private static <T extends Schema<?>> T nullify(T schema,
@@ -149,8 +154,7 @@ final class SchemaProcessor {
         }
 
         var processedType = context.getReplaceMap()
-                .replace(((ClassRefSignatureModel) type).resolve()).findFirst()
-                .get();
+                .replace(((ClassRefSignatureModel) type).resolve());
 
         var fullyQualifiedName = processedType.getName();
 

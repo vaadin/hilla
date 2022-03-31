@@ -94,6 +94,14 @@
           "bar": {
             "type": "integer",
             "format": "int32"
+          },
+          "baz": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.Replace$Baz"
+              }
+            ]
           }
         }
       },
@@ -109,6 +117,9 @@
             ]
           }
         }
+      },
+      "dev.hilla.parser.plugins.backbone.replacemap.Replace$Baz": {
+        "type": "object"
       }
     }
   }

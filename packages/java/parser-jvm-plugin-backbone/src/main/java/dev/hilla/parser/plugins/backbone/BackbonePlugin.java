@@ -29,11 +29,8 @@ public final class BackbonePlugin implements Plugin.Processor {
         var replaceMap = storage.getReplaceMap();
         var context = new Context(storage.getAssociationMap(), replaceMap);
 
-        var collector = replaceMap.replace(endpoints, entities);
-
-        new EndpointProcessor(collector.getEndpoints(), model, context)
-                .process();
-        new EntityProcessor(collector.getEntities(), model, context).process();
+        new EndpointProcessor(endpoints, model, context).process();
+        new EntityProcessor(entities, model, context).process();
     }
 
     @Override
