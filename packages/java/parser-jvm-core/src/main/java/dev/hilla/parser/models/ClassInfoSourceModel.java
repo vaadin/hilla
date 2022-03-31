@@ -40,7 +40,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
         }
 
         if (other instanceof ClassInfoSourceModel) {
-            return Objects.equals(origin, ((ClassInfoSourceModel) other).origin);
+            return Objects.equals(origin,
+                    ((ClassInfoSourceModel) other).origin);
         }
 
         return Objects.equals(getName(), ((ClassInfoModel) other).getName());
@@ -100,8 +101,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     public List<ClassInfoModel> getSuperClasses() {
         if (superClasses == null) {
             superClasses = getMembers(origin.getSuperclasses(),
-                    ClassInfoModelUtils::isNonJDKClass,
-                    ClassInfoModel::of);
+                    ClassInfoModelUtils::isNonJDKClass, ClassInfoModel::of);
         }
 
         return superClasses;

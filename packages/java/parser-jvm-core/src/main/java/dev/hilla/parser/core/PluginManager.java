@@ -1,14 +1,10 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.SortedSet;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import dev.hilla.parser.models.ClassInfoModel;
 
 public final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
@@ -16,9 +12,11 @@ public final class PluginManager {
     private static final Logger logger = LoggerFactory
             .getLogger(PluginManager.class);
     private final SortedSet<Plugin> plugins;
+    private final ChangeListener<Integer> listener;
 
     PluginManager(ParserConfig config, SharedStorage storage) {
         plugins = config.getPlugins();
+        listener = new ChangeListener<>(() -> storage.getReplaceMap().hashCode());
 
         for (var plugin : plugins) {
             plugin.setStorage(storage);
@@ -70,13 +68,18 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
-    public void process(Collection<ClassInfoModel> endpoints,
-            Collection<ClassInfoModel> entities) {
+    public void process(ScanElementsCollector collector) {
+        listener.onChange(collector::collect);
+
         for (var plugin : plugins) {
             if (plugin instanceof Plugin.Processor) {
                 logger.debug("Executing processor plugin "
                         + plugin.getClass().getName());
-                ((Plugin.Processor) plugin).process(endpoints, entities);
+
+                ((Plugin.Processor) plugin).process(collector.getEndpoints(),
+                        collector.getEntities());
+
+                listener.poll();
             }
         }
     }

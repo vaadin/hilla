@@ -3,30 +3,46 @@ package dev.hilla.parser.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
 
 import io.github.classgraph.ScanResult;
 
 public final class ScanElementsCollector {
-    private static List<ClassInfoModel> collect(
-            Stream<ClassInfoModel> endpoints, Stream<ClassInfoModel> entities) {
-        var endpointsColl = endpoints.collect(Collectors.toList());
-        var entitiesColl = entities != null
-                ? entities.collect(Collectors.toList())
-                : null;
+    private List<ClassInfoModel> endpoints;
+    private List<ClassInfoModel> entities;
+    private final ReplaceMap replaceMap;
 
-        endpoints = endpointsColl.stream();
-        entities = entitiesColl != null ? entitiesColl.stream() : null;
+    public ScanElementsCollector(@Nonnull ScanResult result,
+            @Nonnull String endpointAnnotationName, ReplaceMap replaceMap) {
+        this(Objects.requireNonNull(result)
+                .getClassesWithAnnotation(
+                        Objects.requireNonNull(endpointAnnotationName))
+                .stream().map(ClassInfoModel::of).collect(Collectors.toList()),
+                replaceMap);
+    }
 
-        if (entities == null) {
-            entities = endpoints.flatMap(
-                    cls -> cls.getInheritanceChain().getDependenciesStream());
-        }
+    public ScanElementsCollector(@Nonnull Collection<ClassInfoModel> endpoints,
+            ReplaceMap replaceMap) {
+        this.endpoints = Objects.requireNonNull(endpoints) instanceof ArrayList
+                ? (ArrayList<ClassInfoModel>) endpoints
+                : new ArrayList<>(endpoints);
+        this.replaceMap = replaceMap;
+    }
 
-        var list = entities.collect(Collectors.toList());
+    public ScanElementsCollector collect() {
+        endpoints = endpoints.stream().map(replaceMap::replace)
+                .collect(Collectors.toList());
+
+        entities = endpoints.stream()
+                .flatMap(cls -> cls.getInheritanceChain()
+                        .getDependenciesStream())
+                .map(replaceMap::replace).distinct()
+                .collect(Collectors.toList());
 
         // @formatter:off
         //
@@ -70,36 +86,14 @@ public final class ScanElementsCollector {
         // not already exist in our collection.
         //
         // @formatter:on
-        for (var i = 0; i < list.size(); i++) {
-            var entity = list.get(i);
+        for (var i = 0; i < entities.size(); i++) {
+            var entity = entities.get(i);
 
-            entity.getDependenciesStream().filter(e -> !list.contains(e))
-                    .forEach(list::add);
+            entity.getDependenciesStream().map(replaceMap::replace)
+                    .filter(e -> !entities.contains(e)).forEach(entities::add);
         }
 
-        return list;
-    }
-
-    private final List<ClassInfoModel> endpoints;
-    private final List<ClassInfoModel> entities;
-
-    public ScanElementsCollector(ScanResult result,
-            String endpointAnnotationName) {
-        this(result.getClassesWithAnnotation(endpointAnnotationName).stream()
-                .map(ClassInfoModel::of).collect(Collectors.toList()));
-    }
-
-    public ScanElementsCollector(Collection<ClassInfoModel> endpoints) {
-        this(endpoints, null);
-    }
-
-    public ScanElementsCollector(Collection<ClassInfoModel> endpoints,
-            Collection<ClassInfoModel> entities) {
-        this.endpoints = endpoints instanceof ArrayList
-                ? (ArrayList<ClassInfoModel>) endpoints
-                : new ArrayList<>(endpoints);
-        this.entities = collect(endpoints.stream(),
-                entities != null ? entities.stream() : null);
+        return this;
     }
 
     public List<ClassInfoModel> getEndpoints() {

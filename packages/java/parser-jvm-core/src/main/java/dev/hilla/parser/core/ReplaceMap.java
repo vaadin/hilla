@@ -1,38 +1,35 @@
 package dev.hilla.parser.core;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
 
 public class ReplaceMap extends HashMap<String, ClassInfoModel> {
     ReplaceMap() {
         super();
     }
 
+    @Override
+    public ClassInfoModel put(String key, ClassInfoModel value) {
+        return super.put(key, value);
+    }
+
     public ClassInfoModel put(Class<?> key, ClassInfoModel value) {
-        return super.put(key.getName(), value);
+        return put(key.getName(), value);
     }
 
-    public ScanElementsCollector replace(Collection<ClassInfoModel> endpoints,
-            Collection<ClassInfoModel> entities) {
-        return new ScanElementsCollector(
-                replace(endpoints.stream()).collect(Collectors.toList()),
-                replace(entities.stream()).collect(Collectors.toList()));
+    public ClassInfoModel replace(ClassInfoModel model) {
+        return getOrDefault(model.getName(), model);
     }
 
-    public Stream<ClassInfoModel> replace(Stream<ClassInfoModel> classes) {
-        return classes.map(cls -> getOrDefault(cls.getName(), cls));
+    public ClassRefSignatureModel replace(ClassRefSignatureModel model) {
+        var reference = model.resolve();
+        model.setReference(replace(reference));
+        return model;
     }
 
-    public Stream<ClassInfoModel> replace(Collection<ClassInfoModel> classes) {
-        return replace(classes.stream());
-    }
-
-    public Stream<ClassInfoModel> replace(ClassInfoModel... classes) {
-        return replace(Arrays.stream(classes));
+    public boolean containsKey(ClassInfoModel model) {
+        return containsKey(model.getName());
     }
 }

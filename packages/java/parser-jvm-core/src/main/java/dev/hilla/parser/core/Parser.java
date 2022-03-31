@@ -42,6 +42,7 @@ public final class Parser {
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config, storage);
+        var replaceMap = storage.getReplaceMap();
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "
@@ -57,7 +58,7 @@ public final class Parser {
                         + endpointAnnotationName);
 
         var collector = new ScanElementsCollector(result,
-                endpointAnnotationName);
+                endpointAnnotationName, replaceMap).collect();
 
         var endpoints = new LinkedHashSet<>(collector.getEndpoints());
 
@@ -73,10 +74,10 @@ public final class Parser {
 
         logger.debug(
                 "Checking if the compiler is run with -parameters option enabled");
-        checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
+        checkIfJavaCompilerParametersFlagIsEnabled(collector.getEndpoints());
 
         logger.debug("Executing parser plugins");
-        pluginManager.process(endpoints, entities);
+        pluginManager.process(collector);
 
         logger.debug("Parsing process successfully finished");
         return storage.getOpenAPI();

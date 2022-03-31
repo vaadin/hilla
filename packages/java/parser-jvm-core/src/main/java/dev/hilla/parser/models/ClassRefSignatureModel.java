@@ -131,4 +131,6 @@ public interface ClassRefSignatureModel extends SignatureModel {
     }
 
     ClassInfoModel resolve();
+
+    void setReference(ClassInfoModel reference);
 }

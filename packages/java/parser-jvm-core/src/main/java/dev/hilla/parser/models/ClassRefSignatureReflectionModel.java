@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 final class ClassRefSignatureReflectionModel
         extends AbstractAnnotatedReflectionModel<Class<?>>
         implements ClassRefSignatureModel, ReflectionSignatureModel {
-    private ClassInfoModel resolved;
+    private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
     private AnnotatedParameterizedType wrapper;
 
@@ -43,10 +43,15 @@ final class ClassRefSignatureReflectionModel
 
     @Override
     public ClassInfoModel resolve() {
-        if (resolved == null) {
-            resolved = ClassInfoModel.of(origin);
+        if (reference == null) {
+            reference = ClassInfoModel.of(origin);
         }
 
-        return resolved;
+        return reference;
+    }
+
+    @Override
+    public void setReference(ClassInfoModel reference) {
+        this.reference = reference;
     }
 }
