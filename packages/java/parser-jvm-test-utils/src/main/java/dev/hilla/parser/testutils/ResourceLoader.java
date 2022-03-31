@@ -15,11 +15,22 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ResourceLoader {
-    public static String getClasspath(ResourceLoader... loaders) throws URISyntaxException {
+    private final Supplier<ProtectionDomain> getProtectionDomain;
+    private final Function<String, URL> getResource;
+
+    public ResourceLoader(Function<String, URL> getResource,
+            Supplier<ProtectionDomain> getProtectionDomain) {
+        this.getProtectionDomain = getProtectionDomain;
+        this.getResource = getResource;
+    }
+
+    public static String getClasspath(ResourceLoader... loaders)
+            throws URISyntaxException {
         return getClasspath(Arrays.asList(loaders));
     }
 
-    public static String getClasspath(Collection<ResourceLoader> loaders) throws URISyntaxException {
+    public static String getClasspath(Collection<ResourceLoader> loaders)
+            throws URISyntaxException {
         var builder = new StringBuilder(System.getProperty("java.class.path"));
 
         for (var loader : loaders) {
@@ -31,30 +42,21 @@ public final class ResourceLoader {
         return builder.toString();
     }
 
-    private final Supplier<ProtectionDomain> getProtectionDomain;
-    private final Function<String, URL> getResource;
-
-    public ResourceLoader(Function<String, URL> getResource,
-            Supplier<ProtectionDomain> getProtectionDomain) {
-        this.getProtectionDomain = getProtectionDomain;
-        this.getResource = getResource;
-    }
-
     public File find(String resourceName) throws URISyntaxException {
         return Paths.get(
                 Objects.requireNonNull(getResource.apply(resourceName)).toURI())
                 .toFile();
     }
 
-    public Path findTargetPath() throws URISyntaxException {
-        return Paths.get(Objects
-            .requireNonNull(
-                getProtectionDomain.get().getCodeSource().getLocation())
-            .toURI());
-    }
-
     public Path findTargetDirPath() throws URISyntaxException {
         return findTargetPath().getParent();
+    }
+
+    public Path findTargetPath() throws URISyntaxException {
+        return Paths.get(Objects
+                .requireNonNull(
+                        getProtectionDomain.get().getCodeSource().getLocation())
+                .toURI());
     }
 
     public String readToString(String resourceName)
