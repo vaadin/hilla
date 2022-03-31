@@ -5,12 +5,16 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 class ChangeListener<T> {
-    private T former;
     private final Supplier<T> current;
     private Runnable[] actions;
+    private T former;
 
     public ChangeListener(Supplier<T> current) {
         this.current = current;
+    }
+
+    public void onChange(Runnable... actions) {
+        this.actions = actions;
     }
 
     public void poll() {
@@ -20,9 +24,5 @@ class ChangeListener<T> {
             former = current;
             Arrays.stream(actions).forEach(Runnable::run);
         }
-    }
-
-    public void onChange(Runnable... actions) {
-        this.actions = actions;
     }
 }

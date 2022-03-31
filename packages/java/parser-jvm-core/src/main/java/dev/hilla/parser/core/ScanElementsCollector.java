@@ -13,9 +13,9 @@ import dev.hilla.parser.models.ClassInfoModel;
 import io.github.classgraph.ScanResult;
 
 public final class ScanElementsCollector {
+    private final ReplaceMap replaceMap;
     private List<ClassInfoModel> endpoints;
     private List<ClassInfoModel> entities;
-    private final ReplaceMap replaceMap;
 
     public ScanElementsCollector(@Nonnull ScanResult result,
             @Nonnull String endpointAnnotationName, ReplaceMap replaceMap) {

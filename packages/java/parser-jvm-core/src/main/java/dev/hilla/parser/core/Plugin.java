@@ -1,7 +1,6 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 

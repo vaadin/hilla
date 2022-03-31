@@ -10,17 +10,17 @@ public class ReplaceMap extends HashMap<String, ClassInfoModel> {
         super();
     }
 
-    @Override
-    public ClassInfoModel put(String key, ClassInfoModel value) {
-        return super.put(key, value);
+    public boolean containsKey(ClassInfoModel model) {
+        return containsKey(model.getName());
     }
 
     public ClassInfoModel put(Class<?> key, ClassInfoModel value) {
         return put(key.getName(), value);
     }
 
-    public ClassInfoModel replace(ClassInfoModel model) {
-        return getOrDefault(model.getName(), model);
+    @Override
+    public ClassInfoModel put(String key, ClassInfoModel value) {
+        return super.put(key, value);
     }
 
     public ClassRefSignatureModel replace(ClassRefSignatureModel model) {
@@ -29,7 +29,7 @@ public class ReplaceMap extends HashMap<String, ClassInfoModel> {
         return model;
     }
 
-    public boolean containsKey(ClassInfoModel model) {
-        return containsKey(model.getName());
+    public ClassInfoModel replace(ClassInfoModel model) {
+        return getOrDefault(model.getName(), model);
     }
 }

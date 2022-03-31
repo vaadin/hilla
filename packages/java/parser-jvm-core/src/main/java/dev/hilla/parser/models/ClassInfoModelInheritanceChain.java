@@ -38,8 +38,8 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getDependenciesStream() {
-        return getClassesStream()
-                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
+        return getClassesStream().flatMap(ClassInfoModel::getDependenciesStream)
+                .distinct();
     }
 
     public Collection<ClassInfoModel> getFieldDependencies() {
@@ -75,8 +75,8 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getInnerClassesStream() {
-        return getClassesStream()
-                .flatMap(ClassInfoModel::getInnerClassesStream).distinct();
+        return getClassesStream().flatMap(ClassInfoModel::getInnerClassesStream)
+                .distinct();
     }
 
     public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(

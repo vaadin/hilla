@@ -11,12 +11,13 @@ public final class PluginManager {
             .getClassLoader();
     private static final Logger logger = LoggerFactory
             .getLogger(PluginManager.class);
-    private final SortedSet<Plugin> plugins;
     private final ChangeListener<Integer> listener;
+    private final SortedSet<Plugin> plugins;
 
     PluginManager(ParserConfig config, SharedStorage storage) {
         plugins = config.getPlugins();
-        listener = new ChangeListener<>(() -> storage.getReplaceMap().hashCode());
+        listener = new ChangeListener<>(
+                () -> storage.getReplaceMap().hashCode());
 
         for (var plugin : plugins) {
             plugin.setStorage(storage);
