@@ -18,6 +18,8 @@ public class PageableTest extends TestBase {
             throws IOException, URISyntaxException {
         var classpath = getExtendedClassPath(Pageable.class);
 
+        System.out.println(classpath);
+
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(classpath.split(";")))
                 .endpointAnnotation(Endpoint.class.getName())
