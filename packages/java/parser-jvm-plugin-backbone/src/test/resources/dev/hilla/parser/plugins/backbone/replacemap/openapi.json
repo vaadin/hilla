@@ -87,10 +87,6 @@
       "dev.hilla.parser.plugins.backbone.replacemap.Replace$To": {
         "type": "object",
         "properties": {
-          "foo": {
-            "type": "string",
-            "nullable": true
-          },
           "bar": {
             "type": "integer",
             "format": "int32"
@@ -102,6 +98,10 @@
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.replacemap.Replace$Baz"
               }
             ]
+          },
+          "foo": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
