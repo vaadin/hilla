@@ -12,7 +12,8 @@ import dev.hilla.parser.plugins.backbone.utils.TestBase;
 
 public class ReplaceMapTest extends TestBase {
     @Test
-    public void should_useReplaceMapToOverrideClassData() throws IOException, URISyntaxException {
+    public void should_useReplaceMapToOverrideClassData()
+            throws IOException, URISyntaxException {
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(targetDir.toString()))
                 .endpointAnnotation(Endpoint.class.getName())
