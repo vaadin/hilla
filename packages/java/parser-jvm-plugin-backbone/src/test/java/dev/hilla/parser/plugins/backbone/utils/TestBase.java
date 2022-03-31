@@ -29,7 +29,7 @@ public abstract class TestBase {
 
     public static ResourceLoader createResourceLoader(Class<?> target) {
         return new ResourceLoader(target::getResource,
-            target::getProtectionDomain);
+                target::getProtectionDomain);
     }
 
     protected void executeParserWithConfig(ParserConfig config)
