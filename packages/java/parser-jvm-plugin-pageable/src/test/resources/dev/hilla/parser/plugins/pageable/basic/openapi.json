@@ -111,6 +111,27 @@
   },
   "components": {
     "schemas": {
+      "dev.hilla.runtime.transfertypes.Pageable": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+              }
+            ]
+          }
+        }
+      },
       "dev.hilla.runtime.transfertypes.Sort": {
         "type": "object",
         "properties": {

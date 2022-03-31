@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Pageable;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -15,13 +16,12 @@ public class PageableTest extends TestBase {
     @Test
     public void should_ReplaceSpringClassesWithSubstitutes()
             throws IOException, URISyntaxException {
-        var classpath = System.getProperty("java.class.path");
+        var classpath = getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(classpath.split(";")))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new PageablePlugin())
-                .addPlugin(new BackbonePlugin())
+                .addPlugin(new PageablePlugin()).addPlugin(new BackbonePlugin())
                 .finish();
 
         executeParserWithConfig(config);

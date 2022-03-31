@@ -5,25 +5,30 @@ import static dev.hilla.parser.testutils.OpenAPIAssertions.assertEquals;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
+
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class TestBase {
+    public static ResourceLoader createResourceLoader(Class<?> target) {
+        return new ResourceLoader(target::getResource,
+                target::getProtectionDomain);
+    }
+
     protected final ObjectMapper mapper = Json.mapper();
-    protected final ResourceLoader resourceLoader;
+    protected final ResourceLoader resourceLoader = createResourceLoader(
+            getClass());
     protected Path targetDir;
 
     {
-        var target = getClass();
-        resourceLoader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-
         try {
             targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
@@ -41,5 +46,15 @@ public abstract class TestBase {
         var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
+    }
+
+    protected String getExtendedClassPath(Class<?>... classes) {
+        try {
+            return ResourceLoader.getClasspath(
+                    Arrays.stream(classes).map(TestBase::createResourceLoader)
+                            .collect(Collectors.toList()));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
