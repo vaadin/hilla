@@ -35,7 +35,7 @@ public final class ResourceLoader {
 
         for (var loader : loaders) {
             var path = loader.findTargetPath().toString();
-            builder.append(';');
+            builder.append(File.pathSeparatorChar);
             builder.append(path);
         }
 
