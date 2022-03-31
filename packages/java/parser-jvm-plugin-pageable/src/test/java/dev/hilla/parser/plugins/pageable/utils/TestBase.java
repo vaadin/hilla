@@ -18,11 +18,6 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class TestBase {
-    public static ResourceLoader createResourceLoader(Class<?> target) {
-        return new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-    }
-
     protected final ObjectMapper mapper = Json.mapper();
     protected final ResourceLoader resourceLoader = createResourceLoader(
             getClass());
@@ -34,6 +29,11 @@ public abstract class TestBase {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ResourceLoader createResourceLoader(Class<?> target) {
+        return new ResourceLoader(target::getResource,
+                target::getProtectionDomain);
     }
 
     protected void executeParserWithConfig(ParserConfig config)

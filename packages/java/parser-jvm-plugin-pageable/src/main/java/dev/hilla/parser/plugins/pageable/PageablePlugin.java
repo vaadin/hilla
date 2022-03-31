@@ -25,6 +25,11 @@ public class PageablePlugin implements Plugin.Processor {
     }
 
     @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
         var map = storage.getReplaceMap();
@@ -37,11 +42,6 @@ public class PageablePlugin implements Plugin.Processor {
                 ClassInfoModel.of(List.class));
         map.put("org.springframework.data.domain.Sort$Order",
                 ClassInfoModel.of(Order.class));
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     @Override

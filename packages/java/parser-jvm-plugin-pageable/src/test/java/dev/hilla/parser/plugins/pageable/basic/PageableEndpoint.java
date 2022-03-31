@@ -1,12 +1,15 @@
 package dev.hilla.parser.plugins.pageable.basic;
 
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 @Endpoint
 public class PageableEndpoint {
+    public Sort.Order getOrder() {
+        return null;
+    }
+
     public Page<String> getPage() {
         return null;
     }
@@ -16,10 +19,6 @@ public class PageableEndpoint {
     }
 
     public Sort getSort() {
-        return null;
-    }
-
-    public Sort.Order getOrder() {
         return null;
     }
 }
