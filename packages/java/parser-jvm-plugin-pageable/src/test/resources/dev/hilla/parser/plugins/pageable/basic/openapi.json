@@ -16,6 +16,29 @@
     }
   ],
   "paths": {
+    "/PageableEndpoint/getOrder": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getOrder_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PageableEndpoint/getPage": {
       "post": {
         "tags": ["PageableEndpoint"],
@@ -84,33 +107,38 @@
           }
         }
       }
-    },
-    "/PageableEndpoint/getOrder": {
-      "post": {
-        "tags": ["PageableEndpoint"],
-        "operationId": "PageableEndpoint_getOrder_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "dev.hilla.runtime.transfertypes.Order": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$Direction"
+              }
+            ]
+          },
+          "property": {
+            "type": "string",
+            "nullable": true
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          },
+          "nullHandling": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
+              }
+            ]
+          }
+        }
+      },
       "dev.hilla.runtime.transfertypes.Pageable": {
         "type": "object",
         "properties": {
@@ -146,34 +174,6 @@
                 }
               ]
             }
-          }
-        }
-      },
-      "dev.hilla.runtime.transfertypes.Order": {
-        "type": "object",
-        "properties": {
-          "direction": {
-            "nullable": true,
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$Direction"
-              }
-            ]
-          },
-          "property": {
-            "type": "string",
-            "nullable": true
-          },
-          "ignoreCase": {
-            "type": "boolean"
-          },
-          "nullHandling": {
-            "nullable": true,
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
-              }
-            ]
           }
         }
       },
