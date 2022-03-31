@@ -8,11 +8,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ResourceLoader {
+    public static String getClasspath(ResourceLoader... loaders) throws URISyntaxException {
+        return getClasspath(Arrays.asList(loaders));
+    }
+
+    public static String getClasspath(Collection<ResourceLoader> loaders) throws URISyntaxException {
+        var builder = new StringBuilder(System.getProperty("java.class.path"));
+
+        for (var loader : loaders) {
+            var path = loader.findTargetPath().toString();
+            builder.append(';');
+            builder.append(path);
+        }
+
+        return builder.toString();
+    }
+
     private final Supplier<ProtectionDomain> getProtectionDomain;
     private final Function<String, URL> getResource;
 
@@ -28,11 +46,15 @@ public final class ResourceLoader {
                 .toFile();
     }
 
-    public Path findTargetDirPath() throws URISyntaxException {
+    public Path findTargetPath() throws URISyntaxException {
         return Paths.get(Objects
-                .requireNonNull(
-                        getProtectionDomain.get().getCodeSource().getLocation())
-                .toURI()).getParent();
+            .requireNonNull(
+                getProtectionDomain.get().getCodeSource().getLocation())
+            .toURI());
+    }
+
+    public Path findTargetDirPath() throws URISyntaxException {
+        return findTargetPath().getParent();
     }
 
     public String readToString(String resourceName)
