@@ -1,5 +1,6 @@
 package dev.hilla.parser.plugins.pageable.basic;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
@@ -18,10 +19,8 @@ public class PageableTest extends TestBase {
             throws IOException, URISyntaxException {
         var classpath = getExtendedClassPath(Pageable.class);
 
-        System.out.println(classpath);
-
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(";")))
+                .classPath(Set.of(classpath.split(File.pathSeparator)))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new PageablePlugin()).addPlugin(new BackbonePlugin())
                 .finish();
