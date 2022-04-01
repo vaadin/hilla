@@ -49,7 +49,8 @@
   },
   "dependencies": {
     "@vaadin/common-frontend": "^0.0.12",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "socket.io-client": "^4.4.1"
   },
   "peerDependencies": {
     "lit": "^2.0.0"
