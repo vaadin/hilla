@@ -548,9 +548,6 @@ describe('ConnectClient', () => {
       client = new ConnectClient();
     });
 
-    afterEach(() => {
-    });
-
     it('should create a fluxConnection', async () => {
       (client as any).fluxConnection = undefined;
       client.subscribe('FooEndpoint', 'fooMethod');
@@ -559,7 +556,7 @@ describe('ConnectClient', () => {
 
     it('should reuse the fluxConnection', async () => {
       client.subscribe('FooEndpoint', 'fooMethod');
-      const fluxConnection = (client as any).fluxConnection;
+      const { fluxConnection } = client as any;
       client.subscribe('FooEndpoint', 'barMethod');
       expect((client as any).fluxConnection).to.equal(fluxConnection);
     });
