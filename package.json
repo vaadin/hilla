@@ -30,6 +30,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@web/dev-server-esbuild": "^0.2.14",
+    "@web/dev-server-import-maps": "^0.0.6",
     "@web/test-runner-chrome": "^0.10.2",
     "concurrently": "^6.2.1",
     "esbuild": "^0.13.12",
