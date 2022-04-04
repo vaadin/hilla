@@ -1,7 +1,7 @@
-import { io, Socket } from 'socket.io-client';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
+import { io, Socket } from 'socket.io-client';
 import type { Subscription } from './Connect';
+import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
 
 export class FluxConnection {
@@ -25,19 +25,17 @@ export class FluxConnection {
   }
 
   private handleMessage(message: ClientMessage) {
-    const id = message.id;
+    const { id } = message;
     const endpointInfo = this.endpointInfos.get(id);
 
     if (message['@type'] === 'update') {
-      console.debug(`Got value ${JSON.stringify(message.item)} for ${endpointInfo}`);
       const callback = this.onNextCallbacks.get(id);
-      if (!callback) {
-        console.log('No callback for stream id ' + id);
-        return;
+      if (callback) {
+        callback(message.item);
+      } else {
+        throw new Error(`No callback for stream id ${id}`);
       }
-      callback(message.item);
     } else if (message['@type'] === 'complete') {
-      console.debug(`Server completed ${endpointInfo}`);
       const callback = this.onCompleteCallbacks.get(id);
       if (callback) {
         callback();
@@ -48,7 +46,6 @@ export class FluxConnection {
       this.onErrorCallbacks.delete(id);
       this.endpointInfos.delete(id);
     } else if (message['@type'] === 'error') {
-      console.error(`Error in ${endpointInfo}: ${message.message}`);
       const callback = this.onErrorCallbacks.get(id);
       if (callback) {
         callback();
@@ -56,8 +53,11 @@ export class FluxConnection {
       this.onNextCallbacks.delete(id);
       this.onCompleteCallbacks.delete(id);
       this.onErrorCallbacks.delete(id);
+      if (!callback) {
+        throw new Error(`Error in ${endpointInfo}: ${message.message}`);
+      }
     } else {
-      console.error('Unknown message from server: ' + message);
+      throw new Error(`Unknown message from server: ${message}`);
     }
   }
 
@@ -66,11 +66,11 @@ export class FluxConnection {
   }
 
   subscribe(endpointName: string, methodName: string, params?: Array<any>): Subscription<any> {
-    const id: string = '' + this.nextId++;
+    const id: string = this.nextId.toString();
+    this.nextId += 1;
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', id, endpointName, methodName, params };
     const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
-    console.debug(`Subscribing to ${endpointInfo}`);
     this.send(msg);
     this.endpointInfos.set(id, endpointInfo);
     const hillaSubscription: Subscription<any> = {
@@ -87,8 +87,6 @@ export class FluxConnection {
         return hillaSubscription;
       },
       cancel: () => {
-        console.debug(`Ending subscription to ${endpointInfo}`);
-
         const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
         this.send(closeMessage);
       },
