@@ -137,7 +137,7 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
     private static RuntimeException getGeneratorException(String message) {
         return new RuntimeException(message
                 + " For more information, please checkout the Vaadin TypeScript Generator "
-                + "documentation page at https://vaadin.com/docs/flow/typescript/typescript-endpoints-generator.html.");
+                + "documentation page at https://hilla.dev/docs/advanced/endpoints-generator.");
     }
 
     private static boolean isDebugConnectMavenPlugin() {
