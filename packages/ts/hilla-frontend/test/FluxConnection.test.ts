@@ -2,8 +2,6 @@ import { expect } from '@open-wc/testing';
 import { FluxConnection } from '../src/FluxConnection';
 import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
 
-const base = window.location.origin;
-
 describe('FluxConnection', () => {
   let fluxConnection: FluxConnection;
   let fluxConnectionAny: any;
@@ -12,8 +10,6 @@ describe('FluxConnection', () => {
     fluxConnection = new FluxConnection();
     fluxConnectionAny = fluxConnection;
   });
-
-  afterEach(() => {});
 
   it('should be exported', () => {
     expect(FluxConnection).to.be.ok;
@@ -26,7 +22,7 @@ describe('FluxConnection', () => {
 
   it('should reuse the websocket connection for all endpoints', () => {
     fluxConnection.subscribe('MyEndpoint', 'myMethod');
-    const socket = fluxConnectionAny.socket;
+    const { socket } = fluxConnectionAny;
     fluxConnection.subscribe('OtherEndpoint', 'otherMethod');
     expect(fluxConnectionAny.socket).to.equal(socket);
   });
