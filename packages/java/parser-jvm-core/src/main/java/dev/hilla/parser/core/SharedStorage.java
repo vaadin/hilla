@@ -7,9 +7,9 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public final class SharedStorage {
     private final AssociationMap associationMap = new AssociationMap();
+    private final MappingRuleSet mappingRuleSet = new MappingRuleSet();
     private final ParserConfig parserConfig;
     private final Map<String, Object> pluginStorage = new HashMap<>();
-    private final ReplaceMap replaceMap = new ReplaceMap();
 
     SharedStorage(ParserConfig parserConfig) {
         this.parserConfig = parserConfig;
@@ -17,6 +17,10 @@ public final class SharedStorage {
 
     public AssociationMap getAssociationMap() {
         return associationMap;
+    }
+
+    public MappingRuleSet getMappingRuleSet() {
+        return mappingRuleSet;
     }
 
     public OpenAPI getOpenAPI() {
@@ -29,9 +33,5 @@ public final class SharedStorage {
 
     public Map<String, Object> getPluginStorage() {
         return pluginStorage;
-    }
-
-    public ReplaceMap getReplaceMap() {
-        return replaceMap;
     }
 }

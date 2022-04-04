@@ -42,7 +42,7 @@ public final class Parser {
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config, storage);
-        var replaceMap = storage.getReplaceMap();
+        var replaceMap = storage.getMappingRuleSet();
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "

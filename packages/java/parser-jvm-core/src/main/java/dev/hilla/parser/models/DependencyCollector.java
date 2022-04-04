@@ -25,8 +25,7 @@ public interface DependencyCollector<S, D> {
         collector.collect(signature);
 
         return collector.getDependencies().stream()
-                .filter(ClassInfoModelUtils::isNonJDKClass)
-                .map(ClassInfoModel::of);
+                .filter(ClassInfoModel::isNonJDKClass).map(ClassInfoModel::of);
     }
 
     static Stream<ClassInfoModel> collect(HierarchicalTypeSignature signature) {
@@ -34,8 +33,7 @@ public interface DependencyCollector<S, D> {
         collector.collect(signature);
 
         return collector.getDependencies().stream()
-                .filter(ClassInfoModelUtils::isNonJDKClass)
-                .map(ClassInfoModel::of);
+                .filter(ClassInfoModel::isNonJDKClass).map(ClassInfoModel::of);
     }
 
     void collect(S signature);

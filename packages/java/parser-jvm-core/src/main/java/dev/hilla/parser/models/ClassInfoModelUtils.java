@@ -4,12 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ClassRefTypeSignature;
 
 final class ClassInfoModelUtils {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
@@ -24,76 +22,42 @@ final class ClassInfoModelUtils {
         return true;
     }
 
-    public static boolean is(Class<?> actor, Class<?> target) {
-        return actor.equals(target);
+    public static <T> boolean isDateAssignable(T actor,
+            BiPredicate<Class<?>, T> predicate) {
+        for (var cls : DATE_CLASSES) {
+            if (predicate.test(cls, actor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public static boolean is(ClassInfo actor, Class<?> target) {
-        return actor.getName().equals(target.getName());
+    public static boolean isDateAssignable(Class<?> actor) {
+        return isDateAssignable(actor, ClassInfoModel::isAssignableFrom);
     }
 
-    public static boolean is(ClassRefTypeSignature actor, Class<?> target) {
-        return actor.getFullyQualifiedClassName().equals(target.getName());
+    public static boolean isDateAssignable(ClassInfo actor) {
+        return isDateAssignable(actor, ClassInfoModel::isAssignableFrom);
     }
 
-    public static boolean isAssignableFrom(Class<?> target, Class<?> from) {
-        return target.isAssignableFrom(from);
+    public static <T> boolean isDateTimeAssignable(T actor,
+            BiPredicate<Class<?>, T> predicate) {
+        for (var cls : DATE_TIME_CLASSES) {
+            if (predicate.test(cls, actor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public static boolean isAssignableFrom(Class<?> target, ClassInfo from) {
-        return is(from, target)
-                || (target.isInterface() && from.implementsInterface(target))
-                || from.extendsSuperclass(target);
+    public static boolean isDateTimeAssignable(Class<?> actor) {
+        return isDateTimeAssignable(actor, ClassInfoModel::isAssignableFrom);
     }
 
-    public static boolean isDateAssignable(Predicate<Class<?>> predicate) {
-        return Arrays.stream(DATE_CLASSES).anyMatch(predicate);
+    public static boolean isDateTimeAssignable(ClassInfo actor) {
+        return isDateTimeAssignable(actor, ClassInfoModel::isAssignableFrom);
     }
 
-    public static boolean isDateAssignable(Class<?> from) {
-        return isDateAssignable(cls -> cls.isAssignableFrom(from));
-    }
-
-    public static boolean isDateAssignable(ClassInfo from) {
-        return isDateAssignable(cls -> isAssignableFrom(cls, from));
-    }
-
-    public static boolean isDateTimeAssignable(Predicate<Class<?>> predicate) {
-        return Arrays.stream(DATE_TIME_CLASSES).anyMatch(predicate);
-    }
-
-    public static boolean isDateTimeAssignable(Class<?> from) {
-        return isDateTimeAssignable(cls -> cls.isAssignableFrom(from));
-    }
-
-    public static boolean isDateTimeAssignable(ClassInfo from) {
-        return isDateTimeAssignable(cls -> isAssignableFrom(cls, from));
-    }
-
-    public static boolean isJDKClass(ClassInfo cls) {
-        return isJDKClass(cls.getName());
-    }
-
-    public static boolean isJDKClass(String className) {
-        return className.startsWith("java") || className.startsWith("com.sun")
-                || className.startsWith("sun") || className.startsWith("oracle")
-                || className.startsWith("org.xml")
-                || className.startsWith("com.oracle");
-    }
-
-    public static boolean isJDKClass(Class<?> cls) {
-        return isJDKClass(cls.getName());
-    }
-
-    public static boolean isNonJDKClass(String className) {
-        return !isJDKClass(className);
-    }
-
-    public static boolean isNonJDKClass(ClassInfo cls) {
-        return !isJDKClass(cls);
-    }
-
-    public static boolean isNonJDKClass(Class<?> cls) {
-        return !isJDKClass(cls);
-    }
 }

@@ -38,8 +38,8 @@ final class SchemaProcessor {
 
         this.type = Objects
                 .requireNonNull(type) instanceof ClassRefSignatureModel
-                        ? context.getReplaceMap()
-                                .replace((ClassRefSignatureModel) type)
+                        ? context.getMappingRuleSet()
+                                .map((ClassRefSignatureModel) type)
                         : type;
     }
 
@@ -153,10 +153,8 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var processedType = context.getReplaceMap()
-                .replace(((ClassRefSignatureModel) type).resolve());
-
-        var fullyQualifiedName = processedType.getName();
+        var fullyQualifiedName = ((ClassRefSignatureModel) type).resolve()
+                .getName();
 
         return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()

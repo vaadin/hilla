@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.replacemap;
+package dev.hilla.parser.plugins.backbone.mappingruleset;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

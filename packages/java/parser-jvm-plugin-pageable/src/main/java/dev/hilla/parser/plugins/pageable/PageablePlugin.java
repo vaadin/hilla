@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.MappingRuleSet;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
@@ -32,16 +33,20 @@ public class PageablePlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        var map = storage.getReplaceMap();
+        var map = storage.getMappingRuleSet();
 
-        map.put("org.springframework.data.domain.Sort",
-                ClassInfoModel.of(Sort.class));
-        map.put("org.springframework.data.domain.Pageable",
-                ClassInfoModel.of(Pageable.class));
-        map.put("org.springframework.data.domain.Page",
-                ClassInfoModel.of(List.class));
-        map.put("org.springframework.data.domain.Sort$Order",
-                ClassInfoModel.of(Order.class));
+        map.add(MappingRuleSet.createReplacer(
+                "org.springframework.data.domain.Sort",
+                ClassInfoModel.of(Sort.class)));
+        map.add(MappingRuleSet.createReplacer(
+                "org.springframework.data.domain.Pageable",
+                ClassInfoModel.of(Pageable.class)));
+        map.add(MappingRuleSet.createReplacer(
+                "org.springframework.data.domain.Page",
+                ClassInfoModel.of(List.class)));
+        map.add(MappingRuleSet.createReplacer(
+                "org.springframework.data.domain.Sort$Order",
+                ClassInfoModel.of(Order.class)));
     }
 
     @Override

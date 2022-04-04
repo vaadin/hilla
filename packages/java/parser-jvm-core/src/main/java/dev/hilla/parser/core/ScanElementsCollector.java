@@ -13,35 +13,36 @@ import dev.hilla.parser.models.ClassInfoModel;
 import io.github.classgraph.ScanResult;
 
 public final class ScanElementsCollector {
-    private final ReplaceMap replaceMap;
+    private final MappingRuleSet mappingRuleSet;
     private List<ClassInfoModel> endpoints;
     private List<ClassInfoModel> entities;
 
     public ScanElementsCollector(@Nonnull ScanResult result,
-            @Nonnull String endpointAnnotationName, ReplaceMap replaceMap) {
+            @Nonnull String endpointAnnotationName,
+            MappingRuleSet mappingRuleSet) {
         this(Objects.requireNonNull(result)
                 .getClassesWithAnnotation(
                         Objects.requireNonNull(endpointAnnotationName))
                 .stream().map(ClassInfoModel::of).collect(Collectors.toList()),
-                replaceMap);
+                mappingRuleSet);
     }
 
     public ScanElementsCollector(@Nonnull Collection<ClassInfoModel> endpoints,
-            ReplaceMap replaceMap) {
+            MappingRuleSet mappingRuleSet) {
         this.endpoints = Objects.requireNonNull(endpoints) instanceof ArrayList
                 ? (ArrayList<ClassInfoModel>) endpoints
                 : new ArrayList<>(endpoints);
-        this.replaceMap = replaceMap;
+        this.mappingRuleSet = mappingRuleSet;
     }
 
     public ScanElementsCollector collect() {
-        endpoints = endpoints.stream().map(replaceMap::replace)
+        endpoints = endpoints.stream().map(mappingRuleSet::map)
                 .collect(Collectors.toList());
 
         entities = endpoints.stream()
                 .flatMap(cls -> cls.getInheritanceChain()
                         .getDependenciesStream())
-                .map(replaceMap::replace).distinct()
+                .map(mappingRuleSet::map).distinct()
                 .collect(Collectors.toList());
 
         // @formatter:off
@@ -89,7 +90,7 @@ public final class ScanElementsCollector {
         for (var i = 0; i < entities.size(); i++) {
             var entity = entities.get(i);
 
-            entity.getDependenciesStream().map(replaceMap::replace)
+            entity.getDependenciesStream().map(mappingRuleSet::map)
                     .filter(e -> !entities.contains(e)).forEach(entities::add);
         }
 

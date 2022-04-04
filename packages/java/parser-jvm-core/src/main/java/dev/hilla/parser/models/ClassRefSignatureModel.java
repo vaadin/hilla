@@ -7,9 +7,20 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
 public interface ClassRefSignatureModel extends SignatureModel {
+    static boolean is(ClassRefTypeSignature actor, Class<?> target) {
+        return Objects.equals(actor.getFullyQualifiedClassName(),
+                target.getName());
+    }
+
+    static boolean is(ClassRefTypeSignature actor, ClassInfo target) {
+        return Objects.equals(actor.getFullyQualifiedClassName(),
+                target.getName());
+    }
+
     static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin,
             @Nonnull Model parent) {
         return new ClassRefSignatureSourceModel(Objects.requireNonNull(origin),
