@@ -16,6 +16,7 @@ export class FluxConnection {
   constructor() {
     this.connectWebsocket();
   }
+
   private connectWebsocket() {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
     this.socket = io('/hilla', { path: '/VAADIN/hillapush/', extraHeaders });
@@ -65,9 +66,10 @@ export class FluxConnection {
     this.socket.send(message);
   }
 
-  subscribe(endpointName: string, methodName: string, params?: Array<any>): Subscription<any> {
+  subscribe(endpointName: string, methodName: string, maybeParams?: Array<any>): Subscription<any> {
     const id: string = this.nextId.toString();
     this.nextId += 1;
+    const params = maybeParams ? maybeParams : [];
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', id, endpointName, methodName, params };
     const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
