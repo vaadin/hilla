@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.mapperset;
+package dev.hilla.parser.plugins.backbone.classmappers;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

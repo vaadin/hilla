@@ -17,7 +17,7 @@ public final class PluginManager {
     PluginManager(ParserConfig config, SharedStorage storage) {
         plugins = config.getPlugins();
         listener = new ChangeListener<>(
-                () -> storage.getMappingRuleSet().hashCode());
+                () -> storage.getClassMappers().hashCode());
 
         for (var plugin : plugins) {
             plugin.setStorage(storage);

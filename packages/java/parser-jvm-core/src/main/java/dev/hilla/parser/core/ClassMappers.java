@@ -6,7 +6,7 @@ import java.util.function.Function;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 
-public class MapperSet extends HashSet<MapperSet.Mapper> {
+public class ClassMappers extends HashSet<ClassMappers.Mapper> {
     public ClassInfoModel map(ClassInfoModel model) {
         var result = model;
 

@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public final class SharedStorage {
     private final AssociationMap associationMap = new AssociationMap();
-    private final MapperSet mapperSet = new MapperSet();
+    private final ClassMappers classMappers = new ClassMappers();
     private final ParserConfig parserConfig;
     private final Map<String, Object> pluginStorage = new HashMap<>();
 
@@ -19,8 +19,8 @@ public final class SharedStorage {
         return associationMap;
     }
 
-    public MapperSet getMappingRuleSet() {
-        return mapperSet;
+    public ClassMappers getClassMappers() {
+        return classMappers;
     }
 
     public OpenAPI getOpenAPI() {

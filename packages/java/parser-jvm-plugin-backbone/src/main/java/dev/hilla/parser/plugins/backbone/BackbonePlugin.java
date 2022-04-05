@@ -26,11 +26,8 @@ public final class BackbonePlugin implements Plugin.Processor {
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
         var model = storage.getOpenAPI();
-        var mappingRuleSet = storage.getMappingRuleSet();
-        var context = new Context(storage.getAssociationMap(), mappingRuleSet);
-
-        new EndpointProcessor(endpoints, model, context).process();
-        new EntityProcessor(entities, model, context).process();
+        new EndpointProcessor(endpoints, model, storage).process();
+        new EntityProcessor(entities, model, storage).process();
     }
 
     @Override

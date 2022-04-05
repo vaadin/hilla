@@ -13,35 +13,35 @@ import dev.hilla.parser.models.ClassInfoModel;
 import io.github.classgraph.ScanResult;
 
 public final class ScanElementsCollector {
-    private final MapperSet mapperSet;
+    private final ClassMappers classMappers;
     private List<ClassInfoModel> endpoints;
     private List<ClassInfoModel> entities;
 
     public ScanElementsCollector(@Nonnull ScanResult result,
-            @Nonnull String endpointAnnotationName, MapperSet mapperSet) {
+            @Nonnull String endpointAnnotationName, ClassMappers classMappers) {
         this(Objects.requireNonNull(result)
                 .getClassesWithAnnotation(
                         Objects.requireNonNull(endpointAnnotationName))
                 .stream().map(ClassInfoModel::of).collect(Collectors.toList()),
-                mapperSet);
+            classMappers);
     }
 
     public ScanElementsCollector(@Nonnull Collection<ClassInfoModel> endpoints,
-            MapperSet mapperSet) {
+            ClassMappers classMappers) {
         this.endpoints = Objects.requireNonNull(endpoints) instanceof ArrayList
                 ? (ArrayList<ClassInfoModel>) endpoints
                 : new ArrayList<>(endpoints);
-        this.mapperSet = mapperSet;
+        this.classMappers = classMappers;
     }
 
     public ScanElementsCollector collect() {
-        endpoints = endpoints.stream().map(mapperSet::map)
+        endpoints = endpoints.stream().map(classMappers::map)
                 .collect(Collectors.toList());
 
         entities = endpoints.stream()
                 .flatMap(cls -> cls.getInheritanceChain()
                         .getDependenciesStream())
-                .map(mapperSet::map).distinct().collect(Collectors.toList());
+                .map(classMappers::map).distinct().collect(Collectors.toList());
 
         // @formatter:off
         //
@@ -88,7 +88,7 @@ public final class ScanElementsCollector {
         for (var i = 0; i < entities.size(); i++) {
             var entity = entities.get(i);
 
-            entity.getDependenciesStream().map(mapperSet::map)
+            entity.getDependenciesStream().map(classMappers::map)
                     .filter(e -> !entities.contains(e)).forEach(entities::add);
         }
 

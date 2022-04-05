@@ -56,8 +56,7 @@ public interface ClassInfoModel
     }
 
     static boolean isAssignableFrom(String target, ClassInfo actor) {
-        return is(actor, target)
-                || (actor.isInterface() && actor.implementsInterface(target))
+        return is(actor, target) || actor.implementsInterface(target)
                 || actor.extendsSuperclass(target);
     }
 

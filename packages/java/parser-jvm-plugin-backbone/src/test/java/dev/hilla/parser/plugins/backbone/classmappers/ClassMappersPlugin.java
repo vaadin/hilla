@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.mapperset;
+package dev.hilla.parser.plugins.backbone.classmappers;
 
 import java.util.Collection;
 
@@ -8,7 +8,7 @@ import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ClassInfoModel;
 
-public class MapperSetPlugin implements Plugin.Processor {
+public class ClassMappersPlugin implements Plugin.Processor {
     private int order = -100;
     private SharedStorage storage;
 
@@ -25,7 +25,7 @@ public class MapperSetPlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        storage.getMappingRuleSet()
+        storage.getClassMappers()
                 .add(model -> ClassInfoModel
                         .isAssignableFrom(Replace.From.class, model)
                                 ? ClassInfoModel.of(Replace.To.class)

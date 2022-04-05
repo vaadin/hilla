@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.mapperset;
+package dev.hilla.parser.plugins.backbone.classmappers;
 
 public class Replace {
     public static class Baz {

@@ -12,14 +12,14 @@
   ],
   "tags": [
     {
-      "name": "MapperSetEndpoint"
+      "name": "ClassMappersEndpoint"
     }
   ],
   "paths": {
-    "/MapperSetEndpoint/direct": {
+    "/ClassMappersEndpoint/direct": {
       "post": {
-        "tags": ["MapperSetEndpoint"],
-        "operationId": "MapperSetEndpoint_direct_POST",
+        "tags": ["ClassMappersEndpoint"],
+        "operationId": "ClassMappersEndpoint_direct_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -30,7 +30,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.mapperset.Replace$To"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
                       }
                     ]
                   }
@@ -48,7 +48,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.mapperset.Replace$To"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
                     }
                   ]
                 }
@@ -58,10 +58,10 @@
         }
       }
     },
-    "/MapperSetEndpoint/withEntity": {
+    "/ClassMappersEndpoint/withEntity": {
       "post": {
-        "tags": ["MapperSetEndpoint"],
-        "operationId": "MapperSetEndpoint_withEntity_POST",
+        "tags": ["ClassMappersEndpoint"],
+        "operationId": "ClassMappersEndpoint_withEntity_POST",
         "responses": {
           "200": {
             "description": "",
@@ -71,7 +71,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.mapperset.MapperSetEndpoint$ReplaceMapEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity"
                     }
                   ]
                 }
@@ -84,7 +84,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.mapperset.Replace$To": {
+      "dev.hilla.parser.plugins.backbone.classmappers.Replace$To": {
         "type": "object",
         "properties": {
           "bar": {
@@ -95,7 +95,7 @@
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.mapperset.Replace$Baz"
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz"
               }
             ]
           },
@@ -105,20 +105,20 @@
           }
         }
       },
-      "dev.hilla.parser.plugins.backbone.mapperset.MapperSetEndpoint$ReplaceMapEntity": {
+      "dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity": {
         "type": "object",
         "properties": {
           "entity": {
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.mapperset.Replace$To"
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
               }
             ]
           }
         }
       },
-      "dev.hilla.parser.plugins.backbone.mapperset.Replace$Baz": {
+      "dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz": {
         "type": "object"
       }
     }

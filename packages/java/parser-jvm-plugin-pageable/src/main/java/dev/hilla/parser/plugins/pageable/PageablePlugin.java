@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.MapperSet;
+import dev.hilla.parser.core.ClassMappers;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
@@ -20,7 +20,8 @@ public class PageablePlugin implements Plugin.Processor {
     private int order = -100;
     private SharedStorage storage;
 
-    private static MapperSet.Mapper createReplacer(String from, Class<?> to) {
+    private static ClassMappers.Mapper createReplacer(String from,
+            Class<?> to) {
         return cls -> ClassInfoModel.is(to, from) ? ClassInfoModel.of(to) : cls;
     }
 
@@ -37,16 +38,16 @@ public class PageablePlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        var map = storage.getMappingRuleSet();
+        var classMappers = storage.getClassMappers();
 
-        map.add(createReplacer("org.springframework.data.domain.Sort",
+        classMappers.add(createReplacer("org.springframework.data.domain.Sort",
                 Sort.class));
-        map.add(createReplacer("org.springframework.data.domain.Pageable",
-                Pageable.class));
-        map.add(createReplacer("org.springframework.data.domain.Page",
+        classMappers.add(createReplacer(
+                "org.springframework.data.domain.Pageable", Pageable.class));
+        classMappers.add(createReplacer("org.springframework.data.domain.Page",
                 List.class));
-        map.add(createReplacer("org.springframework.data.domain.Sort$Order",
-                Order.class));
+        classMappers.add(createReplacer(
+                "org.springframework.data.domain.Sort$Order", Order.class));
     }
 
     @Override
