@@ -23,7 +23,7 @@ public final class ScanElementsCollector {
                 .getClassesWithAnnotation(
                         Objects.requireNonNull(endpointAnnotationName))
                 .stream().map(ClassInfoModel::of).collect(Collectors.toList()),
-            classMappers);
+                classMappers);
     }
 
     public ScanElementsCollector(@Nonnull Collection<ClassInfoModel> endpoints,
