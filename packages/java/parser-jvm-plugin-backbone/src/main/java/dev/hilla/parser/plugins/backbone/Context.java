@@ -1,23 +1,22 @@
 package dev.hilla.parser.plugins.backbone;
 
 import dev.hilla.parser.core.AssociationMap;
-import dev.hilla.parser.core.MappingRuleSet;
+import dev.hilla.parser.core.MapperSet;
 
 final class Context {
     private final AssociationMap associationMap;
-    private final MappingRuleSet mappingRuleSet;
+    private final MapperSet mapperSet;
 
-    public Context(AssociationMap associationMap,
-            MappingRuleSet mappingRuleSet) {
+    public Context(AssociationMap associationMap, MapperSet mapperSet) {
         this.associationMap = associationMap;
-        this.mappingRuleSet = mappingRuleSet;
+        this.mapperSet = mapperSet;
     }
 
     public AssociationMap getAssociationMap() {
         return associationMap;
     }
 
-    public MappingRuleSet getMappingRuleSet() {
-        return mappingRuleSet;
+    public MapperSet getMappingRuleSet() {
+        return mapperSet;
     }
 }

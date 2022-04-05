@@ -1,7 +1,7 @@
-package dev.hilla.parser.plugins.backbone.mappingruleset;
+package dev.hilla.parser.plugins.backbone.mapperset;
 
 @Endpoint
-public class MappingRuleSetEndpoint {
+public class MapperSetEndpoint {
     public Replace.From direct(Replace.From entity) {
         return entity;
     }

@@ -1,15 +1,14 @@
-package dev.hilla.parser.plugins.backbone.mappingruleset;
+package dev.hilla.parser.plugins.backbone.mapperset;
 
 import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.MappingRuleSet;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ClassInfoModel;
 
-public class MappingRuleSetPlugin implements Plugin.Processor {
+public class MapperSetPlugin implements Plugin.Processor {
     private int order = -100;
     private SharedStorage storage;
 
@@ -26,8 +25,11 @@ public class MappingRuleSetPlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        storage.getMappingRuleSet().add(MappingRuleSet.createReplacer(
-                Replace.From.class, ClassInfoModel.of(Replace.To.class)));
+        storage.getMappingRuleSet()
+                .add(model -> ClassInfoModel
+                        .isAssignableFrom(Replace.From.class, model)
+                                ? ClassInfoModel.of(Replace.To.class)
+                                : model);
     }
 
     @Override

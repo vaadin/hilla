@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.mappingruleset;
+package dev.hilla.parser.plugins.backbone.mapperset;
 
 public class Replace {
     public static class Baz {
