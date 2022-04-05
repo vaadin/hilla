@@ -408,7 +408,6 @@ export class ConnectClient {
     // Invoke all the folded async middlewares and return
     return chain(initialContext);
   }
-  // let connection: FluxConnection | undefined = undefined
 
   /**
    * Subscribes to the given method defined using the endpoint and method

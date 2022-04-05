@@ -549,7 +549,7 @@ describe('ConnectClient', () => {
     });
 
     it('should create a fluxConnection', async () => {
-      (client as any).fluxConnection = undefined;
+      (client as any).fluxConnection = undefined; //NOSONAR
       client.subscribe('FooEndpoint', 'fooMethod');
       expect((client as any).fluxConnection).to.not.equal(undefined);
     });
