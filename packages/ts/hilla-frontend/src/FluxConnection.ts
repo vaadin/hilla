@@ -19,7 +19,7 @@ export class FluxConnection {
 
   private connectWebsocket() {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
-    this.socket = io('/hilla', { path: '/VAADIN/hillapush/', extraHeaders });
+    this.socket = io('/hilla', { path: 'VAADIN/hillapush/', extraHeaders });
     this.socket.on('message', (message) => {
       this.handleMessage(JSON.parse(message));
     });
