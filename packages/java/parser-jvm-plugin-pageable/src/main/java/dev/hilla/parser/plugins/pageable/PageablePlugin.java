@@ -22,7 +22,7 @@ public class PageablePlugin implements Plugin.Processor {
 
     private static ClassMappers.Mapper createReplacer(String from,
             Class<?> to) {
-        return cls -> ClassInfoModel.is(to, from) ? ClassInfoModel.of(to) : cls;
+        return cls -> cls.is(from) ? ClassInfoModel.of(to) : cls;
     }
 
     @Override

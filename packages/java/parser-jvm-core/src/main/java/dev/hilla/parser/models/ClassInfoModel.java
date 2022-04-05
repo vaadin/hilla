@@ -316,6 +316,34 @@ public interface ClassInfoModel
         return getSuperClasses().stream();
     }
 
+    default boolean is(String name) {
+        var origin = get();
+
+        return origin instanceof ClassInfo ? is((ClassInfo) origin, name)
+                : is((Class<?>) origin, name);
+    }
+
+    default boolean is(Class<?> cls) {
+        var origin = get();
+
+        return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
+                : is((Class<?>) origin, cls);
+    }
+
+    default boolean is(ClassInfo cls) {
+        var origin = get();
+
+        return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
+                : is((Class<?>) origin, cls);
+    }
+
+    default boolean is(ClassInfoModel model) {
+        var cls = model.get();
+
+        return cls instanceof ClassInfo ? is((ClassInfo) cls)
+                : is((Class<?>) cls);
+    }
+
     boolean isAbstract();
 
     boolean isAnnotation();

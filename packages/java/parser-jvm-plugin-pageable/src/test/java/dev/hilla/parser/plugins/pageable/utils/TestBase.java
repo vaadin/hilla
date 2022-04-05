@@ -48,13 +48,10 @@ public abstract class TestBase {
         assertEquals(expected, actual);
     }
 
-    protected String getExtendedClassPath(Class<?>... classes) {
-        try {
-            return ResourceLoader.getClasspath(
-                    Arrays.stream(classes).map(TestBase::createResourceLoader)
-                            .collect(Collectors.toList()));
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    protected String getExtendedClassPath(Class<?>... classes)
+            throws URISyntaxException {
+        return ResourceLoader.getClasspath(
+                Arrays.stream(classes).map(TestBase::createResourceLoader)
+                        .collect(Collectors.toList()));
     }
 }
