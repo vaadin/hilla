@@ -1,6 +1,6 @@
 # Hilla Form
 
-[API documentation ↗](https://vaadin.com/docs/latest/fusion/forms/appendix-client-side-form-binding-reference)
+[API documentation ↗](https://hilla.dev/docs/data-binding/reference)
 
 [![Latest Stable Version](https://img.shields.io/npm/v/@hilla/form.svg)](https://www.npmjs.com/package/@hilla/form)
 
