@@ -10,6 +10,7 @@ export class FluxConnection {
   private onNextCallbacks = new Map<string, (value: any) => void>();
   private onCompleteCallbacks = new Map<string, () => void>();
   private onErrorCallbacks = new Map<string, () => void>();
+  private closed = new Set<string>();
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
 
@@ -31,8 +32,11 @@ export class FluxConnection {
 
     if (message['@type'] === 'update') {
       const callback = this.onNextCallbacks.get(id);
+      const closed = this.closed.has(id);
       if (callback) {
-        callback(message.item);
+        if (!closed) {
+          callback(message.item);
+        }
       } else {
         throw new Error(`No callback for stream id ${id}`);
       }
@@ -42,24 +46,27 @@ export class FluxConnection {
         callback();
       }
 
-      this.onNextCallbacks.delete(id);
-      this.onCompleteCallbacks.delete(id);
-      this.onErrorCallbacks.delete(id);
-      this.endpointInfos.delete(id);
+      this.removeSubscription(id);
     } else if (message['@type'] === 'error') {
       const callback = this.onErrorCallbacks.get(id);
       if (callback) {
         callback();
       }
-      this.onNextCallbacks.delete(id);
-      this.onCompleteCallbacks.delete(id);
-      this.onErrorCallbacks.delete(id);
+      this.removeSubscription(id);
       if (!callback) {
         throw new Error(`Error in ${endpointInfo}: ${message.message}`);
       }
     } else {
       throw new Error(`Unknown message from server: ${message}`);
     }
+  }
+
+  private removeSubscription(id: string) {
+    this.onNextCallbacks.delete(id);
+    this.onCompleteCallbacks.delete(id);
+    this.onErrorCallbacks.delete(id);
+    this.endpointInfos.delete(id);
+    this.closed.delete(id);
   }
 
   private send(message: ServerMessage) {
@@ -91,6 +98,7 @@ export class FluxConnection {
       cancel: () => {
         const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
         this.send(closeMessage);
+        this.closed.add(id);
       },
     };
     return hillaSubscription;

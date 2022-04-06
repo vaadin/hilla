@@ -77,4 +77,115 @@ describe('FluxConnection', () => {
     fluxConnectionAny.handleMessage(msg);
     expect(errorCalled).to.eq(1);
   });
+  it('should call not deliver messages after completing', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    let onNextCalled = 0;
+    sub.onNext((_value) => {
+      onNextCalled += 1;
+    });
+    const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
+    const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
+    fluxConnectionAny.handleMessage(completeMsg);
+    try {
+      fluxConnectionAny.handleMessage(msg);
+      expect.fail('Should not fail silently');
+    } catch (e) {
+      // No need to handle the error
+    }
+    expect(onNextCalled).to.eq(0);
+  });
+  it('should cancel the server subscription on cancel', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onNext((_value) => {
+      // No need to handle the value
+    });
+    sub.cancel();
+    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
+    expect(fluxConnectionAny.socket.sentMessages[1]).to.eql({
+      '@type': 'unsubscribe',
+      id: '0',
+    });
+  });
+  it('should call not deliver messages after canceling', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    let onNextCalled = 0;
+    sub.onNext((_value) => {
+      onNextCalled += 1;
+    });
+    sub.cancel();
+    const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
+    fluxConnectionAny.handleMessage(msg);
+    expect(onNextCalled).to.equal(0);
+  });
+  it('should throw an error for messages to unknown subscriptions', () => {
+    const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
+    try {
+      fluxConnectionAny.handleMessage(msg);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      // No need to handle the error
+    }
+  });
+  it('should throw an error for flux errors without onError', () => {
+    const msg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
+    try {
+      fluxConnectionAny.handleMessage(msg);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      // No need to handle the error
+    }
+  });
+  it('should throw an error for unknown messages', () => {
+    const msg: any = { '@type': 'unknown', id: '0' };
+    try {
+      fluxConnectionAny.handleMessage(msg);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      // No need to handle the error
+    }
+  });
+  it('clean internal data on complete', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onComplete(() => {
+      // Just need a callback
+    });
+    sub.onError(() => {
+      // Just need a callback
+    });
+    sub.onNext((_value) => {
+      // Just need a callback
+    });
+    sub.cancel();
+
+    const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
+    fluxConnectionAny.handleMessage(completeMsg);
+
+    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
+    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.closed.size).to.equal(0);
+  });
+  it('clean internal data on error', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onComplete(() => {
+      // Just need a callback
+    });
+    sub.onError(() => {
+      // Just need a callback
+    });
+    sub.onNext((_value) => {
+      // Just need a callback
+    });
+    sub.cancel();
+
+    const completeMsg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
+    fluxConnectionAny.handleMessage(completeMsg);
+
+    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
+    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.closed.size).to.equal(0);
+  });
 });
