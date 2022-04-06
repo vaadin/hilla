@@ -33,11 +33,9 @@ export class FluxConnection {
     if (message['@type'] === 'update') {
       const callback = this.onNextCallbacks.get(id);
       const closed = this.closed.has(id);
-      if (callback) {
-        if (!closed) {
-          callback(message.item);
-        }
-      } else {
+      if (callback && !closed) {
+        callback(message.item);
+      } else if (!callback) {
         throw new Error(`No callback for stream id ${id}`);
       }
     } else if (message['@type'] === 'complete') {
