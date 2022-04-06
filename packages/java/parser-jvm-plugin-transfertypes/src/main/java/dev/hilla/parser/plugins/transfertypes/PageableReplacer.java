@@ -9,13 +9,15 @@ import dev.hilla.runtime.transfertypes.Order;
 import dev.hilla.runtime.transfertypes.Pageable;
 import dev.hilla.runtime.transfertypes.Sort;
 
-public class PageableReplacer {
-    private final ClassMappers classMappers;
+final class PageableReplacer implements Replacer {
+    private ClassMappers classMappers;
 
-    public PageableReplacer(ClassMappers classMappers) {
+    @Override
+    public void setClassMappers(ClassMappers classMappers) {
         this.classMappers = classMappers;
     }
 
+    @Override
     public void process() {
         classMappers.add(createReplacer("org.springframework.data.domain.Sort",
                 Sort.class));
