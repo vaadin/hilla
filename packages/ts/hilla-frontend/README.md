@@ -1,10 +1,10 @@
 # Hilla Frontend
 
-[API documentation ↗](https://vaadin.com/docs/latest/fusion/tutorials/in-depth-course/login-and-authentication#handling-login-and-logout)
+[API documentation ↗](https://hilla.dev/docs/tutorials/in-depth-course/login-and-authentication)
 
 [![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)](https://www.npmjs.com/package/@hilla/frontend)
 
-A set of utilities to interact with the [Hilla](https://vaadin.com/docs/latest/fusion/overview) application server.
+A set of utilities to interact with the [Hilla](https://hilla.dev/docs/) application server.
 A part of the Hilla project.
 
 ## Installation
