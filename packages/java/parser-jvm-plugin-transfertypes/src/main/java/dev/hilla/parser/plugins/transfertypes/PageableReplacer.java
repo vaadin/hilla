@@ -13,11 +13,6 @@ final class PageableReplacer implements Replacer {
     private ClassMappers classMappers;
 
     @Override
-    public void setClassMappers(ClassMappers classMappers) {
-        this.classMappers = classMappers;
-    }
-
-    @Override
     public void process() {
         classMappers.add(createReplacer("org.springframework.data.domain.Sort",
                 Sort.class));
@@ -27,5 +22,10 @@ final class PageableReplacer implements Replacer {
                 List.class));
         classMappers.add(createReplacer(
                 "org.springframework.data.domain.Sort$Order", Order.class));
+    }
+
+    @Override
+    public void setClassMappers(ClassMappers classMappers) {
+        this.classMappers = classMappers;
     }
 }
