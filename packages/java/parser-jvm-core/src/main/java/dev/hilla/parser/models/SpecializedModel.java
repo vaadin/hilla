@@ -77,6 +77,10 @@ public interface SpecializedModel {
         return false;
     }
 
+    default boolean isNonJDKClass() {
+        return !isJDKClass();
+    }
+
     default boolean isOptional() {
         return false;
     }

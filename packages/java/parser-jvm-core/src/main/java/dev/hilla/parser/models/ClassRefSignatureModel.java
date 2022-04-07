@@ -32,7 +32,7 @@ public interface ClassRefSignatureModel extends SignatureModel {
     }
 
     static ClassRefSignatureModel of(@Nonnull Class<?> origin, Model parent) {
-        return new ClassRefSignatureReflectionModel(origin, parent);
+        return new ClassRefSignatureReflectionModel.Bare(origin, parent);
     }
 
     static ClassRefSignatureModel of(

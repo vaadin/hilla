@@ -36,12 +36,14 @@ public final class ScanElementsCollector {
 
     public ScanElementsCollector collect() {
         endpoints = endpoints.stream().map(classMappers::map)
+                .filter(ClassInfoModel::isNonJDKClass)
                 .collect(Collectors.toList());
 
         entities = endpoints.stream()
                 .flatMap(cls -> cls.getInheritanceChain()
                         .getDependenciesStream())
-                .map(classMappers::map).distinct().collect(Collectors.toList());
+                .map(classMappers::map).filter(ClassInfoModel::isNonJDKClass)
+                .distinct().collect(Collectors.toList());
 
         // @formatter:off
         //
@@ -89,6 +91,7 @@ public final class ScanElementsCollector {
             var entity = entities.get(i);
 
             entity.getDependenciesStream().map(classMappers::map)
+                    .filter(ClassInfoModel::isNonJDKClass)
                     .filter(e -> !entities.contains(e)).forEach(entities::add);
         }
 
