@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.transfertypes.pageable;
+package dev.hilla.parser.plugins.transfertypes.pageable.basic;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

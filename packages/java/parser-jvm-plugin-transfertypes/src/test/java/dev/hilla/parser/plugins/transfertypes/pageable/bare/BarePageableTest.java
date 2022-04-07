@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.transfertypes.pageable;
+package dev.hilla.parser.plugins.transfertypes.pageable.bare;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,23 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.utils.TestBase;
 
-public class PageableTest extends TestBase {
+public class BarePageableTest extends TestBase {
     @Test
-    public void should_ReplaceSpringClassesWithSubstitutes()
+    public void should_ConsiderInternalDependenciesForReplacedEntities()
+            throws IOException, URISyntaxException {
+        var classpath = getExtendedClassPath(Pageable.class);
+
+        var config = new ParserConfig.Builder()
+                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .endpointAnnotation(Endpoint.class.getName())
+                .addPlugin(new TransferTypesPlugin())
+                .addPlugin(new BackbonePlugin()).finish();
+
+        executeParserWithConfig(config);
+    }
+
+    @Test
+    public void should_CorrectlyResolveReplacedDependencies()
             throws IOException, URISyntaxException {
         var classpath = getExtendedClassPath(Pageable.class);
 

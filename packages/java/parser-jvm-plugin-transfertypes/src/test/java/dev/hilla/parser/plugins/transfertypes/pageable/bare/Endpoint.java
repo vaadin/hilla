@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.transfertypes.pageable;
+package dev.hilla.parser.plugins.transfertypes.pageable.bare;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
