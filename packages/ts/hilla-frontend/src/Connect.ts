@@ -420,11 +420,11 @@ export class ConnectClient {
    * @param params Optional parameters to pass to the method.
    * @returns {} A subscription used to handles values as they become available.
    */
-  public subscribe(endpointName: string, methodName: string, params?: any): Subscription<any> {
+  public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
     if (!this.fluxConnection) {
       this.fluxConnection = new FluxConnection();
     }
 
-    return this.fluxConnection.subscribe(endpointName, methodName, params ? Object.values(params) : []);
+    return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
   }
 }
