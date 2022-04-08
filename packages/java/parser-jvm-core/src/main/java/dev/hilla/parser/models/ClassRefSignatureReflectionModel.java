@@ -1,39 +1,29 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 final class ClassRefSignatureReflectionModel
-        extends AbstractAnnotatedReflectionModel<Class<?>>
+        extends AbstractAnnotatedReflectionModel<AnnotatedParameterizedType>
         implements ClassRefSignatureModel, ReflectionSignatureModel {
-    private ClassInfoModel resolved;
+    private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
-    private AnnotatedParameterizedType wrapper;
 
-    public ClassRefSignatureReflectionModel(Class<?> origin) {
-        this(origin, null);
-    }
-
-    public ClassRefSignatureReflectionModel(Class<?> origin, Model parent) {
-        super(origin, parent);
-    }
-
-    public ClassRefSignatureReflectionModel(AnnotatedParameterizedType wrapper,
+    public ClassRefSignatureReflectionModel(AnnotatedParameterizedType origin,
             Model parent) {
-        super((Class<?>) wrapper.getType(), parent);
-        this.wrapper = wrapper;
+        super(origin, parent);
     }
 
     @Override
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
-            typeArguments = wrapper != null
-                    ? Arrays.stream(wrapper.getAnnotatedActualTypeArguments())
-                            .map(arg -> TypeArgumentModel.of(arg, this))
-                            .collect(Collectors.toList())
-                    : List.of();
+            typeArguments = Arrays
+                    .stream(origin.getAnnotatedActualTypeArguments())
+                    .map(arg -> TypeArgumentModel.of(arg, this))
+                    .collect(Collectors.toList());
         }
 
         return typeArguments;
@@ -41,10 +31,45 @@ final class ClassRefSignatureReflectionModel
 
     @Override
     public ClassInfoModel resolve() {
-        if (resolved == null) {
-            resolved = ClassInfoModel.of(origin);
+        if (reference == null) {
+            reference = ClassInfoModel
+                    .of((Class<?>) ((ParameterizedType) origin.getType())
+                            .getRawType());
         }
 
-        return resolved;
+        return reference;
+    }
+
+    @Override
+    public void setReference(ClassInfoModel reference) {
+        this.reference = reference;
+    }
+
+    static class Bare extends AbstractAnnotatedReflectionModel<Class<?>>
+            implements ClassRefSignatureModel, ReflectionSignatureModel {
+        private ClassInfoModel reference;
+
+        public Bare(Class<?> origin, Model parent) {
+            super(origin, parent);
+        }
+
+        @Override
+        public List<TypeArgumentModel> getTypeArguments() {
+            return List.of();
+        }
+
+        @Override
+        public ClassInfoModel resolve() {
+            if (reference == null) {
+                reference = ClassInfoModel.of(origin);
+            }
+
+            return reference;
+        }
+
+        @Override
+        public void setReference(ClassInfoModel reference) {
+            this.reference = reference;
+        }
     }
 }

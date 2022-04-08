@@ -21,8 +21,10 @@
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
     <module>packages/java/parser-jvm-plugin-nonnull</module>
+    <module>packages/java/parser-jvm-plugin-transfertypes</module>
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
+    <module>packages/java/runtime-plugin-transfertypes</module>
   </modules>
 
   <properties>
@@ -35,6 +37,8 @@
     <swagger.version>2.1.11</swagger.version>
     <jackson.version>2.13.0</jackson.version>
     <junit.version>5.8.0</junit.version>
+    <spring.data.version>2.6.0</spring.data.version>
+    <validation.api.version>2.0.1.Final</validation.api.version>
     <project.scm.id>github</project.scm.id>
   </properties>
 
@@ -120,8 +124,19 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-commons</artifactId>
+        <version>${spring.data.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
   <build>
     <plugins>
       <plugin>

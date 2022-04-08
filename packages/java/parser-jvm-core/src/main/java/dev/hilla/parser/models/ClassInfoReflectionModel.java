@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,24 @@ final class ClassInfoReflectionModel
                         : null;
 
         this.chain = new ClassInfoModelInheritanceChain(this);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof ClassInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof ClassInfoReflectionModel) {
+            return Objects.equals(origin,
+                    ((ClassInfoReflectionModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((ClassInfoModel) other).getName());
     }
 
     @Override
@@ -87,7 +104,7 @@ final class ClassInfoReflectionModel
 
             var cls = origin.getSuperclass();
 
-            while (cls != null && cls != Object.class) {
+            while (cls != null && ClassInfoModel.isNonJDKClass(cls)) {
                 superClasses.add(ClassInfoModel.of(cls));
                 cls = cls.getSuperclass();
             }
@@ -113,17 +130,17 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isBoolean() {
-        return ClassInfoModelUtils.isAssignableFrom(Boolean.class, origin);
+        return ClassInfoModel.isAssignableFrom(Boolean.class, origin);
     }
 
     @Override
     public boolean isByte() {
-        return ClassInfoModelUtils.isAssignableFrom(Byte.class, origin);
+        return ClassInfoModel.isAssignableFrom(Byte.class, origin);
     }
 
     @Override
     public boolean isCharacter() {
-        return ClassInfoModelUtils.isAssignableFrom(Character.class, origin);
+        return ClassInfoModel.isAssignableFrom(Character.class, origin);
     }
 
     @Override
@@ -138,7 +155,7 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isDouble() {
-        return ClassInfoModelUtils.isAssignableFrom(Double.class, origin);
+        return ClassInfoModel.isAssignableFrom(Double.class, origin);
     }
 
     @Override
@@ -153,12 +170,12 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isFloat() {
-        return ClassInfoModelUtils.isAssignableFrom(Float.class, origin);
+        return ClassInfoModel.isAssignableFrom(Float.class, origin);
     }
 
     @Override
     public boolean isInteger() {
-        return ClassInfoModelUtils.isAssignableFrom(Integer.class, origin);
+        return ClassInfoModel.isAssignableFrom(Integer.class, origin);
     }
 
     @Override
@@ -173,32 +190,32 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isIterable() {
-        return ClassInfoModelUtils.isAssignableFrom(Iterable.class, origin);
+        return ClassInfoModel.isAssignableFrom(Iterable.class, origin);
     }
 
     @Override
     public boolean isJDKClass() {
-        return ClassInfoModelUtils.isJDKClass((Type) origin);
+        return ClassInfoModel.isJDKClass(origin);
     }
 
     @Override
     public boolean isLong() {
-        return ClassInfoModelUtils.isAssignableFrom(Long.class, origin);
+        return ClassInfoModel.isAssignableFrom(Long.class, origin);
     }
 
     @Override
     public boolean isMap() {
-        return ClassInfoModelUtils.isAssignableFrom(Map.class, origin);
+        return ClassInfoModel.isAssignableFrom(Map.class, origin);
     }
 
     @Override
     public boolean isNativeObject() {
-        return ClassInfoModelUtils.is(origin, Object.class);
+        return ClassInfoModel.is(origin, Object.class);
     }
 
     @Override
     public boolean isOptional() {
-        return ClassInfoModelUtils.isAssignableFrom(Optional.class, origin);
+        return ClassInfoModel.isAssignableFrom(Optional.class, origin);
     }
 
     @Override
@@ -218,7 +235,7 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isShort() {
-        return ClassInfoModelUtils.isAssignableFrom(Short.class, origin);
+        return ClassInfoModel.isAssignableFrom(Short.class, origin);
     }
 
     @Override
@@ -233,7 +250,7 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isString() {
-        return ClassInfoModelUtils.isAssignableFrom(String.class, origin);
+        return ClassInfoModel.isAssignableFrom(String.class, origin);
     }
 
     @Override
