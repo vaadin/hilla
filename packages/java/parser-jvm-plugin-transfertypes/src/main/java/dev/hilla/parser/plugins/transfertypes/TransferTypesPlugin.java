@@ -1,0 +1,49 @@
+package dev.hilla.parser.plugins.transfertypes;
+
+import java.util.Collection;
+
+import javax.annotation.Nonnull;
+
+import dev.hilla.parser.core.Plugin;
+import dev.hilla.parser.core.PluginsToolset;
+import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.utils.PluginException;
+
+public final class TransferTypesPlugin implements Plugin.Processor {
+    private int order = -100;
+    private SharedStorage storage;
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
+        var classMappers = storage.getClassMappers();
+
+        new PageableReplacer(classMappers).process();
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        var toolset = new PluginsToolset(
+                storage.getParserConfig().getPlugins());
+
+        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
+                .map(result -> result >= 0).orElse(true)) {
+            throw new PluginException(
+                    "PageableReplacer should be run before BackbonePlugin");
+        }
+
+        this.storage = storage;
+    }
+}

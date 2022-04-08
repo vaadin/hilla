@@ -31,15 +31,6 @@ public final class NonnullPlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        var toolset = new PluginsToolset(
-                storage.getParserConfig().getPlugins());
-
-        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
-                .map(result -> result <= 0).orElse(true)) {
-            throw new PluginException(
-                    "NonnullPlugin should be run after BackbonePlugin");
-        }
-
         new NonnullProcessor(Objects.requireNonNull(annotations),
                 storage.getAssociationMap()).process();
     }
@@ -62,6 +53,15 @@ public final class NonnullPlugin implements Plugin.Processor {
 
     @Override
     public void setStorage(@Nonnull SharedStorage storage) {
+        var toolset = new PluginsToolset(
+                storage.getParserConfig().getPlugins());
+
+        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
+                .map(result -> result <= 0).orElse(true)) {
+            throw new PluginException(
+                    "NonnullPlugin should be run after BackbonePlugin");
+        }
+
         this.storage = storage;
     }
 }

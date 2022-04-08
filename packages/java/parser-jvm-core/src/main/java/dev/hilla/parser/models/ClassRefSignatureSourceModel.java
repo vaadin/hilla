@@ -15,7 +15,7 @@ import io.github.classgraph.ClassRefTypeSignature;
 final class ClassRefSignatureSourceModel
         extends AbstractAnnotatedSourceModel<ClassRefTypeSignature>
         implements ClassRefSignatureModel, SourceSignatureModel {
-    private ClassInfoModel resolved;
+    private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
 
     public ClassRefSignatureSourceModel(ClassRefTypeSignature origin,
@@ -39,14 +39,19 @@ final class ClassRefSignatureSourceModel
 
     @Override
     public ClassInfoModel resolve() {
-        if (resolved == null) {
+        if (reference == null) {
             var originInfo = origin.getClassInfo();
 
-            resolved = originInfo != null ? ClassInfoModel.of(originInfo)
+            reference = originInfo != null ? ClassInfoModel.of(originInfo)
                     : ClassInfoModel.of(origin.loadClass());
         }
 
-        return resolved;
+        return reference;
+    }
+
+    @Override
+    public void setReference(ClassInfoModel reference) {
+        this.reference = reference;
     }
 
     @Override

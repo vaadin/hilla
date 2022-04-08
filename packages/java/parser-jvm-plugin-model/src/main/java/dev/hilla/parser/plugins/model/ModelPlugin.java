@@ -18,15 +18,6 @@ public final class ModelPlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        var toolset = new PluginsToolset(
-                storage.getParserConfig().getPlugins());
-
-        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
-                .map(result -> result <= 0).orElse(true)) {
-            throw new PluginException(
-                    "ModelPlugin should be run after BackbonePlugin");
-        }
-
         new ValidationConstraint.Processor(storage.getAssociationMap())
                 .process();
     }
@@ -43,6 +34,15 @@ public final class ModelPlugin implements Plugin.Processor {
 
     @Override
     public void setStorage(@Nonnull SharedStorage storage) {
+        var toolset = new PluginsToolset(
+                storage.getParserConfig().getPlugins());
+
+        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
+                .map(result -> result <= 0).orElse(true)) {
+            throw new PluginException(
+                    "ModelPlugin should be run after BackbonePlugin");
+        }
+
         this.storage = storage;
     }
 }

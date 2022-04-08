@@ -16,19 +16,20 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class TestBase {
     protected final ObjectMapper mapper = Json.mapper();
-    protected ResourceLoader resourceLoader;
+    protected ResourceLoader resourceLoader = createResourceLoader(getClass());
     protected Path targetDir;
 
     {
-        var target = getClass();
-        resourceLoader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-
         try {
             targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ResourceLoader createResourceLoader(Class<?> target) {
+        return new ResourceLoader(target::getResource,
+                target::getProtectionDomain);
     }
 
     protected void executeParserWithConfig(ParserConfig config)

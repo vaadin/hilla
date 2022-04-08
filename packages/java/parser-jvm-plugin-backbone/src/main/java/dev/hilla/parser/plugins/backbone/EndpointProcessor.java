@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
@@ -24,13 +25,13 @@ import io.swagger.v3.oas.models.tags.Tag;
 
 final class EndpointProcessor {
     private final Collection<ClassInfoModel> classes;
-    private final Context context;
     private final OpenAPI model;
+    private final SharedStorage storage;
 
     public EndpointProcessor(@Nonnull Collection<ClassInfoModel> classes,
-            @Nonnull OpenAPI model, @Nonnull Context context) {
+            @Nonnull OpenAPI model, @Nonnull SharedStorage storage) {
         this.classes = Objects.requireNonNull(classes);
-        this.context = Objects.requireNonNull(context);
+        this.storage = Objects.requireNonNull(storage);
         this.model = Objects.requireNonNull(model);
     }
 
@@ -100,10 +101,10 @@ final class EndpointProcessor {
             var requestMap = new ObjectSchema();
 
             for (var parameter : method.getParameters()) {
-                var schema = new SchemaProcessor(parameter.getType(), context)
+                var schema = new SchemaProcessor(parameter.getType(), storage)
                         .process();
                 requestMap.addProperties(parameter.getName(), schema);
-                context.getAssociationMap().addParameter(schema, parameter);
+                storage.getAssociationMap().addParameter(schema, parameter);
             }
 
             return new RequestBody().content(new Content().addMediaType(
@@ -116,11 +117,11 @@ final class EndpointProcessor {
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                var schema = new SchemaProcessor(resultType, context).process();
+                var schema = new SchemaProcessor(resultType, storage).process();
 
                 content.addMediaType("application/json",
                         new MediaType().schema(schema));
-                context.getAssociationMap().addMethod(schema, method);
+                storage.getAssociationMap().addMethod(schema, method);
             }
 
             return new ApiResponses().addApiResponse("200",

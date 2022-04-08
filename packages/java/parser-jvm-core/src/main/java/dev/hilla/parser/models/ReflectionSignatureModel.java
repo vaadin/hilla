@@ -9,7 +9,6 @@ public interface ReflectionSignatureModel extends ReflectionModel {
 
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
-        return SignatureModel.resolveDependencies(get())
-                .map(ClassInfoModel::of);
+        return DependencyCollector.collect(get());
     }
 }

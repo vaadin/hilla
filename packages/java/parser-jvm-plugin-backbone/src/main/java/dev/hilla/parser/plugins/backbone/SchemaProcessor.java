@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
@@ -29,13 +30,18 @@ import io.swagger.v3.oas.models.media.StringSchema;
 final class SchemaProcessor {
     private static final Schema<?> anySchemaSample = new ObjectSchema();
 
-    private final Context context;
+    private final SharedStorage storage;
     private final SignatureModel type;
 
     public SchemaProcessor(@Nonnull SignatureModel type,
-            @Nonnull Context context) {
-        this.context = Objects.requireNonNull(context);
-        this.type = Objects.requireNonNull(type);
+            @Nonnull SharedStorage storage) {
+        this.storage = Objects.requireNonNull(storage);
+
+        this.type = Objects
+                .requireNonNull(type) instanceof ClassRefSignatureModel
+                        ? storage.getClassMappers()
+                                .map((ClassRefSignatureModel) type)
+                        : type;
     }
 
     private static <T extends Schema<?>> T nullify(T schema,
@@ -78,7 +84,7 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
-        context.getAssociationMap().addType(result, type);
+        storage.getAssociationMap().addType(result, type);
 
         return result;
     }
@@ -89,7 +95,7 @@ final class SchemaProcessor {
 
     private Schema<?> arraySchema() {
         var nestedType = ((ArraySignatureModel) type).getNestedType();
-        var items = new SchemaProcessor(nestedType, context).process();
+        var items = new SchemaProcessor(nestedType, storage).process();
 
         return nullify(new ArraySchema().items(items), true);
     }
@@ -117,7 +123,7 @@ final class SchemaProcessor {
 
         if (typeArguments.size() > 0) {
             return schema
-                    .items(new SchemaProcessor(typeArguments.get(0), context)
+                    .items(new SchemaProcessor(typeArguments.get(0), storage)
                             .process());
         }
 
@@ -126,7 +132,7 @@ final class SchemaProcessor {
 
     private Schema<?> mapSchema() {
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
-        var values = new SchemaProcessor(typeArguments.get(1), context)
+        var values = new SchemaProcessor(typeArguments.get(1), storage)
                 .process();
 
         return nullify(new MapSchema(), true).additionalProperties(values);
@@ -140,7 +146,7 @@ final class SchemaProcessor {
     private Schema<?> optionalSchema() {
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), context).process();
+        return new SchemaProcessor(typeArguments.get(0), storage).process();
     }
 
     private Schema<?> refSchema() {
@@ -164,8 +170,8 @@ final class SchemaProcessor {
         var types = ((TypeArgumentModel) type).getAssociatedTypes();
 
         return types.size() > 0
-                ? new SchemaProcessor(types.get(0), context).process()
-                : this.anySchema();
+                ? new SchemaProcessor(types.get(0), storage).process()
+                : anySchema();
     }
 
     private Schema<?> typeParameterSchema() {
@@ -173,13 +179,13 @@ final class SchemaProcessor {
                 .filter(Objects::nonNull)
                 .filter(bound -> !bound.isNativeObject())
                 .<Schema<?>> map(
-                        bound -> new SchemaProcessor(bound, context).process())
+                        bound -> new SchemaProcessor(bound, storage).process())
                 .filter(schema -> !Objects.equals(schema, anySchemaSample))
                 .findFirst().orElseGet(this::anySchema);
     }
 
     private Schema<?> typeVariableSchema() {
         return new SchemaProcessor(((TypeVariableModel) type).resolve(),
-                context).process();
+                storage).process();
     }
 }
