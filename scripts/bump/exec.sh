@@ -7,6 +7,11 @@ branch=main
 bump_scripts_dir=$(dirname -- "$0")
 packages_dir="$PWD/packages/ts"
 
+# Convert X.Y.Z.suffix git tag to X.Y.Z-suffix npm version
+version_tag_split=(${VERSION_TAG//./ })
+version_tag_suffix=${version_tag_split[3]:+-${version_tag_split[3]}}
+version_tag_npm=$(IFS=. ; echo "${version_tag_split[*]:0:3}")${version_tag_suffix}
+
 # shellcheck disable=SC2139
 alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -H 'Accept: application/vnd.github.v3+json' \
@@ -14,22 +19,23 @@ alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
   -s"
 
 # Updating the registration version for all packages
-find "$packages_dir"/*/src/index.ts -exec sed -i "" -e "s/version:.\+\,/version: \/* updated-by-script *\/ \'$VERSION_TAG\',/" {} +
+find "$packages_dir"/*/src/index.ts -exec sed -i -e "s/version:.\+\,/version: \/* updated-by-script *\/ \'$version_tag_npm\',/" {} +
 
-npx lerna version "$VERSION_TAG" --no-git-tag-version --no-push --yes
+npx lerna version "$version_tag_npm" --no-git-tag-version --no-push --yes
 
 # Updating the peer dependencies in packages
-find "$packages_dir"/*/package.json -exec node "$bump_scripts_dir"/package-update.js -v "$VERSION_TAG" {} +
+find "$packages_dir"/*/package.json -exec node "$bump_scripts_dir"/package-update.js -v "$version_tag_npm" {} +
 
 # Updating package-lock.json to reflect results of the previous command
 npm install --package-lock-only --ignore-scripts
 
-git add --all
+# No new files are expected, only add modified files to commit
+git add --update
 
 git \
   -c user.name='Vaadin Bot' \
   -c user.email='vaadin-bot@users.noreply.github.com' \
-  commit -m "chore(release): $VERSION_TAG"
+  commit -m "chore(release): npm version $version_tag_npm"
 
 protection_config=$(ghr -X GET)
 

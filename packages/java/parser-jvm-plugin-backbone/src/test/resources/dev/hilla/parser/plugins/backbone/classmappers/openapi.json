@@ -1,0 +1,126 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ClassMappersEndpoint"
+    }
+  ],
+  "paths": {
+    "/ClassMappersEndpoint/direct": {
+      "post": {
+        "tags": ["ClassMappersEndpoint"],
+        "operationId": "ClassMappersEndpoint_direct_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ClassMappersEndpoint/withEntity": {
+      "post": {
+        "tags": ["ClassMappersEndpoint"],
+        "operationId": "ClassMappersEndpoint_withEntity_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.classmappers.Replace$To": {
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "baz": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz"
+              }
+            ]
+          },
+          "foo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
+              }
+            ]
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz": {
+        "type": "object"
+      }
+    }
+  }
+}

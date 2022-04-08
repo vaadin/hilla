@@ -38,8 +38,8 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getDependenciesStream() {
-        return getClasses().stream()
-                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
+        return getClassesStream().flatMap(ClassInfoModel::getDependenciesStream)
+                .distinct();
     }
 
     public Collection<ClassInfoModel> getFieldDependencies() {
@@ -47,7 +47,7 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getFieldDependenciesStream() {
-        return getClasses().stream()
+        return getClassesStream()
                 .flatMap(ClassInfoModel::getFieldDependenciesStream).distinct();
     }
 
@@ -56,7 +56,7 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<FieldInfoModel> getFieldsStream() {
-        return getClasses().stream().flatMap(ClassInfoModel::getFieldsStream)
+        return getClassesStream().flatMap(ClassInfoModel::getFieldsStream)
                 .distinct();
     }
 
@@ -65,7 +65,7 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getInnerClassDependenciesStream() {
-        return getClasses().stream()
+        return getClassesStream()
                 .flatMap(ClassInfoModel::getInnerClassDependenciesStream)
                 .distinct();
     }
@@ -75,8 +75,8 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getInnerClassesStream() {
-        return getClasses().stream()
-                .flatMap(ClassInfoModel::getInnerClassesStream).distinct();
+        return getClassesStream().flatMap(ClassInfoModel::getInnerClassesStream)
+                .distinct();
     }
 
     public <Member, ModelMember extends Model> Collection<ModelMember> getMembers(
@@ -139,7 +139,7 @@ public class ClassInfoModelInheritanceChain {
         Objects.requireNonNull(filter);
         Objects.requireNonNull(members);
 
-        return getClasses().stream()
+        return getClassesStream()
                 .flatMap(cls -> cls.getMembersStream(members, filter, wrapper))
                 .distinct();
     }
@@ -149,7 +149,7 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<ClassInfoModel> getMethodDependenciesStream() {
-        return getClasses().stream()
+        return getClassesStream()
                 .flatMap(ClassInfoModel::getMethodDependenciesStream)
                 .distinct();
     }
@@ -159,7 +159,7 @@ public class ClassInfoModelInheritanceChain {
     }
 
     public Stream<MethodInfoModel> getMethodsStream() {
-        return getClasses().stream().flatMap(ClassInfoModel::getMethodsStream)
+        return getClassesStream().flatMap(ClassInfoModel::getMethodsStream)
                 .distinct();
     }
 }
