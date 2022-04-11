@@ -393,7 +393,14 @@ public class SecurityIT extends ChromeBrowserTest {
         String timeBefore = getPublicView().findElement(By.id("time"))
                 .getText();
         Assert.assertNotNull(timeBefore);
-        executeScript("document.querySelector('public-view').updateTime()");
+        executeScript(
+                "document.oldPage=true; document.querySelector('public-view').updateTime()");
+
+        // Wait for reload
+        waitUntil(driver -> {
+            return (Boolean) executeScript("return !document.oldPage");
+        });
+
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
