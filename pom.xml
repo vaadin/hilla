@@ -34,7 +34,7 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.141</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.version>2.1.11</swagger.version>
+    <swagger.version>2.1.13</swagger.version>
     <jackson.version>2.13.2</jackson.version>
     <junit.version>5.8.0</junit.version>
     <spring.data.version>2.6.0</spring.data.version>
