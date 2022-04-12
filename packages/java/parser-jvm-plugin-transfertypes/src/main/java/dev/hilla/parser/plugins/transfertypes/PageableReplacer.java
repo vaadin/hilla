@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createReplacer;
+import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createMapper;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ final class PageableReplacer implements Replacer {
 
     @Override
     public void process() {
-        classMappers.add(createReplacer("org.springframework.data.domain.Sort",
+        classMappers.add(TransferTypesPluginUtils.createMapper("org.springframework.data.domain.Sort",
                 Sort.class));
-        classMappers.add(createReplacer(
+        classMappers.add(TransferTypesPluginUtils.createMapper(
                 "org.springframework.data.domain.Pageable", Pageable.class));
-        classMappers.add(createReplacer("org.springframework.data.domain.Page",
+        classMappers.add(TransferTypesPluginUtils.createMapper("org.springframework.data.domain.Page",
                 List.class));
-        classMappers.add(createReplacer(
+        classMappers.add(TransferTypesPluginUtils.createMapper(
                 "org.springframework.data.domain.Sort$Order", Order.class));
     }
 

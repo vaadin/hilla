@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createReplacer;
+import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createMapper;
 
 import java.util.UUID;
 
@@ -11,7 +11,7 @@ final class UUIDReplacer implements Replacer {
 
     @Override
     public void process() {
-        classMappers.add(createReplacer(UUID.class, String.class));
+        classMappers.add(createMapper(UUID.class, String.class));
     }
 
     @Override
