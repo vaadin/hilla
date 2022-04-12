@@ -1,6 +1,7 @@
 package dev.hilla.parser.plugins.transfertypes;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -12,8 +13,9 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
 public final class TransferTypesPlugin implements Plugin.Processor {
+    private final List<Replacer> replacers = List.of(new PageableReplacer(),
+            new UUIDReplacer());
     private int order = -100;
-    private SharedStorage storage;
 
     @Override
     public int getOrder() {
@@ -28,9 +30,9 @@ public final class TransferTypesPlugin implements Plugin.Processor {
     @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
-        var classMappers = storage.getClassMappers();
-
-        new PageableReplacer(classMappers).process();
+        for (var replacer : replacers) {
+            replacer.process();
+        }
     }
 
     @Override
@@ -41,9 +43,13 @@ public final class TransferTypesPlugin implements Plugin.Processor {
         if (toolset.comparePluginOrders(this, BackbonePlugin.class)
                 .map(result -> result >= 0).orElse(true)) {
             throw new PluginException(
-                    "PageableReplacer should be run before BackbonePlugin");
+                    "TransferTypesPlugin should be run before BackbonePlugin");
         }
 
-        this.storage = storage;
+        var classMappers = storage.getClassMappers();
+
+        for (var replacer : replacers) {
+            replacer.setClassMappers(classMappers);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createReplacer;
+import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createMapper;
 
 import java.util.List;
 
@@ -9,21 +9,23 @@ import dev.hilla.runtime.transfertypes.Order;
 import dev.hilla.runtime.transfertypes.Pageable;
 import dev.hilla.runtime.transfertypes.Sort;
 
-public class PageableReplacer {
-    private final ClassMappers classMappers;
+final class PageableReplacer implements Replacer {
+    private ClassMappers classMappers;
 
-    public PageableReplacer(ClassMappers classMappers) {
-        this.classMappers = classMappers;
+    @Override
+    public void process() {
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Sort", Sort.class));
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Pageable", Pageable.class));
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Page", List.class));
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Sort$Order", Order.class));
     }
 
-    public void process() {
-        classMappers.add(createReplacer("org.springframework.data.domain.Sort",
-                Sort.class));
-        classMappers.add(createReplacer(
-                "org.springframework.data.domain.Pageable", Pageable.class));
-        classMappers.add(createReplacer("org.springframework.data.domain.Page",
-                List.class));
-        classMappers.add(createReplacer(
-                "org.springframework.data.domain.Sort$Order", Order.class));
+    @Override
+    public void setClassMappers(ClassMappers classMappers) {
+        this.classMappers = classMappers;
     }
 }
