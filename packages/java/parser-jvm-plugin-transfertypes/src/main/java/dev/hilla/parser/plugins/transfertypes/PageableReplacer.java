@@ -14,12 +14,12 @@ final class PageableReplacer implements Replacer {
 
     @Override
     public void process() {
-        classMappers.add(TransferTypesPluginUtils.createMapper("org.springframework.data.domain.Sort",
-                Sort.class));
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Sort", Sort.class));
         classMappers.add(TransferTypesPluginUtils.createMapper(
                 "org.springframework.data.domain.Pageable", Pageable.class));
-        classMappers.add(TransferTypesPluginUtils.createMapper("org.springframework.data.domain.Page",
-                List.class));
+        classMappers.add(TransferTypesPluginUtils.createMapper(
+                "org.springframework.data.domain.Page", List.class));
         classMappers.add(TransferTypesPluginUtils.createMapper(
                 "org.springframework.data.domain.Sort$Order", Order.class));
     }

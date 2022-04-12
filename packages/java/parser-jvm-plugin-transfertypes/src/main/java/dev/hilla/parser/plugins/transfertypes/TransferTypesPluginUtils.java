@@ -8,8 +8,7 @@ final class TransferTypesPluginUtils {
         return cls -> cls.is(from) ? ClassInfoModel.of(to) : cls;
     }
 
-    public static ClassMappers.Mapper createMapper(Class<?> from,
-                                                   Class<?> to) {
+    public static ClassMappers.Mapper createMapper(Class<?> from, Class<?> to) {
         return createMapper(from.getName(), to);
     }
 }
