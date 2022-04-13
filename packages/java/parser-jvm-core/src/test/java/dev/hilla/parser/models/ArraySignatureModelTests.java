@@ -1,12 +1,12 @@
 package dev.hilla.parser.models;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.AnnotatedArrayType;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,21 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.hilla.parser.test.helpers.TestHelper;
 
+import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ScanResult;
 
-public class AnnotationInfoModelTests {
-    private static void checkModelProvidingName(AnnotationInfoModel model) {
-        assertEquals(model.getName(), Foo.class.getName());
-    }
-
-    private static void checkModelProvidingNoDependencies(
-            AnnotationInfoModel model) {
-        assertEquals(model.getDependencies().size(), 0);
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    @interface Foo {
+public class ArraySignatureModelTests {
+    private static void checkNestedType(ArraySignatureModel model) {
+        var nestedModel = model.getNestedType();
+        assertTrue(nestedModel.isString());
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -42,12 +34,14 @@ public class AnnotationInfoModelTests {
 
     @ExtendWith(MockitoExtension.class)
     public static class ReflectionModelTests {
-        private AnnotationInfoModel model;
+        private ArraySignatureModel model;
 
         @BeforeEach
         public void setUp(@Mock Model parent) throws NoSuchMethodException {
-            var origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
-            model = AnnotationInfoModel.of(origin, parent);
+            var origin = (AnnotatedArrayType) Sample.class.getMethod("foo")
+                    .getAnnotatedReturnType();
+
+            model = ArraySignatureModel.of(origin, parent);
         }
 
         @Test
@@ -56,13 +50,8 @@ public class AnnotationInfoModelTests {
         }
 
         @Test
-        public void should_ProvideName() {
-            checkModelProvidingName(model);
-        }
-
-        @Test
-        public void should_ProvideNoDependencies() {
-            checkModelProvidingNoDependencies(model);
+        public void should_GetNestedType() {
+            checkNestedType(model);
         }
     }
 
@@ -70,7 +59,7 @@ public class AnnotationInfoModelTests {
     public static class SourceModelTests {
         private static final TestHelper helper = new TestHelper();
         private static ScanResult result;
-        private AnnotationInfoModel model;
+        private ArraySignatureModel model;
 
         @AfterAll
         public static void destroy() {
@@ -84,34 +73,31 @@ public class AnnotationInfoModelTests {
 
         @BeforeEach
         public void setUp(@Mock Model parent) {
-            var origin = result.getClassesWithAnnotation(Selector.class)
-                    .stream().flatMap(cls -> cls.getMethodInfo().stream())
-                    .flatMap(method -> method.getAnnotationInfo().stream())
+            var origin = (ArrayTypeSignature) result
+                    .getClassesWithAnnotation(Selector.class).stream()
+                    .flatMap(cls -> cls.getMethodInfo().stream())
+                    .map(method -> method.getTypeSignatureOrTypeDescriptor()
+                            .getResultType())
                     .findFirst().get();
 
-            model = AnnotationInfoModel.of(origin, parent);
+            model = ArraySignatureModel.of(origin, parent);
         }
 
         @Test
-        public void should_ProvideName() {
-            checkModelProvidingName(model);
-        }
-
-        @Test
-        public void should_ProvideNoDependencies() {
-            checkModelProvidingNoDependencies(model);
-        }
-
-        @Test
-        public void should_createCorrectModel_When_ClassGraphUsed() {
+        public void should_CreateCorrectModel_When_ClassGraphUsed() {
             assertTrue(model.isSource());
+        }
+
+        @Test
+        public void should_GetNestedType() {
+            checkNestedType(model);
         }
     }
 
     @Selector
-    static class Sample {
-        @Foo
-        public void bar() {
+    private static class Sample {
+        public String[] foo() {
+            return new String[] {};
         }
     }
 }
