@@ -1,4 +1,4 @@
-package dev.hilla.parser.misc;
+package dev.hilla.parser.test.helpers;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

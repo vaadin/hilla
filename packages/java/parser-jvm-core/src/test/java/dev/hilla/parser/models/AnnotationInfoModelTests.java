@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import dev.hilla.parser.misc.TestHelper;
+import dev.hilla.parser.test.helpers.TestHelper;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ScanResult;

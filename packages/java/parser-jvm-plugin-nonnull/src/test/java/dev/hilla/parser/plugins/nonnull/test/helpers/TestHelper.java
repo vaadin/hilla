@@ -1,27 +1,23 @@
-package dev.hilla.parser.plugins.transfertypes.utils;
+package dev.hilla.parser.plugins.nonnull.test.helpers;
 
 import static dev.hilla.parser.testutils.OpenAPIAssertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
-
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public abstract class TestBase {
-    protected final ObjectMapper mapper = Json.mapper();
-    protected final ResourceLoader resourceLoader = createResourceLoader(
-            getClass());
-    protected Path targetDir;
+public final class TestHelper {
+    private final ObjectMapper mapper = Json.mapper();
+    private final ResourceLoader resourceLoader = createResourceLoader(getClass());
+    private final Path targetDir;
 
     {
         try {
@@ -31,27 +27,24 @@ public abstract class TestBase {
         }
     }
 
-    public static ResourceLoader createResourceLoader(Class<?> target) {
+    private static ResourceLoader createResourceLoader(Class<?> target) {
         return new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
+            target::getProtectionDomain);
     }
 
-    protected void executeParserWithConfig(ParserConfig config)
-            throws IOException, URISyntaxException {
+    public Path getTargetDir() {
+        return targetDir;
+    }
+
+    public void executeParserWithConfig(ParserConfig config)
+        throws IOException, URISyntaxException {
         var parser = new Parser(config);
         parser.execute();
 
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
-                OpenAPI.class);
+            OpenAPI.class);
         var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
-    }
-
-    protected String getExtendedClassPath(Class<?>... classes)
-            throws URISyntaxException {
-        return ResourceLoader.getClasspath(
-                Arrays.stream(classes).map(TestBase::createResourceLoader)
-                        .collect(Collectors.toList()));
     }
 }

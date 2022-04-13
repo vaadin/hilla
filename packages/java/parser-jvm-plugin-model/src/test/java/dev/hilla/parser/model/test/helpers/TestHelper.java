@@ -1,4 +1,4 @@
-package dev.hilla.parser.model.utils;
+package dev.hilla.parser.model.test.helpers;
 
 import static dev.hilla.parser.testutils.OpenAPIAssertions.assertEquals;
 
@@ -14,16 +14,12 @@ import dev.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public abstract class TestBase {
-    protected final ObjectMapper mapper = Json.mapper();
-    protected ResourceLoader resourceLoader;
-    protected Path targetDir;
+public final class TestHelper {
+    private final ObjectMapper mapper = Json.mapper();
+    private final ResourceLoader resourceLoader = createResourceLoader(getClass());
+    private final Path targetDir;
 
     {
-        var target = getClass();
-        resourceLoader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-
         try {
             targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
@@ -31,13 +27,22 @@ public abstract class TestBase {
         }
     }
 
-    protected void executeParserWithConfig(ParserConfig config)
-            throws IOException, URISyntaxException {
+    private static ResourceLoader createResourceLoader(Class<?> target) {
+        return new ResourceLoader(target::getResource,
+            target::getProtectionDomain);
+    }
+
+    public Path getTargetDir() {
+        return targetDir;
+    }
+
+    public void executeParserWithConfig(ParserConfig config)
+        throws IOException, URISyntaxException {
         var parser = new Parser(config);
         parser.execute();
 
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
-                OpenAPI.class);
+            OpenAPI.class);
         var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
