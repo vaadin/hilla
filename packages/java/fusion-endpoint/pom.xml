@@ -14,8 +14,8 @@
     <properties>
         <javax.annotation.api.version>1.3.2</javax.annotation.api.version>
         <javaparser.version>3.24.2</javaparser.version>
-        <swagger.codegen.version>3.0.20</swagger.codegen.version>
-        <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
+        <swagger.codegen.version>3.0.34</swagger.codegen.version>
+        <swagger.codegen.generators.version>1.0.34</swagger.codegen.generators.version>
     </properties>
 
     <dependencies>
