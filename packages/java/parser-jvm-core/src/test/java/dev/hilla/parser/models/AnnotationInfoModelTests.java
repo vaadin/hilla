@@ -3,23 +3,25 @@ package dev.hilla.parser.models;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.github.classgraph.AnnotationInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import dev.hilla.parser.test.helpers.TestHelper;
+import dev.hilla.parser.test.helpers.SourceHelper;
 
-import io.github.classgraph.ScanResult;
-
+@ExtendWith(MockitoExtension.class)
 public class AnnotationInfoModelTests {
     private static void checkModelProvidingName(AnnotationInfoModel model) {
         assertEquals(model.getName(), Foo.class.getName());
@@ -40,61 +42,59 @@ public class AnnotationInfoModelTests {
     @interface Selector {
     }
 
-    @ExtendWith(MockitoExtension.class)
     public static class ReflectionModelTests {
         private AnnotationInfoModel model;
+        private Annotation origin;
 
         @BeforeEach
         public void setUp(@Mock Model parent) throws NoSuchMethodException {
-            var origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
+            origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
             model = AnnotationInfoModel.of(origin, parent);
         }
 
         @Test
         public void should_CreateCorrectModel_When_JavaReflectionUsed() {
             assertTrue(model.isReflection());
-        }
-
-        @Test
-        public void should_ProvideName() {
-            checkModelProvidingName(model);
+            assertEquals(model.get(), origin);
         }
 
         @Test
         public void should_ProvideNoDependencies() {
             checkModelProvidingNoDependencies(model);
         }
+
+        @Nested
+        public class AsNamedModel {
+            @Test
+            public void should_HaveName() {
+                checkModelProvidingName(model);
+            }
+        }
     }
 
-    @ExtendWith(MockitoExtension.class)
     public static class SourceModelTests {
-        private static final TestHelper helper = new TestHelper();
-        private static ScanResult result;
+        private static final SourceHelper helper = new SourceHelper();
         private AnnotationInfoModel model;
+        private AnnotationInfo origin;
 
         @AfterAll
-        public static void destroy() {
-            result.close();
+        public static void fin() {
+            helper.fin();
         }
 
         @BeforeAll
         public static void init() {
-            result = helper.createClassGraph().scan();
+            helper.init();
         }
 
         @BeforeEach
         public void setUp(@Mock Model parent) {
-            var origin = result.getClassesWithAnnotation(Selector.class)
+            origin = helper.getScanResult().getClassesWithAnnotation(Selector.class)
                     .stream().flatMap(cls -> cls.getMethodInfo().stream())
                     .flatMap(method -> method.getAnnotationInfo().stream())
                     .findFirst().get();
 
             model = AnnotationInfoModel.of(origin, parent);
-        }
-
-        @Test
-        public void should_ProvideName() {
-            checkModelProvidingName(model);
         }
 
         @Test
@@ -105,6 +105,15 @@ public class AnnotationInfoModelTests {
         @Test
         public void should_createCorrectModel_When_ClassGraphUsed() {
             assertTrue(model.isSource());
+            assertEquals(model.get(), origin);
+        }
+
+        @Nested
+        public class AsNamedModel {
+            @Test
+            public void should_HaveName() {
+                checkModelProvidingName(model);
+            }
         }
     }
 
