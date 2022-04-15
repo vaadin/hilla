@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 
@@ -21,13 +22,13 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class EntityProcessor {
     private final Collection<ClassInfoModel> classes;
-    private final Context context;
     private final OpenAPI model;
+    private final SharedStorage storage;
 
     public EntityProcessor(@Nonnull Collection<ClassInfoModel> classes,
-            @Nonnull OpenAPI model, @Nonnull Context context) {
+            @Nonnull OpenAPI model, @Nonnull SharedStorage storage) {
         this.classes = Objects.requireNonNull(classes);
-        this.context = Objects.requireNonNull(context);
+        this.storage = Objects.requireNonNull(storage);
         this.model = Objects.requireNonNull(model);
     }
 
@@ -50,7 +51,7 @@ final class EntityProcessor {
                         components.addSchemas(processor.getKey(),
                                 processor.getValue());
 
-                        context.getAssociationMap()
+                        storage.getAssociationMap()
                                 .addEntity(processor.getValue(), entity);
                     }
                 });
@@ -87,7 +88,7 @@ final class EntityProcessor {
 
                 schema.addProperties(processor.getKey(), processor.getValue());
 
-                context.getAssociationMap().addField(processor.getValue(),
+                storage.getAssociationMap().addField(processor.getValue(),
                         field);
             });
 
@@ -122,7 +123,7 @@ final class EntityProcessor {
 
         public ComponentSchemaPropertyProcessor(FieldInfoModel field) {
             this.key = field.getName();
-            this.value = new SchemaProcessor(field.getType(), context)
+            this.value = new SchemaProcessor(field.getType(), storage)
                     .process();
         }
 
