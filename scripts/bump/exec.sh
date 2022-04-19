@@ -3,7 +3,6 @@
 # Fails the script if any command failed or any variable is unset
 set -eu
 
-branch=main
 bump_scripts_dir=$(dirname -- "$0")
 packages_dir="$PWD/packages/ts"
 
@@ -13,7 +12,7 @@ version_tag_suffix=${version_tag_split[3]:+-${version_tag_split[3]}}
 version_tag_npm=$(IFS=. ; echo "${version_tag_split[*]:0:3}")${version_tag_suffix}
 
 ghr () {
-  curl https://api.github.com/repos/"$REPO"/branches/"$branch"/protection \
+  curl https://api.github.com/repos/"$REPO"/branches/"$BRANCH"/protection \
        -H 'Accept: application/vnd.github.v3+json' \
        -H "Authorization: token $GIT_RELEASE_TOKEN" \
        "$@"
@@ -53,7 +52,7 @@ remapped=$(node "$bump_scripts_dir/protection-remap.js" "$protection_config")
 # Restores the protection of the branch
 restore_protection() {
   ghr_put "$remapped"
-  echo "[$(date -Iseconds)][info] Protection of ${branch} branch restored"
+  echo "[$(date -Iseconds)][info] Protection of ${BRANCH} branch restored"
 }
 
 # Will execute "restore_protection" function in the end of the script even if
@@ -62,4 +61,4 @@ trap "restore_protection" EXIT
 
 ghr_put '@-' < "$bump_scripts_dir/disabled-protection.json"
 
-git push "https://vaadin-bot:$GIT_RELEASE_TOKEN@github.com/$REPO.git" "$branch"
+git push "https://vaadin-bot:$GIT_RELEASE_TOKEN@github.com/$REPO.git" "$BRANCH"
