@@ -12,6 +12,7 @@ on:
 
 env:
   VERSION_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.tag_name }}
+  BRANCH: ${{ github.ref_type == 'branch' && github.ref_name || 'main' }}
 
 jobs:
   testing:
@@ -21,10 +22,10 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: main
+          ref: ${{ env.BRANCH }}
       - name: Verify Version Tag
         run: |
           git show-ref -q --tags $VERSION_TAG || { \
