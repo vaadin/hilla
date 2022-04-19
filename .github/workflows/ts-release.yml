@@ -3,6 +3,15 @@ name: TypeScript Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+        required: true
+        description: 'Version tag'
+
+env:
+  VERSION_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.tag_name }}
 
 jobs:
   testing:
@@ -16,6 +25,11 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+      - name: Verify Version Tag
+        run: |
+          git show-ref -q --tags $VERSION_TAG || { \
+            echo "::error::$VERSION_TAG is not a valid tag" 1>&2;
+            false; }
       - name: Use NodeJS LTS
         uses: actions/setup-node@v2
         with:
@@ -36,12 +50,11 @@ jobs:
         env:
           GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
-          VERSION_TAG: ${{ github.event.release.tag_name }}
       - name: Re-build New Version
         run: npm run build
       - name: Publish
         run: |
           npx lerna publish from-package --yes --dist-tag \
-            "$([[ ${{ github.event.release.tag_name }} =~ alpha|beta|rc ]] && echo "next" || echo "latest")"
+            "$([[ $VERSION_TAG =~ alpha|beta|rc ]] && echo "next" || echo "latest")"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
