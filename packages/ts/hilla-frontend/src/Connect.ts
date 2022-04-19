@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import { FluxConnection } from './FluxConnection.js';
 
 const $wnd = window as any;
 /* c8 ignore next 2 */
@@ -84,6 +85,20 @@ export class EndpointResponseError extends Error {
     super(message);
     this.response = response;
   }
+}
+
+/**
+ * Represents the connection to and endpoint returning a subscription rather than a value.
+ */
+export interface Subscription<T> {
+  /** Cancels the subscription.  No values are made available after calling this. */
+  cancel: () => void;
+  /** Called when a new value is available. */
+  onNext: (callback: (value: T) => void) => Subscription<T>;
+  /** Called when an exception occured in the subscription. */
+  onError: (callback: () => void) => Subscription<T>;
+  /** Called when the subscription has completed. No values are made available after calling this. */
+  onComplete: (callback: () => void) => Subscription<T>;
 }
 
 interface ConnectExceptionData {
@@ -261,6 +276,8 @@ export class ConnectClient {
    */
   public middlewares: Middleware[] = [];
 
+  private fluxConnection: FluxConnection | undefined = undefined;
+
   /**
    * @param options Constructor options.
    */
@@ -291,14 +308,13 @@ export class ConnectClient {
   }
 
   /**
-   * Makes a JSON HTTP request to the `${prefix}/${endpoint}/${method}` URL,
-   * optionally supplying the provided params as a JSON request body,
-   * and asynchronously returns the parsed JSON response data.
+   * Calls the given endpoint method defined using the endpoint and method
+   * parameters with the parameters given as params.
+   * Asynchronously returns the parsed JSON response data.
    *
    * @param endpoint Endpoint name.
    * @param method Method name to call in the endpoint class.
-   * @param params Optional object to be send in JSON request body.
-   * @param options Optional client options for this call.
+   * @param params Optional parameters to pass to the method.
    * @returns {} Decoded JSON response data.
    */
   public async call(endpoint: string, method: string, params?: any): Promise<any> {
@@ -391,5 +407,24 @@ export class ConnectClient {
 
     // Invoke all the folded async middlewares and return
     return chain(initialContext);
+  }
+
+  /**
+   * Subscribes to the given method defined using the endpoint and method
+   * parameters with the parameters given as params. The method must return a
+   * compatible type such as a Flux.
+   * Returns a subscription that is used to fetch values as they become available.
+   *
+   * @param endpoint Endpoint name.
+   * @param method Method name to call in the endpoint class.
+   * @param params Optional parameters to pass to the method.
+   * @returns {} A subscription used to handles values as they become available.
+   */
+  public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
+    if (!this.fluxConnection) {
+      this.fluxConnection = new FluxConnection();
+    }
+
+    return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
   }
 }

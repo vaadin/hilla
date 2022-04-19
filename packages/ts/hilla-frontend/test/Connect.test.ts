@@ -4,7 +4,13 @@ import { expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src/index.js';
+import {
+  ConnectClient,
+  EndpointError,
+  EndpointResponseError,
+  EndpointValidationError,
+  FluxConnection,
+} from '../src/index.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
@@ -533,6 +539,39 @@ describe('ConnectClient', () => {
         client.middlewares = [firstMiddleware, secondMiddleware];
         await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
       });
+    });
+  });
+  describe('subscribe method', () => {
+    let client: ConnectClient;
+
+    beforeEach(() => {
+      client = new ConnectClient();
+    });
+
+    it('should create a fluxConnection', async () => {
+      (client as any).fluxConnection = undefined; // NOSONAR
+      client.subscribe('FooEndpoint', 'fooMethod');
+      expect((client as any).fluxConnection).to.not.equal(undefined);
+    });
+
+    it('should reuse the fluxConnection', async () => {
+      client.subscribe('FooEndpoint', 'fooMethod');
+      const { fluxConnection } = client as any;
+      client.subscribe('FooEndpoint', 'barMethod');
+      expect((client as any).fluxConnection).to.equal(fluxConnection);
+    });
+
+    it('should call FluxConnection', async () => {
+      (client as any).fluxConnection = new FluxConnection();
+      let called = 0;
+      (client as any).fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
+        called += 1;
+        expect(endpointName).to.equal('FooEndpoint');
+        expect(methodName).to.equal('fooMethod');
+        expect(params).to.eql([1]);
+      };
+      client.subscribe('FooEndpoint', 'fooMethod', { param: 1 });
+      expect(called).to.equal(1);
     });
   });
 });
