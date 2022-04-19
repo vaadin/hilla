@@ -30,7 +30,6 @@ import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class BaseSignatureModelTests {
@@ -131,9 +130,9 @@ public class BaseSignatureModelTests {
     public static class ModelProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext extensionContext) {
+                ExtensionContext context) {
             return StreamUtils.combine(getReflectionModel(),
-                    getBareReflectionModel(), getSourceModel(extensionContext));
+                    getBareReflectionModel(), getSourceModel(context));
         }
 
         private Stream<Arguments> getReflectionModel() {
@@ -163,11 +162,8 @@ public class BaseSignatureModelTests {
         }
 
         private Stream<Arguments> getSourceModel(ExtensionContext context) {
-            var store = context.getStore(ParserExtension.STORE);
-            var scanResult = (ScanResult) Objects.requireNonNull(
-                    store.get(ParserExtension.Keys.SCAN_RESULT));
-
-            return scanResult.getClassesWithAnnotation(Selector.class).stream()
+            return ParserExtension.getScanResult(context)
+                    .getClassesWithAnnotation(Selector.class).stream()
                     .flatMap(cls -> cls.getMethodInfo().stream())
                     .map(method -> {
                         var origin = (BaseTypeSignature) method
@@ -192,8 +188,8 @@ public class BaseSignatureModelTests {
     public static class AnnotatedModelProvider extends ModelProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext extensionContext) {
-            return super.provideArguments(extensionContext)
+                ExtensionContext context) {
+            return super.provideArguments(context)
                     .filter(this::isNonBareReflection);
         }
 

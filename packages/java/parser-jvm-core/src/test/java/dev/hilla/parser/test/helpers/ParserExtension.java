@@ -12,22 +12,22 @@ import dev.hilla.parser.testutils.ResourceLoader;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 
-public class ParserExtension
-        implements BeforeAllCallback, AfterAllCallback {
+public class ParserExtension implements BeforeAllCallback, AfterAllCallback {
     public static final ExtensionContext.Namespace STORE = ExtensionContext.Namespace
             .create(ParserExtension.class);
 
-    @Override
-    public void afterAll(ExtensionContext context) {
+    public static ScanResult getScanResult(ExtensionContext context) {
         var store = context.getStore(STORE);
-        var scanResult = (ScanResult) Objects
-                .requireNonNull(store.get(Keys.SCAN_RESULT));
-        scanResult.close();
+        return (ScanResult) Objects.requireNonNull(store.get(Keys.SCAN_RESULT));
     }
 
     @Override
-    public void beforeAll(ExtensionContext context)
-            throws URISyntaxException {
+    public void afterAll(ExtensionContext context) {
+        getScanResult(context).close();
+    }
+
+    @Override
+    public void beforeAll(ExtensionContext context) throws URISyntaxException {
         var target = getClass();
         var loader = new ResourceLoader(target::getResource,
                 target::getProtectionDomain);

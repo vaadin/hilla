@@ -8,7 +8,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -22,8 +21,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import dev.hilla.parser.test.helpers.ModelOriginType;
 import dev.hilla.parser.test.helpers.ParserExtension;
-
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class AnnotationInfoModelTests {
@@ -89,11 +86,9 @@ public class AnnotationInfoModelTests {
         }
 
         private Arguments getSourceModel(ExtensionContext context) {
-            var store = context.getStore(ParserExtension.STORE);
-            var scanResult = (ScanResult) Objects.requireNonNull(
-                    store.get(ParserExtension.Keys.SCAN_RESULT));
-            var origin = scanResult.getClassesWithAnnotation(Selector.class)
-                    .stream().flatMap(cls -> cls.getMethodInfo().stream())
+            var origin = ParserExtension.getScanResult(context)
+                    .getClassesWithAnnotation(Selector.class).stream()
+                    .flatMap(cls -> cls.getMethodInfo().stream())
                     .flatMap(method -> method.getAnnotationInfo().stream())
                     .findFirst().get();
             var model = AnnotationInfoModel.of(origin, mock(Model.class));

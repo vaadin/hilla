@@ -30,7 +30,6 @@ import dev.hilla.parser.test.helpers.SpecializationChecker;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class ArraySignatureModelTests {
@@ -140,9 +139,8 @@ public class ArraySignatureModelTests {
     public static class ModelProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext extensionContext) throws Exception {
-            return Stream.of(getReflectionModel(),
-                    getSourceModel(extensionContext));
+                ExtensionContext context) throws Exception {
+            return Stream.of(getReflectionModel(), getSourceModel(context));
         }
 
         private Arguments getReflectionModel() throws NoSuchMethodException {
@@ -155,10 +153,8 @@ public class ArraySignatureModelTests {
         }
 
         private Arguments getSourceModel(ExtensionContext context) {
-            var store = context.getStore(ParserExtension.STORE);
-            var scanResult = (ScanResult) store
-                    .get(ParserExtension.Keys.SCAN_RESULT);
-            var origin = (ArrayTypeSignature) scanResult
+            var origin = (ArrayTypeSignature) ParserExtension
+                    .getScanResult(context)
                     .getClassesWithAnnotation(Selector.class).stream()
                     .flatMap(cls -> cls.getMethodInfo().stream())
                     .map(method -> method.getTypeSignatureOrTypeDescriptor()
