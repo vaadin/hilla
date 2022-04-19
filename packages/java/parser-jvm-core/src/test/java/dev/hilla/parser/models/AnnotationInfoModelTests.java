@@ -2,34 +2,54 @@ package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import io.github.classgraph.AnnotationInfo;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.SourceHelper;
+import dev.hilla.parser.test.helpers.ModelOriginType;
+import dev.hilla.parser.test.helpers.ParserExtension;
 
-@ExtendWith(MockitoExtension.class)
+import io.github.classgraph.ScanResult;
+
+@ExtendWith(ParserExtension.class)
 public class AnnotationInfoModelTests {
-    private static void checkModelProvidingName(AnnotationInfoModel model) {
-        assertEquals(model.getName(), Foo.class.getName());
+    @DisplayName("It should create correct model")
+    @ParameterizedTest(name = "{2}")
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CreateCorrectModel(AnnotationInfoModel model,
+            Object origin, ModelOriginType type) {
+        assertEquals(origin, model.get());
+
+        switch (type) {
+        case SOURCE:
+            assertTrue(model.isSource());
+            break;
+        case REFLECTION:
+            assertTrue(model.isReflection());
+            break;
+        }
     }
 
-    private static void checkModelProvidingNoDependencies(
-            AnnotationInfoModel model) {
-        assertEquals(model.getDependencies().size(), 0);
+    @DisplayName("It should provide no dependencies")
+    @ParameterizedTest(name = "{2}")
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideNoDependencies(AnnotationInfoModel model,
+            Object origin, ModelOriginType type) {
+        assertEquals(0, model.getDependencies().size());
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -42,83 +62,48 @@ public class AnnotationInfoModelTests {
     @interface Selector {
     }
 
-    public static class ReflectionModelTests {
-        private AnnotationInfoModel model;
-        private Annotation origin;
-
-        @BeforeEach
-        public void setUp(@Mock Model parent) throws NoSuchMethodException {
-            origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
-            model = AnnotationInfoModel.of(origin, parent);
-        }
-
-        @Test
-        public void should_CreateCorrectModel_When_JavaReflectionUsed() {
-            assertTrue(model.isReflection());
-            assertEquals(model.get(), origin);
-        }
-
-        @Test
-        public void should_ProvideNoDependencies() {
-            checkModelProvidingNoDependencies(model);
-        }
-
-        @Nested
-        public class AsNamedModel {
-            @Test
-            public void should_HaveName() {
-                checkModelProvidingName(model);
-            }
+    @Nested
+    @DisplayName("As a NamedModel")
+    public class AsNamedModel {
+        @DisplayName("It should have name")
+        @ParameterizedTest(name = "{2}")
+        @ArgumentsSource(ModelProvider.class)
+        public void should_HaveName(AnnotationInfoModel model, Object origin,
+                ModelOriginType type) {
+            assertEquals(Foo.class.getName(), model.getName());
         }
     }
 
-    public static class SourceModelTests {
-        private static final SourceHelper helper = new SourceHelper();
-        private AnnotationInfoModel model;
-        private AnnotationInfo origin;
-
-        @AfterAll
-        public static void fin() {
-            helper.fin();
+    public static class ModelProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(
+                ExtensionContext context) throws NoSuchMethodException {
+            return Stream.of(getReflectionModel(), getSourceModel(context));
         }
 
-        @BeforeAll
-        public static void init() {
-            helper.init();
+        private Arguments getReflectionModel() throws NoSuchMethodException {
+            var origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
+            var model = AnnotationInfoModel.of(origin, mock(Model.class));
+
+            return Arguments.of(model, origin, ModelOriginType.REFLECTION);
         }
 
-        @BeforeEach
-        public void setUp(@Mock Model parent) {
-            origin = helper.getScanResult().getClassesWithAnnotation(Selector.class)
+        private Arguments getSourceModel(ExtensionContext context) {
+            var store = context.getStore(ParserExtension.STORE);
+            var scanResult = (ScanResult) Objects.requireNonNull(
+                    store.get(ParserExtension.Keys.SCAN_RESULT));
+            var origin = scanResult.getClassesWithAnnotation(Selector.class)
                     .stream().flatMap(cls -> cls.getMethodInfo().stream())
                     .flatMap(method -> method.getAnnotationInfo().stream())
                     .findFirst().get();
+            var model = AnnotationInfoModel.of(origin, mock(Model.class));
 
-            model = AnnotationInfoModel.of(origin, parent);
-        }
-
-        @Test
-        public void should_ProvideNoDependencies() {
-            checkModelProvidingNoDependencies(model);
-        }
-
-        @Test
-        public void should_createCorrectModel_When_ClassGraphUsed() {
-            assertTrue(model.isSource());
-            assertEquals(model.get(), origin);
-        }
-
-        @Nested
-        public class AsNamedModel {
-            @Test
-            public void should_HaveName() {
-                checkModelProvidingName(model);
-            }
+            return Arguments.of(model, origin, ModelOriginType.SOURCE);
         }
     }
 
     @Selector
-    static class Sample {
+    private static class Sample {
         @Foo
         public void bar() {
         }
