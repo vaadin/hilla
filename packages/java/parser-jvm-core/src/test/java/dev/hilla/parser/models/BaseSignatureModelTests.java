@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,14 @@ public class BaseSignatureModelTests {
             assertTrue(model.isReflection());
             break;
         }
+    }
+
+    @DisplayName("It should create correct model")
+    @ParameterizedTest(name = "{3} [{2}]")
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideNoDependencies(BaseSignatureModel model,
+            Object origin, String name, ModelOriginType type) {
+        assertEquals(Set.of(), model.getDependencies());
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -178,16 +187,19 @@ public class BaseSignatureModelTests {
         }
     }
 
-    // BareSignatureModel.Bare is not supposed to be annotated, so we can safely ignore it.
+    // BareSignatureModel.Bare is not supposed to be annotated, so we can safely
+    // ignore it.
     public static class AnnotatedModelProvider extends ModelProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(
-            ExtensionContext extensionContext) {
-            return super.provideArguments(extensionContext).filter(this::isNonBareReflection);
+                ExtensionContext extensionContext) {
+            return super.provideArguments(extensionContext)
+                    .filter(this::isNonBareReflection);
         }
 
         private boolean isNonBareReflection(Arguments arguments) {
-            return !Objects.equals(arguments.get()[3], ModelOriginType.REFLECTION_BARE);
+            return !Objects.equals(arguments.get()[3],
+                    ModelOriginType.REFLECTION_BARE);
         }
     }
 

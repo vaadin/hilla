@@ -9,7 +9,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedType;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import dev.hilla.parser.test.helpers.ParserExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 
 import io.github.classgraph.ArrayTypeSignature;
+import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
@@ -53,7 +56,35 @@ public class ArraySignatureModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
             Object origin, ModelOriginType type) {
-        assertTrue(model.getNestedType().isString());
+        var nested = model.getNestedType();
+        assertTrue(nested instanceof ClassRefSignatureModel);
+
+        switch (type) {
+        case REFLECTION: {
+            var nestedOrigin = (AnnotatedType) nested.get();
+            var cls = (Class<?>) nestedOrigin.getType();
+            assertTrue(Dependency.class.isAssignableFrom(cls));
+        }
+            break;
+        case SOURCE: {
+            var nestedOrigin = (ClassRefTypeSignature) nested.get();
+            var cls = nestedOrigin.getClassInfo().loadClass();
+            assertTrue(Dependency.class.isAssignableFrom(cls));
+        }
+            break;
+        }
+    }
+
+    @DisplayName("It should provide dependencies")
+    @ParameterizedTest(name = "{2}")
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideDependencies(ArraySignatureModel model,
+            Object origin, ModelOriginType type) {
+        var dependencies = model.getDependencies();
+
+        assertEquals(
+                Set.of(ClassInfoModel.of(Dependency.class, mock(Model.class))),
+                dependencies);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -140,11 +171,15 @@ public class ArraySignatureModelTests {
         }
     }
 
+    private static class Dependency {
+        public final String baz = "baz";
+    }
+
     @Selector
     private static class Sample {
         @Bar
-        public String[] foo() {
-            return new String[] {};
+        public Dependency[] foo() {
+            return new Dependency[] {};
         }
     }
 }
