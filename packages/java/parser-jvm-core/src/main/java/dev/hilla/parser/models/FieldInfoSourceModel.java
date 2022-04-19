@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -11,6 +12,24 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
 
     public FieldInfoSourceModel(FieldInfo field, Model parent) {
         super(field, parent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof FieldInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof FieldInfoSourceModel) {
+            return Objects.equals(origin,
+                    ((FieldInfoSourceModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((FieldInfoModel) other).getName());
     }
 
     @Override

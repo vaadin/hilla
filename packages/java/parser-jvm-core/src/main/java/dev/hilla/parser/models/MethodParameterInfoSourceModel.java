@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -13,6 +14,25 @@ final class MethodParameterInfoSourceModel
     public MethodParameterInfoSourceModel(MethodParameterInfo parameter,
             Model parent) {
         super(parameter, parent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof MethodParameterInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof MethodParameterInfoSourceModel) {
+            return Objects.equals(origin,
+                    ((MethodParameterInfoSourceModel) other).origin);
+        }
+
+        return Objects.equals(getName(),
+                ((MethodParameterInfoModel) other).getName());
     }
 
     @Override

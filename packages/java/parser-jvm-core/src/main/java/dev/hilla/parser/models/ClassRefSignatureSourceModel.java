@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,7 +8,6 @@ import java.util.stream.Stream;
 import dev.hilla.parser.utils.StreamUtils;
 
 import io.github.classgraph.AnnotationInfo;
-import io.github.classgraph.AnnotationInfoList;
 import io.github.classgraph.ClassRefTypeSignature;
 
 final class ClassRefSignatureSourceModel
@@ -56,16 +54,13 @@ final class ClassRefSignatureSourceModel
 
     @Override
     protected Stream<AnnotationInfo> getOriginAnnotations() {
-        List<AnnotationInfo> typeAnnotationInfo = origin
-                .getTypeAnnotationInfo() != null
-                        ? origin.getTypeAnnotationInfo()
-                        : Collections.emptyList();
-        List<AnnotationInfoList> suffixTypeAnnotations = origin
-                .getSuffixTypeAnnotationInfo() != null
-                        ? origin.getSuffixTypeAnnotationInfo()
-                        : Collections.emptyList();
+        var annotations = origin.getTypeAnnotationInfo();
+        var suffixAnnotations = origin.getSuffixTypeAnnotationInfo();
 
-        return StreamUtils.combine(typeAnnotationInfo.stream(),
-                suffixTypeAnnotations.stream().flatMap(Collection::stream));
+        return StreamUtils.combine(
+                annotations != null ? annotations.stream() : Stream.empty(),
+                suffixAnnotations != null
+                        ? suffixAnnotations.stream().flatMap(Collection::stream)
+                        : Stream.empty());
     }
 }

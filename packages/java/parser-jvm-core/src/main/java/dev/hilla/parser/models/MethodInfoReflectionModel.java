@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class MethodInfoReflectionModel
@@ -14,6 +15,24 @@ final class MethodInfoReflectionModel
 
     public MethodInfoReflectionModel(Method method, Model parent) {
         super(method, parent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof MethodInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof MethodInfoReflectionModel) {
+            return Objects.equals(origin,
+                    ((MethodInfoReflectionModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((MethodInfoModel) other).getName());
     }
 
     @Override

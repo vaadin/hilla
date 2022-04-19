@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,6 +17,24 @@ final class MethodInfoSourceModel
 
     public MethodInfoSourceModel(MethodInfo method, Model parent) {
         super(method, parent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof MethodInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof MethodInfoSourceModel) {
+            return Objects.equals(origin,
+                    ((MethodInfoSourceModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((MethodInfoModel) other).getName());
     }
 
     @Override

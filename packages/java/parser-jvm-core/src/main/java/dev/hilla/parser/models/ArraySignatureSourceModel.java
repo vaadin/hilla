@@ -25,6 +25,7 @@ final class ArraySignatureSourceModel
 
     @Override
     protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getTypeAnnotationInfo().stream();
+        var annotations = origin.getTypeAnnotationInfo();
+        return annotations != null ? annotations.stream() : Stream.empty();
     }
 }

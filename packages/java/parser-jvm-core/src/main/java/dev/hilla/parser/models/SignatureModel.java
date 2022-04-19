@@ -50,10 +50,17 @@ public interface SignatureModel
         } else if (signature instanceof AnnotatedWildcardType) {
             return TypeArgumentModel.of((AnnotatedWildcardType) signature,
                     parent);
+        } else if (signature instanceof AnnotatedType) {
+            var type = (Class<?>) ((AnnotatedType) signature).getType();
+
+            if (type.isPrimitive()) {
+                return BaseSignatureModel.of((AnnotatedType) signature, parent);
+            } else {
+                return ClassRefSignatureModel.of((AnnotatedType) signature,
+                        parent);
+            }
         } else {
-            var type = signature instanceof AnnotatedType
-                    ? (Class<?>) ((AnnotatedType) signature).getType()
-                    : (Class<?>) signature;
+            var type = (Class<?>) signature;
 
             if (type.isPrimitive()) {
                 return BaseSignatureModel.of(type, parent);

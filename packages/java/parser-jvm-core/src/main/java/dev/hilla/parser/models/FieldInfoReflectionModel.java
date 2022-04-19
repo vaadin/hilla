@@ -3,6 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Objects;
 
 final class FieldInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Field>
@@ -12,6 +13,24 @@ final class FieldInfoReflectionModel
 
     public FieldInfoReflectionModel(Field field, Model parent) {
         super(field, parent);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof FieldInfoModel)) {
+            return false;
+        }
+
+        if (other instanceof FieldInfoReflectionModel) {
+            return Objects.equals(origin,
+                    ((FieldInfoReflectionModel) other).origin);
+        }
+
+        return Objects.equals(getName(), ((FieldInfoModel) other).getName());
     }
 
     @Override

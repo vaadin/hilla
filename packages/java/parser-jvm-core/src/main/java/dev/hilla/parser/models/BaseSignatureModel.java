@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.lang.reflect.AnnotatedType;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -13,9 +14,14 @@ public interface BaseSignatureModel extends SignatureModel {
                 Objects.requireNonNull(parent));
     }
 
-    static BaseSignatureModel of(@Nonnull Class<?> origin, Model parent) {
+    static BaseSignatureModel of(@Nonnull AnnotatedType origin, Model parent) {
         return new BaseSignatureReflectionModel(Objects.requireNonNull(origin),
                 parent);
+    }
+
+    static BaseSignatureModel of(@Nonnull Class<?> origin, Model parent) {
+        return new BaseSignatureReflectionModel.Bare(Objects.requireNonNull(origin),
+            parent);
     }
 
     @Override

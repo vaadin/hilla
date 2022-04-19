@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -43,6 +44,16 @@ public interface ClassRefSignatureModel extends SignatureModel {
     static ClassRefSignatureModel of(@Nonnull AnnotatedParameterizedType origin,
             Model parent) {
         return new ClassRefSignatureReflectionModel(origin, parent);
+    }
+
+    static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
+        return of(origin, null);
+    }
+
+    static ClassRefSignatureModel of(@Nonnull AnnotatedType origin,
+            Model parent) {
+        return new ClassRefSignatureReflectionModel.AnnotatedBare(origin,
+                parent);
     }
 
     List<TypeArgumentModel> getTypeArguments();

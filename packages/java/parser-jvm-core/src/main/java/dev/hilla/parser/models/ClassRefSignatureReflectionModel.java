@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +44,35 @@ final class ClassRefSignatureReflectionModel
     @Override
     public void setReference(ClassInfoModel reference) {
         this.reference = reference;
+    }
+
+    static class AnnotatedBare
+            extends AbstractAnnotatedReflectionModel<AnnotatedType>
+            implements ClassRefSignatureModel, ReflectionSignatureModel {
+        private ClassInfoModel reference;
+
+        public AnnotatedBare(AnnotatedType origin, Model parent) {
+            super(origin, parent);
+        }
+
+        @Override
+        public List<TypeArgumentModel> getTypeArguments() {
+            return List.of();
+        }
+
+        @Override
+        public ClassInfoModel resolve() {
+            if (reference == null) {
+                reference = ClassInfoModel.of((Class<?>) origin.getType());
+            }
+
+            return reference;
+        }
+
+        @Override
+        public void setReference(ClassInfoModel reference) {
+            this.reference = reference;
+        }
     }
 
     static class Bare extends AbstractAnnotatedReflectionModel<Class<?>>
