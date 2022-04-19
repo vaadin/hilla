@@ -32,7 +32,7 @@ jobs:
         env:
           CI: true
       - name: Bump New Version
-        run: sh scripts/bump/exec.sh
+        run: ./scripts/bump/exec.sh
         env:
           GIT_RELEASE_TOKEN: ${{ secrets.GIT_RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
