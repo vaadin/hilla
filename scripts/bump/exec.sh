@@ -8,7 +8,7 @@ bump_scripts_dir=$(dirname -- "$0")
 packages_dir="$PWD/packages/ts"
 
 # Convert X.Y.Z.suffix git tag to X.Y.Z-suffix npm version
-version_tag_split=(${VERSION_TAG//./ })
+IFS=. read -ra version_tag_split <<< "${VERSION_TAG}"
 version_tag_suffix=${version_tag_split[3]:+-${version_tag_split[3]}}
 version_tag_npm=$(IFS=. ; echo "${version_tag_split[*]:0:3}")${version_tag_suffix}
 
