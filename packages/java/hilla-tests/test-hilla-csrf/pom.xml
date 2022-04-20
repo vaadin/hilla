@@ -6,12 +6,16 @@
   <parent>
     <groupId>dev.hilla</groupId>
     <artifactId>hilla-tests</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>test-hilla-csrf</artifactId>
   <name>ITs for Hilla CSRF</name>
   <packaging>war</packaging>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
 
   <dependencies>
     <!-- Project dependencies -->

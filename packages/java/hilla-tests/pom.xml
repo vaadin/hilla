@@ -6,7 +6,7 @@
   <parent>
     <groupId>dev.hilla</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -17,25 +17,33 @@
   <properties>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
 
-    <sonar.skip>true</sonar.skip>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
+    <jetty.version>9.4.37.v20210219</jetty.version>
+    <jetty.scantrigger></jetty.scantrigger>
+
     <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
 
     <maven.deploy.skip>true</maven.deploy.skip>
-    <vaadin.devmode.liveReload.enabled>false</vaadin.devmode.liveReload.enabled>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+
     <vaadin.allow.appshell.annotations>false</vaadin.allow.appshell.annotations>
+    <vaadin.devmode.liveReload.enabled>false</vaadin.devmode.liveReload.enabled>
+    <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
     <!-- make sure we do not leave webpack-dev-server running after IT -->
     <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
+
+    <!-- Used in the tests, should be overridden for each module to support
+    concurrent running of test modules. -->
     <server.port>8888</server.port>
     <server.stop.port>8889</server.stop.port>
-    <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
-    <jetty.version>9.4.37.v20210219</jetty.version>
-    <jetty.scantrigger></jetty.scantrigger>
+
+    <sonar.skip>true</sonar.skip>
+    <testListener></testListener>
   </properties>
 
   <modules>
     <module>test-hilla-csrf</module>
     <module>test-hilla-csrf-context</module>
+    <module>hilla-spring-tests</module>
   </modules>
 
   <dependencies>
@@ -93,7 +101,21 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-maven-plugin</artifactId>
+          <version>${flow.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-frontend</goal>
+                <goal>build-frontend</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <artifactId>maven-clean-plugin</artifactId>
+          <version>3.2.0</version>
           <configuration>
             <filesets>
               <fileset>
@@ -177,4 +199,25 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <!-- Production mode is activated using -Pproduction -->
+      <id>production</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>com.vaadin</groupId>
+              <artifactId>flow-maven-plugin</artifactId>
+              <version>${flow.version}</version>
+              <configuration>
+                <productionMode>true</productionMode>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
 </project>
