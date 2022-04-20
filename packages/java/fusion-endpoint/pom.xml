@@ -99,7 +99,7 @@
         <dependency>
             <groupId>io.socket</groupId>
             <artifactId>socket.io-server</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.json</groupId>
