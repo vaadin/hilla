@@ -3,12 +3,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-spring-tests</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <groupId>dev.hilla</groupId>
+        <artifactId>hilla-spring-tests</artifactId>
+        <version>1.1-SNAPSHOT</version>
     </parent>
     <artifactId>test-endpoints</artifactId>
-    <name>Integration tests for endpoints</name>
+    <name>ITs for Endpoints</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
             <exclusions>
                 <!-- There are no vaadin components in the test UIs -->
                 <exclusion>
@@ -30,17 +30,17 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dev-server</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-polymer-template</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>fusion-endpoint</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -70,19 +70,6 @@
 
         <plugins>
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-frontend</goal>
-                            <goal>build-frontend</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
@@ -101,6 +88,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

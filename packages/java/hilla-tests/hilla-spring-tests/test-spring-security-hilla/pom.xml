@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-spring-tests</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <groupId>dev.hilla</groupId>
+        <artifactId>hilla-spring-tests</artifactId>
+        <version>1.1-SNAPSHOT</version>
     </parent>
-    <artifactId>test-spring-security-fusion</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion</name>
+    <artifactId>test-spring-security-hilla</artifactId>
+    <name>ITs for Vaadin Spring Security and Hilla</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -16,8 +16,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin</artifactId>
+            <groupId>dev.hilla</groupId>
+            <artifactId>hilla</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -30,6 +31,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
+            <version>${vaadin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -41,19 +43,19 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
     </dependencies>
 
@@ -73,7 +75,7 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>${flow.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -105,28 +107,6 @@
                         <goals>
                             <goal>stop</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>package-frontend-folder</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>frontend</classifier>
-                            <classesDirectory>${project.basedir}/frontend</classesDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

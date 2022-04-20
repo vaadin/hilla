@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-spring-tests</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <groupId>dev.hilla</groupId>
+        <artifactId>hilla-spring-tests</artifactId>
+        <version>1.1-SNAPSHOT</version>
     </parent>
-    <artifactId>test-spring-security-fusion-jwt</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion With JWT</name>
+    <artifactId>test-spring-security-hilla-jwt</artifactId>
+    <name>ITs for Vaadin Spring Security and Hilla / JWT</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -16,14 +16,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring</artifactId>
+            <groupId>dev.hilla</groupId>
+            <artifactId>hilla</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>fusion-endpoint</artifactId>
-            <version>${project.version}</version>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench</artifactId>
+            <version>${vaadin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -35,25 +44,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-spring-security-fusion</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-spring-security-fusion</artifactId>
-            <version>${project.version}</version>
-            <classifier>frontend</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-spring-security-fusion</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -66,6 +61,10 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
 
     </dependencies>
@@ -84,33 +83,9 @@
 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.vaadin</groupId>
-                                    <artifactId>test-spring-security-fusion</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>frontend</classifier>
-                                    <outputDirectory>${project.basedir}/frontend</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>${flow.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -139,6 +114,33 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>package*.json</include>
+                                <include>node_modules/**</include>
+                                <include>types.d.ts</include>
+                                <include>tsconfig.json</include>
+                                <include>webpack.generated.js</include>
+                                <include>vite*.js</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>com/vaadin/flow/spring/fusionsecurity/**/*.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

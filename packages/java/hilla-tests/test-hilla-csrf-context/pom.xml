@@ -1,99 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>com.vaadin</groupId>
-        <artifactId>flow-tests</artifactId>
-        <version>23.2-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-tests</artifactId>
+    <version>1.1-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>test-fusion-csrf-context</artifactId>
-    <name>Fusion CSRF tests with custom context path</name>
-    <description>
-        For https://github.com/vaadin/fusion/issues/105.
-        It verifies that the csrf cookie is added to correct path
-        when first open a sub view.
-        Note, the test needs to be in a separate module because
-        it needs to open a sub view first, put the test into another
-        module cannot gurantee this.
-    </description>
-    <version>23.2-SNAPSHOT</version>
-    <packaging>war</packaging>
+  <artifactId>test-hilla-csrf-context</artifactId>
+  <name>ITs for Hilla CSRF / context path</name>
+  <description>
+    For https://github.com/vaadin/fusion/issues/105.
+    It verifies that the csrf cookie is added to correct path
+    when first open a sub view.
+    Note, the test needs to be in a separate module because
+    it needs to open a sub view first, put the test into another
+    module cannot gurantee this.
+  </description>
+  <packaging>war</packaging>
 
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
 
-    <dependencies>
-        <!-- Project dependencies -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>fusion-endpoint</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-fusion-csrf</artifactId>
-            <version>${project.version}</version>
-            <classifier>frontend</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-fusion-csrf</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <!-- Project dependencies -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>fusion-endpoint</artifactId>
+      <version>${flow.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-client</artifactId>
+      <version>${flow.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-dev-server</artifactId>
+      <version>${flow.version}</version>
+    </dependency>
+  </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.vaadin</groupId>
-                                    <artifactId>test-fusion-csrf</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>frontend</classifier>
-                                    <outputDirectory>${project.basedir}/frontend</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- This module is mapped to default web context -->
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <webApp>
-                        <contextPath>/foo</contextPath>
-                    </webApp>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
-                <configuration>
-                    <productionMode>false</productionMode>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <plugins>
+      <!-- This module is mapped to default web context -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <configuration>
+          <webApp>
+            <contextPath>/foo</contextPath>
+          </webApp>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
 </project>

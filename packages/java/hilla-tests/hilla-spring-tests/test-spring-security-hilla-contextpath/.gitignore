@@ -1,3 +1,1 @@
-# ignore the frontend folder
-# since it's supposed to be extracted from test-spring-security-fusion:frontend jar
-frontend/
+!webpack.config.js
