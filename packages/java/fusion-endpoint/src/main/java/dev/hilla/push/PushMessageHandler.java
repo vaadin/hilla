@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import dev.hilla.ConditionalOnFeatureFlag;
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
@@ -41,8 +42,10 @@ import reactor.core.publisher.Flux;
  * returned from endpoints.
  */
 @Service
+@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public class PushMessageHandler {
 
+    static final String PUSH_FEATURE_FLAG = "hillaPush";
     private final EndpointInvoker endpointInvoker;
     private Map<String, Disposable> closeHandlers = new ConcurrentHashMap<>();
 

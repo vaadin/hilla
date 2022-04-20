@@ -4,9 +4,10 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import reactor.core.scheduler.Schedulers;
+import dev.hilla.ConditionalOnFeatureFlag;
 
 @WebListener
+@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public class EngineIoCleanup implements ServletContextListener {
 
     private EngineIoHandler engineIoHandler;

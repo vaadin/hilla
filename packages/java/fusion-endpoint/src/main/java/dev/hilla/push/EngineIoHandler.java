@@ -25,6 +25,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import dev.hilla.ConditionalOnFeatureFlag;
 import io.socket.engineio.server.EngineIoServer;
 import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.engineio.server.utils.ParseQS;
@@ -35,6 +36,7 @@ import reactor.core.scheduler.Schedulers;
  * transport mechansim for socket.io.
  */
 @Controller
+@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public final class EngineIoHandler
         implements HandshakeInterceptor, WebSocketHandler {
 
