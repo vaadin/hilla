@@ -6,6 +6,8 @@
 
 // @ts-ignore
 import client from './connect-client.default';
+// @ts-ignore
+import { Subscription } from '@hilla/frontend';
 import type ChildModel from './dev/hilla/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ChildModel';
 import type ParentModel from './dev/hilla/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ParentModel';
 

@@ -136,6 +136,10 @@ class SchemaResolver {
             return createNullableWrapper(createEnumTypeSchema());
         }
 
+        if (type.isFlux()) {
+            return createNullableWrapper(createFluxSchema());
+        }
+
         return createNullableWrapper(createUserBeanSchema());
     }
 
@@ -209,6 +213,15 @@ class SchemaResolver {
                     .$ref(getFullQualifiedNameRef(qualifiedName));
         }
         return new ObjectSchema();
+    }
+
+    private Schema createFluxSchema() {
+        Schema subTypeSchema = new SchemaResolver(
+                type.getTypeArguments().get(0), usedTypes).resolve();
+        ArraySchema arr = new ArraySchema();
+        arr.setItems(subTypeSchema);
+        arr.addExtension("x-flux", true);
+        return arr;
     }
 
     private boolean isRequired() {

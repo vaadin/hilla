@@ -1,28 +1,21 @@
 package com.vaadin.flow.connect;
 
+import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // Use default spring login form
-        http.formLogin();
-        // Vaadin already handles csrf.
-        http.csrf().disable();
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        // Access to static resources, bypassing Spring security.
-        web.ignoring().antMatchers("/VAADIN/**");
+        super.configure(http);
+        http.csrf().ignoringAntMatchers("/login");
+        setLoginView(http, "/login");
     }
 
     @Override
@@ -33,4 +26,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .roles("USER").and().withUser("admin").password("{noop}admin")
                 .roles("ADMIN", "USER");
     }
+
 }

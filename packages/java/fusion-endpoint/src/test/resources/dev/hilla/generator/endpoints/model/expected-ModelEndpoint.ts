@@ -6,6 +6,8 @@
 
 // @ts-ignore
 import client from './connect-client.default';
+// @ts-ignore
+import { Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/model/ModelEndpoint/Account';
 import type Group from './dev/hilla/generator/endpoints/model/ModelEndpoint/Group';
 import type ModelFromDifferentPackage from './dev/hilla/generator/endpoints/model/subpackage/ModelFromDifferentPackage';

@@ -34,7 +34,14 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dev.hilla.EndpointNameChecker;
+import dev.hilla.generator.GeneratorUtils;
+import dev.hilla.generator.MainGenerator;
+import dev.hilla.generator.OpenAPIObjectGenerator;
 import io.swagger.codegen.v3.ClientOptInput;
 import io.swagger.codegen.v3.CodegenModel;
 import io.swagger.codegen.v3.CodegenOperation;
@@ -55,12 +62,6 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dev.hilla.generator.GeneratorUtils;
-import dev.hilla.generator.MainGenerator;
-import dev.hilla.generator.OpenAPIObjectGenerator;
 
 /**
  * Vaadin JavaScript generator implementation for swagger-codegen. Some parts of
@@ -73,6 +74,9 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
     private static final String EXTENSION_VAADIN_CONNECT_PARAMETERS = "x-vaadin-connect-parameters";
     private static final String EXTENSION_VAADIN_CONNECT_SERVICE_NAME = "x-vaadin-connect-endpoint-name";
     private static final String EXTENSION_VAADIN_CONNECT_SHOW_TSDOC = "x-vaadin-connect-show-tsdoc";
+    private static final String EXTENSION_VAADIN_CONNECT_SUBSCRIBE_FLAG = "x-vaadin-connect-subscribe";
+    private static final String EXTENSION_VAADIN_CONNECT_CALL_OR_SUBSCRIBE = "x-vaadin-connect-call-or-subscribe";
+    private static final String EXTENSION_VAADIN_CONNECT_SUBSCRIBE_RETURN_TYPE = "x-vaadin-connect-subscribe-return-type";
     private static final String GENERATOR_NAME = "javascript-vaadin-connect";
     private static final String OPERATION = "operation";
     private static final Pattern PATH_REGEX = Pattern
@@ -216,6 +220,20 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
                 httpMethod, operation, schemas, openAPI);
         String endpointName = matcher.group(1);
         String methodName = matcher.group(2);
+
+        if (codegenOperation.getReturnType() != null && codegenOperation
+                .getReturnType().startsWith("Subscription<")) {
+            codegenOperation.getVendorExtensions()
+                    .put(EXTENSION_VAADIN_CONNECT_SUBSCRIBE_FLAG, true);
+            codegenOperation.getVendorExtensions().put(
+                    EXTENSION_VAADIN_CONNECT_SUBSCRIBE_RETURN_TYPE,
+                    codegenOperation.getReturnType());
+            codegenOperation.getVendorExtensions().put(
+                    EXTENSION_VAADIN_CONNECT_CALL_OR_SUBSCRIBE, "subscribe");
+        } else {
+            codegenOperation.getVendorExtensions()
+                    .put(EXTENSION_VAADIN_CONNECT_CALL_OR_SUBSCRIBE, "call");
+        }
         codegenOperation.getVendorExtensions()
                 .put(EXTENSION_VAADIN_CONNECT_METHOD_NAME, methodName);
         codegenOperation.getVendorExtensions()
@@ -298,8 +316,14 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
         if (schema instanceof ArraySchema) {
             ArraySchema arraySchema = (ArraySchema) schema;
             Schema inner = arraySchema.getItems();
-            return String.format("Array<%s>%s", this.getTypeDeclaration(inner),
-                    optionalSuffix);
+            if (schema.getExtensions() != null
+                    && schema.getExtensions().containsKey("x-flux")) {
+                return String.format("Subscription<%s>%s",
+                        this.getTypeDeclaration(inner), optionalSuffix);
+            } else {
+                return String.format("Array<%s>%s",
+                        this.getTypeDeclaration(inner), optionalSuffix);
+            }
         } else if (GeneratorUtils.isNotBlank(schema.get$ref())) {
             return OpenAPIUtil.getSimpleRef(schema.get$ref()) + optionalSuffix;
         } else if (schema.getAdditionalProperties() != null) {

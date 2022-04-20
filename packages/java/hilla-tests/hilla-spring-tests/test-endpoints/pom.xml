@@ -8,7 +8,7 @@
         <version>23.1-SNAPSHOT</version>
     </parent>
     <artifactId>test-endpoints</artifactId>
-    <name>Integration tests for V15+ endpoints</name>
+    <name>Integration tests for endpoints</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

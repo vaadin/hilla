@@ -37,6 +37,9 @@ So `// @ts-ignore` is used for now to mute this error. The consequences are:
 
 }}// @ts-ignore
 import client from '{{vaadinConnectDefaultClientPath}}';
+// @ts-ignore
+import { Subscription } from '@hilla/frontend';
+
 {{#each imports}}
 import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/importAs}} from '{{importPath}}';
 {{/each}}
@@ -56,10 +59,24 @@ function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
  }}{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
  {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports type ../../imports}}}{{#if @last}}{{! Append new line if it's the last param.}}
 {{else}},{{! Used the `~` after if to remove extra empty line by the each loop}}{{/if~}}
-{{/each}}): Promise<{{!
+{{/each}}): {{#vendorExtensions.x-vaadin-connect-subscribe}}
+{{!
+}}{{{getClassNameFromImports vendorExtensions.x-vaadin-connect-subscribe-return-type ../../../imports}}}{{!
+}}
+{{/vendorExtensions.x-vaadin-connect-subscribe}}
+{{^vendorExtensions.x-vaadin-connect-subscribe}}
+Promise<{{!
 }}{{#responses}}{{#dataType}}{{{getClassNameFromImports dataType ../../../imports}}}{{/dataType}}{{^dataType}}void{{/dataType}}{{/responses}}{{!
-}}> {
+}}>
+{{/vendorExtensions.x-vaadin-connect-subscribe}}
+{
 {{=<% %>=}}
+<%#vendorExtensions.x-vaadin-connect-subscribe%>
+  return client.subscribe('<%vendorExtensions.x-vaadin-connect-endpoint-name%>', '<%vendorExtensions.x-vaadin-connect-method-name%>',{<%#each bodyParam.vendorExtensions.x-vaadin-connect-parameters%><%!
+      %><%name%><%#if @last%><%else%>, <%/if%><%!
+    %><%/each%>});
+<%/vendorExtensions.x-vaadin-connect-subscribe%>
+<%^vendorExtensions.x-vaadin-connect-subscribe%>
  return client.call(<%!
    %>'<%vendorExtensions.x-vaadin-connect-endpoint-name%>', <%!
    %>'<%vendorExtensions.x-vaadin-connect-method-name%>'<%!
@@ -73,6 +90,7 @@ function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
    %>}<%/bodyParams%><%!
    %><%^authMethods%>, {requireCredentials: false}<%/authMethods%><%!
  %>);
+<%/vendorExtensions.x-vaadin-connect-subscribe%>
 }
 <%={{ }}=%>
 {{/operation}}

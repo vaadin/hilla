@@ -32,7 +32,7 @@ import com.vaadin.testbench.TestBenchElement;
 public class AppViewIT extends ChromeBrowserTest {
 
     private void openTestUrl(String url) {
-        getDriver().get(getRootURL() + "/foo" + url);
+        getDriver().get(getRootURL() + url);
     }
 
     private TestBenchElement testComponent;
@@ -193,25 +193,6 @@ public class AppViewIT extends ChromeBrowserTest {
         WebElement meta = findElement(By.cssSelector("meta[name=foo]"));
         Assert.assertNotNull(meta);
         Assert.assertEquals("bar", meta.getAttribute("content"));
-    }
-
-    @Test
-    public void should_beAble_toLogin_usingSpringForm() {
-        // Login by using the Spring Login Form
-        openTestUrl("/login");
-
-        TestBenchElement container = $("div")
-                .attributeContains("class", "container").first();
-        container.$(TestBenchElement.class).id("username").sendKeys("admin");
-        container.$(TestBenchElement.class).id("password").sendKeys("admin");
-        container.$("button").first().click();
-
-        // Wait for the server connect response
-        testComponent = $("test-component").first();
-        content = testComponent.$(TestBenchElement.class).id("content");
-
-        // Verify admin calls
-        verifyCallingAdminService("Hello, admin!");
     }
 
     @Test

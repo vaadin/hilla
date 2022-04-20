@@ -6,6 +6,8 @@
 
 // @ts-ignore
 import client from './connect-client.default';
+// @ts-ignore
+import { Subscription } from '@hilla/frontend';
 import type Foo from './dev/hilla/generator/endpoints/iterableendpoint/IterableEndpoint/Foo';
 
 function _getFoos(): Promise<Array<Foo | undefined> | undefined> {

@@ -29,8 +29,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletContext;
 
 import org.slf4j.Logger;
@@ -153,8 +151,7 @@ public class EndpointInvoker {
             throw new EndpointNotFoundException();
         }
 
-        Method methodToInvoke = vaadinEndpointData.getMethod(methodName)
-                .orElse(null);
+        Method methodToInvoke = getMethod(endpointName, methodName);
         if (methodToInvoke == null) {
             getLogger().debug("Method '{}' not found in endpoint '{}'",
                     methodName, endpointName);
@@ -453,6 +450,33 @@ public class EndpointInvoker {
                     return new VaadinConnectAccessCheckerWrapper(accessChecker);
                 });
         return wrapper.accessChecker;
+    }
+
+    private Method getMethod(String endpointName, String methodName) {
+        VaadinEndpointData endpointData = endpointRegistry.get(endpointName);
+        if (endpointData == null) {
+            getLogger().debug("Endpoint '{}' not found", endpointName);
+            return null;
+        }
+        return endpointData.getMethod(methodName).orElse(null);
+    }
+
+    /**
+     * Gets the return type of the given method.
+     *
+     * @param endpointName
+     *            the name of the endpoint
+     * @param methodName
+     *            the name of the method
+     */
+    public Class<?> getReturnType(String endpointName, String methodName) {
+        Method method = getMethod(endpointName, methodName);
+        if (method == null) {
+            getLogger().debug("Method '{}' not found in endpoint '{}'",
+                    methodName, endpointName);
+            return null;
+        }
+        return method.getReturnType();
     }
 
 }

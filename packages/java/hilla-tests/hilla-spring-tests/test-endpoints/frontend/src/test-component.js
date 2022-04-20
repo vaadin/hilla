@@ -20,10 +20,10 @@ class TestComponent extends PolymerElement {
         <button id="getObjectWithNullValues" on-click="getObjectWithNullValues">Get Object With Null Values From Endpoint</button><br/>
         <button id="denied" on-click="denied">endpoint denied</button><br/>
         <button id="logout" on-click="logout">logout</button><br/>
-        <form method="post" action="login">
-          <input id="username" name="username"></input>
-          <input id="password" name="password"></input>
-          <input id="login" type="submit"></input>
+        <form method="POST" action="login">
+          <input id="username" name="username">
+          <input id="password" name="password">
+          <input id="login" type="submit">
         </form>
         <div id="content"></div>
     `;

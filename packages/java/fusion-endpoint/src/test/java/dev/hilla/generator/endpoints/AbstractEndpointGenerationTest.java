@@ -79,6 +79,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import reactor.core.publisher.Flux;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.springframework.data.domain.Sort.Direction;
@@ -425,7 +427,11 @@ public abstract class AbstractEndpointGenerationTest
                         .anyMatch(jsonNumberClass -> jsonNumberClass
                                 .isAssignableFrom(expectedSchemaClass)));
             } else if (actualSchema instanceof ArraySchema) {
-                if (expectedSchemaClass.isArray()) {
+                if (expectedSchemaClass == Flux.class) {
+                    assertSchema(((ArraySchema) actualSchema).getItems(),
+                            typeArguments.values().iterator().next(),
+                            typeArguments);
+                } else if (expectedSchemaClass.isArray()) {
                     assertSchema(((ArraySchema) actualSchema).getItems(),
                             expectedSchemaClass.getComponentType(),
                             typeArguments);

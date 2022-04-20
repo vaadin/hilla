@@ -36,6 +36,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.Pair;
 
 import dev.hilla.ExplicitNullableTypeChecker;
+import reactor.core.publisher.Flux;
 
 import static dev.hilla.generator.GeneratorUtils.zip;
 
@@ -116,6 +117,10 @@ class GeneratorType {
     boolean isOptional() {
         return resolvedType.isReferenceType()
                 && isAssignableType(Optional.class);
+    }
+
+    boolean isFlux() {
+        return resolvedType.isReferenceType() && isAssignableType(Flux.class);
     }
 
     boolean isPrimitive() {

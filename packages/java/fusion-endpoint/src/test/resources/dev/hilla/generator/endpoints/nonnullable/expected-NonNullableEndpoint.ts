@@ -6,6 +6,8 @@
 
 // @ts-ignore
 import client from './connect-client.default';
+// @ts-ignore
+import { Subscription } from '@hilla/frontend';
 import type NonNullableModel from './dev/hilla/generator/endpoints/nonnullable/NonNullableEndpoint/NonNullableModel';
 import type ParameterType from './dev/hilla/generator/endpoints/nonnullable/NonNullableEndpoint/ParameterType';
 import type ReturnType from './dev/hilla/generator/endpoints/nonnullable/NonNullableEndpoint/ReturnType';

@@ -20,8 +20,10 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.WildcardParameter;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "")
+@AnonymousAllowed
 public class MainView extends Div implements HasUrlParameter<String> {
 
     public MainView() {

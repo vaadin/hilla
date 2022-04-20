@@ -38,10 +38,13 @@ class CodeGeneratorUtils {
 
     static String getSimpleNameFromImports(String dataType,
             List<Map<String, String>> imports) {
-        for (Map<String, String> anImport : imports) {
-            if (Objects.equals(dataType, anImport.get(IMPORT))) {
-                return GeneratorUtils.firstNonBlank(anImport.get("importAs"),
-                        anImport.get("className"));
+        if (imports != null) {
+            for (Map<String, String> anImport : imports) {
+                if (Objects.equals(dataType, anImport.get(IMPORT))) {
+                    return GeneratorUtils.firstNonBlank(
+                            anImport.get("importAs"),
+                            anImport.get("className"));
+                }
             }
         }
         if (GeneratorUtils.contains(dataType, "<")
