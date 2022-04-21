@@ -41,7 +41,8 @@ final class EndpointProcessor {
 
     private Paths preparePaths() {
         return classes.stream()
-                .flatMap(cls -> cls.getInheritanceChain().getMethodsStream())
+                .flatMap(cls -> cls.getInheritanceChainStream()
+                        .flatMap(ClassInfoModel::getMethodsStream))
                 .filter(MethodInfoModel::isPublic).map(MethodProcessor::new)
                 .collect(Collectors.toMap(MethodProcessor::getPathKey,
                         MethodProcessor::getPathItem, (o1, o2) -> o1,

@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,8 +12,8 @@ import io.github.classgraph.ClassInfo;
 
 final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
         implements ClassInfoModel, SourceModel {
-    private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
+    private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
@@ -25,8 +26,6 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
         superClass = originSuperClass != null
                 ? ClassInfoModel.of(originSuperClass)
                 : null;
-
-        chain = new ClassInfoModelInheritanceChain(this);
     }
 
     @Override
@@ -58,7 +57,14 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public ClassInfoModelInheritanceChain getInheritanceChain() {
+    public List<ClassInfoModel> getInheritanceChain() {
+        if (chain == null) {
+            var superClasses = getSuperClasses();
+            chain = new ArrayList<>(superClasses.size() + 1);
+            chain.add(this);
+            chain.addAll(superClasses);
+        }
+
         return chain;
     }
 

@@ -165,7 +165,11 @@ public interface ClassInfoModel
         return getFields().stream();
     }
 
-    ClassInfoModelInheritanceChain getInheritanceChain();
+    List<ClassInfoModel> getInheritanceChain();
+
+    default Stream<ClassInfoModel> getInheritanceChainStream() {
+        return getInheritanceChain().stream();
+    }
 
     default List<ClassInfoModel> getInnerClassDependencies() {
         return getInnerClassDependenciesStream().collect(Collectors.toList());

@@ -10,8 +10,8 @@ import java.util.Optional;
 final class ClassInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Class<?>>
         implements ClassInfoModel, ReflectionModel {
-    private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
+    private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
@@ -26,8 +26,6 @@ final class ClassInfoReflectionModel
                 && !Objects.equals(superClass, Object.class)
                         ? ClassInfoModel.of(superClass)
                         : null;
-
-        this.chain = new ClassInfoModelInheritanceChain(this);
     }
 
     @Override
@@ -58,7 +56,14 @@ final class ClassInfoReflectionModel
     }
 
     @Override
-    public ClassInfoModelInheritanceChain getInheritanceChain() {
+    public List<ClassInfoModel> getInheritanceChain() {
+        if (chain == null) {
+            var superClasses = getSuperClasses();
+            chain = new ArrayList<>(superClasses.size() + 1);
+            chain.add(this);
+            chain.addAll(superClasses);
+        }
+
         return chain;
     }
 
