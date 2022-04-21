@@ -8,6 +8,7 @@ import javax.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -48,6 +49,9 @@ public class FluxEndpoint {
     public Flux<String> checkUser() {
         Authentication auth = SecurityContextHolder.getContext()
                 .getAuthentication();
+        if (auth instanceof AnonymousAuthenticationToken) {
+            auth = null;
+        }
         return Flux.just(auth == null ? "Not authenticated" : auth.getName());
     }
 

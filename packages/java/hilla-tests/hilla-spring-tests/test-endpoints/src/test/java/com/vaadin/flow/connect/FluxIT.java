@@ -95,7 +95,7 @@ public class FluxIT extends ChromeBrowserTest {
     public void checkUser() {
         String endpoint = "checkUser";
         exec(endpoint);
-        assertContent("Value: anonymousUser\nCompleted");
+        assertContent("Value: Not authenticated\nCompleted");
         loginUser();
         exec(endpoint);
         assertContent("Value: user\nCompleted");
