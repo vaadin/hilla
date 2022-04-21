@@ -3,20 +3,28 @@
 # Fails the script if any command failed or any variable is unset
 set -eu
 
-branch=main
 bump_scripts_dir=$(dirname -- "$0")
 packages_dir="$PWD/packages/ts"
 
 # Convert X.Y.Z.suffix git tag to X.Y.Z-suffix npm version
-version_tag_split=(${VERSION_TAG//./ })
+IFS=. read -ra version_tag_split <<< "${VERSION_TAG}"
 version_tag_suffix=${version_tag_split[3]:+-${version_tag_split[3]}}
 version_tag_npm=$(IFS=. ; echo "${version_tag_split[*]:0:3}")${version_tag_suffix}
 
-# shellcheck disable=SC2139
-alias ghr="curl https://api.github.com/repos/$REPO/branches/$branch/protection \
-  -H 'Accept: application/vnd.github.v3+json' \
-  -H 'Authorization: token $GIT_RELEASE_TOKEN' \
-  -s"
+ghr () {
+  curl https://api.github.com/repos/"$REPO"/branches/"$BRANCH"/protection \
+       -H 'Accept: application/vnd.github.v3+json' \
+       -H "Authorization: token $GIT_RELEASE_TOKEN" \
+       "$@"
+}
+
+ghr_get () {
+  ghr -X GET
+}
+
+ghr_put () {
+  ghr -X PUT -d "$1" > /dev/null
+}
 
 # Updating the registration version for all packages
 find "$packages_dir"/*/src/index.ts -exec sed -i -e "s/version:.\+\,/version: \/* updated-by-script *\/ \'$version_tag_npm\',/" {} +
@@ -37,20 +45,20 @@ git \
   -c user.email='vaadin-bot@users.noreply.github.com' \
   commit -m "chore(release): npm version $version_tag_npm"
 
-protection_config=$(ghr -X GET)
+protection_config=$(ghr_get)
 
 remapped=$(node "$bump_scripts_dir/protection-remap.js" "$protection_config")
 
 # Restores the protection of the branch
 restore_protection() {
-  ghr -X PUT -d "$remapped" > /dev/null
-  echo "[$(date -Iseconds)][info] Protection of ${branch} branch restored"
+  ghr_put "$remapped"
+  echo "[$(date -Iseconds)][info] Protection of ${BRANCH} branch restored"
 }
 
 # Will execute "restore_protection" function in the end of the script even if
 # the script exits with an error
 trap "restore_protection" EXIT
 
-< "$bump_scripts_dir/disabled-protection.json" ghr -X PUT -d '@-' > /dev/null
+ghr_put '@-' < "$bump_scripts_dir/disabled-protection.json"
 
-git push "https://vaadin-bot:$GIT_RELEASE_TOKEN@github.com/$REPO.git" "$branch"
+git push "https://vaadin-bot:$GIT_RELEASE_TOKEN@github.com/$REPO.git" "$BRANCH"

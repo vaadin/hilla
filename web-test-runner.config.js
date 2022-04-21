@@ -3,6 +3,7 @@ import { esbuildPlugin } from '@web/dev-server-esbuild';
 import { chromeLauncher } from '@web/test-runner-chrome';
 import { readdir } from 'fs/promises';
 import { URL } from 'url';
+import { importMapsPlugin } from '@web/dev-server-import-maps';
 
 // One of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -34,6 +35,16 @@ export default {
           : source;
       },
     },
+    importMapsPlugin({
+      inject: {
+        importMap: {
+          imports: {
+            'socket.io-client': '/mocks/socket.io-client.ts'
+          },
+        },
+      },
+    }),
+
   ],
   browsers: [
     chromeLauncher({
