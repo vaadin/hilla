@@ -39,4 +39,9 @@ public class SocketIoConfigurer {
         return new SocketIoHandler(socketIoServer, objectMapper,
                 pushMessageHandler);
     }
+
+    @Bean
+    public EngineIoCleanup engineIoCleanup(EngineIoHandler engineIoHandler) {
+        return new EngineIoCleanup(engineIoHandler);
+    }
 }
