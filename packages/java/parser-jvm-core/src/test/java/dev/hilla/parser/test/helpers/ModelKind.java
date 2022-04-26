@@ -1,5 +1,5 @@
 package dev.hilla.parser.test.helpers;
 
-public enum ModelOriginType {
+public enum ModelKind {
     REFLECTION, SOURCE,
 }

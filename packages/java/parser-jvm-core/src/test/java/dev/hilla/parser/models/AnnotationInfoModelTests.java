@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,33 +20,40 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.ModelOriginType;
+import dev.hilla.parser.test.helpers.BaseTestContext;
+import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
+
+import io.github.classgraph.AnnotationInfo;
 
 @ExtendWith(ParserExtension.class)
 public class AnnotationInfoModelTests {
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{2}")
+    @ParameterizedTest(name = "{1}")
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(AnnotationInfoModel model,
-            Object origin, ModelOriginType type) {
-        assertEquals(origin, model.get());
-
-        switch (type) {
-        case SOURCE:
-            assertTrue(model.isSource());
-            break;
-        case REFLECTION:
+            ModelKind kind, TestContext context) throws NoSuchMethodException {
+        switch (kind) {
+        case REFLECTION: {
+            var origin = context.getReflectionOrigin();
+            assertEquals(origin, model.get());
             assertTrue(model.isReflection());
+        }
+            break;
+        case SOURCE: {
+            var origin = context.getSourceOrigin();
+            assertEquals(origin, model.get());
+            assertTrue(model.isSource());
+        }
             break;
         }
     }
 
     @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = "{2}")
+    @ParameterizedTest(name = "{1}")
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(AnnotationInfoModel model,
-            Object origin, ModelOriginType type) {
+            ModelKind kind, BaseTestContext context) {
         assertEquals(0, model.getDependencies().size());
     }
 
@@ -54,19 +62,44 @@ public class AnnotationInfoModelTests {
     @interface Foo {
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    @interface Selector {
+    private static final class TestContext extends BaseTestContext {
+        public TestContext(ExtensionContext context) {
+            super(context);
+        }
+
+        public Arguments getReflectionArguments() throws NoSuchMethodException {
+            var origin = getReflectionOrigin();
+            var model = AnnotationInfoModel.of(origin, mock(Model.class));
+
+            return Arguments.of(model, ModelKind.REFLECTION, this);
+        }
+
+        public Annotation getReflectionOrigin() throws NoSuchMethodException {
+            return Sample.class.getMethod("bar").getAnnotation(Foo.class);
+        }
+
+        public Arguments getSourceArguments() {
+            var origin = getSourceOrigin();
+            var model = AnnotationInfoModel.of(origin, mock(Model.class));
+
+            return Arguments.of(model, ModelKind.SOURCE, this);
+        }
+
+        public AnnotationInfo getSourceOrigin() {
+            return getScanResult().getClassInfo(Sample.class.getName())
+                    .getMethodInfo("bar").getSingleMethod("bar")
+                    .getAnnotationInfo(Foo.class.getName());
+        }
     }
 
     @Nested
     @DisplayName("As a NamedModel")
     public class AsNamedModel {
         @DisplayName("It should have name")
-        @ParameterizedTest(name = "{2}")
+        @ParameterizedTest(name = "{1}")
         @ArgumentsSource(ModelProvider.class)
-        public void should_HaveName(AnnotationInfoModel model, Object origin,
-                ModelOriginType type) {
+        public void should_HaveName(AnnotationInfoModel model, ModelKind kind,
+                BaseTestContext context) {
             assertEquals(Foo.class.getName(), model.getName());
         }
     }
@@ -75,29 +108,13 @@ public class AnnotationInfoModelTests {
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws NoSuchMethodException {
-            return Stream.of(getReflectionModel(), getSourceModel(context));
-        }
+            var ctx = new TestContext(context);
 
-        private Arguments getReflectionModel() throws NoSuchMethodException {
-            var origin = Sample.class.getMethod("bar").getAnnotation(Foo.class);
-            var model = AnnotationInfoModel.of(origin, mock(Model.class));
-
-            return Arguments.of(model, origin, ModelOriginType.REFLECTION);
-        }
-
-        private Arguments getSourceModel(ExtensionContext context) {
-            var origin = ParserExtension.getScanResult(context)
-                    .getClassesWithAnnotation(Selector.class).stream()
-                    .flatMap(cls -> cls.getMethodInfo().stream())
-                    .flatMap(method -> method.getAnnotationInfo().stream())
-                    .findFirst().get();
-            var model = AnnotationInfoModel.of(origin, mock(Model.class));
-
-            return Arguments.of(model, origin, ModelOriginType.SOURCE);
+            return Stream.of(ctx.getReflectionArguments(),
+                    ctx.getSourceArguments());
         }
     }
 
-    @Selector
     private static class Sample {
         @Foo
         public void bar() {
