@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
 
@@ -25,7 +25,7 @@ public interface MethodInfoModel extends Model, NamedModel, AnnotatedModel {
 
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
-        return StreamUtils.combine(getResultDependenciesStream(),
+        return Streams.combine(getResultDependenciesStream(),
                 getParameterDependenciesStream());
     }
 

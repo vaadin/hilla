@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassRefTypeSignature;
@@ -24,7 +24,7 @@ final class ClassRefSignatureSourceModel
     @Override
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
-            typeArguments = StreamUtils
+            typeArguments = Streams
                     .combine(origin.getTypeArguments().stream(),
                             origin.getSuffixTypeArguments().stream()
                                     .flatMap(Collection::stream))
@@ -57,7 +57,7 @@ final class ClassRefSignatureSourceModel
         var annotations = origin.getTypeAnnotationInfo();
         var suffixAnnotations = origin.getSuffixTypeAnnotationInfo();
 
-        return StreamUtils.combine(
+        return Streams.combine(
                 annotations != null ? annotations.stream() : Stream.empty(),
                 suffixAnnotations != null
                         ? suffixAnnotations.stream().flatMap(Collection::stream)

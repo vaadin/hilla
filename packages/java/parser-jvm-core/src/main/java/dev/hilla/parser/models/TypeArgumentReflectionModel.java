@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeArgument;
 
@@ -26,7 +26,7 @@ final class TypeArgumentReflectionModel
     public List<SignatureModel> getAssociatedTypes() {
         if (associatedTypes == null) {
             var stream = origin instanceof AnnotatedWildcardType
-                    ? StreamUtils.combine(
+                    ? Streams.combine(
                             ((AnnotatedWildcardType) origin)
                                     .getAnnotatedLowerBounds(),
                             ((AnnotatedWildcardType) origin)

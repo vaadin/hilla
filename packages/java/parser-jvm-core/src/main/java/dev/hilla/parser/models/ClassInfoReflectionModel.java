@@ -1,11 +1,14 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import dev.hilla.parser.utils.Predicates;
 
 final class ClassInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Class<?>>
@@ -15,7 +18,8 @@ final class ClassInfoReflectionModel
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
-    private List<ClassInfoModel> superClasses;
+
+    private List<ClassInfoModel> interfaces;
 
     public ClassInfoReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);
@@ -23,7 +27,7 @@ final class ClassInfoReflectionModel
         var superClass = origin.getSuperclass();
 
         this.superClass = superClass != null
-                && !Objects.equals(superClass, Object.class)
+                && ClassInfoModel.isNonJDKClass(superClass)
                         ? ClassInfoModel.of(superClass)
                         : null;
     }
@@ -58,10 +62,13 @@ final class ClassInfoReflectionModel
     @Override
     public List<ClassInfoModel> getInheritanceChain() {
         if (chain == null) {
-            var superClasses = getSuperClasses();
-            chain = new ArrayList<>(superClasses.size() + 1);
-            chain.add(this);
-            chain.addAll(superClasses);
+            chain = Stream
+                    .<Class<?>> iterate(origin,
+                            Predicates.and(Objects::nonNull,
+                                    ClassInfoModel::isNonJDKClass),
+                            Class::getSuperclass)
+                    .distinct().map(ClassInfoModel::of)
+                    .collect(Collectors.toList());
         }
 
         return chain;
@@ -103,19 +110,12 @@ final class ClassInfoReflectionModel
     }
 
     @Override
-    public List<ClassInfoModel> getSuperClasses() {
-        if (superClasses == null) {
-            superClasses = new ArrayList<>();
-
-            var cls = origin.getSuperclass();
-
-            while (cls != null && ClassInfoModel.isNonJDKClass(cls)) {
-                superClasses.add(ClassInfoModel.of(cls));
-                cls = cls.getSuperclass();
-            }
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
         }
 
-        return superClasses;
+        return interfaces;
     }
 
     @Override

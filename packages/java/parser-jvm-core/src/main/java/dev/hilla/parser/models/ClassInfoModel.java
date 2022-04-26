@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
@@ -145,9 +145,9 @@ public interface ClassInfoModel
 
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
-        return StreamUtils.combine(getFieldDependenciesStream(),
+        return Streams.combine(getFieldDependenciesStream(),
                 getMethodDependenciesStream(), getInnerClassesStream(),
-                getSuperClassesStream()).distinct();
+                getSuperClassStream()).distinct();
     }
 
     default List<ClassInfoModel> getFieldDependencies() {
@@ -314,10 +314,10 @@ public interface ClassInfoModel
 
     Optional<ClassInfoModel> getSuperClass();
 
-    List<ClassInfoModel> getSuperClasses();
+    List<ClassInfoModel> getInterfaces();
 
-    default Stream<ClassInfoModel> getSuperClassesStream() {
-        return getSuperClasses().stream();
+    default Stream<ClassInfoModel> getSuperClassStream() {
+        return getSuperClass().stream();
     }
 
     default boolean is(String name) {

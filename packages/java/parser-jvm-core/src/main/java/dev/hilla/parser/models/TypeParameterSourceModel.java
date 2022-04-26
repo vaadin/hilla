@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeParameter;
 
@@ -30,7 +30,7 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
     @Override
     public List<SignatureModel> getBounds() {
         if (bounds == null) {
-            bounds = StreamUtils
+            bounds = Streams
                     .combine(Stream.of(origin.getClassBound()),
                             origin.getInterfaceBounds().stream())
                     .map(signature -> signature != null

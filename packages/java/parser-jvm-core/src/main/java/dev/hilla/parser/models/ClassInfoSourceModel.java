@@ -1,11 +1,13 @@
 package dev.hilla.parser.models;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassInfo;
@@ -17,7 +19,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<MethodInfoModel> methods;
-    private List<ClassInfoModel> superClasses;
+    private List<ClassInfoModel> interfaces;
 
     public ClassInfoSourceModel(ClassInfo origin, Model parent) {
         super(origin, parent);
@@ -59,10 +61,10 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<ClassInfoModel> getInheritanceChain() {
         if (chain == null) {
-            var superClasses = getSuperClasses();
-            chain = new ArrayList<>(superClasses.size() + 1);
-            chain.add(this);
-            chain.addAll(superClasses);
+            chain = Streams.combine(Stream.of(this),
+                    getMembersStream(origin.getSuperclasses(),
+                            ClassInfoModel::isNonJDKClass, ClassInfoModel::of))
+                    .collect(Collectors.toList());
         }
 
         return chain;
@@ -104,13 +106,12 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public List<ClassInfoModel> getSuperClasses() {
-        if (superClasses == null) {
-            superClasses = getMembers(origin.getSuperclasses(),
-                    ClassInfoModel::isNonJDKClass, ClassInfoModel::of);
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
         }
 
-        return superClasses;
+        return interfaces;
     }
 
     @Override

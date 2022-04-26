@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class StreamUtils {
-    private StreamUtils() {
+public final class Streams {
+    private Streams() {
     }
 
     @SafeVarargs
