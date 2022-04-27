@@ -29,7 +29,7 @@ import io.github.classgraph.AnnotationInfo;
 @ExtendWith(ParserExtension.class)
 public class AnnotationInfoModelTests {
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(AnnotationInfoModel model,
             ModelKind kind, TestContext context) throws NoSuchMethodException {
@@ -50,7 +50,7 @@ public class AnnotationInfoModelTests {
     }
 
     @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(AnnotationInfoModel model,
             ModelKind kind, BaseTestContext context) {
@@ -96,7 +96,7 @@ public class AnnotationInfoModelTests {
     @DisplayName("As a NamedModel")
     public class AsNamedModel {
         @DisplayName("It should have name")
-        @ParameterizedTest(name = "{1}")
+        @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveName(AnnotationInfoModel model, ModelKind kind,
                 BaseTestContext context) {
@@ -104,7 +104,9 @@ public class AnnotationInfoModelTests {
         }
     }
 
-    public static class ModelProvider implements ArgumentsProvider {
+    public static final class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{1}";
+
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws NoSuchMethodException {

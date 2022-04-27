@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import dev.hilla.parser.test.helpers.BaseTestContext;
+import dev.hilla.parser.test.helpers.NameBeautifier;
 import dev.hilla.parser.test.helpers.ParserExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
@@ -38,25 +39,26 @@ import io.github.classgraph.ClassInfo;
 @ExtendWith(ParserExtension.class)
 public class BaseSignatureModelTests {
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{2} [{1}]")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(BaseSignatureModel model, String name,
             ModelKind kind, TestContext context) throws NoSuchMethodException {
         switch (kind) {
         case REFLECTION_BARE: {
-            var origin = context.getBareReflectionOrigin("get" + name);
+            var origin = context.getBareReflectionOrigin(context.restore(name));
             assertEquals(origin, model.get());
             assertTrue(model.isReflection());
         }
             break;
         case REFLECTION_COMPLETE: {
-            var origin = context.getCompleteReflectionOrigin("get" + name);
+            var origin = context
+                    .getCompleteReflectionOrigin(context.restore(name));
             assertEquals(origin, model.get());
             assertTrue(model.isReflection());
         }
             break;
         case SOURCE: {
-            var origin = context.getSourceOrigin("get" + name);
+            var origin = context.getSourceOrigin(context.restore(name));
             assertEquals(origin, model.get());
             assertTrue(model.isSource());
         }
@@ -65,7 +67,7 @@ public class BaseSignatureModelTests {
     }
 
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{2} [{1}]")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(BaseSignatureModel model,
             String name, ModelKind kind, TestContext context) {
@@ -93,13 +95,10 @@ public class BaseSignatureModelTests {
     @interface Bar {
     }
 
-    private static final class TestContext extends BaseTestContext {
+    private static final class TestContext extends BaseTestContext
+            implements NameBeautifier {
         public TestContext(ExtensionContext context) {
             super(context);
-        }
-
-        private static String shorten(String name) {
-            return name.substring(3);
         }
 
         public Stream<Arguments> getBareReflectionArguments() {
@@ -133,6 +132,11 @@ public class BaseSignatureModelTests {
                 throws NoSuchMethodException {
             return Sample.class.getDeclaredMethod(methodName)
                     .getAnnotatedReturnType();
+        }
+
+        @Override
+        public String getPart() {
+            return "get";
         }
 
         public Stream<Arguments> getSourceArguments() {
@@ -192,7 +196,7 @@ public class BaseSignatureModelTests {
         }
 
         @DisplayName("It should access annotations")
-        @ParameterizedTest(name = "{2} [{1}]")
+        @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(AnnotatedModelProvider.class)
         public void should_AccessAnnotations(BaseSignatureModel model,
                 String name, ModelKind kind, TestContext context) {
@@ -212,7 +216,7 @@ public class BaseSignatureModelTests {
                 "Long", "Integer");
 
         @DisplayName("It should have an array specialization")
-        @ParameterizedTest(name = "{2} [{1}]")
+        @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveBaseSpecialization(BaseSignatureModel model,
                 String name, ModelKind kind, TestContext context) {
@@ -236,6 +240,8 @@ public class BaseSignatureModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{2} [{1}]";
+
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {

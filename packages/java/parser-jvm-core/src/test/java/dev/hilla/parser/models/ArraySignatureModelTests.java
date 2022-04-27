@@ -35,7 +35,7 @@ import io.github.classgraph.ClassRefTypeSignature;
 @ExtendWith(ParserExtension.class)
 public class ArraySignatureModelTests {
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(ArraySignatureModel model,
             ModelKind kind, TestContext context) throws NoSuchMethodException {
@@ -56,7 +56,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(ArraySignatureModel model,
             ModelKind kind, BaseTestContext context) {
@@ -68,7 +68,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should provide nested type")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
             ModelKind kind, BaseTestContext context) {
@@ -146,7 +146,7 @@ public class ArraySignatureModelTests {
         }
 
         @DisplayName("It should access annotations")
-        @ParameterizedTest(name = "{1}")
+        @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotations(ArraySignatureModel model,
                 ModelKind kind, BaseTestContext context) {
@@ -161,7 +161,7 @@ public class ArraySignatureModelTests {
     @DisplayName("As a SpecializedModel")
     public class AsSpecializedModel {
         @DisplayName("It should have an array specialization")
-        @ParameterizedTest(name = "{1}")
+        @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveArraySpecialization(ArraySignatureModel model,
                 ModelKind kind, BaseTestContext context) {
@@ -170,6 +170,8 @@ public class ArraySignatureModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{1}";
+
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws NoSuchMethodException {

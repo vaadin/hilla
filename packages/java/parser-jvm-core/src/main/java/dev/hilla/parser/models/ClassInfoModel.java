@@ -316,6 +316,10 @@ public interface ClassInfoModel
 
     List<ClassInfoModel> getInterfaces();
 
+    default Stream<ClassInfoModel> getInterfacesStream() {
+        return getInterfaces().stream();
+    }
+
     default Stream<ClassInfoModel> getSuperClassStream() {
         return getSuperClass().stream();
     }

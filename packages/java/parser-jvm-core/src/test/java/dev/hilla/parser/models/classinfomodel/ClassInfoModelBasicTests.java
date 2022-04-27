@@ -1,14 +1,10 @@
-package dev.hilla.parser.models;
+package dev.hilla.parser.models.classinfomodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -24,6 +20,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.FieldInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.models.Model;
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
@@ -32,12 +32,12 @@ import dev.hilla.parser.utils.Predicates;
 import io.github.classgraph.ClassInfo;
 
 @ExtendWith(ParserExtension.class)
-public class ClassInfoModelTests {
+public class ClassInfoModelBasicTests {
     @DisplayName("It should collect all dependencies from the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassDependencies(ClassInfoModel model,
-            ModelKind kind, TestContext context) {
+                                                ModelKind kind, TestContext context) {
         var expected = Stream.of(
                 // Class Field Dependencies
                 DependencyFieldStaticPublic.class,
@@ -67,7 +67,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(ClassInfoModel model, ModelKind kind,
             TestContext context) {
@@ -87,8 +87,36 @@ public class ClassInfoModelTests {
         }
     }
 
+    @DisplayName("It should check if it is assignable from other classes")
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_checkAssignability(ClassInfoModel model, ModelKind kind,
+            TestContext context) {
+        var assignableReflectionClass = Child.class;
+        var nonAssignableReflectionClass = Sample.DependencyStaticInner.class;
+
+        var assignableSourceClass = context.getScanResult()
+                .getClassInfo(Child.class.getName());
+        var nonAssignableSourceClass = context.getScanResult()
+                .getClassInfo(Sample.DependencyStaticInner.class.getName());
+
+        assertTrue(model.isAssignableFrom(assignableReflectionClass));
+        assertTrue(model.isAssignableFrom(assignableSourceClass));
+        assertTrue(model.isAssignableFrom(
+                ClassInfoModel.of(assignableReflectionClass)));
+        assertTrue(model
+                .isAssignableFrom(ClassInfoModel.of(assignableSourceClass)));
+
+        assertFalse(model.isAssignableFrom(nonAssignableReflectionClass));
+        assertFalse(model.isAssignableFrom(nonAssignableSourceClass));
+        assertFalse(model.isAssignableFrom(
+                ClassInfoModel.of(nonAssignableReflectionClass)));
+        assertFalse(model
+                .isAssignableFrom(ClassInfoModel.of(nonAssignableSourceClass)));
+    }
+
     @DisplayName("It should be able to compare model with classes and other models")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_compareClasses(ClassInfoModel model, ModelKind kind,
             TestContext context) {
@@ -124,7 +152,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get all inner classes of the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getAllInnerClasses(ClassInfoModel model, ModelKind kind,
             TestContext context) {
@@ -137,20 +165,20 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get all fields of the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassFields(ClassInfoModel model, ModelKind kind,
             TestContext context) {
         var expected = Arrays.stream(Sample.class.getDeclaredFields())
                 .map(Field::getName).collect(Collectors.toSet());
-        var actual = model.getFields().stream().map(FieldInfoModel::getName)
+        var actual = model.getFieldsStream().map(FieldInfoModel::getName)
                 .collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should get the whole inheritance chain of the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassInheritanceChain(ClassInfoModel model,
             ModelKind kind, TestContext context) {
@@ -167,20 +195,44 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get all methods of the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassMethods(ClassInfoModel model, ModelKind kind,
             TestContext context) {
         var expected = Arrays.stream(Sample.class.getDeclaredMethods())
                 .map(Method::getName).collect(Collectors.toSet());
-        var actual = model.getMethods().stream().map(MethodInfoModel::getName)
+        var actual = model.getMethodsStream().map(MethodInfoModel::getName)
                 .collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }
 
+    @DisplayName("It should get interfaces the class implements")
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_getInterfaces(ClassInfoModel model, ModelKind kind,
+            TestContext context) {
+        var expected = Arrays.stream(Sample.class.getInterfaces())
+                .map(Class::getName).collect(Collectors.toSet());
+        var actual = model.getInterfacesStream().map(ClassInfoModel::getName)
+                .collect(Collectors.toSet());
+
+        assertEquals(expected, actual);
+    }
+
+    @DisplayName("It should get simple name of the class")
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_getSimpleName(ClassInfoModel model, ModelKind kind,
+            TestContext context) {
+        var expected = Sample.class.getSimpleName();
+        var actual = model.getSimpleName();
+
+        assertEquals(expected, actual);
+    }
+
     @DisplayName("It should get superclass of the class")
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getSuperclass(ClassInfoModel model, ModelKind kind,
             TestContext context) {
@@ -191,11 +243,6 @@ public class ClassInfoModelTests {
     }
 
     private interface DependencyInterface {
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    private @interface Selector {
     }
 
     private static final class TestContext extends BaseTestContext {
@@ -227,6 +274,8 @@ public class ClassInfoModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{1}";
+
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
@@ -235,6 +284,9 @@ public class ClassInfoModelTests {
             return Stream.of(ctx.getReflectionArguments(),
                     ctx.getSourceArguments());
         }
+    }
+
+    private static class Child extends Sample {
     }
 
     private static class DependencyFieldPrivate {
@@ -313,7 +365,6 @@ public class ClassInfoModelTests {
     private static class DependencySuperSuperMethodPrivate {
     }
 
-    @Selector
     private static class Sample extends DependencySuper
             implements DependencyInterface {
         public static DependencyFieldStaticPublic fieldStaticPublic;
