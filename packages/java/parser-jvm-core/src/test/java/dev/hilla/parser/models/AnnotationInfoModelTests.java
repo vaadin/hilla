@@ -62,6 +62,19 @@ public class AnnotationInfoModelTests {
     @interface Foo {
     }
 
+    public static final class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{1}";
+
+        @Override
+        public Stream<? extends Arguments> provideArguments(
+                ExtensionContext context) throws NoSuchMethodException {
+            var ctx = new TestContext(context);
+
+            return Stream.of(ctx.getReflectionArguments(),
+                    ctx.getSourceArguments());
+        }
+    }
+
     private static final class TestContext extends BaseTestContext {
         public TestContext(ExtensionContext context) {
             super(context);
@@ -101,19 +114,6 @@ public class AnnotationInfoModelTests {
         public void should_HaveName(AnnotationInfoModel model, ModelKind kind,
                 BaseTestContext context) {
             assertEquals(Foo.class.getName(), model.getName());
-        }
-    }
-
-    public static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchMethodException {
-            var ctx = new TestContext(context);
-
-            return Stream.of(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
         }
     }
 

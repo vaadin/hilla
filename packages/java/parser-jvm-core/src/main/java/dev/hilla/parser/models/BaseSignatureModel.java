@@ -20,8 +20,8 @@ public interface BaseSignatureModel extends SignatureModel {
     }
 
     static BaseSignatureModel of(@Nonnull Class<?> origin, Model parent) {
-        return new BaseSignatureReflectionModel.Bare(Objects.requireNonNull(origin),
-            parent);
+        return new BaseSignatureReflectionModel.Bare(
+                Objects.requireNonNull(origin), parent);
     }
 
     @Override

@@ -37,7 +37,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassDependencies(ClassInfoModel model,
-                                                ModelKind kind, TestContext context) {
+            ModelKind kind, TestContext context) {
         var expected = Stream.of(
                 // Class Field Dependencies
                 DependencyFieldStaticPublic.class,

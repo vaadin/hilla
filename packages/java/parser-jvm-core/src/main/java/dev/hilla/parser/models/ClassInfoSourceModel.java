@@ -18,8 +18,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
-    private List<MethodInfoModel> methods;
     private List<ClassInfoModel> interfaces;
+    private List<MethodInfoModel> methods;
 
     public ClassInfoSourceModel(ClassInfo origin, Model parent) {
         super(origin, parent);
@@ -81,6 +81,15 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
+        }
+
+        return interfaces;
+    }
+
+    @Override
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
             methods = getMembers(origin.getDeclaredMethodInfo(),
@@ -103,15 +112,6 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
-    }
-
-    @Override
-    public List<ClassInfoModel> getInterfaces() {
-        if (interfaces == null) {
-            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
-        }
-
-        return interfaces;
     }
 
     @Override

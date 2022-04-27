@@ -186,6 +186,12 @@ public interface ClassInfoModel
         return getInnerClasses().stream();
     }
 
+    List<ClassInfoModel> getInterfaces();
+
+    default Stream<ClassInfoModel> getInterfacesStream() {
+        return getInterfaces().stream();
+    }
+
     default <ModelMember extends Model> List<ClassInfoModel> getMemberDependencies(
             @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
             @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
@@ -313,12 +319,6 @@ public interface ClassInfoModel
     String getSimpleName();
 
     Optional<ClassInfoModel> getSuperClass();
-
-    List<ClassInfoModel> getInterfaces();
-
-    default Stream<ClassInfoModel> getInterfacesStream() {
-        return getInterfaces().stream();
-    }
 
     default Stream<ClassInfoModel> getSuperClassStream() {
         return getSuperClass().stream();

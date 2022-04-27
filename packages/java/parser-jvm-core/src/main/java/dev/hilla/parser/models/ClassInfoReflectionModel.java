@@ -17,9 +17,8 @@ final class ClassInfoReflectionModel
     private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
-    private List<MethodInfoModel> methods;
-
     private List<ClassInfoModel> interfaces;
+    private List<MethodInfoModel> methods;
 
     public ClassInfoReflectionModel(Class<?> origin, Model parent) {
         super(origin, parent);
@@ -85,6 +84,15 @@ final class ClassInfoReflectionModel
     }
 
     @Override
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
+        }
+
+        return interfaces;
+    }
+
+    @Override
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
             methods = getMembers(origin.getDeclaredMethods(),
@@ -107,15 +115,6 @@ final class ClassInfoReflectionModel
     @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
-    }
-
-    @Override
-    public List<ClassInfoModel> getInterfaces() {
-        if (interfaces == null) {
-            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
-        }
-
-        return interfaces;
     }
 
     @Override
