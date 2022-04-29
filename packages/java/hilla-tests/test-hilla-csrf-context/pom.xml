@@ -44,6 +44,11 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-maven-plugin</artifactId>
+      </plugin>
+
       <!-- This module is mapped to default web context -->
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
