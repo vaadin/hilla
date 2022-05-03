@@ -38,19 +38,15 @@ public class ArraySignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(ArraySignatureModel model,
-            ModelKind kind, TestContext context) throws NoSuchMethodException {
+            Object origin, ModelKind kind, ModelProvider.Context context) {
         switch (kind) {
-        case REFLECTION: {
-            var origin = context.getReflectionOrigin();
+        case REFLECTION:
             assertEquals(origin, model.get());
             assertTrue(model.isReflection());
-        }
             break;
-        case SOURCE: {
-            var origin = context.getSourceOrigin();
+        case SOURCE:
             assertEquals(origin, model.get());
             assertTrue(model.isSource());
-        }
             break;
         }
     }
@@ -59,7 +55,7 @@ public class ArraySignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(ArraySignatureModel model,
-            ModelKind kind, BaseTestContext context) {
+            Object origin, ModelKind kind, ModelProvider.Context context) {
         var dependencies = model.getDependencies();
 
         assertEquals(
@@ -71,21 +67,21 @@ public class ArraySignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
-            ModelKind kind, BaseTestContext context) {
+            Object origin, ModelKind kind, ModelProvider.Context context) {
         var nested = model.getNestedType();
         assertTrue(nested instanceof ClassRefSignatureModel);
 
         switch (kind) {
         case REFLECTION: {
             var nestedOrigin = (AnnotatedType) nested.get();
-            var cls = (Class<?>) nestedOrigin.getType();
-            assertTrue(Dependency.class.isAssignableFrom(cls));
+            assertEquals(nestedOrigin.getType().getTypeName(),
+                    Dependency.class.getName());
         }
             break;
         case SOURCE: {
             var nestedOrigin = (ClassRefTypeSignature) nested.get();
-            var cls = nestedOrigin.getClassInfo().loadClass();
-            assertTrue(Dependency.class.isAssignableFrom(cls));
+            assertEquals(nestedOrigin.getFullyQualifiedClassName(),
+                    Dependency.class.getName());
         }
             break;
         }
@@ -94,39 +90,6 @@ public class ArraySignatureModelTests {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE_USE)
     @interface Bar {
-    }
-
-    private static final class TestContext extends BaseTestContext {
-        public TestContext(ExtensionContext context) {
-            super(context);
-        }
-
-        public Arguments getReflectionArguments() throws NoSuchMethodException {
-            var origin = getReflectionOrigin();
-            var model = ArraySignatureModel.of(origin, mock(Model.class));
-
-            return Arguments.of(model, ModelKind.REFLECTION, this);
-        }
-
-        public AnnotatedArrayType getReflectionOrigin()
-                throws NoSuchMethodException {
-            return (AnnotatedArrayType) Sample.class.getDeclaredMethod("foo")
-                    .getAnnotatedReturnType();
-        }
-
-        public Arguments getSourceArguments() {
-            var origin = getSourceOrigin();
-            var model = ArraySignatureModel.of(origin, mock(Model.class));
-
-            return Arguments.of(model, ModelKind.SOURCE, this);
-        }
-
-        public ArrayTypeSignature getSourceOrigin() {
-            return (ArrayTypeSignature) getScanResult()
-                    .getClassInfo(Sample.class.getName()).getMethodInfo("foo")
-                    .getSingleMethod("foo").getTypeSignatureOrTypeDescriptor()
-                    .getResultType();
-        }
     }
 
     @Nested
@@ -149,7 +112,7 @@ public class ArraySignatureModelTests {
         @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotations(ArraySignatureModel model,
-                ModelKind kind, BaseTestContext context) {
+                Object origin, ModelKind kind, ModelProvider.Context context) {
             // Annotation is added to String, not String[]; so we need to
             // extract nested type to get the type annotation
             assertEquals(List.of(annotation),
@@ -160,36 +123,64 @@ public class ArraySignatureModelTests {
     @Nested
     @DisplayName("As a SpecializedModel")
     public class AsSpecializedModel {
+        private final SpecializationChecker<SpecializedModel> checker = new SpecializationChecker<>(
+                SpecializedModel.class,
+                SpecializedModel.class.getDeclaredMethods());
+
         @DisplayName("It should have an array specialization")
         @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveArraySpecialization(ArraySignatureModel model,
-                ModelKind kind, BaseTestContext context) {
-            new SpecializationChecker(model).apply("isArray", "isNonJDKClass");
+                Object origin, ModelKind kind, ModelProvider.Context context) {
+            checker.apply(model, "isArray", "isNonJDKClass");
         }
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testName = "{2}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) throws NoSuchMethodException {
-            var ctx = new TestContext(context);
+            var ctx = new Context(context);
 
             return Stream.of(ctx.getReflectionArguments(),
                     ctx.getSourceArguments());
         }
+
+        public static final class Context extends BaseTestContext {
+            Context(ExtensionContext context) {
+                super(context);
+            }
+
+            public Arguments getReflectionArguments()
+                    throws NoSuchMethodException {
+                var origin = (AnnotatedArrayType) Sample.class
+                        .getDeclaredMethod("foo").getAnnotatedReturnType();
+                var model = ArraySignatureModel.of(origin, mock(Model.class));
+
+                return Arguments.of(model, origin, ModelKind.REFLECTION, this);
+            }
+
+            public Arguments getSourceArguments() {
+                var origin = (ArrayTypeSignature) getScanResult()
+                        .getClassInfo(Sample.class.getName())
+                        .getMethodInfo("foo").getSingleMethod("foo")
+                        .getTypeSignatureOrTypeDescriptor().getResultType();
+                var model = ArraySignatureModel.of(origin, mock(Model.class));
+
+                return Arguments.of(model, origin, ModelKind.SOURCE, this);
+            }
+        }
     }
 
     private static class Dependency {
-        public final String baz = "baz";
     }
 
     private static class Sample {
         @Bar
         public Dependency[] foo() {
-            return new Dependency[] {};
+            return null;
         }
     }
 }

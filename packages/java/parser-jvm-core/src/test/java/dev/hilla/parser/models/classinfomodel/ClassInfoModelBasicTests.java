@@ -37,28 +37,28 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassDependencies(ClassInfoModel model,
-            ModelKind kind, TestContext context) {
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Stream.of(
                 // Class Field Dependencies
-                DependencyFieldStaticPublic.class,
-                DependencyFieldStaticProtected.class,
-                DependencyFieldStaticPrivate.class, DependencyFieldPublic.class,
-                DependencyFieldProtected.class, DependencyFieldPrivate.class,
+                Dependency.FieldStaticPublic.class,
+                Dependency.FieldStaticProtected.class,
+                Dependency.FieldStaticPrivate.class,
+                Dependency.FieldPublic.class, Dependency.FieldProtected.class,
+                Dependency.FieldPrivate.class,
 
                 // Class Method Dependencies
-                DependencyMethodStaticPublic.class,
-                DependencyMethodStaticProtected.class,
-                DependencyMethodStaticPrivate.class,
-                DependencyMethodPublic.class, DependencyMethodProtected.class,
-                DependencyMethodPrivate.class,
+                Dependency.MethodStaticPublic.class,
+                Dependency.MethodStaticProtected.class,
+                Dependency.MethodStaticPrivate.class,
+                Dependency.MethodPublic.class, Dependency.MethodProtected.class,
+                Dependency.MethodPrivate.class,
 
                 // Class Superclass Dependency
-                DependencySuper.class,
+                Dependency.Parent.class,
 
                 // Class Inner Class Dependencies
-                Sample.DependencyInner.class,
-                Sample.DependencyStaticInner.class).map(Class::getName)
-                .collect(Collectors.toSet());
+                Sample.DependencyInner.class, Sample.StaticInner.class)
+                .map(Class::getName).collect(Collectors.toSet());
 
         var actual = model.getDependencies().stream()
                 .map(ClassInfoModel::getName).collect(Collectors.toSet());
@@ -70,7 +70,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         switch (kind) {
         case REFLECTION: {
             var origin = context.getReflectionOrigin();
@@ -91,14 +91,14 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_checkAssignability(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        var assignableReflectionClass = Child.class;
-        var nonAssignableReflectionClass = Sample.DependencyStaticInner.class;
+            ModelProvider.Context context) {
+        var assignableReflectionClass = SampleChild.class;
+        var nonAssignableReflectionClass = Sample.StaticInner.class;
 
         var assignableSourceClass = context.getScanResult()
-                .getClassInfo(Child.class.getName());
+                .getClassInfo(SampleChild.class.getName());
         var nonAssignableSourceClass = context.getScanResult()
-                .getClassInfo(Sample.DependencyStaticInner.class.getName());
+                .getClassInfo(Sample.StaticInner.class.getName());
 
         assertTrue(model.isAssignableFrom(assignableReflectionClass));
         assertTrue(model.isAssignableFrom(assignableSourceClass));
@@ -119,11 +119,11 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_compareClasses(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var sameClassName = Sample.class.getName();
-        var anotherClassName = DependencySuper.class.getName();
+        var anotherClassName = Dependency.Parent.class.getName();
         var sameReflectionClass = Sample.class;
-        var anotherReflectionClass = DependencySuper.class;
+        var anotherReflectionClass = Dependency.Parent.class;
         var sameSourceClass = context.getScanResult()
                 .getClassInfo(sameClassName);
         var anotherSourceClass = context.getScanResult()
@@ -155,7 +155,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getAllInnerClasses(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredClasses())
                 .map(Class::getName).collect(Collectors.toSet());
         var actual = model.getInnerClassesStream().map(ClassInfoModel::getName)
@@ -168,7 +168,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassFields(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredFields())
                 .map(Field::getName).collect(Collectors.toSet());
         var actual = model.getFieldsStream().map(FieldInfoModel::getName)
@@ -181,7 +181,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassInheritanceChain(ClassInfoModel model,
-            ModelKind kind, TestContext context) {
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Stream
                 .<Class<?>> iterate(Sample.class,
                         Predicates.and(Objects::nonNull,
@@ -198,7 +198,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getClassMethods(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredMethods())
                 .map(Method::getName).collect(Collectors.toSet());
         var actual = model.getMethodsStream().map(MethodInfoModel::getName)
@@ -211,7 +211,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getInterfaces(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getInterfaces())
                 .map(Class::getName).collect(Collectors.toSet());
         var actual = model.getInterfacesStream().map(ClassInfoModel::getName)
@@ -224,7 +224,7 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getSimpleName(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Sample.class.getSimpleName();
         var actual = model.getSimpleName();
 
@@ -235,41 +235,88 @@ public class ClassInfoModelBasicTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_getSuperclass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
+            ModelProvider.Context context) {
         var expected = Sample.class.getSuperclass().getName();
         var actual = model.getSuperClass().get().getName();
 
         assertEquals(expected, actual);
     }
 
-    private interface DependencyInterface {
-    }
-
-    private static final class TestContext extends BaseTestContext {
-        public TestContext(ExtensionContext context) {
-            super(context);
+    private static final class Dependency {
+        private interface Interface {
         }
 
-        public Arguments getReflectionArguments() {
-            var origin = getReflectionOrigin();
-            var model = ClassInfoModel.of(origin, null);
-
-            return Arguments.of(model, ModelKind.REFLECTION, this);
+        private static class FieldPrivate {
         }
 
-        public Class<?> getReflectionOrigin() {
-            return Sample.class;
+        private static class FieldProtected extends FieldSuper {
         }
 
-        public Arguments getSourceArguments() {
-            var origin = getSourceOrigin();
-            var model = ClassInfoModel.of(origin, mock(Model.class));
-
-            return Arguments.of(model, ModelKind.SOURCE, this);
+        private static class FieldPublic {
         }
 
-        public ClassInfo getSourceOrigin() {
-            return getScanResult().getClassInfo(Sample.class.getName());
+        private static class FieldStaticPrivate {
+        }
+
+        private static class FieldStaticProtected {
+        }
+
+        private static class FieldStaticPublic extends FieldStaticSuper {
+        }
+
+        private static class FieldStaticSuper {
+        }
+
+        private static class FieldSuper {
+        }
+
+        private static class GrandParent {
+            private GrandParentMethodPrivate methodPrivate() {
+                return null;
+            }
+        }
+
+        private static class GrandParentMethodPrivate {
+        }
+
+        private static class InnerField {
+        }
+
+        private static class InnerMethod {
+        }
+
+        private static class InnerParent {
+        }
+
+        private static class MethodParent {
+        }
+
+        private static class MethodPrivate {
+        }
+
+        private static class MethodProtected extends MethodParent {
+        }
+
+        private static class MethodPublic {
+        }
+
+        private static class MethodStaticParent {
+        }
+
+        private static class MethodStaticPrivate extends MethodStaticParent {
+        }
+
+        private static class MethodStaticProtected {
+        }
+
+        private static class MethodStaticPublic {
+        }
+
+        private static class Parent extends GrandParent {
+            public ParentFieldPublic fieldPublic;
+        }
+
+        private static class ParentFieldPublic {
         }
     }
 
@@ -279,133 +326,89 @@ public class ClassInfoModelBasicTests {
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
-            var ctx = new TestContext(context);
+            var ctx = new Context(context);
 
             return Stream.of(ctx.getReflectionArguments(),
                     ctx.getSourceArguments());
         }
-    }
 
-    private static class Child extends Sample {
-    }
+        public static class Context extends BaseTestContext {
+            private final Class<?> reflectionOrigin;
+            private final ClassInfo sourceOrigin;
 
-    private static class DependencyFieldPrivate {
-    }
+            public Context(ExtensionContext context) {
+                super(context);
+                sourceOrigin = getScanResult()
+                        .getClassInfo(Sample.class.getName());
+                reflectionOrigin = Sample.class;
+            }
 
-    private static class DependencyFieldProtected extends DependencyFieldSuper {
-    }
+            public Arguments getReflectionArguments() {
+                var model = ClassInfoModel.of(reflectionOrigin, null);
 
-    private static class DependencyFieldPublic {
-    }
+                return Arguments.of(model, ModelKind.REFLECTION, this);
+            }
 
-    private static class DependencyFieldStaticPrivate {
-    }
+            public Class<?> getReflectionOrigin() {
+                return reflectionOrigin;
+            }
 
-    private static class DependencyFieldStaticProtected {
-    }
+            public Arguments getSourceArguments() {
+                var model = ClassInfoModel.of(sourceOrigin, mock(Model.class));
 
-    private static class DependencyFieldStaticPublic
-            extends DependencyFieldStaticSuper {
-    }
+                return Arguments.of(model, ModelKind.SOURCE, this);
+            }
 
-    private static class DependencyFieldStaticSuper {
-    }
-
-    private static class DependencyFieldSuper {
-    }
-
-    private static class DependencyInnerField {
-    }
-
-    private static class DependencyInnerMethod {
-    }
-
-    private static class DependencyInnerSuper {
-    }
-
-    private static class DependencyMethodPrivate {
-    }
-
-    private static class DependencyMethodProtected
-            extends DependencyMethodSuper {
-    }
-
-    private static class DependencyMethodPublic {
-    }
-
-    private static class DependencyMethodStaticPrivate
-            extends DependencyMethodStaticSuper {
-    }
-
-    private static class DependencyMethodStaticProtected {
-    }
-
-    private static class DependencyMethodStaticPublic {
-    }
-
-    private static class DependencyMethodStaticSuper {
-    }
-
-    private static class DependencyMethodSuper {
-    }
-
-    private static class DependencySuper extends DependencySuperSuper {
-        public DependencySuperFieldPublic fieldPublic;
-    }
-
-    private static class DependencySuperFieldPublic {
-    }
-
-    private static class DependencySuperSuper {
-        private DependencySuperSuperMethodPrivate methodPrivate() {
-            return null;
+            public ClassInfo getSourceOrigin() {
+                return sourceOrigin;
+            }
         }
     }
 
-    private static class DependencySuperSuperMethodPrivate {
-    }
+    private static class Sample extends Dependency.Parent
+            implements Dependency.Interface {
+        public static Dependency.FieldStaticPublic fieldStaticPublic;
+        protected static Dependency.FieldStaticProtected fieldStaticProtected;
+        private static Dependency.FieldStaticPrivate fieldStaticPrivate;
+        public Dependency.FieldPublic fieldPublic;
+        protected Dependency.FieldProtected fieldProtected;
+        private Dependency.FieldPrivate fieldPrivate;
 
-    private static class Sample extends DependencySuper
-            implements DependencyInterface {
-        public static DependencyFieldStaticPublic fieldStaticPublic;
-        protected static DependencyFieldStaticProtected fieldStaticProtected;
-        private static DependencyFieldStaticPrivate fieldStaticPrivate;
-        public DependencyFieldPublic fieldPublic;
-        protected DependencyFieldProtected fieldProtected;
-        private DependencyFieldPrivate fieldPrivate;
-
-        public static DependencyMethodStaticPublic methodStaticPublic() {
+        public static Dependency.MethodStaticPublic methodStaticPublic() {
             return null;
         }
 
-        protected static DependencyMethodStaticProtected methodStaticProtected() {
+        protected static Dependency.MethodStaticProtected methodStaticProtected() {
             return null;
         }
 
-        private static DependencyMethodStaticPrivate methodStaticPrivate() {
+        private static Dependency.MethodStaticPrivate methodStaticPrivate() {
             return null;
         }
 
-        public DependencyMethodPublic methodPublic() {
+        public Dependency.MethodPublic methodPublic() {
             return null;
         }
 
-        protected DependencyMethodProtected methodProtected() {
+        protected Dependency.MethodProtected methodProtected() {
             return null;
         }
 
-        private DependencyMethodPrivate methodPrivate() {
+        private Dependency.MethodPrivate methodPrivate() {
             return null;
         }
 
         public class DependencyInner {
-            protected DependencyInnerMethod innerMethod() {
+            protected Dependency.InnerMethod innerMethod() {
                 return null;
             }
         }
 
-        public static class DependencyStaticInner extends DependencyInnerSuper {
-            public DependencyInnerField innerField;
+        public static class StaticInner extends Dependency.InnerParent {
+            public Dependency.InnerField innerField;
         }
+    }
+
+    private static class SampleChild extends Sample {
     }
 }

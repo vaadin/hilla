@@ -184,7 +184,7 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isInterface() {
-        return origin.isInterface();
+        return origin.isInterface() && !origin.isAnnotation();
     }
 
     @Override

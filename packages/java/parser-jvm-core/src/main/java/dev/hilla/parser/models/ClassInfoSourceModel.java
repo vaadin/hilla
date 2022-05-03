@@ -116,7 +116,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isAbstract() {
-        return origin.isAbstract();
+        return origin.isAbstract() || origin.isArrayClass();
     }
 
     @Override
@@ -166,7 +166,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isFinal() {
-        return origin.isFinal();
+        return origin.isFinal() || origin.isArrayClass();
     }
 
     @Override
@@ -231,7 +231,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isPublic() {
-        return origin.isPublic();
+        return (origin.isPublic() && !origin.isProtected())
+                || origin.isArrayClass();
     }
 
     @Override

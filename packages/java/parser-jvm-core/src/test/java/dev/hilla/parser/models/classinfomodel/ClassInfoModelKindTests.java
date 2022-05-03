@@ -1,12 +1,14 @@
 package dev.hilla.parser.models.classinfomodel;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -21,209 +23,140 @@ import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
+import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.utils.Streams;
+
+import io.github.classgraph.ArrayTypeSignature;
 
 @ExtendWith(ParserExtension.class)
 public class ClassInfoModelKindTests {
-    @DisplayName("It should detect abstract class")
+    private static final Map<Class<?>, String[]> associations = Map.ofEntries(
+            entry(Kind.Abstract.class, "isAbstract", "isStandardClass",
+                    "isStatic"),
+            entry(Kind.Annotation.class, "isAnnotation", "isAbstract",
+                    "isInterfaceOrAnnotation", "isStatic"),
+            entry(Object[].class, "isAbstract", "isArrayClass", "isFinal",
+                    "isPublic", "isStandardClass"),
+            entry(Kind.Enum.class, "isEnum", "isFinal", "isStandardClass",
+                    "isStatic"),
+            entry(Kind.Final.class, "isFinal", "isStandardClass", "isStatic"),
+            entry(Kind.Interface.class, "isAbstract", "isInterface",
+                    "isInterfaceOrAnnotation", "isStatic"),
+            entry(Byte.class, "isFinal", "isPublic", "isStandardClass"),
+            entry(Kind.Private.class, "isPrivate", "isStandardClass",
+                    "isStatic"),
+            entry(Kind.Protected.class, "isProtected", "isStandardClass",
+                    "isStatic"),
+            entry(Kind.Public.class, "isPublic", "isStandardClass",
+                    "isStatic"));
+
+    private final KindChecker checker = new KindChecker();
+
+    @DisplayName("It should detect class kind correctly")
     @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindAbstractProvider.class)
-    public void should_DetectAbstractClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isAbstract());
+    @ArgumentsSource(ModelProvider.class)
+    public void should_DetectClassKind(ClassInfoModel model, Object origin,
+            String[] specializations, ModelKind kind,
+            ModelProvider.Context context, String testName) {
+        checker.apply(model, specializations);
     }
 
-    @DisplayName("It should detect annotation interface")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindAnnotationProvider.class)
-    public void should_DetectAnnotationInterface(ClassInfoModel model,
-            ModelKind kind, TestContext context) {
-        assertTrue(model.isAnnotation());
-        assertTrue(model.isInterfaceOrAnnotation());
-    }
-
-    @DisplayName("It should detect dynamic class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindDynamicProvider.class)
-    public void should_DetectDynamicClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertFalse(model.isStatic());
-    }
-
-    @DisplayName("It should detect final class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindFinalProvider.class)
-    public void should_DetectFinalClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isFinal());
-    }
-
-    @DisplayName("It should detect interface")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindInterfaceProvider.class)
-    public void should_DetectInterface(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isInterface());
-        assertTrue(model.isInterfaceOrAnnotation());
-    }
-
-    @DisplayName("It should detect private class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindPrivateProvider.class)
-    public void should_DetectPrivateClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isPrivate());
-    }
-
-    @DisplayName("It should detect protected class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindProtectedProvider.class)
-    public void should_DetectProtectedClass(ClassInfoModel model,
-            ModelKind kind, TestContext context) {
-        assertTrue(model.isProtected());
-    }
-
-    @DisplayName("It should detect public class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindPublicProvider.class)
-    public void should_DetectPublicClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isPublic());
-    }
-
-    @DisplayName("It should detect static class")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(KindStaticProvider.class)
-    public void should_DetectStaticClass(ClassInfoModel model, ModelKind kind,
-            TestContext context) {
-        assertTrue(model.isStatic());
-    }
-
-    public static final class KindAbstractProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Abstract.class;
-        }
-
-        private static abstract class Abstract {
-        }
-    }
-
-    public static final class KindAnnotationProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Annotation.class;
+    private static final class Kind {
+        enum Enum {
         }
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.TYPE)
-        private @interface Annotation {
-        }
-    }
-
-    public static final class KindDynamicProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Dynamic.class;
+        @interface Annotation {
         }
 
-        private class Dynamic {
-        }
-    }
-
-    public static final class KindFinalProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Final.class;
+        interface Interface {
         }
 
-        private static final class Final {
-        }
-    }
-
-    public static final class KindInterfaceProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Interface.class;
+        static final class Final {
         }
 
-        private interface Interface {
+        public static class Public {
         }
-    }
 
-    public static final class KindPrivateProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Private.class;
+        protected static class Protected {
+        }
+
+        static abstract class Abstract {
         }
 
         private static class Private {
         }
     }
 
-    public static final class KindProtectedProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Protected.class;
-        }
+    private static final class KindChecker
+            extends SpecializationChecker<ClassInfoModel> {
+        private static final List<String> allowedMethods = List.of("isAbstract",
+                "isAnnotation", "isArrayClass", "isEnum", "isFinal",
+                "isInterface", "isInterfaceOrAnnotation", "isNative",
+                "isPrivate", "isProtected", "isPublic", "isStandardClass",
+                "isStatic", "isSynthetic");
 
-        protected static class Protected {
-        }
-    }
-
-    public static final class KindPublicProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Public.class;
-        }
-
-        public static class Public {
+        public KindChecker() {
+            super(ClassInfoModel.class,
+                    Arrays.stream(ClassInfoModel.class.getDeclaredMethods())
+                            .filter(method -> allowedMethods
+                                    .contains(method.getName())));
         }
     }
 
-    public static final class KindStaticProvider extends ModelProvider {
-        @Override
-        protected Class<?> getKindClass() {
-            return Static.class;
-        }
-
-        private static class Static {
-        }
-    }
-
-    public static abstract class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+    public static class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{3} [{5}]";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
-            var ctx = new TestContext(getKindClass(), context);
+            var ctx = new Context(context);
 
-            return Stream.of(ctx.getReflectionArguments(),
+            return Streams.combine(ctx.getReflectionArguments(),
                     ctx.getSourceArguments());
         }
 
-        protected abstract Class<?> getKindClass();
+        public static class Context extends BaseTestContext {
+            public Context(ExtensionContext context) {
+                super(context);
+            }
+
+            public Stream<Arguments> getReflectionArguments() {
+                return associations.entrySet().stream().map(entry -> {
+                    var origin = entry.getKey();
+                    var model = ClassInfoModel.of(origin);
+                    var testName = origin.getSimpleName();
+
+                    return Arguments.of(model, origin, entry.getValue(),
+                            ModelKind.REFLECTION, this, testName);
+                });
+            }
+
+            public Stream<Arguments> getSourceArguments() {
+                return associations.entrySet().stream().map(entry -> {
+                    var cls = entry.getKey();
+
+                    var origin = cls.isArray()
+                            ? ((ArrayTypeSignature) getScanResult()
+                                    .getClassInfo(UnsearchableTypesSample.class
+                                            .getName())
+                                    .getFieldInfo("array")
+                                    .getTypeSignatureOrTypeDescriptor())
+                                            .getArrayClassInfo()
+                            : getScanResult().getClassInfo(cls.getName());
+                    var model = ClassInfoModel.of(origin);
+                    var testName = origin.getSimpleName();
+
+                    return Arguments.of(model, origin, entry.getValue(),
+                            ModelKind.SOURCE, this, testName);
+                });
+            }
+        }
+
+        private static class UnsearchableTypesSample {
+            Object[] array;
+        }
     }
 
-    private static class TestContext extends BaseTestContext {
-        private final Class<?> kind;
-
-        public TestContext(Class<?> kind, ExtensionContext context) {
-            super(context);
-            this.kind = kind;
-        }
-
-        public Arguments getReflectionArguments() {
-            var model = ClassInfoModel.of(kind);
-
-            return Arguments.of(model, ModelKind.REFLECTION, this);
-        }
-
-        public Arguments getSourceArguments() {
-            var origin = getScanResult().getClassInfo(kind.getName());
-            var model = ClassInfoModel.of(origin);
-
-            return Arguments.of(model, ModelKind.SOURCE, this);
-        }
-    }
 }

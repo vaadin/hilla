@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -10,9 +11,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -28,40 +29,50 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import dev.hilla.parser.test.helpers.BaseTestContext;
-import dev.hilla.parser.test.helpers.NameBeautifier;
 import dev.hilla.parser.test.helpers.ParserExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.ClassInfo;
+import io.github.classgraph.MethodInfo;
+import io.github.classgraph.MethodTypeSignature;
 
 @ExtendWith(ParserExtension.class)
 public class BaseSignatureModelTests {
+    private static final Map<String, String[]> specializations = Map.ofEntries(
+            entry(Boolean.TYPE.getName(), "isBase", "isJDKClass", "isBoolean",
+                    "isPrimitive"),
+            entry(Byte.TYPE.getName(), "isBase", "isJDKClass", "isByte",
+                    "isPrimitive", "hasIntegerType"),
+            entry(Character.TYPE.getName(), "isBase", "isJDKClass",
+                    "isCharacter", "isPrimitive"),
+            entry(Double.TYPE.getName(), "isBase", "isJDKClass", "isDouble",
+                    "isPrimitive", "hasFloatType"),
+            entry(Float.TYPE.getName(), "isBase", "isJDKClass", "isFloat",
+                    "isPrimitive", "hasFloatType"),
+            entry(Integer.TYPE.getName(), "isBase", "isJDKClass", "isInteger",
+                    "isPrimitive", "hasIntegerType"),
+            entry(Long.TYPE.getName(), "isBase", "isJDKClass", "isLong",
+                    "isPrimitive", "hasIntegerType"),
+            entry(Short.TYPE.getName(), "isBase", "isJDKClass", "isShort",
+                    "isPrimitive", "hasIntegerType"),
+            entry(Void.TYPE.getName(), "isBase", "isJDKClass", "isVoid"));
+
     @DisplayName("It should create correct model")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(BaseSignatureModel model, String name,
-            ModelKind kind, TestContext context) throws NoSuchMethodException {
+    public void should_CreateCorrectModel(BaseSignatureModel model,
+            Object origin, String[] specializations, ModelKind kind,
+            ModelProvider.Context context, String testName) {
         switch (kind) {
-        case REFLECTION_BARE: {
-            var origin = context.getBareReflectionOrigin(context.restore(name));
+        case REFLECTION_BARE:
+        case REFLECTION_COMPLETE:
             assertEquals(origin, model.get());
             assertTrue(model.isReflection());
-        }
             break;
-        case REFLECTION_COMPLETE: {
-            var origin = context
-                    .getCompleteReflectionOrigin(context.restore(name));
-            assertEquals(origin, model.get());
-            assertTrue(model.isReflection());
-        }
-            break;
-        case SOURCE: {
-            var origin = context.getSourceOrigin(context.restore(name));
+        case SOURCE:
             assertEquals(origin, model.get());
             assertTrue(model.isSource());
-        }
             break;
         }
     }
@@ -70,7 +81,8 @@ public class BaseSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(BaseSignatureModel model,
-            String name, ModelKind kind, TestContext context) {
+            Object origin, String[] specializations, ModelKind kind,
+            ModelProvider.Context context, String testName) {
         assertEquals(Set.of(), model.getDependencies());
     }
 
@@ -92,93 +104,7 @@ public class BaseSignatureModelTests {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE_USE)
-    @interface Bar {
-    }
-
-    private static final class TestContext extends BaseTestContext
-            implements NameBeautifier {
-        public TestContext(ExtensionContext context) {
-            super(context);
-        }
-
-        public Stream<Arguments> getBareReflectionArguments() {
-            return getReflectionMethodsStream().map(method -> {
-                var origin = method.getReturnType();
-                var model = BaseSignatureModel.of(origin, mock(Model.class));
-                var name = shorten(method.getName());
-
-                return Arguments.of(model, name, ModelKind.REFLECTION_BARE,
-                        this);
-            });
-        }
-
-        public Class<?> getBareReflectionOrigin(String methodName)
-                throws NoSuchMethodException {
-            return Sample.class.getDeclaredMethod(methodName).getReturnType();
-        }
-
-        public Stream<Arguments> getCompleteReflectionArguments() {
-            return getReflectionMethodsStream().map(method -> {
-                var origin = method.getAnnotatedReturnType();
-                var model = BaseSignatureModel.of(origin, mock(Model.class));
-                var name = shorten(method.getName());
-
-                return Arguments.of(model, name, ModelKind.REFLECTION_COMPLETE,
-                        this);
-            });
-        }
-
-        public AnnotatedType getCompleteReflectionOrigin(String methodName)
-                throws NoSuchMethodException {
-            return Sample.class.getDeclaredMethod(methodName)
-                    .getAnnotatedReturnType();
-        }
-
-        @Override
-        public String getPart() {
-            return "get";
-        }
-
-        public Stream<Arguments> getSourceArguments() {
-            return getSourceClass().getMethodInfo().stream().map(method -> {
-                var origin = (BaseTypeSignature) method
-                        .getTypeSignatureOrTypeDescriptor().getResultType();
-                var model = BaseSignatureModel.of(origin, mock(Model.class));
-                var name = shorten(method.getName());
-
-                return Arguments.of(model, name, ModelKind.SOURCE, this);
-            });
-        }
-
-        public BaseTypeSignature getSourceOrigin(String methodName) {
-            return (BaseTypeSignature) getSourceClass()
-                    .getMethodInfo(methodName).getSingleMethod(methodName)
-                    .getTypeSignatureOrTypeDescriptor().getResultType();
-        }
-
-        private Stream<Method> getReflectionMethodsStream() {
-            return Arrays.stream(Sample.class.getDeclaredMethods());
-        }
-
-        private ClassInfo getSourceClass() {
-            return getScanResult().getClassInfo(Sample.class.getName());
-        }
-    }
-
-    // BareSignatureModel.Bare is not supposed to be annotated, so we can safely
-    // ignore it.
-    public static class AnnotatedModelProvider extends ModelProvider {
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            return super.provideArguments(context)
-                    .filter(this::isNonBareReflection);
-        }
-
-        private boolean isNonBareReflection(Arguments arguments) {
-            return !Objects.equals(arguments.get()[2],
-                    ModelKind.REFLECTION_BARE);
-        }
+    private @interface Bar {
     }
 
     @Nested
@@ -197,10 +123,11 @@ public class BaseSignatureModelTests {
 
         @DisplayName("It should access annotations")
         @ParameterizedTest(name = ModelProvider.testName)
-        @ArgumentsSource(AnnotatedModelProvider.class)
+        @ArgumentsSource(ModelProvider.Annotated.class)
         public void should_AccessAnnotations(BaseSignatureModel model,
-                String name, ModelKind kind, TestContext context) {
-            if (Objects.equals(name, "Byte")) {
+                Object origin, String[] specializations, ModelKind kind,
+                ModelProvider.Context context, String testName) {
+            if (ModelProvider.Context.is(origin, Byte.TYPE)) {
                 assertEquals(List.of(annotation), model.getAnnotations());
             } else {
                 assertEquals(List.of(), model.getAnnotations());
@@ -211,44 +138,105 @@ public class BaseSignatureModelTests {
     @Nested
     @DisplayName("As a SpecializedModel")
     public class AsSpecializedModel {
-        private final List<String> floatTypeOwners = List.of("Float", "Double");
-        private final List<String> integerTypeOwners = List.of("Byte", "Short",
-                "Long", "Integer");
+        private final SpecializationChecker<SpecializedModel> checker = new SpecializationChecker<>(
+                SpecializedModel.class,
+                SpecializedModel.class.getDeclaredMethods());
 
         @DisplayName("It should have an array specialization")
         @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
-        public void should_HaveBaseSpecialization(BaseSignatureModel model,
-                String name, ModelKind kind, TestContext context) {
-            var specializations = new ArrayList<>(
-                    List.of("isBase", "isJDKClass", "is" + name));
-
-            if (!Objects.equals(name, "Void")) {
-                specializations.add("isPrimitive");
-            }
-
-            if (integerTypeOwners.contains(name)) {
-                specializations.add("hasIntegerType");
-            }
-
-            if (floatTypeOwners.contains(name)) {
-                specializations.add("hasFloatType");
-            }
-
-            new SpecializationChecker(model).apply(specializations);
+        public void should_HasSpecialization(BaseSignatureModel model,
+                Object origin, String[] specializations, ModelKind kind,
+                ModelProvider.Context context, String testName) {
+            checker.apply(model, specializations);
         }
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{2} [{1}]";
+        public static final String testName = "{3} [{5}]";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
-            var ctx = new TestContext(context);
+            var ctx = new Context(context);
 
             return Streams.combine(ctx.getCompleteReflectionArguments(),
                     ctx.getBareReflectionArguments(), ctx.getSourceArguments());
+        }
+
+        // BareSignatureModel.Bare is not supposed to be annotated, so we can
+        // safely ignore it.
+        public static final class Annotated extends ModelProvider {
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                return super.provideArguments(context)
+                        .filter(this::isNonBareReflection);
+            }
+
+            private boolean isNonBareReflection(Arguments arguments) {
+                return !Objects.equals(arguments.get()[3],
+                        ModelKind.REFLECTION_BARE);
+            }
+        }
+
+        public static final class Context extends BaseTestContext {
+            public Context(ExtensionContext context) {
+                super(context);
+            }
+
+            public static boolean is(Object origin, Class<?> cls) {
+                String name;
+
+                if (origin instanceof AnnotatedType) {
+                    name = ((AnnotatedType) origin).getType().getTypeName();
+                } else if (origin instanceof Class<?>) {
+                    name = ((Class<?>) origin).getName();
+                } else {
+                    name = ((BaseTypeSignature) origin).getType().getName();
+                }
+
+                return Objects.equals(name, cls.getName());
+            }
+
+            public Stream<Arguments> getBareReflectionArguments() {
+                return Arrays.stream(Sample.class.getDeclaredMethods())
+                        .map(Method::getReturnType)
+                        .map(origin -> Arguments.of(
+                                BaseSignatureModel.of(origin,
+                                        mock(Model.class)),
+                                origin, specializations.get(origin.getName()),
+                                ModelKind.REFLECTION_BARE, this,
+                                origin.getSimpleName()));
+            }
+
+            public Stream<Arguments> getCompleteReflectionArguments() {
+                return Arrays.stream(Sample.class.getDeclaredMethods())
+                        .map(Method::getAnnotatedReturnType)
+                        .map(origin -> Arguments.of(
+                                BaseSignatureModel.of(origin,
+                                        mock(Model.class)),
+                                origin,
+                                specializations
+                                        .get(origin.getType().getTypeName()),
+                                ModelKind.REFLECTION_COMPLETE, this,
+                                ((Class<?>) origin.getType()).getSimpleName()));
+            }
+
+            public Stream<Arguments> getSourceArguments() {
+                return getScanResult().getClassInfo(Sample.class.getName())
+                        .getMethodInfo().stream()
+                        .map(MethodInfo::getTypeSignatureOrTypeDescriptor)
+                        .map(MethodTypeSignature::getResultType)
+                        .map(BaseTypeSignature.class::cast)
+                        .map(origin -> Arguments.of(
+                                BaseSignatureModel.of(origin,
+                                        mock(Model.class)),
+                                origin,
+                                specializations.get(origin.getType().getName()),
+                                ModelKind.SOURCE, this,
+                                origin.getType().getName()));
+            }
         }
     }
 

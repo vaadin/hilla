@@ -33,6 +33,7 @@ public class ParserExtension implements BeforeAllCallback, AfterAllCallback {
                 target::getProtectionDomain);
         var targetDir = loader.findTargetDirPath();
         var scanResult = new ClassGraph().enableAllInfo()
+                .enableSystemJarsAndModules()
                 .overrideClasspath(targetDir.toString()).scan();
         var store = context.getStore(STORE);
         store.put(Keys.SCAN_RESULT, scanResult);
