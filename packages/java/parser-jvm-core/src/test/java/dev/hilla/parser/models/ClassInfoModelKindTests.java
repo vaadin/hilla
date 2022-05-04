@@ -1,4 +1,4 @@
-package dev.hilla.parser.models.classinfomodel;
+package dev.hilla.parser.models;
 
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 
