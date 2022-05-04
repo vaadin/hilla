@@ -20,10 +20,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.models.Model;
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
@@ -69,17 +65,15 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should create correct model")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_CreateCorrectModel(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         switch (kind) {
         case REFLECTION: {
-            var origin = context.getReflectionOrigin();
             assertEquals(origin, model.get());
             assertTrue(model.isReflection());
         }
             break;
         case SOURCE: {
-            var origin = context.getSourceOrigin();
             assertEquals(origin, model.get());
             assertTrue(model.isSource());
         }
@@ -90,8 +84,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should check if it is assignable from other classes")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_checkAssignability(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_checkAssignability(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var assignableReflectionClass = SampleChild.class;
         var nonAssignableReflectionClass = Sample.StaticInner.class;
 
@@ -118,8 +112,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should be able to compare model with classes and other models")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_compareClasses(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_compareClasses(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var sameClassName = Sample.class.getName();
         var anotherClassName = Dependency.Parent.class.getName();
         var sameReflectionClass = Sample.class;
@@ -143,10 +137,10 @@ public class ClassInfoModelBasicTests {
 
         switch (kind) {
         case REFLECTION:
-            assertTrue(model.is(context.getReflectionOrigin()));
+            assertTrue(model.is((Class<?>) origin));
             break;
         case SOURCE:
-            assertTrue(model.is(context.getSourceOrigin()));
+            assertTrue(model.is((ClassInfo) origin));
             break;
         }
     }
@@ -154,8 +148,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get all inner classes of the class")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getAllInnerClasses(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getAllInnerClasses(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredClasses())
                 .map(Class::getName).collect(Collectors.toSet());
         var actual = model.getInnerClassesStream().map(ClassInfoModel::getName)
@@ -167,8 +161,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get all fields of the class")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getClassFields(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getClassFields(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredFields())
                 .map(Field::getName).collect(Collectors.toSet());
         var actual = model.getFieldsStream().map(FieldInfoModel::getName)
@@ -197,8 +191,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get all methods of the class")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getClassMethods(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getClassMethods(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getDeclaredMethods())
                 .map(Method::getName).collect(Collectors.toSet());
         var actual = model.getMethodsStream().map(MethodInfoModel::getName)
@@ -210,8 +204,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get interfaces the class implements")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getInterfaces(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getInterfaces(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Arrays.stream(Sample.class.getInterfaces())
                 .map(Class::getName).collect(Collectors.toSet());
         var actual = model.getInterfacesStream().map(ClassInfoModel::getName)
@@ -223,8 +217,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get simple name of the class")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getSimpleName(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getSimpleName(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Sample.class.getSimpleName();
         var actual = model.getSimpleName();
 
@@ -234,8 +228,8 @@ public class ClassInfoModelBasicTests {
     @DisplayName("It should get superclass of the class")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_getSuperclass(ClassInfoModel model, ModelKind kind,
-            ModelProvider.Context context) {
+    public void should_getSuperclass(ClassInfoModel model, Object origin,
+            ModelKind kind, ModelProvider.Context context) {
         var expected = Sample.class.getSuperclass().getName();
         var actual = model.getSuperClass().get().getName();
 
@@ -333,34 +327,23 @@ public class ClassInfoModelBasicTests {
         }
 
         public static class Context extends BaseTestContext {
-            private final Class<?> reflectionOrigin;
-            private final ClassInfo sourceOrigin;
-
             public Context(ExtensionContext context) {
                 super(context);
-                sourceOrigin = getScanResult()
-                        .getClassInfo(Sample.class.getName());
-                reflectionOrigin = Sample.class;
             }
 
             public Arguments getReflectionArguments() {
-                var model = ClassInfoModel.of(reflectionOrigin, null);
+                var origin = Sample.class;
+                var model = ClassInfoModel.of(origin, null);
 
                 return Arguments.of(model, ModelKind.REFLECTION, this);
             }
 
-            public Class<?> getReflectionOrigin() {
-                return reflectionOrigin;
-            }
-
             public Arguments getSourceArguments() {
-                var model = ClassInfoModel.of(sourceOrigin, mock(Model.class));
+                var origin = getScanResult()
+                        .getClassInfo(Sample.class.getName());
+                var model = ClassInfoModel.of(origin, mock(Model.class));
 
-                return Arguments.of(model, ModelKind.SOURCE, this);
-            }
-
-            public ClassInfo getSourceOrigin() {
-                return sourceOrigin;
+                return Arguments.of(model, origin, ModelKind.SOURCE, this);
             }
         }
     }
