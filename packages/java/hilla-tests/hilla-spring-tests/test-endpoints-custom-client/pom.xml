@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>23.1-SNAPSHOT</version>
+        <version>23.2-SNAPSHOT</version>
     </parent>
     <artifactId>test-endpoints-custom-client</artifactId>
     <name>Integration tests for V15+ endpoints (custom Connect client)</name>
