@@ -63,9 +63,7 @@ final class EndpointProcessor {
             this.method = method;
             this.pathItem = new PathItem().post(createOperation());
 
-            var endpointName = method.getParent()
-                    .map(cls -> ((ClassInfoModel) cls).getSimpleName())
-                    .orElse("Unknown");
+            var endpointName = method.getOwner().getSimpleName();
             var methodName = method.getName();
 
             this.pathKey = "/" + endpointName + "/" + methodName;
@@ -82,9 +80,7 @@ final class EndpointProcessor {
         private Operation createOperation() {
             var operation = new Operation();
 
-            var endpointName = method.getParent()
-                    .map(cls -> ((ClassInfoModel) cls).getSimpleName())
-                    .orElse("Unknown");
+            var endpointName = method.getOwner().getSimpleName();
 
             operation
                     .operationId(
