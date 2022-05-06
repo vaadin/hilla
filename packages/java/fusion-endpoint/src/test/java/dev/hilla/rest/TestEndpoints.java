@@ -23,6 +23,8 @@ import dev.hilla.Endpoint;
 @Endpoint
 public class TestEndpoints {
 
+    byte[] arr = { 1, 2, 3, 4 };
+
     public BeanWithZonedDateTimeField getBeanWithZonedDateTimeField() {
         return new BeanWithZonedDateTimeField();
     }
@@ -33,6 +35,10 @@ public class TestEndpoints {
 
     public BeanWithJacksonAnnotation getBeanWithJacksonAnnotation() {
         return new BeanWithJacksonAnnotation();
+    }
+
+    public byte[] getByteArray() {
+        return arr;
     }
 
     public LocalTime getLocalTime() {

@@ -121,6 +121,23 @@ public class EndpointWithRestControllerTest {
     }
 
     @Test
+    // https://github.com/vaadin/hilla/issues/396
+    public void should_SerializeByteArrayIntoArrayOfNumbers() {
+        try {
+            String result = callEndpointMethod("getByteArray");
+            assertNotNull(result);
+            assertEquals("[1,2,3,4]", result);
+            assertNotEquals("", result);
+            assertNotEquals("AQIDBA==", result);
+            assertNotEquals(
+                    "{\"message\":\"Failed to serialize endpoint 'VaadinConnectTypeConversionEndpoints' method 'getByteArray' response. Double check method's return type or specify a custom mapper bean with qualifier 'vaadinEndpointMapper'\"}",
+                    result);
+        } catch (Exception e) {
+            fail("failed to serialize a byte[] field");
+        }
+    }
+
+    @Test
     /**
      * this requires jackson-datatype-jsr310, which is added as a test scope
      * dependency. jackson-datatype-jsr310 is provided in

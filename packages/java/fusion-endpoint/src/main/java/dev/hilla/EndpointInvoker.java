@@ -175,6 +175,7 @@ public class EndpointInvoker {
             objectMapper.setVisibility(PropertyAccessor.ALL,
                     JsonAutoDetect.Visibility.ANY);
         }
+        objectMapper.registerModule(new ByteArrayModule());
         return objectMapper;
     }
 
