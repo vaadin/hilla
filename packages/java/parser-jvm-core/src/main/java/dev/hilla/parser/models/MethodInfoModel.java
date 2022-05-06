@@ -12,15 +12,14 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
 
-public interface MethodInfoModel extends Model, NamedModel, AnnotatedModel {
-    static MethodInfoModel of(@Nonnull MethodInfo method,
-            @Nonnull Model parent) {
-        return new MethodInfoSourceModel(Objects.requireNonNull(method),
-                Objects.requireNonNull(parent));
+public interface MethodInfoModel
+        extends Model, NamedModel, AnnotatedModel, OwnedModel<ClassInfoModel> {
+    static MethodInfoModel of(@Nonnull MethodInfo method) {
+        return new MethodInfoSourceModel(Objects.requireNonNull(method));
     }
 
-    static MethodInfoModel of(@Nonnull Method method, @Nonnull Model parent) {
-        return new MethodInfoReflectionModel(method, parent);
+    static MethodInfoModel of(@Nonnull Method method) {
+        return new MethodInfoReflectionModel(method);
     }
 
     @Override

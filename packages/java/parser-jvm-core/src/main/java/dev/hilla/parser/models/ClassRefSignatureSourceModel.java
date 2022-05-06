@@ -16,9 +16,8 @@ final class ClassRefSignatureSourceModel
     private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
 
-    public ClassRefSignatureSourceModel(ClassRefTypeSignature origin,
-            Model parent) {
-        super(origin, parent);
+    public ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
+        super(origin);
     }
 
     @Override
@@ -28,8 +27,7 @@ final class ClassRefSignatureSourceModel
                     .combine(origin.getTypeArguments().stream(),
                             origin.getSuffixTypeArguments().stream()
                                     .flatMap(Collection::stream))
-                    .map(arg -> TypeArgumentModel.of(arg, this))
-                    .collect(Collectors.toList());
+                    .map(TypeArgumentModel::of).collect(Collectors.toList());
         }
 
         return typeArguments;

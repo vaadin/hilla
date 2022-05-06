@@ -10,11 +10,12 @@ import java.util.stream.Collectors;
 final class MethodInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Method>
         implements MethodInfoModel, ReflectionModel {
+    private ClassInfoModel owner;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
 
-    public MethodInfoReflectionModel(Method method, Model parent) {
-        super(method, parent);
+    public MethodInfoReflectionModel(Method method) {
+        super(method);
     }
 
     @Override
@@ -41,10 +42,19 @@ final class MethodInfoReflectionModel
     }
 
     @Override
+    public ClassInfoModel getOwner() {
+        if (owner == null) {
+            owner = ClassInfoModel.of(origin.getDeclaringClass());
+        }
+
+        return owner;
+    }
+
+    @Override
     public List<MethodParameterInfoModel> getParameters() {
         if (parameters == null) {
-            parameters = Arrays.stream(origin.getParameters()).map(
-                    parameter -> MethodParameterInfoModel.of(parameter, this))
+            parameters = Arrays.stream(origin.getParameters())
+                    .map(MethodParameterInfoModel::of)
                     .collect(Collectors.toList());
         }
 
@@ -54,8 +64,7 @@ final class MethodInfoReflectionModel
     @Override
     public SignatureModel getResultType() {
         if (resultType == null) {
-            resultType = SignatureModel.of(origin.getAnnotatedReturnType(),
-                    this);
+            resultType = SignatureModel.of(origin.getAnnotatedReturnType());
         }
 
         return resultType;

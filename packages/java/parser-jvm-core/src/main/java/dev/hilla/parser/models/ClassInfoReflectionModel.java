@@ -1,14 +1,14 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import dev.hilla.parser.utils.Predicates;
 
 final class ClassInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Class<?>>
@@ -52,7 +52,9 @@ final class ClassInfoReflectionModel
     @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
-            fields = getMembers(origin.getDeclaredFields(), FieldInfoModel::of);
+            fields = Arrays.stream(origin.getDeclaredFields())
+                    .map(field -> FieldInfoModel.of(field, this))
+                    .collect(Collectors.toList());
         }
 
         return fields;
@@ -63,8 +65,8 @@ final class ClassInfoReflectionModel
         if (chain == null) {
             chain = Stream
                     .<Class<?>> iterate(origin,
-                            Predicates.and(Objects::nonNull,
-                                    ClassInfoModel::isNonJDKClass),
+                            ((Predicate<Class<?>>) Objects::nonNull)
+                                    .and(ClassInfoModel::isNonJDKClass),
                             Class::getSuperclass)
                     .distinct().map(ClassInfoModel::of)
                     .collect(Collectors.toList());
@@ -76,8 +78,8 @@ final class ClassInfoReflectionModel
     @Override
     public List<ClassInfoModel> getInnerClasses() {
         if (innerClasses == null) {
-            innerClasses = getMembers(origin.getDeclaredClasses(),
-                    ClassInfoModel::of);
+            innerClasses = Arrays.stream(origin.getDeclaredClasses())
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
         }
 
         return innerClasses;
@@ -86,7 +88,9 @@ final class ClassInfoReflectionModel
     @Override
     public List<ClassInfoModel> getInterfaces() {
         if (interfaces == null) {
-            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
+            interfaces = Arrays.stream(origin.getInterfaces())
+                    .map(cls -> ClassInfoModel.of(cls, this))
+                    .collect(Collectors.toList());
         }
 
         return interfaces;
@@ -95,8 +99,9 @@ final class ClassInfoReflectionModel
     @Override
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
-            methods = getMembers(origin.getDeclaredMethods(),
-                    MethodInfoModel::of);
+            methods = Arrays.stream(origin.getDeclaredMethods())
+                    .map(method -> MethodInfoModel.of(method, this))
+                    .collect(Collectors.toList());
         }
 
         return methods;

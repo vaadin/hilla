@@ -5,8 +5,8 @@ import java.util.Objects;
 
 final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
         implements AnnotationInfoModel, ReflectionModel {
-    public AnnotationInfoReflectionModel(Annotation annotation, Model parent) {
-        super(annotation, parent);
+    public AnnotationInfoReflectionModel(Annotation annotation) {
+        super(annotation);
     }
 
     @Override

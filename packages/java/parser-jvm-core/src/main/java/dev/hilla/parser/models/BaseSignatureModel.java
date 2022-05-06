@@ -8,20 +8,17 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.BaseTypeSignature;
 
 public interface BaseSignatureModel extends SignatureModel {
-    static BaseSignatureModel of(@Nonnull BaseTypeSignature origin,
-            @Nonnull Model parent) {
-        return new BaseSignatureSourceModel(Objects.requireNonNull(origin),
-                Objects.requireNonNull(parent));
+    static BaseSignatureModel of(@Nonnull BaseTypeSignature origin) {
+        return new BaseSignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    static BaseSignatureModel of(@Nonnull AnnotatedType origin, Model parent) {
-        return new BaseSignatureReflectionModel(Objects.requireNonNull(origin),
-                parent);
+    static BaseSignatureModel of(@Nonnull AnnotatedType origin) {
+        return new BaseSignatureReflectionModel(Objects.requireNonNull(origin));
     }
 
-    static BaseSignatureModel of(@Nonnull Class<?> origin, Model parent) {
+    static BaseSignatureModel of(@Nonnull Class<?> origin) {
         return new BaseSignatureReflectionModel.Bare(
-                Objects.requireNonNull(origin), parent);
+                Objects.requireNonNull(origin));
     }
 
     @Override

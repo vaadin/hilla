@@ -11,8 +11,8 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
     private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> associatedTypes;
 
-    public TypeArgumentSourceModel(TypeArgument origin, Model parent) {
-        super(origin, parent);
+    public TypeArgumentSourceModel(TypeArgument origin) {
+        super(origin);
     }
 
     @Override
@@ -30,7 +30,7 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
         if (associatedTypes == null) {
             var signature = origin.getTypeSignature();
             associatedTypes = signature == null ? Collections.emptyList()
-                    : List.of(SignatureModel.of(signature, this));
+                    : List.of(SignatureModel.of(signature));
         }
 
         return associatedTypes;

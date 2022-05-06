@@ -7,15 +7,14 @@ final class TypeVariableReflectionModel
         implements TypeVariableModel, ReflectionSignatureModel {
     private TypeParameterModel typeParameter;
 
-    public TypeVariableReflectionModel(AnnotatedTypeVariable origin,
-            Model parent) {
-        super(origin, parent);
+    public TypeVariableReflectionModel(AnnotatedTypeVariable origin) {
+        super(origin);
     }
 
     @Override
     public SignatureModel resolve() {
         if (typeParameter == null) {
-            typeParameter = TypeParameterModel.of(origin, parent);
+            typeParameter = TypeParameterModel.of(origin);
         }
 
         return typeParameter;

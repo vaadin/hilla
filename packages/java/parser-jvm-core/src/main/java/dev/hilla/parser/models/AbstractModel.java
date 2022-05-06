@@ -1,17 +1,14 @@
 package dev.hilla.parser.models;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
 public abstract class AbstractModel<T> implements Model {
     protected final T origin;
-    protected final Model parent;
 
-    AbstractModel(@Nonnull T origin, Model parent) {
+    AbstractModel(@Nonnull T origin) {
         this.origin = Objects.requireNonNull(origin);
-        this.parent = parent;
     }
 
     @Override
@@ -30,11 +27,6 @@ public abstract class AbstractModel<T> implements Model {
     @Override
     public T get() {
         return origin;
-    }
-
-    @Override
-    public Optional<Model> getParent() {
-        return Optional.of(parent);
     }
 
     @Override

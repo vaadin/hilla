@@ -8,8 +8,8 @@ import io.github.classgraph.BaseTypeSignature;
 final class BaseSignatureSourceModel
         extends AbstractAnnotatedSourceModel<BaseTypeSignature>
         implements BaseSignatureModel, SourceSignatureModel {
-    public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
-        super(origin, parent);
+    public BaseSignatureSourceModel(BaseTypeSignature origin) {
+        super(origin);
     }
 
     @Override

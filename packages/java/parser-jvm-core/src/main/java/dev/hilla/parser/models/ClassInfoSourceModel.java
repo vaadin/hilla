@@ -21,8 +21,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
 
-    public ClassInfoSourceModel(ClassInfo origin, Model parent) {
-        super(origin, parent);
+    public ClassInfoSourceModel(ClassInfo origin) {
+        super(origin);
 
         var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null
@@ -51,8 +51,9 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
-            fields = getMembers(origin.getDeclaredFieldInfo(),
-                    FieldInfoModel::of);
+            fields = origin.getDeclaredFieldInfo().stream()
+                    .map(field -> FieldInfoModel.of(field, this))
+                    .collect(Collectors.toList());
         }
 
         return fields;
@@ -61,9 +62,11 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<ClassInfoModel> getInheritanceChain() {
         if (chain == null) {
-            chain = Streams.combine(Stream.of(this),
-                    getMembersStream(origin.getSuperclasses(),
-                            ClassInfoModel::isNonJDKClass, ClassInfoModel::of))
+            chain = Streams
+                    .combine(Stream.of(this),
+                            origin.getSuperclasses().stream()
+                                    .filter(ClassInfoModel::isNonJDKClass)
+                                    .map(ClassInfoModel::of))
                     .collect(Collectors.toList());
         }
 
@@ -73,8 +76,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<ClassInfoModel> getInnerClasses() {
         if (innerClasses == null) {
-            innerClasses = getMembers(origin.getInnerClasses(),
-                    ClassInfoModel::of);
+            innerClasses = origin.getInnerClasses().stream()
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
         }
 
         return innerClasses;
@@ -83,7 +86,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<ClassInfoModel> getInterfaces() {
         if (interfaces == null) {
-            interfaces = getMembers(origin.getInterfaces(), ClassInfoModel::of);
+            interfaces = origin.getInterfaces().stream().map(ClassInfoModel::of)
+                    .collect(Collectors.toList());
         }
 
         return interfaces;
@@ -92,8 +96,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
-            methods = getMembers(origin.getDeclaredMethodInfo(),
-                    MethodInfoModel::of);
+            methods = origin.getDeclaredMethodInfo().stream()
+                    .map(MethodInfoModel::of).collect(Collectors.toList());
         }
 
         return methods;

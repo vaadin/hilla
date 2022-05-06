@@ -18,8 +18,8 @@ final class TypeArgumentReflectionModel
     private List<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;
 
-    public TypeArgumentReflectionModel(AnnotatedType origin, Model parent) {
-        super(origin, parent);
+    public TypeArgumentReflectionModel(AnnotatedType origin) {
+        super(origin);
     }
 
     @Override
@@ -33,8 +33,8 @@ final class TypeArgumentReflectionModel
                                     .getAnnotatedUpperBounds())
                     : Stream.of(origin);
 
-            associatedTypes = stream.map(type -> SignatureModel.of(type, this))
-                    .distinct().collect(Collectors.toList());
+            associatedTypes = stream.map(SignatureModel::of).distinct()
+                    .collect(Collectors.toList());
         }
 
         return associatedTypes;

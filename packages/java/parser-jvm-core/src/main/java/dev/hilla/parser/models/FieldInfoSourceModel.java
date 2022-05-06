@@ -8,10 +8,11 @@ import io.github.classgraph.FieldInfo;
 
 final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
         implements FieldInfoModel, SourceModel {
+    private ClassInfoModel owner;
     private SignatureModel type;
 
-    public FieldInfoSourceModel(FieldInfo field, Model parent) {
-        super(field, parent);
+    public FieldInfoSourceModel(FieldInfo field) {
+        super(field);
     }
 
     @Override
@@ -38,10 +39,18 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     }
 
     @Override
+    public ClassInfoModel getOwner() {
+        if (owner == null) {
+            owner = ClassInfoModel.of(origin.getClassInfo());
+        }
+
+        return owner;
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
-            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor(),
-                    this);
+            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
         }
 
         return type;

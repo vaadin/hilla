@@ -6,8 +6,8 @@ import io.github.classgraph.AnnotationInfo;
 
 final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
         implements AnnotationInfoModel, SourceModel {
-    public AnnotationInfoSourceModel(AnnotationInfo origin, Model parent) {
-        super(origin, parent);
+    public AnnotationInfoSourceModel(AnnotationInfo origin) {
+        super(origin);
     }
 
     @Override

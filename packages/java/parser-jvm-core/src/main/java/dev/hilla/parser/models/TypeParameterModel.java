@@ -9,14 +9,12 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeParameter;
 
 public interface TypeParameterModel extends SignatureModel {
-    static TypeParameterModel of(@Nonnull TypeParameter origin,
-            @Nonnull Model parent) {
-        return new TypeParameterSourceModel(origin, parent);
+    static TypeParameterModel of(@Nonnull TypeParameter origin) {
+        return new TypeParameterSourceModel(origin);
     }
 
-    static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin,
-            Model parent) {
-        return new TypeParameterReflectionModel(origin, parent);
+    static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
+        return new TypeParameterReflectionModel(origin);
     }
 
     List<SignatureModel> getBounds();

@@ -8,16 +8,12 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeVariableSignature;
 
 public interface TypeVariableModel extends SignatureModel {
-    static TypeVariableModel of(@Nonnull TypeVariableSignature origin,
-            @Nonnull Model parent) {
-        return new TypeVariableSourceModel(Objects.requireNonNull(origin),
-                Objects.requireNonNull(parent));
+    static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
+        return new TypeVariableSourceModel(Objects.requireNonNull(origin));
     }
 
-    static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin,
-            Model parent) {
-        return new TypeVariableReflectionModel(Objects.requireNonNull(origin),
-                parent);
+    static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin) {
+        return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override

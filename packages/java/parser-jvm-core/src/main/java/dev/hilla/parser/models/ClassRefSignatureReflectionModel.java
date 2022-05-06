@@ -13,9 +13,8 @@ final class ClassRefSignatureReflectionModel
     private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
 
-    public ClassRefSignatureReflectionModel(AnnotatedParameterizedType origin,
-            Model parent) {
-        super(origin, parent);
+    public ClassRefSignatureReflectionModel(AnnotatedParameterizedType origin) {
+        super(origin);
     }
 
     @Override
@@ -23,8 +22,7 @@ final class ClassRefSignatureReflectionModel
         if (typeArguments == null) {
             typeArguments = Arrays
                     .stream(origin.getAnnotatedActualTypeArguments())
-                    .map(arg -> TypeArgumentModel.of(arg, this))
-                    .collect(Collectors.toList());
+                    .map(TypeArgumentModel::of).collect(Collectors.toList());
         }
 
         return typeArguments;
@@ -51,8 +49,8 @@ final class ClassRefSignatureReflectionModel
             implements ClassRefSignatureModel, ReflectionSignatureModel {
         private ClassInfoModel reference;
 
-        public AnnotatedBare(AnnotatedType origin, Model parent) {
-            super(origin, parent);
+        public AnnotatedBare(AnnotatedType origin) {
+            super(origin);
         }
 
         @Override
@@ -79,8 +77,8 @@ final class ClassRefSignatureReflectionModel
             implements ClassRefSignatureModel, ReflectionSignatureModel {
         private ClassInfoModel reference;
 
-        public Bare(Class<?> origin, Model parent) {
-            super(origin, parent);
+        public Bare(Class<?> origin) {
+            super(origin);
         }
 
         @Override

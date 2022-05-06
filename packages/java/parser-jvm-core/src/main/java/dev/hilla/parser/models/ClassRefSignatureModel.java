@@ -22,38 +22,21 @@ public interface ClassRefSignatureModel extends SignatureModel {
                 target.getName());
     }
 
-    static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin,
-            @Nonnull Model parent) {
-        return new ClassRefSignatureSourceModel(Objects.requireNonNull(origin),
-                Objects.requireNonNull(parent));
+    static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin) {
+        return new ClassRefSignatureSourceModel(Objects.requireNonNull(origin));
     }
 
     static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
-        return of(origin, null);
-    }
-
-    static ClassRefSignatureModel of(@Nonnull Class<?> origin, Model parent) {
-        return new ClassRefSignatureReflectionModel.Bare(origin, parent);
+        return new ClassRefSignatureReflectionModel.Bare(origin);
     }
 
     static ClassRefSignatureModel of(
             @Nonnull AnnotatedParameterizedType origin) {
-        return of(origin, null);
-    }
-
-    static ClassRefSignatureModel of(@Nonnull AnnotatedParameterizedType origin,
-            Model parent) {
-        return new ClassRefSignatureReflectionModel(origin, parent);
+        return new ClassRefSignatureReflectionModel(origin);
     }
 
     static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
-        return of(origin, null);
-    }
-
-    static ClassRefSignatureModel of(@Nonnull AnnotatedType origin,
-            Model parent) {
-        return new ClassRefSignatureReflectionModel.AnnotatedBare(origin,
-                parent);
+        return new ClassRefSignatureReflectionModel.AnnotatedBare(origin);
     }
 
     List<TypeArgumentModel> getTypeArguments();

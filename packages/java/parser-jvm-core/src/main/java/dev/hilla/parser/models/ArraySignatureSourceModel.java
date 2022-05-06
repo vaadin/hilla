@@ -10,14 +10,14 @@ final class ArraySignatureSourceModel
         implements ArraySignatureModel, SourceSignatureModel {
     private SignatureModel nestedType;
 
-    public ArraySignatureSourceModel(ArrayTypeSignature origin, Model parent) {
-        super(origin, parent);
+    public ArraySignatureSourceModel(ArrayTypeSignature origin) {
+        super(origin);
     }
 
     @Override
     public SignatureModel getNestedType() {
         if (nestedType == null) {
-            nestedType = SignatureModel.of(origin.getNestedType(), this);
+            nestedType = SignatureModel.of(origin.getNestedType());
         }
 
         return nestedType;

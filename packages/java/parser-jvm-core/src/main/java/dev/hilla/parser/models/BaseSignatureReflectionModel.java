@@ -7,8 +7,8 @@ final class BaseSignatureReflectionModel
         implements BaseSignatureModel, ReflectionSignatureModel {
     private final Class<?> inner;
 
-    public BaseSignatureReflectionModel(AnnotatedType origin, Model parent) {
-        super(origin, parent);
+    public BaseSignatureReflectionModel(AnnotatedType origin) {
+        super(origin);
         inner = (Class<?>) origin.getType();
     }
 
@@ -69,8 +69,8 @@ final class BaseSignatureReflectionModel
 
     static class Bare extends AbstractAnnotatedReflectionModel<Class<?>>
             implements BaseSignatureModel, ReflectionSignatureModel {
-        public Bare(Class<?> origin, Model parent) {
-            super(origin, parent);
+        public Bare(Class<?> origin) {
+            super(origin);
         }
 
         @Override

@@ -8,15 +8,13 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.MethodParameterInfo;
 
 public interface MethodParameterInfoModel
-        extends Model, NamedModel, AnnotatedModel {
-    static MethodParameterInfoModel of(@Nonnull MethodParameterInfo parameter,
-            @Nonnull Model parent) {
-        return new MethodParameterInfoSourceModel(parameter, parent);
+        extends Model, NamedModel, AnnotatedModel, OwnedModel<MethodInfoModel> {
+    static MethodParameterInfoModel of(@Nonnull MethodParameterInfo parameter) {
+        return new MethodParameterInfoSourceModel(parameter);
     }
 
-    static MethodParameterInfoModel of(@Nonnull Parameter parameter,
-            @Nonnull Model parent) {
-        return new MethodParameterInfoReflectionModel(parameter, parent);
+    static MethodParameterInfoModel of(@Nonnull Parameter parameter) {
+        return new MethodParameterInfoReflectionModel(parameter);
     }
 
     @Override

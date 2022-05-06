@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,8 +13,8 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
     private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> bounds;
 
-    public TypeParameterSourceModel(TypeParameter origin, Model parent) {
-        super(origin, Objects.requireNonNull(parent));
+    public TypeParameterSourceModel(TypeParameter origin) {
+        super(origin);
     }
 
     @Override
@@ -34,7 +33,7 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
                     .combine(Stream.of(origin.getClassBound()),
                             origin.getInterfaceBounds().stream())
                     .map(signature -> signature != null
-                            ? SignatureModel.of(signature, this)
+                            ? SignatureModel.of(signature)
                             : null)
                     .distinct().collect(Collectors.toList());
         }

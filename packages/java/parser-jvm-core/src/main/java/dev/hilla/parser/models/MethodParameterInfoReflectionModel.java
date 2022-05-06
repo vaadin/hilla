@@ -1,16 +1,17 @@
 package dev.hilla.parser.models;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 final class MethodParameterInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Parameter>
         implements MethodParameterInfoModel, ReflectionModel {
+    private MethodInfoModel owner;
     private SignatureModel type;
 
-    public MethodParameterInfoReflectionModel(Parameter parameter,
-            Model parent) {
-        super(parameter, parent);
+    public MethodParameterInfoReflectionModel(Parameter parameter) {
+        super(parameter);
     }
 
     @Override
@@ -38,9 +39,19 @@ final class MethodParameterInfoReflectionModel
     }
 
     @Override
+    public MethodInfoModel getOwner() {
+        if (owner == null) {
+            owner = MethodInfoModel
+                    .of((Method) origin.getDeclaringExecutable());
+        }
+
+        return owner;
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
-            type = SignatureModel.of(origin.getAnnotatedType(), this);
+            type = SignatureModel.of(origin.getAnnotatedType());
         }
 
         return type;

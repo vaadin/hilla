@@ -7,9 +7,8 @@ final class ArraySignatureReflectionModel
         implements ArraySignatureModel, ReflectionSignatureModel {
     private SignatureModel nestedType;
 
-    public ArraySignatureReflectionModel(AnnotatedArrayType origin,
-            Model parent) {
-        super(origin, parent);
+    public ArraySignatureReflectionModel(AnnotatedArrayType origin) {
+        super(origin);
     }
 
     @Override

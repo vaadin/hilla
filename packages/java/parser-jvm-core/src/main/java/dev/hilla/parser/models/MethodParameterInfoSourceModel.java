@@ -9,11 +9,11 @@ import io.github.classgraph.MethodParameterInfo;
 final class MethodParameterInfoSourceModel
         extends AbstractAnnotatedSourceModel<MethodParameterInfo>
         implements MethodParameterInfoModel, SourceModel {
+    private MethodInfoModel owner;
     private SignatureModel type;
 
-    public MethodParameterInfoSourceModel(MethodParameterInfo parameter,
-            Model parent) {
-        super(parameter, parent);
+    public MethodParameterInfoSourceModel(MethodParameterInfo parameter) {
+        super(parameter);
     }
 
     @Override
@@ -41,10 +41,18 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
+    public MethodInfoModel getOwner() {
+        if (owner == null) {
+            owner = MethodInfoModel.of(origin.getMethodInfo());
+        }
+
+        return owner;
+    }
+
+    @Override
     public SignatureModel getType() {
         if (type == null) {
-            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor(),
-                    this);
+            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
         }
 
         return type;
