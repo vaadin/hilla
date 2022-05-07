@@ -4,6 +4,15 @@ import type { Subscription } from './Connect';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
 
+export enum State {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+const activeEventName = 'state-changed';
+
+/**
+ * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+ */
 export class FluxConnection {
   private nextId = 0;
   private endpointInfos = new Map<string, string>();
@@ -13,6 +22,8 @@ export class FluxConnection {
   private closed = new Set<string>();
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
+  public state: State = State.INACTIVE;
+  private listeners: { [key: string]: ((event: CustomEvent) => void)[] } = {};
 
   constructor() {
     if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
@@ -29,6 +40,24 @@ export class FluxConnection {
     this.socket = io('/hilla', { path: '/VAADIN/hillapush/', extraHeaders });
     this.socket.on('message', (message) => {
       this.handleMessage(JSON.parse(message));
+    });
+    this.socket.on('disconnect', () => {
+      // https://socket.io/docs/v4/client-api/#event-disconnect
+      if (this.state === State.ACTIVE) {
+        this.state = State.INACTIVE;
+        this.dispatchEvent(new CustomEvent(activeEventName, { detail: { active: false } }));
+      }
+    });
+    this.socket.on('connect_error', () => {
+      // https://socket.io/docs/v4/client-api/#event-connect_error
+    });
+
+    this.socket.on('connect', () => {
+      // https://socket.io/docs/v4/client-api/#event-connect
+      if (this.state === State.INACTIVE) {
+        this.state = State.ACTIVE;
+        this.dispatchEvent(new CustomEvent(activeEventName, { detail: { active: true } }));
+      }
     });
   }
 
@@ -77,10 +106,18 @@ export class FluxConnection {
     this.socket.send(message);
   }
 
-  subscribe(endpointName: string, methodName: string, maybeParams?: Array<any>): Subscription<any> {
+  /**
+   * Subscribes to the flux returned by the given endpoint name + method name using the given parameters.
+   *
+   * @param endpointName the endpoint to connect to
+   * @param methodName the method in the endpoint to connect to
+   * @param parameters the parameters to use
+   * @returns a subscription
+   */
+  subscribe(endpointName: string, methodName: string, parameters?: Array<any>): Subscription<any> {
     const id: string = this.nextId.toString();
     this.nextId += 1;
-    const params = maybeParams || [];
+    const params = parameters || [];
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', id, endpointName, methodName, params };
     const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
@@ -106,5 +143,34 @@ export class FluxConnection {
       },
     };
     return hillaSubscription;
+  }
+
+  /**
+   * Adds a listener for the given event type.
+   *
+   * @param type  the type of event
+   * @param listener  the listener to call when the event occurs
+   */
+  addEventListener(type: string, listener: (event: CustomEvent) => void) {
+    this.listeners[type] = this.listeners[type] || [];
+    this.listeners[type].push(listener);
+  }
+
+  /**
+   * Removes a listener for the given event type.
+   *
+   * @param type  the type of event
+   * @param listener  the listener to remove
+   */
+  removeEventListener(type: string, listener: (event: CustomEvent) => void) {
+    if (this.listeners[type]) {
+      this.listeners[type] = this.listeners[type].filter((l) => l !== listener);
+    }
+  }
+
+  private dispatchEvent(e: CustomEvent) {
+    (this.listeners[e.type] || []).forEach((listener: (event: CustomEvent) => void) => {
+      listener(e);
+    });
   }
 }

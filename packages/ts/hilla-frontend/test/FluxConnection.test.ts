@@ -198,4 +198,58 @@ describe('FluxConnection', () => {
     expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
     expect(fluxConnectionAny.closed.size).to.equal(0);
   });
+  it('dispatches an active event on socket.io connect', () => {
+    const { socket } = fluxConnectionAny;
+    socket.connected = false;
+    let events = 0;
+    fluxConnection.addEventListener('state-changed', (e) => {
+      if (e.detail.active) {
+        events += 1;
+      }
+    });
+    socket.connected = true;
+    socket.emit('connect');
+    expect(events).to.equal(1);
+  });
+  it('dispatches an active event on socket.io reconnect', () => {
+    const { socket } = fluxConnectionAny;
+    socket.connected = false;
+    let events = 0;
+    fluxConnection.addEventListener('state-changed', (e) => {
+      if (e.detail.active) {
+        events += 1;
+      }
+    });
+    socket.connected = true;
+    socket.emit('connect');
+    socket.connected = false;
+    socket.emit('disconnect');
+    socket.connected = true;
+    socket.emit('connect');
+    expect(events).to.equal(2);
+  });
+  it('dispatches an inactive event on socket.io disconnect', () => {
+    const { socket } = fluxConnectionAny;
+    let events = 0;
+    fluxConnection.addEventListener('state-changed', (e) => {
+      if (!e.detail.active) {
+        events += 1;
+      }
+    });
+    socket.connected = true;
+    socket.emit('connect');
+    socket.connected = false;
+    socket.emit('disconnect');
+    expect(events).to.equal(1);
+  });
+  it('removes listeners with removeEventListener', () => {
+    const listener = () => {
+      // Nothing needed here
+    };
+    fluxConnection.addEventListener('state-changed', listener);
+
+    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(1);
+    fluxConnection.removeEventListener('state-changed', listener);
+    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(0);
+  });
 });
