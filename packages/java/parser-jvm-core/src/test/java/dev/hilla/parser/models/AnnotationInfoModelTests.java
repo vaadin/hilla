@@ -76,7 +76,7 @@ public class AnnotationInfoModelTests {
                     throws NoSuchMethodException {
                 var origin = Sample.class.getMethod("bar")
                         .getAnnotation(Foo.class);
-                var model = AnnotationInfoModel.of(origin, mock(Model.class));
+                var model = AnnotationInfoModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.REFLECTION, this);
             }
@@ -86,7 +86,7 @@ public class AnnotationInfoModelTests {
                         .getClassInfo(Sample.class.getName())
                         .getMethodInfo("bar").getSingleMethod("bar")
                         .getAnnotationInfo(Foo.class.getName());
-                var model = AnnotationInfoModel.of(origin, mock(Model.class));
+                var model = AnnotationInfoModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.SOURCE, this);
             }

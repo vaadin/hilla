@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -117,8 +116,7 @@ public class BaseSignatureModelTests {
             var annotationOrigin = Sample.class.getMethod("getByte")
                     .getAnnotatedReturnType().getAnnotation(Bar.class);
 
-            annotation = AnnotationInfoModel.of(annotationOrigin,
-                    mock(Model.class));
+            annotation = AnnotationInfoModel.of(annotationOrigin);
         }
 
         @DisplayName("It should access annotations")
@@ -203,9 +201,8 @@ public class BaseSignatureModelTests {
                 return Arrays.stream(Sample.class.getDeclaredMethods())
                         .map(Method::getReturnType)
                         .map(origin -> Arguments.of(
-                                BaseSignatureModel.of(origin,
-                                        mock(Model.class)),
-                                origin, specializations.get(origin.getName()),
+                                BaseSignatureModel.of(origin), origin,
+                                specializations.get(origin.getName()),
                                 ModelKind.REFLECTION_BARE, this,
                                 origin.getSimpleName()));
             }
@@ -214,9 +211,7 @@ public class BaseSignatureModelTests {
                 return Arrays.stream(Sample.class.getDeclaredMethods())
                         .map(Method::getAnnotatedReturnType)
                         .map(origin -> Arguments.of(
-                                BaseSignatureModel.of(origin,
-                                        mock(Model.class)),
-                                origin,
+                                BaseSignatureModel.of(origin), origin,
                                 specializations
                                         .get(origin.getType().getTypeName()),
                                 ModelKind.REFLECTION_COMPLETE, this,
@@ -230,9 +225,7 @@ public class BaseSignatureModelTests {
                         .map(MethodTypeSignature::getResultType)
                         .map(BaseTypeSignature.class::cast)
                         .map(origin -> Arguments.of(
-                                BaseSignatureModel.of(origin,
-                                        mock(Model.class)),
-                                origin,
+                                BaseSignatureModel.of(origin), origin,
                                 specializations.get(origin.getType().getName()),
                                 ModelKind.SOURCE, this,
                                 origin.getType().getName()));

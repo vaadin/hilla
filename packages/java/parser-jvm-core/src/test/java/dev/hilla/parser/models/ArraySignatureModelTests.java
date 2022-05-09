@@ -59,7 +59,7 @@ public class ArraySignatureModelTests {
         var dependencies = model.getDependencies();
 
         assertEquals(
-                Set.of(ClassInfoModel.of(Dependency.class, mock(Model.class))),
+                Set.of(ClassInfoModel.of(Dependency.class)),
                 dependencies);
     }
 
@@ -104,8 +104,7 @@ public class ArraySignatureModelTests {
                             .getAnnotatedGenericComponentType()
                             .getAnnotation(Bar.class);
 
-            annotation = AnnotationInfoModel.of(annotationOrigin,
-                    mock(Model.class));
+            annotation = AnnotationInfoModel.of(annotationOrigin);
         }
 
         @DisplayName("It should access annotations")
@@ -137,7 +136,7 @@ public class ArraySignatureModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{2}";
+        public static final String testName  = "{2}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -157,7 +156,7 @@ public class ArraySignatureModelTests {
                     throws NoSuchMethodException {
                 var origin = (AnnotatedArrayType) Sample.class
                         .getDeclaredMethod("foo").getAnnotatedReturnType();
-                var model = ArraySignatureModel.of(origin, mock(Model.class));
+                var model = ArraySignatureModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.REFLECTION, this);
             }
@@ -167,7 +166,7 @@ public class ArraySignatureModelTests {
                         .getClassInfo(Sample.class.getName())
                         .getMethodInfo("foo").getSingleMethod("foo")
                         .getTypeSignatureOrTypeDescriptor().getResultType();
-                var model = ArraySignatureModel.of(origin, mock(Model.class));
+                var model = ArraySignatureModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.SOURCE, this);
             }
