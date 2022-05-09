@@ -235,6 +235,75 @@ public class ClassInfoModelTests {
         }
     }
 
+    @DisplayName("It should check if the class belongs to JDK")
+    @ParameterizedTest(name = JDKCheckProvider.testName)
+    @ArgumentsSource(JDKCheckProvider.class)
+    public void should_CheckJDKBelonging(Object origin, ModelKind kind,
+            boolean isJDK, JDKCheckProvider.Context context) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ClassInfoModel.isNonJDKClass((Class<?>) origin),
+                    !isJDK);
+            assertEquals(ClassInfoModel.isJDKClass((Class<?>) origin), isJDK);
+            assertEquals(
+                    ClassInfoModel.isNonJDKClass(((Class<?>) origin).getName()),
+                    !isJDK);
+            assertEquals(
+                    ClassInfoModel.isJDKClass(((Class<?>) origin).getName()),
+                    isJDK);
+            break;
+        case SOURCE:
+            assertEquals(ClassInfoModel.isNonJDKClass((ClassInfo) origin),
+                    !isJDK);
+            assertEquals(ClassInfoModel.isJDKClass((ClassInfo) origin), isJDK);
+            assertEquals(ClassInfoModel
+                    .isNonJDKClass(((ClassInfo) origin).getName()), !isJDK);
+            assertEquals(
+                    ClassInfoModel.isJDKClass(((ClassInfo) origin).getName()),
+                    isJDK);
+            break;
+        }
+    }
+
+    public static class JDKCheckProvider implements ArgumentsProvider {
+        public static final String testName = "{1} [jdk={2}]";
+
+        @Override
+        public Stream<? extends Arguments> provideArguments(
+                ExtensionContext context) {
+            var ctx = new Context(context);
+
+            return Streams.combine(ctx.getReflectionArguments(),
+                    ctx.getSourceArguments());
+        }
+
+        public static class Context extends BaseTestContext {
+            Context(ExtensionContext context) {
+                super(context);
+            }
+
+            public Stream<Arguments> getReflectionArguments() {
+                var jdk = List.class;
+                var nonJdk = Dependency.Sample.class;
+
+                return Stream.of(
+                        Arguments.of(jdk, ModelKind.REFLECTION, true, this),
+                        Arguments.of(nonJdk, ModelKind.REFLECTION, false,
+                                this));
+            }
+
+            public Stream<Arguments> getSourceArguments() {
+                var jdk = getScanResult().getClassInfo(List.class.getName());
+                var nonJdk = getScanResult()
+                        .getClassInfo(Dependency.Sample.class.getName());
+
+                return Stream.of(
+                        Arguments.of(jdk, ModelKind.SOURCE, true, this),
+                        Arguments.of(nonJdk, ModelKind.SOURCE, false, this));
+            }
+        }
+    }
+
     @DisplayName("It should be able to compare model with classes and other models")
     @ParameterizedTest(name = DependencyModelProvider.testName)
     @ArgumentsSource(DependencyModelProvider.class)

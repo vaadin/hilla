@@ -145,8 +145,7 @@ public interface ClassInfoModel
     }
 
     default Stream<ClassInfoModel> getFieldDependenciesStream() {
-        return getMemberDependenciesStream(ClassInfoModel::getFields,
-                FieldInfoModel::getDependenciesStream);
+        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream).distinct();
     }
 
     List<FieldInfoModel> getFields();
@@ -166,8 +165,7 @@ public interface ClassInfoModel
     }
 
     default Stream<ClassInfoModel> getInnerClassDependenciesStream() {
-        return getMemberDependenciesStream(ClassInfoModel::getInnerClasses,
-                ClassInfoModel::getDependenciesStream);
+        return getInnerClassesStream().flatMap(ClassInfoModel::getDependenciesStream).distinct();
     }
 
     List<ClassInfoModel> getInnerClasses();
@@ -182,48 +180,12 @@ public interface ClassInfoModel
         return getInterfaces().stream();
     }
 
-    default <ModelMember extends Model> Set<ClassInfoModel> getMemberDependencies(
-            @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
-            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
-        return getMemberDependencies(selector,
-                ClassInfoModelUtils::defaultClassInfoMemberFilter,
-                dependencyExtractor);
-    }
-
-    default <ModelMember extends Model> Set<ClassInfoModel> getMemberDependencies(
-            @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
-            @Nonnull Predicate<ModelMember> filter,
-            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
-        return getMemberDependenciesStream(selector, filter,
-                dependencyExtractor).collect(Collectors.toSet());
-    }
-
-    default <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
-            @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
-            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
-        return getMemberDependenciesStream(selector,
-                ClassInfoModelUtils::defaultClassInfoMemberFilter,
-                dependencyExtractor);
-    }
-
-    default <ModelMember extends Model> Stream<ClassInfoModel> getMemberDependenciesStream(
-            @Nonnull Function<ClassInfoModel, Collection<ModelMember>> selector,
-            @Nonnull Predicate<ModelMember> filter,
-            @Nonnull Function<ModelMember, Stream<ClassInfoModel>> dependencyExtractor) {
-        Objects.requireNonNull(selector);
-        return selector.apply(this).stream().filter(Objects::nonNull)
-                .filter(Objects.requireNonNull(filter))
-                .flatMap(Objects.requireNonNull(dependencyExtractor))
-                .distinct();
-    }
-
     default Set<ClassInfoModel> getMethodDependencies() {
         return getMethodDependenciesStream().collect(Collectors.toSet());
     }
 
     default Stream<ClassInfoModel> getMethodDependenciesStream() {
-        return getMemberDependenciesStream(ClassInfoModel::getMethods,
-                MethodInfoModel::getDependenciesStream);
+        return getMethodsStream().flatMap(MethodInfoModel::getDependenciesStream).distinct();
     }
 
     List<MethodInfoModel> getMethods();
