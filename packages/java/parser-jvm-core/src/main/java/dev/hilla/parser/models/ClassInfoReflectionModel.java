@@ -20,8 +20,8 @@ final class ClassInfoReflectionModel
     private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
 
-    public ClassInfoReflectionModel(Class<?> origin, Model parent) {
-        super(origin, parent);
+    public ClassInfoReflectionModel(Class<?> origin) {
+        super(origin);
 
         var superClass = origin.getSuperclass();
 
@@ -53,8 +53,7 @@ final class ClassInfoReflectionModel
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
             fields = Arrays.stream(origin.getDeclaredFields())
-                    .map(field -> FieldInfoModel.of(field, this))
-                    .collect(Collectors.toList());
+                    .map(FieldInfoModel::of).collect(Collectors.toList());
         }
 
         return fields;
@@ -89,8 +88,7 @@ final class ClassInfoReflectionModel
     public List<ClassInfoModel> getInterfaces() {
         if (interfaces == null) {
             interfaces = Arrays.stream(origin.getInterfaces())
-                    .map(cls -> ClassInfoModel.of(cls, this))
-                    .collect(Collectors.toList());
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
         }
 
         return interfaces;
@@ -100,8 +98,7 @@ final class ClassInfoReflectionModel
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
             methods = Arrays.stream(origin.getDeclaredMethods())
-                    .map(method -> MethodInfoModel.of(method, this))
-                    .collect(Collectors.toList());
+                    .map(MethodInfoModel::of).collect(Collectors.toList());
         }
 
         return methods;

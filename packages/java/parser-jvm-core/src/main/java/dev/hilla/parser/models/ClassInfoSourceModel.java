@@ -52,8 +52,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
             fields = origin.getDeclaredFieldInfo().stream()
-                    .map(field -> FieldInfoModel.of(field, this))
-                    .collect(Collectors.toList());
+                    .map(FieldInfoModel::of).collect(Collectors.toList());
         }
 
         return fields;

@@ -130,12 +130,7 @@ public interface ClassInfoModel
     }
 
     static ClassInfoModel of(@Nonnull Class<?> origin) {
-        return of(origin, null);
-    }
-
-    static ClassInfoModel of(@Nonnull Class<?> origin, Model parent) {
-        return new ClassInfoReflectionModel(Objects.requireNonNull(origin),
-                parent);
+        return new ClassInfoReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override

@@ -15,7 +15,7 @@ final class ArraySignatureReflectionModel
     public SignatureModel getNestedType() {
         if (nestedType == null) {
             nestedType = SignatureModel
-                    .of(origin.getAnnotatedGenericComponentType(), this);
+                    .of(origin.getAnnotatedGenericComponentType());
         }
 
         return nestedType;
