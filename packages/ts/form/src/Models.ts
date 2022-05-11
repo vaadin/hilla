@@ -94,7 +94,11 @@ export abstract class PrimitiveModel<T> extends AbstractModel<T> {}
 export class BooleanModel extends PrimitiveModel<boolean> implements HasFromString<boolean> {
   public static override createEmptyValue = Boolean;
 
-  public [_fromString] = Boolean;
+  public [_fromString](str: string): boolean {
+    // This implementation matches the values accepted by validator.js and converts all other values to false
+    // See https://github.com/validatorjs/validator.js/blob/master/src/lib/isBoolean.js
+    return ['true', '1', 'yes'].includes(str.toLowerCase());
+  }
 }
 
 export class NumberModel extends PrimitiveModel<number> implements HasFromString<number | undefined> {
