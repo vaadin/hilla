@@ -100,6 +100,35 @@ describe('form/Model', () => {
     });
   });
 
+  describe('boolean model', () => {
+    describe('_fromString', () => {
+      let fromString: (str: string) => boolean;
+
+      beforeEach(() => {
+        fromString = binder.model.fieldBoolean[_fromString];
+      });
+
+      it('should do semantic conversion from string to boolean model', async () => {
+        // The validator.js library is used as a reference of valid boolean values
+        // see https://github.com/validatorjs/validator.js/blob/master/src/lib/isBoolean.js
+        expect(fromString('true')).to.be.true;
+        expect(fromString('false')).to.be.false;
+        expect(fromString('1')).to.be.true;
+        expect(fromString('0')).to.be.false;
+        // loose values are also converted and case doesn't matter (again, see validator)
+        expect(fromString('yes')).to.be.true;
+        expect(fromString('no')).to.be.false;
+        expect(fromString('TRUE')).to.be.true;
+        expect(fromString('FALSE')).to.be.false;
+        expect(fromString('Yes')).to.be.true;
+        expect(fromString('No')).to.be.false;
+        // all other values are treated as false
+        expect(fromString('')).to.be.false;
+        expect(fromString('other')).to.be.false;
+      });
+    });
+  });
+
   describe('array model', () => {
     const strings = ['foo', 'bar'];
 
