@@ -2,7 +2,6 @@ package dev.hilla.internal;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
