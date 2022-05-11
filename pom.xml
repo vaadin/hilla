@@ -41,10 +41,6 @@
     <spring.data.version>2.6.0</spring.data.version>
     <validation.api.version>2.0.1.Final</validation.api.version>
     <project.scm.id>github</project.scm.id>
-    <flow.release.repo.id>vaadin-prereleases</flow.release.repo.id>
-    <flow.release.repo.url>
-      https://maven.vaadin.com/vaadin-prereleases/
-    </flow.release.repo.url>
   </properties>
 
   <organization>
@@ -75,13 +71,6 @@
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
-    </repository>
-    <repository>
-        <id>${flow.release.repo.id}</id>
-        <url>${flow.release.repo.url}</url>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
     </repository>
   </repositories>
 
