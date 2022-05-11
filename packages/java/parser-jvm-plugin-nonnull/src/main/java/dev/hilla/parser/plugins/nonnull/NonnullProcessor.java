@@ -2,17 +2,15 @@ package dev.hilla.parser.plugins.nonnull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AssociationMap;
-import dev.hilla.parser.core.RelativeFieldInfo;
-import dev.hilla.parser.core.RelativeMethodInfo;
-import dev.hilla.parser.core.RelativeMethodParameterInfo;
-import dev.hilla.parser.core.RelativeTypeSignature;
-import io.github.classgraph.AnnotationInfoList;
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.HierarchicalTypeSignature;
-import io.github.classgraph.TypeArgument;
-import io.github.classgraph.TypeSignature;
+import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.models.FieldInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.models.MethodParameterInfoModel;
+import dev.hilla.parser.models.SignatureModel;
+
 import io.swagger.v3.oas.models.media.Schema;
 
 final class NonnullProcessor {
@@ -32,60 +30,35 @@ final class NonnullProcessor {
         map.getTypes().forEach(this::processSchema);
     }
 
-    private boolean isNonNull(AnnotationInfoList annotationInfos) {
-        return annotationInfos != null && annotationInfos.stream().anyMatch(
+    private boolean isNonNull(Stream<AnnotationInfoModel> annotationsStream) {
+        return annotationsStream.anyMatch(
                 annotation -> annotations.contains(annotation.getName()));
     }
 
-    private boolean isNonNull(RelativeFieldInfo field) {
-        return isNonNull(field.get().getAnnotationInfo());
+    private boolean isNonNull(FieldInfoModel field) {
+        return isNonNull(field.getAnnotationsStream());
     }
 
-    private boolean isNonNull(RelativeMethodInfo method) {
-        return isNonNull(method.get().getAnnotationInfo());
+    private boolean isNonNull(MethodInfoModel method) {
+        return isNonNull(method.getAnnotationsStream());
     }
 
-    private boolean isNonNull(RelativeMethodParameterInfo parameter) {
-        return isNonNull(parameter.get().getAnnotationInfo());
+    private boolean isNonNull(MethodParameterInfoModel parameter) {
+        return isNonNull(parameter.getAnnotationsStream());
     }
 
-    private boolean isNonNull(HierarchicalTypeSignature signature) {
-        if (signature instanceof ClassRefTypeSignature) {
-            var infos = ((ClassRefTypeSignature) signature)
-                    .getTypeAnnotationInfo();
-
-            if (infos == null) {
-                var suffixTypeAnnotations = ((ClassRefTypeSignature) signature)
-                        .getSuffixTypeAnnotationInfo();
-
-                // Having more than 1 suffix (like List<X.@X.B Y>) is some kind
-                // of edge case for @Nonnull, so here we just get the
-                // annotations for the latest one.
-                infos = suffixTypeAnnotations != null
-                        ? suffixTypeAnnotations
-                                .get(suffixTypeAnnotations.size() - 1)
-                        : null;
-            }
-
-            return isNonNull(infos);
-        } else if (signature instanceof TypeSignature) {
-            return isNonNull(
-                    ((TypeSignature) signature).getTypeAnnotationInfo());
-        } else if (signature instanceof TypeArgument) {
-            return isNonNull(((TypeArgument) signature).getTypeSignature());
-        }
-
-        return false;
+    private boolean isNonNull(SignatureModel signature) {
+        return isNonNull(signature.getAnnotationsStream());
     }
 
-    private void processField(Schema<?> schema, RelativeFieldInfo field) {
+    private void processField(Schema<?> schema, FieldInfoModel field) {
         if (Objects.equals(schema.getNullable(), Boolean.TRUE)
                 && isNonNull(field)) {
             schema.setNullable(null);
         }
     }
 
-    private void processMethod(Schema<?> schema, RelativeMethodInfo method) {
+    private void processMethod(Schema<?> schema, MethodInfoModel method) {
         if (Objects.equals(schema.getNullable(), Boolean.TRUE)
                 && isNonNull(method)) {
             schema.setNullable(null);
@@ -93,17 +66,16 @@ final class NonnullProcessor {
     }
 
     private void processParameter(Schema<?> schema,
-            RelativeMethodParameterInfo parameter) {
+            MethodParameterInfoModel parameter) {
         if (Objects.equals(schema.getNullable(), Boolean.TRUE)
                 && isNonNull(parameter)) {
             schema.setNullable(null);
         }
     }
 
-    private void processSchema(Schema<?> schema,
-            RelativeTypeSignature signature) {
+    private void processSchema(Schema<?> schema, SignatureModel signature) {
         if (Objects.equals(schema.getNullable(), Boolean.TRUE)
-                && isNonNull(signature.get())) {
+                && isNonNull(signature)) {
             schema.setNullable(null);
         }
     }

@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
@@ -22,8 +22,10 @@
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
     <module>packages/java/parser-jvm-plugin-nonnull</module>
+    <module>packages/java/parser-jvm-plugin-transfertypes</module>
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
+    <module>packages/java/runtime-plugin-transfertypes</module>
   </modules>
 
   <properties>
@@ -31,14 +33,17 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.138</classgraph.version>
+    <classgraph.version>4.8.143</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.version>2.1.11</swagger.version>
-    <jackson.version>2.13.0</jackson.version>
+    <swagger.version>2.1.13</swagger.version>
+    <jackson.version>2.13.2</jackson.version>
     <junit.version>5.8.0</junit.version>
+    <spring.data.version>2.6.0</spring.data.version>
+    <validation.api.version>2.0.1.Final</validation.api.version>
+    <project.scm.id>github</project.scm.id>
     <flow.release.repo.id>vaadin-prereleases</flow.release.repo.id>
     <flow.release.repo.url>
-        https://maven.vaadin.com/vaadin-prereleases/
+      https://maven.vaadin.com/vaadin-prereleases/
     </flow.release.repo.url>
   </properties>
 
@@ -131,8 +136,19 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-commons</artifactId>
+        <version>${spring.data.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
   <build>
     <plugins>
       <plugin>

@@ -4,11 +4,9 @@ import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
-public interface Plugin {
-    void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            @Nonnull SharedStorage storage);
+import dev.hilla.parser.models.ClassInfoModel;
 
+public interface Plugin {
     int getOrder();
 
     void setOrder(int order);
@@ -19,5 +17,12 @@ public interface Plugin {
                     "The '%s' plugin does not expect configuration set",
                     getClass().getName()));
         }
+    }
+
+    void setStorage(@Nonnull SharedStorage storage);
+
+    interface Processor extends Plugin {
+        void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities);
     }
 }

@@ -20,7 +20,7 @@ export async function resolve(specifier, context, defaultResolve) {
       );
     }
 
-    const { url } = defaultResolve(`${specifier.substring(0, specifier.length - 3)}.ts`, context, defaultResolve);
+    const { url } = await defaultResolve(`${specifier.substring(0, specifier.length - 3)}.ts`, context);
 
     return {
       format: 'module',

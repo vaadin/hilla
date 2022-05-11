@@ -1,40 +1,33 @@
 package dev.hilla.parser.core.basic;
 
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.RelativeClassInfo;
-import dev.hilla.parser.core.RelativeFieldInfo;
-import dev.hilla.parser.core.RelativeMethodInfo;
 import dev.hilla.parser.core.SharedStorage;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.MethodInfo;
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.FieldInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.utils.StreamUtils;
 
-public class BasicPlugin implements Plugin {
+public class BasicPlugin implements Plugin.Processor {
     public static final String STORAGE_KEY = "BasicPluginResult";
 
     private int order = 0;
+    private SharedStorage storage;
 
     @Override
-    public void execute(@Nonnull Collection<RelativeClassInfo> endpoints,
-            @Nonnull Collection<RelativeClassInfo> entities,
-            SharedStorage storage) {
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
         storage.getPluginStorage().put(STORAGE_KEY,
-                endpoints.stream().flatMap(endpoint -> Stream.of(
-                        endpoint.getFieldsStream().map(RelativeFieldInfo::get)
-                                .map(FieldInfo::getName),
-                        endpoint.getMethodsStream().map(RelativeMethodInfo::get)
-                                .map(MethodInfo::getName),
+                endpoints.stream().flatMap(endpoint -> StreamUtils.combine(
+                        endpoint.getFieldsStream().map(FieldInfoModel::getName),
+                        endpoint.getMethodsStream()
+                                .map(MethodInfoModel::getName),
                         endpoint.getInnerClassesStream()
-                                .map(RelativeClassInfo::get)
-                                .map(ClassInfo::getName))
-                        .flatMap(Function.identity()))
+                                .map(ClassInfoModel::getName)))
                         .collect(Collectors.toList()));
     }
 
@@ -46,5 +39,10 @@ public class BasicPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public void setStorage(@Nonnull SharedStorage storage) {
+        this.storage = storage;
     }
 }

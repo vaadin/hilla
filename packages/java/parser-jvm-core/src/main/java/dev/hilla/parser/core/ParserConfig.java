@@ -160,7 +160,8 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder plugins(@Nonnull Collection<Plugin> plugins) {
+        public <P extends Plugin> Builder plugins(
+                @Nonnull Collection<P> plugins) {
             Objects.requireNonNull(plugins);
             actions.add(config -> {
                 config.plugins.clear();
