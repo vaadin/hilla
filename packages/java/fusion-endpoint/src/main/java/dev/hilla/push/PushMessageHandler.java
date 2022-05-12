@@ -16,11 +16,9 @@ import com.vaadin.flow.server.VaadinServletContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import dev.hilla.AuthenticationUtil;
 import dev.hilla.ConditionalOnFeatureFlag;
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -109,19 +107,11 @@ public class PushMessageHandler {
             paramsObject.set(i + "", paramsArray.get(i));
         }
 
-        Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication();
-        Principal principal;
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            principal = null;
-        } else {
-            principal = authentication;
-        }
-        Function<String, Boolean> isInRole = role -> {
-            return authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority
-                            .getAuthority().equals("ROLE_" + role));
-        };
+        Principal principal = AuthenticationUtil
+                .getSecurityHolderAuthentication();
+        Function<String, Boolean> isInRole = AuthenticationUtil
+                .getSecurityHolderRoleChecker();
+
         try {
             Flux<?> result = (Flux<?>) endpointInvoker.invoke(
                     message.getEndpointName(), message.getMethodName(),
