@@ -12,7 +12,7 @@ on:
 
 env:
   VERSION_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.tag_name }}
-  BRANCH: ${{ github.ref_type == 'branch' && github.ref_name || 'main' }}
+  BRANCH: ${{ github.ref_type == 'branch' && github.ref_name || '1.1' }}
 
 jobs:
   testing:
