@@ -1,6 +1,5 @@
 package dev.hilla.maven;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
@@ -11,8 +10,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 final class GeneratorShellRunner {
+    private static final boolean IS_WINDOWS;
     private static final Pattern jsonEscapePattern = Pattern
             .compile("[\r\n\b\f\t\"']");
+
+    static {
+        var osName = System.getProperty("os.name").toLowerCase();
+        IS_WINDOWS = osName.contains("windows");
+    }
 
     private final List<String> arguments = new ArrayList<>();
     private final Log logger;
@@ -20,12 +25,12 @@ final class GeneratorShellRunner {
     public GeneratorShellRunner(File baseDir, Log logger) {
         this.logger = logger;
 
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (IS_WINDOWS) {
             arguments.add("cmd.exe");
             arguments.add("/c");
         }
 
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (IS_WINDOWS) {
             arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
                     ".bin", "tsgen.cmd").toString());
         } else {
@@ -35,7 +40,7 @@ final class GeneratorShellRunner {
     }
 
     public static String prepareJSONForCLI(String json) {
-        return SystemUtils.IS_OS_WINDOWS ? jsonEscapePattern.matcher(json)
+        return IS_WINDOWS ? jsonEscapePattern.matcher(json)
                 .replaceAll(match -> "\\\\" + match.group(0)) : json;
     }
 
