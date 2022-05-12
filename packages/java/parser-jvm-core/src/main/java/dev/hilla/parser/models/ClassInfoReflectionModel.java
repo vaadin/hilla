@@ -41,12 +41,12 @@ final class ClassInfoReflectionModel
             return false;
         }
 
-        if (other instanceof ClassInfoReflectionModel) {
-            return Objects.equals(origin,
-                    ((ClassInfoReflectionModel) other).origin);
-        }
+        return Objects.equals(origin.getName(), ((ClassInfoModel) other).getName());
+    }
 
-        return Objects.equals(getName(), ((ClassInfoModel) other).getName());
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode();
     }
 
     @Override

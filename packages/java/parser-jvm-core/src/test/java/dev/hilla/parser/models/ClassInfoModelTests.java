@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,11 +59,10 @@ public class ClassInfoModelTests {
         var expected = Stream.of(SampleReferences.fieldDependencies,
                 SampleReferences.methodDependencies,
                 SampleReferences.parentClass, SampleReferences.innerClasses)
-                .flatMap(Collection::stream).map(Class::getName)
+                .flatMap(Collection::stream).map(ClassInfoModel::of)
                 .collect(Collectors.toSet());
 
-        var actual = model.getDependencies().stream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+        var actual = model.getDependencies();
 
         assertEquals(expected, actual);
     }
@@ -74,9 +74,8 @@ public class ClassInfoModelTests {
             Object origin, ModelKind kind,
             DependencyModelProvider.Context context) {
         var expected = SampleReferences.fieldDependencies.stream()
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getFieldDependencies().stream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toSet());
+        var actual = model.getFieldDependencies();
 
         assertEquals(expected, actual);
     }
@@ -88,9 +87,8 @@ public class ClassInfoModelTests {
             Object origin, ModelKind kind,
             DependencyModelProvider.Context context) {
         var expected = SampleReferences.methodDependencies.stream()
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getMethodDependencies().stream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toSet());
+        var actual = model.getMethodDependencies();
 
         assertEquals(expected, actual);
     }
@@ -102,9 +100,8 @@ public class ClassInfoModelTests {
             Object origin, ModelKind kind,
             DependencyModelProvider.Context context) {
         var expected = SampleReferences.innerClassesDependencies.stream()
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getInnerClassDependencies().stream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toSet());
+        var actual = model.getInnerClassDependencies();
 
         assertEquals(expected, actual);
     }

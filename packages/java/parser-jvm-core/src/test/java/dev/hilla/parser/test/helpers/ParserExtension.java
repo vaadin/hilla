@@ -6,13 +6,17 @@ import java.util.Objects;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
 import dev.hilla.parser.testutils.ResourceLoader;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 
-public class ParserExtension implements BeforeAllCallback, AfterAllCallback {
+public class ParserExtension
+        implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
     public static final ExtensionContext.Namespace STORE = ExtensionContext.Namespace
             .create(ParserExtension.class);
 
@@ -37,6 +41,21 @@ public class ParserExtension implements BeforeAllCallback, AfterAllCallback {
                 .overrideClasspath(targetDir.toString()).scan();
         var store = context.getStore(STORE);
         store.put(Keys.SCAN_RESULT, scanResult);
+    }
+
+    @Override
+    public boolean supportsParameter(ParameterContext parameterContext,
+            ExtensionContext extensionContext)
+            throws ParameterResolutionException {
+        return parameterContext.getParameter()
+                .getAnnotation(WithScanResult.class) != null;
+    }
+
+    @Override
+    public ScanResult resolveParameter(ParameterContext parameterContext,
+            ExtensionContext extensionContext)
+            throws ParameterResolutionException {
+        return getScanResult(extensionContext);
     }
 
     public enum Keys {

@@ -76,7 +76,7 @@ public class BaseSignatureModelTests {
         }
     }
 
-    @DisplayName("It should create correct model")
+    @DisplayName("It should provide no dependencies")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(BaseSignatureModel model,

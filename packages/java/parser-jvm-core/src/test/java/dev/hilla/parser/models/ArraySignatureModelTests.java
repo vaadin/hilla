@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -56,11 +55,10 @@ public class ArraySignatureModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(ArraySignatureModel model,
             Object origin, ModelKind kind, ModelProvider.Context context) {
-        var dependencies = model.getDependencies();
+        var expected = Set.of(ClassInfoModel.of(Dependency.class));
+        var actual = model.getDependencies();
 
-        assertEquals(
-                Set.of(ClassInfoModel.of(Dependency.class)),
-                dependencies);
+        assertEquals(expected, actual);
     }
 
     @DisplayName("It should provide nested type")
@@ -136,7 +134,7 @@ public class ArraySignatureModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName  = "{2}";
+        public static final String testName = "{2}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(

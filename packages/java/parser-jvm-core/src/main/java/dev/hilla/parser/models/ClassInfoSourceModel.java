@@ -40,12 +40,12 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
             return false;
         }
 
-        if (other instanceof ClassInfoSourceModel) {
-            return Objects.equals(origin,
-                    ((ClassInfoSourceModel) other).origin);
-        }
+        return Objects.equals(origin.getName(), ((ClassInfoModel) other).getName());
+    }
 
-        return Objects.equals(getName(), ((ClassInfoModel) other).getName());
+    @Override
+    public int hashCode() {
+        return origin.hashCode();
     }
 
     @Override

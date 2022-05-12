@@ -1,8 +1,8 @@
 package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,9 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
+import dev.hilla.parser.test.helpers.WithScanResult;
+
+import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class AnnotationInfoModelTests {
@@ -42,6 +46,35 @@ public class AnnotationInfoModelTests {
         }
     }
 
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels(
+            @WithScanResult ScanResult scanResult)
+            throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSourceAndReflectionModelsEqual(
+            @WithScanResult ScanResult scanResult)
+            throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
+
+        assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
+
+        assertNotEquals(sourceModel, new Object());
+        assertNotEquals(reflectionModel, new Object());
+    }
+
     @DisplayName("It should provide no dependencies")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
@@ -50,9 +83,16 @@ public class AnnotationInfoModelTests {
         assertEquals(0, model.getDependencies().size());
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    @interface Foo {
+    private AnnotationInfoModel getDefaultReflectionModel()
+            throws NoSuchMethodException {
+        return AnnotationInfoModel.of(Sample.class.getDeclaredMethod("bar")
+                .getAnnotation(Sample.Foo.class));
+    }
+
+    private AnnotationInfoModel getDefaultSourceModel(ScanResult scanResult) {
+        return AnnotationInfoModel.of(scanResult
+                .getClassInfo(Sample.class.getName()).getMethodInfo("bar")
+                .getSingleMethod("bar").getAnnotationInfo(Sample.Foo.class));
     }
 
     public static final class ModelProvider implements ArgumentsProvider {
@@ -75,7 +115,7 @@ public class AnnotationInfoModelTests {
             public Arguments getReflectionArguments()
                     throws NoSuchMethodException {
                 var origin = Sample.class.getMethod("bar")
-                        .getAnnotation(Foo.class);
+                        .getAnnotation(Sample.Foo.class);
                 var model = AnnotationInfoModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.REFLECTION, this);
@@ -85,7 +125,7 @@ public class AnnotationInfoModelTests {
                 var origin = getScanResult()
                         .getClassInfo(Sample.class.getName())
                         .getMethodInfo("bar").getSingleMethod("bar")
-                        .getAnnotationInfo(Foo.class.getName());
+                        .getAnnotationInfo(Sample.Foo.class.getName());
                 var model = AnnotationInfoModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.SOURCE, this);
@@ -101,13 +141,18 @@ public class AnnotationInfoModelTests {
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveName(AnnotationInfoModel model, Object origin,
                 ModelKind kind, BaseTestContext context) {
-            assertEquals(Foo.class.getName(), model.getName());
+            assertEquals(Sample.Foo.class.getName(), model.getName());
         }
     }
 
     private static class Sample {
         @Foo
         public void bar() {
+        }
+
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.METHOD)
+        @interface Foo {
         }
     }
 }

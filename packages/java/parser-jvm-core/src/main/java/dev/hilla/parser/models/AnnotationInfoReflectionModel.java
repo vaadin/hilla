@@ -19,13 +19,13 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
             return false;
         }
 
-        if (other instanceof AnnotationInfoReflectionModel) {
-            return Objects.equals(origin,
-                    ((AnnotationInfoReflectionModel) other).origin);
-        }
-
         return Objects.equals(getName(),
                 ((AnnotationInfoModel) other).getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.annotationType().getName().hashCode();
     }
 
     @Override

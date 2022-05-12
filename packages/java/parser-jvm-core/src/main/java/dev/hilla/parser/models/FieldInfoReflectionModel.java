@@ -26,12 +26,15 @@ final class FieldInfoReflectionModel
             return false;
         }
 
-        if (other instanceof FieldInfoReflectionModel) {
-            return Objects.equals(origin,
-                    ((FieldInfoReflectionModel) other).origin);
-        }
+        var model = (FieldInfoModel) other;
 
-        return Objects.equals(getName(), ((FieldInfoModel) other).getName());
+        return Objects.equals(getOwner(), model.getOwner())
+                && Objects.equals(origin.getName(), model.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + getOwner().hashCode() * 11;
     }
 
     @Override
