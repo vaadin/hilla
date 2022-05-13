@@ -10,7 +10,6 @@ export class FluxConnection {
   private onNextCallbacks = new Map<string, (value: any) => void>();
   private onCompleteCallbacks = new Map<string, () => void>();
   private onErrorCallbacks = new Map<string, () => void>();
-  private closed = new Set<string>();
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
 
@@ -38,11 +37,8 @@ export class FluxConnection {
 
     if (message['@type'] === 'update') {
       const callback = this.onNextCallbacks.get(id);
-      const closed = this.closed.has(id);
-      if (callback && !closed) {
+      if (callback) {
         callback(message.item);
-      } else if (!callback) {
-        throw new Error(`No callback for stream id ${id}`);
       }
     } else if (message['@type'] === 'complete') {
       const callback = this.onCompleteCallbacks.get(id);
@@ -70,7 +66,6 @@ export class FluxConnection {
     this.onCompleteCallbacks.delete(id);
     this.onErrorCallbacks.delete(id);
     this.endpointInfos.delete(id);
-    this.closed.delete(id);
   }
 
   private send(message: ServerMessage) {
@@ -102,7 +97,7 @@ export class FluxConnection {
       cancel: () => {
         const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
         this.send(closeMessage);
-        this.closed.add(id);
+        this.removeSubscription(id);
       },
     };
     return hillaSubscription;

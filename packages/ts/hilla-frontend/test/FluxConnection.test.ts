@@ -87,7 +87,7 @@ describe('FluxConnection', () => {
     fluxConnectionAny.handleMessage(msg);
     expect(errorCalled).to.eq(1);
   });
-  it('should call not deliver messages after completing', () => {
+  it('should not deliver messages after completing', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
     let onNextCalled = 0;
     sub.onNext((_value) => {
@@ -116,7 +116,7 @@ describe('FluxConnection', () => {
       id: '0',
     });
   });
-  it('should call not deliver messages after canceling', () => {
+  it('should not deliver messages after canceling', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
     let onNextCalled = 0;
     sub.onNext((_value) => {
@@ -165,7 +165,6 @@ describe('FluxConnection', () => {
     sub.onNext((_value) => {
       // Just need a callback
     });
-    sub.cancel();
 
     const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
     fluxConnectionAny.handleMessage(completeMsg);
@@ -174,7 +173,6 @@ describe('FluxConnection', () => {
     expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
     expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
     expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.closed.size).to.equal(0);
   });
   it('clean internal data on error', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -187,7 +185,6 @@ describe('FluxConnection', () => {
     sub.onNext((_value) => {
       // Just need a callback
     });
-    sub.cancel();
 
     const completeMsg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
     fluxConnectionAny.handleMessage(completeMsg);
@@ -196,6 +193,23 @@ describe('FluxConnection', () => {
     expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
     expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
     expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.closed.size).to.equal(0);
+  });
+  it('clean internal data on cancel', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onComplete(() => {
+      // Just need a callback
+    });
+    sub.onError(() => {
+      // Just need a callback
+    });
+    sub.onNext((_value) => {
+      // Just need a callback
+    });
+    sub.cancel();
+
+    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
+    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
+    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
   });
 });
