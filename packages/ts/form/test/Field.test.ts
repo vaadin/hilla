@@ -9,14 +9,15 @@ import type { BinderNode } from '../src/BinderNode.js';
 import {
   Binder,
   field,
-  GenericFieldStrategy,
   CheckedFieldStrategy,
+  GenericFieldStrategy,
   SelectedFieldStrategy,
   VaadinFieldStrategy,
   Required,
   AbstractModel,
   FieldStrategy,
   AbstractFieldStrategy,
+  ComboBoxFieldStrategy,
 } from '../src';
 import { OrderModel, TestModel, TestEntity, Order } from './TestModels';
 
@@ -469,8 +470,8 @@ describe('form/Field', () => {
     const div = document.createElement('div');
     let currentStrategy: FieldStrategy;
     const binder = new (class StrategySpyBinder<T, M extends AbstractModel<T>> extends Binder<T, M> {
-      public override getFieldStrategy(elm: any): FieldStrategy {
-        currentStrategy = super.getFieldStrategy(elm);
+      public override getFieldStrategy(elm: any, model?: AbstractModel<any>): FieldStrategy {
+        currentStrategy = super.getFieldStrategy(elm, model);
         return currentStrategy;
       }
     })(div, TestModel);
@@ -517,6 +518,7 @@ describe('form/Field', () => {
 
         expect(currentStrategy instanceof GenericFieldStrategy).to.be.true;
         expect(currentStrategy.value).to.be.equal('foo');
+        expect(currentStrategy.model).to.be.equal(model);
 
         await binderNode.validate();
         const element = renderElement();
@@ -557,6 +559,7 @@ describe('form/Field', () => {
 
         expect(currentStrategy instanceof CheckedFieldStrategy).to.be.true;
         expect(currentStrategy.value).to.be.true;
+        expect(currentStrategy.model).to.be.equal(model);
 
         expect(element.checked).to.be.true;
 
@@ -584,6 +587,7 @@ describe('form/Field', () => {
 
       expect(currentStrategy instanceof SelectedFieldStrategy).to.be.true;
       expect(currentStrategy.value).to.be.true;
+      expect(currentStrategy.model).to.be.equal(model);
       expect(element.selected).to.be.true;
 
       await binderNode.validate();
@@ -627,6 +631,7 @@ describe('form/Field', () => {
 
         expect(currentStrategy instanceof VaadinFieldStrategy).to.be.true;
         expect(currentStrategy.value).to.be.equal(value);
+        expect(currentStrategy.model).to.be.equal(model);
         expect(element.value).to.be.equal(value);
         expect(element.required).to.be.true;
         expect(element.invalid).to.be.undefined;
@@ -636,6 +641,101 @@ describe('form/Field', () => {
         element = renderElement();
         expect(element.invalid).to.be.true;
         expect(element.errorMessage).to.be.equal('any-err-msg');
+      });
+    });
+
+    [
+      { model: binder.model.fieldString as AbstractModel<any>, value: 'a-string-value' },
+      { model: binder.model.fieldBoolean as AbstractModel<any>, value: true },
+      { model: binder.model.fieldNumber as AbstractModel<any>, value: 10 },
+    ].forEach(async ({ model, value }) => {
+      it(`ComboBoxFieldStrategy value for ${model.constructor.name}`, async () => {
+        let element;
+        const renderElement = () => {
+          render(html`<vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
+          const result = div.firstElementChild as HTMLInputElement & {
+            value?: any;
+            invalid?: boolean;
+            required?: boolean;
+            errorMessage?: string;
+            selectedItem?: any;
+          };
+          return result;
+        };
+
+        const binderNode = binder.for(model);
+        binderNode.value = value;
+        await resetBinderNodeValidation(binderNode);
+
+        binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
+        element = renderElement();
+
+        expect(currentStrategy.constructor).to.equal(ComboBoxFieldStrategy);
+        expect(currentStrategy.value).to.be.equal(value);
+        expect(currentStrategy.model).to.be.equal(model);
+        expect(element.value).to.equal(value);
+        expect(element.selectedItem).to.be.undefined;
+        expect(element.required).to.be.true;
+        expect(element.invalid).to.be.undefined;
+        expect(element.errorMessage).to.be.undefined;
+
+        await binderNode.validate();
+        element = renderElement();
+        expect(element.invalid).to.be.true;
+        expect(element.errorMessage).to.be.equal('any-err-msg');
+
+        element.selectedItem = element.value;
+        element.value = '';
+        element.dispatchEvent(new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }));
+        expect(currentStrategy.value).to.equal('');
+        expect(binderNode.value).to.not.equal(value);
+      });
+    });
+
+    [
+      { model: binder.model.fieldObject as AbstractModel<any>, value: { foo: true } },
+      { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
+    ].forEach(async ({ model, value }) => {
+      it(`ComboBoxFieldStrategy selectedItem for ${model.constructor.name}`, async () => {
+        let element;
+        const renderElement = () => {
+          render(html`<vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
+          const result = div.firstElementChild as HTMLInputElement & {
+            value?: any;
+            invalid?: boolean;
+            required?: boolean;
+            errorMessage?: string;
+            selectedItem?: any;
+          };
+          return result;
+        };
+
+        const binderNode = binder.for(model);
+        binderNode.value = value;
+        await resetBinderNodeValidation(binderNode);
+
+        binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
+        element = renderElement();
+
+        expect(currentStrategy.constructor).to.equal(ComboBoxFieldStrategy);
+        expect(currentStrategy.value).to.be.equal(value);
+        expect(currentStrategy.model).to.be.equal(model);
+        // expect(element.value).to.be.undefined;
+        expect(element.selectedItem).to.equal(value);
+        expect(element.required).to.be.true;
+        expect(element.invalid).to.be.undefined;
+        expect(element.errorMessage).to.be.undefined;
+
+        await binderNode.validate();
+        element = renderElement();
+        expect(element.invalid).to.be.true;
+        expect(element.errorMessage).to.be.equal('any-err-msg');
+
+        element.value = element.selectedItem;
+        element.selectedItem = null;
+        element.dispatchEvent(new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }));
+        expect(currentStrategy.value).to.equal(undefined);
+        expect(binderNode.value).to.not.equal(value);
       });
     });
 
@@ -652,8 +752,8 @@ describe('form/Field', () => {
           super(elm, TestModel);
         }
 
-        public override getFieldStrategy(elm: any): FieldStrategy {
-          currentStrategy = new MyStrategy(elm);
+        public override getFieldStrategy(elm: any, model: AbstractModel<any>): FieldStrategy {
+          currentStrategy = new MyStrategy(elm, model);
           return currentStrategy;
         }
       }
@@ -663,6 +763,7 @@ describe('form/Field', () => {
 
       render(html`<div ${field(model)}></div>`, element);
       expect(currentStrategy instanceof MyStrategy).to.be.true;
+      expect(currentStrategy.model).to.be.equal(model);
     });
   });
 });
