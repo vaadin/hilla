@@ -1,4 +1,5 @@
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
+import type { ReactiveElement } from 'lit';
 import { io, Socket } from 'socket.io-client';
 import type { Subscription } from './Connect';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
@@ -95,9 +96,22 @@ export class FluxConnection {
         return hillaSubscription;
       },
       cancel: () => {
+        if (!this.endpointInfos.has(id)) {
+          // Subscription already closed or canceled
+          return;
+        }
+
         const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
         this.send(closeMessage);
         this.removeSubscription(id);
+      },
+      context: (context: ReactiveElement): Subscription<any> => {
+        context.addController({
+          hostDisconnected: () => {
+            hillaSubscription.cancel();
+          },
+        });
+        return hillaSubscription;
       },
     };
     return hillaSubscription;
