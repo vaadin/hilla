@@ -739,6 +739,63 @@ describe('form/Field', () => {
       });
     });
 
+    it(`Dynamic strategy`, async () => {
+      const stringValue = 'a-string-value';
+      let model = binder.model.fieldString as AbstractModel<any>;
+      let binderNode = binder.for(model);
+      binderNode.value = stringValue;
+      await resetBinderNodeValidation(binderNode);
+
+      let element;
+      const renderElement = (tag: string, model: AbstractModel<any>) => {
+        /* eslint-disable lit/binding-positions, lit/no-invalid-html */
+        const tagName = unsafeStatic(tag);
+        render(html`<${tagName} ${field(model)}></${tagName}>`, div);
+        return div.firstElementChild as HTMLInputElement & {
+          value?: any;
+        };
+      };
+
+      element = renderElement('some-text-field', model);
+
+      expect(element.localName).to.equal('some-text-field');
+      const textFieldElement = element;
+      expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+      const textFieldStrategy = currentStrategy;
+      expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+      expect(element.value).to.equal(stringValue);
+
+      element = renderElement('some-text-field', model);
+
+      expect(element).to.equal(textFieldElement);
+      expect(currentStrategy).to.equal(textFieldStrategy);
+      expect(element.value).to.equal(stringValue);
+
+      element = renderElement('some-password-field', model);
+      expect(element.localName).to.equal('some-password-field');
+      expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+      expect(currentStrategy).to.not.equal(textFieldStrategy);
+      expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+      expect(element.value).to.equal(stringValue);
+
+      element = renderElement('vaadin-combo-box', model);
+      expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+      const comboBoxFieldStrategy = currentStrategy;
+      expect(element.value).to.equal(stringValue);
+      expect((element as any).selectedItem).to.be.undefined;
+
+      model = binder.model.fieldObject;
+      binderNode = binder.for(model);
+      binderNode.value = { label: 'Object string item', value: 'obj-string-value' };
+      await resetBinderNodeValidation(binderNode);
+
+      element = renderElement('vaadin-combo-box', model);
+      expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+      expect(currentStrategy).to.not.equal(comboBoxFieldStrategy);
+      expect(element.value).to.equal(stringValue);
+      expect((element as any).selectedItem).to.equal(binderNode.value);
+    });
+
     it(`Strategy can be overridden in binder`, async () => {
       const element = document.createElement('div');
       class MyStrategy extends AbstractFieldStrategy {
