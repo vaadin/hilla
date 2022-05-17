@@ -45,7 +45,7 @@ public class PushMessageHandler {
 
     static final String PUSH_FEATURE_FLAG = "hillaPush";
     private final EndpointInvoker endpointInvoker;
-    private Map<String, Disposable> closeHandlers = new ConcurrentHashMap<>();
+    Map<String, Disposable> closeHandlers = new ConcurrentHashMap<>();
 
     @Autowired
     private ServletContext servletContext;

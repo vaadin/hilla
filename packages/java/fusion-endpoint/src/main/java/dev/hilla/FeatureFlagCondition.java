@@ -27,6 +27,12 @@ public class FeatureFlagCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context,
             AnnotatedTypeMetadata metadata) {
+        if (context.getEnvironment()
+                .getProperty(FeatureFlagCondition.class.getName()
+                        + ".alwaysEnable") != null) {
+            // This is only for testing
+            return true;
+        }
         if (featureFlags == null) {
             featureFlags = getFeatureFlags(context);
         }
