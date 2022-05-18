@@ -13,7 +13,7 @@ import dev.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import dev.hilla.parser.plugins.nonnull.test.helpers.TestHelper;
 
 public class ExtendedTest {
-  private final TestHelper helper = new TestHelper();
+  private final TestHelper helper = new TestHelper(getClass());
 
     @Test
     public void should_ApplyNonNullAnnotation()

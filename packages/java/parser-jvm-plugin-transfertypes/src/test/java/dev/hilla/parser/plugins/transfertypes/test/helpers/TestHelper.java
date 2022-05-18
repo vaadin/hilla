@@ -18,11 +18,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public final class TestHelper {
     private final ObjectMapper mapper = Json.mapper();
-    private final ResourceLoader resourceLoader = createResourceLoader(
-            getClass());
+    private final ResourceLoader resourceLoader;
     private final Path targetDir;
 
-    {
+    public TestHelper(Class cls) {
+        resourceLoader = createResourceLoader(cls);
+
         try {
             targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
