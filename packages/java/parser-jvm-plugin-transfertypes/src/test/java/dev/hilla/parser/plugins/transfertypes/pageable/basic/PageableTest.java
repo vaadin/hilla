@@ -12,6 +12,8 @@ import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class PageableTest {
   private final TestHelper helper = new TestHelper(getClass());
@@ -22,7 +24,8 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(Arrays.stream(classpath.split(File.pathSeparator))
+                        .collect(Collectors.toSet()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
@@ -36,7 +39,8 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(Arrays.stream(classpath.split(File.pathSeparator))
+                        .collect(Collectors.toSet()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
