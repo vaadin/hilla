@@ -6,6 +6,7 @@ module dev.hilla.parser.plugins.model {
     requires jsr305;
     requires io.github.classgraph;
     requires io.swagger.v3.oas.models;
+    requires java.validation;
 
     opens dev.hilla.parser.plugins.model to dev.hilla.parser.core;
     exports dev.hilla.parser.plugins.model;
