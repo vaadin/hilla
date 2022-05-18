@@ -62,6 +62,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>parser-jvm-test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-commons</artifactId>
     </dependency>
