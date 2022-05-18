@@ -5,6 +5,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class ClassRefSignatureReflectionModel
@@ -70,6 +71,28 @@ final class ClassRefSignatureReflectionModel
         @Override
         public void setReference(ClassInfoModel reference) {
             this.reference = reference;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 59 * hash + Objects.hashCode(this.reference);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final AnnotatedBare other = (AnnotatedBare) obj;
+            return Objects.equals(this.reference, other.reference);
         }
     }
 
