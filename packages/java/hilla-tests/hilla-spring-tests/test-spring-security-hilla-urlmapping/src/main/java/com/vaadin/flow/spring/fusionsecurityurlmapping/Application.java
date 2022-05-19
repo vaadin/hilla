@@ -17,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class Application
         extends com.vaadin.flow.spring.fusionsecurity.Application {
 
+    protected static final String URL_MAPPING = "/urlmapping";
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -37,15 +39,14 @@ public class Application
                             HttpServletResponse response,
                             FilterChain filterChain)
                             throws ServletException, IOException {
-                        request.getRequestDispatcher(
-                                request.getRequestURI().substring(7))
+                        request.getRequestDispatcher(request.getRequestURI()
+                                .substring(URL_MAPPING.length()))
                                 .forward(request, response);
                     }
                 });
-        registrationBean.addUrlPatterns("/vaadin/public/images/*",
-                "/vaadin/public/profiles/*");
+        registrationBean.addUrlPatterns(URL_MAPPING + "/public/images/*",
+                URL_MAPPING + "/public/profiles/*");
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registrationBean;
     }
-
 }

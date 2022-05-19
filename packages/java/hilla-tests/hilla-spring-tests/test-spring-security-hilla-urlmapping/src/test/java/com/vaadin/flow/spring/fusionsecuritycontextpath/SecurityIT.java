@@ -5,7 +5,7 @@ public class SecurityIT
 
     @Override
     protected String getUrlMappingBasePath() {
-        return "/vaadin";
+        return "/urlmapping";
     }
 
 }
