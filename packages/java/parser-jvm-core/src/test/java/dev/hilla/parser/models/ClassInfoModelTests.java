@@ -411,9 +411,11 @@ public class ClassInfoModelTests {
             ModelKind kind, DependencyModelProvider.Context context) {
         var expected = Arrays
                 .stream(Dependency.Sample.class.getDeclaredMethods())
+                .filter(m -> !m.isSynthetic())
                 .map(Method::getName).collect(Collectors.toSet());
-        var actual = model.getMethodsStream().map(MethodInfoModel::getName)
-                .collect(Collectors.toSet());
+        var actual = model.getMethodsStream()
+                .filter(m -> !m.isSynthetic())
+                .map(MethodInfoModel::getName).collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }

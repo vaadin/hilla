@@ -33,7 +33,7 @@ public class SpecializationChecker<Model> {
             Stream<Method> methods) {
         var lookup = MethodHandles.lookup();
 
-        this.functions = methods
+        this.functions = methods.filter(m -> !m.isSynthetic())
                 .collect(Collectors.toMap(Method::getName, function(method -> {
                     var site = LambdaMetafactory.metafactory(lookup, "apply",
                             MethodType.methodType(Function.class),
