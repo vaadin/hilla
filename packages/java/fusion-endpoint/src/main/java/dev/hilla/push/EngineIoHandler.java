@@ -56,7 +56,7 @@ public final class EngineIoHandler
         mEngineIoServer = engineIoServer;
     }
 
-    @RequestMapping(value = "/VAADIN/hillapush/", method = { RequestMethod.GET,
+    @RequestMapping(value = "/HILLA/push", method = { RequestMethod.GET,
             RequestMethod.POST,
             RequestMethod.OPTIONS }, headers = "Connection!=Upgrade")
     public void httpHandler(HttpServletRequest request,
