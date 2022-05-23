@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import type { ReactiveController } from 'lit';
-import { ActiveEvent, FluxConnection } from '../src/FluxConnection';
+import { FluxConnection } from '../src/FluxConnection';
 import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
 
 describe('FluxConnection', () => {
@@ -294,7 +294,7 @@ describe('FluxConnection', () => {
   it('dispatches an inactive event on socket.io disconnect', () => {
     const { socket } = fluxConnectionAny;
     let events = 0;
-    fluxConnection.addEventListener('state-changed', e => {
+    fluxConnection.addEventListener('state-changed', (e) => {
       if (!e.detail.active) {
         events += 1;
       }

@@ -11,17 +11,15 @@ export enum State {
 }
 
 type ActiveEvent = CustomEvent<{ active: boolean }>;
-declare global {
-  interface EventMap {
-    'state-changed': ActiveEvent;
-  }
+interface EventMap {
+  'state-changed': ActiveEvent;
 }
 
 type ListenerType<T extends keyof EventMap> =
   | ((this: FluxConnection, ev: EventMap[T]) => any)
-  // | {
-  //     handleEvent(ev: EventMap[T]): void;
-  //   }
+  | {
+      handleEvent(ev: EventMap[T]): void;
+    }
   | null;
 
 /**
@@ -167,6 +165,9 @@ export class FluxConnection extends EventTarget {
     return hillaSubscription;
   }
   override addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
-    super.addEventListener(type, listener);
+    super.addEventListener(type, listener as any);
+  }
+  override removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
+    super.removeEventListener(type, listener as any);
   }
 }
