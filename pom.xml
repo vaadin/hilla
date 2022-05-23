@@ -32,7 +32,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.145</classgraph.version>
+    <classgraph.version>4.8.146</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
     <swagger.version>2.1.13</swagger.version>
     <jackson.version>2.13.3</jackson.version>
