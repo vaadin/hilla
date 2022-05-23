@@ -239,8 +239,8 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * @param elm the bound element
    */
-  public getFieldStrategy(elm: any): FieldStrategy {
-    return getDefaultFieldStrategy(elm);
+  public getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
+    return getDefaultFieldStrategy(elm, model);
   }
 
   /**
