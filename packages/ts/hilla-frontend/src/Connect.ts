@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
+import type { ReactiveElement } from 'lit';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
 
@@ -99,6 +100,10 @@ export interface Subscription<T> {
   onError: (callback: () => void) => Subscription<T>;
   /** Called when the subscription has completed. No values are made available after calling this. */
   onComplete: (callback: () => void) => Subscription<T>;
+  /*
+   * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
+   */
+  context: (context: ReactiveElement) => Subscription<T>;
 }
 
 interface ConnectExceptionData {

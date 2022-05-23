@@ -1,30 +1,58 @@
 import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
-import { _fromString, AbstractModel, getBinderNode } from './Models.js';
+import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode } from './Models.js';
 
-interface Field {
+interface FieldBase<T> {
   required: boolean;
   invalid: boolean;
   errorMessage: string;
-  value: any;
-}
-interface FieldState extends Field {
-  name: string;
-  strategy: FieldStrategy;
-}
-export interface FieldStrategy extends Field {
-  element: Element;
+  value: T;
 }
 
-export abstract class AbstractFieldStrategy implements FieldStrategy {
+type FieldElement<T> = Element & FieldBase<T>;
+
+interface FieldElementHolder<T> {
+  get element(): FieldElement<T>;
+
+  /**
+   * @param element the new element value
+   * @deprecated will be read-only in future
+   */
+  set element(element: FieldElement<T>);
+}
+
+interface Field<T> extends FieldBase<T> {
+  readonly model?: AbstractModel<T>;
+}
+
+interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
+  name: string;
+  strategy: FieldStrategy<T>;
+}
+
+export type FieldStrategy<T = any> = Field<T>;
+
+export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T> {
   public abstract required: boolean;
 
   public abstract invalid: boolean;
 
-  public element: Element & Field;
+  private _element: FieldElement<T>;
 
-  public constructor(element: Element & Field) {
-    this.element = element;
+  public constructor(element: FieldElement<T>, public readonly model?: AbstractModel<T>) {
+    this._element = element;
+  }
+
+  public get element() {
+    return this._element;
+  }
+
+  /**
+   * @param element the new element value
+   * @deprecated will be read-only in future
+   */
+  public set element(element: FieldElement<T>) {
+    this._element = element;
   }
 
   public validate = async () => [];
@@ -84,12 +112,20 @@ export class CheckedFieldStrategy extends GenericFieldStrategy {
 
 export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
   public override get value() {
-    const { selectedItem } = this.element as any;
-    return selectedItem === null ? undefined : selectedItem;
+    if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
+      const { selectedItem } = this.element as any;
+      return selectedItem === null ? undefined : selectedItem;
+    }
+
+    return super.value;
   }
 
   public override set value(val: any) {
-    (this.element as any).selectedItem = val === undefined ? null : val;
+    if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
+      (this.element as any).selectedItem = val === undefined ? null : val;
+    } else {
+      super.value = val;
+    }
   }
 }
 
@@ -103,22 +139,22 @@ export class SelectedFieldStrategy extends GenericFieldStrategy {
   }
 }
 
-export function getDefaultFieldStrategy(elm: any): FieldStrategy {
+export function getDefaultFieldStrategy<T>(elm: any, model?: AbstractModel<T>): AbstractFieldStrategy<T> {
   switch (elm.localName) {
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
-      return new CheckedFieldStrategy(elm);
+      return new CheckedFieldStrategy(elm, model);
     case 'vaadin-combo-box':
-      return new ComboBoxFieldStrategy(elm);
+      return new ComboBoxFieldStrategy(elm, model);
     case 'vaadin-list-box':
-      return new SelectedFieldStrategy(elm);
+      return new SelectedFieldStrategy(elm, model);
     case 'vaadin-rich-text-editor':
-      return new GenericFieldStrategy(elm);
+      return new GenericFieldStrategy(elm, model);
     default:
       if (elm.localName === 'input' && /^(checkbox|radio)$/.test(elm.type)) {
-        return new CheckedFieldStrategy(elm);
+        return new CheckedFieldStrategy(elm, model);
       }
-      return elm.constructor.version ? new VaadinFieldStrategy(elm) : new GenericFieldStrategy(elm);
+      return elm.constructor.version ? new VaadinFieldStrategy(elm, model) : new GenericFieldStrategy(elm, model);
   }
 }
 
@@ -134,7 +170,7 @@ export function getDefaultFieldStrategy(elm: any): FieldStrategy {
  */
 export const field = directive(
   class extends Directive {
-    public fieldState?: FieldState;
+    public fieldState?: FieldState<any>;
 
     public constructor(partInfo: PartInfo) {
       super(partInfo);
@@ -151,10 +187,9 @@ export const field = directive(
     }
 
     public override update(part: PropertyPart | ElementPart, [model, effect]: DirectiveParameters<this>) {
-      const element = part.element as HTMLInputElement & Field;
+      const element = part.element as HTMLInputElement & FieldElement<any>;
 
       const binderNode = getBinderNode(model);
-      const fieldStrategy = binderNode.binder.getFieldStrategy(element);
 
       const convertFieldValue = (fieldValue: any) => {
         const fromString = (model as any)[_fromString];
@@ -168,7 +203,9 @@ export const field = directive(
           required: false,
           invalid: false,
           errorMessage: '',
-          strategy: fieldStrategy,
+          model,
+          element,
+          strategy: binderNode.binder.getFieldStrategy(element, model),
         };
 
         const { fieldState } = this;
@@ -196,6 +233,11 @@ export const field = directive(
       }
 
       const { fieldState } = this;
+
+      if (fieldState.element !== element || fieldState.model !== model) {
+        fieldState.strategy = binderNode.binder.getFieldStrategy(element, model);
+      }
+
       const { name } = binderNode;
       if (name !== fieldState.name) {
         fieldState.name = name;
