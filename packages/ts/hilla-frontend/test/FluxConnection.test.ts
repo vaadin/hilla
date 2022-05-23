@@ -1,4 +1,5 @@
 import { expect } from '@open-wc/testing';
+import type { ReactiveController } from 'lit';
 import { FluxConnection } from '../src/FluxConnection';
 import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
 
@@ -208,6 +209,51 @@ describe('FluxConnection', () => {
     });
     sub.cancel();
 
+    expectNoDataRetained(fluxConnectionAny);
+  });
+  it('should ignore a second cancel call', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onComplete(() => {
+      // Just need a callback
+    });
+    sub.onError(() => {
+      // Just need a callback
+    });
+    sub.onNext((_value) => {
+      // Just need a callback
+    });
+    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(1);
+
+    sub.cancel();
+    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
+    sub.cancel();
+    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
+  });
+  it('calls cancel when context is deactivated', () => {
+    const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+    sub.onComplete(() => {
+      // Just need a callback
+    });
+    sub.onError(() => {
+      // Just need a callback
+    });
+    sub.onNext((_value) => {
+      // Just need a callback
+    });
+    class FakeElement {
+      private controllers: ReactiveController[] = [];
+
+      addController(controller: ReactiveController) {
+        this.controllers.push(controller);
+      }
+      disconnectedCallback() {
+        this.controllers.forEach((controller) => controller.hostDisconnected && controller.hostDisconnected());
+      }
+    }
+
+    const fakeElement: any = new FakeElement();
+    sub.context(fakeElement);
+    fakeElement.disconnectedCallback();
     expectNoDataRetained(fluxConnectionAny);
   });
 });
