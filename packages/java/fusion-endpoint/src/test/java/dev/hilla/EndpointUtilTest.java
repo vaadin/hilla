@@ -121,7 +121,13 @@ public class EndpointUtilTest {
     }
 
     private void testPath(String path, boolean expected) {
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletRequest request = new MockHttpServletRequest() {
+            @Override
+            public void setAttribute(String name, Object value) {
+                throw new RuntimeException(
+                        "ErrorPageSecurityFilter in Spring Boot currently prevent this from being used. See https://github.com/spring-projects/spring-boot/issues/29820");
+            }
+        };
         request.setPathInfo(path);
         request.setRequestURI(path);
         Assert.assertEquals(expected, endpointUtil.isEndpointRequest(request));

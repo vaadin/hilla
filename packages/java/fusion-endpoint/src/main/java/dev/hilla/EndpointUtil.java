@@ -66,8 +66,9 @@ public class EndpointUtil {
         PathPattern pathPattern = pathParser
                 .parse(endpointProperties.getEndpointPrefix()
                         + EndpointController.ENDPOINT_METHODS);
-        RequestPath requestPath = ServletRequestPathUtils
-                .parseAndCache(request);
+
+        RequestPath requestPath = RequestPath.parse(request.getRequestURI(),
+                request.getContextPath());
         PathContainer pathWithinApplication = requestPath
                 .pathWithinApplication();
         PathMatchInfo matchInfo = pathPattern
