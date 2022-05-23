@@ -9,12 +9,21 @@ export enum State {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
 }
-const activeEventName = 'state-changed';
 
+interface EventMap {
+  'state-changed': CustomEvent<{ active: boolean }>;
+}
+
+type ListenerType<T extends keyof EventMap> =
+  | ((this: FluxConnection, ev: EventMap[T]) => any)
+  | {
+      handleEvent(ev: EventMap[T]): void;
+    }
+  | null;
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
-export class FluxConnection {
+export class FluxConnection implements EventTarget {
   private nextId = 0;
   private endpointInfos = new Map<string, string>();
   private onNextCallbacks = new Map<string, (value: any) => void>();
@@ -23,7 +32,7 @@ export class FluxConnection {
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
   public state: State = State.INACTIVE;
-  private listeners: { [key: string]: ((event: CustomEvent) => void)[] } = {};
+  private listeners: { [key: string]: ListenerType<keyof EventMap>[] } = {};
 
   constructor() {
     if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
@@ -45,7 +54,7 @@ export class FluxConnection {
       // https://socket.io/docs/v4/client-api/#event-disconnect
       if (this.state === State.ACTIVE) {
         this.state = State.INACTIVE;
-        this.dispatchEvent(new CustomEvent(activeEventName, { detail: { active: false } }));
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
       }
     });
     this.socket.on('connect_error', () => {
@@ -56,7 +65,7 @@ export class FluxConnection {
       // https://socket.io/docs/v4/client-api/#event-connect
       if (this.state === State.INACTIVE) {
         this.state = State.ACTIVE;
-        this.dispatchEvent(new CustomEvent(activeEventName, { detail: { active: true } }));
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
       }
     });
   }
@@ -160,7 +169,10 @@ export class FluxConnection {
    * @param type  the type of event
    * @param listener  the listener to call when the event occurs
    */
-  addEventListener(type: string, listener: (event: CustomEvent) => void) {
+  addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
+    if (listener === null) {
+      return;
+    }
     this.listeners[type] = this.listeners[type] || [];
     this.listeners[type].push(listener);
   }
@@ -171,15 +183,20 @@ export class FluxConnection {
    * @param type  the type of event
    * @param listener  the listener to remove
    */
-  removeEventListener(type: string, listener: (event: CustomEvent) => void) {
+  removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
     if (this.listeners[type]) {
       this.listeners[type] = this.listeners[type].filter((l) => l !== listener);
     }
   }
 
-  private dispatchEvent(e: CustomEvent) {
-    (this.listeners[e.type] || []).forEach((listener: (event: CustomEvent) => void) => {
-      listener(e);
+  dispatchEvent(event: CustomEvent<{ active: boolean }>): boolean {
+    (this.listeners[event.type] || []).forEach((listener: ListenerType<any>) => {
+      if ((listener as any).handleEvent) {
+        (listener as EventListenerObject).handleEvent(event);
+      } else {
+        (listener as EventListener)(event);
+      }
     });
+    return true;
   }
 }
