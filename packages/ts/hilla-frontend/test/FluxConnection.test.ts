@@ -305,14 +305,4 @@ describe('FluxConnection', () => {
     socket.emit('disconnect');
     expect(events).to.equal(1);
   });
-  it('removes listeners with removeEventListener', () => {
-    const listener = () => {
-      // Nothing needed here
-    };
-    fluxConnection.addEventListener('state-changed', listener);
-
-    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(1);
-    fluxConnection.removeEventListener('state-changed', listener);
-    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(0);
-  });
 });
