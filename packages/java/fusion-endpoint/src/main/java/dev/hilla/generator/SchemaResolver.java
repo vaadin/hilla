@@ -18,11 +18,13 @@ package dev.hilla.generator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+
 import dev.hilla.ExplicitNullableTypeChecker;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -41,18 +43,19 @@ class SchemaResolver {
     private final Map<String, GeneratorType> usedTypes;
     private final GeneratorType type;
     private final List<AnnotationExpr> nodeAnnotations;
+    private boolean requiredByContext;
 
-    SchemaResolver(GeneratorType type, Map<String, GeneratorType> usedTypes) {
-        this.type = type;
-        this.nodeAnnotations = null;
-        this.usedTypes = usedTypes;
+    SchemaResolver(GeneratorType type, Map<String, GeneratorType> usedTypes,
+            boolean requiredByContext) {
+        this(type, null, usedTypes, requiredByContext);
     }
 
     SchemaResolver(GeneratorType type, List<AnnotationExpr> nodeAnnotations,
-            Map<String, GeneratorType> usedTypes) {
+            Map<String, GeneratorType> usedTypes, boolean requiredByContext) {
         this.type = type;
         this.nodeAnnotations = nodeAnnotations;
         this.usedTypes = usedTypes;
+        this.requiredByContext = requiredByContext;
     }
 
     /**
@@ -145,8 +148,8 @@ class SchemaResolver {
 
     private Schema createArraySchema() {
         ArraySchema array = new ArraySchema();
-        array.items(
-                new SchemaResolver(type.getItemType(), usedTypes).resolve());
+        array.items(new SchemaResolver(type.getItemType(), usedTypes,
+                requiredByContext).resolve());
         return array;
     }
 
@@ -155,8 +158,8 @@ class SchemaResolver {
         List<GeneratorType> typeArguments = type.getTypeArguments();
 
         if (!typeArguments.isEmpty()) {
-            array.items(new SchemaResolver(typeArguments.get(0), usedTypes)
-                    .resolve());
+            array.items(new SchemaResolver(typeArguments.get(0), usedTypes,
+                    requiredByContext).resolve());
         }
 
         return array;
@@ -164,8 +167,8 @@ class SchemaResolver {
 
     private Schema createOptionalSchema() {
         return createNullableWrapper(
-                new SchemaResolver(type.getTypeArguments().get(0), usedTypes)
-                        .resolve());
+                new SchemaResolver(type.getTypeArguments().get(0), usedTypes,
+                        requiredByContext).resolve());
     }
 
     private Schema createNullableWrapper(Schema nestedTypeSchema) {
@@ -180,8 +183,8 @@ class SchemaResolver {
             // Assumed that Map always has the first type parameter as `String`
             // and the second is for its value type
             mapSchema.additionalProperties(
-                    new SchemaResolver(typeArguments.get(1), usedTypes)
-                            .resolve());
+                    new SchemaResolver(typeArguments.get(1), usedTypes,
+                            requiredByContext).resolve());
         }
         return mapSchema;
     }
@@ -217,7 +220,8 @@ class SchemaResolver {
 
     private Schema createFluxSchema() {
         Schema subTypeSchema = new SchemaResolver(
-                type.getTypeArguments().get(0), usedTypes).resolve();
+                type.getTypeArguments().get(0), usedTypes, requiredByContext)
+                        .resolve();
         ArraySchema arr = new ArraySchema();
         arr.setItems(subTypeSchema);
         arr.addExtension("x-flux", true);
@@ -225,8 +229,8 @@ class SchemaResolver {
     }
 
     private boolean isRequired() {
-        return (nodeAnnotations != null
-                && ExplicitNullableTypeChecker.isRequired(nodeAnnotations))
-                || type.isRequired();
+        // Method return value annotations are not included in the type but need
+        // to be passed separately
+        return type.isRequired(nodeAnnotations);
     }
 }

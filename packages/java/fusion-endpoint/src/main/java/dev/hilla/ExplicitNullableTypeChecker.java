@@ -32,15 +32,21 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
  * parameter and return types.
  */
 public class ExplicitNullableTypeChecker {
+    private static final String NULLABLE_ANNOTATION_NAME = "nullable";
+    private static final String NONNULL_ANNOTATION_NAME = "nonnull";
+
     /**
      * Checks if the reflected element should be required (not nullable) in the
      * generated Typescript code based on annotations.
      *
      * @param element
      *            an element to be required
+     * @param requiredByContext
+     *            {@code true} if the context defines that the node is required
      * @return a result of check
      */
-    public static boolean isRequired(AnnotatedElement element) {
+    public static boolean isRequired(AnnotatedElement element,
+            boolean requiredByContext) {
         if ((element instanceof Field
                 && ((Field) element).getType().isPrimitive())
                 || (element instanceof Parameter
@@ -58,22 +64,43 @@ public class ExplicitNullableTypeChecker {
                     ((Parameter) element).getAnnotatedType().getAnnotations()));
         }
 
-        return annotations.anyMatch(annotation -> "nonnull"
-                .equalsIgnoreCase(annotation.annotationType().getSimpleName()));
+        if (requiredByContext) {
+            return !hasAnnotation(annotations, NULLABLE_ANNOTATION_NAME);
+        }
+
+        return hasAnnotation(annotations, NONNULL_ANNOTATION_NAME);
     }
 
     /**
      * Checks if the parsed node should be required (not nullable) in the
      * generated Typescript code based on the list of annotations.
      *
+     * @param requiredByContext
+     *            {@code true} if the context defines that the node is required
      * @param annotations
      *            a list of node annotations to check
      * @return a result of check
      */
-    public static boolean isRequired(List<AnnotationExpr> annotations) {
+    public static boolean isRequired(boolean requiredByContext,
+            List<AnnotationExpr> annotations) {
+        if (requiredByContext) {
+            return !hasAnnotation(annotations, NULLABLE_ANNOTATION_NAME);
+        }
+
+        return hasAnnotation(annotations, NONNULL_ANNOTATION_NAME);
+    }
+
+    private static boolean hasAnnotation(List<AnnotationExpr> annotations,
+            String annotationName) {
         return annotations != null && annotations.stream()
-                .anyMatch(annotation -> "nonnull".equalsIgnoreCase(
+                .anyMatch(annotation -> annotationName.equalsIgnoreCase(
                         annotation.getName().getIdentifier()));
+    }
+
+    private static boolean hasAnnotation(Stream<Annotation> annotations,
+            String annotationName) {
+        return annotations.anyMatch(annotation -> annotationName
+                .equalsIgnoreCase(annotation.annotationType().getSimpleName()));
     }
 
     /**
@@ -84,23 +111,28 @@ public class ExplicitNullableTypeChecker {
      *            the value to validate
      * @param annotatedElement
      *            the entity to be type checked
+     * @param requiredByContext
+     *            {@code true} if the context defines that the node is required
+     *
      * @return error message when the value is null while the expected type does
      *         not explicitly allow null, or null meaning the value is OK.
      */
     public String checkValueForAnnotatedElement(Object value,
-            AnnotatedElement annotatedElement) {
-        if (!isRequired(annotatedElement)) {
+            AnnotatedElement annotatedElement, boolean requiredByContext) {
+        if (!isRequired(annotatedElement, requiredByContext)) {
             return null;
         }
         if (annotatedElement instanceof Method) {
             return checkValueForType(value,
-                    ((Method) annotatedElement).getGenericReturnType());
+                    ((Method) annotatedElement).getGenericReturnType(),
+                    requiredByContext);
         }
         return null;
     }
 
-    String checkValueForType(Object value, Type expectedType) {
-        return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
-                expectedType);
+    String checkValueForType(Object value, Type expectedType,
+            boolean requiredByContext) {
+        return new ExplicitNullableTypeCheckerHelper(requiredByContext)
+                .checkValueForType(value, expectedType);
     }
 }

@@ -48,8 +48,20 @@ class ExplicitNullableTypeCheckerHelper {
     // A map for tracking already visited Beans.
     private Map<Type, Set<Object>> visitedBeans;
 
+    private boolean requiredByContext;
+
     private static Logger getLogger() {
         return LoggerFactory.getLogger(EndpointController.class);
+    }
+
+    /**
+     * Creates a new helper.
+     *
+     * @param requiredByContext
+     *            {@code true} if the context defines that the node is required
+     */
+    public ExplicitNullableTypeCheckerHelper(boolean requiredByContext) {
+        this.requiredByContext = requiredByContext;
     }
 
     /**
@@ -236,7 +248,7 @@ class ExplicitNullableTypeCheckerHelper {
             Field field = readMethod.getDeclaringClass().getDeclaredField(name);
             return (!Modifier.isStatic(field.getModifiers())
                     && !Modifier.isTransient(field.getModifiers())
-                    && isRequired(field)
+                    && isRequired(field, requiredByContext)
                     && !field.isAnnotationPresent(JsonIgnore.class));
         } catch (NoSuchFieldException e) {
             getLogger().error("Unexpected missing declared field in Java Bean",

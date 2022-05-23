@@ -41,6 +41,7 @@ import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -96,6 +97,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNullApi;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.endpointransfermapper.EndpointTransferMapper;
@@ -127,6 +129,7 @@ public class OpenAPIObjectGenerator {
     private boolean needsDeferrableImport = false;
     private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
     private CombinedTypeSolver typeSolver;
+    private Set<String> nonNullApiPackages = new HashSet<>();
 
     private static Logger getLogger() {
         return LoggerFactory.getLogger(OpenAPIObjectGenerator.class);
@@ -188,13 +191,15 @@ public class OpenAPIObjectGenerator {
         return openApiModel;
     }
 
-    Schema parseResolvedTypeToSchema(GeneratorType type) {
-        return new SchemaResolver(type, usedTypes).resolve();
+    Schema parseResolvedTypeToSchema(GeneratorType type,
+            boolean requiredByContext) {
+        return new SchemaResolver(type, usedTypes, requiredByContext).resolve();
     }
 
     Schema parseResolvedTypeToSchema(GeneratorType type,
-            List<AnnotationExpr> annotations) {
-        return new SchemaResolver(type, annotations, usedTypes).resolve();
+            List<AnnotationExpr> annotations, boolean requiredByContext) {
+        return new SchemaResolver(type, annotations, usedTypes,
+                requiredByContext).resolve();
     }
 
     Class<?> getClassFromReflection(GeneratorType type)
@@ -228,6 +233,11 @@ public class OpenAPIObjectGenerator {
         javaSourcePaths.stream()
                 .map(path -> new SourceRoot(path, parserConfiguration))
                 .forEach(sourceRoot -> parseSourceRoot(sourceRoot,
+                        this::findPackageAnnotations));
+
+        javaSourcePaths.stream()
+                .map(path -> new SourceRoot(path, parserConfiguration))
+                .forEach(sourceRoot -> parseSourceRoot(sourceRoot,
                         this::findEndpointExposed));
 
         javaSourcePaths.stream()
@@ -238,7 +248,7 @@ public class OpenAPIObjectGenerator {
         for (Map.Entry<String, GeneratorType> entry : new ArrayList<>(
                 usedTypes.entrySet())) {
             List<Schema> schemas = createSchemasFromQualifiedNameAndType(
-                    entry.getKey(), entry.getValue());
+                    entry.getKey(), entry.getValue(), false);
             schemas.forEach(schema -> {
                 if (qualifiedNameToPath.get(schema.getName()) != null) {
                     schema.addExtension(EXTENSION_VAADIN_FILE_PATH,
@@ -338,6 +348,26 @@ public class OpenAPIObjectGenerator {
             openApiModel.addExtension(EXTENSION_VAADIN_CONNECT_DEFERRABLE,
                     true);
         }
+        return SourceRoot.Callback.Result.DONT_SAVE;
+    }
+
+    private SourceRoot.Callback.Result findPackageAnnotations(Path localPath,
+            Path absolutePath, ParseResult<CompilationUnit> result) {
+
+        result.ifSuccessful(compilationUnit -> {
+            if (localPath.getFileName()
+                    .equals(java.nio.file.Paths.get("package-info.java"))) {
+                PackageDeclaration pkgDecl = compilationUnit
+                        .getPackageDeclaration().get();
+                boolean nonNullApiAnnotation = pkgDecl.getAnnotations().stream()
+                        .anyMatch(annotation -> NonNullApi.class.getSimpleName()
+                                .equals(annotation.getName().getIdentifier()));
+                if (nonNullApiAnnotation) {
+                    nonNullApiPackages.add(pkgDecl.getNameAsString());
+                }
+            }
+        });
+
         return SourceRoot.Callback.Result.DONT_SAVE;
     }
 
@@ -459,8 +489,8 @@ public class OpenAPIObjectGenerator {
                 .findFirst().orElse(null);
     }
 
-    private List<Schema> parseNonEndpointClassAsSchema(
-            String fullQualifiedName) {
+    private List<Schema> parseNonEndpointClassAsSchema(String fullQualifiedName,
+            boolean requiredByContext) {
         TypeDeclaration<?> typeDeclaration = nonEndpointMap
                 .get(fullQualifiedName);
         if (typeDeclaration == null || typeDeclaration.isEnumDeclaration()) {
@@ -469,7 +499,7 @@ public class OpenAPIObjectGenerator {
         List<Schema> result = new ArrayList<>();
 
         Schema schema = schemaGenerator.createSingleSchema(fullQualifiedName,
-                typeDeclaration);
+                typeDeclaration, requiredByContext);
         generatedSchema.add(fullQualifiedName);
 
         NodeList<ClassOrInterfaceType> extendedTypes = null;
@@ -479,13 +509,14 @@ public class OpenAPIObjectGenerator {
         }
         if (extendedTypes == null || extendedTypes.isEmpty()) {
             result.add(schema);
-            result.addAll(generatedRelatedSchemas(schema));
+            result.addAll(generatedRelatedSchemas(schema, requiredByContext));
         } else {
             ComposedSchema parentSchema = new ComposedSchema();
             parentSchema.setName(fullQualifiedName);
             result.add(parentSchema);
             extendedTypes.forEach(parentType -> {
-                GeneratorType type = new GeneratorType(parentType.resolve());
+                GeneratorType type = new GeneratorType(parentType.resolve(),
+                        false);
                 String parentQualifiedName = type.asResolvedType()
                         .asReferenceType().getQualifiedName();
                 String parentRef = SchemaResolver
@@ -495,16 +526,19 @@ public class OpenAPIObjectGenerator {
             });
             // The inserting order matters for `allof` property.
             parentSchema.addAllOfItem(schema);
-            result.addAll(generatedRelatedSchemas(parentSchema));
+            result.addAll(
+                    generatedRelatedSchemas(parentSchema, requiredByContext));
         }
         return result;
     }
 
     private List<Schema> createSchemasFromQualifiedNameAndType(
-            String qualifiedName, GeneratorType type) {
-        List<Schema> list = parseNonEndpointClassAsSchema(qualifiedName);
+            String qualifiedName, GeneratorType type,
+            boolean requiredByContext) {
+        List<Schema> list = parseNonEndpointClassAsSchema(qualifiedName,
+                requiredByContext);
         if (list.isEmpty()) {
-            return parseReferencedTypeAsSchema(type);
+            return parseReferencedTypeAsSchema(type, requiredByContext);
         } else {
             return list;
         }
@@ -572,6 +606,7 @@ public class OpenAPIObjectGenerator {
             CompilationUnit compilationUnit) {
         Map<String, PathItem> newPathItems = new HashMap<>();
         Collection<MethodDeclaration> methods = typeDeclaration.getMethods();
+        boolean nonNullApi = hasNonNullApi(compilationUnit);
         for (MethodDeclaration methodDeclaration : methods) {
             if (isAccessForbidden(typeDeclaration, methodDeclaration)) {
                 continue;
@@ -581,11 +616,11 @@ public class OpenAPIObjectGenerator {
             Operation post = createPostOperation(methodDeclaration);
             if (methodDeclaration.getParameters().isNonEmpty()) {
                 post.setRequestBody(createRequestBody(methodDeclaration,
-                        resolvedTypeParametersMap));
+                        resolvedTypeParametersMap, nonNullApi));
             }
 
             ApiResponses responses = createApiResponses(methodDeclaration,
-                    resolvedTypeParametersMap);
+                    resolvedTypeParametersMap, nonNullApi);
             post.setResponses(responses);
             post.tags(Collections.singletonList(tagName));
             PathItem pathItem = new PathItem().post(post);
@@ -607,6 +642,17 @@ public class OpenAPIObjectGenerator {
                         .putAll(createPathItems(endpointName, tagName, pair.a,
                                 pair.b, compilationUnit)));
         return newPathItems;
+    }
+
+    private boolean hasNonNullApi(CompilationUnit compilationUnit) {
+        Optional<PackageDeclaration> maybePkg = compilationUnit
+                .getPackageDeclaration();
+        if (!maybePkg.isPresent()) {
+            return false;
+        }
+
+        PackageDeclaration pkgDecl = maybePkg.get();
+        return nonNullApiPackages.contains(pkgDecl.getNameAsString());
     }
 
     private boolean isAccessForbidden(
@@ -638,9 +684,10 @@ public class OpenAPIObjectGenerator {
     }
 
     private ApiResponses createApiResponses(MethodDeclaration methodDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean nonNullApi) {
         ApiResponse successfulResponse = createApiSuccessfulResponse(
-                methodDeclaration, resolvedTypeParametersMap);
+                methodDeclaration, resolvedTypeParametersMap, nonNullApi);
         ApiResponses responses = new ApiResponses();
         responses.addApiResponse("200", successfulResponse);
         return responses;
@@ -648,7 +695,8 @@ public class OpenAPIObjectGenerator {
 
     private ApiResponse createApiSuccessfulResponse(
             MethodDeclaration methodDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean nonNullApi) {
         Content successfulContent = new Content();
         // "description" is a REQUIRED property of Response
         ApiResponse successfulResponse = new ApiResponse().description("");
@@ -662,7 +710,7 @@ public class OpenAPIObjectGenerator {
         });
         if (!methodDeclaration.getType().isVoidType()) {
             MediaType mediaItem = createReturnMediaType(methodDeclaration,
-                    resolvedTypeParametersMap);
+                    resolvedTypeParametersMap, nonNullApi);
             successfulContent.addMediaType("application/json", mediaItem);
             successfulResponse.content(successfulContent);
         }
@@ -670,12 +718,13 @@ public class OpenAPIObjectGenerator {
     }
 
     private MediaType createReturnMediaType(MethodDeclaration methodDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean requiredByContext) {
         MediaType mediaItem = new MediaType();
         GeneratorType generatorType = createSchemaType(methodDeclaration,
-                resolvedTypeParametersMap);
+                resolvedTypeParametersMap, requiredByContext);
         Schema schema = parseResolvedTypeToSchema(generatorType,
-                methodDeclaration.getAnnotations());
+                methodDeclaration.getAnnotations(), requiredByContext);
         schema.setDescription("");
         mediaItem.schema(schema);
         return mediaItem;
@@ -685,7 +734,8 @@ public class OpenAPIObjectGenerator {
         if (!type.isReferenceType()) {
             return null;
         }
-        String className = getFullyQualifiedName(new GeneratorType(type));
+        String className = getFullyQualifiedName(
+                new GeneratorType(type, false));
         String mappedClassName = endpointTransferMapper
                 .getTransferType(className);
         if (mappedClassName == null) {
@@ -708,7 +758,8 @@ public class OpenAPIObjectGenerator {
         if (!resolvedType.isReferenceType()) {
             return null;
         }
-        String className = getFullyQualifiedName(new GeneratorType(type));
+        String className = getFullyQualifiedName(
+                new GeneratorType(type, false));
         String mappedClassName = endpointTransferMapper
                 .getTransferType(className);
         if (mappedClassName == null) {
@@ -731,7 +782,8 @@ public class OpenAPIObjectGenerator {
     }
 
     private RequestBody createRequestBody(MethodDeclaration methodDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean requiredByContext) {
         Map<String, String> paramsDescription = new HashMap<>();
         methodDeclaration.getJavadoc().ifPresent(javadoc -> {
             for (JavadocBlockTag blockTag : javadoc.getBlockTags()) {
@@ -753,10 +805,10 @@ public class OpenAPIObjectGenerator {
 
         methodDeclaration.getParameters().forEach(parameter -> {
             GeneratorType generatorType = createSchemaType(parameter,
-                    resolvedTypeParametersMap);
+                    resolvedTypeParametersMap, requiredByContext);
 
             Schema paramSchema = parseResolvedTypeToSchema(generatorType,
-                    parameter.getAnnotations());
+                    parameter.getAnnotations(), requiredByContext);
 
             paramSchema.setDescription("");
             usedTypes.putAll(collectUsedTypesFromSchema(paramSchema));
@@ -778,39 +830,47 @@ public class OpenAPIObjectGenerator {
     }
 
     private GeneratorType createSchemaType(MethodDeclaration methodDeclaration,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean requiredByContext) {
         Type type = methodDeclaration.getType();
         ResolvedType resolvedType = methodDeclaration.resolve().getReturnType();
-        return createSchemaType(type, resolvedType, resolvedTypeParametersMap);
+        return createSchemaType(type, resolvedType, resolvedTypeParametersMap,
+                requiredByContext);
     }
 
     private GeneratorType createSchemaType(Parameter parameter,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean requiredByContext) {
         Type type = parameter.getType();
         ResolvedType resolvedType = parameter.resolve().getType();
-        return createSchemaType(type, resolvedType, resolvedTypeParametersMap);
+        return createSchemaType(type, resolvedType, resolvedTypeParametersMap,
+                requiredByContext);
     }
 
     private GeneratorType createSchemaType(Type type, ResolvedType resolvedType,
-            ResolvedTypeParametersMap resolvedTypeParametersMap) {
+            ResolvedTypeParametersMap resolvedTypeParametersMap,
+            boolean requiredByContext) {
         ResolvedType mappedType = toMappedType(type);
 
         if (mappedType != null) {
             resolvedType = mappedType;
             return new GeneratorType(
-                    resolvedTypeParametersMap.replaceAll(resolvedType));
+                    resolvedTypeParametersMap.replaceAll(resolvedType),
+                    requiredByContext);
         } else {
             return new GeneratorType(type,
-                    resolvedTypeParametersMap.replaceAll(resolvedType));
+                    resolvedTypeParametersMap.replaceAll(resolvedType),
+                    requiredByContext);
         }
     }
 
     @SuppressWarnings("squid:S1872")
-    private List<Schema> parseReferencedTypeAsSchema(GeneratorType type) {
+    private List<Schema> parseReferencedTypeAsSchema(GeneratorType type,
+            boolean requiredByContext) {
         List<Schema> results = new ArrayList<>();
 
-        Schema schema = schemaGenerator
-                .createSingleSchemaFromResolvedType(type);
+        Schema schema = schemaGenerator.createSingleSchemaFromResolvedType(type,
+                requiredByContext);
         ResolvedReferenceType resolvedReferenceType = type.asResolvedType()
                 .asReferenceType();
         String qualifiedName = resolvedReferenceType.getQualifiedName();
@@ -826,7 +886,7 @@ public class OpenAPIObjectGenerator {
 
         if (directAncestors.isEmpty() || type.isEnum()) {
             results.add(schema);
-            results.addAll(generatedRelatedSchemas(schema));
+            results.addAll(generatedRelatedSchemas(schema, requiredByContext));
         } else {
             ComposedSchema parentSchema = new ComposedSchema();
             parentSchema.name(qualifiedName);
@@ -837,22 +897,24 @@ public class OpenAPIObjectGenerator {
                 String parentRef = SchemaResolver
                         .getFullQualifiedNameRef(ancestorQualifiedName);
                 parentSchema.addAllOfItem(new ObjectSchema().$ref(parentRef));
-                usedTypes.put(ancestorQualifiedName,
-                        new GeneratorType(directAncestor));
+                usedTypes.put(ancestorQualifiedName, new GeneratorType(
+                        directAncestor, type.isRequiredByContext()));
             }
             parentSchema.addAllOfItem(schema);
-            results.addAll(generatedRelatedSchemas(parentSchema));
+            results.addAll(
+                    generatedRelatedSchemas(parentSchema, requiredByContext));
         }
         return results;
     }
 
-    private List<Schema> generatedRelatedSchemas(Schema schema) {
+    private List<Schema> generatedRelatedSchemas(Schema schema,
+            boolean requiredByContext) {
         List<Schema> result = new ArrayList<>();
         collectUsedTypesFromSchema(schema).entrySet().stream()
                 .filter(s -> !generatedSchema.contains(s.getKey()))
                 .forEach(s -> result.addAll(
                         createSchemasFromQualifiedNameAndType(s.getKey(),
-                                s.getValue())));
+                                s.getValue(), requiredByContext)));
         return result;
     }
 

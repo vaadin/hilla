@@ -35,6 +35,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.cglib.proxy.Enhancer;
@@ -991,8 +992,8 @@ public class EndpointControllerTest {
                 ExplicitNullableTypeChecker.class);
 
         when(explicitNullableTypeChecker.checkValueForType(
-                eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class)))
-                        .thenReturn(null);
+                eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class),
+                eq(false))).thenReturn(null);
 
         String testOkMethod = "testOkMethod";
         ResponseEntity<String> response = createVaadinController(
@@ -1004,7 +1005,7 @@ public class EndpointControllerTest {
 
         verify(explicitNullableTypeChecker).checkValueForAnnotatedElement(
                 NullCheckerTestClass.OK_RESPONSE,
-                NullCheckerTestClass.class.getMethod(testOkMethod));
+                NullCheckerTestClass.class.getMethod(testOkMethod), false);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("\"" + NullCheckerTestClass.OK_RESPONSE + "\"",
@@ -1022,7 +1023,7 @@ public class EndpointControllerTest {
         Method testNullMethod = NullCheckerTestClass.class
                 .getMethod(testNullMethodName);
         when(explicitNullableTypeChecker.checkValueForAnnotatedElement(null,
-                testNullMethod)).thenReturn(errorMessage);
+                testNullMethod, false)).thenReturn(errorMessage);
 
         ResponseEntity<String> response = createVaadinController(
                 new NullCheckerTestClass(), null, null, null,
@@ -1032,7 +1033,7 @@ public class EndpointControllerTest {
                         requestMock);
 
         verify(explicitNullableTypeChecker).checkValueForAnnotatedElement(null,
-                testNullMethod);
+                testNullMethod, false);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
                 response.getStatusCode());
@@ -1249,8 +1250,8 @@ public class EndpointControllerTest {
         if (explicitNullableTypeChecker == null) {
             explicitNullableTypeChecker = mock(
                     ExplicitNullableTypeChecker.class);
-            when(explicitNullableTypeChecker.checkValueForType(any(), any()))
-                    .thenReturn(null);
+            when(explicitNullableTypeChecker.checkValueForType(any(), any(),
+                    ArgumentMatchers.anyBoolean())).thenReturn(null);
         }
 
         ApplicationContext mockApplicationContext = mockApplicationContext(

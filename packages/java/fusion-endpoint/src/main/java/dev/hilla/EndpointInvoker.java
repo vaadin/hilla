@@ -37,6 +37,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
@@ -247,7 +248,9 @@ public class EndpointInvoker {
         returnValue = endpointTransferMapper.toTransferType(returnValue);
 
         String implicitNullError = this.explicitNullableTypeChecker
-                .checkValueForAnnotatedElement(returnValue, methodToInvoke);
+                .checkValueForAnnotatedElement(returnValue, methodToInvoke,
+                        isNonNullApi(methodToInvoke.getDeclaringClass()
+                                .getPackage()));
         if (implicitNullError != null) {
             String errorMessage = String.format(
                     "Unexpected return value in endpoint '%s' method '%s'. %s",
@@ -268,6 +271,12 @@ public class EndpointInvoker {
         }
 
         return returnValue;
+    }
+
+    private boolean isNonNullApi(Package pkg) {
+        return Stream.of(pkg.getAnnotations())
+                .anyMatch(ann -> ann.annotationType().getSimpleName()
+                        .equals(NonNullApi.class.getSimpleName()));
     }
 
     private Type[] getJavaParameters(Method methodToInvoke, Type classType) {

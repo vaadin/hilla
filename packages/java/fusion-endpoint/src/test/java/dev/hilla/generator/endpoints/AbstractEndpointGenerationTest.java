@@ -538,7 +538,8 @@ public abstract class AbstractEndpointGenerationTest
             Type type = expectedSchemaField.getGenericType();
             assertSchema(propertySchema, expectedSchemaField.getType(),
                     extractTypeArguments(type, typeArguments));
-            if (ExplicitNullableTypeChecker.isRequired(expectedSchemaField)) {
+            if (ExplicitNullableTypeChecker.isRequired(expectedSchemaField,
+                    false)) {
                 assertTrue(schema.getRequired()
                         .contains(expectedSchemaField.getName()));
             } else {
