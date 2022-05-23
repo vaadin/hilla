@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -212,6 +213,44 @@ public class PushMessageHandlerTest {
                 TimeUnit.SECONDS);
         Assert.assertEquals(subscribeMessage.getId(), clientMessage.getId());
         Assert.assertEquals("Exception in Flux", clientMessage.getMessage());
+    }
+
+    @Test
+    public void fluxSubscription_cleanUpProperlyOnImmediateExceptionInFlux()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createFluxWithExceptionSubscribe();
+        CountDownLatch wait = new CountDownLatch(1);
+
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                msg -> {
+                    if (msg instanceof ClientMessageError) {
+                        wait.countDown();
+                    } else {
+                        unexpectedMessages.add(msg);
+                    }
+                });
+
+        wait.await(2, TimeUnit.SECONDS);
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionDisposables
+                .get(connectionId).size());
+    }
+
+    @Test
+    public void fluxSubscription_cleanUpProperlyOnImmediateFluxComplete()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createFluxSubscribe();
+        CountDownLatch wait = new CountDownLatch(1);
+
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                msg -> {
+                    if (msg instanceof ClientMessageComplete) {
+                        wait.countDown();
+                    }
+                });
+
+        wait.await(2, TimeUnit.SECONDS);
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionDisposables
+                .get(connectionId).size());
     }
 
     @Test

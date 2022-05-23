@@ -1,6 +1,7 @@
 package dev.hilla.push;
 
 import java.security.Principal;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -129,21 +130,34 @@ public class PushMessageHandler {
             Flux<?> flux = (Flux<?>) endpointInvoker.invoke(
                     message.getEndpointName(), message.getMethodName(),
                     paramsObject, principal, isInRole);
+
+            CompletableFuture<Void> waitForSubscriptionData = new CompletableFuture<>();
             Disposable endpointFluxSubscriber = flux.subscribe(item -> {
                 send(sender, new ClientMessageUpdate(fluxId, item));
             }, error -> {
                 // An exception was thrown from the Flux
-                disposeSubscriptionInfo(connectionId, fluxId);
-                send(sender,
-                        new ClientMessageError(fluxId, "Exception in Flux"));
-                getLogger().error("Exception in Flux", error);
+
+                // Ensure that the subscription data has been stored before it
+                // is used
+                waitForSubscriptionData.whenComplete((a, b) -> {
+                    disposeSubscriptionInfo(connectionId, fluxId);
+                    send(sender, new ClientMessageError(fluxId,
+                            "Exception in Flux"));
+                    getLogger().error("Exception in Flux", error);
+                });
             }, () -> {
                 // Flux completed
-                disposeSubscriptionInfo(connectionId, fluxId);
-                send(sender, new ClientMessageComplete(fluxId));
+
+                // Ensure that the subscription data has been stored before it
+                // is used
+                waitForSubscriptionData.whenComplete((a, b) -> {
+                    disposeSubscriptionInfo(connectionId, fluxId);
+                    send(sender, new ClientMessageComplete(fluxId));
+                });
             });
             fluxSubscriptionDisposables.get(connectionId).put(fluxId,
                     endpointFluxSubscriber);
+            waitForSubscriptionData.complete(null);
 
         } catch (EndpointNotFoundException e) {
             sender.accept(new ClientMessageError(fluxId, "No such endpoint"));
