@@ -3,6 +3,13 @@ import type { ReactiveController } from 'lit';
 import { FluxConnection } from '../src/FluxConnection';
 import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
 
+function expectNoDataRetained(fluxConnectionAny: any) {
+  expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
+  expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
+  expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
+  expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+}
+
 describe('FluxConnection', () => {
   let fluxConnection: FluxConnection;
   let fluxConnectionAny: any;
@@ -170,10 +177,7 @@ describe('FluxConnection', () => {
     const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
     fluxConnectionAny.handleMessage(completeMsg);
 
-    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
-    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expectNoDataRetained(fluxConnectionAny);
   });
   it('clean internal data on error', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -190,10 +194,7 @@ describe('FluxConnection', () => {
     const completeMsg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
     fluxConnectionAny.handleMessage(completeMsg);
 
-    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
-    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expectNoDataRetained(fluxConnectionAny);
   });
   it('clean internal data on cancel', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -208,10 +209,7 @@ describe('FluxConnection', () => {
     });
     sub.cancel();
 
-    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
-    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expectNoDataRetained(fluxConnectionAny);
   });
   it('should ignore a second cancel call', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -256,9 +254,6 @@ describe('FluxConnection', () => {
     const fakeElement: any = new FakeElement();
     sub.context(fakeElement);
     fakeElement.disconnectedCallback();
-    expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
-    expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onCompleteCallbacks.size).to.equal(0);
-    expect(fluxConnectionAny.onErrorCallbacks.size).to.equal(0);
+    expectNoDataRetained(fluxConnectionAny);
   });
 });
