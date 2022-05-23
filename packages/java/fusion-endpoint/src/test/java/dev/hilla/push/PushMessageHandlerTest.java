@@ -32,9 +32,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import dev.hilla.EndpointControllerConfiguration;
+import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
+import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
+import dev.hilla.EndpointInvocationException.EndpointInternalException;
+import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.EndpointInvoker;
 import dev.hilla.EndpointProperties;
+import dev.hilla.EndpointSubscription;
 import dev.hilla.ServletContextTestSetup;
+import dev.hilla.push.PushMessageHandler.SubscriptionInfo;
 import dev.hilla.push.messages.fromclient.SubscribeMessage;
 import dev.hilla.push.messages.fromclient.UnsubscribeMessage;
 import dev.hilla.push.messages.toclient.AbstractClientMessage;
@@ -59,6 +65,9 @@ public class PushMessageHandlerTest {
     private static final String FLUX_METHOD = "testFlux";
     private static final String INFINITE_FLUX_METHOD = "testInfiniteFlux";
     private static final String FLUX_WITH_EXCEPTION_METHOD = "testFluxWithException";
+    private static final String ENDPOINT_SUBSCRIPTION_METHOD = "testEndpointSubscription";
+    private static final String INFINITE_ENDPOINT_SUBSCRIPTION_METHOD = "testInfiniteEndpointSubscription";
+    private static final String ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD = "testEndpointSubscriptionWithException";
 
     @Autowired
     private PushMessageHandler pushMessageHandler;
@@ -71,12 +80,18 @@ public class PushMessageHandlerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    private int unsubscribeCalled;
+    private Runnable unsubscribeHandler = () -> {
+        unsubscribeCalled++;
+    };
     private List<AbstractClientMessage> unexpectedMessages = new ArrayList<>();
 
     private String connectionId;
 
     @Before
-    public void setup() throws Exception {
+    public void setup()
+            throws EndpointNotFoundException, EndpointAccessDeniedException,
+            EndpointBadRequestException, EndpointInternalException {
         FeatureFlags featureFlags = FeatureFlags
                 .get(new VaadinServletContext(servletContext));
         try {
@@ -95,11 +110,18 @@ public class PushMessageHandlerTest {
                             || methodName.equals(FLUX_WITH_EXCEPTION_METHOD)
                             || methodName.equals(INFINITE_FLUX_METHOD)) {
                         return Flux.class;
+                    } else if (methodName.equals(ENDPOINT_SUBSCRIPTION_METHOD)
+                            || methodName.equals(
+                                    ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD)
+                            || methodName.equals(
+                                    INFINITE_ENDPOINT_SUBSCRIPTION_METHOD)) {
+                        return EndpointSubscription.class;
                     }
 
                     return null;
                 });
 
+        unsubscribeCalled = 0;
         Mockito.when(endpointInvoker.invoke(Mockito.any(), Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenAnswer(request -> {
@@ -113,12 +135,24 @@ public class PushMessageHandlerTest {
                         return createInfiniteDataFlux();
                     } else if (methodName.equals(FLUX_WITH_EXCEPTION_METHOD)) {
                         return createErrorFlux();
+                    } else if (methodName
+                            .equals(ENDPOINT_SUBSCRIPTION_METHOD)) {
+                        return EndpointSubscription.of(createSingleDataFlux(),
+                                unsubscribeHandler);
+                    } else if (methodName
+                            .equals(INFINITE_ENDPOINT_SUBSCRIPTION_METHOD)) {
+                        return EndpointSubscription.of(createInfiniteDataFlux(),
+                                unsubscribeHandler);
+                    } else if (methodName.equals(
+                            ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD)) {
+                        return EndpointSubscription.of(createErrorFlux(),
+                                unsubscribeHandler);
                     }
                     return null;
                 });
 
         connectionId = UUID.randomUUID().toString();
-        pushMessageHandler.fluxSubscriptionDisposables = new ConcurrentHashMap<>();
+        pushMessageHandler.fluxSubscriptionInfos = new ConcurrentHashMap<>();
         pushMessageHandler.handleBrowserConnect(connectionId);
     }
 
@@ -141,19 +175,40 @@ public class PushMessageHandlerTest {
 
     @Test
     public void fluxSubscription_canSubscribe() {
-        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId).size());
         SubscribeMessage message = createInfiniteFluxSubscribe();
         pushMessageHandler.handleMessage(connectionId, message,
                 ignoreUpdateMessages());
-        Assert.assertEquals(1,
-                pushMessageHandler.fluxSubscriptionDisposables.size());
-        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionInfos.size());
+        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId).size());
     }
 
     @Test
     public void fluxSubscription_receivesMessage() throws Exception {
+        SubscribeMessage subscribeMessage = createFluxSubscribe();
+        CompletableFuture<ClientMessageUpdate> clientMessageWrapper = new CompletableFuture<>();
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                msg -> {
+                    if (msg instanceof ClientMessageUpdate) {
+                        clientMessageWrapper
+                                .complete((ClientMessageUpdate) msg);
+                    } else if (msg instanceof ClientMessageComplete) {
+                        // Expected
+                    } else {
+                        unexpectedMessages.add(msg);
+                    }
+                });
+
+        ClientMessageUpdate clientMessage = clientMessageWrapper.get(2,
+                TimeUnit.SECONDS);
+        Assert.assertEquals(subscribeMessage.getId(), clientMessage.getId());
+        Assert.assertEquals("Hello", clientMessage.getItem());
+    }
+
+    @Test
+    public void endpointSubscription_receivesMessage() throws Exception {
         SubscribeMessage subscribeMessage = createFluxSubscribe();
         CompletableFuture<ClientMessageUpdate> clientMessageWrapper = new CompletableFuture<>();
         pushMessageHandler.handleMessage(connectionId, subscribeMessage,
@@ -231,7 +286,7 @@ public class PushMessageHandlerTest {
                 });
 
         wait.await(2, TimeUnit.SECONDS);
-        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId).size());
     }
 
@@ -249,7 +304,7 @@ public class PushMessageHandlerTest {
                 });
 
         wait.await(2, TimeUnit.SECONDS);
-        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId).size());
     }
 
@@ -260,17 +315,15 @@ public class PushMessageHandlerTest {
         pushMessageHandler.handleMessage(connectionId, subscribeMessage,
                 ignoreUpdateMessages());
 
-        Assert.assertEquals(1,
-                pushMessageHandler.fluxSubscriptionDisposables.size());
+        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionInfos.size());
 
         UnsubscribeMessage unsubscribeMessage = new UnsubscribeMessage();
         unsubscribeMessage.setId(subscribeMessage.getId());
         pushMessageHandler.handleMessage(connectionId, unsubscribeMessage,
                 ignoreAll());
         Assert.assertEquals(List.of(), unexpectedMessages);
-        Assert.assertEquals(1,
-                pushMessageHandler.fluxSubscriptionDisposables.size());
-        Assert.assertTrue(pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionInfos.size());
+        Assert.assertTrue(pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId).isEmpty());
     }
 
@@ -284,15 +337,70 @@ public class PushMessageHandlerTest {
         pushMessageHandler.handleMessage(connectionId, subscribeMessage2,
                 ignoreUpdateMessages());
 
-        Assert.assertEquals(1,
-                pushMessageHandler.fluxSubscriptionDisposables.size());
-        ConcurrentHashMap<String, Disposable> subscriptions = pushMessageHandler.fluxSubscriptionDisposables
+        Assert.assertEquals(1, pushMessageHandler.fluxSubscriptionInfos.size());
+        ConcurrentHashMap<String, SubscriptionInfo> subscriptions = pushMessageHandler.fluxSubscriptionInfos
                 .get(connectionId);
         Assert.assertEquals(2, subscriptions.size());
 
         pushMessageHandler.handleBrowserDisconnect(connectionId);
-        Assert.assertEquals(0,
-                pushMessageHandler.fluxSubscriptionDisposables.size());
+        Assert.assertEquals(0, pushMessageHandler.fluxSubscriptionInfos.size());
+    }
+
+    @Test
+    public void endpointSubscription_triggersUnsubscribeCallbackOnClientCloseMessage()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createInfiniteEndpointSubscriptionSubscribe();
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                ignore(ClientMessageUpdate.class));
+
+        UnsubscribeMessage unsubscribeMessage = new UnsubscribeMessage();
+        unsubscribeMessage.setId(subscribeMessage.getId());
+        Assert.assertEquals(0, unsubscribeCalled);
+        pushMessageHandler.handleMessage(connectionId, unsubscribeMessage,
+                ignoreAll());
+        Assert.assertEquals(1, unsubscribeCalled);
+    }
+
+    @Test
+    public void endpointSubscription_triggersUnsubscribeCallbackOnClientConnectionLost()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createInfiniteEndpointSubscriptionSubscribe();
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                ignoreUpdateMessages());
+
+        Assert.assertEquals(0, unsubscribeCalled);
+        pushMessageHandler.handleBrowserDisconnect(connectionId);
+        Assert.assertEquals(1, unsubscribeCalled);
+    }
+
+    @Test
+    public void endpointSubscription_doesNotTriggerUnsubscribeCallbackOnFluxException()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createEndpointSubscriptionWithExceptionSubscribe();
+        CountDownLatch done = new CountDownLatch(1);
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                msg -> {
+                    if (msg instanceof ClientMessageError) {
+                        done.countDown();
+                    }
+                });
+        done.await(2, TimeUnit.SECONDS);
+        Assert.assertEquals(0, unsubscribeCalled);
+    }
+
+    @Test
+    public void endpointSubscription_doesNotTriggerUnsubscribeCallbackOnFluxCompletion()
+            throws Exception {
+        SubscribeMessage subscribeMessage = createEndpointSubscriptionSubscribe();
+        CountDownLatch done = new CountDownLatch(1);
+        pushMessageHandler.handleMessage(connectionId, subscribeMessage,
+                msg -> {
+                    if (msg instanceof ClientMessageComplete) {
+                        done.countDown();
+                    }
+                });
+        done.await(2, TimeUnit.SECONDS);
+        Assert.assertEquals(0, unsubscribeCalled);
     }
 
     private Consumer<AbstractClientMessage> ignoreAll() {
@@ -343,4 +451,31 @@ public class PushMessageHandlerTest {
         return subscribeMessage;
     }
 
+    private SubscribeMessage createEndpointSubscriptionSubscribe() {
+        SubscribeMessage subscribeMessage = new SubscribeMessage();
+        subscribeMessage.setId(connectionId);
+        subscribeMessage.setEndpointName(ENDPOINT_NAME);
+        subscribeMessage.setMethodName(ENDPOINT_SUBSCRIPTION_METHOD);
+        subscribeMessage.setParams(objectMapper.createArrayNode());
+        return subscribeMessage;
+    }
+
+    private SubscribeMessage createInfiniteEndpointSubscriptionSubscribe() {
+        SubscribeMessage subscribeMessage = new SubscribeMessage();
+        subscribeMessage.setId(connectionId);
+        subscribeMessage.setEndpointName(ENDPOINT_NAME);
+        subscribeMessage.setMethodName(INFINITE_ENDPOINT_SUBSCRIPTION_METHOD);
+        subscribeMessage.setParams(objectMapper.createArrayNode());
+        return subscribeMessage;
+    }
+
+    private SubscribeMessage createEndpointSubscriptionWithExceptionSubscribe() {
+        SubscribeMessage subscribeMessage = new SubscribeMessage();
+        subscribeMessage.setId(connectionId);
+        subscribeMessage.setEndpointName(ENDPOINT_NAME);
+        subscribeMessage
+                .setMethodName(ENDPOINT_SUBSCRIPTION_WITH_EXCEPTION_METHOD);
+        subscribeMessage.setParams(objectMapper.createArrayNode());
+        return subscribeMessage;
+    }
 }

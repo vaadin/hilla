@@ -25,6 +25,7 @@ import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
 import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.EndpointInvoker;
+import dev.hilla.EndpointSubscription;
 import dev.hilla.push.messages.fromclient.AbstractServerMessage;
 import dev.hilla.push.messages.fromclient.SubscribeMessage;
 import dev.hilla.push.messages.fromclient.UnsubscribeMessage;
@@ -45,6 +46,26 @@ public class PushMessageHandler {
 
     static final String PUSH_FEATURE_FLAG = "hillaPush";
 
+    static class SubscriptionInfo {
+        private final Disposable fluxSubscriptionDisposable;
+
+        private SubscriptionInfo(Disposable fluxSubscriptionDisposable,
+                Runnable unsubscribeHandler) {
+            this.fluxSubscriptionDisposable = fluxSubscriptionDisposable;
+            this.unsubscribeHandler = unsubscribeHandler;
+        }
+
+        private final Runnable unsubscribeHandler;
+
+        private Disposable getFluxSubscriptionDisposable() {
+            return fluxSubscriptionDisposable;
+        }
+
+        private Runnable getUnsubscribeHandler() {
+            return unsubscribeHandler;
+        }
+    }
+
     private final EndpointInvoker endpointInvoker;
 
     /*
@@ -52,7 +73,7 @@ public class PushMessageHandler {
      * actual objects so that we can clean up everything related to a connection
      * id on disconnect
      */
-    ConcurrentHashMap<String, ConcurrentHashMap<String, Disposable>> fluxSubscriptionDisposables = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, ConcurrentHashMap<String, SubscriptionInfo>> fluxSubscriptionInfos = new ConcurrentHashMap<>();
 
     @Autowired
     private ServletContext servletContext;
@@ -104,14 +125,15 @@ public class PushMessageHandler {
             getLogger().error(msg);
             sender.accept(new ClientMessageError(fluxId, msg));
             return;
-
         }
-        if (endpointInvoker.getReturnType(message.getEndpointName(),
-                message.getMethodName()) != Flux.class) {
-            sender.accept(new ClientMessageError(fluxId,
-                    "Method " + message.getEndpointName() + "/"
-                            + message.getMethodName()
-                            + " is not a Flux method"));
+
+        Class<?> returnType = endpointInvoker.getReturnType(
+                message.getEndpointName(), message.getMethodName());
+        if (returnType != Flux.class
+                && returnType != EndpointSubscription.class) {
+            sender.accept(new ClientMessageError(fluxId, "Method "
+                    + message.getEndpointName() + "/" + message.getMethodName()
+                    + " is not a Flux nor EndpointSubscription method"));
             return;
         }
 
@@ -127,9 +149,19 @@ public class PushMessageHandler {
                 .getSecurityHolderRoleChecker();
 
         try {
-            Flux<?> flux = (Flux<?>) endpointInvoker.invoke(
+            Object returnValue = endpointInvoker.invoke(
                     message.getEndpointName(), message.getMethodName(),
                     paramsObject, principal, isInRole);
+
+            Flux<?> flux;
+            Runnable unsubscribeHandler = null;
+            if (returnValue instanceof EndpointSubscription) {
+                EndpointSubscription<?> endpointSubscription = (EndpointSubscription<?>) returnValue;
+                flux = endpointSubscription.getFlux();
+                unsubscribeHandler = endpointSubscription.getOnUnsubscribe();
+            } else {
+                flux = (Flux<?>) returnValue;
+            }
 
             CompletableFuture<Void> waitForSubscriptionData = new CompletableFuture<>();
             Disposable endpointFluxSubscriber = flux.subscribe(item -> {
@@ -140,7 +172,7 @@ public class PushMessageHandler {
                 // Ensure that the subscription data has been stored before it
                 // is used
                 waitForSubscriptionData.whenComplete((a, b) -> {
-                    disposeSubscriptionInfo(connectionId, fluxId);
+                    disposeSubscriptionInfo(connectionId, fluxId, false);
                     send(sender, new ClientMessageError(fluxId,
                             "Exception in Flux"));
                     getLogger().error("Exception in Flux", error);
@@ -151,14 +183,17 @@ public class PushMessageHandler {
                 // Ensure that the subscription data has been stored before it
                 // is used
                 waitForSubscriptionData.whenComplete((a, b) -> {
-                    disposeSubscriptionInfo(connectionId, fluxId);
+                    disposeSubscriptionInfo(connectionId, fluxId, false);
                     send(sender, new ClientMessageComplete(fluxId));
                 });
             });
-            fluxSubscriptionDisposables.get(connectionId).put(fluxId,
-                    endpointFluxSubscriber);
+
+            fluxSubscriptionInfos.get(connectionId).put(fluxId,
+                    new SubscriptionInfo(endpointFluxSubscriber,
+                            unsubscribeHandler));
             waitForSubscriptionData.complete(null);
 
+            waitForSubscriptionData.complete(null);
         } catch (EndpointNotFoundException e) {
             sender.accept(new ClientMessageError(fluxId, "No such endpoint"));
             return;
@@ -185,8 +220,7 @@ public class PushMessageHandler {
      *            the id of the connection
      */
     public void handleBrowserConnect(String connectionId) {
-        fluxSubscriptionDisposables.put(connectionId,
-                new ConcurrentHashMap<>());
+        fluxSubscriptionInfos.put(connectionId, new ConcurrentHashMap<>());
     }
 
     /**
@@ -199,13 +233,13 @@ public class PushMessageHandler {
      *            the id of the connection
      */
     public void handleBrowserDisconnect(String connectionId) {
-        disposeConnectionInfo(connectionId);
+        disposeConnectionInfo(connectionId, true);
     }
 
     private void handleBrowserUnsubscribe(String connectionId,
             UnsubscribeMessage message) {
         String fluxId = message.getId();
-        disposeSubscriptionInfo(connectionId, fluxId);
+        disposeSubscriptionInfo(connectionId, fluxId, true);
     }
 
     /**
@@ -214,13 +248,16 @@ public class PushMessageHandler {
      *
      * @param connectionId
      *            the connection id
+     * @param invokeUnsubscribeListener
+     *            true to invoke any unsubscribe listeners, false to ignore them
      */
-    private void disposeConnectionInfo(String connectionId) {
-        ConcurrentHashMap<String, Disposable> fluxMap = fluxSubscriptionDisposables
+    private void disposeConnectionInfo(String connectionId,
+            boolean invokeUnsubscribeListener) {
+        ConcurrentHashMap<String, SubscriptionInfo> fluxMap = fluxSubscriptionInfos
                 .remove(connectionId);
         if (fluxMap != null) {
-            fluxMap.forEach((cid, fluxSubscriptionDisposable) -> {
-                dispose(fluxSubscriptionDisposable);
+            fluxMap.forEach((cid, subscriptionInfo) -> {
+                dispose(subscriptionInfo, invokeUnsubscribeListener);
             });
         }
     }
@@ -233,21 +270,32 @@ public class PushMessageHandler {
      *            the connection id
      * @param subscriptionId
      *            the subscription id
+     * @param invokeUnsubscribeListener
+     *            true to invoke any unsubscribe listeners, false to ignore them
      */
     private void disposeSubscriptionInfo(String connectionId,
-            String subscriptionId) {
-        ConcurrentHashMap<String, Disposable> fluxMap = fluxSubscriptionDisposables
+            String subscriptionId, boolean invokeUnsubscribeListener) {
+        ConcurrentHashMap<String, SubscriptionInfo> fluxMap = fluxSubscriptionInfos
                 .get(connectionId);
         if (fluxMap != null) {
-            Disposable subscriptionInfo = fluxMap.remove(subscriptionId);
+            SubscriptionInfo subscriptionInfo = fluxMap.remove(subscriptionId);
             if (subscriptionInfo != null) {
-                dispose(subscriptionInfo);
+                dispose(subscriptionInfo, invokeUnsubscribeListener);
             }
         }
     }
 
-    private void dispose(Disposable fluxSubscriptionDisposable) {
-        fluxSubscriptionDisposable.dispose();
+    private void dispose(SubscriptionInfo subscriptionInfo,
+            boolean invokeUnsubscribeListener) {
+        subscriptionInfo.getFluxSubscriptionDisposable().dispose();
+        if (invokeUnsubscribeListener) {
+            Runnable unsubscribeHandler = subscriptionInfo
+                    .getUnsubscribeHandler();
+            if (unsubscribeHandler != null) {
+                unsubscribeHandler.run();
+            }
+        }
+
     }
 
     private Logger getLogger() {

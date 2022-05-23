@@ -139,7 +139,7 @@ class SchemaResolver {
             return createNullableWrapper(createEnumTypeSchema());
         }
 
-        if (type.isFlux()) {
+        if (type.isFlux() || type.isEndpointSubscription()) {
             return createNullableWrapper(createFluxSchema());
         }
 
