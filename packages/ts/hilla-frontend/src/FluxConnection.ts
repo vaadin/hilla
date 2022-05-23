@@ -10,20 +10,24 @@ export enum State {
   INACTIVE = 'inactive',
 }
 
-interface EventMap {
-  'state-changed': CustomEvent<{ active: boolean }>;
+type ActiveEvent = CustomEvent<{ active: boolean }>;
+declare global {
+  interface EventMap {
+    'state-changed': ActiveEvent;
+  }
 }
 
 type ListenerType<T extends keyof EventMap> =
   | ((this: FluxConnection, ev: EventMap[T]) => any)
-  | {
-      handleEvent(ev: EventMap[T]): void;
-    }
+  // | {
+  //     handleEvent(ev: EventMap[T]): void;
+  //   }
   | null;
+
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
-export class FluxConnection implements EventTarget {
+export class FluxConnection extends EventTarget {
   private nextId = 0;
   private endpointInfos = new Map<string, string>();
   private onNextCallbacks = new Map<string, (value: any) => void>();
@@ -32,9 +36,9 @@ export class FluxConnection implements EventTarget {
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
   public state: State = State.INACTIVE;
-  private listeners: { [key: string]: ListenerType<keyof EventMap>[] } = {};
 
   constructor() {
+    super();
     if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
       // Remove when removing feature flag
       throw new Error(
@@ -162,41 +166,7 @@ export class FluxConnection implements EventTarget {
     };
     return hillaSubscription;
   }
-
-  /**
-   * Adds a listener for the given event type.
-   *
-   * @param type  the type of event
-   * @param listener  the listener to call when the event occurs
-   */
-  addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
-    if (listener === null) {
-      return;
-    }
-    this.listeners[type] = this.listeners[type] || [];
-    this.listeners[type].push(listener);
-  }
-
-  /**
-   * Removes a listener for the given event type.
-   *
-   * @param type  the type of event
-   * @param listener  the listener to remove
-   */
-  removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
-    if (this.listeners[type]) {
-      this.listeners[type] = this.listeners[type].filter((l) => l !== listener);
-    }
-  }
-
-  dispatchEvent(event: CustomEvent<{ active: boolean }>): boolean {
-    (this.listeners[event.type] || []).forEach((listener: ListenerType<any>) => {
-      if ((listener as any).handleEvent) {
-        (listener as EventListenerObject).handleEvent(event);
-      } else {
-        (listener as EventListener)(event);
-      }
-    });
-    return true;
+  override addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
+    super.addEventListener(type, listener);
   }
 }

@@ -1,6 +1,6 @@
 import { expect } from '@open-wc/testing';
 import type { ReactiveController } from 'lit';
-import { FluxConnection } from '../src/FluxConnection';
+import { ActiveEvent, FluxConnection } from '../src/FluxConnection';
 import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
 
 describe('FluxConnection', () => {
@@ -294,7 +294,7 @@ describe('FluxConnection', () => {
   it('dispatches an inactive event on socket.io disconnect', () => {
     const { socket } = fluxConnectionAny;
     let events = 0;
-    fluxConnection.addEventListener('state-changed', (e) => {
+    fluxConnection.addEventListener('state-changed', e => {
       if (!e.detail.active) {
         events += 1;
       }
@@ -304,15 +304,5 @@ describe('FluxConnection', () => {
     socket.connected = false;
     socket.emit('disconnect');
     expect(events).to.equal(1);
-  });
-  it('removes listeners with removeEventListener', () => {
-    const listener = () => {
-      // Nothing needed here
-    };
-    fluxConnection.addEventListener('state-changed', listener);
-
-    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(1);
-    fluxConnection.removeEventListener('state-changed', listener);
-    expect(fluxConnectionAny.listeners['state-changed'].length).to.equal(0);
   });
 });
