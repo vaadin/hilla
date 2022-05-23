@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
-import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { chmod, mkdtemp, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import GeneratorIO from '../src/GeneratorIO.js';
 
@@ -78,6 +78,18 @@ describe('Testing GeneratorIO', () => {
       const deletedFiles = await genIO.cleanOutputDir();
       expect(deletedFiles.size).to.be.equal(generatedFilenames.length);
       expect(await genIO.exists(join(tmpDir, name))).to.be.true;
+    });
+
+    it('should fail when IO error happens', async () => {
+      await chmod(tmpDir, 0o666);
+
+      try {
+        await genIO.cleanOutputDir();
+        expect(0).to.be.equal(1); // fail as this shouldn't be reached
+      } catch (err: any) {
+      } finally {
+        await chmod(tmpDir, 0o777);
+      }
     });
   });
 });
