@@ -13,11 +13,14 @@ import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 public class UserInfo {
 
     @Id
     @GeneratedValue
+    @Type(type = "uuid-char")
     @JsonIgnore
     private UUID id;
 
