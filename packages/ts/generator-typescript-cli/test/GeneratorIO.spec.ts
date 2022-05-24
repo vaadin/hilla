@@ -86,6 +86,8 @@ describe('Testing GeneratorIO', () => {
       try {
         await genIO.cleanOutputDir();
         expect(0).to.be.equal(1); // fail as this shouldn't be reached
+      } catch (e: any) {
+        expect(e.code).to.not.equal('ENOENT');
       } finally {
         await chmod(tmpDir, 0o777);
       }
