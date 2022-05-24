@@ -17,7 +17,7 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <vaadin.version>23.1-SNAPSHOT</vaadin.version>
+    <vaadin.version>23.2-SNAPSHOT</vaadin.version>
   </properties>
 
   <dependencyManagement>

@@ -9,7 +9,7 @@
     "@vaadin/flow-frontend": "./target/flow-frontend",
     "@vaadin/router": "1.7.4",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.2.1"
+    "lit": "2.2.3"
   },
   "devDependencies": {
     "async": "3.2.2",
@@ -28,7 +28,7 @@
     "typescript": "4.5.3",
     "webpack": "4.46.0",
     "webpack-cli": "4.9.2",
-    "webpack-dev-server": "4.8.1",
+    "webpack-dev-server": "4.9.0",
     "webpack-merge": "4.2.2",
     "workbox-core": "6.5.0",
     "workbox-precaching": "6.5.0",
@@ -36,13 +36,13 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "1.1.0-alpha3",
-      "@hilla/frontend": "1.1.0-alpha3",
+      "@hilla/form": "1.1.0-beta3",
+      "@hilla/frontend": "1.1.0-beta3",
       "@polymer/polymer": "3.4.1",
       "@vaadin/common-frontend": "0.0.17",
       "@vaadin/router": "1.7.4",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.2.1"
+      "lit": "2.2.3"
     },
     "devDependencies": {
       "async": "3.2.2",
@@ -61,13 +61,13 @@
       "typescript": "4.5.3",
       "webpack": "4.46.0",
       "webpack-cli": "4.9.2",
-      "webpack-dev-server": "4.8.1",
+      "webpack-dev-server": "4.9.0",
       "webpack-merge": "4.2.2",
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0",
       "workbox-webpack-plugin": "6.5.0"
     },
-    "hash": "297abd0ac77b32a7dc9d58857d3398f9c0a138b5ad786b4a8ff5b6ccc8b8c259"
+    "hash": "c073ace12305d099a0fb779793635d8896961618f5db3e8fc32fbc88001647ca"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

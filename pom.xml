@@ -43,7 +43,7 @@
     <jackson.databind.version>2.13.2.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>23.1-SNAPSHOT</flow.version>
+    <flow.version>23.2-SNAPSHOT</flow.version>
     <slf4j.version>1.7.36</slf4j.version>
     <spring.version>5.3.16</spring.version>
     <spring.boot.version>2.6.4</spring.boot.version>
