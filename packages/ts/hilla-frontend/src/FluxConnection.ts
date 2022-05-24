@@ -164,10 +164,9 @@ export class FluxConnection extends EventTarget {
     };
     return hillaSubscription;
   }
-  override addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
-    super.addEventListener(type, listener as any);
-  }
-  override removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>) {
-    super.removeEventListener(type, listener as any);
-  }
+}
+
+export interface FluxConnection {
+  addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>): void;
+  removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>): void;
 }
