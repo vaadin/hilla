@@ -5,7 +5,27 @@ import type { Subscription } from './Connect';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
 
-export class FluxConnection {
+export enum State {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
+type ActiveEvent = CustomEvent<{ active: boolean }>;
+interface EventMap {
+  'state-changed': ActiveEvent;
+}
+
+type ListenerType<T extends keyof EventMap> =
+  | ((this: FluxConnection, ev: EventMap[T]) => any)
+  | {
+      handleEvent(ev: EventMap[T]): void;
+    }
+  | null;
+
+/**
+ * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+ */
+export class FluxConnection extends EventTarget {
   private nextId = 0;
   private endpointInfos = new Map<string, string>();
   private onNextCallbacks = new Map<string, (value: any) => void>();
@@ -13,8 +33,10 @@ export class FluxConnection {
   private onErrorCallbacks = new Map<string, () => void>();
 
   private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
+  public state: State = State.INACTIVE;
 
   constructor() {
+    super();
     if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
       // Remove when removing feature flag
       throw new Error(
@@ -29,6 +51,24 @@ export class FluxConnection {
     this.socket = io('/hilla', { path: '/HILLA/push', extraHeaders });
     this.socket.on('message', (message) => {
       this.handleMessage(JSON.parse(message));
+    });
+    this.socket.on('disconnect', () => {
+      // https://socket.io/docs/v4/client-api/#event-disconnect
+      if (this.state === State.ACTIVE) {
+        this.state = State.INACTIVE;
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+      }
+    });
+    this.socket.on('connect_error', () => {
+      // https://socket.io/docs/v4/client-api/#event-connect_error
+    });
+
+    this.socket.on('connect', () => {
+      // https://socket.io/docs/v4/client-api/#event-connect
+      if (this.state === State.INACTIVE) {
+        this.state = State.ACTIVE;
+        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+      }
     });
   }
 
@@ -73,10 +113,18 @@ export class FluxConnection {
     this.socket.send(message);
   }
 
-  subscribe(endpointName: string, methodName: string, maybeParams?: Array<any>): Subscription<any> {
+  /**
+   * Subscribes to the flux returned by the given endpoint name + method name using the given parameters.
+   *
+   * @param endpointName the endpoint to connect to
+   * @param methodName the method in the endpoint to connect to
+   * @param parameters the parameters to use
+   * @returns a subscription
+   */
+  subscribe(endpointName: string, methodName: string, parameters?: Array<any>): Subscription<any> {
     const id: string = this.nextId.toString();
     this.nextId += 1;
-    const params = maybeParams || [];
+    const params = parameters || [];
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', id, endpointName, methodName, params };
     const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
@@ -116,4 +164,9 @@ export class FluxConnection {
     };
     return hillaSubscription;
   }
+}
+
+export interface FluxConnection {
+  addEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>): void;
+  removeEventListener<T extends keyof EventMap>(type: T, listener: ListenerType<T>): void;
 }
