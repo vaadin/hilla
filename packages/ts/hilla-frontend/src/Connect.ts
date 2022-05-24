@@ -249,7 +249,7 @@ function isFlowLoaded(): boolean {
 }
 
 /**
- * Hilla Connect client class is a low-level network calling utility. It stores
+ * A low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
  * on the Hilla backend.
  *
@@ -281,7 +281,7 @@ export class ConnectClient {
    */
   public middlewares: Middleware[] = [];
 
-  private fluxConnection: FluxConnection | undefined = undefined;
+  private _fluxConnection: FluxConnection | undefined = undefined;
 
   /**
    * @param options Constructor options.
@@ -426,10 +426,16 @@ export class ConnectClient {
    * @returns {} A subscription used to handles values as they become available.
    */
   public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
-    if (!this.fluxConnection) {
-      this.fluxConnection = new FluxConnection();
-    }
-
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
+  }
+
+  /**
+   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+   */
+  get fluxConnection(): FluxConnection {
+    if (!this._fluxConnection) {
+      this._fluxConnection = new FluxConnection();
+    }
+    return this._fluxConnection;
   }
 }
