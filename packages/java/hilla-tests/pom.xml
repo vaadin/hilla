@@ -15,8 +15,6 @@
   <packaging>pom</packaging>
 
   <properties>
-    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
-
     <jetty.version>9.4.37.v20210219</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 

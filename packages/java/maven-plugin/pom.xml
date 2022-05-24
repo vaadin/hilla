@@ -16,7 +16,6 @@
 
   <properties>
     <maven.version>3.8.5</maven.version>
-    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>

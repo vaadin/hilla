@@ -40,21 +40,21 @@ public class CsrfCookieIT extends ChromeBrowserTest {
 
         // Simulate logout: invalidate the session
         ((JavascriptExecutor) getDriver()).executeAsyncScript(
-            "const resolve = arguments[arguments.length - 1];\n"
-                + "console.clear();\n"
-                + "fetch('logout', {method: 'POST'}).then(resolve);");
+                "const resolve = arguments[arguments.length - 1];\n"
+                        + "console.clear();\n"
+                        + "fetch('logout', {method: 'POST'}).then(resolve);");
 
         checkLogsForErrors(msg -> Stream
-            .of("favicon.ico", "sockjs-node", "[WDS] Disconnected!",
-                "WebSocket connection to 'ws://")
-            .anyMatch(msg::contains));
+                .of("favicon.ico", "sockjs-node", "[WDS] Disconnected!",
+                        "WebSocket connection to 'ws://")
+                .anyMatch(msg::contains));
 
         executeScript("window.location.reload();");
 
         String csrfCookieValue = readCsrfCookieValue();
         verifyCsrfCookieValue(csrfCookieValue);
         Assert.assertEquals("Expected value to be the same as before",
-            csrfCookieValueBefore, csrfCookieValue);
+                csrfCookieValueBefore, csrfCookieValue);
     }
 
     @Override
@@ -65,17 +65,17 @@ public class CsrfCookieIT extends ChromeBrowserTest {
     private String readCsrfCookieValue() {
         final String csrfCookieNamePrefix = "csrfToken=";
         String documentCookie = executeScript("return document.cookie")
-            .toString();
+                .toString();
         return Arrays.stream(documentCookie.split(";[ ]?"))
-            .filter(cookieStr -> cookieStr.startsWith(csrfCookieNamePrefix))
-            .findFirst().map(cookieValue -> cookieValue
-                .substring(csrfCookieNamePrefix.length()))
-            .orElse(null);
+                .filter(cookieStr -> cookieStr.startsWith(csrfCookieNamePrefix))
+                .findFirst().map(cookieValue -> cookieValue
+                        .substring(csrfCookieNamePrefix.length()))
+                .orElse(null);
     }
 
     private void verifyCsrfCookieValue(String csrfCookieValue) {
         Assert.assertNotNull("Unexpected null csrf cookie", csrfCookieValue);
         Assert.assertFalse("Unexpected empty csrf cookie value",
-            csrfCookieValue.isEmpty());
+                csrfCookieValue.isEmpty());
     }
 }

@@ -34,7 +34,7 @@ public class CsrfCookieWithTrailingSlashAndCustomContextIT
     @Test
     // https://github.com/vaadin/fusion/issues/105
     public void should_registerCsrfCookieToContextRoot_whenRequestFromSubViewAndUrlHasTrailingSlash()
-        throws IOException {
+            throws IOException {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
 
@@ -47,14 +47,15 @@ public class CsrfCookieWithTrailingSlashAndCustomContextIT
         CookieStore cookieStore = cookieManager.getCookieStore();
 
         HttpCookie csrfCookie = cookieStore.getCookies().stream()
-            .filter(cookie -> "csrfToken".equals(cookie.getName())).findFirst().get();
+                .filter(cookie -> "csrfToken".equals(cookie.getName()))
+                .findFirst().get();
         Assert.assertEquals(getContextPath(), csrfCookie.getPath());
     }
 
     @Override
     protected String getTestPath() {
-        return getContextPath() + ("/".equals(getContextPath()) ? "" : "/") +
-            "hello/";
+        return getContextPath() + ("/".equals(getContextPath()) ? "" : "/")
+                + "hello/";
     }
 
     protected String getContextPath() {

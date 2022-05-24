@@ -16,7 +16,6 @@
   <packaging>jar</packaging>
 
   <properties>
-    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>
