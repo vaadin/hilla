@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
+import type { ReactiveElement } from 'lit';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
 
@@ -99,6 +100,10 @@ export interface Subscription<T> {
   onError: (callback: () => void) => Subscription<T>;
   /** Called when the subscription has completed. No values are made available after calling this. */
   onComplete: (callback: () => void) => Subscription<T>;
+  /*
+   * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
+   */
+  context: (context: ReactiveElement) => Subscription<T>;
 }
 
 interface ConnectExceptionData {
@@ -244,7 +249,7 @@ function isFlowLoaded(): boolean {
 }
 
 /**
- * Hilla Connect client class is a low-level network calling utility. It stores
+ * A low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
  * on the Hilla backend.
  *
@@ -276,7 +281,7 @@ export class ConnectClient {
    */
   public middlewares: Middleware[] = [];
 
-  private fluxConnection: FluxConnection | undefined = undefined;
+  private _fluxConnection: FluxConnection | undefined = undefined;
 
   /**
    * @param options Constructor options.
@@ -421,10 +426,16 @@ export class ConnectClient {
    * @returns {} A subscription used to handles values as they become available.
    */
   public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
-    if (!this.fluxConnection) {
-      this.fluxConnection = new FluxConnection();
-    }
-
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
+  }
+
+  /**
+   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+   */
+  get fluxConnection(): FluxConnection {
+    if (!this._fluxConnection) {
+      this._fluxConnection = new FluxConnection();
+    }
+    return this._fluxConnection;
   }
 }

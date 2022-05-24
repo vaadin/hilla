@@ -550,22 +550,22 @@ describe('ConnectClient', () => {
     });
 
     it('should create a fluxConnection', async () => {
-      (client as any).fluxConnection = undefined; // NOSONAR
+      (client as any)._fluxConnection = undefined; // NOSONAR
       client.subscribe('FooEndpoint', 'fooMethod');
-      expect((client as any).fluxConnection).to.not.equal(undefined);
+      expect((client as any)._fluxConnection).to.not.equal(undefined);
     });
 
     it('should reuse the fluxConnection', async () => {
       client.subscribe('FooEndpoint', 'fooMethod');
       const { fluxConnection } = client as any;
       client.subscribe('FooEndpoint', 'barMethod');
-      expect((client as any).fluxConnection).to.equal(fluxConnection);
+      expect((client as any)._fluxConnection).to.equal(fluxConnection);
     });
 
     it('should call FluxConnection', async () => {
-      (client as any).fluxConnection = new FluxConnection();
+      (client as any)._fluxConnection = new FluxConnection();
       let called = 0;
-      (client as any).fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
+      (client as any)._fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
         called += 1;
         expect(endpointName).to.equal('FooEndpoint');
         expect(methodName).to.equal('fooMethod');
