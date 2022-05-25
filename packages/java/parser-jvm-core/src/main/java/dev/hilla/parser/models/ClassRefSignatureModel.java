@@ -4,6 +4,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -11,7 +12,8 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
-public interface ClassRefSignatureModel extends SignatureModel {
+public interface ClassRefSignatureModel
+        extends SignatureModel, OwnedModel<Optional<ClassRefSignatureModel>> {
     static boolean is(ClassRefTypeSignature actor, Class<?> target) {
         return Objects.equals(actor.getFullyQualifiedClassName(),
                 target.getName());
@@ -23,7 +25,9 @@ public interface ClassRefSignatureModel extends SignatureModel {
     }
 
     static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin) {
-        return new ClassRefSignatureSourceModel(Objects.requireNonNull(origin));
+        return Objects.requireNonNull(origin).getSuffixes().size() > 0
+                ? new ClassRefSignatureSourceModel.Suffixed(origin)
+                : new ClassRefSignatureSourceModel(origin);
     }
 
     static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
@@ -32,12 +36,16 @@ public interface ClassRefSignatureModel extends SignatureModel {
 
     static ClassRefSignatureModel of(
             @Nonnull AnnotatedParameterizedType origin) {
-        return new ClassRefSignatureReflectionModel(origin);
+        return new ClassRefSignatureReflectionModel.Regular(origin);
     }
 
     static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
-        return new ClassRefSignatureReflectionModel.AnnotatedBare(origin);
+        return origin instanceof AnnotatedParameterizedType
+                ? of((AnnotatedParameterizedType) origin)
+                : new ClassRefSignatureReflectionModel.AnnotatedBare(origin);
     }
+
+    String getClassName();
 
     List<TypeArgumentModel> getTypeArguments();
 

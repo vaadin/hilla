@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,21 +20,21 @@ final class MethodInfoSourceModel
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof MethodInfoModel)) {
+        if (!(obj instanceof MethodInfoModel)) {
             return false;
         }
 
-        if (other instanceof MethodInfoSourceModel) {
-            return Objects.equals(origin,
-                    ((MethodInfoSourceModel) other).origin);
-        }
+        var other = (MethodInfoModel) obj;
 
-        return Objects.equals(getName(), ((MethodInfoModel) other).getName());
+        return origin.getName().equals(other.getName())
+                && getResultType().equals(other.getResultType())
+                && getParameters().equals(other.getParameters())
+                && origin.getClassName().equals(other.getOwnerName());
     }
 
     @Override
@@ -50,6 +49,11 @@ final class MethodInfoSourceModel
         }
 
         return owner;
+    }
+
+    @Override
+    public String getOwnerName() {
+        return origin.getClassName();
     }
 
     @Override
@@ -71,6 +75,13 @@ final class MethodInfoSourceModel
         }
 
         return resultType;
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + 11 * getResultType().hashCode()
+                + 23 * getParameters().hashCode()
+                + 53 * origin.getClassName().hashCode();
     }
 
     @Override

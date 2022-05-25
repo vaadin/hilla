@@ -21,6 +21,8 @@ public interface BaseSignatureModel extends SignatureModel {
                 Objects.requireNonNull(origin));
     }
 
+    Class<?> getType();
+
     @Override
     default boolean isBase() {
         return true;

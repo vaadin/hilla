@@ -23,6 +23,8 @@ public interface TypeParameterModel extends SignatureModel {
         return getBounds().stream();
     }
 
+    String getName();
+
     @Override
     default boolean isTypeParameter() {
         return true;

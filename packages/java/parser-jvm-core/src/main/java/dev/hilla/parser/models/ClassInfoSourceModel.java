@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,21 +30,18 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof ClassInfoModel)) {
+        if (!(obj instanceof ClassInfoModel)) {
             return false;
         }
 
-        return Objects.equals(origin.getName(), ((ClassInfoModel) other).getName());
-    }
+        var other = (ClassInfoModel) obj;
 
-    @Override
-    public int hashCode() {
-        return origin.hashCode();
+        return origin.getName().equals(other.getName());
     }
 
     @Override
@@ -115,6 +111,11 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return 3 + origin.hashCode();
     }
 
     @Override

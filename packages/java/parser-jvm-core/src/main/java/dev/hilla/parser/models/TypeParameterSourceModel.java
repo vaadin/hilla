@@ -18,6 +18,23 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeParameterModel)) {
+            return false;
+        }
+
+        var other = (TypeParameterModel) obj;
+
+        return origin.getName().equals(other.getName())
+                && getAnnotations().equals(other.getAnnotations())
+                && getBounds().equals(other.getBounds());
+    }
+
+    @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
             annotations = List.of();
@@ -39,5 +56,15 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
         }
 
         return bounds;
+    }
+
+    @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + 3 * getBounds().hashCode();
     }
 }

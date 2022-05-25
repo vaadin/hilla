@@ -24,12 +24,12 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
     }
 
     @Override
-    public int hashCode() {
-        return origin.annotationType().getName().hashCode();
+    public String getName() {
+        return origin.annotationType().getName();
     }
 
     @Override
-    public String getName() {
-        return origin.annotationType().getName();
+    public int hashCode() {
+        return origin.annotationType().getName().hashCode();
     }
 }

@@ -16,6 +16,23 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeArgumentModel)) {
+            return false;
+        }
+
+        var other = (TypeArgumentModel) obj;
+
+        return getAnnotations().equals(other.getAnnotations())
+                && getAssociatedTypes().equals(other.getAssociatedTypes())
+                && getWildcard().equals(other.getWildcard());
+    }
+
+    @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
             annotations = getAssociatedTypes().stream()
@@ -38,5 +55,10 @@ final class TypeArgumentSourceModel extends AbstractModel<TypeArgument>
 
     public TypeArgument.Wildcard getWildcard() {
         return origin.getWildcard();
+    }
+
+    @Override
+    public int hashCode() {
+        return getAssociatedTypes().hashCode() + 7 * getWildcard().hashCode();
     }
 }

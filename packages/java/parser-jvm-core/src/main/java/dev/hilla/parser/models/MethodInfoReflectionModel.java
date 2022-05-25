@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 final class MethodInfoReflectionModel
@@ -19,21 +18,22 @@ final class MethodInfoReflectionModel
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof MethodInfoModel)) {
+        if (!(obj instanceof MethodInfoModel)) {
             return false;
         }
 
-        if (other instanceof MethodInfoReflectionModel) {
-            return Objects.equals(origin,
-                    ((MethodInfoReflectionModel) other).origin);
-        }
+        var other = (MethodInfoModel) obj;
 
-        return Objects.equals(getName(), ((MethodInfoModel) other).getName());
+        return origin.getName().equals(other.getName())
+                && getResultType().equals(other.getResultType())
+                && getParameters().equals(other.getParameters())
+                && origin.getDeclaringClass().getName()
+                        .equals(other.getOwnerName());
     }
 
     @Override
@@ -48,6 +48,11 @@ final class MethodInfoReflectionModel
         }
 
         return owner;
+    }
+
+    @Override
+    public String getOwnerName() {
+        return origin.getDeclaringClass().getName();
     }
 
     @Override
@@ -68,6 +73,13 @@ final class MethodInfoReflectionModel
         }
 
         return resultType;
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + 11 * getResultType().hashCode()
+                + 23 * getParameters().hashCode()
+                + 53 * origin.getDeclaringClass().getName().hashCode();
     }
 
     @Override

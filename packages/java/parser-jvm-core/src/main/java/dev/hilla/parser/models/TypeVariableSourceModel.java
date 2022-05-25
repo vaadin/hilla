@@ -14,6 +14,33 @@ final class TypeVariableSourceModel
         super(origin);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeVariableModel)) {
+            return false;
+        }
+
+        var other = (TypeVariableModel) obj;
+
+        return origin.getName().equals(other.getName())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode();
+    }
+
+    @Override
     public TypeParameterModel resolve() {
         if (typeParameter == null) {
             typeParameter = TypeParameterModel.of(origin.resolve());

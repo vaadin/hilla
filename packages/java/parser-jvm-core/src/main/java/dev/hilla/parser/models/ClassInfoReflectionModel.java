@@ -32,21 +32,18 @@ final class ClassInfoReflectionModel
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof ClassInfoModel)) {
+        if (!(obj instanceof ClassInfoModel)) {
             return false;
         }
 
-        return Objects.equals(origin.getName(), ((ClassInfoModel) other).getName());
-    }
+        var other = (ClassInfoModel) obj;
 
-    @Override
-    public int hashCode() {
-        return origin.getName().hashCode();
+        return origin.getName().equals(other.getName());
     }
 
     @Override
@@ -117,6 +114,11 @@ final class ClassInfoReflectionModel
     @Override
     public Optional<ClassInfoModel> getSuperClass() {
         return Optional.ofNullable(superClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return 3 + origin.getName().hashCode();
     }
 
     @Override

@@ -1,12 +1,10 @@
 package dev.hilla.parser.models;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -145,7 +143,8 @@ public interface ClassInfoModel
     }
 
     default Stream<ClassInfoModel> getFieldDependenciesStream() {
-        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream).distinct();
+        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream)
+                .distinct();
     }
 
     List<FieldInfoModel> getFields();
@@ -165,7 +164,8 @@ public interface ClassInfoModel
     }
 
     default Stream<ClassInfoModel> getInnerClassDependenciesStream() {
-        return getInnerClassesStream().flatMap(ClassInfoModel::getDependenciesStream).distinct();
+        return getInnerClassesStream()
+                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
     }
 
     List<ClassInfoModel> getInnerClasses();
@@ -185,7 +185,8 @@ public interface ClassInfoModel
     }
 
     default Stream<ClassInfoModel> getMethodDependenciesStream() {
-        return getMethodsStream().flatMap(MethodInfoModel::getDependenciesStream).distinct();
+        return getMethodsStream()
+                .flatMap(MethodInfoModel::getDependenciesStream).distinct();
     }
 
     List<MethodInfoModel> getMethods();

@@ -30,12 +30,12 @@ final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
     }
 
     @Override
-    public int hashCode() {
-        return origin.getName().hashCode();
+    public String getName() {
+        return origin.getName();
     }
 
     @Override
-    public String getName() {
-        return origin.getName();
+    public int hashCode() {
+        return origin.getName().hashCode();
     }
 }

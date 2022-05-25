@@ -33,11 +33,6 @@ final class FieldInfoReflectionModel
     }
 
     @Override
-    public int hashCode() {
-        return origin.getName().hashCode() + getOwner().hashCode() * 11;
-    }
-
-    @Override
     public String getName() {
         return origin.getName();
     }
@@ -58,6 +53,11 @@ final class FieldInfoReflectionModel
         }
 
         return type;
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + getOwner().hashCode() * 11;
     }
 
     @Override

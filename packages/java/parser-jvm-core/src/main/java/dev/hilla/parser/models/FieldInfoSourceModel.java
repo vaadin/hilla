@@ -32,11 +32,6 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     }
 
     @Override
-    public int hashCode() {
-        return origin.hashCode();
-    }
-
-    @Override
     public String getName() {
         return origin.getName();
     }
@@ -57,6 +52,11 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
         }
 
         return type;
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.hashCode();
     }
 
     @Override

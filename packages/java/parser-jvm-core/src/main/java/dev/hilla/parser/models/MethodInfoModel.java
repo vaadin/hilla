@@ -28,6 +28,8 @@ public interface MethodInfoModel
                 getParameterDependenciesStream());
     }
 
+    String getOwnerName();
+
     default List<ClassInfoModel> getParameterDependencies() {
         return getParameterDependenciesStream().collect(Collectors.toList());
     }

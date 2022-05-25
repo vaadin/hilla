@@ -16,6 +16,8 @@ public interface TypeVariableModel extends SignatureModel {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 
+    String getName();
+
     @Override
     default boolean isTypeVariable() {
         return true;

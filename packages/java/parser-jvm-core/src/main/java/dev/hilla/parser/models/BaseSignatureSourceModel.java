@@ -13,6 +13,32 @@ final class BaseSignatureSourceModel
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof BaseSignatureModel)) {
+            return false;
+        }
+
+        var other = (BaseSignatureModel) obj;
+
+        return origin.getType().equals(other.getType())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    @Override
+    public Class<?> getType() {
+        return origin.getType();
+    }
+
+    @Override
+    public int hashCode() {
+        return 7 + origin.getType().hashCode();
+    }
+
+    @Override
     public boolean isBoolean() {
         return origin.getType() == Boolean.TYPE;
     }
