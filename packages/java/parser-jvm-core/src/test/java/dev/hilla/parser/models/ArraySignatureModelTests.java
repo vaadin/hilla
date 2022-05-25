@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,9 +29,11 @@ import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.WithScanResult;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class ArraySignatureModelTests {
@@ -83,6 +87,48 @@ public class ArraySignatureModelTests {
         }
             break;
         }
+    }
+
+    @DisplayName("It should have the same hashCode for source and reflection models")
+//    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels(
+            @WithScanResult ScanResult scanResult)
+            throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
+    @DisplayName("It should have source and reflection models equal")
+//    @Test
+    public void should_HaveSourceAndReflectionModelsEqual(
+            @WithScanResult ScanResult scanResult)
+            throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
+
+        assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
+
+        assertNotEquals(sourceModel, new Object());
+        assertNotEquals(reflectionModel, new Object());
+    }
+
+    private ArraySignatureModel getDefaultReflectionModel()
+            throws NoSuchMethodException {
+        return ArraySignatureModel.of((AnnotatedArrayType) Sample.class
+                .getDeclaredMethod("foo").getAnnotatedReturnType());
+    }
+
+    private ArraySignatureModel getDefaultSourceModel(ScanResult scanResult) {
+        return ArraySignatureModel.of((ArrayTypeSignature) scanResult
+                .getClassInfo(Sample.class.getName())
+                .getDeclaredMethodInfo("foo").getSingleMethod("foo")
+                .getTypeSignatureOrTypeDescriptor().getResultType());
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -162,7 +208,7 @@ public class ArraySignatureModelTests {
             public Arguments getSourceArguments() {
                 var origin = (ArrayTypeSignature) getScanResult()
                         .getClassInfo(Sample.class.getName())
-                        .getMethodInfo("foo").getSingleMethod("foo")
+                        .getDeclaredMethodInfo("foo").getSingleMethod("foo")
                         .getTypeSignatureOrTypeDescriptor().getResultType();
                 var model = ArraySignatureModel.of(origin);
 

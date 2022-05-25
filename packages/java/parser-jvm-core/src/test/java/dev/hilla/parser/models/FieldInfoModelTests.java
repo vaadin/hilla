@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
-import static dev.hilla.parser.utils.Functions.function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -17,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.function.Failable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,15 +40,15 @@ import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class FieldInfoModelTests {
-    private final KindModelProvider.Checker kindChecker = new KindModelProvider.Checker();
+    private final CharacteristicsModelProvider.Checker characteristicsChecker = new CharacteristicsModelProvider.Checker();
 
-    @DisplayName("It should detect field kind correctly")
-    @ParameterizedTest(name = KindModelProvider.testName)
-    @ArgumentsSource(KindModelProvider.class)
-    public void should_DetectKind(FieldInfoModel model, Object origin,
-            String[] specializations, ModelKind kind,
-            KindModelProvider.Context context, String testName) {
-        kindChecker.apply(model, specializations);
+    @DisplayName("It should detect field characteristics correctly")
+    @ParameterizedTest(name = CharacteristicsModelProvider.testName)
+    @ArgumentsSource(CharacteristicsModelProvider.class)
+    public void should_DetectCharacteristics(FieldInfoModel model,
+            Object origin, String[] characteristics, ModelKind kind,
+            CharacteristicsModelProvider.Context context, String testName) {
+        characteristicsChecker.apply(model, characteristics);
     }
 
     @DisplayName("It should provide field dependencies")
@@ -124,10 +124,11 @@ public class FieldInfoModelTests {
 
     private FieldInfoModel getDefaultSourceModel(ScanResult scanResult) {
         return FieldInfoModel.of(scanResult.getClassInfo(Sample.class.getName())
-                .getFieldInfo("field"));
+                .getDeclaredFieldInfo("field"));
     }
 
-    public static final class KindModelProvider implements ArgumentsProvider {
+    public static final class CharacteristicsModelProvider
+            implements ArgumentsProvider {
         public static final String testName = "{3} [{5}]";
 
         @Override
@@ -156,37 +157,40 @@ public class FieldInfoModelTests {
         public static final class Context extends BaseTestContext {
             private static final Map<Map.Entry<Class<?>, String>, String[]> associations = Map
                     .ofEntries(
-                            entry(Map.entry(Kind.class, "publicField"),
-                                    "isPublic"),
-                            entry(Map.entry(Kind.class, "protectedField"),
-                                    "isProtected"),
-                            entry(Map.entry(Kind.class, "privateField"),
-                                    "isPrivate"),
-                            entry(Map.entry(Kind.class, "staticField"),
-                                    "isPrivate", "isStatic"),
-                            entry(Map.entry(Kind.class, "finalField"),
-                                    "isFinal", "isPrivate"),
-                            entry(Map.entry(Kind.class,
+                            entry(Map.entry(Characteristics.class,
+                                    "publicField"), "isPublic"),
+                            entry(Map.entry(Characteristics.class,
+                                    "protectedField"), "isProtected"),
+                            entry(Map.entry(Characteristics.class,
+                                    "privateField"), "isPrivate"),
+                            entry(Map.entry(Characteristics.class,
+                                    "staticField"), "isPrivate", "isStatic"),
+                            entry(Map.entry(Characteristics.class,
+                                    "finalField"), "isFinal", "isPrivate"),
+                            entry(Map.entry(Characteristics.class,
                                     "publicStaticFinalField"), "isFinal",
                                     "isPublic", "isStatic"),
-                            entry(Map.entry(Kind.class, "transientField"),
-                                    "isPublic", "isTransient"),
-                            entry(Map.entry(Kind.Enum.class, "ENUM_FIELD"),
-                                    "isEnum", "isFinal", "isPublic",
-                                    "isStatic"));
+                            entry(Map.entry(Characteristics.class,
+                                    "transientField"), "isPublic",
+                                    "isTransient"),
+                            entry(Map.entry(Characteristics.Enum.class,
+                                    "ENUM_FIELD"), "isEnum", "isFinal",
+                                    "isPublic", "isStatic"));
 
             Context(ExtensionContext context) {
                 super(context);
             }
 
             public Stream<Arguments> getReflectionArguments() {
-                return associations.entrySet().stream().map(function(entry -> {
-                    var origin = getReflectionOrigin(entry.getKey());
-                    var model = FieldInfoModel.of(origin);
+                return associations.entrySet().stream()
+                        .map(Failable.asFunction(entry -> {
+                            var origin = getReflectionOrigin(entry.getKey());
+                            var model = FieldInfoModel.of(origin);
 
-                    return Arguments.of(model, origin, entry.getValue(),
-                            ModelKind.REFLECTION, this, origin.getName());
-                }));
+                            return Arguments.of(model, origin, entry.getValue(),
+                                    ModelKind.REFLECTION, this,
+                                    origin.getName());
+                        }));
             }
 
             public Stream<Arguments> getSourceArguments() {
@@ -210,7 +214,7 @@ public class FieldInfoModelTests {
                     Map.Entry<Class<?>, String> searchInfo) {
                 return getScanResult()
                         .getClassInfo(searchInfo.getKey().getName())
-                        .getFieldInfo(searchInfo.getValue());
+                        .getDeclaredFieldInfo(searchInfo.getValue());
             }
         }
     }
@@ -243,7 +247,7 @@ public class FieldInfoModelTests {
             public Arguments getSourceArguments() {
                 var origin = getScanResult()
                         .getClassInfo(Sample.class.getName())
-                        .getFieldInfo("field");
+                        .getDeclaredFieldInfo("field");
                 var model = FieldInfoModel.of(origin);
 
                 return Arguments.of(model, origin, ModelKind.SOURCE, this);
@@ -286,7 +290,7 @@ public class FieldInfoModelTests {
         }
     }
 
-    static class Kind {
+    static class Characteristics {
         public static final String publicStaticFinalField = "";
         private static String staticField;
         private final String finalField = "";

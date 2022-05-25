@@ -15,7 +15,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +26,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,6 +38,7 @@ import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.ParserExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.WithScanResult;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ArrayTypeSignature;
@@ -45,10 +46,11 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.MethodInfo;
 import io.github.classgraph.MethodTypeSignature;
+import io.github.classgraph.ScanResult;
 
 @ExtendWith(ParserExtension.class)
 public class ClassInfoModelTests {
-    private final KindModelProvider.Checker kindChecker = new KindModelProvider.Checker();
+    private final CharacteristicsModelProvider.Checker characteristicsChecker = new CharacteristicsModelProvider.Checker();
 
     @DisplayName("It should collect all dependencies from the class")
     @ParameterizedTest(name = DependencyModelProvider.testName)
@@ -74,8 +76,10 @@ public class ClassInfoModelTests {
             Object origin, ModelKind kind,
             DependencyModelProvider.Context context) {
         var expected = SampleReferences.fieldDependencies.stream()
-                .map(ClassInfoModel::of).collect(Collectors.toSet());
-        var actual = model.getFieldDependencies();
+                .map(ClassInfoModel::of).map(ClassInfoModel::getName)
+                .collect(Collectors.toSet());
+        var actual = model.getFieldDependencies().stream()
+                .map(ClassInfoModel::getName).collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }
@@ -125,13 +129,13 @@ public class ClassInfoModelTests {
         }
     }
 
-    @DisplayName("It should detect class kind correctly")
-    @ParameterizedTest(name = KindModelProvider.testName)
-    @ArgumentsSource(KindModelProvider.class)
-    public void should_DetectClassKind(ClassInfoModel model, Object origin,
-            String[] specializations, ModelKind kind,
-            KindModelProvider.Context context, String testName) {
-        kindChecker.apply(model, specializations);
+    @DisplayName("It should detect class characteristics correctly")
+    @ParameterizedTest(name = CharacteristicsModelProvider.testName)
+    @ArgumentsSource(CharacteristicsModelProvider.class)
+    public void should_DetectCharacteristics(ClassInfoModel model,
+            Object origin, String[] characteristics, ModelKind kind,
+            CharacteristicsModelProvider.Context context, String testName) {
+        characteristicsChecker.apply(model, characteristics);
     }
 
     @Nested
@@ -260,6 +264,42 @@ public class ClassInfoModelTests {
                     isJDK);
             break;
         }
+    }
+
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels(
+            @WithScanResult ScanResult scanResult) {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
+    @DisplayName("It should have source and reflection models equal")
+    @Test
+    public void should_HaveSourceAndReflectionModelsEqual(
+            @WithScanResult ScanResult scanResult) {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
+
+        assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
+
+        assertNotEquals(sourceModel, new Object());
+        assertNotEquals(reflectionModel, new Object());
+    }
+
+    private ClassInfoModel getDefaultReflectionModel() {
+        return ClassInfoModel.of(Dependency.Sample.class);
+    }
+
+    private ClassInfoModel getDefaultSourceModel(ScanResult scanResult) {
+        return ClassInfoModel
+                .of(scanResult.getClassInfo(Dependency.Sample.class.getName()));
     }
 
     public static class JDKCheckProvider implements ArgumentsProvider {
@@ -526,7 +566,7 @@ public class ClassInfoModelTests {
             public Stream<Arguments> getSourceArguments() {
                 return getScanResult()
                         .getClassInfo(Specialization.Sample.class.getName())
-                        .getMethodInfo().stream()
+                        .getDeclaredMethodInfo().stream()
                         .map(MethodInfo::getTypeSignatureOrTypeDescriptor)
                         .map(MethodTypeSignature::getResultType)
                         .map(ClassRefTypeSignature.class::cast)
@@ -669,7 +709,7 @@ public class ClassInfoModelTests {
         }
     }
 
-    static final class Kind {
+    static final class Characteristics {
         enum Enum {
         }
 
@@ -823,13 +863,14 @@ public class ClassInfoModelTests {
         }
     }
 
-    public static class KindModelProvider implements ArgumentsProvider {
+    public static class CharacteristicsModelProvider
+            implements ArgumentsProvider {
         public static final String testName = "{3} [{5}]";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
-            var ctx = new KindModelProvider.Context(context);
+            var ctx = new CharacteristicsModelProvider.Context(context);
 
             return Streams.combine(ctx.getReflectionArguments(),
                     ctx.getSourceArguments());
@@ -854,27 +895,28 @@ public class ClassInfoModelTests {
         public static class Context extends BaseTestContext {
             private static final Map<Class<?>, String[]> associations = Map
                     .ofEntries(
-                            entry(Kind.Abstract.class, "isAbstract",
+                            entry(Characteristics.Abstract.class, "isAbstract",
                                     "isStandardClass", "isStatic"),
-                            entry(Kind.Annotation.class, "isAnnotation",
-                                    "isAbstract", "isInterfaceOrAnnotation",
-                                    "isStatic"),
+                            entry(Characteristics.Annotation.class,
+                                    "isAnnotation", "isAbstract",
+                                    "isInterfaceOrAnnotation", "isStatic"),
                             entry(Object[].class, "isAbstract", "isArrayClass",
                                     "isFinal", "isPublic", "isStandardClass"),
-                            entry(Kind.Enum.class, "isEnum", "isFinal",
+                            entry(Characteristics.Enum.class, "isEnum",
+                                    "isFinal", "isStandardClass", "isStatic"),
+                            entry(Characteristics.Final.class, "isFinal",
                                     "isStandardClass", "isStatic"),
-                            entry(Kind.Final.class, "isFinal",
-                                    "isStandardClass", "isStatic"),
-                            entry(Kind.Interface.class, "isAbstract",
+                            entry(Characteristics.Interface.class, "isAbstract",
                                     "isInterface", "isInterfaceOrAnnotation",
                                     "isStatic"),
                             entry(Byte.class, "isFinal", "isPublic",
                                     "isStandardClass"),
-                            entry(Kind.Private.class, "isPrivate",
+                            entry(Characteristics.Private.class, "isPrivate",
                                     "isStandardClass", "isStatic"),
-                            entry(Kind.Protected.class, "isProtected",
-                                    "isStandardClass", "isStatic"),
-                            entry(Kind.Public.class, "isPublic",
+                            entry(Characteristics.Protected.class,
+                                    "isProtected", "isStandardClass",
+                                    "isStatic"),
+                            entry(Characteristics.Public.class, "isPublic",
                                     "isStandardClass", "isStatic"));
 
             public Context(ExtensionContext context) {
@@ -899,7 +941,7 @@ public class ClassInfoModelTests {
                     var origin = cls.isArray()
                             ? ((ArrayTypeSignature) getScanResult()
                                     .getClassInfo(
-                                            KindModelProvider.UnsearchableTypesSample.class
+                                            CharacteristicsModelProvider.UnsearchableTypesSample.class
                                                     .getName())
                                     .getFieldInfo("array")
                                     .getTypeSignatureOrTypeDescriptor())

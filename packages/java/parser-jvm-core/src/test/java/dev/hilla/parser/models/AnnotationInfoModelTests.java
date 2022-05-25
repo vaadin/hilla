@@ -91,7 +91,7 @@ public class AnnotationInfoModelTests {
 
     private AnnotationInfoModel getDefaultSourceModel(ScanResult scanResult) {
         return AnnotationInfoModel.of(scanResult
-                .getClassInfo(Sample.class.getName()).getMethodInfo("bar")
+                .getClassInfo(Sample.class.getName()).getDeclaredMethodInfo("bar")
                 .getSingleMethod("bar").getAnnotationInfo(Sample.Foo.class));
     }
 
@@ -124,7 +124,7 @@ public class AnnotationInfoModelTests {
             public Arguments getSourceArguments() {
                 var origin = getScanResult()
                         .getClassInfo(Sample.class.getName())
-                        .getMethodInfo("bar").getSingleMethod("bar")
+                        .getDeclaredMethodInfo("bar").getSingleMethod("bar")
                         .getAnnotationInfo(Sample.Foo.class.getName());
                 var model = AnnotationInfoModel.of(origin);
 
