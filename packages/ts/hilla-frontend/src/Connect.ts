@@ -320,9 +320,10 @@ export class ConnectClient {
    * @param endpoint Endpoint name.
    * @param method Method name to call in the endpoint class.
    * @param params Optional parameters to pass to the method.
+   * @param fetchOptions Optional object to pass options to the fetch request
    * @returns {} Decoded JSON response data.
    */
-  public async call(endpoint: string, method: string, params?: any): Promise<any> {
+  public async call(endpoint: string, method: string, params?: any, fetchOptions?: RequestInit): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -378,13 +379,18 @@ export class ConnectClient {
     // this way makes the folding down below more concise.
     const fetchNext: MiddlewareNext = async (context: MiddlewareContext): Promise<Response> => {
       $wnd.Vaadin.connectionState.loadingStarted();
-      return fetch(context.request)
+      return fetch(context.request, fetchOptions)
         .then((response) => {
           $wnd.Vaadin.connectionState.loadingFinished();
           return response;
         })
         .catch((error) => {
-          $wnd.Vaadin.connectionState.loadingFailed();
+          // don't bother about connections aborted by purpose
+          if (error.name === 'AbortError') {
+            $wnd.Vaadin.connectionState.loadingFinished();
+          } else {
+            $wnd.Vaadin.connectionState.loadingFailed();
+          }
           return Promise.reject(error);
         });
     };
