@@ -249,6 +249,16 @@ function isFlowLoaded(): boolean {
 }
 
 /**
+ * A list of parameters supported by {@link ConnectClient.call | the call() method in ConnectClient}.
+ */
+export interface EndpointRequestInit {
+  /**
+   * An AbortSignal to set request's signal.
+   */
+  signal?: AbortSignal | null;
+}
+
+/**
  * A low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
  * on the Hilla backend.
@@ -320,10 +330,15 @@ export class ConnectClient {
    * @param endpoint Endpoint name.
    * @param method Method name to call in the endpoint class.
    * @param params Optional parameters to pass to the method.
-   * @param fetchOptions Optional object to pass options to the fetch request
+   * @param endpointRequestInit Optional parameters for the request
    * @returns {} Decoded JSON response data.
    */
-  public async call(endpoint: string, method: string, params?: any, fetchOptions?: RequestInit): Promise<any> {
+  public async call(
+    endpoint: string,
+    method: string,
+    params?: any,
+    endpointRequestInit?: EndpointRequestInit,
+  ): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -379,7 +394,7 @@ export class ConnectClient {
     // this way makes the folding down below more concise.
     const fetchNext: MiddlewareNext = async (context: MiddlewareContext): Promise<Response> => {
       $wnd.Vaadin.connectionState.loadingStarted();
-      return fetch(context.request, fetchOptions)
+      return fetch(context.request, { signal: endpointRequestInit?.signal })
         .then((response) => {
           $wnd.Vaadin.connectionState.loadingFinished();
           return response;
