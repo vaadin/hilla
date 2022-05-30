@@ -1,0 +1,243 @@
+name: Validation
+
+on:
+  push:
+    branches: [ main, '1.1', '1.0' ]
+    paths:
+      - '.github/workflows/java.yml'
+      - 'packages/java/**/*'
+      - 'scripts/**/*'
+      - 'pom.xml'
+  pull_request:
+    paths:
+      - '.github/workflows/java.yml'
+      - 'packages/java/**/*'
+      - 'scripts/**/*'
+      - 'pom.xml'
+
+jobs:
+  init:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    outputs:
+      packages-java: ${{ steps.packages-java.outputs.packages }}
+      packages-ts: ${{ steps.packages-ts.outputs.packages }}
+      packages-it: ${{ steps.packages-it.outputs.packages }}
+
+    steps:
+      - uses: actions-cool/check-user-permission@v2
+        id: check
+        with:
+          require: 'write'
+      - name: Check Secrets
+        run: |
+          [ "${{ steps.check.outputs.require-result }}" != "true" ] \
+            && echo "::error::!! NO USER PERMISSIONS FOR RUNNING VALIDATION: Check if the PR is from an external contributor !!" \
+            && exit 1 || exit 0
+          TB_LICENSE="${{secrets.TB_LICENSE}}"
+          [ -z "$TB_LICENSE" ] \
+            && echo "::error::!! ERROR NO TB_LICENSE: Check that this repo has a valid TB_LICENSE secret !!" \
+            && exit 1 || exit 0
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: List Java Unit
+        id: packages-java
+        run: |
+          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+            require('fs').readdirSync('packages/java')
+              .filter(name => name !== 'hilla-tests')
+          ))")"
+      - name: List TypeScript Unit
+        id: packages-ts
+        run: >-
+          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+            require('fs').readdirSync('packages/ts')
+          ))")"
+      - name: List IT
+        id: packages-it
+        run: >-
+          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+            [
+              require('fs').readdirSync('packages/java/hilla-tests/')
+                .filter(name => name !== 'hilla-spring-tests'),
+              require('fs').readdirSync('packages/java/hilla-tests/hilla-spring-tests/')
+                .map(name => 'hilla-spring-tests/' + name)
+            ].flat()
+              .filter(path =>
+                require('fs').lstatSync('packages/java/hilla-tests/' + path).isDirectory()
+              )
+          ))")"
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Validate Java Format
+        run: mvn -B formatter:validate
+      - name: Build TypeScript
+        run: npm run build
+      - name: Lint TypeScript
+        run: npm run check
+      - name: Build Java
+        run: mvn install -B -ntp -DskipTests
+      - name: Save Workspace
+        run: |
+          tar cf workspace.tar -C ~/ $( \
+            mvn -q \
+              -Dexec.executable='echo' \
+              -Dexec.args='${project.groupId}:${project.artifactId}' \
+              -Dexec.skip='${maven.deploy.skip}' \
+              exec:exec \
+            | tr '.:' '/' \
+            | sed -e 's/^/.m2\/repository\//' \
+          )
+          tar rf workspace.tar $(find packages/java -d -name target)
+          tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
+      - uses: actions/upload-artifact@v3
+        with:
+          name: saved-workspace
+          path: workspace.tar
+          retention-days: 1
+          if-no-files-found: error
+
+  test-java:
+    needs: init
+    name: Test Java
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.init.outputs.packages-java) }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Test
+        run: (cd packages/java/${{ matrix.package }} && mvn -B -am -P\!it-modules verify)
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
+      - name: Send Coverage to Codecov
+        if: ${{ env.COVFILES != '' }}
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.COVFILES }}
+          flags: unittests
+          fail_ci_if_error: true
+          root_dir: ${{ github.workspace }}
+
+  test-typescript:
+    needs: init
+    name: Test TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.init.outputs.packages-ts) }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Test
+        run: (cd packages/ts/${{ matrix.package }} && npm run test:coverage)
+        env:
+          CI: true
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
+      - name: Send Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.COVFILES }}
+          flags: unittests
+          fail_ci_if_error: true
+          root_dir: ${{ github.workspace }}
+
+  test-it:
+    needs:
+      - init
+      - test-java
+      - test-typescript
+    name: ITs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.init.outputs.packages-it) }}
+        java-version:
+            - 11
+        exclude:
+          - package: hilla-spring-tests/test-endpoints-latest-java
+            java-version: 11
+        include:
+          - package: hilla-spring-tests/test-endpoints-latest-java
+            java-version: 17
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          java-version: ${{ matrix.java-version }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Verify
+        run: |
+          (
+            cd packages/java/hilla-tests/${{ matrix.package }} && \
+            mvn -B -am -ntp -fae \
+              -Dfailsafe.forkCount=4 \
+              -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
+              -Dfailsafe.rerunFailingTestsCount=2 \
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+              -Dmaven.wagon.http.retryHandler.count=3 \
+              verify
+          )
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs
+          path: |
+            packages/java/hilla-tests/**/target/*-reports/*
+            packages/java/hilla-tests/**/error-screenshots/*.png
