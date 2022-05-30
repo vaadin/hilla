@@ -210,6 +210,22 @@ describe('ConnectClient', () => {
       }
     });
 
+    it('should be able to abort a call', async () => {
+      const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+      fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
+
+      const controller = new AbortController();
+      const called = client.call('FooEndpoint', 'fooMethod', {}, { signal: controller.signal });
+      controller.abort();
+
+      try {
+        await called;
+        expect(false).to.be.true; // should not reach here
+      } catch (err: any) {
+        expect(err.name).to.equal('AbortError');
+      }
+    });
+
     it('should  set connection state to CONNECTED upon server error', async () => {
       const $wnd = window as any;
       const body = 'Unexpected error';
