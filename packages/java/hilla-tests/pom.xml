@@ -38,12 +38,6 @@
     <testListener></testListener>
   </properties>
 
-  <modules>
-    <module>test-hilla-csrf</module>
-    <module>test-hilla-csrf-context</module>
-    <module>hilla-spring-tests</module>
-  </modules>
-
   <dependencies>
 
     <dependency>
@@ -215,6 +209,20 @@
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+
+    <profile>
+      <id>it-modules</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <modules>
+        <module>test-hilla-csrf</module>
+        <module>test-hilla-csrf-context</module>
+        <module>hilla-spring-tests</module>
+      </modules>
     </profile>
   </profiles>
 </project>
