@@ -140,6 +140,16 @@
         <artifactId>mockito-core</artifactId>
         <version>${mockito.version}</version>
       </dependency>
+      <dependency>
+        <groupId>one.util</groupId>
+        <artifactId>streamex</artifactId>
+        <version>0.8.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.12.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
