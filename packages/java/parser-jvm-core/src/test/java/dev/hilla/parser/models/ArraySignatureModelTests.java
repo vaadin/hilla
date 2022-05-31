@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,15 +25,14 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
-import dev.hilla.parser.test.helpers.ParserExtension;
+import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
-import dev.hilla.parser.test.helpers.WithScanResult;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.ScanResult;
 
-@ExtendWith(ParserExtension.class)
+@ExtendWith(SourceExtension.class)
 public class ArraySignatureModelTests {
     @DisplayName("It should create correct model")
     @ParameterizedTest(name = ModelProvider.testName)
@@ -89,34 +86,35 @@ public class ArraySignatureModelTests {
         }
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
-//    @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            @WithScanResult ScanResult scanResult)
-            throws NoSuchMethodException {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
-
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
-    }
-
-    @DisplayName("It should have source and reflection models equal")
-//    @Test
-    public void should_HaveSourceAndReflectionModelsEqual(
-            @WithScanResult ScanResult scanResult)
-            throws NoSuchMethodException {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
-
-        assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
-
-        assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
-
-        assertNotEquals(sourceModel, new Object());
-        assertNotEquals(reflectionModel, new Object());
-    }
+    // @DisplayName("It should have the same hashCode for source and reflection
+    // models")
+    //// @Test
+    // public void should_HaveSameHashCodeForSourceAndReflectionModels(
+    // @Source ScanResult scanResult)
+    // throws NoSuchMethodException {
+    // var reflectionModel = getDefaultReflectionModel();
+    // var sourceModel = getDefaultSourceModel(scanResult);
+    //
+    // assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    // }
+    //
+    // @DisplayName("It should have source and reflection models equal")
+    //// @Test
+    // public void should_HaveSourceAndReflectionModelsEqual(
+    // @Source ScanResult scanResult)
+    // throws NoSuchMethodException {
+    // var reflectionModel = getDefaultReflectionModel();
+    // var sourceModel = getDefaultSourceModel(scanResult);
+    //
+    // assertEquals(reflectionModel, reflectionModel);
+    // assertEquals(reflectionModel, sourceModel);
+    //
+    // assertEquals(sourceModel, sourceModel);
+    // assertEquals(sourceModel, reflectionModel);
+    //
+    // assertNotEquals(sourceModel, new Object());
+    // assertNotEquals(reflectionModel, new Object());
+    // }
 
     private ArraySignatureModel getDefaultReflectionModel()
             throws NoSuchMethodException {

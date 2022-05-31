@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,20 +15,61 @@ import io.github.classgraph.ClassRefTypeSignature;
 
 public interface ClassRefSignatureModel
         extends SignatureModel, OwnedModel<Optional<ClassRefSignatureModel>> {
+    static boolean is(AnnotatedParameterizedType actor, Class<?> target) {
+        return is(actor, target.getName());
+    }
+
+    static boolean is(AnnotatedParameterizedType actor, ClassInfo target) {
+        return is(actor, target.getName());
+    }
+
+    static boolean is(AnnotatedParameterizedType actor, String target) {
+        return ((Class<?>) ((ParameterizedType) actor.getType()).getRawType())
+                .getName().equals(target);
+    }
+
+    static boolean is(AnnotatedType actor, Class<?> target) {
+        return is(actor, target.getName());
+    }
+
+    static boolean is(AnnotatedType actor, ClassInfo target) {
+        return is(actor, target.getName());
+    }
+
+    static boolean is(AnnotatedType actor, String target) {
+        return actor instanceof AnnotatedParameterizedType
+                ? is((AnnotatedParameterizedType) actor, target)
+                : ((Class<?>) actor.getType()).getName().equals(target);
+    }
+
+    static boolean is(Class<?> actor, Class<?> target) {
+        return actor.equals(target);
+    }
+
+    static boolean is(Class<?> actor, ClassInfo target) {
+        return is(actor, target.getName());
+    }
+
+    static boolean is(Class<?> actor, String target) {
+        return actor.getName().equals(target);
+    }
+
     static boolean is(ClassRefTypeSignature actor, Class<?> target) {
-        return Objects.equals(actor.getFullyQualifiedClassName(),
-                target.getName());
+        return is(actor, target.getName());
     }
 
     static boolean is(ClassRefTypeSignature actor, ClassInfo target) {
-        return Objects.equals(actor.getFullyQualifiedClassName(),
-                target.getName());
+        return is(actor, target.getName());
+    }
+
+    static boolean is(ClassRefTypeSignature actor, String target) {
+        return actor.getFullyQualifiedClassName().equals(target);
     }
 
     static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin) {
         return Objects.requireNonNull(origin).getSuffixes().size() > 0
                 ? new ClassRefSignatureSourceModel.Suffixed(origin)
-                : new ClassRefSignatureSourceModel(origin);
+                : new ClassRefSignatureSourceModel.Regular(origin);
     }
 
     static ClassRefSignatureModel of(@Nonnull Class<?> origin) {

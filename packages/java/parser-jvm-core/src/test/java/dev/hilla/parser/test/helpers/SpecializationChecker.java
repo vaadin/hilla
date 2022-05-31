@@ -1,6 +1,5 @@
 package dev.hilla.parser.test.helpers;
 
-import static dev.hilla.parser.utils.Functions.function;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +16,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.function.Failable;
+
 public class SpecializationChecker<Model> {
     private final Map<String, Function<Model, Boolean>> functions;
 
@@ -29,12 +30,18 @@ public class SpecializationChecker<Model> {
         this(modelClass, methods.stream());
     }
 
+    public SpecializationChecker(Class<Model> modelClass, Method[] methods,
+            Collection<String> allowedMethods) {
+        this(modelClass, Arrays.stream(methods)
+                .filter(method -> allowedMethods.contains(method.getName())));
+    }
+
     public SpecializationChecker(Class<Model> modelClass,
             Stream<Method> methods) {
         var lookup = MethodHandles.lookup();
 
-        this.functions = methods
-                .collect(Collectors.toMap(Method::getName, function(method -> {
+        this.functions = methods.collect(Collectors.toMap(Method::getName,
+                Failable.asFunction(method -> {
                     var site = LambdaMetafactory.metafactory(lookup, "apply",
                             MethodType.methodType(Function.class),
                             MethodType.methodType(Object.class, Object.class),
@@ -69,4 +76,5 @@ public class SpecializationChecker<Model> {
                     String.format("'%s' expected to return false", name));
         }));
     }
+
 }

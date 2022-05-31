@@ -1,18 +1,21 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
+import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.TypeArgument;
 
-class ClassRefSignatureSourceModel
+abstract class ClassRefSignatureSourceModel
         extends AbstractAnnotatedSourceModel<ClassRefTypeSignature>
         implements ClassRefSignatureModel, SourceSignatureModel {
-    protected List<TypeArgumentModel> typeArguments;
-    private ClassInfoModel reference;
+    protected ClassInfoModel reference;
+    private List<TypeArgumentModel> typeArguments;
 
     public ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
         super(origin);
@@ -30,14 +33,15 @@ class ClassRefSignatureSourceModel
 
         var other = (ClassRefSignatureModel) obj;
 
-        return origin.getFullyQualifiedClassName().equals(other.getClassName())
+        return getClassName().equals(other.getClassName())
+                && getOwner().equals(other.getOwner())
                 && getTypeArguments().equals(other.getTypeArguments())
                 && getAnnotations().equals(other.getAnnotations());
     }
 
     @Override
     public String getClassName() {
-        return origin.getFullyQualifiedClassName();
+        return origin.getBaseClassName();
     }
 
     @Override
@@ -48,7 +52,7 @@ class ClassRefSignatureSourceModel
     @Override
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
-            typeArguments = origin.getTypeArguments().stream()
+            typeArguments = getOriginTypeArguments().stream()
                     .map(TypeArgumentModel::of).collect(Collectors.toList());
         }
 
@@ -57,18 +61,16 @@ class ClassRefSignatureSourceModel
 
     @Override
     public int hashCode() {
-        return origin.getFullyQualifiedClassName().hashCode()
-                + 7 * getTypeArguments().hashCode()
-                + 13 * getAnnotations().hashCode();
+        return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
+                + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
     }
 
     @Override
     public ClassInfoModel resolve() {
         if (reference == null) {
-            var originInfo = origin.getClassInfo();
-
-            reference = originInfo != null ? ClassInfoModel.of(originInfo)
-                    : ClassInfoModel.of(origin.loadClass());
+            reference = origin.getBaseClassName().equals("java.lang.Object")
+                    ? ClassInfoModel.of(Object.class)
+                    : ClassInfoModel.of(getOriginClassInfo());
         }
 
         return reference;
@@ -86,7 +88,21 @@ class ClassRefSignatureSourceModel
         return annotations != null ? annotations.stream() : Stream.empty();
     }
 
-    final static class Suffixed extends ClassRefSignatureSourceModel {
+    protected ClassInfo getOriginClassInfo() {
+        return origin.getClassInfo();
+    }
+
+    protected List<TypeArgument> getOriginTypeArguments() {
+        return origin.getTypeArguments();
+    }
+
+    static final class Regular extends ClassRefSignatureSourceModel {
+        public Regular(ClassRefTypeSignature origin) {
+            super(origin);
+        }
+    }
+
+    static final class Suffixed extends ClassRefSignatureSourceModel {
         private final int currentSuffixIndex;
 
         public Suffixed(ClassRefTypeSignature origin) {
@@ -99,30 +115,63 @@ class ClassRefSignatureSourceModel
         }
 
         @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
-            return currentSuffixIndex > 0
-                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
-                    : Optional.empty();
+        public String getClassName() {
+            var builder = new StringBuilder(origin.getBaseClassName());
+
+            for (var i = 0; i <= currentSuffixIndex; i++) {
+                builder.append('$');
+                builder.append(origin.getSuffixes().get(i));
+            }
+
+            return builder.toString();
         }
 
         @Override
-        public List<TypeArgumentModel> getTypeArguments() {
-            if (typeArguments == null) {
-                typeArguments = origin.getSuffixTypeArguments()
-                        .get(currentSuffixIndex).stream()
-                        .map(TypeArgumentModel::of)
-                        .collect(Collectors.toList());
-            }
-
-            return typeArguments;
+        public Optional<ClassRefSignatureModel> getOwner() {
+            return currentSuffixIndex > 0
+                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
+                    : Optional.of(new SuffixedBase(origin));
         }
 
         @Override
         protected Stream<AnnotationInfo> getOriginAnnotations() {
-            var annotations = origin.getSuffixTypeAnnotationInfo()
-                    .get(currentSuffixIndex);
+            return origin.getSuffixTypeAnnotationInfo().get(currentSuffixIndex)
+                    .stream();
+        }
 
-            return annotations != null ? annotations.stream() : Stream.empty();
+        @Override
+        protected ClassInfo getOriginClassInfo() {
+            if (currentSuffixIndex == origin.getSuffixes().size() - 1) {
+                return origin.getClassInfo();
+            }
+
+            var outerClasses = origin.getClassInfo().getOuterClasses();
+            var currentSuffix = origin.getSuffixes().get(currentSuffixIndex);
+
+            for (var cls : outerClasses) {
+                if (cls.getName().endsWith(currentSuffix)) {
+                    return cls;
+                }
+            }
+
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        protected List<TypeArgument> getOriginTypeArguments() {
+            return origin.getSuffixTypeArguments().get(currentSuffixIndex);
+        }
+    }
+
+    static final class SuffixedBase extends ClassRefSignatureSourceModel {
+        public SuffixedBase(ClassRefTypeSignature origin) {
+            super(origin);
+        }
+
+        @Override
+        protected ClassInfo getOriginClassInfo() {
+            var outerClasses = origin.getClassInfo().getOuterClasses();
+            return outerClasses.get(outerClasses.size() - 1);
         }
     }
 }

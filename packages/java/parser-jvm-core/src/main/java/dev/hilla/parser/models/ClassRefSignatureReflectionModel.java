@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         extends AbstractAnnotatedReflectionModel<T>
         implements ClassRefSignatureModel, ReflectionSignatureModel {
+    private ClassInfoModel reference;
+
     public ClassRefSignatureReflectionModel(T origin) {
         super(origin);
     }
@@ -31,39 +31,50 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         var other = (ClassRefSignatureModel) obj;
 
         return getClassName().equals(other.getClassName())
+                && getOwner().equals(other.getOwner())
                 && getTypeArguments().equals(other.getTypeArguments())
                 && getAnnotations().equals(other.getAnnotations());
     }
 
     @Override
+    public String getClassName() {
+        return getOriginClassInfo().getName();
+    }
+
+    @Override
     public int hashCode() {
         return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
-                + 13 * getAnnotations().hashCode();
+                + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
     }
+
+    @Override
+    public ClassInfoModel resolve() {
+        if (reference == null) {
+            reference = ClassInfoModel.of(getOriginClassInfo());
+        }
+
+        return reference;
+    }
+
+    @Override
+    public void setReference(ClassInfoModel reference) {
+        this.reference = reference;
+    }
+
+    protected abstract Class<?> getOriginClassInfo();
 
     static final class Regular extends
             ClassRefSignatureReflectionModel<AnnotatedParameterizedType> {
-        private ClassInfoModel reference;
         private List<TypeArgumentModel> typeArguments;
 
-        public Regular(@Nonnull AnnotatedParameterizedType origin) {
+        public Regular(AnnotatedParameterizedType origin) {
             super(origin);
         }
 
         @Override
-        public String getClassName() {
-            return resolveRaw().getName();
-        }
-
-        @Override
         public Optional<ClassRefSignatureModel> getOwner() {
-            var owner = origin.getAnnotatedOwnerType();
-
-            if (owner == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(ClassRefSignatureModel.of(owner));
+            return Optional.ofNullable(origin.getAnnotatedOwnerType())
+                    .map(ClassRefSignatureModel::of);
         }
 
         @Override
@@ -79,20 +90,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public ClassInfoModel resolve() {
-            if (reference == null) {
-                reference = ClassInfoModel.of(resolveRaw());
-            }
-
-            return reference;
-        }
-
-        @Override
-        public void setReference(ClassInfoModel reference) {
-            this.reference = reference;
-        }
-
-        private Class<?> resolveRaw() {
+        protected Class<?> getOriginClassInfo() {
             return (Class<?>) ((ParameterizedType) origin.getType())
                     .getRawType();
         }
@@ -100,26 +98,14 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
 
     static class AnnotatedBare
             extends ClassRefSignatureReflectionModel<AnnotatedType> {
-        private ClassInfoModel reference;
-
         public AnnotatedBare(AnnotatedType origin) {
             super(origin);
         }
 
         @Override
-        public String getClassName() {
-            return ((Class<?>) origin.getType()).getName();
-        }
-
-        @Override
         public Optional<ClassRefSignatureModel> getOwner() {
-            var owner = origin.getAnnotatedOwnerType();
-
-            if (owner == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(ClassRefSignatureModel.of(owner));
+            return Optional.ofNullable(origin.getAnnotatedOwnerType())
+                    .map(ClassRefSignatureModel::of);
         }
 
         @Override
@@ -128,30 +114,14 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public ClassInfoModel resolve() {
-            if (reference == null) {
-                reference = ClassInfoModel.of((Class<?>) origin.getType());
-            }
-
-            return reference;
-        }
-
-        @Override
-        public void setReference(ClassInfoModel reference) {
-            this.reference = reference;
+        protected Class<?> getOriginClassInfo() {
+            return (Class<?>) origin.getType();
         }
     }
 
     static class Bare extends ClassRefSignatureReflectionModel<Class<?>> {
-        private ClassInfoModel reference;
-
         public Bare(Class<?> origin) {
             super(origin);
-        }
-
-        @Override
-        public String getClassName() {
-            return origin.getName();
         }
 
         @Override
@@ -165,17 +135,8 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public ClassInfoModel resolve() {
-            if (reference == null) {
-                reference = ClassInfoModel.of(origin);
-            }
-
-            return reference;
-        }
-
-        @Override
-        public void setReference(ClassInfoModel reference) {
-            this.reference = reference;
+        protected Class<?> getOriginClassInfo() {
+            return origin;
         }
     }
 }

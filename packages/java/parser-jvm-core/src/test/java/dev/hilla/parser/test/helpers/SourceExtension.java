@@ -15,19 +15,22 @@ import dev.hilla.parser.testutils.ResourceLoader;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 
-public class ParserExtension
+public class SourceExtension
         implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
-    public static final ExtensionContext.Namespace STORE = ExtensionContext.Namespace
-            .create(ParserExtension.class);
+    public static final ExtensionContext.Namespace SOURCE = ExtensionContext.Namespace
+            .create(SourceExtension.class);
+    private ScanResult source;
 
-    public static ScanResult getScanResult(ExtensionContext context) {
-        var store = context.getStore(STORE);
-        return (ScanResult) Objects.requireNonNull(store.get(Keys.SCAN_RESULT));
+    public static ScanResult getSource(ExtensionContext context) {
+        var store = Objects.requireNonNull(context.getStore(SOURCE));
+
+        return (ScanResult) Objects
+                .requireNonNull(store.get(context.getRequiredTestClass()));
     }
 
     @Override
     public void afterAll(ExtensionContext context) {
-        getScanResult(context).close();
+        getSource(context).close();
     }
 
     @Override
@@ -36,11 +39,18 @@ public class ParserExtension
         var loader = new ResourceLoader(target::getResource,
                 target::getProtectionDomain);
         var targetDir = loader.findTargetDirPath();
-        var scanResult = new ClassGraph().enableAllInfo()
+
+        var source = new ClassGraph().enableAllInfo()
                 .enableSystemJarsAndModules()
                 .overrideClasspath(targetDir.toString()).scan();
-        var store = context.getStore(STORE);
-        store.put(Keys.SCAN_RESULT, scanResult);
+
+        context.getStore(SOURCE).put(context.getRequiredTestClass(), source);
+    }
+
+    @Override
+    public ScanResult resolveParameter(ParameterContext parameterContext,
+            ExtensionContext context) throws ParameterResolutionException {
+        return getSource(context);
     }
 
     @Override
@@ -48,17 +58,6 @@ public class ParserExtension
             ExtensionContext extensionContext)
             throws ParameterResolutionException {
         return parameterContext.getParameter()
-                .getAnnotation(WithScanResult.class) != null;
-    }
-
-    @Override
-    public ScanResult resolveParameter(ParameterContext parameterContext,
-            ExtensionContext extensionContext)
-            throws ParameterResolutionException {
-        return getScanResult(extensionContext);
-    }
-
-    public enum Keys {
-        SCAN_RESULT
+                .getAnnotation(Source.class) != null;
     }
 }
