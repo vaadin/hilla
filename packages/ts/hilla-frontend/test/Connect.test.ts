@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { expect } from '@open-wc/testing';
+import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
@@ -220,9 +220,12 @@ describe('ConnectClient', () => {
 
       try {
         await called;
-        expect(false).to.be.true; // should not reach here
+        assert.fail("Request didn't abort as expected");
       } catch (err: any) {
-        expect(err.name).to.equal('AbortError');
+        // Should throw AbortError. If not, rethrow
+        if (err.name !== 'AbortError') {
+          throw err;
+        }
       }
     });
 
