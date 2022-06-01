@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.function.FailableBiFunction;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,6 +22,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
+import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
@@ -53,36 +56,32 @@ public class MethodInfoModelTests {
         assertEquals(expected, actual);
     }
 
-    // @DisplayName("It should have the same hashCode for source and reflection
-    // models")
-    // @Test
-    // public void should_HaveSameHashCodeForSourceAndReflectionModels(
-    // @Source ScanResult scanResult)
-    // throws NoSuchMethodException {
-    // var reflectionModel = getDefaultReflectionModel();
-    // var sourceModel = getDefaultSourceModel(scanResult);
-    //
-    // assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
-    // }
-    //
-    // @DisplayName("It should have the same hashCode for source and reflection
-    // models")
-    // @Test
-    // public void should_HaveSourceAndReflectionModelsEqual(
-    // @Source ScanResult scanResult)
-    // throws NoSuchMethodException {
-    // var reflectionModel = getDefaultReflectionModel();
-    // var sourceModel = getDefaultSourceModel(scanResult);
-    //
-    // assertEquals(reflectionModel, reflectionModel);
-    // assertEquals(reflectionModel, sourceModel);
-    //
-    // assertEquals(sourceModel, sourceModel);
-    // assertEquals(sourceModel, reflectionModel);
-    //
-    // assertNotEquals(sourceModel, new Object());
-    // assertNotEquals(reflectionModel, new Object());
-    // }
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels(
+            @Source ScanResult scanResult) throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
+    @DisplayName("It should have source and reflection models equal")
+    @Test
+    public void should_HaveSourceAndReflectionModelsEqual(
+            @Source ScanResult scanResult) throws NoSuchMethodException {
+        var reflectionModel = getDefaultReflectionModel();
+        var sourceModel = getDefaultSourceModel(scanResult);
+
+        assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
+
+        assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
+
+        assertNotEquals(sourceModel, new Object());
+        assertNotEquals(reflectionModel, new Object());
+    }
 
     private MethodInfoModel getDefaultReflectionModel()
             throws NoSuchMethodException {
@@ -91,11 +90,6 @@ public class MethodInfoModelTests {
     }
 
     private MethodInfoModel getDefaultSourceModel(ScanResult scanResult) {
-        var a = scanResult.getClassInfo(Sample.class.getName())
-                .getDeclaredMethodInfo("method").getSingleMethod("method");
-
-        var str = a.getTypeDescriptorStr();
-
         return MethodInfoModel.of(scanResult
                 .getClassInfo(Sample.class.getName())
                 .getDeclaredMethodInfo("method").getSingleMethod("method"));

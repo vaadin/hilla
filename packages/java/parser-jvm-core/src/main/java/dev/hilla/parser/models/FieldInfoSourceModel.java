@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -16,19 +15,19 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof FieldInfoModel)) {
+        if (!(obj instanceof FieldInfoModel)) {
             return false;
         }
 
-        var model = (FieldInfoModel) other;
+        var other = (FieldInfoModel) obj;
 
-        return Objects.equals(getOwner(), model.getOwner())
-                && Objects.equals(origin.getName(), model.getName());
+        return origin.getClassName().equals(other.getClassName())
+                && origin.getName().equals(other.getName());
     }
 
     @Override
@@ -97,6 +96,11 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     @Override
     public boolean isTransient() {
         return origin.isTransient();
+    }
+
+    @Override
+    public String getClassName() {
+        return origin.getClassName();
     }
 
     @Override

@@ -135,8 +135,12 @@ abstract class ClassRefSignatureSourceModel
 
         @Override
         protected Stream<AnnotationInfo> getOriginAnnotations() {
-            return origin.getSuffixTypeAnnotationInfo().get(currentSuffixIndex)
-                    .stream();
+            var suffixAnnotations = origin.getSuffixTypeAnnotationInfo();
+
+            return suffixAnnotations != null
+                    ? origin.getSuffixTypeAnnotationInfo()
+                            .get(currentSuffixIndex).stream()
+                    : Stream.empty();
         }
 
         @Override

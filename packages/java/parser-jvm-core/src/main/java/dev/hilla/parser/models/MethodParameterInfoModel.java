@@ -22,5 +22,13 @@ public interface MethodParameterInfoModel
         return getType().getDependenciesStream();
     }
 
+    int getModifiers();
+
     SignatureModel getType();
+
+    boolean isFinal();
+
+    boolean isMandated();
+
+    boolean isSynthetic();
 }

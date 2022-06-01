@@ -18,6 +18,8 @@ public interface FieldInfoModel
         return new FieldInfoReflectionModel(field);
     }
 
+    String getClassName();
+
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
         return getType().getDependenciesStream();

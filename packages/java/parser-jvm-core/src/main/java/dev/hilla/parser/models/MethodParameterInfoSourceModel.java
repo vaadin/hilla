@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
@@ -17,22 +16,29 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof MethodParameterInfoModel)) {
+        if (!(obj instanceof MethodParameterInfoModel)) {
             return false;
         }
 
-        if (other instanceof MethodParameterInfoSourceModel) {
-            return Objects.equals(origin,
-                    ((MethodParameterInfoSourceModel) other).origin);
-        }
+        var other = (MethodParameterInfoModel) obj;
 
-        return Objects.equals(getName(),
-                ((MethodParameterInfoModel) other).getName());
+        return getOwner().equalsIgnoreParameters(other.getOwner())
+                && getAnnotations().equals(other.getAnnotations())
+                && origin.getModifiers() == other.getModifiers()
+                && getType().equals(other.getType())
+                && origin.getName().equals(other.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return getOwner().hashCodeIgnoreParameters()
+                + 11 * getAnnotations().hashCode() + 17 * origin.getModifiers()
+                + 23 * getType().hashCode() + 53 * origin.getName().hashCode();
     }
 
     @Override
@@ -56,6 +62,26 @@ final class MethodParameterInfoSourceModel
         }
 
         return type;
+    }
+
+    @Override
+    public boolean isFinal() {
+        return origin.isFinal();
+    }
+
+    @Override
+    public boolean isMandated() {
+        return origin.isMandated();
+    }
+
+    @Override
+    public boolean isSynthetic() {
+        return origin.isSynthetic();
+    }
+
+    @Override
+    public int getModifiers() {
+        return origin.getModifiers();
     }
 
     @Override

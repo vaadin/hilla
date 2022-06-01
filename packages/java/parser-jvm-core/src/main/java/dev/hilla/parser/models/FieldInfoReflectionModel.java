@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.Objects;
 
 final class FieldInfoReflectionModel
         extends AbstractAnnotatedReflectionModel<Field>
@@ -17,19 +16,19 @@ final class FieldInfoReflectionModel
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof FieldInfoModel)) {
+        if (!(obj instanceof FieldInfoModel)) {
             return false;
         }
 
-        var model = (FieldInfoModel) other;
+        var other = (FieldInfoModel) obj;
 
-        return Objects.equals(getOwner(), model.getOwner())
-                && Objects.equals(origin.getName(), model.getName());
+        return origin.getDeclaringClass().getName().equals(other.getClassName())
+                && origin.getName().equals(other.getName());
     }
 
     @Override
@@ -57,7 +56,8 @@ final class FieldInfoReflectionModel
 
     @Override
     public int hashCode() {
-        return origin.getName().hashCode() + getOwner().hashCode() * 11;
+        return origin.getName().hashCode()
+                + 11 * origin.getDeclaringClass().getName().hashCode();
     }
 
     @Override
@@ -98,5 +98,10 @@ final class FieldInfoReflectionModel
     @Override
     public boolean isTransient() {
         return Modifier.isTransient(origin.getModifiers());
+    }
+
+    @Override
+    public String getClassName() {
+        return origin.getDeclaringClass().getName();
     }
 }

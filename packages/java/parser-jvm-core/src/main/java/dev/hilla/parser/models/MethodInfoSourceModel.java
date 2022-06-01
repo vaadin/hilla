@@ -31,10 +31,39 @@ final class MethodInfoSourceModel
 
         var other = (MethodInfoModel) obj;
 
+        return equalsIgnoreParameters(other)
+                && getParameters().equals(other.getParameters());
+    }
+
+    @Override
+    public boolean equalsIgnoreParameters(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof MethodInfoModel)) {
+            return false;
+        }
+
+        return equalsIgnoreParameters((MethodInfoModel) obj);
+    }
+
+    @Override
+    public boolean equalsIgnoreParameters(MethodInfoModel other) {
         return origin.getName().equals(other.getName())
+                && origin.getModifiers() == other.getModifiers()
                 && getResultType().equals(other.getResultType())
-                && getParameters().equals(other.getParameters())
-                && origin.getClassName().equals(other.getOwnerName());
+                && origin.getClassName().equals(other.getClassName());
+    }
+
+    @Override
+    public String getClassName() {
+        return origin.getClassName();
+    }
+
+    @Override
+    public int getModifiers() {
+        return origin.getModifiers();
     }
 
     @Override
@@ -49,11 +78,6 @@ final class MethodInfoSourceModel
         }
 
         return owner;
-    }
-
-    @Override
-    public String getOwnerName() {
-        return origin.getClassName();
     }
 
     @Override
@@ -79,9 +103,14 @@ final class MethodInfoSourceModel
 
     @Override
     public int hashCode() {
+        return hashCodeIgnoreParameters() + 53 * getParameters().hashCode();
+    }
+
+    @Override
+    public int hashCodeIgnoreParameters() {
         return origin.getName().hashCode() + 11 * getResultType().hashCode()
-                + 23 * getParameters().hashCode()
-                + 53 * origin.getClassName().hashCode();
+                + 17 * origin.getModifiers()
+                + 23 * origin.getClassName().hashCode();
     }
 
     @Override

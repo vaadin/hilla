@@ -28,7 +28,9 @@ public interface MethodInfoModel
                 getParameterDependenciesStream());
     }
 
-    String getOwnerName();
+    int getModifiers();
+
+    String getClassName();
 
     default List<ClassInfoModel> getParameterDependencies() {
         return getParameterDependenciesStream().collect(Collectors.toList());
@@ -79,4 +81,9 @@ public interface MethodInfoModel
     boolean isSynthetic();
 
     boolean isVarArgs();
+
+    boolean equalsIgnoreParameters(Object obj);
+    boolean equalsIgnoreParameters(MethodInfoModel obj);
+
+    int hashCodeIgnoreParameters();
 }
