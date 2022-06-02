@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { expect } from '@open-wc/testing';
+import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
@@ -207,6 +207,25 @@ describe('ConnectClient', () => {
         // expected
       } finally {
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTION_LOST);
+      }
+    });
+
+    it('should be able to abort a call', async () => {
+      const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+      fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
+
+      const controller = new AbortController();
+      const called = client.call('FooEndpoint', 'fooMethod', {}, { signal: controller.signal });
+      controller.abort();
+
+      try {
+        await called;
+        assert.fail("Request didn't abort as expected");
+      } catch (err: any) {
+        // Should throw AbortError. If not, rethrow
+        if (err.name !== 'AbortError') {
+          throw err;
+        }
       }
     });
 
