@@ -1,7 +1,4 @@
-import {
-  ConnectClient,
-  InvalidSessionMiddleware,
-} from '@hilla/frontend';
+import { ConnectClient, InvalidSessionMiddleware } from '@hilla/frontend';
 
 const client = new ConnectClient({
   prefix: 'connect',
@@ -9,9 +6,9 @@ const client = new ConnectClient({
     new InvalidSessionMiddleware(async () => {
       location.reload();
       return {
-        error: true
-      }
-    })
+        error: true,
+      };
+    }),
   ],
 });
 

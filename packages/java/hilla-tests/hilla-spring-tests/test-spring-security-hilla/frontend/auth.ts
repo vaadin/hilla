@@ -1,10 +1,6 @@
 // Uses the Vaadin provided login an logout helper methods
-import {
-  login as loginImpl,
-  LoginResult,
-  logout as logoutImpl,
-} from "@hilla/frontend";
-import { appStore } from "./stores/app-store";
+import { login as loginImpl, LoginResult, logout as logoutImpl } from '@hilla/frontend';
+import { appStore } from './stores/app-store';
 
 interface Authentication {
   timestamp: number;
@@ -12,18 +8,15 @@ interface Authentication {
 
 let authentication: Authentication | undefined = undefined;
 
-const AUTHENTICATION_KEY = "authentication";
+const AUTHENTICATION_KEY = 'authentication';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 // Get authentication from local storage
 const storedAuthenticationJson = localStorage.getItem(AUTHENTICATION_KEY);
 if (storedAuthenticationJson !== null) {
-  const storedAuthentication = JSON.parse(
-    storedAuthenticationJson
-  ) as Authentication;
+  const storedAuthentication = JSON.parse(storedAuthenticationJson) as Authentication;
   // Check that the stored timestamp is not older than 30 days
-  const hasRecentAuthenticationTimestamp =
-    new Date().getTime() - storedAuthentication.timestamp < THIRTY_DAYS_MS;
+  const hasRecentAuthenticationTimestamp = new Date().getTime() - storedAuthentication.timestamp < THIRTY_DAYS_MS;
   if (hasRecentAuthenticationTimestamp) {
     // Use loaded authentication
     authentication = storedAuthentication;
@@ -53,10 +46,7 @@ export function isAuthenticated() {
  *
  * Uses `localStorage` for offline support.
  */
-export async function login(
-  username: string,
-  password: string
-): Promise<LoginResult> {
+export async function login(username: string, password: string): Promise<LoginResult> {
   const result = await loginImpl(username, password);
   if (!result.error) {
     // Get user info from endpoint
