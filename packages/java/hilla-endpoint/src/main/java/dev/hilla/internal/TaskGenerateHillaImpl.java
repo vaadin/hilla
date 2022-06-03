@@ -19,11 +19,12 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
 
     @Override
     public void execute() throws ExecutionFailedException {
-        List<String> command = prepareCommand();
+        var baseDir = System.getProperty("user.dir", ".");
+        var command = prepareCommand(baseDir);
         runCodeGeneration(command);
     }
 
-    private void runCodeGeneration(List<String> command)
+    void runCodeGeneration(List<String> command)
             throws ExecutionFailedException {
         var exitCode = 0;
         try {
@@ -40,7 +41,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         }
     }
 
-    private boolean isMavenProject(Path path) {
+    boolean isMavenProject(Path path) {
         return path.resolve("pom.xml").toFile().exists();
     }
 
@@ -48,9 +49,8 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         return path.resolve("build.gradle").toFile().exists();
     }
 
-    private List<String> prepareCommand() {
-        String baseDirCandidate = System.getProperty("user.dir", ".");
-        Path path = Paths.get(baseDirCandidate);
+    List<String> prepareCommand(String baseDir) {
+        var path = Paths.get(baseDir);
         if (path.toFile().isDirectory()) {
             if (isMavenProject(path)) {
                 return prepareMavenCommand();
@@ -64,11 +64,11 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
                         + "Gradle project.", path.toString()));
     }
 
-    private List<String> prepareMavenCommand() {
+    List<String> prepareMavenCommand() {
         return List.of("mvn", "generator:generate");
     }
 
-    private List<String> prepareGradleCommand() {
+    List<String> prepareGradleCommand() {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
 
