@@ -40,4 +40,5 @@ export default interface Schema {
   extensions?: Record<string, any | undefined>;
   _enum?: Array<any | undefined>;
   discriminator?: Discriminator;
+  exampleSetFlag: boolean;
 }
