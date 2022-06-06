@@ -104,6 +104,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>com.vaadin.flow.spring.fusionsecuritycontextpath.Application</mainClass>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
