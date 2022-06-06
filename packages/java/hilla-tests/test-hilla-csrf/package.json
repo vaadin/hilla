@@ -36,8 +36,8 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "1.1.0-beta3",
-      "@hilla/frontend": "1.1.0-beta3",
+      "@hilla/form": "1.1.0-rc1",
+      "@hilla/frontend": "1.1.0-rc1",
       "@polymer/polymer": "3.4.1",
       "@vaadin/common-frontend": "0.0.17",
       "@vaadin/router": "1.7.4",
