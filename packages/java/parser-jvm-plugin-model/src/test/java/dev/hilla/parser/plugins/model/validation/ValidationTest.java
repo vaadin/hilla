@@ -11,8 +11,8 @@ import dev.hilla.parser.model.test.helpers.TestHelper;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.model.ModelPlugin;
 
-public class ValidationTest{
-  private final TestHelper helper = new TestHelper();
+public class ValidationTest {
+    private final TestHelper helper = new TestHelper();
 
     @Test
     public void should_GenerateValidations()
