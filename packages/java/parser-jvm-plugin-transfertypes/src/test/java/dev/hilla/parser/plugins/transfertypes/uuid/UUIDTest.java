@@ -12,7 +12,7 @@ import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
 
 public class UUIDTest {
-  private final TestHelper helper = new TestHelper();
+    private final TestHelper helper = new TestHelper();
 
     @Test
     public void should_ReplaceUUIDClassWithString()

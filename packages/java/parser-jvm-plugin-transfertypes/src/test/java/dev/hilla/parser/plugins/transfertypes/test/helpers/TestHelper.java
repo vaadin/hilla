@@ -35,10 +35,6 @@ public final class TestHelper {
                 target::getProtectionDomain);
     }
 
-    public Path getTargetDir() {
-        return targetDir;
-    }
-
     public void executeParserWithConfig(ParserConfig config)
             throws IOException, URISyntaxException {
         var parser = new Parser(config);
@@ -56,5 +52,9 @@ public final class TestHelper {
         return ResourceLoader.getClasspath(
                 Arrays.stream(classes).map(TestHelper::createResourceLoader)
                         .collect(Collectors.toList()));
+    }
+
+    public Path getTargetDir() {
+        return targetDir;
     }
 }
