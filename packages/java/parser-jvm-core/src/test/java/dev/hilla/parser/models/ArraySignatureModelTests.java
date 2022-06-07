@@ -1,5 +1,7 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +42,7 @@ public class ArraySignatureModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) throws NoSuchFieldException {
+    public void setUp(@Source ScanResult source) {
         ctx = new Context(source);
     }
 
@@ -122,7 +124,7 @@ public class ArraySignatureModelTests {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
+    @Target(ElementType.TYPE_USE)
     @interface Bar {
     }
 
@@ -132,19 +134,19 @@ public class ArraySignatureModelTests {
         private final AnnotatedArrayType reflectionOrigin;
         private final ArrayTypeSignature sourceOrigin;
 
-        Context(ExtensionContext context) throws NoSuchFieldException {
+        Context(ExtensionContext context) {
             this(SourceExtension.getSource(context));
         }
 
-        Context(ScanResult source) throws NoSuchFieldException {
-            reflectionOrigin = (AnnotatedArrayType) Sample.class
-                    .getDeclaredField(fieldName).getAnnotatedType();
-            sourceOrigin = (ArrayTypeSignature) source
-                    .getClassInfo(Sample.class.getName())
-                    .getDeclaredFieldInfo(fieldName)
-                    .getTypeSignatureOrTypeDescriptor();
-            annotation = Sample.class.getDeclaredField(fieldName)
-                    .getAnnotation(Bar.class);
+        Context(ScanResult source) {
+            reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
+                    Sample.class, fieldName).getAnnotatedType();
+            sourceOrigin = (ArrayTypeSignature) getDeclaredField(Sample.class,
+                    fieldName, source).getTypeSignatureOrTypeDescriptor();
+            annotation = ((AnnotatedArrayType) getDeclaredField(Sample.class,
+                    fieldName).getAnnotatedType())
+                            .getAnnotatedGenericComponentType()
+                            .getAnnotation(Bar.class);
         }
 
         public Annotation getAnnotation() {
@@ -181,7 +183,7 @@ public class ArraySignatureModelTests {
                 extends SpecializationChecker<SpecializedModel> {
             Checker() {
                 super(SpecializedModel.class,
-                        SpecializedModel.class.getDeclaredMethods());
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
     }

@@ -1,5 +1,9 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -65,8 +69,8 @@ public class ClassRefSignatureModelTests {
         var sourceParametrized = ctx.getSourceOrigin(fieldName);
 
         var classParametrized = Sample.StaticParametrizedDependency.Sub.class;
-        var classInfoParametrized = ctx.getSource()
-                .getClassInfo(classParametrized.getName());
+        var classInfoParametrized = getClassInfo(classParametrized,
+                ctx.getSource());
 
         assertTrue(
                 ClassRefSignatureModel.is(bareParametrized, classParametrized));
@@ -305,7 +309,7 @@ public class ClassRefSignatureModelTests {
                 extends SpecializationChecker<SpecializedModel> {
             public Checker() {
                 super(SpecializedModel.class,
-                        SpecializedModel.class.getDeclaredMethods());
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
 
@@ -333,24 +337,24 @@ public class ClassRefSignatureModelTests {
                     .ofEntries(
                             entry(Boolean.class.getName(), "isBoolean",
                                     "isClassRef", "isJDKClass"),
-                            entry(Byte.class.getName(), "isByte", "isClassRef",
-                                    "isJDKClass"),
+                            entry(Byte.class.getName(), "hasIntegerType",
+                                    "isByte", "isClassRef", "isJDKClass"),
                             entry(Character.class.getName(), "isCharacter",
                                     "isClassRef", "isJDKClass"),
-                            entry(Double.class.getName(), "isDouble",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Float.class.getName(), "isFloat",
-                                    "isClassRef", "isJDKClass"),
+                            entry(Double.class.getName(), "hasFloatType",
+                                    "isDouble", "isClassRef", "isJDKClass"),
+                            entry(Float.class.getName(), "hasFloatType",
+                                    "isFloat", "isClassRef", "isJDKClass"),
                             entry(List.class.getName(), "isIterable",
                                     "isClassRef", "isJDKClass"),
-                            entry(Long.class.getName(), "isLong", "isClassRef",
-                                    "isJDKClass"),
-                            entry(Short.class.getName(), "isShort",
-                                    "isClassRef", "isJDKClass"),
+                            entry(Long.class.getName(), "hasIntegerType",
+                                    "isLong", "isClassRef", "isJDKClass"),
+                            entry(Short.class.getName(), "hasIntegerType",
+                                    "isShort", "isClassRef", "isJDKClass"),
                             entry(Sample.Characteristics.Enum.class.getName(),
-                                    "isEnum", "isClassRef"),
-                            entry(Integer.class.getName(), "isInteger",
-                                    "isClassRef", "isJDKClass"),
+                                    "isEnum", "isClassRef", "isNonJDKClass"),
+                            entry(Integer.class.getName(), "hasIntegerType",
+                                    "isInteger", "isClassRef", "isJDKClass"),
                             entry(Date.class.getName(), "isDate", "isClassRef",
                                     "isJDKClass"),
                             entry(LocalDateTime.class.getName(), "isDateTime",
@@ -456,16 +460,16 @@ public class ClassRefSignatureModelTests {
         Context(ScanResult source, Class<?> target) {
             this.source = source;
 
-            var classInfo = source.getClassInfo(target.getName());
+            var classInfo = getClassInfo(target, source);
 
-            for (var field : target.getDeclaredFields()) {
+            getDeclaredFields(target).forEach(field -> {
                 var name = field.getName();
 
                 completeReflectionOrigins.put(name, field.getAnnotatedType());
                 bareReflectionOrigins.put(name, field.getType());
                 sourceOrigins.put(name, (ClassRefTypeSignature) classInfo
                         .getFieldInfo(name).getTypeSignatureOrTypeDescriptor());
-            }
+            });
         }
 
         public Class<?> getBareReflectionOrigin(String name) {
@@ -503,7 +507,7 @@ public class ClassRefSignatureModelTests {
         static final class Matches {
             public Annotation getAnnotation(String name)
                     throws NoSuchFieldException {
-                var annotations = Sample.Matches.class.getDeclaredField(name)
+                var annotations = getDeclaredField(Sample.Matches.class, name)
                         .getAnnotatedType().getAnnotations();
 
                 if (annotations.length > 0) {
@@ -516,7 +520,7 @@ public class ClassRefSignatureModelTests {
 
             public AnnotatedType getTypeArgument(String name)
                     throws NoSuchFieldException {
-                var owner = Sample.Matches.class.getDeclaredField(name)
+                var owner = getDeclaredField(Sample.Matches.class, name)
                         .getAnnotatedType();
 
                 if (owner instanceof AnnotatedParameterizedType) {

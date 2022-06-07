@@ -1,5 +1,7 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -11,12 +13,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.function.Failable;
@@ -37,6 +41,7 @@ import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.BaseTypeSignature;
+import io.github.classgraph.MethodInfo;
 import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
@@ -44,7 +49,7 @@ public class BaseSignatureModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) throws NoSuchMethodException {
+    public void setUp(@Source ScanResult source) {
         ctx = new Context(source);
     }
 
@@ -149,29 +154,29 @@ public class BaseSignatureModelTests {
 
     static final class Context {
         private final Annotation annotation;
-        private final Map<String, Class<?>> bareReflectionOrigins = new HashMap<>();
-        private final Map<String, AnnotatedType> completeReflectionOrigins = new HashMap<>();
-        private final Map<String, BaseTypeSignature> sourceOrigins = new HashMap<>();
+        private final Map<String, Class<?>> bareReflectionOrigins;
+        private final Map<String, AnnotatedType> completeReflectionOrigins;
+        private final Map<String, BaseTypeSignature> sourceOrigins;
 
-        Context(ExtensionContext context) throws NoSuchMethodException {
+        Context(ExtensionContext context) {
             this(SourceExtension.getSource(context));
         }
 
-        Context(ScanResult source) throws NoSuchMethodException {
-            var classInfo = source.getClassInfo(Sample.class.getName());
+        Context(ScanResult source) {
+            bareReflectionOrigins = getDeclaredMethods(Sample.class).collect(
+                    Collectors.toMap(Method::getName, Method::getReturnType));
 
-            for (var method : Sample.class.getDeclaredMethods()) {
-                var name = method.getName();
+            completeReflectionOrigins = getDeclaredMethods(Sample.class)
+                    .collect(Collectors.toMap(Method::getName,
+                            Method::getAnnotatedReturnType));
 
-                bareReflectionOrigins.put(name, method.getReturnType());
-                completeReflectionOrigins.put(name,
-                        method.getAnnotatedReturnType());
-                sourceOrigins.put(name, (BaseTypeSignature) classInfo
-                        .getDeclaredMethodInfo(name).getSingleMethod(name)
-                        .getTypeSignatureOrTypeDescriptor().getResultType());
-            }
+            sourceOrigins = getDeclaredMethods(Sample.class, source)
+                    .collect(Collectors.toMap(MethodInfo::getName,
+                            method -> (BaseTypeSignature) method
+                                    .getTypeSignatureOrTypeDescriptor()
+                                    .getResultType()));
 
-            annotation = Sample.class.getMethod("getByte")
+            annotation = getDeclaredMethod(Sample.class, "getByte")
                     .getAnnotatedReturnType().getAnnotation(Bar.class);
         }
 
@@ -229,8 +234,7 @@ public class BaseSignatureModelTests {
         }
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context)
-                throws NoSuchMethodException {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Streams.combine(getCompleteReflectionArguments(ctx),
@@ -243,8 +247,8 @@ public class BaseSignatureModelTests {
             public static final String testNamePattern = ModelProvider.testNamePattern;
 
             @Override
-            public Stream<Arguments> provideArguments(ExtensionContext context)
-                    throws NoSuchMethodException {
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
                 var ctx = new Context(context);
 
                 return Streams.combine(getCompleteReflectionArguments(ctx),
@@ -255,7 +259,7 @@ public class BaseSignatureModelTests {
         static class Checker extends SpecializationChecker<SpecializedModel> {
             Checker() {
                 super(SpecializedModel.class,
-                        SpecializedModel.class.getDeclaredMethods());
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
 
@@ -284,11 +288,10 @@ public class BaseSignatureModelTests {
             private static final Function<Arguments, Arguments> failableInsert = Failable
                     .asFunction(Specialized::insert);
 
-            private static Arguments insert(Arguments args)
-                    throws NoSuchMethodException {
-                var list = Arrays.asList(args.get());
+            private static Arguments insert(Arguments args) {
+                var list = new ArrayList<>(Arrays.asList(args.get()));
                 var methodName = (String) list.get(list.size() - 1);
-                var type = Sample.class.getDeclaredMethod(methodName)
+                var type = getDeclaredMethod(Sample.class, methodName)
                         .getReturnType();
 
                 list.add(1, specializations.get(type));
@@ -297,8 +300,8 @@ public class BaseSignatureModelTests {
             }
 
             @Override
-            public Stream<Arguments> provideArguments(ExtensionContext context)
-                    throws NoSuchMethodException {
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
                 var ctx = new Context(context);
 
                 return Streams.combine(

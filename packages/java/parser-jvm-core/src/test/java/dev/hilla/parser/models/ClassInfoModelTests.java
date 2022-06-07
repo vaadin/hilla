@@ -1,5 +1,9 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,6 +38,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import dev.hilla.parser.test.helpers.ClassMemberUtils;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
@@ -61,10 +66,10 @@ public class ClassInfoModelTests {
         var assignableReflectionClass = Dependency.SampleChild.class;
         var nonAssignableReflectionClass = Dependency.Sample.StaticInner.class;
 
-        var assignableSourceClass = ctx.getSource()
-                .getClassInfo(Dependency.SampleChild.class.getName());
-        var nonAssignableSourceClass = ctx.getSource()
-                .getClassInfo(Dependency.Sample.StaticInner.class.getName());
+        var assignableSourceClass = getClassInfo(Dependency.SampleChild.class,
+                ctx.getSource());
+        var nonAssignableSourceClass = getClassInfo(
+                Dependency.Sample.StaticInner.class, ctx.getSource());
 
         assertTrue(model.isAssignableFrom(assignableReflectionClass));
         assertTrue(model.isAssignableFrom(assignableSourceClass));
@@ -223,12 +228,14 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CompareClasses(ClassInfoModel model, ModelKind kind) {
-        var sameClassName = Dependency.Sample.class.getName();
-        var anotherClassName = Dependency.Parent.class.getName();
         var sameReflectionClass = Dependency.Sample.class;
         var anotherReflectionClass = Dependency.Parent.class;
-        var sameSourceClass = ctx.getSource().getClassInfo(sameClassName);
-        var anotherSourceClass = ctx.getSource().getClassInfo(anotherClassName);
+        var sameClassName = sameReflectionClass.getName();
+        var anotherClassName = anotherReflectionClass.getName();
+        var sameSourceClass = getClassInfo(sameReflectionClass,
+                ctx.getSource());
+        var anotherSourceClass = getClassInfo(anotherReflectionClass,
+                ctx.getSource());
 
         assertTrue(model.is(sameClassName));
         assertTrue(model.is(sameReflectionClass));
@@ -267,8 +274,8 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetAllInnerClasses(ClassInfoModel model,
             ModelKind kind) {
-        var expected = Arrays
-                .stream(Dependency.Sample.class.getDeclaredClasses())
+        var expected = ClassMemberUtils
+                .getDeclaredClasses(Dependency.Sample.class)
                 .map(ClassInfoModel::of).collect(Collectors.toSet());
         var actual = new HashSet<>(model.getInnerClasses());
 
@@ -299,8 +306,7 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
-        var expected = Arrays
-                .stream(Dependency.Sample.class.getDeclaredFields())
+        var expected = getDeclaredFields(Dependency.Sample.class)
                 .map(FieldInfoModel::of).collect(Collectors.toList());
         var actual = model.getFields();
 
@@ -327,10 +333,10 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassMethods(ClassInfoModel model, ModelKind kind) {
-        var expected = Arrays
-                .stream(Dependency.Sample.class.getDeclaredMethods())
+        var expected = getDeclaredMethods(Dependency.Sample.class)
                 .map(MethodInfoModel::of).collect(Collectors.toSet());
-        var actual = new HashSet<>(model.getMethods());
+        var actual = cleanup(model.getMethods().stream())
+                .collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }
@@ -700,7 +706,7 @@ public class ClassInfoModelTests {
 
             public CharacteristicsChecker() {
                 super(ClassInfoModel.class,
-                        ClassInfoModel.class.getDeclaredMethods(),
+                        getDeclaredMethods(ClassInfoModel.class),
                         allowedMethods);
             }
         }
@@ -709,7 +715,7 @@ public class ClassInfoModelTests {
                 extends SpecializationChecker<SpecializedModel> {
             public Checker() {
                 super(SpecializedModel.class,
-                        SpecializedModel.class.getDeclaredMethods());
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
     }
@@ -726,7 +732,7 @@ public class ClassInfoModelTests {
         }
 
         protected ClassInfo transformKey(Map.Entry<Class<?>, String[]> entry) {
-            return source.getClassInfo(entry.getKey().getName());
+            return getClassInfo(entry.getKey(), source);
         }
 
         static class Characteristics extends Context {
@@ -834,9 +840,9 @@ public class ClassInfoModelTests {
             Default(ScanResult source) {
                 super(source);
                 reflectionOrigin = Dependency.Sample.class;
-                sourceOrigin = source.getClassInfo(reflectionOrigin.getName());
+                sourceOrigin = getClassInfo(reflectionOrigin, source);
                 reflectionJDK = List.class;
-                sourceJDK = source.getClassInfo(reflectionJDK.getName());
+                sourceJDK = getClassInfo(reflectionJDK, source);
                 annotation = Dependency.Sample.class
                         .getAnnotation(Dependency.Annotation.class);
             }

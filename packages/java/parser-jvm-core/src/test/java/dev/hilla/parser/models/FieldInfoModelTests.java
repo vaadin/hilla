@@ -1,5 +1,7 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -10,7 +12,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +43,7 @@ public class FieldInfoModelTests {
     private Context.Default ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) throws NoSuchFieldException {
+    public void setUp(@Source ScanResult source) {
         ctx = new Context.Default(source);
     }
 
@@ -113,7 +114,7 @@ public class FieldInfoModelTests {
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchFieldException {
+                ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -128,7 +129,7 @@ public class FieldInfoModelTests {
 
             @Override
             public Stream<? extends Arguments> provideArguments(
-                    ExtensionContext context) throws NoSuchFieldException {
+                    ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
                 return Streams.combine(
@@ -154,9 +155,8 @@ public class FieldInfoModelTests {
 
             public CharacterizedChecker() {
                 super(FieldInfoModel.class,
-                        Arrays.stream(FieldInfoModel.class.getDeclaredMethods())
-                                .filter(method -> allowedMethods
-                                        .contains(method.getName())));
+                        getDeclaredMethods(FieldInfoModel.class),
+                        allowedMethods);
             }
         }
     }
@@ -230,42 +230,40 @@ public class FieldInfoModelTests {
             private final Map<Field, String[]> reflectionAssociations;
             private final Map<FieldInfo, String[]> sourceAssociations;
 
-            Characteristics(ExtensionContext context)
-                    throws NoSuchFieldException {
+            Characteristics(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
-            Characteristics(ScanResult source) throws NoSuchFieldException {
+            Characteristics(ScanResult source) {
                 super(source);
 
                 var refClass = FieldInfoModelTests.Characteristics.class;
                 var refEnumClass = FieldInfoModelTests.Characteristics.Enum.class;
                 reflectionAssociations = Map.ofEntries(
-                        entry(refClass.getDeclaredField("publicField"),
+                        entry(getDeclaredField(refClass, "publicField"),
                                 "isPublic"),
-                        entry(refClass.getDeclaredField("protectedField"),
+                        entry(getDeclaredField(refClass, "protectedField"),
                                 "isProtected"),
-                        entry(refClass.getDeclaredField("privateField"),
+                        entry(getDeclaredField(refClass, "privateField"),
                                 "isPrivate"),
-                        entry(refClass.getDeclaredField("staticField"),
+                        entry(getDeclaredField(refClass, "staticField"),
                                 "isPrivate", "isStatic"),
-                        entry(refClass.getDeclaredField("finalField"),
+                        entry(getDeclaredField(refClass, "finalField"),
                                 "isFinal", "isPrivate"),
-                        entry(refClass
-                                .getDeclaredField("publicStaticFinalField"),
-                                "isFinal", "isPublic", "isStatic"),
-                        entry(refClass.getDeclaredField("transientField"),
+                        entry(getDeclaredField(refClass,
+                                "publicStaticFinalField"), "isFinal",
+                                "isPublic", "isStatic"),
+                        entry(getDeclaredField(refClass, "transientField"),
                                 "isPublic", "isTransient"),
-                        entry(refEnumClass.getDeclaredField("ENUM_FIELD"),
+                        entry(getDeclaredField(refEnumClass, "ENUM_FIELD"),
                                 "isEnum", "isFinal", "isPublic", "isStatic"));
 
                 sourceAssociations = reflectionAssociations.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                entry -> source
-                                        .getClassInfo(entry.getKey()
-                                                .getDeclaringClass().getName())
-                                        .getFieldInfo(entry.getKey().getName()),
-                                Map.Entry::getValue));
+                        .collect(
+                                Collectors.toMap(
+                                        entry -> getDeclaredField(
+                                                entry.getKey(), source),
+                                        Map.Entry::getValue));
 
             }
 
@@ -283,17 +281,17 @@ public class FieldInfoModelTests {
             private final Field reflectionOrigin;
             private final FieldInfo sourceOrigin;
 
-            Default(ExtensionContext context) throws NoSuchFieldException {
+            Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
-            Default(ScanResult source) throws NoSuchFieldException {
+            Default(ScanResult source) {
                 super(source);
 
-                this.reflectionOrigin = Sample.class.getDeclaredField("field");
-                this.sourceOrigin = source.getClassInfo(Sample.class.getName())
-                        .getDeclaredFieldInfo("field");
-                this.annotation = Sample.class.getDeclaredField("field")
+                this.reflectionOrigin = getDeclaredField(Sample.class, "field");
+                this.sourceOrigin = getDeclaredField(Sample.class, "field",
+                        source);
+                this.annotation = getDeclaredField(Sample.class, "field")
                         .getAnnotation(Sample.Foo.class);
             }
 

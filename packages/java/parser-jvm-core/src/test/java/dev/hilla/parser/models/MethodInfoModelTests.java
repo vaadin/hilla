@@ -1,5 +1,7 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -36,7 +38,7 @@ public class MethodInfoModelTests {
     private Context.Default ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) throws NoSuchMethodException {
+    public void setUp(@Source ScanResult source) {
         ctx = new Context.Default(source);
     }
 
@@ -121,7 +123,7 @@ public class MethodInfoModelTests {
 
             public Checker() {
                 super(MethodInfoModel.class,
-                        MethodInfoModel.class.getDeclaredMethods(),
+                        getDeclaredMethods(MethodInfoModel.class),
                         allowedMethods);
             }
         }
@@ -132,7 +134,7 @@ public class MethodInfoModelTests {
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchMethodException {
+                ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -158,44 +160,41 @@ public class MethodInfoModelTests {
             private final Map<Method, String[]> reflectionCharacteristics;
             private final Map<MethodInfo, String[]> sourceCharacteristics;
 
-            Characteristics(ExtensionContext context)
-                    throws NoSuchMethodException {
+            Characteristics(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
-            Characteristics(ScanResult source) throws NoSuchMethodException {
+            Characteristics(ScanResult source) {
                 super(source);
 
                 var reflectionClass = Sample.Characteristics.class;
 
                 reflectionCharacteristics = Map.ofEntries(
-                        entry(reflectionClass.getDeclaredMethod(
+                        entry(getDeclaredMethod(reflectionClass,
                                 "abstractMethod"), "isPublic", "isAbstract"),
-                        entry(reflectionClass.getDeclaredMethod("finalMethod"),
+                        entry(getDeclaredMethod(reflectionClass, "finalMethod"),
                                 "isPublic", "isFinal"),
-                        entry(reflectionClass.getDeclaredMethod("nativeMethod"),
-                                "isPublic", "isNative"),
-                        entry(reflectionClass.getDeclaredMethod(
+                        entry(getDeclaredMethod(reflectionClass,
+                                "nativeMethod"), "isPublic", "isNative"),
+                        entry(getDeclaredMethod(reflectionClass,
                                 "privateMethod"), "isPrivate"),
-                        entry(reflectionClass.getDeclaredMethod(
+                        entry(getDeclaredMethod(reflectionClass,
                                 "protectedMethod"), "isProtected"),
-                        entry(reflectionClass.getDeclaredMethod("staticMethod"),
-                                "isPublic", "isStatic"),
-                        entry(reflectionClass
-                                .getDeclaredMethod("synchronizedMethod"),
-                                "isPublic", "isSynchronized"),
-                        entry(reflectionClass.getDeclaredMethod("varArgsMethod",
-                                String[].class), "isPublic", "isVarArgs"));
+                        entry(getDeclaredMethod(reflectionClass,
+                                "staticMethod"), "isPublic", "isStatic"),
+                        entry(getDeclaredMethod(reflectionClass,
+                                "synchronizedMethod"), "isPublic",
+                                "isSynchronized"),
+                        entry(getDeclaredMethod(reflectionClass,
+                                "varArgsMethod", String[].class), "isPublic",
+                                "isVarArgs"));
 
                 sourceCharacteristics = reflectionCharacteristics.entrySet()
-                        .stream().collect(Collectors.toMap(entry -> {
-                            var method = entry.getKey();
-                            return source
-                                    .getClassInfo(method.getDeclaringClass()
-                                            .getName())
-                                    .getMethodInfo(method.getName())
-                                    .getSingleMethod(method.getName());
-                        }, Map.Entry::getValue));
+                        .stream().collect(
+                                Collectors.toMap(
+                                        entry -> getDeclaredMethod(
+                                                entry.getKey(), source),
+                                        Map.Entry::getValue));
             }
 
             public Map<Method, String[]> getReflectionCharacteristics() {
@@ -212,17 +211,17 @@ public class MethodInfoModelTests {
             private final Method reflectionOrigin;
             private final MethodInfo sourceOrigin;
 
-            Default(ExtensionContext context) throws NoSuchMethodException {
+            Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
-            Default(ScanResult source) throws NoSuchMethodException {
+            Default(ScanResult source) {
                 super(source);
 
-                reflectionOrigin = Sample.class.getDeclaredMethod(methodName,
+                reflectionOrigin = getDeclaredMethod(Sample.class, methodName,
                         String.class, Sample.ParamDependency.class);
-                sourceOrigin = source.getClassInfo(Sample.class.getName())
-                        .getMethodInfo(methodName).getSingleMethod(methodName);
+                sourceOrigin = getDeclaredMethod(Sample.class, methodName,
+                        source);
             }
 
             public Method getReflectionOrigin() {

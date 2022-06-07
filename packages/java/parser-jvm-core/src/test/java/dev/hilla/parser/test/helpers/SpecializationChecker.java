@@ -26,13 +26,8 @@ public class SpecializationChecker<Model> {
     }
 
     public SpecializationChecker(Class<Model> modelClass,
-            Collection<Method> methods) {
-        this(modelClass, methods.stream());
-    }
-
-    public SpecializationChecker(Class<Model> modelClass, Method[] methods,
-            Collection<String> allowedMethods) {
-        this(modelClass, Arrays.stream(methods)
+            Stream<Method> methods, Collection<String> allowedMethods) {
+        this(modelClass, methods
                 .filter(method -> allowedMethods.contains(method.getName())));
     }
 
@@ -76,5 +71,4 @@ public class SpecializationChecker<Model> {
                     String.format("'%s' expected to return false", name));
         }));
     }
-
 }

@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,7 +35,7 @@ public class AnnotationInfoModelTests {
     private Context ctx;
 
     @BeforeEach
-    public void setUp(@Source ScanResult source) throws NoSuchFieldException {
+    public void setUp(@Source ScanResult source) {
         ctx = new Context(source);
     }
 
@@ -93,15 +94,14 @@ public class AnnotationInfoModelTests {
         private final Annotation reflectionOrigin;
         private final AnnotationInfo sourceOrigin;
 
-        Context(ExtensionContext context) throws NoSuchFieldException {
+        Context(ExtensionContext context) {
             this(SourceExtension.getSource(context));
         }
 
-        Context(ScanResult source) throws NoSuchFieldException {
-            reflectionOrigin = Sample.class.getDeclaredField(fieldName)
+        Context(ScanResult source) {
+            reflectionOrigin = getDeclaredField(Sample.class, fieldName)
                     .getAnnotation(Sample.Foo.class);
-            sourceOrigin = source.getClassInfo(Sample.class.getName())
-                    .getDeclaredFieldInfo(fieldName)
+            sourceOrigin = getDeclaredField(Sample.class, fieldName, source)
                     .getAnnotationInfo(Sample.Foo.class);
         }
 
