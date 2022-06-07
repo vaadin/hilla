@@ -1,10 +1,16 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { expect } from '@open-wc/testing';
+import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import { ConnectClient, EndpointError, EndpointResponseError, EndpointValidationError } from '../src/index.js';
+import {
+  ConnectClient,
+  EndpointError,
+  EndpointResponseError,
+  EndpointValidationError,
+  FluxConnection,
+} from '../src/index.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
@@ -201,6 +207,25 @@ describe('ConnectClient', () => {
         // expected
       } finally {
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTION_LOST);
+      }
+    });
+
+    it('should be able to abort a call', async () => {
+      const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+      fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
+
+      const controller = new AbortController();
+      const called = client.call('FooEndpoint', 'fooMethod', {}, { signal: controller.signal });
+      controller.abort();
+
+      try {
+        await called;
+        assert.fail("Request didn't abort as expected");
+      } catch (err: any) {
+        // Should throw AbortError. If not, rethrow
+        if (err.name !== 'AbortError') {
+          throw err;
+        }
       }
     });
 
@@ -533,6 +558,40 @@ describe('ConnectClient', () => {
         client.middlewares = [firstMiddleware, secondMiddleware];
         await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
       });
+    });
+  });
+  describe('subscribe method', () => {
+    let client: ConnectClient;
+
+    beforeEach(() => {
+      (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
+      client = new ConnectClient();
+    });
+
+    it('should create a fluxConnection', async () => {
+      (client as any)._fluxConnection = undefined; // NOSONAR
+      client.subscribe('FooEndpoint', 'fooMethod');
+      expect((client as any)._fluxConnection).to.not.equal(undefined);
+    });
+
+    it('should reuse the fluxConnection', async () => {
+      client.subscribe('FooEndpoint', 'fooMethod');
+      const { fluxConnection } = client as any;
+      client.subscribe('FooEndpoint', 'barMethod');
+      expect((client as any)._fluxConnection).to.equal(fluxConnection);
+    });
+
+    it('should call FluxConnection', async () => {
+      (client as any)._fluxConnection = new FluxConnection();
+      let called = 0;
+      (client as any)._fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
+        called += 1;
+        expect(endpointName).to.equal('FooEndpoint');
+        expect(methodName).to.equal('fooMethod');
+        expect(params).to.eql([1]);
+      };
+      client.subscribe('FooEndpoint', 'fooMethod', { param: 1 });
+      expect(called).to.equal(1);
     });
   });
 });

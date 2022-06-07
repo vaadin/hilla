@@ -1,6 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
+import type { ReactiveElement } from 'lit';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import { FluxConnection } from './FluxConnection.js';
 
 const $wnd = window as any;
 /* c8 ignore next 2 */
@@ -84,6 +86,24 @@ export class EndpointResponseError extends Error {
     super(message);
     this.response = response;
   }
+}
+
+/**
+ * Represents the connection to and endpoint returning a subscription rather than a value.
+ */
+export interface Subscription<T> {
+  /** Cancels the subscription.  No values are made available after calling this. */
+  cancel: () => void;
+  /** Called when a new value is available. */
+  onNext: (callback: (value: T) => void) => Subscription<T>;
+  /** Called when an exception occured in the subscription. */
+  onError: (callback: () => void) => Subscription<T>;
+  /** Called when the subscription has completed. No values are made available after calling this. */
+  onComplete: (callback: () => void) => Subscription<T>;
+  /*
+   * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
+   */
+  context: (context: ReactiveElement) => Subscription<T>;
 }
 
 interface ConnectExceptionData {
@@ -229,7 +249,17 @@ function isFlowLoaded(): boolean {
 }
 
 /**
- * Hilla Connect client class is a low-level network calling utility. It stores
+ * A list of parameters supported by {@link ConnectClient.call | the call() method in ConnectClient}.
+ */
+export interface EndpointRequestInit {
+  /**
+   * An AbortSignal to set request's signal.
+   */
+  signal?: AbortSignal | null;
+}
+
+/**
+ * A low-level network calling utility. It stores
  * a prefix and facilitates remote calls to endpoint class methods
  * on the Hilla backend.
  *
@@ -261,6 +291,8 @@ export class ConnectClient {
    */
   public middlewares: Middleware[] = [];
 
+  private _fluxConnection: FluxConnection | undefined = undefined;
+
   /**
    * @param options Constructor options.
    */
@@ -291,17 +323,22 @@ export class ConnectClient {
   }
 
   /**
-   * Makes a JSON HTTP request to the `${prefix}/${endpoint}/${method}` URL,
-   * optionally supplying the provided params as a JSON request body,
-   * and asynchronously returns the parsed JSON response data.
+   * Calls the given endpoint method defined using the endpoint and method
+   * parameters with the parameters given as params.
+   * Asynchronously returns the parsed JSON response data.
    *
    * @param endpoint Endpoint name.
    * @param method Method name to call in the endpoint class.
-   * @param params Optional object to be send in JSON request body.
-   * @param options Optional client options for this call.
+   * @param params Optional parameters to pass to the method.
+   * @param endpointRequestInit Optional parameters for the request
    * @returns {} Decoded JSON response data.
    */
-  public async call(endpoint: string, method: string, params?: any): Promise<any> {
+  public async call(
+    endpoint: string,
+    method: string,
+    params?: any,
+    endpointRequestInit?: EndpointRequestInit,
+  ): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -357,13 +394,18 @@ export class ConnectClient {
     // this way makes the folding down below more concise.
     const fetchNext: MiddlewareNext = async (context: MiddlewareContext): Promise<Response> => {
       $wnd.Vaadin.connectionState.loadingStarted();
-      return fetch(context.request)
+      return fetch(context.request, { signal: endpointRequestInit?.signal })
         .then((response) => {
           $wnd.Vaadin.connectionState.loadingFinished();
           return response;
         })
         .catch((error) => {
-          $wnd.Vaadin.connectionState.loadingFailed();
+          // don't bother about connections aborted by purpose
+          if (error.name === 'AbortError') {
+            $wnd.Vaadin.connectionState.loadingFinished();
+          } else {
+            $wnd.Vaadin.connectionState.loadingFailed();
+          }
           return Promise.reject(error);
         });
     };
@@ -391,5 +433,30 @@ export class ConnectClient {
 
     // Invoke all the folded async middlewares and return
     return chain(initialContext);
+  }
+
+  /**
+   * Subscribes to the given method defined using the endpoint and method
+   * parameters with the parameters given as params. The method must return a
+   * compatible type such as a Flux.
+   * Returns a subscription that is used to fetch values as they become available.
+   *
+   * @param endpoint Endpoint name.
+   * @param method Method name to call in the endpoint class.
+   * @param params Optional parameters to pass to the method.
+   * @returns {} A subscription used to handles values as they become available.
+   */
+  public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
+    return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
+  }
+
+  /**
+   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+   */
+  get fluxConnection(): FluxConnection {
+    if (!this._fluxConnection) {
+      this._fluxConnection = new FluxConnection();
+    }
+    return this._fluxConnection;
   }
 }
