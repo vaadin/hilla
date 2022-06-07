@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
@@ -43,26 +42,28 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.MethodInfo;
-import io.github.classgraph.MethodTypeSignature;
 import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ClassInfoModelTests {
-    private final CharacteristicsModelProvider.Checker characteristicsChecker = new CharacteristicsModelProvider.Checker();
+    private Context.Default ctx;
+
+    @BeforeEach
+    public void setUp(@Source ScanResult source) {
+        ctx = new Context.Default(source);
+    }
 
     @DisplayName("It should check assignability from other classes")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_CheckAssignability(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CheckAssignability(ClassInfoModel model,
+            ModelKind kind) {
         var assignableReflectionClass = Dependency.SampleChild.class;
         var nonAssignableReflectionClass = Dependency.Sample.StaticInner.class;
 
-        var assignableSourceClass = context.getScanResult()
+        var assignableSourceClass = ctx.getSource()
                 .getClassInfo(Dependency.SampleChild.class.getName());
-        var nonAssignableSourceClass = context.getScanResult()
+        var nonAssignableSourceClass = ctx.getSource()
                 .getClassInfo(Dependency.Sample.StaticInner.class.getName());
 
         assertTrue(model.isAssignableFrom(assignableReflectionClass));
@@ -99,7 +100,7 @@ public class ClassInfoModelTests {
 
         switch (kind) {
         case REFLECTION: {
-            var refOrigin = (Class<?>) origin;
+            var refOrigin = ctx.getReflectionOrigin();
             assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
                     assignableReflectionClass));
             assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
@@ -120,7 +121,7 @@ public class ClassInfoModelTests {
         }
             break;
         case SOURCE: {
-            var sourceOrigin = (ClassInfo) origin;
+            var sourceOrigin = ctx.getSourceOrigin();
             assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     assignableReflectionClass));
             assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
@@ -144,44 +145,36 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should check if the class belongs to JDK")
-    @ParameterizedTest(name = JDKCheckProvider.testName)
-    @ArgumentsSource(JDKCheckProvider.class)
-    public void should_CheckJDKBelonging(Object origin, ModelKind kind,
-            boolean isJDK, JDKCheckProvider.Context context) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ClassInfoModel.isNonJDKClass((Class<?>) origin),
-                    !isJDK);
-            assertEquals(ClassInfoModel.isJDKClass((Class<?>) origin), isJDK);
-            assertEquals(
-                    ClassInfoModel.isNonJDKClass(((Class<?>) origin).getName()),
-                    !isJDK);
-            assertEquals(
-                    ClassInfoModel.isJDKClass(((Class<?>) origin).getName()),
-                    isJDK);
-            break;
-        case SOURCE:
-            assertEquals(ClassInfoModel.isNonJDKClass((ClassInfo) origin),
-                    !isJDK);
-            assertEquals(ClassInfoModel.isJDKClass((ClassInfo) origin), isJDK);
-            assertEquals(ClassInfoModel
-                    .isNonJDKClass(((ClassInfo) origin).getName()), !isJDK);
-            assertEquals(
-                    ClassInfoModel.isJDKClass(((ClassInfo) origin).getName()),
-                    isJDK);
-            break;
-        }
+    @Test
+    public void should_CheckJDKBelonging() {
+        var reflectionJDK = ctx.getReflectionJDK();
+        var sourceJDK = ctx.getSourceJDK();
+        var reflectionNonJDK = ctx.getReflectionOrigin();
+        var sourceNonJDK = ctx.getSourceOrigin();
+
+        assertTrue(ClassInfoModel.isJDKClass(reflectionJDK));
+        assertTrue(ClassInfoModel.isJDKClass(sourceJDK));
+        assertTrue(ClassInfoModel.isJDKClass(reflectionJDK.getName()));
+        assertTrue(ClassInfoModel.isJDKClass(sourceJDK.getName()));
+        assertTrue(ClassInfoModel.of(reflectionJDK).isJDKClass());
+        assertTrue(ClassInfoModel.of(sourceJDK).isJDKClass());
+
+        assertTrue(ClassInfoModel.isNonJDKClass(reflectionNonJDK));
+        assertTrue(ClassInfoModel.isNonJDKClass(sourceNonJDK));
+        assertTrue(ClassInfoModel.isNonJDKClass(reflectionNonJDK.getName()));
+        assertTrue(ClassInfoModel.isNonJDKClass(sourceNonJDK.getName()));
+        assertTrue(ClassInfoModel.of(reflectionNonJDK).isNonJDKClass());
+        assertTrue(ClassInfoModel.of(sourceNonJDK).isNonJDKClass());
     }
 
     @DisplayName("It should collect all dependencies from the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassDependencies(ClassInfoModel model,
-            Object origin, ModelKind kind,
-            DependencyModelProvider.Context context) {
-        var expected = Stream.of(SampleReferences.fieldDependencies,
-                SampleReferences.methodDependencies,
-                SampleReferences.parentClass, SampleReferences.innerClasses)
+            ModelKind kind) {
+        var expected = Stream
+                .of(ctx.getFieldDependencies(), ctx.getMethodDependencies(),
+                        ctx.getParentClass(), ctx.getInnerClasses())
                 .flatMap(Collection::stream).map(ClassInfoModel::of)
                 .collect(Collectors.toSet());
 
@@ -191,27 +184,23 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect field dependencies of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassFieldDependencies(ClassInfoModel model,
-            Object origin, ModelKind kind,
-            DependencyModelProvider.Context context) {
-        var expected = SampleReferences.fieldDependencies.stream()
-                .map(ClassInfoModel::of).map(ClassInfoModel::getName)
-                .collect(Collectors.toSet());
-        var actual = model.getFieldDependencies().stream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+            ModelKind kind) {
+        var expected = ctx.getFieldDependencies().stream()
+                .map(ClassInfoModel::of).collect(Collectors.toSet());
+        var actual = model.getFieldDependencies();
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should collect method dependencies of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassMethodDependencies(ClassInfoModel model,
-            Object origin, ModelKind kind,
-            DependencyModelProvider.Context context) {
-        var expected = SampleReferences.methodDependencies.stream()
+            ModelKind kind) {
+        var expected = ctx.getMethodDependencies().stream()
                 .map(ClassInfoModel::of).collect(Collectors.toSet());
         var actual = model.getMethodDependencies();
 
@@ -219,12 +208,11 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect inner class dependencies of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
     public void should_CollectInnerClassDependencies(ClassInfoModel model,
-            Object origin, ModelKind kind,
-            DependencyModelProvider.Context context) {
-        var expected = SampleReferences.innerClassesDependencies.stream()
+            ModelKind kind) {
+        var expected = ctx.getInnerClassesDependencies().stream()
                 .map(ClassInfoModel::of).collect(Collectors.toSet());
         var actual = model.getInnerClassDependencies();
 
@@ -232,18 +220,15 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should be able to compare model with classes and other models")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_CompareClasses(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CompareClasses(ClassInfoModel model, ModelKind kind) {
         var sameClassName = Dependency.Sample.class.getName();
         var anotherClassName = Dependency.Parent.class.getName();
         var sameReflectionClass = Dependency.Sample.class;
         var anotherReflectionClass = Dependency.Parent.class;
-        var sameSourceClass = context.getScanResult()
-                .getClassInfo(sameClassName);
-        var anotherSourceClass = context.getScanResult()
-                .getClassInfo(anotherClassName);
+        var sameSourceClass = ctx.getSource().getClassInfo(sameClassName);
+        var anotherSourceClass = ctx.getSource().getClassInfo(anotherClassName);
 
         assertTrue(model.is(sameClassName));
         assertTrue(model.is(sameReflectionClass));
@@ -256,70 +241,50 @@ public class ClassInfoModelTests {
         assertFalse(model.is(anotherSourceClass));
         assertFalse(model.is(ClassInfoModel.of(anotherReflectionClass)));
         assertFalse(model.is(ClassInfoModel.of(anotherSourceClass)));
-
-        switch (kind) {
-        case REFLECTION:
-            assertTrue(model.is((Class<?>) origin));
-            break;
-        case SOURCE:
-            assertTrue(model.is((ClassInfo) origin));
-            break;
-        }
     }
 
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_CreateCorrectModel(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CreateCorrectModel(ClassInfoModel model,
+            ModelKind kind) {
         switch (kind) {
         case REFLECTION: {
-            assertEquals(origin, model.get());
+            assertEquals(ctx.getReflectionOrigin(), model.get());
             assertTrue(model.isReflection());
         }
             break;
         case SOURCE: {
-            assertEquals(origin, model.get());
+            assertEquals(ctx.getSourceOrigin(), model.get());
             assertTrue(model.isSource());
         }
             break;
         }
     }
 
-    @DisplayName("It should detect class characteristics correctly")
-    @ParameterizedTest(name = CharacteristicsModelProvider.testName)
-    @ArgumentsSource(CharacteristicsModelProvider.class)
-    public void should_DetectCharacteristics(ClassInfoModel model,
-            Object origin, String[] characteristics, ModelKind kind,
-            CharacteristicsModelProvider.Context context, String testName) {
-        characteristicsChecker.apply(model, characteristics);
-    }
-
     @DisplayName("It should get all inner classes of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetAllInnerClasses(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetAllInnerClasses(ClassInfoModel model,
+            ModelKind kind) {
         var expected = Arrays
                 .stream(Dependency.Sample.class.getDeclaredClasses())
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getInnerClassesStream().map(ClassInfoModel::getName)
-                .collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toSet());
+        var actual = new HashSet<>(model.getInnerClasses());
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should check equality")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetCheckEquality(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
-        var reflectionModel = ClassInfoModel.of(context.getReflectionOrigin());
-        var sourceModel = ClassInfoModel.of(context.getSourceOrigin());
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetCheckEquality(ClassInfoModel model, ModelKind kind) {
+        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
 
         var otherReflectionModel = ClassInfoModel
                 .of(Dependency.SampleChild.class);
-        var otherSourceModel = ClassInfoModel.of(context.getScanResult()
+        var otherSourceModel = ClassInfoModel.of(ctx.getSource()
                 .getClassInfo(Dependency.SampleChild.class.getName()));
 
         assertEquals(model, model);
@@ -331,102 +296,86 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get all fields of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetClassFields(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays
                 .stream(Dependency.Sample.class.getDeclaredFields())
-                .map(Field::getName).collect(Collectors.toSet());
-        var actual = model.getFieldsStream().map(FieldInfoModel::getName)
-                .collect(Collectors.toSet());
+                .map(FieldInfoModel::of).collect(Collectors.toList());
+        var actual = model.getFields();
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should get the whole inheritance chain of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInheritanceChain(ClassInfoModel model,
-            Object origin, ModelKind kind,
-            DependencyModelProvider.Context context) {
+            ModelKind kind) {
         var expected = Stream
                 .<Class<?>> iterate(Dependency.Sample.class,
                         ((Predicate<Class<?>>) Objects::nonNull)
                                 .and(ClassInfoModel::isNonJDKClass),
                         Class::getSuperclass)
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getInheritanceChainStream()
-                .map(ClassInfoModel::getName).collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toList());
+        var actual = model.getInheritanceChain();
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should get all methods of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetClassMethods(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetClassMethods(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays
                 .stream(Dependency.Sample.class.getDeclaredMethods())
-                .map(Method::getName).collect(Collectors.toSet());
-        var actual = model.getMethodsStream().map(MethodInfoModel::getName)
-                .collect(Collectors.toSet());
+                .map(MethodInfoModel::of).collect(Collectors.toSet());
+        var actual = new HashSet<>(model.getMethods());
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should get interfaces the class implements")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetInterfaces(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetInterfaces(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
-                .map(Class::getName).collect(Collectors.toSet());
-        var actual = model.getInterfacesStream().map(ClassInfoModel::getName)
-                .collect(Collectors.toSet());
+                .map(ClassInfoModel::of).collect(Collectors.toList());
+        var actual = model.getInterfaces();
 
         assertEquals(expected, actual);
     }
 
     @DisplayName("It should get simple name of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetSimpleName(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
-        var expected = Dependency.Sample.class.getSimpleName();
-        var actual = model.getSimpleName();
-
-        assertEquals(expected, actual);
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetSimpleName(ClassInfoModel model, ModelKind kind) {
+        assertEquals(Dependency.Sample.class.getSimpleName(),
+                model.getSimpleName());
     }
 
     @DisplayName("It should get superclass of the class")
-    @ParameterizedTest(name = DependencyModelProvider.testName)
-    @ArgumentsSource(DependencyModelProvider.class)
-    public void should_GetSuperclass(ClassInfoModel model, Object origin,
-            ModelKind kind, DependencyModelProvider.Context context) {
-        var expected = Dependency.Sample.class.getSuperclass().getName();
-        var actual = model.getSuperClass().get().getName();
-
-        assertEquals(expected, actual);
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetSuperclass(ClassInfoModel model, ModelKind kind) {
+        assertEquals(Dependency.Sample.class.getSuperclass().getName(), model
+                .getSuperClass().map(ClassInfoModel::getName).orElse(null));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            @Source ScanResult scanResult) {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
+    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
+        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
 
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
 
     @DisplayName("It should have source and reflection models equal")
     @Test
-    public void should_HaveSourceAndReflectionModelsEqual(
-            @Source ScanResult scanResult) {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
+    public void should_HaveSourceAndReflectionModelsEqual() {
+        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
 
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -436,80 +385,6 @@ public class ClassInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
-    }
-
-    private ClassInfoModel getDefaultReflectionModel() {
-        return ClassInfoModel.of(Dependency.Sample.class);
-    }
-
-    private ClassInfoModel getDefaultSourceModel(ScanResult scanResult) {
-        return ClassInfoModel
-                .of(scanResult.getClassInfo(Dependency.Sample.class.getName()));
-    }
-
-    public static final class SpecializationModelProvider
-            implements ArgumentsProvider {
-        public static final String testName = "{3} [{5}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new SpecializationModelProvider.Context(context);
-
-            return Streams.combine(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
-        }
-
-        public static final class Context extends BaseTestContext {
-            private static final Map<String, String[]> specializations = Map
-                    .ofEntries(
-                            entry(Boolean.class.getName(), "isJDKClass",
-                                    "isBoolean"),
-                            entry(Byte.class.getName(), "isJDKClass", "isByte",
-                                    "hasIntegerType"),
-                            entry(Character.class.getName(), "isJDKClass",
-                                    "isCharacter"),
-                            entry(Double.class.getName(), "isJDKClass",
-                                    "isDouble", "hasFloatType"),
-                            entry(Float.class.getName(), "isJDKClass",
-                                    "isFloat", "hasFloatType"),
-                            entry(Integer.class.getName(), "isJDKClass",
-                                    "isInteger", "hasIntegerType"),
-                            entry(Long.class.getName(), "isJDKClass", "isLong",
-                                    "hasIntegerType"),
-                            entry(Short.class.getName(), "isJDKClass",
-                                    "isShort", "hasIntegerType"),
-                            entry(Void.class.getName(), "isJDKClass"));
-
-            Context(ExtensionContext context) {
-                super(context);
-            }
-
-            public Stream<Arguments> getReflectionArguments() {
-                return Arrays
-                        .stream(Specialization.Sample.class
-                                .getDeclaredMethods())
-                        .map(Method::getReturnType)
-                        .map(origin -> Arguments.of(ClassInfoModel.of(origin),
-                                origin, specializations.get(origin.getName()),
-                                ModelKind.REFLECTION, this,
-                                origin.getSimpleName()));
-            }
-
-            public Stream<Arguments> getSourceArguments() {
-                return getScanResult()
-                        .getClassInfo(Specialization.Sample.class.getName())
-                        .getDeclaredMethodInfo().stream()
-                        .map(MethodInfo::getTypeSignatureOrTypeDescriptor)
-                        .map(MethodTypeSignature::getResultType)
-                        .map(ClassRefTypeSignature.class::cast)
-                        .map(ClassRefTypeSignature::getClassInfo)
-                        .map(origin -> Arguments.of(ClassInfoModel.of(origin),
-                                origin, specializations.get(origin.getName()),
-                                ModelKind.SOURCE, this,
-                                origin.getSimpleName()));
-            }
-        }
     }
 
     static final class Characteristics {
@@ -668,33 +543,10 @@ public class ClassInfoModelTests {
 
         static class SampleChild extends Sample {
         }
-    }
 
-    private static final class SampleReferences {
-        public static final Set<Class<?>> fieldDependencies = Set.of(
-                Dependency.FieldStaticPublic.class,
-                Dependency.FieldStaticProtected.class,
-                Dependency.FieldStaticPrivate.class,
-                Dependency.FieldPublic.class, Dependency.FieldProtected.class,
-                Dependency.FieldPrivate.class);
-        public static final Set<Class<?>> innerClasses = Set.of(
-                Dependency.Sample.DynamicInner.class,
-                Dependency.Sample.StaticInner.class);
-        public static final Set<Class<?>> innerClassesDependencies = Set.of(
-                Dependency.Sample.class, Dependency.InnerMethod.class,
-                Dependency.InnerField.class, Dependency.InnerParent.class);
-        public static final Set<Class<?>> methodDependencies = Set.of(
-                Dependency.MethodStaticPublic.class,
-                Dependency.MethodStaticProtected.class,
-                Dependency.MethodStaticPrivate.class,
-                Dependency.MethodPublic.class, Dependency.MethodProtected.class,
-                Dependency.MethodPrivate.class);
-        public static final Set<Class<?>> parentClass = Set
-                .of(Dependency.Parent.class);
-        public static final Set<Class<?>> parentClassDependencies = Set.of(
-                Dependency.ParentFieldPublic.class,
-                Dependency.GrandParent.class,
-                Dependency.GrandParentMethodPrivate.class);
+        static class UnsearchableTypesSample {
+            Object[] array;
+        }
     }
 
     private static final class Specialization {
@@ -740,62 +592,105 @@ public class ClassInfoModelTests {
     @Nested
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
-        private AnnotationInfoModel annotation;
-
-        @BeforeEach
-        public void setUp() {
-            annotation = AnnotationInfoModel.of(Dependency.Sample.class
-                    .getAnnotation(Dependency.Annotation.class));
-        }
-
         @DisplayName("It should get a class annotation")
-        @ParameterizedTest(name = DependencyModelProvider.testName)
-        @ArgumentsSource(DependencyModelProvider.class)
+        @ParameterizedTest(name = ModelProvider.testName)
+        @ArgumentsSource(ModelProvider.class)
         public void should_GetClassAnnotation(ClassInfoModel model,
-                Object origin, ModelKind kind,
-                DependencyModelProvider.Context context) {
-            assertEquals(List.of(annotation), model.getAnnotations());
+                ModelKind kind) {
+            assertEquals(List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
+                    model.getAnnotations());
+        }
+    }
+
+    @DisplayName("As a class model with characteristics")
+    @Nested
+    public class AsCharacterizedClassModel {
+        private final ModelProvider.CharacteristicsChecker checker = new ModelProvider.CharacteristicsChecker();
+
+        @DisplayName("It should detect class characteristics correctly")
+        @ParameterizedTest(name = ModelProvider.Characteristics.testName)
+        @ArgumentsSource(ModelProvider.Characteristics.class)
+        public void should_DetectCharacteristics(ClassInfoModel model,
+                String[] characteristics, ModelKind kind, String testName) {
+            checker.apply(model, characteristics);
         }
     }
 
     @Nested
     @DisplayName("As a SpecializedModel")
     public class AsSpecializedModel {
-        private final SpecializationChecker<SpecializedModel> checker = new SpecializationChecker<>(
-                SpecializedModel.class,
-                SpecializedModel.class.getDeclaredMethods());
+        private final ModelProvider.Checker checker = new ModelProvider.Checker();
 
         @DisplayName("It should detect class specialization correctly")
-        @ParameterizedTest(name = SpecializationModelProvider.testName)
-        @ArgumentsSource(SpecializationModelProvider.class)
+        @ParameterizedTest(name = ModelProvider.Specialization.testName)
+        @ArgumentsSource(ModelProvider.Specialization.class)
         public void should_DetectClassSpecialization(ClassInfoModel model,
-                Object origin, String[] specializations, ModelKind kind,
-                SpecializationModelProvider.Context context, String testName) {
+                String[] specializations, ModelKind kind, String testName) {
             checker.apply(model, specializations);
         }
     }
 
-    @Nested
-    @DisplayName("In assignability scope")
-    public class Assignability {
-        private Class<?> assignableReflectionClass;
-
-    }
-
-    public static class CharacteristicsModelProvider
-            implements ArgumentsProvider {
-        public static final String testName = "{3} [{5}]";
+    public static class ModelProvider implements ArgumentsProvider {
+        public static final String testName = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
                 ExtensionContext context) {
-            var ctx = new CharacteristicsModelProvider.Context(context);
+            var ctx = new Context.Default(context);
 
-            return Streams.combine(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
+            return Stream.of(
+                    Arguments.of(ClassInfoModel.of(ctx.getReflectionOrigin()),
+                            ModelKind.REFLECTION),
+                    Arguments.of(ClassInfoModel.of(ctx.getSourceOrigin()),
+                            ModelKind.SOURCE));
         }
 
-        private static final class Checker
+        public static final class Specialization implements ArgumentsProvider {
+            public static final String testName = "{2} [{3}]";
+
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Specializations(context);
+
+                return Streams.combine(
+                        ctx.getReflectionSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.REFLECTION,
+                                        entry.getKey().getSimpleName())),
+                        ctx.getSourceSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getSimpleName())));
+            }
+        }
+
+        static final class Characteristics implements ArgumentsProvider {
+            public static final String testName = "{2} [{3}]";
+
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Characteristics(context);
+
+                return Streams.combine(
+                        ctx.getReflectionCharacteristics().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.REFLECTION,
+                                        entry.getKey().getSimpleName())),
+                        ctx.getSourceCharacteristics().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getSimpleName())));
+            }
+
+        }
+
+        static final class CharacteristicsChecker
                 extends SpecializationChecker<ClassInfoModel> {
             private static final List<String> allowedMethods = List.of(
                     "isAbstract", "isAnnotation", "isArrayClass", "isEnum",
@@ -803,160 +698,233 @@ public class ClassInfoModelTests {
                     "isNative", "isPrivate", "isProtected", "isPublic",
                     "isStandardClass", "isStatic", "isSynthetic");
 
-            public Checker() {
+            public CharacteristicsChecker() {
                 super(ClassInfoModel.class,
                         ClassInfoModel.class.getDeclaredMethods(),
                         allowedMethods);
             }
         }
 
-        public static class Context extends BaseTestContext {
-            private static final Map<Class<?>, String[]> associations = Map
-                    .ofEntries(
-                            entry(Characteristics.Abstract.class, "isAbstract",
-                                    "isStandardClass", "isStatic"),
-                            entry(Characteristics.Annotation.class,
+        static final class Checker
+                extends SpecializationChecker<SpecializedModel> {
+            public Checker() {
+                super(SpecializedModel.class,
+                        SpecializedModel.class.getDeclaredMethods());
+            }
+        }
+    }
+
+    static abstract class Context {
+        private final ScanResult source;
+
+        Context(ScanResult source) {
+            this.source = source;
+        }
+
+        public ScanResult getSource() {
+            return source;
+        }
+
+        protected ClassInfo transformKey(Map.Entry<Class<?>, String[]> entry) {
+            return source.getClassInfo(entry.getKey().getName());
+        }
+
+        static class Characteristics extends Context {
+            private final Map<Class<?>, String[]> reflectionCharacteristics = Map
+                    .ofEntries(entry(
+                            ClassInfoModelTests.Characteristics.Abstract.class,
+                            "isAbstract", "isStandardClass", "isStatic"),
+                            entry(ClassInfoModelTests.Characteristics.Annotation.class,
                                     "isAnnotation", "isAbstract",
                                     "isInterfaceOrAnnotation", "isStatic"),
                             entry(Object[].class, "isAbstract", "isArrayClass",
                                     "isFinal", "isPublic", "isStandardClass"),
-                            entry(Characteristics.Enum.class, "isEnum",
-                                    "isFinal", "isStandardClass", "isStatic"),
-                            entry(Characteristics.Final.class, "isFinal",
-                                    "isStandardClass", "isStatic"),
-                            entry(Characteristics.Interface.class, "isAbstract",
-                                    "isInterface", "isInterfaceOrAnnotation",
+                            entry(ClassInfoModelTests.Characteristics.Enum.class,
+                                    "isEnum", "isFinal", "isStandardClass",
                                     "isStatic"),
+                            entry(ClassInfoModelTests.Characteristics.Final.class,
+                                    "isFinal", "isStandardClass", "isStatic"),
+                            entry(ClassInfoModelTests.Characteristics.Interface.class,
+                                    "isAbstract", "isInterface",
+                                    "isInterfaceOrAnnotation", "isStatic"),
                             entry(Byte.class, "isFinal", "isPublic",
                                     "isStandardClass"),
-                            entry(Characteristics.Private.class, "isPrivate",
-                                    "isStandardClass", "isStatic"),
-                            entry(Characteristics.Protected.class,
+                            entry(ClassInfoModelTests.Characteristics.Private.class,
+                                    "isPrivate", "isStandardClass", "isStatic"),
+                            entry(ClassInfoModelTests.Characteristics.Protected.class,
                                     "isProtected", "isStandardClass",
                                     "isStatic"),
-                            entry(Characteristics.Public.class, "isPublic",
-                                    "isStandardClass", "isStatic"));
+                            entry(ClassInfoModelTests.Characteristics.Public.class,
+                                    "isPublic", "isStandardClass", "isStatic"));
+            private final Map<ClassInfo, String[]> sourceCharacteristics;
 
-            public Context(ExtensionContext context) {
-                super(context);
+            Characteristics(ExtensionContext context) {
+                this(SourceExtension.getSource(context));
             }
 
-            public Stream<Arguments> getReflectionArguments() {
-                return associations.entrySet().stream().map(entry -> {
-                    var origin = entry.getKey();
-                    var model = ClassInfoModel.of(origin);
-                    var testName = origin.getSimpleName();
+            Characteristics(ScanResult source) {
+                super(source);
 
-                    return Arguments.of(model, origin, entry.getValue(),
-                            ModelKind.REFLECTION, this, testName);
-                });
+                this.sourceCharacteristics = reflectionCharacteristics
+                        .entrySet().stream().collect(Collectors.toMap(
+                                this::transformKey, Map.Entry::getValue));
             }
 
-            public Stream<Arguments> getSourceArguments() {
-                return associations.entrySet().stream().map(entry -> {
-                    var cls = entry.getKey();
+            public Map<Class<?>, String[]> getReflectionCharacteristics() {
+                return reflectionCharacteristics;
+            }
 
-                    var origin = cls.isArray()
-                            ? ((ArrayTypeSignature) getScanResult()
-                                    .getClassInfo(
-                                            CharacteristicsModelProvider.UnsearchableTypesSample.class
-                                                    .getName())
-                                    .getFieldInfo("array")
-                                    .getTypeSignatureOrTypeDescriptor())
-                                            .getArrayClassInfo()
-                            : getScanResult().getClassInfo(cls.getName());
-                    var model = ClassInfoModel.of(origin);
-                    var testName = origin.getSimpleName();
+            public Map<ClassInfo, String[]> getSourceCharacteristics() {
+                return sourceCharacteristics;
+            }
 
-                    return Arguments.of(model, origin, entry.getValue(),
-                            ModelKind.SOURCE, this, testName);
-                });
+            @Override
+            protected ClassInfo transformKey(
+                    Map.Entry<Class<?>, String[]> entry) {
+                if (!entry.getKey().isArray()) {
+                    return super.transformKey(entry);
+                }
+
+                return ((ArrayTypeSignature) getSource()
+                        .getClassInfo(Dependency.UnsearchableTypesSample.class
+                                .getName())
+                        .getFieldInfo("array")
+                        .getTypeSignatureOrTypeDescriptor())
+                                .getArrayClassInfo();
             }
         }
 
-        private static class UnsearchableTypesSample {
-            Object[] array;
-        }
-    }
+        static class Default extends Context {
+            private final Annotation annotation;
+            private final Set<Class<?>> fieldDependencies = Set.of(
+                    Dependency.FieldStaticPublic.class,
+                    Dependency.FieldStaticProtected.class,
+                    Dependency.FieldStaticPrivate.class,
+                    Dependency.FieldPublic.class,
+                    Dependency.FieldProtected.class,
+                    Dependency.FieldPrivate.class);
+            private final Set<Class<?>> innerClasses = Set.of(
+                    Dependency.Sample.DynamicInner.class,
+                    Dependency.Sample.StaticInner.class);
+            private final Set<Class<?>> innerClassesDependencies = Set.of(
+                    Dependency.Sample.class, Dependency.InnerMethod.class,
+                    Dependency.InnerField.class, Dependency.InnerParent.class);
+            private final Set<Class<?>> methodDependencies = Set.of(
+                    Dependency.MethodStaticPublic.class,
+                    Dependency.MethodStaticProtected.class,
+                    Dependency.MethodStaticPrivate.class,
+                    Dependency.MethodPublic.class,
+                    Dependency.MethodProtected.class,
+                    Dependency.MethodPrivate.class);
+            private final Set<Class<?>> parentClass = Set
+                    .of(Dependency.Parent.class);
+            private final Set<Class<?>> parentClassDependencies = Set.of(
+                    Dependency.ParentFieldPublic.class,
+                    Dependency.GrandParent.class,
+                    Dependency.GrandParentMethodPrivate.class);
+            private final Class<?> reflectionJDK;
+            private final Class<?> reflectionOrigin;
+            private final ClassInfo sourceJDK;
+            private final ClassInfo sourceOrigin;
 
-    public static class DependencyModelProvider implements ArgumentsProvider {
-        public static final String testName = "{2}";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context(context);
-
-            return Stream.of(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
-        }
-
-        public static class Context extends BaseTestContext {
-            public Context(ExtensionContext context) {
-                super(context);
+            Default(ExtensionContext context) {
+                this(SourceExtension.getSource(context));
             }
 
-            public Arguments getReflectionArguments() {
-                var origin = getReflectionOrigin();
-                var model = ClassInfoModel.of(origin);
+            Default(ScanResult source) {
+                super(source);
+                reflectionOrigin = Dependency.Sample.class;
+                sourceOrigin = source.getClassInfo(reflectionOrigin.getName());
+                reflectionJDK = List.class;
+                sourceJDK = source.getClassInfo(reflectionJDK.getName());
+                annotation = Dependency.Sample.class
+                        .getAnnotation(Dependency.Annotation.class);
+            }
 
-                return Arguments.of(model, origin, ModelKind.REFLECTION, this);
+            public Annotation getAnnotation() {
+                return annotation;
+            }
+
+            public Set<Class<?>> getFieldDependencies() {
+                return fieldDependencies;
+            }
+
+            public Set<Class<?>> getInnerClasses() {
+                return innerClasses;
+            }
+
+            public Set<Class<?>> getInnerClassesDependencies() {
+                return innerClassesDependencies;
+            }
+
+            public Set<Class<?>> getMethodDependencies() {
+                return methodDependencies;
+            }
+
+            public Set<Class<?>> getParentClass() {
+                return parentClass;
+            }
+
+            public Set<Class<?>> getParentClassDependencies() {
+                return parentClassDependencies;
+            }
+
+            public Class<?> getReflectionJDK() {
+                return reflectionJDK;
             }
 
             public Class<?> getReflectionOrigin() {
-                return Dependency.Sample.class;
+                return reflectionOrigin;
             }
 
-            public Arguments getSourceArguments() {
-                var origin = getSourceOrigin();
-                var model = ClassInfoModel.of(origin);
-
-                return Arguments.of(model, origin, ModelKind.SOURCE, this);
+            public ClassInfo getSourceJDK() {
+                return sourceJDK;
             }
 
             public ClassInfo getSourceOrigin() {
-                return getScanResult()
-                        .getClassInfo(Dependency.Sample.class.getName());
+                return sourceOrigin;
+            }
+        }
+
+        static class Specializations extends Context {
+            private final Map<Class<?>, String[]> reflectionSpecializations = Map
+                    .ofEntries(entry(Boolean.class, "isJDKClass", "isBoolean"),
+                            entry(Byte.class, "isJDKClass", "isByte",
+                                    "hasIntegerType"),
+                            entry(Character.class, "isJDKClass", "isCharacter"),
+                            entry(Double.class, "isJDKClass", "isDouble",
+                                    "hasFloatType"),
+                            entry(Float.class, "isJDKClass", "isFloat",
+                                    "hasFloatType"),
+                            entry(Integer.class, "isJDKClass", "isInteger",
+                                    "hasIntegerType"),
+                            entry(Long.class, "isJDKClass", "isLong",
+                                    "hasIntegerType"),
+                            entry(Short.class, "isJDKClass", "isShort",
+                                    "hasIntegerType"),
+                            entry(Void.class, "isJDKClass"));
+            private final Map<ClassInfo, String[]> sourceSpecializations;
+
+            Specializations(ExtensionContext context) {
+                this(SourceExtension.getSource(context));
+            }
+
+            Specializations(ScanResult source) {
+                super(source);
+
+                this.sourceSpecializations = reflectionSpecializations
+                        .entrySet().stream().collect(Collectors.toMap(
+                                this::transformKey, Map.Entry::getValue));
+            }
+
+            public Map<Class<?>, String[]> getReflectionSpecializations() {
+                return reflectionSpecializations;
+            }
+
+            public Map<ClassInfo, String[]> getSourceSpecializations() {
+                return sourceSpecializations;
             }
         }
     }
 
-    public static class JDKCheckProvider implements ArgumentsProvider {
-        public static final String testName = "{1} [jdk={2}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context(context);
-
-            return Streams.combine(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
-        }
-
-        public static class Context extends BaseTestContext {
-            Context(ExtensionContext context) {
-                super(context);
-            }
-
-            public Stream<Arguments> getReflectionArguments() {
-                var jdk = List.class;
-                var nonJdk = Dependency.Sample.class;
-
-                return Stream.of(
-                        Arguments.of(jdk, ModelKind.REFLECTION, true, this),
-                        Arguments.of(nonJdk, ModelKind.REFLECTION, false,
-                                this));
-            }
-
-            public Stream<Arguments> getSourceArguments() {
-                var jdk = getScanResult().getClassInfo(List.class.getName());
-                var nonJdk = getScanResult()
-                        .getClassInfo(Dependency.Sample.class.getName());
-
-                return Stream.of(
-                        Arguments.of(jdk, ModelKind.SOURCE, true, this),
-                        Arguments.of(nonJdk, ModelKind.SOURCE, false, this));
-            }
-        }
-    }
 }

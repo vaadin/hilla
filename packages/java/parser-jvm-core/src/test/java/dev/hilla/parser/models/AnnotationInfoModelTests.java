@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,27 +22,34 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.BaseTestContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 
+import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class AnnotationInfoModelTests {
+    private Context ctx;
+
+    @BeforeEach
+    public void setUp(@Source ScanResult source) throws NoSuchFieldException {
+        ctx = new Context(source);
+    }
+
     @DisplayName("It should create correct model")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(AnnotationInfoModel model,
-            Object origin, ModelKind kind, ModelProvider.Context context) {
+            ModelKind kind) {
         switch (kind) {
         case REFLECTION:
-            assertEquals(origin, model.get());
+            assertEquals(ctx.getReflectionOrigin(), model.get());
             assertTrue(model.isReflection());
             break;
         case SOURCE:
-            assertEquals(origin, model.get());
+            assertEquals(ctx.getSourceOrigin(), model.get());
             assertTrue(model.isSource());
             break;
         }
@@ -48,20 +57,18 @@ public class AnnotationInfoModelTests {
 
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            @Source ScanResult scanResult) throws NoSuchMethodException {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
+    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
+        var reflectionModel = AnnotationInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = AnnotationInfoModel.of(ctx.getSourceOrigin());
 
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
 
     @DisplayName("It should have source and reflection models equal")
     @Test
-    public void should_HaveSourceAndReflectionModelsEqual(
-            @Source ScanResult scanResult) throws NoSuchMethodException {
-        var reflectionModel = getDefaultReflectionModel();
-        var sourceModel = getDefaultSourceModel(scanResult);
+    public void should_HaveSourceAndReflectionModelsEqual() {
+        var reflectionModel = AnnotationInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = AnnotationInfoModel.of(ctx.getSourceOrigin());
 
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -77,58 +84,60 @@ public class AnnotationInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNoDependencies(AnnotationInfoModel model,
-            Object origin, ModelKind kind, BaseTestContext context) {
+            ModelKind kind) {
         assertEquals(0, model.getDependencies().size());
     }
 
-    private AnnotationInfoModel getDefaultReflectionModel()
-            throws NoSuchMethodException {
-        return AnnotationInfoModel.of(Sample.class.getDeclaredMethod("bar")
-                .getAnnotation(Sample.Foo.class));
+    static final class Context {
+        private static final String fieldName = "bar";
+        private final Annotation reflectionOrigin;
+        private final AnnotationInfo sourceOrigin;
+
+        Context(ExtensionContext context) throws NoSuchFieldException {
+            this(SourceExtension.getSource(context));
+        }
+
+        Context(ScanResult source) throws NoSuchFieldException {
+            reflectionOrigin = Sample.class.getDeclaredField(fieldName)
+                    .getAnnotation(Sample.Foo.class);
+            sourceOrigin = source.getClassInfo(Sample.class.getName())
+                    .getDeclaredFieldInfo(fieldName)
+                    .getAnnotationInfo(Sample.Foo.class);
+        }
+
+        public Annotation getReflectionOrigin() {
+            return reflectionOrigin;
+        }
+
+        public AnnotationInfo getSourceOrigin() {
+            return sourceOrigin;
+        }
     }
 
-    private AnnotationInfoModel getDefaultSourceModel(ScanResult scanResult) {
-        return AnnotationInfoModel
-                .of(scanResult.getClassInfo(Sample.class.getName())
-                        .getDeclaredMethodInfo("bar").getSingleMethod("bar")
-                        .getAnnotationInfo(Sample.Foo.class));
-    }
-
-    public static final class ModelProvider implements ArgumentsProvider {
+    static final class ModelProvider implements ArgumentsProvider {
         public static final String testName = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchMethodException {
+                ExtensionContext context) throws NoSuchFieldException {
             var ctx = new Context(context);
 
-            return Stream.of(ctx.getReflectionArguments(),
-                    ctx.getSourceArguments());
+            return Stream.of(
+                    Arguments.of(
+                            AnnotationInfoModel.of(ctx.getReflectionOrigin()),
+                            ModelKind.REFLECTION),
+                    Arguments.of(AnnotationInfoModel.of(ctx.getSourceOrigin()),
+                            ModelKind.SOURCE));
         }
+    }
 
-        public static final class Context extends BaseTestContext {
-            Context(ExtensionContext context) {
-                super(context);
-            }
+    static final class Sample {
+        @Foo
+        private String bar;
 
-            public Arguments getReflectionArguments()
-                    throws NoSuchMethodException {
-                var origin = Sample.class.getMethod("bar")
-                        .getAnnotation(Sample.Foo.class);
-                var model = AnnotationInfoModel.of(origin);
-
-                return Arguments.of(model, origin, ModelKind.REFLECTION, this);
-            }
-
-            public Arguments getSourceArguments() {
-                var origin = getScanResult()
-                        .getClassInfo(Sample.class.getName())
-                        .getDeclaredMethodInfo("bar").getSingleMethod("bar")
-                        .getAnnotationInfo(Sample.Foo.class.getName());
-                var model = AnnotationInfoModel.of(origin);
-
-                return Arguments.of(model, origin, ModelKind.SOURCE, this);
-            }
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.FIELD)
+        @interface Foo {
         }
     }
 
@@ -138,20 +147,8 @@ public class AnnotationInfoModelTests {
         @DisplayName("It should have name")
         @ParameterizedTest(name = ModelProvider.testName)
         @ArgumentsSource(ModelProvider.class)
-        public void should_HaveName(AnnotationInfoModel model, Object origin,
-                ModelKind kind, BaseTestContext context) {
+        public void should_HaveName(AnnotationInfoModel model, ModelKind kind) {
             assertEquals(Sample.Foo.class.getName(), model.getName());
-        }
-    }
-
-    private static class Sample {
-        @Foo
-        public void bar() {
-        }
-
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target(ElementType.METHOD)
-        @interface Foo {
         }
     }
 }

@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import static dev.hilla.parser.test.helpers.Specializations.entry;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,7 +37,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
-import dev.hilla.parser.test.helpers.Specializations;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassRefTypeSignature;
@@ -45,30 +44,28 @@ import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ClassRefSignatureModelTests {
-    private final CharacteristicsModelProvider.Checker checker = new CharacteristicsModelProvider.Checker();
+    private Context.Default ctx;
     private Context.Matches matches;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Source ScanResult source) {
+        ctx = new Context.Default(source);
         matches = new Context.Matches();
     }
 
     @DisplayName("It should compare parametrized class reference signature with its class info")
     @Test
-    public void should_CompareParametrizedClassRefWithClassInfo(
-            @Source ScanResult source) {
-        var parametrizedFieldName = "staticParametrizedDependency";
+    public void should_CompareParametrizedClassRefWithClassInfo() {
+        var fieldName = "staticParametrizedDependency";
 
-        var ctx = new Context.Default(source);
-        var bareParametrized = ctx
-                .getBareReflectionOrigin(parametrizedFieldName);
+        var bareParametrized = ctx.getBareReflectionOrigin(fieldName);
         var completeParametrizedHidden = ctx
-                .getCompleteReflectionOrigin(parametrizedFieldName);
+                .getCompleteReflectionOrigin(fieldName);
         var completeParametrized = (AnnotatedParameterizedType) completeParametrizedHidden;
-        var sourceParametrized = ctx.getSourceOrigin(parametrizedFieldName);
+        var sourceParametrized = ctx.getSourceOrigin(fieldName);
 
         var classParametrized = Sample.StaticParametrizedDependency.Sub.class;
-        var classInfoParametrized = source
+        var classInfoParametrized = ctx.getSource()
                 .getClassInfo(classParametrized.getName());
 
         assertTrue(
@@ -92,17 +89,16 @@ public class ClassRefSignatureModelTests {
 
     @DisplayName("It should compare simple class reference signature with its class info")
     @Test
-    public void should_CompareSimpleClassRefWithClassInfo(
-            @Source ScanResult source) {
-        var simpleFieldName = "staticDependency";
+    public void should_CompareSimpleClassRefWithClassInfo() {
+        var fieldName = "staticDependency";
 
-        var ctx = new Context.Default(source);
-        var bareSimple = ctx.getBareReflectionOrigin(simpleFieldName);
-        var completeSimple = ctx.getCompleteReflectionOrigin(simpleFieldName);
-        var sourceSimple = ctx.getSourceOrigin(simpleFieldName);
+        var bareSimple = ctx.getBareReflectionOrigin(fieldName);
+        var completeSimple = ctx.getCompleteReflectionOrigin(fieldName);
+        var sourceSimple = ctx.getSourceOrigin(fieldName);
 
         var classSimple = Sample.StaticDependency.Sub.class;
-        var classInfoSimple = source.getClassInfo(classSimple.getName());
+        var classInfoSimple = ctx.getSource()
+                .getClassInfo(classSimple.getName());
 
         assertTrue(ClassRefSignatureModel.is(bareSimple, classSimple));
         assertTrue(ClassRefSignatureModel.is(completeSimple, classSimple));
@@ -113,21 +109,13 @@ public class ClassRefSignatureModelTests {
         assertTrue(ClassRefSignatureModel.is(sourceSimple, classInfoSimple));
     }
 
-    @DisplayName("It should detect class reference characteristics correctly")
-    @ParameterizedTest(name = CharacteristicsModelProvider.testNamePattern)
-    @ArgumentsSource(CharacteristicsModelProvider.class)
-    public void should_DetectCharacteristics(ClassRefSignatureModel model,
-            String[] characteristics, ModelKind kind, String testName) {
-        checker.apply(model, characteristics);
-    }
-
     @DisplayName("It should get type arguments as a stream")
     @Test
     public void should_GetTypeArgumentsAsStream(@Source ScanResult source)
             throws NoSuchFieldException {
         var ctx = new Context.Default(source);
-        var model = ClassRefSignatureModel.of(
-                ctx.getCompleteReflectionOrigin(SingleModelProvider.fieldName));
+        var model = ClassRefSignatureModel
+                .of(ctx.getCompleteReflectionOrigin(ModelProvider.fieldName));
         var expected = List.of(TypeArgumentModel
                 .of(matches.getTypeArgument("intTypeArgument")));
         var actual = model.getTypeArgumentsStream()
@@ -137,8 +125,8 @@ public class ClassRefSignatureModelTests {
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
-    @ParameterizedTest(name = EqualityModelProvider.testNamePattern)
-    @ArgumentsSource(EqualityModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
+    @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
             Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
             String testName) {
@@ -149,8 +137,8 @@ public class ClassRefSignatureModelTests {
     }
 
     @DisplayName("It should have source and reflection models equal")
-    @ParameterizedTest(name = EqualityModelProvider.testNamePattern)
-    @ArgumentsSource(EqualityModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
+    @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSourceAndReflectionModelsEqual(
             Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
             String testName) {
@@ -168,8 +156,8 @@ public class ClassRefSignatureModelTests {
     }
 
     @DisplayName("It should resolve class info")
-    @ParameterizedTest(name = SingleModelProvider.testNamePattern)
-    @ArgumentsSource(SingleModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_ResolveClassInfo(ClassRefSignatureModel model,
             ModelKind kind) {
         var cls = ClassInfoModel
@@ -204,8 +192,8 @@ public class ClassRefSignatureModelTests {
     }
 
     @DisplayName("It should resolve type owner")
-    @ParameterizedTest(name = SingleModelProvider.testNamePattern)
-    @ArgumentsSource(SingleModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_ResolveTypeOwner(ClassRefSignatureModel model,
             ModelKind kind) {
         switch (kind) {
@@ -233,13 +221,14 @@ public class ClassRefSignatureModelTests {
         }
             break;
         case REFLECTION_BARE:
+            assertEquals(Optional.empty(), model.getOwner());
             break;
         }
     }
 
     @DisplayName("It should resolve underlying class correctly")
-    @ParameterizedTest(name = SingleModelProvider.testNamePattern)
-    @ArgumentsSource(SingleModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_ResolveUnderlyingClass(ClassRefSignatureModel model,
             ModelKind kind) {
         assertEquals(Sample.DynamicParametrizedDependency.Sub.class.getName(),
@@ -247,8 +236,8 @@ public class ClassRefSignatureModelTests {
     }
 
     @DisplayName("It should resolve underlying type arguments")
-    @ParameterizedTest(name = SingleModelProvider.testNamePattern)
-    @ArgumentsSource(SingleModelProvider.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_ResolveUnderlyingTypeArguments(
             ClassRefSignatureModel model, ModelKind kind)
             throws NoSuchFieldException {
@@ -290,143 +279,7 @@ public class ClassRefSignatureModelTests {
         }
     }
 
-    static final class CharacteristicsModelProvider
-            implements ArgumentsProvider {
-        public static final String testNamePattern = "{2} [{3}]";
-
-        private static final Specializations specializations = Specializations
-                .of(entry(Boolean.class.getName(), "isBoolean", "isClassRef",
-                        "isJDKClass"),
-                        entry(Byte.class.getName(), "isByte", "isClassRef",
-                                "isJDKClass"),
-                        entry(Character.class.getName(), "isCharacter",
-                                "isClassRef", "isJDKClass"),
-                        entry(Double.class.getName(), "isDouble", "isClassRef",
-                                "isJDKClass"),
-                        entry(Float.class.getName(), "isFloat", "isClassRef",
-                                "isJDKClass"),
-                        entry(List.class.getName(), "isIterable", "isClassRef",
-                                "isJDKClass"),
-                        entry(Long.class.getName(), "isLong", "isClassRef",
-                                "isJDKClass"),
-                        entry(Short.class.getName(), "isShort", "isClassRef",
-                                "isJDKClass"),
-                        entry(Sample.Characteristics.Enum.class.getName(),
-                                "isEnum", "isClassRef"),
-                        entry(Integer.class.getName(), "isInteger",
-                                "isClassRef", "isJDKClass"),
-                        entry(Date.class.getName(), "isDate", "isClassRef",
-                                "isJDKClass"),
-                        entry(LocalDateTime.class.getName(), "isDateTime",
-                                "isClassRef", "isJDKClass"),
-                        entry(Map.class.getName(), "isMap", "isClassRef",
-                                "isJDKClass"),
-                        entry(Object.class.getName(), "isNativeObject",
-                                "isClassRef", "isJDKClass"),
-                        entry(Optional.class.getName(), "isOptional",
-                                "isClassRef", "isJDKClass"),
-                        entry(String.class.getName(), "isString", "isClassRef",
-                                "isJDKClass"));
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context.Characteristics(context);
-
-            var complete = ctx.getCompleteReflectionOrigins().entrySet()
-                    .stream().map(entry -> {
-                        var origin = entry.getValue();
-                        var name = origin instanceof AnnotatedParameterizedType
-                                ? ((Class<?>) ((ParameterizedType) origin
-                                        .getType()).getRawType()).getName()
-                                : ((Class<?>) origin.getType()).getName();
-
-                        return Arguments.of(ClassRefSignatureModel.of(origin),
-                                specializations.get(name),
-                                ModelKind.REFLECTION_COMPLETE, entry.getKey());
-                    });
-            var bare = ctx.getBareReflectionOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            ClassRefSignatureModel.of(entry.getValue()),
-                            specializations.get(entry.getValue().getName()),
-                            ModelKind.REFLECTION_BARE, entry.getKey()));
-
-            var source = ctx.getSourceOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            ClassRefSignatureModel.of(entry.getValue()),
-                            specializations.get(entry.getValue()
-                                    .getFullyQualifiedClassName()),
-                            ModelKind.SOURCE, entry.getKey()));
-
-            return Streams.combine(complete, bare, source);
-        }
-
-        static final class Checker
-                extends SpecializationChecker<ClassRefSignatureModel> {
-            private static final List<String> allowedMethods = List.of(
-                    "isBoolean", "isByte", "isCharacter", "isClassRef",
-                    "isDate", "isDateTime", "isDouble", "isEnum", "isFloat",
-                    "isInteger", "isIterable", "isJDKClass", "isLong", "isMap",
-                    "isNativeObject", "isOptional", "isShort", "isString");
-
-            public Checker() {
-                super(ClassRefSignatureModel.class,
-                        ClassRefSignatureModel.class.getDeclaredMethods(),
-                        allowedMethods);
-            }
-        }
-    }
-
-    static final class EqualityModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "BOTH [{1}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context.Default(context);
-
-            return ctx.getNames().stream().map(name -> {
-                var complete = ctx.getCompleteReflectionOrigin(name);
-                var source = ctx.getSourceOrigin(name);
-
-                return Arguments.of(Map.entry(complete, source), name);
-            });
-        }
-    }
-
-    static final class ParametrizedModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1} [{2}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context.Default(context);
-
-            var complete = ctx.getCompleteReflectionOrigins().entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey().contains("Parametrized"))
-                    .map(entry -> Arguments.of(
-                            ClassRefSignatureModel.of(entry.getValue()),
-                            ModelKind.REFLECTION_COMPLETE, entry.getKey()));
-
-            var bare = ctx.getBareReflectionOrigins().entrySet().stream()
-                    .filter(entry -> entry.getKey().contains("Parametrized"))
-                    .map(entry -> Arguments.of(
-                            ClassRefSignatureModel.of(entry.getValue()),
-                            ModelKind.REFLECTION_BARE, entry.getKey()));
-
-            var source = ctx.getSourceOrigins().entrySet().stream()
-                    .filter(entry -> entry.getKey().contains("Parametrized"))
-                    .map(entry -> Arguments.of(
-                            ClassRefSignatureModel.of(entry.getValue()),
-                            ModelKind.SOURCE, entry.getKey()));
-
-            return Streams.combine(complete, bare, source);
-        }
-
-    }
-
-    static final class SingleModelProvider implements ArgumentsProvider {
+    static final class ModelProvider implements ArgumentsProvider {
         public static final String fieldName = "dynamicParametrizedDependency";
         public static final String testNamePattern = "{1}";
 
@@ -447,14 +300,114 @@ public class ClassRefSignatureModelTests {
                     Arguments.of(ClassRefSignatureModel.of(source),
                             ModelKind.SOURCE));
         }
+
+        static final class Checker
+                extends SpecializationChecker<SpecializedModel> {
+            public Checker() {
+                super(SpecializedModel.class,
+                        SpecializedModel.class.getDeclaredMethods());
+            }
+        }
+
+        static final class Equality implements ArgumentsProvider {
+            public static final String testNamePattern = "BOTH [{1}]";
+
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Default(context);
+
+                return ctx.getNames().stream().map(name -> {
+                    var complete = ctx.getCompleteReflectionOrigin(name);
+                    var source = ctx.getSourceOrigin(name);
+
+                    return Arguments.of(Map.entry(complete, source), name);
+                });
+            }
+        }
+
+        static final class Specialized implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            private static final Map<String, String[]> specializations = Map
+                    .ofEntries(
+                            entry(Boolean.class.getName(), "isBoolean",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Byte.class.getName(), "isByte", "isClassRef",
+                                    "isJDKClass"),
+                            entry(Character.class.getName(), "isCharacter",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Double.class.getName(), "isDouble",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Float.class.getName(), "isFloat",
+                                    "isClassRef", "isJDKClass"),
+                            entry(List.class.getName(), "isIterable",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Long.class.getName(), "isLong", "isClassRef",
+                                    "isJDKClass"),
+                            entry(Short.class.getName(), "isShort",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Sample.Characteristics.Enum.class.getName(),
+                                    "isEnum", "isClassRef"),
+                            entry(Integer.class.getName(), "isInteger",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Date.class.getName(), "isDate", "isClassRef",
+                                    "isJDKClass"),
+                            entry(LocalDateTime.class.getName(), "isDateTime",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Map.class.getName(), "isMap", "isClassRef",
+                                    "isJDKClass"),
+                            entry(Object.class.getName(), "isNativeObject",
+                                    "isClassRef", "isJDKClass"),
+                            entry(Optional.class.getName(), "isOptional",
+                                    "isClassRef", "isJDKClass"),
+                            entry(String.class.getName(), "isString",
+                                    "isClassRef", "isJDKClass"));
+
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Characteristics(context);
+
+                var complete = ctx.getCompleteReflectionOrigins().entrySet()
+                        .stream().map(entry -> {
+                            var origin = entry.getValue();
+                            var name = origin instanceof AnnotatedParameterizedType
+                                    ? ((Class<?>) ((ParameterizedType) origin
+                                            .getType()).getRawType()).getName()
+                                    : ((Class<?>) origin.getType()).getName();
+
+                            return Arguments.of(
+                                    ClassRefSignatureModel.of(origin),
+                                    specializations.get(name),
+                                    ModelKind.REFLECTION_COMPLETE,
+                                    entry.getKey());
+                        });
+                var bare = ctx.getBareReflectionOrigins().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                ClassRefSignatureModel.of(entry.getValue()),
+                                specializations.get(entry.getValue().getName()),
+                                ModelKind.REFLECTION_BARE, entry.getKey()));
+
+                var source = ctx.getSourceOrigins().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                ClassRefSignatureModel.of(entry.getValue()),
+                                specializations.get(entry.getValue()
+                                        .getFullyQualifiedClassName()),
+                                ModelKind.SOURCE, entry.getKey()));
+
+                return Streams.combine(complete, bare, source);
+            }
+
+        }
     }
 
     @Nested
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
         @DisplayName("It should get a type annotation")
-        @ParameterizedTest(name = SingleModelProvider.testNamePattern)
-        @ArgumentsSource(SingleModelProvider.class)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
+        @ArgumentsSource(ModelProvider.class)
         public void should_GetTypeAnnotation(ClassRefSignatureModel model,
                 ModelKind kind) throws NoSuchFieldException {
             switch (kind) {
@@ -480,12 +433,29 @@ public class ClassRefSignatureModelTests {
         }
     }
 
+    @Nested
+    @DisplayName("As a SpecializedModel")
+    public class AsSpecializedModel {
+        private final ModelProvider.Checker checker = new ModelProvider.Checker();
+
+        @DisplayName("It should have a class reference specialization")
+        @ParameterizedTest(name = ModelProvider.Specialized.testNamePattern)
+        @ArgumentsSource(ModelProvider.Specialized.class)
+        public void should_HaveSpecialization(ClassRefSignatureModel model,
+                String[] characteristics, ModelKind kind, String testName) {
+            checker.apply(model, characteristics);
+        }
+    }
+
     abstract static class Context {
         private final Map<String, Class<?>> bareReflectionOrigins = new HashMap<>();
         private final Map<String, AnnotatedType> completeReflectionOrigins = new HashMap<>();
+        private final ScanResult source;
         private final Map<String, ClassRefTypeSignature> sourceOrigins = new HashMap<>();
 
         Context(ScanResult source, Class<?> target) {
+            this.source = source;
+
             var classInfo = source.getClassInfo(target.getName());
 
             for (var field : target.getDeclaredFields()) {
@@ -516,6 +486,10 @@ public class ClassRefSignatureModelTests {
 
         public Set<String> getNames() {
             return bareReflectionOrigins.keySet();
+        }
+
+        public ScanResult getSource() {
+            return source;
         }
 
         public ClassRefTypeSignature getSourceOrigin(String name) {
