@@ -31,6 +31,11 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     }
 
     @Override
+    public String getClassName() {
+        return origin.getClassName();
+    }
+
+    @Override
     public String getName() {
         return origin.getName();
     }
@@ -96,11 +101,6 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     @Override
     public boolean isTransient() {
         return origin.isTransient();
-    }
-
-    @Override
-    public String getClassName() {
-        return origin.getClassName();
     }
 
     @Override

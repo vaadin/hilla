@@ -35,10 +35,8 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
-    public int hashCode() {
-        return getOwner().hashCodeIgnoreParameters()
-                + 11 * getAnnotations().hashCode() + 17 * origin.getModifiers()
-                + 23 * getType().hashCode() + 53 * origin.getName().hashCode();
+    public int getModifiers() {
+        return origin.getModifiers();
     }
 
     @Override
@@ -65,6 +63,13 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
+    public int hashCode() {
+        return getOwner().hashCodeIgnoreParameters()
+                + 11 * getAnnotations().hashCode() + 17 * origin.getModifiers()
+                + 23 * getType().hashCode() + 53 * origin.getName().hashCode();
+    }
+
+    @Override
     public boolean isFinal() {
         return origin.isFinal();
     }
@@ -77,11 +82,6 @@ final class MethodParameterInfoSourceModel
     @Override
     public boolean isSynthetic() {
         return origin.isSynthetic();
-    }
-
-    @Override
-    public int getModifiers() {
-        return origin.getModifiers();
     }
 
     @Override

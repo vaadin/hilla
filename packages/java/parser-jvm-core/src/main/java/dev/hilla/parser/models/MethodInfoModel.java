@@ -22,6 +22,12 @@ public interface MethodInfoModel
         return new MethodInfoReflectionModel(method);
     }
 
+    boolean equalsIgnoreParameters(Object obj);
+
+    boolean equalsIgnoreParameters(MethodInfoModel obj);
+
+    String getClassName();
+
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(getResultDependenciesStream(),
@@ -29,8 +35,6 @@ public interface MethodInfoModel
     }
 
     int getModifiers();
-
-    String getClassName();
 
     default List<ClassInfoModel> getParameterDependencies() {
         return getParameterDependenciesStream().collect(Collectors.toList());
@@ -58,6 +62,8 @@ public interface MethodInfoModel
 
     SignatureModel getResultType();
 
+    int hashCodeIgnoreParameters();
+
     boolean isAbstract();
 
     boolean isBridge();
@@ -81,9 +87,4 @@ public interface MethodInfoModel
     boolean isSynthetic();
 
     boolean isVarArgs();
-
-    boolean equalsIgnoreParameters(Object obj);
-    boolean equalsIgnoreParameters(MethodInfoModel obj);
-
-    int hashCodeIgnoreParameters();
 }

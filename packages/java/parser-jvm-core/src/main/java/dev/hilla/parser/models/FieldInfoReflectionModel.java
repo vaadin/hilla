@@ -32,6 +32,11 @@ final class FieldInfoReflectionModel
     }
 
     @Override
+    public String getClassName() {
+        return origin.getDeclaringClass().getName();
+    }
+
+    @Override
     public String getName() {
         return origin.getName();
     }
@@ -98,10 +103,5 @@ final class FieldInfoReflectionModel
     @Override
     public boolean isTransient() {
         return Modifier.isTransient(origin.getModifiers());
-    }
-
-    @Override
-    public String getClassName() {
-        return origin.getDeclaringClass().getName();
     }
 }
