@@ -8,7 +8,9 @@
         <version>1.2-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
+    <groupId>com.vaadin</groupId>
     <artifactId>fusion-endpoint</artifactId>
+    <version>${flow.version}</version>
     <name>Fusion Endpoint</name>
     <packaging>jar</packaging>
 
