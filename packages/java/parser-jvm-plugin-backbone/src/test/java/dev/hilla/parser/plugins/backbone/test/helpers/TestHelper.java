@@ -16,7 +16,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public final class TestHelper {
     private final ObjectMapper mapper = Json.mapper();
-    private final ResourceLoader resourceLoader = createResourceLoader(getClass());
+    private final ResourceLoader resourceLoader = createResourceLoader(
+            getClass());
     private final Path targetDir;
 
     {
@@ -32,10 +33,6 @@ public final class TestHelper {
                 target::getProtectionDomain);
     }
 
-    public Path getTargetDir() {
-        return targetDir;
-    }
-
     public void executeParserWithConfig(ParserConfig config)
             throws IOException, URISyntaxException {
         var parser = new Parser(config);
@@ -46,5 +43,9 @@ public final class TestHelper {
         var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
+    }
+
+    public Path getTargetDir() {
+        return targetDir;
     }
 }

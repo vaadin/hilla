@@ -10,7 +10,7 @@ import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
-public class GenericsTest{
+public class GenericsTest {
     private final TestHelper helper = new TestHelper();
 
     @Test
