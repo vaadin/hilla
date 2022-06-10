@@ -91,7 +91,8 @@ public class AnnotationInfoModelTests {
 
     static final class Context {
         private static final String fieldName = "bar";
-        private final Annotation reflectionOrigin;
+        private static final Annotation reflectionOrigin = getDeclaredField(
+                Sample.class, fieldName).getAnnotation(Sample.Foo.class);
         private final AnnotationInfo sourceOrigin;
 
         Context(ExtensionContext context) {
@@ -99,8 +100,6 @@ public class AnnotationInfoModelTests {
         }
 
         Context(ScanResult source) {
-            reflectionOrigin = getDeclaredField(Sample.class, fieldName)
-                    .getAnnotation(Sample.Foo.class);
             sourceOrigin = getDeclaredField(Sample.class, fieldName, source)
                     .getAnnotationInfo(Sample.Foo.class);
         }

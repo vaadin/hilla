@@ -157,7 +157,29 @@ public class MethodInfoModelTests {
         }
 
         static final class Characteristics extends Context {
-            private final Map<Method, String[]> reflectionCharacteristics;
+            private static final Map<Method, String[]> reflectionCharacteristics;
+
+            static {
+                var refClass = Sample.Characteristics.class;
+                reflectionCharacteristics = Map.ofEntries(
+                        entry(getDeclaredMethod(refClass, "abstractMethod"),
+                                "isPublic", "isAbstract"),
+                        entry(getDeclaredMethod(refClass, "finalMethod"),
+                                "isPublic", "isFinal"),
+                        entry(getDeclaredMethod(refClass, "nativeMethod"),
+                                "isPublic", "isNative"),
+                        entry(getDeclaredMethod(refClass, "privateMethod"),
+                                "isPrivate"),
+                        entry(getDeclaredMethod(refClass, "protectedMethod"),
+                                "isProtected"),
+                        entry(getDeclaredMethod(refClass, "staticMethod"),
+                                "isPublic", "isStatic"),
+                        entry(getDeclaredMethod(refClass, "synchronizedMethod"),
+                                "isPublic", "isSynchronized"),
+                        entry(getDeclaredMethod(refClass, "varArgsMethod",
+                                String[].class), "isPublic", "isVarArgs"));
+            }
+
             private final Map<MethodInfo, String[]> sourceCharacteristics;
 
             Characteristics(ExtensionContext context) {
@@ -166,29 +188,6 @@ public class MethodInfoModelTests {
 
             Characteristics(ScanResult source) {
                 super(source);
-
-                var reflectionClass = Sample.Characteristics.class;
-
-                reflectionCharacteristics = Map.ofEntries(
-                        entry(getDeclaredMethod(reflectionClass,
-                                "abstractMethod"), "isPublic", "isAbstract"),
-                        entry(getDeclaredMethod(reflectionClass, "finalMethod"),
-                                "isPublic", "isFinal"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "nativeMethod"), "isPublic", "isNative"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "privateMethod"), "isPrivate"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "protectedMethod"), "isProtected"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "staticMethod"), "isPublic", "isStatic"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "synchronizedMethod"), "isPublic",
-                                "isSynchronized"),
-                        entry(getDeclaredMethod(reflectionClass,
-                                "varArgsMethod", String[].class), "isPublic",
-                                "isVarArgs"));
-
                 sourceCharacteristics = reflectionCharacteristics.entrySet()
                         .stream().collect(
                                 Collectors.toMap(
@@ -208,7 +207,9 @@ public class MethodInfoModelTests {
 
         static final class Default extends Context {
             private static final String methodName = "method";
-            private final Method reflectionOrigin;
+            private static final Method reflectionOrigin = getDeclaredMethod(
+                    Sample.class, methodName, String.class,
+                    Sample.ParamDependency.class);;
             private final MethodInfo sourceOrigin;
 
             Default(ExtensionContext context) {
@@ -217,9 +218,6 @@ public class MethodInfoModelTests {
 
             Default(ScanResult source) {
                 super(source);
-
-                reflectionOrigin = getDeclaredMethod(Sample.class, methodName,
-                        String.class, Sample.ParamDependency.class);
                 sourceOrigin = getDeclaredMethod(Sample.class, methodName,
                         source);
             }

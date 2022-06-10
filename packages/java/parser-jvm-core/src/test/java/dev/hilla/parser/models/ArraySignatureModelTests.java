@@ -130,8 +130,12 @@ public class ArraySignatureModelTests {
 
     static final class Context {
         private static final String fieldName = "foo";
-        private final Annotation annotation;
-        private final AnnotatedArrayType reflectionOrigin;
+        private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
+                Sample.class, fieldName).getAnnotatedType())
+                        .getAnnotatedGenericComponentType()
+                        .getAnnotation(Bar.class);
+        private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
+                Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;
 
         Context(ExtensionContext context) {
@@ -139,14 +143,8 @@ public class ArraySignatureModelTests {
         }
 
         Context(ScanResult source) {
-            reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
-                    Sample.class, fieldName).getAnnotatedType();
             sourceOrigin = (ArrayTypeSignature) getDeclaredField(Sample.class,
                     fieldName, source).getTypeSignatureOrTypeDescriptor();
-            annotation = ((AnnotatedArrayType) getDeclaredField(Sample.class,
-                    fieldName).getAnnotatedType())
-                            .getAnnotatedGenericComponentType()
-                            .getAnnotation(Bar.class);
         }
 
         public Annotation getAnnotation() {

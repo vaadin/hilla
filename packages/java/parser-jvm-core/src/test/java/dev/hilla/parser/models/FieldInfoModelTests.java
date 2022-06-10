@@ -227,16 +227,9 @@ public class FieldInfoModelTests {
         }
 
         static final class Characteristics extends Context {
-            private final Map<Field, String[]> reflectionAssociations;
-            private final Map<FieldInfo, String[]> sourceAssociations;
+            private static final Map<Field, String[]> reflectionAssociations;
 
-            Characteristics(ExtensionContext context) {
-                this(SourceExtension.getSource(context));
-            }
-
-            Characteristics(ScanResult source) {
-                super(source);
-
+            static {
                 var refClass = FieldInfoModelTests.Characteristics.class;
                 var refEnumClass = FieldInfoModelTests.Characteristics.Enum.class;
                 reflectionAssociations = Map.ofEntries(
@@ -257,7 +250,16 @@ public class FieldInfoModelTests {
                                 "isPublic", "isTransient"),
                         entry(getDeclaredField(refEnumClass, "ENUM_FIELD"),
                                 "isEnum", "isFinal", "isPublic", "isStatic"));
+            }
 
+            private final Map<FieldInfo, String[]> sourceAssociations;
+
+            Characteristics(ExtensionContext context) {
+                this(SourceExtension.getSource(context));
+            }
+
+            Characteristics(ScanResult source) {
+                super(source);
                 sourceAssociations = reflectionAssociations.entrySet().stream()
                         .collect(
                                 Collectors.toMap(
@@ -277,8 +279,10 @@ public class FieldInfoModelTests {
         }
 
         static final class Default extends Context {
-            private final Annotation annotation;
-            private final Field reflectionOrigin;
+            private static final Annotation annotation = getDeclaredField(
+                    Sample.class, "field").getAnnotation(Sample.Foo.class);
+            private static final Field reflectionOrigin = getDeclaredField(
+                    Sample.class, "field");
             private final FieldInfo sourceOrigin;
 
             Default(ExtensionContext context) {
@@ -287,12 +291,8 @@ public class FieldInfoModelTests {
 
             Default(ScanResult source) {
                 super(source);
-
-                this.reflectionOrigin = getDeclaredField(Sample.class, "field");
                 this.sourceOrigin = getDeclaredField(Sample.class, "field",
                         source);
-                this.annotation = getDeclaredField(Sample.class, "field")
-                        .getAnnotation(Sample.Foo.class);
             }
 
             public Annotation getAnnotation() {

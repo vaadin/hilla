@@ -736,7 +736,7 @@ public class ClassInfoModelTests {
         }
 
         static class Characteristics extends Context {
-            private final Map<Class<?>, String[]> reflectionCharacteristics = Map
+            private static final Map<Class<?>, String[]> reflectionCharacteristics = Map
                     .ofEntries(entry(
                             ClassInfoModelTests.Characteristics.Abstract.class,
                             "isAbstract", "isStandardClass", "isStatic"),
@@ -770,7 +770,6 @@ public class ClassInfoModelTests {
 
             Characteristics(ScanResult source) {
                 super(source);
-
                 this.sourceCharacteristics = reflectionCharacteristics
                         .entrySet().stream().collect(Collectors.toMap(
                                 this::transformKey, Map.Entry::getValue));
@@ -801,35 +800,37 @@ public class ClassInfoModelTests {
         }
 
         static class Default extends Context {
-            private final Annotation annotation;
-            private final Set<Class<?>> fieldDependencies = Set.of(
+            private static final Annotation annotation = Dependency.Sample.class
+                    .getAnnotation(Dependency.Annotation.class);
+            private static final Set<Class<?>> fieldDependencies = Set.of(
                     Dependency.FieldStaticPublic.class,
                     Dependency.FieldStaticProtected.class,
                     Dependency.FieldStaticPrivate.class,
                     Dependency.FieldPublic.class,
                     Dependency.FieldProtected.class,
                     Dependency.FieldPrivate.class);
-            private final Set<Class<?>> innerClasses = Set.of(
+            private static final Set<Class<?>> innerClasses = Set.of(
                     Dependency.Sample.DynamicInner.class,
                     Dependency.Sample.StaticInner.class);
-            private final Set<Class<?>> innerClassesDependencies = Set.of(
-                    Dependency.Sample.class, Dependency.InnerMethod.class,
-                    Dependency.InnerField.class, Dependency.InnerParent.class);
-            private final Set<Class<?>> methodDependencies = Set.of(
+            private static final Set<Class<?>> innerClassesDependencies = Set
+                    .of(Dependency.Sample.class, Dependency.InnerMethod.class,
+                            Dependency.InnerField.class,
+                            Dependency.InnerParent.class);
+            private static final Set<Class<?>> methodDependencies = Set.of(
                     Dependency.MethodStaticPublic.class,
                     Dependency.MethodStaticProtected.class,
                     Dependency.MethodStaticPrivate.class,
                     Dependency.MethodPublic.class,
                     Dependency.MethodProtected.class,
                     Dependency.MethodPrivate.class);
-            private final Set<Class<?>> parentClass = Set
+            private static final Set<Class<?>> parentClass = Set
                     .of(Dependency.Parent.class);
-            private final Set<Class<?>> parentClassDependencies = Set.of(
+            private static final Set<Class<?>> parentClassDependencies = Set.of(
                     Dependency.ParentFieldPublic.class,
                     Dependency.GrandParent.class,
                     Dependency.GrandParentMethodPrivate.class);
-            private final Class<?> reflectionJDK;
-            private final Class<?> reflectionOrigin;
+            private static final Class<?> reflectionJDK = List.class;
+            private static final Class<?> reflectionOrigin = Dependency.Sample.class;
             private final ClassInfo sourceJDK;
             private final ClassInfo sourceOrigin;
 
@@ -839,12 +840,8 @@ public class ClassInfoModelTests {
 
             Default(ScanResult source) {
                 super(source);
-                reflectionOrigin = Dependency.Sample.class;
                 sourceOrigin = getClassInfo(reflectionOrigin, source);
-                reflectionJDK = List.class;
                 sourceJDK = getClassInfo(reflectionJDK, source);
-                annotation = Dependency.Sample.class
-                        .getAnnotation(Dependency.Annotation.class);
             }
 
             public Annotation getAnnotation() {
@@ -893,7 +890,7 @@ public class ClassInfoModelTests {
         }
 
         static class Specializations extends Context {
-            private final Map<Class<?>, String[]> reflectionSpecializations = Map
+            private static final Map<Class<?>, String[]> reflectionSpecializations = Map
                     .ofEntries(entry(Boolean.class, "isJDKClass", "isBoolean"),
                             entry(Byte.class, "isJDKClass", "isByte",
                                     "hasIntegerType"),
@@ -917,7 +914,6 @@ public class ClassInfoModelTests {
 
             Specializations(ScanResult source) {
                 super(source);
-
                 this.sourceSpecializations = reflectionSpecializations
                         .entrySet().stream().collect(Collectors.toMap(
                                 this::transformKey, Map.Entry::getValue));

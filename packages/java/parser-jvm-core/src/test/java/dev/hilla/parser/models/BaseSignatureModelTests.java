@@ -153,9 +153,17 @@ public class BaseSignatureModelTests {
     }
 
     static final class Context {
-        private final Annotation annotation;
-        private final Map<String, Class<?>> bareReflectionOrigins;
-        private final Map<String, AnnotatedType> completeReflectionOrigins;
+        private static final Annotation annotation = getDeclaredMethod(
+                Sample.class, "getByte").getAnnotatedReturnType()
+                        .getAnnotation(Bar.class);
+        private static final Map<String, Class<?>> bareReflectionOrigins = getDeclaredMethods(
+                Sample.class)
+                        .collect(Collectors.toMap(Method::getName,
+                                Method::getReturnType));
+        private static final Map<String, AnnotatedType> completeReflectionOrigins = getDeclaredMethods(
+                Sample.class)
+                        .collect(Collectors.toMap(Method::getName,
+                                Method::getAnnotatedReturnType));
         private final Map<String, BaseTypeSignature> sourceOrigins;
 
         Context(ExtensionContext context) {
@@ -163,21 +171,11 @@ public class BaseSignatureModelTests {
         }
 
         Context(ScanResult source) {
-            bareReflectionOrigins = getDeclaredMethods(Sample.class).collect(
-                    Collectors.toMap(Method::getName, Method::getReturnType));
-
-            completeReflectionOrigins = getDeclaredMethods(Sample.class)
-                    .collect(Collectors.toMap(Method::getName,
-                            Method::getAnnotatedReturnType));
-
             sourceOrigins = getDeclaredMethods(Sample.class, source)
                     .collect(Collectors.toMap(MethodInfo::getName,
                             method -> (BaseTypeSignature) method
                                     .getTypeSignatureOrTypeDescriptor()
                                     .getResultType()));
-
-            annotation = getDeclaredMethod(Sample.class, "getByte")
-                    .getAnnotatedReturnType().getAnnotation(Bar.class);
         }
 
         public Annotation getAnnotation() {
@@ -344,7 +342,7 @@ public class BaseSignatureModelTests {
         }
     }
 
-    private static class Sample {
+    static class Sample {
         public boolean getBoolean() {
             return true;
         }

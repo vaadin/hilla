@@ -16,10 +16,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +44,7 @@ import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.FieldInfo;
 import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
@@ -452,24 +453,20 @@ public class ClassRefSignatureModelTests {
     }
 
     abstract static class Context {
-        private final Map<String, Class<?>> bareReflectionOrigins = new HashMap<>();
-        private final Map<String, AnnotatedType> completeReflectionOrigins = new HashMap<>();
+        private final Map<String, Class<?>> bareReflectionOrigins;
+        private final Map<String, AnnotatedType> completeReflectionOrigins;
         private final ScanResult source;
-        private final Map<String, ClassRefTypeSignature> sourceOrigins = new HashMap<>();
+        private final Map<String, ClassRefTypeSignature> sourceOrigins;
 
-        Context(ScanResult source, Class<?> target) {
+        Context(ScanResult source, ReflectionData data) {
             this.source = source;
-
-            var classInfo = getClassInfo(target, source);
-
-            getDeclaredFields(target).forEach(field -> {
-                var name = field.getName();
-
-                completeReflectionOrigins.put(name, field.getAnnotatedType());
-                bareReflectionOrigins.put(name, field.getType());
-                sourceOrigins.put(name, (ClassRefTypeSignature) classInfo
-                        .getFieldInfo(name).getTypeSignatureOrTypeDescriptor());
-            });
+            this.sourceOrigins = getDeclaredFields(data.getTarget(), source)
+                    .collect(Collectors.toMap(FieldInfo::getName,
+                            field -> (ClassRefTypeSignature) field
+                                    .getTypeSignatureOrTypeDescriptor()));
+            this.bareReflectionOrigins = data.getBareReflectionOrigins();
+            this.completeReflectionOrigins = data
+                    .getCompleteReflectionOrigins();
         }
 
         public Class<?> getBareReflectionOrigin(String name) {
@@ -534,9 +531,39 @@ public class ClassRefSignatureModelTests {
             }
         }
 
+        static final class ReflectionData {
+            private final Map<String, Class<?>> bareReflectionOrigins;
+            private final Map<String, AnnotatedType> completeReflectionOrigins;
+            private final Class<?> target;
+
+            ReflectionData(Class<?> target) {
+                this.target = target;
+                this.bareReflectionOrigins = getDeclaredFields(target).collect(
+                        Collectors.toMap(Field::getName, Field::getType));
+                this.completeReflectionOrigins = getDeclaredFields(target)
+                        .collect(Collectors.toMap(Field::getName,
+                                Field::getAnnotatedType));
+            }
+
+            public Map<String, Class<?>> getBareReflectionOrigins() {
+                return bareReflectionOrigins;
+            }
+
+            public Map<String, AnnotatedType> getCompleteReflectionOrigins() {
+                return completeReflectionOrigins;
+            }
+
+            public Class<?> getTarget() {
+                return target;
+            }
+        }
+
         static class Characteristics extends Context {
+            private static final ReflectionData data = new ReflectionData(
+                    Sample.Characteristics.class);
+
             Characteristics(ScanResult source) {
-                super(source, Sample.Characteristics.class);
+                super(source, data);
             }
 
             Characteristics(ExtensionContext context) {
@@ -545,8 +572,11 @@ public class ClassRefSignatureModelTests {
         }
 
         static class Default extends Context {
+            private static final ReflectionData data = new ReflectionData(
+                    Sample.class);
+
             Default(ScanResult source) {
-                super(source, Sample.class);
+                super(source, data);
             }
 
             Default(ExtensionContext context) {
