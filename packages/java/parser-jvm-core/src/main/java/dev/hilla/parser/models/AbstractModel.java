@@ -12,30 +12,7 @@ public abstract class AbstractModel<T> implements Model {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-
-        if (!(other instanceof AbstractModel)) {
-            return false;
-        }
-
-        return Objects.equals(origin, ((AbstractModel<?>) other).origin);
-    }
-
-    @Override
     public T get() {
         return origin;
-    }
-
-    @Override
-    public int hashCode() {
-        return origin.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return origin.toString();
     }
 }
