@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +50,10 @@ import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ClassRefSignatureModelTests {
+    private static final boolean isJDK11 = Runtime.Version
+            .parse(System.getProperty("java.version")).feature() <= 11;
+    private static final Logger log = Logger
+            .getLogger(ClassRefSignatureModelTests.class.getName());
     private Context.Default ctx;
     private Context.Matches matches;
 
@@ -135,6 +140,13 @@ public class ClassRefSignatureModelTests {
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
             Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
             String testName) {
+        if (isJDK11 && (testName.equals("staticParametrizedDependency")
+                || testName.equals("staticDependency"))) {
+            log.info(
+                    "Disabled due to a bug in JDK 11 (https://bugs.openjdk.org/browse/JDK-8217102)");
+            return;
+        }
+
         var reflectionModel = ClassRefSignatureModel.of(origins.getKey());
         var sourceModel = ClassRefSignatureModel.of(origins.getValue());
 
@@ -151,13 +163,20 @@ public class ClassRefSignatureModelTests {
         var sourceModel = ClassRefSignatureModel.of(origins.getValue());
 
         assertEquals(reflectionModel, reflectionModel);
-        assertEquals(reflectionModel, sourceModel);
-
         assertEquals(sourceModel, sourceModel);
-        assertEquals(sourceModel, reflectionModel);
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+
+        if (isJDK11 && (testName.equals("staticParametrizedDependency")
+                || testName.equals("staticDependency"))) {
+            log.info(
+                    "Comparison between models of a different origin is disabled due "
+                            + "to a bug in JDK 11 (https://bugs.openjdk.org/browse/JDK-8217102)");
+        } else {
+            assertEquals(sourceModel, reflectionModel);
+            assertEquals(reflectionModel, sourceModel);
+        }
     }
 
     @DisplayName("It should resolve class info")
