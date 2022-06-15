@@ -22,7 +22,7 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
@@ -36,7 +36,7 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
