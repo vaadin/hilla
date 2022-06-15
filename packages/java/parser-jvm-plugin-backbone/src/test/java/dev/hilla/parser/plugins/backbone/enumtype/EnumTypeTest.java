@@ -11,7 +11,7 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
 public class EnumTypeTest {
-    private final TestHelper helper = new TestHelper();
+    private final TestHelper helper = new TestHelper(getClass());
 
     @Test
     public void should_GenerateStringType_When_ReferringToEnumTypes()

@@ -19,7 +19,6 @@ public class SourceExtension
         implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
     public static final ExtensionContext.Namespace SOURCE = ExtensionContext.Namespace
             .create(SourceExtension.class);
-    private ScanResult source;
 
     public static ScanResult getSource(ExtensionContext context) {
         var store = Objects.requireNonNull(context.getStore(SOURCE));
@@ -35,16 +34,15 @@ public class SourceExtension
 
     @Override
     public void beforeAll(ExtensionContext context) throws URISyntaxException {
-        var target = getClass();
-        var loader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
+        var testClass = context.getRequiredTestClass();
+        var loader = new ResourceLoader(testClass);
         var targetDir = loader.findTargetDirPath();
 
         var source = new ClassGraph().enableAllInfo()
                 .enableSystemJarsAndModules()
                 .overrideClasspath(targetDir.toString()).scan();
 
-        context.getStore(SOURCE).put(context.getRequiredTestClass(), source);
+        context.getStore(SOURCE).put(testClass, source);
     }
 
     @Override

@@ -14,7 +14,7 @@ import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
 
 public class BarePageableTest {
-    private final TestHelper helper = new TestHelper();
+    private final TestHelper helper = new TestHelper(getClass());
 
     @Test
     public void should_ConsiderInternalDependenciesForReplacedEntities()

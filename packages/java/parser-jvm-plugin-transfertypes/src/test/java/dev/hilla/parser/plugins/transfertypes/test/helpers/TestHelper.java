@@ -18,21 +18,16 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 public final class TestHelper {
     private final ObjectMapper mapper = Json.mapper();
-    private final ResourceLoader resourceLoader = createResourceLoader(
-            getClass());
+    private final ResourceLoader resourceLoader;
     private final Path targetDir;
 
-    {
+    public TestHelper(Class<?> cls) {
         try {
-            targetDir = resourceLoader.findTargetDirPath();
+            this.resourceLoader = new ResourceLoader(cls);
+            this.targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static ResourceLoader createResourceLoader(Class<?> target) {
-        return new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
     }
 
     public void executeParserWithConfig(ParserConfig config)
@@ -49,9 +44,8 @@ public final class TestHelper {
 
     public String getExtendedClassPath(Class<?>... classes)
             throws URISyntaxException {
-        return ResourceLoader.getClasspath(
-                Arrays.stream(classes).map(TestHelper::createResourceLoader)
-                        .collect(Collectors.toList()));
+        return ResourceLoader.getClasspath(Arrays.stream(classes)
+                .map(ResourceLoader::new).collect(Collectors.toList()));
     }
 
     public Path getTargetDir() {
