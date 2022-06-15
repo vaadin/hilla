@@ -15,7 +15,8 @@ import dev.hilla.parser.core.dependency.DependencyPlugin;
 import dev.hilla.parser.testutils.ResourceLoader;
 
 public class ParserTests {
-    private final ResourceLoader resourceLoader = new ResourceLoader(getClass());
+    private final ResourceLoader resourceLoader = new ResourceLoader(
+            getClass());
     private String basicPluginEndpointName;
     private Set<String> defaultClassPathElements;
     private String dependencyPluginEndpointName;
