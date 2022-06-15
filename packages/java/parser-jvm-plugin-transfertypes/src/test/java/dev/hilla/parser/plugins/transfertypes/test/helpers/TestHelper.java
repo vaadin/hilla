@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
+
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 

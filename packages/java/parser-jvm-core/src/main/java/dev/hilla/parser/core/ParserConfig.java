@@ -1,6 +1,5 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,16 +13,20 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.OpenAPI;
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.OpenAPI;
+
 public final class ParserConfig extends AbstractParserConfig {
     private final SortedSet<Plugin> plugins = new TreeSet<>(
-        Comparator.comparingInt(Plugin::getOrder));
+            Comparator.comparingInt(Plugin::getOrder));
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
@@ -71,7 +74,7 @@ public final class ParserConfig extends AbstractParserConfig {
 
     public static final class Builder {
         private static final Logger logger = LoggerFactory
-            .getLogger(Builder.class);
+                .getLogger(Builder.class);
 
         private final List<Consumer<ParserConfig>> actions = new ArrayList<>();
         private FileSource openAPISpec;
@@ -97,13 +100,16 @@ public final class ParserConfig extends AbstractParserConfig {
         }
 
         @Nonnull
-        public Builder classPath(@Nonnull String[] classPathElements, boolean override) {
-            return classPath(Arrays.asList(Objects.requireNonNull(classPathElements)), override);
+        public Builder classPath(@Nonnull String[] classPathElements,
+                boolean override) {
+            return classPath(
+                    Arrays.asList(Objects.requireNonNull(classPathElements)),
+                    override);
         }
 
         @Nonnull
         public Builder classPath(@Nonnull Collection<String> classPathElements,
-            boolean override) {
+                boolean override) {
             Objects.requireNonNull(classPathElements);
 
             actions.add(config -> {
@@ -117,14 +123,14 @@ public final class ParserConfig extends AbstractParserConfig {
 
         @Nonnull
         public Builder classPath(
-            @Nonnull Collection<String> classPathElements) {
+                @Nonnull Collection<String> classPathElements) {
             return classPath(classPathElements, true);
         }
 
         @Nonnull
         public Builder endpointAnnotation(
-            @Nonnull String annotationFullyQualifiedName,
-            boolean override) {
+                @Nonnull String annotationFullyQualifiedName,
+                boolean override) {
             Objects.requireNonNull(annotationFullyQualifiedName);
 
             actions.add(config -> {
@@ -137,7 +143,7 @@ public final class ParserConfig extends AbstractParserConfig {
 
         @Nonnull
         public Builder endpointAnnotation(
-            @Nonnull String annotationQualifiedName) {
+                @Nonnull String annotationQualifiedName) {
             return endpointAnnotation(annotationQualifiedName, true);
         }
 
@@ -152,24 +158,24 @@ public final class ParserConfig extends AbstractParserConfig {
             actions.forEach(action -> action.accept(config));
 
             Objects.requireNonNull(config.classPathElements,
-                "[JVM Parser] classPath is not provided.");
+                    "[JVM Parser] classPath is not provided.");
             Objects.requireNonNull(config.endpointAnnotationName,
-                "[JVM Parser] endpointAnnotationName is not provided.");
+                    "[JVM Parser] endpointAnnotationName is not provided.");
 
             return config;
         }
 
         @Nonnull
         public Builder openAPISource(@Nonnull String src,
-            @Nonnull OpenAPIFileType type) {
+                @Nonnull OpenAPIFileType type) {
             openAPISpec = new FileSource(Objects.requireNonNull(src),
-                Objects.requireNonNull(type));
+                    Objects.requireNonNull(type));
             return this;
         }
 
         @Nonnull
         public <P extends Plugin> Builder plugins(
-            @Nonnull Collection<P> plugins) {
+                @Nonnull Collection<P> plugins) {
             Objects.requireNonNull(plugins);
             actions.add(config -> {
                 config.plugins.clear();
@@ -183,9 +189,9 @@ public final class ParserConfig extends AbstractParserConfig {
                 var parser = new OpenAPIParser();
 
                 var src = new String(Objects
-                    .requireNonNull(getClass()
-                        .getResourceAsStream("OpenAPIBase.json"))
-                    .readAllBytes());
+                        .requireNonNull(getClass()
+                                .getResourceAsStream("OpenAPIBase.json"))
+                        .readAllBytes());
 
                 parser.parse(new FileSource(src, OpenAPIFileType.JSON));
 
@@ -196,7 +202,7 @@ public final class ParserConfig extends AbstractParserConfig {
                 return parser.getValue();
             } catch (IOException e) {
                 throw new ParserException(
-                    "Failed to parse openAPI specification", e);
+                        "Failed to parse openAPI specification", e);
             }
         }
     }
@@ -229,7 +235,7 @@ public final class ParserConfig extends AbstractParserConfig {
         public void parse(FileSource spec) throws IOException {
             var mapper = spec.getType().getMapper();
             var reader = value != null ? mapper.readerForUpdating(value)
-                : mapper.reader();
+                    : mapper.reader();
             value = reader.readValue(spec.getSrc(), OpenAPI.class);
         }
     }
