@@ -3,7 +3,6 @@ package dev.hilla.parser.plugins.transfertypes.pageable.bare;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,7 @@ public class BarePageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
@@ -36,7 +35,7 @@ public class BarePageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(classpath.split(File.pathSeparator)))
+                .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
