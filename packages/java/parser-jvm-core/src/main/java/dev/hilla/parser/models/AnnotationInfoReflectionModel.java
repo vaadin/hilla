@@ -30,6 +30,6 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
 
     @Override
     public int hashCode() {
-        return origin.annotationType().getName().hashCode();
+        return getName().hashCode();
     }
 }
