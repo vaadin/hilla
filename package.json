@@ -32,6 +32,7 @@
     "@web/dev-server-esbuild": "^0.2.14",
     "@web/dev-server-import-maps": "^0.0.6",
     "@web/test-runner-chrome": "^0.10.2",
+    "@web/test-runner-puppeteer": "^0.10.5",
     "concurrently": "^6.2.1",
     "esbuild": "^0.13.12",
     "eslint": "^7.32.0",
