@@ -69,9 +69,11 @@ public class ClassRefSignatureModelTests {
         var fieldName = "staticParametrizedDependency";
 
         var bareParametrized = ctx.getBareReflectionOrigin(fieldName);
+
         var completeParametrizedHidden = ctx
                 .getCompleteReflectionOrigin(fieldName);
         var completeParametrized = (AnnotatedParameterizedType) completeParametrizedHidden;
+
         var sourceParametrized = ctx.getSourceOrigin(fieldName);
 
         var classParametrized = Sample.StaticParametrizedDependency.Sub.class;
