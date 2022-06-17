@@ -330,15 +330,10 @@ export class ConnectClient {
    * @param endpoint Endpoint name.
    * @param method Method name to call in the endpoint class.
    * @param params Optional parameters to pass to the method.
-   * @param endpointRequestInit Optional parameters for the request
+   * @param init Optional parameters for the request
    * @returns {} Decoded JSON response data.
    */
-  public async call(
-    endpoint: string,
-    method: string,
-    params?: any,
-    endpointRequestInit?: EndpointRequestInit,
-  ): Promise<any> {
+  public async call(endpoint: string, method: string, params?: any, init?: EndpointRequestInit): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -394,7 +389,7 @@ export class ConnectClient {
     // this way makes the folding down below more concise.
     const fetchNext: MiddlewareNext = async (context: MiddlewareContext): Promise<Response> => {
       $wnd.Vaadin.connectionState.loadingStarted();
-      return fetch(context.request, { signal: endpointRequestInit?.signal })
+      return fetch(context.request, { signal: init?.signal })
         .then((response) => {
           $wnd.Vaadin.connectionState.loadingFinished();
           return response;
