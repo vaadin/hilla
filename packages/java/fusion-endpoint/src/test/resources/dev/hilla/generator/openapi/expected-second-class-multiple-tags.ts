@@ -7,16 +7,17 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type User from './User';
 
 /**
  * Get all users
  *
+ * @param init an optional object containing additional parameters for the request
  * Return list of users
  */
-function _getAllUsers(): Promise<Array<User | undefined>> {
-  return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
+function _getAllUsers (init?: EndpointRequestInit): Promise<Array<User | undefined>> {
+  return client.call('GeneratorTestClass', 'getAllUsers', {}, init);
 }
 
 export {

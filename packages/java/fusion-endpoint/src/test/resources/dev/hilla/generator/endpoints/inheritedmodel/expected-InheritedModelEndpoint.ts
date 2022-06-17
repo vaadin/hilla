@@ -7,14 +7,15 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type ChildModel from './dev/hilla/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ChildModel';
 import type ParentModel from './dev/hilla/generator/endpoints/inheritedmodel/InheritedModelEndpoint/ParentModel';
 
 function _getParentModel(
-  child: ChildModel | undefined
+ child: ChildModel | undefined,
+ init?: EndpointRequestInit
 ): Promise<ParentModel | undefined> {
-  return client.call('InheritedModelEndpoint', 'getParentModel', {child});
+  return client.call('InheritedModelEndpoint', 'getParentModel', {child}, init);
 }
 
 export {

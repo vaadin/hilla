@@ -38,7 +38,7 @@ So `// @ts-ignore` is used for now to mute this error. The consequences are:
 }}// @ts-ignore
 import client from '{{vaadinConnectDefaultClientPath}}';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
 {{#each imports}}
 import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}{{/importAs}} from '{{importPath}}';
@@ -52,14 +52,22 @@ import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}
  *{{/multiplelines}}{{/notes}}{{!
  }}{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
  * @param {{name}}{{#description}} {{description}}{{/description}}{{!
- }}{{/each}}
+ }}{{/each}}{{!
+}}{{^vendorExtensions.x-vaadin-connect-subscribe}}
+ * @param init an optional object containing additional parameters for the request{{!
+}}{{/vendorExtensions.x-vaadin-connect-subscribe}}
  *{{#responses}}{{#message}} {{message}}{{/message}}{{/responses}}
  */{{/vendorExtensions.x-vaadin-connect-show-tsdoc}}
-function _{{vendorExtensions.x-vaadin-connect-method-name}}({{!
- }}{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
- {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports type ../../imports}}}{{#if @last}}{{! Append new line if it's the last param.}}
-{{else}},{{! Used the `~` after if to remove extra empty line by the each loop}}{{/if~}}
-{{/each}}): {{#vendorExtensions.x-vaadin-connect-subscribe}}
+function _{{vendorExtensions.x-vaadin-connect-method-name}}(
+{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}
+ {{name}}{{^required}}?{{/required}}: {{{getClassNameFromImports type ../../imports}}}{{#if @last}}{{!
+}}{{else}},
+{{/if}}{{!
+}}{{/each}}{{^vendorExtensions.x-vaadin-connect-subscribe}}
+{{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}{{#if @last}},
+{{/if}}{{/each}} init?: EndpointRequestInit
+{{/vendorExtensions.x-vaadin-connect-subscribe}}{{!
+}}): {{#vendorExtensions.x-vaadin-connect-subscribe}}
 {{!
 }}{{{getClassNameFromImports vendorExtensions.x-vaadin-connect-subscribe-return-type ../../../imports}}}{{!
 }}
@@ -80,15 +88,12 @@ Promise<{{!
  return client.call(<%!
    %>'<%vendorExtensions.x-vaadin-connect-endpoint-name%>', <%!
    %>'<%vendorExtensions.x-vaadin-connect-method-name%>'<%!
-   %><%^bodyParams%><%!
-     %><%^authMethods%>, undefined<%/authMethods%><%!
-   %><%/bodyParams%><%!
-   %><%#bodyParams%>, {<%!
+   %>, {<%!
    %><%#each bodyParam.vendorExtensions.x-vaadin-connect-parameters%><%!
      %><%name%><%#if @last%><%else%>, <%/if%><%!
    %><%/each%><%!
-   %>}<%/bodyParams%><%!
-   %><%^authMethods%>, {requireCredentials: false}<%/authMethods%><%!
+   %>}<%!
+   %>, init<%!
  %>);
 <%/vendorExtensions.x-vaadin-connect-subscribe%>
 }

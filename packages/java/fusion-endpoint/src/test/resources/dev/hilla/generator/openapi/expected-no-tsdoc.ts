@@ -9,12 +9,11 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
-function _getAllUsers(): Promise<void> {
-  return client.call('GeneratorTestClass', 'getAllUsers', undefined, {requireCredentials: false});
+function _getAllUsers(init?: EndpointRequestInit): Promise<void> {
+  return client.call('GeneratorTestClass', 'getAllUsers', {}, init);
 }
-
 export {
   _getAllUsers as getAllUsers,
 };

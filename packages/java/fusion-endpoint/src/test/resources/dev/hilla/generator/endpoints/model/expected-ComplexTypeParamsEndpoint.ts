@@ -7,22 +7,24 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/model/ModelEndpoint/Account';
 import type Group from './dev/hilla/generator/endpoints/model/ModelEndpoint/Group';
 
 function _getComplexTypeParams(
   accounts: Array<Account | undefined> | undefined,
-  groups: Record<string, Group | undefined> | undefined
+  groups: Record<string, Group | undefined> | undefined,
+  init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('ComplexTypeParamsEndpoint', 'getComplexTypeParams', {accounts, groups});
+  return client.call('ComplexTypeParamsEndpoint', 'getComplexTypeParams', {accounts, groups}, init);
 }
 
 function _send(
   text: string | undefined,
-  chatPartnerId: number
+  chatPartnerId: number,
+  init?: EndpointRequestInit
  ): Promise<void> {
-  return client.call('ComplexTypeParamsEndpoint', 'send', {text, chatPartnerId});
+  return client.call('ComplexTypeParamsEndpoint', 'send', {text, chatPartnerId}, init);
  }
 
 export {

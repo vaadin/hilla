@@ -7,11 +7,11 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/model/ModelEndpoint/Account';
 
-function _getAccounts(): Promise<Array<Account | undefined> | undefined> {
-  return client.call('ComplexReturnTypeEndpoint', 'getAccounts');
+function _getAccounts(init?: EndpointRequestInit): Promise<Array<Account | undefined> | undefined> {
+  return client.call('ComplexReturnTypeEndpoint', 'getAccounts', {}, init);
 }
 
 export {

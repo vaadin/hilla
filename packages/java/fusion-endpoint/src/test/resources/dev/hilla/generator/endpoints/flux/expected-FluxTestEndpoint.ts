@@ -9,7 +9,7 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type User from './dev/hilla/generator/endpoints/flux/FluxTestEndpoint/User';
 function _getAllUsersNonnull():
 Subscription<User> {

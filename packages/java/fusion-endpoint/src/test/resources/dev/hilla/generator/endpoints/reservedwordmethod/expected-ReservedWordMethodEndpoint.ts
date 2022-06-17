@@ -9,10 +9,10 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
-function _delete(): Promise<void> {
-  return client.call('ReservedWordMethodEndpoint', 'delete');
+function _delete(init?: EndpointRequestInit): Promise<void> {
+  return client.call('ReservedWordMethodEndpoint', 'delete', {}, init);
 }
 
 export {

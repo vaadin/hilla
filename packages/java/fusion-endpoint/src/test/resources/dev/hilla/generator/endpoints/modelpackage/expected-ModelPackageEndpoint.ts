@@ -7,28 +7,31 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/modelpackage/ModelPackageEndpoint/Account';
 
 /**
  * Get a list of user name.
  *
+ * @param init an optional object containing additional parameters for the request
  * Return list of user name
  */
-function _getListOfUserName(): Promise<Array<string | undefined> | undefined> {
-  return client.call('ModelPackageEndpoint', 'getListOfUserName');
+function _getListOfUserName(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+  return client.call('ModelPackageEndpoint', 'getListOfUserName', {}, init);
 }
 
 /**
  * Get a collection by author name. The generator should not mix this type with the Java's Collection type.
  *
  * @param name author name
+ * @param init an optional object containing additional parameters for the request
  * Return a collection
  */
 function _getSameModelPackage(
-  name: string | undefined
+  name: string | undefined,
+  init?: EndpointRequestInit
 ): Promise<Account | undefined> {
-  return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name});
+  return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name}, init);
 }
 
 export {

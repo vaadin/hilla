@@ -7,11 +7,11 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Model from './dev/hilla/generator/endpoints/complexhierarchymodel/Model';
 
-function _getModel(): Promise<Model | undefined> {
-  return client.call('ComplexHierarchyEndpoint', 'getModel');
+function _getModel(init?: EndpointRequestInit): Promise<Model | undefined> {
+  return client.call('ComplexHierarchyEndpoint', 'getModel', {} , init);
 }
 
 export {

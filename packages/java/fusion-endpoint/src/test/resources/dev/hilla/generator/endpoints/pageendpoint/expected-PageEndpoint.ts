@@ -6,16 +6,16 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Foo from './dev/hilla/generator/endpoints/pageendpoint/PageEndpoint/Foo';
-function _getPageOfObjects(): Promise<Array<Foo | undefined> | undefined> {
+function _getPageOfObjects(init?: EndpointRequestInit): Promise<Array<Foo | undefined> | undefined> {
   return client.call (
-    'PageEndpoint', 'getPageOfObjects'
+    'PageEndpoint', 'getPageOfObjects', {}, init
   );
 }
-function _getPageOfStrings(): Promise<Array<string | undefined> | undefined> {
+function _getPageOfStrings(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
   return client.call (
-    'PageEndpoint', 'getPageOfStrings'
+    'PageEndpoint', 'getPageOfStrings', {}, init
   );
 }
 export {

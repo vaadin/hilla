@@ -9,14 +9,15 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type ComplexRequest from './ComplexRequest';
 import type ComplexResponse from './ComplexResponse';
 
 function _complexEntitiesTest(
-  request?: ComplexRequest
+  request?: ComplexRequest,
+  init?: EndpointRequestInit
 ): Promise<ComplexResponse> {
-  return client.call('GeneratorTestClass', 'complexEntitiesTest', {request});
+  return client.call('GeneratorTestClass', 'complexEntitiesTest', {request}, init);
 }
 export {
   _complexEntitiesTest as complexEntitiesTest,

@@ -7,13 +7,14 @@
 // @ts-ignore
 import client from './connect-client.default';
 // @ts-ignore
-import { Subscription } from '@hilla/frontend';
+import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/modelpackage/subpackage/Account';
 
 function _getSubAccountPackage(
-  name: string | undefined
+  name: string | undefined,
+  init?: EndpointRequestInit
 ): Promise<Account | undefined> {
-  return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name});
+  return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name}, init);
 }
 
 export {
