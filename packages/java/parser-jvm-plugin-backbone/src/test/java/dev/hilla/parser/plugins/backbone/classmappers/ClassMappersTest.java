@@ -8,18 +8,20 @@ import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.plugins.backbone.utils.TestBase;
+import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
-public class ClassMappersTest extends TestBase {
+public class ClassMappersTest {
+    private final TestHelper helper = new TestHelper(getClass());
+
     @Test
     public void should_OverrideClassData()
             throws IOException, URISyntaxException {
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(targetDir.toString()))
+                .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new ClassMappersPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
 
-        executeParserWithConfig(config);
+        helper.executeParserWithConfig(config);
     }
 }
