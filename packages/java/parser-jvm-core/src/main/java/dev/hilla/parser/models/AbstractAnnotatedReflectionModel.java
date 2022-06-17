@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
@@ -12,20 +11,16 @@ public abstract class AbstractAnnotatedReflectionModel<T extends AnnotatedElemen
         extends AbstractModel<T> implements AnnotatedModel, ReflectionModel {
     protected List<AnnotationInfoModel> annotations;
 
-    AbstractAnnotatedReflectionModel(@Nonnull T origin, Model parent) {
-        super(origin, parent);
+    AbstractAnnotatedReflectionModel(@Nonnull T origin) {
+        super(origin);
     }
 
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
             annotations = Arrays.stream(origin.getAnnotations())
-                    .map(this::processAnnotation).collect(Collectors.toList());
+                    .map(AnnotationInfoModel::of).collect(Collectors.toList());
         }
         return annotations;
-    }
-
-    private AnnotationInfoModel processAnnotation(Annotation annotation) {
-        return AnnotationInfoModel.of(annotation, this);
     }
 }

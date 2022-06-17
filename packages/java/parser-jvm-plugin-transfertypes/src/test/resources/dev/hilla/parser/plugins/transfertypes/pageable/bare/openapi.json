@@ -70,10 +70,6 @@
               }
             ]
           },
-          "property": {
-            "type": "string",
-            "nullable": true
-          },
           "ignoreCase": {
             "type": "boolean"
           },
@@ -84,6 +80,10 @@
                 "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
               }
             ]
+          },
+          "property": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

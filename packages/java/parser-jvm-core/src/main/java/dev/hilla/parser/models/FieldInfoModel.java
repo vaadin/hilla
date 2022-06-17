@@ -8,15 +8,17 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public interface FieldInfoModel extends Model, NamedModel, AnnotatedModel {
-    static FieldInfoModel of(@Nonnull FieldInfo field, @Nonnull Model parent) {
-        return new FieldInfoSourceModel(Objects.requireNonNull(field),
-                Objects.requireNonNull(parent));
+public interface FieldInfoModel
+        extends Model, NamedModel, AnnotatedModel, OwnedModel<ClassInfoModel> {
+    static FieldInfoModel of(@Nonnull FieldInfo field) {
+        return new FieldInfoSourceModel(Objects.requireNonNull(field));
     }
 
-    static FieldInfoModel of(@Nonnull Field field, @Nonnull Model parent) {
-        return new FieldInfoReflectionModel(field, parent);
+    static FieldInfoModel of(@Nonnull Field field) {
+        return new FieldInfoReflectionModel(field);
     }
+
+    String getClassName();
 
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
