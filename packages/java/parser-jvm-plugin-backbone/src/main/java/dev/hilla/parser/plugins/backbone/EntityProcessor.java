@@ -42,8 +42,8 @@ final class EntityProcessor {
         classes.stream().filter(cls -> !cls.isSynthetic())
                 .filter(cls -> !cls.isDate() && !cls.isDateTime()
                         && !cls.isIterable() && !cls.isMap())
-                .flatMap(cls -> cls.getInheritanceChain().getClassesStream())
-                .distinct().forEach(entity -> {
+                .flatMap(ClassInfoModel::getInheritanceChainStream).distinct()
+                .forEach(entity -> {
                     if (components.getSchemas() == null || (!components
                             .getSchemas().containsKey(entity.getName()))) {
                         var processor = new ComponentSchemaProcessor(entity);

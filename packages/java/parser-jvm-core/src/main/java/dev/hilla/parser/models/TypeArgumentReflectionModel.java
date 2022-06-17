@@ -4,11 +4,10 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeArgument;
 
@@ -18,23 +17,40 @@ final class TypeArgumentReflectionModel
     private List<SignatureModel> associatedTypes;
     private TypeArgument.Wildcard wildcard;
 
-    public TypeArgumentReflectionModel(AnnotatedType origin, Model parent) {
-        super(origin, parent);
+    public TypeArgumentReflectionModel(AnnotatedType origin) {
+        super(origin);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeArgumentModel)) {
+            return false;
+        }
+
+        var other = (TypeArgumentModel) obj;
+
+        return getAnnotations().equals(other.getAnnotations())
+                && getAssociatedTypes().equals(other.getAssociatedTypes())
+                && getWildcard().equals(other.getWildcard());
     }
 
     @Override
     public List<SignatureModel> getAssociatedTypes() {
         if (associatedTypes == null) {
             var stream = origin instanceof AnnotatedWildcardType
-                    ? StreamUtils.combine(
+                    ? Streams.combine(
                             ((AnnotatedWildcardType) origin)
                                     .getAnnotatedLowerBounds(),
                             ((AnnotatedWildcardType) origin)
                                     .getAnnotatedUpperBounds())
                     : Stream.of(origin);
 
-            associatedTypes = stream.map(type -> SignatureModel.of(type, this))
-                    .distinct().collect(Collectors.toList());
+            associatedTypes = stream.map(SignatureModel::of).distinct()
+                    .collect(Collectors.toList());
         }
 
         return associatedTypes;
@@ -47,7 +63,7 @@ final class TypeArgumentReflectionModel
 
                 if (((WildcardType) origin).getLowerBounds().length > 0) {
                     wildcard = TypeArgument.Wildcard.SUPER;
-                } else if (!Objects.equals(upperBounds[0], Object.class)) {
+                } else if (!upperBounds[0].equals(Object.class)) {
                     wildcard = TypeArgument.Wildcard.EXTENDS;
                 } else {
                     wildcard = TypeArgument.Wildcard.ANY;
@@ -58,5 +74,10 @@ final class TypeArgumentReflectionModel
         }
 
         return wildcard;
+    }
+
+    @Override
+    public int hashCode() {
+        return getAssociatedTypes().hashCode() + 7 * getWildcard().hashCode();
     }
 }

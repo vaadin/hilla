@@ -21,6 +21,16 @@ public class DependencyPlugin implements Plugin.Processor {
     private SharedStorage storage;
 
     @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
     public void process(@Nonnull Collection<ClassInfoModel> endpoints,
             @Nonnull Collection<ClassInfoModel> entities) {
         var collector = new DependencyCollector(endpoints, entities);
@@ -33,16 +43,6 @@ public class DependencyPlugin implements Plugin.Processor {
 
         storage.getPluginStorage().put(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
                 collector.collectEndpointDirectDependencyNames());
-    }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     @Override

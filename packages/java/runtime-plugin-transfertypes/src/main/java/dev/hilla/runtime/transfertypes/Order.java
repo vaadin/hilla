@@ -12,11 +12,11 @@ import org.springframework.data.domain.Sort.NullHandling;
 public class Order {
     @Nonnull
     private Direction direction;
+    private boolean ignoreCase;
+    private NullHandling nullHandling;
     @Nonnull
     @NotBlank
     private String property;
-    private boolean ignoreCase;
-    private NullHandling nullHandling;
 
     public Direction getDirection() {
         return direction;
@@ -24,6 +24,14 @@ public class Order {
 
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public NullHandling getNullHandling() {
+        return nullHandling;
+    }
+
+    public void setNullHandling(NullHandling nullHandling) {
+        this.nullHandling = nullHandling;
     }
 
     public String getProperty() {
@@ -40,14 +48,6 @@ public class Order {
 
     public void setIgnoreCase(boolean ignoreCase) {
         this.ignoreCase = ignoreCase;
-    }
-
-    public NullHandling getNullHandling() {
-        return nullHandling;
-    }
-
-    public void setNullHandling(NullHandling nullHandling) {
-        this.nullHandling = nullHandling;
     }
 
 }
