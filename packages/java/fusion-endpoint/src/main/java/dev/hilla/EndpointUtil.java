@@ -20,12 +20,12 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 
+import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
 import dev.hilla.auth.EndpointAccessChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -34,7 +34,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * A util class related to {@link Endpoint}.
  */
 @Component
-public class EndpointUtil {
+public class EndpointUtil implements EndpointRequestUtil {
 
     @Autowired
     private EndpointProperties endpointProperties;
@@ -57,6 +57,7 @@ public class EndpointUtil {
      * @return <code>true</code> if the request is for an endpoint,
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean isEndpointRequest(HttpServletRequest request) {
         return getEndpoint(request).isPresent();
     }
@@ -96,6 +97,7 @@ public class EndpointUtil {
      * @return <code>true</code> if the request goes to an anonymous endpoint,
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean isAnonymousEndpoint(HttpServletRequest request) {
         Optional<Method> method = getEndpoint(request);
         if (!method.isPresent()) {
