@@ -1,11 +1,10 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.utils.StreamUtils;
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeParameter;
 
@@ -14,8 +13,25 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
     private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> bounds;
 
-    public TypeParameterSourceModel(TypeParameter origin, Model parent) {
-        super(origin, Objects.requireNonNull(parent));
+    public TypeParameterSourceModel(TypeParameter origin) {
+        super(origin);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeParameterModel)) {
+            return false;
+        }
+
+        var other = (TypeParameterModel) obj;
+
+        return origin.getName().equals(other.getName())
+                && getAnnotations().equals(other.getAnnotations())
+                && getBounds().equals(other.getBounds());
     }
 
     @Override
@@ -30,15 +46,25 @@ final class TypeParameterSourceModel extends AbstractModel<TypeParameter>
     @Override
     public List<SignatureModel> getBounds() {
         if (bounds == null) {
-            bounds = StreamUtils
+            bounds = Streams
                     .combine(Stream.of(origin.getClassBound()),
                             origin.getInterfaceBounds().stream())
                     .map(signature -> signature != null
-                            ? SignatureModel.of(signature, this)
+                            ? SignatureModel.of(signature)
                             : null)
                     .distinct().collect(Collectors.toList());
         }
 
         return bounds;
+    }
+
+    @Override
+    public String getName() {
+        return origin.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return origin.getName().hashCode() + 3 * getBounds().hashCode();
     }
 }

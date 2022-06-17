@@ -2,81 +2,97 @@ package dev.hilla.parser.models;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassInfo;
 
 final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
         implements ClassInfoModel, SourceModel {
-    private final ClassInfoModelInheritanceChain chain;
     private final ClassInfoModel superClass;
+    private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
+    private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
-    private List<ClassInfoModel> superClasses;
 
-    public ClassInfoSourceModel(ClassInfo origin, Model parent) {
-        super(origin, parent);
+    public ClassInfoSourceModel(ClassInfo origin) {
+        super(origin);
 
         var originSuperClass = origin.getSuperclass();
         superClass = originSuperClass != null
                 ? ClassInfoModel.of(originSuperClass)
                 : null;
-
-        chain = new ClassInfoModelInheritanceChain(this);
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof ClassInfoModel)) {
+        if (!(obj instanceof ClassInfoModel)) {
             return false;
         }
 
-        if (other instanceof ClassInfoSourceModel) {
-            return Objects.equals(origin,
-                    ((ClassInfoSourceModel) other).origin);
-        }
+        var other = (ClassInfoModel) obj;
 
-        return Objects.equals(getName(), ((ClassInfoModel) other).getName());
+        return origin.getName().equals(other.getName());
     }
 
     @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
-            fields = getMembers(origin.getDeclaredFieldInfo(),
-                    FieldInfoModel::of);
+            fields = origin.getDeclaredFieldInfo().stream()
+                    .map(FieldInfoModel::of).collect(Collectors.toList());
         }
 
         return fields;
     }
 
     @Override
-    public ClassInfoModelInheritanceChain getInheritanceChain() {
+    public List<ClassInfoModel> getInheritanceChain() {
+        if (chain == null) {
+            chain = Streams
+                    .combine(Stream.of(this),
+                            origin.getSuperclasses().stream()
+                                    .filter(ClassInfoModel::isNonJDKClass)
+                                    .map(ClassInfoModel::of))
+                    .collect(Collectors.toList());
+        }
+
         return chain;
     }
 
     @Override
     public List<ClassInfoModel> getInnerClasses() {
         if (innerClasses == null) {
-            innerClasses = getMembers(origin.getInnerClasses(),
-                    ClassInfoModel::of);
+            innerClasses = origin.getInnerClasses().stream()
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
         }
 
         return innerClasses;
     }
 
     @Override
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = origin.getInterfaces().stream().map(ClassInfoModel::of)
+                    .collect(Collectors.toList());
+        }
+
+        return interfaces;
+    }
+
+    @Override
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
-            methods = getMembers(origin.getDeclaredMethodInfo(),
-                    MethodInfoModel::of);
+            methods = origin.getDeclaredMethodInfo().stream()
+                    .map(MethodInfoModel::of).collect(Collectors.toList());
         }
 
         return methods;
@@ -98,18 +114,13 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    public List<ClassInfoModel> getSuperClasses() {
-        if (superClasses == null) {
-            superClasses = getMembers(origin.getSuperclasses(),
-                    ClassInfoModel::isNonJDKClass, ClassInfoModel::of);
-        }
-
-        return superClasses;
+    public int hashCode() {
+        return 3 + origin.hashCode();
     }
 
     @Override
     public boolean isAbstract() {
-        return origin.isAbstract();
+        return origin.isAbstract() || origin.isArrayClass();
     }
 
     @Override
@@ -159,7 +170,7 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isFinal() {
-        return origin.isFinal();
+        return origin.isFinal() || origin.isArrayClass();
     }
 
     @Override
@@ -224,7 +235,8 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isPublic() {
-        return origin.isPublic();
+        return (origin.isPublic() && !origin.isProtected())
+                || origin.isArrayClass();
     }
 
     @Override

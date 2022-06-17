@@ -37,6 +37,7 @@
     <swagger.version>2.1.13</swagger.version>
     <jackson.version>2.13.3</jackson.version>
     <junit.version>5.8.0</junit.version>
+    <mockito.version>4.4.0</mockito.version>
     <spring.data.version>2.6.0</spring.data.version>
     <validation.api.version>2.0.1.Final</validation.api.version>
     <project.scm.id>github</project.scm.id>
@@ -134,6 +135,21 @@
         <artifactId>validation-api</artifactId>
         <version>${validation.api.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>one.util</groupId>
+        <artifactId>streamex</artifactId>
+        <version>0.8.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.12.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -172,7 +188,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>3.0.0-M6</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>

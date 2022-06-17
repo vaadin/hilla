@@ -50,4 +50,5 @@ const generator = new Generator(resolvedPlugins, logger);
 
 const files = await generator.process(await processInput(input, io));
 await io.cleanOutputDir();
+await io.createFileIndex(files.map((file) => file.name));
 await Promise.all(files.map((file) => io.write(file)));

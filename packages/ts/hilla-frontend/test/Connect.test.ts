@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { expect } from '@open-wc/testing';
+import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
@@ -207,6 +207,25 @@ describe('ConnectClient', () => {
         // expected
       } finally {
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTION_LOST);
+      }
+    });
+
+    it('should be able to abort a call', async () => {
+      const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+      fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
+
+      const controller = new AbortController();
+      const called = client.call('FooEndpoint', 'fooMethod', {}, { signal: controller.signal });
+      controller.abort();
+
+      try {
+        await called;
+        assert.fail("Request didn't abort as expected");
+      } catch (err: any) {
+        // Should throw AbortError. If not, rethrow
+        if (err.name !== 'AbortError') {
+          throw err;
+        }
       }
     });
 
@@ -550,22 +569,22 @@ describe('ConnectClient', () => {
     });
 
     it('should create a fluxConnection', async () => {
-      (client as any).fluxConnection = undefined; // NOSONAR
+      (client as any)._fluxConnection = undefined; // NOSONAR
       client.subscribe('FooEndpoint', 'fooMethod');
-      expect((client as any).fluxConnection).to.not.equal(undefined);
+      expect((client as any)._fluxConnection).to.not.equal(undefined);
     });
 
     it('should reuse the fluxConnection', async () => {
       client.subscribe('FooEndpoint', 'fooMethod');
       const { fluxConnection } = client as any;
       client.subscribe('FooEndpoint', 'barMethod');
-      expect((client as any).fluxConnection).to.equal(fluxConnection);
+      expect((client as any)._fluxConnection).to.equal(fluxConnection);
     });
 
     it('should call FluxConnection', async () => {
-      (client as any).fluxConnection = new FluxConnection();
+      (client as any)._fluxConnection = new FluxConnection();
       let called = 0;
-      (client as any).fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
+      (client as any)._fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
         called += 1;
         expect(endpointName).to.equal('FooEndpoint');
         expect(methodName).to.equal('fooMethod');

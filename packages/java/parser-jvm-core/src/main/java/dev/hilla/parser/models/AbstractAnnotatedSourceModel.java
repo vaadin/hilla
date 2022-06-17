@@ -12,14 +12,14 @@ public abstract class AbstractAnnotatedSourceModel<T> extends AbstractModel<T>
         implements AnnotatedModel, SourceModel {
     protected List<AnnotationInfoModel> annotations;
 
-    AbstractAnnotatedSourceModel(@Nonnull T origin, Model parent) {
-        super(origin, parent);
+    AbstractAnnotatedSourceModel(@Nonnull T origin) {
+        super(origin);
     }
 
     @Override
     public List<AnnotationInfoModel> getAnnotations() {
         if (annotations == null) {
-            annotations = getOriginAnnotations().map(this::processAnnotation)
+            annotations = getOriginAnnotations().map(AnnotationInfoModel::of)
                     .collect(Collectors.toList());
         }
 
@@ -27,8 +27,4 @@ public abstract class AbstractAnnotatedSourceModel<T> extends AbstractModel<T>
     }
 
     protected abstract Stream<AnnotationInfo> getOriginAnnotations();
-
-    private AnnotationInfoModel processAnnotation(AnnotationInfo annotation) {
-        return AnnotationInfoModel.of(annotation, this);
-    }
 }

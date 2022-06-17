@@ -2,6 +2,7 @@ package dev.hilla.parser.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -91,6 +92,19 @@ public final class ParserConfig extends AbstractParserConfig {
 
             actions.add(config -> action.accept(config.openAPI));
             return this;
+        }
+
+        @Nonnull
+        public Builder classPath(@Nonnull String[] classPathElements) {
+            return classPath(classPathElements, true);
+        }
+
+        @Nonnull
+        public Builder classPath(@Nonnull String[] classPathElements,
+                boolean override) {
+            return classPath(
+                    Arrays.asList(Objects.requireNonNull(classPathElements)),
+                    override);
         }
 
         @Nonnull

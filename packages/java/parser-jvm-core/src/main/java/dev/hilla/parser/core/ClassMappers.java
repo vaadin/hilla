@@ -17,6 +17,8 @@ public class ClassMappers extends HashSet<ClassMappers.Mapper> {
         return result;
     }
 
+    // TODO: remove this mapping because it breaks ClassRefSignatureModel
+    // purpose
     public ClassRefSignatureModel map(ClassRefSignatureModel model) {
         var reference = model.resolve();
         model.setReference(map(reference));

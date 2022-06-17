@@ -3,25 +3,18 @@ package dev.hilla.parser.testutils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class ResourceLoader {
-    private final Supplier<ProtectionDomain> getProtectionDomain;
-    private final Function<String, URL> getResource;
+    private final Class<?> cls;
 
-    public ResourceLoader(Function<String, URL> getResource,
-            Supplier<ProtectionDomain> getProtectionDomain) {
-        this.getProtectionDomain = getProtectionDomain;
-        this.getResource = getResource;
+    public ResourceLoader(Class<?> cls) {
+        this.cls = cls;
     }
 
     public static String getClasspath(ResourceLoader... loaders)
@@ -44,7 +37,7 @@ public final class ResourceLoader {
 
     public File find(String resourceName) throws URISyntaxException {
         return Paths.get(
-                Objects.requireNonNull(getResource.apply(resourceName)).toURI())
+                Objects.requireNonNull(cls.getResource(resourceName)).toURI())
                 .toFile();
     }
 
@@ -55,7 +48,7 @@ public final class ResourceLoader {
     public Path findTargetPath() throws URISyntaxException {
         return Paths.get(Objects
                 .requireNonNull(
-                        getProtectionDomain.get().getCodeSource().getLocation())
+                        cls.getProtectionDomain().getCodeSource().getLocation())
                 .toURI());
     }
 

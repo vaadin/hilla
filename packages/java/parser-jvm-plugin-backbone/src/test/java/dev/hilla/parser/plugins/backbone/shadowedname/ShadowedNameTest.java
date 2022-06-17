@@ -8,17 +8,19 @@ import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.plugins.backbone.utils.TestBase;
+import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
-public class ShadowedNameTest extends TestBase {
+public class ShadowedNameTest {
+    private final TestHelper helper = new TestHelper(getClass());
+
     @Test
     public void should_DistinguishBetweenUserAndBuiltinTypes_When_TheyHaveSameName()
             throws IOException, URISyntaxException {
         var config = new ParserConfig.Builder()
-                .classPath(Set.of(targetDir.toString()))
+                .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BackbonePlugin()).finish();
 
-        executeParserWithConfig(config);
+        helper.executeParserWithConfig(config);
     }
 }

@@ -8,16 +8,13 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.ArrayTypeSignature;
 
 public interface ArraySignatureModel extends SignatureModel {
-    static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin,
-            @Nonnull Model parent) {
-        return new ArraySignatureSourceModel(Objects.requireNonNull(origin),
-                Objects.requireNonNull(parent));
+    static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin) {
+        return new ArraySignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin,
-            Model parent) {
-        return new ArraySignatureReflectionModel(Objects.requireNonNull(origin),
-                parent);
+    static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin) {
+        return new ArraySignatureReflectionModel(
+                Objects.requireNonNull(origin));
     }
 
     SignatureModel getNestedType();

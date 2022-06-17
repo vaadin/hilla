@@ -18,10 +18,6 @@ final class ClassInfoModelUtils {
     private ClassInfoModelUtils() {
     }
 
-    public static <T> boolean defaultClassInfoMemberFilter(T member) {
-        return true;
-    }
-
     public static <T> boolean isDateAssignable(T actor,
             BiPredicate<Class<?>, T> predicate) {
         for (var cls : DATE_CLASSES) {

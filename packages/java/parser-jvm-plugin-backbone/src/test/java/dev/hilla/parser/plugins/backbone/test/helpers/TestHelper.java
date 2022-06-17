@@ -1,4 +1,4 @@
-package dev.hilla.parser.model.utils;
+package dev.hilla.parser.plugins.backbone.test.helpers;
 
 import static dev.hilla.parser.testutils.OpenAPIAssertions.assertEquals;
 
@@ -14,24 +14,21 @@ import dev.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
-public abstract class TestBase {
-    protected final ObjectMapper mapper = Json.mapper();
-    protected ResourceLoader resourceLoader;
-    protected Path targetDir;
+public final class TestHelper {
+    private final ObjectMapper mapper = Json.mapper();
+    private final ResourceLoader resourceLoader;
+    private final Path targetDir;
 
-    {
-        var target = getClass();
-        resourceLoader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-
+    public TestHelper(Class<?> cls) {
         try {
-            targetDir = resourceLoader.findTargetDirPath();
+            this.resourceLoader = new ResourceLoader(cls);
+            this.targetDir = resourceLoader.findTargetDirPath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected void executeParserWithConfig(ParserConfig config)
+    public void executeParserWithConfig(ParserConfig config)
             throws IOException, URISyntaxException {
         var parser = new Parser(config);
         parser.execute();
@@ -41,5 +38,9 @@ public abstract class TestBase {
         var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
+    }
+
+    public Path getTargetDir() {
+        return targetDir;
     }
 }
