@@ -49,7 +49,7 @@ public final class AnnotatedOwnerUtils {
      *
      * <li>if {@code Child} exists AND ((it is dynamic AND {@code CurrentType}
      * is dynamic) OR (it is dynamic AND {@code CurrentType} is static but not
-     * parametrized)) — then annotations for that type are child's annotations
+     * parametrized)) — then annotations for that type are {@code Child}'s annotations
      * and shouldn't be used.</li>
      *
      * <li>if {@code Child} and {@code CurrentType} are static — getting the
