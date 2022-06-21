@@ -10,15 +10,13 @@
     </parent>
     <groupId>com.vaadin</groupId>
     <artifactId>fusion-endpoint</artifactId>
-    <version>${flow.version}</version>
+    <version>23.2-SNAPSHOT</version>
     <name>Fusion Endpoint</name>
     <packaging>jar</packaging>
 
     <properties>
         <javax.annotation.api.version>1.3.2</javax.annotation.api.version>
         <javaparser.version>3.24.2</javaparser.version>
-        <swagger.codegen.version>3.0.20</swagger.codegen.version>
-        <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
     </properties>
 
     <dependencies>
@@ -214,6 +212,11 @@
           mockito-core 2.23.0 see:
           https://github.com/vaadin/beverage-starter-flow/issues/442 -->
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

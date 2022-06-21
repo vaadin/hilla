@@ -38,7 +38,9 @@
     <formatter.basedir>${maven.multiModuleProjectDirectory}</formatter.basedir>
     <classgraph.version>4.8.146</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.version>2.2.1</swagger.version>
+    <swagger.version>2.1.13</swagger.version>
+    <swagger.codegen.version>3.0.34</swagger.codegen.version>
+    <swagger.codegen.generators.version>1.0.34</swagger.codegen.generators.version>
     <jackson.version>2.13.3</jackson.version>
     <jackson.databind.version>2.13.2.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
