@@ -55,6 +55,32 @@ public class AnnotatedOwnerUtilsTests {
         assertEquals(0, list.get(grandOwnerIndex).length);
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    @interface Bar {
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    @interface Foo {
+    }
+
+    class DYN_Param<P> {
+        class DYN_CParam<C> {
+        }
+
+        class DYN_CSimple {
+        }
+    }
+
+    class DYN_Simple {
+        class DYN_CParam<C> {
+        }
+
+        class DYN_CSimple {
+        }
+    }
+
     static class Provider implements ArgumentsProvider {
         public static final String testNamePattern = "{1}";
 
@@ -85,92 +111,62 @@ public class AnnotatedOwnerUtilsTests {
         }
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
-    @interface Foo {
-    }
+    static class ST_Param<P> {
+        class DYN_CParam<C> {
+        }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
-    @interface Bar {
-    }
-
-    static class Sample {
-        DYN_Simple.@Foo DYN_CSimple ds_ds; // me
-        DYN_Simple.@Foo DYN_CParam<Integer> ds_dp; // me
-        DYN_Param<Integer>.@Foo DYN_CSimple dp_ds; // me
-        DYN_Param<Integer>.@Foo DYN_CParam<Integer> dp_dp; // me
-
-        @Bar
-        ST_Simple.@Foo DYN_CSimple ss_ds; // me
-        @Bar
-        ST_Simple.@Foo DYN_CParam<Integer> ss_dp; // me
-        @Bar
-        ST_Param<Integer>.@Foo DYN_CSimple sp_ds; // parent
-        @Bar
-        ST_Param<Integer>.@Foo DYN_CParam<Integer> sp_dp; // parent
-
-        ST_Simple.@Foo ST_CSimple ss_ss; // both
-        ST_Simple.@Foo ST_CParam<Integer> ss_sp; // parent
-        ST_Param.@Foo ST_CSimple sp_ss; // both
-        ST_Param.@Foo ST_CParam<Integer> sp_sp; // parent
-
-        @Bar
-        GLOB_Simple.@Foo DYN_CSimple gs_ds; // me me
-        @Bar
-        GLOB_Simple.@Foo DYN_CParam<Integer> gs_dp; // me me
-        GLOB_Simple.@Foo ST_CSimple gs_ss; // both
-        GLOB_Simple.@Foo ST_CParam<Integer> gs_sp; // parent
-
-        @Bar
-        GLOB_Param<Integer>.@Foo DYN_CSimple gp_ds; // me me
-        @Bar
-        GLOB_Param<Integer>.@Foo DYN_CParam<Integer> gp_dp; // me me
-        GLOB_Param.@Foo ST_CSimple gp_ss; // both
-        GLOB_Param.@Foo ST_CParam<Integer> gp_sp; // parent
-    }
-
-    class DYN_Simple {
         class DYN_CSimple {
         }
 
-        class DYN_CParam<C> {
-        }
-    }
-
-    class DYN_Param<P> {
-        class DYN_CSimple {
+        static class ST_CParam<C> {
         }
 
-        class DYN_CParam<C> {
+        static class ST_CSimple {
         }
     }
 
     static class ST_Simple {
-        class DYN_CSimple {
-        }
-
         class DYN_CParam<C> {
         }
 
-        static class ST_CSimple {
+        class DYN_CSimple {
         }
 
         static class ST_CParam<C> {
+        }
+
+        static class ST_CSimple {
         }
     }
 
-    static class ST_Param<P> {
-        class DYN_CSimple {
-        }
-
-        class DYN_CParam<C> {
-        }
-
-        static class ST_CSimple {
-        }
-
-        static class ST_CParam<C> {
-        }
+    static class Sample {
+        DYN_Param<Integer>.@Foo DYN_CParam<Integer> dp_dp; // me
+        DYN_Param<Integer>.@Foo DYN_CSimple dp_ds; // me
+        DYN_Simple.@Foo DYN_CParam<Integer> ds_dp; // me
+        DYN_Simple.@Foo DYN_CSimple ds_ds; // me
+        @Bar
+        GLOB_Param<Integer>.@Foo DYN_CParam<Integer> gp_dp; // me me
+        @Bar
+        GLOB_Param<Integer>.@Foo DYN_CSimple gp_ds; // me me
+        GLOB_Param.@Foo ST_CParam<Integer> gp_sp; // parent
+        GLOB_Param.@Foo ST_CSimple gp_ss; // both
+        @Bar
+        GLOB_Simple.@Foo DYN_CParam<Integer> gs_dp; // me me
+        @Bar
+        GLOB_Simple.@Foo DYN_CSimple gs_ds; // me me
+        GLOB_Simple.@Foo ST_CParam<Integer> gs_sp; // parent
+        GLOB_Simple.@Foo ST_CSimple gs_ss; // both
+        @Bar
+        ST_Param<Integer>.@Foo DYN_CParam<Integer> sp_dp; // parent
+        @Bar
+        ST_Param<Integer>.@Foo DYN_CSimple sp_ds; // parent
+        ST_Param.@Foo ST_CParam<Integer> sp_sp; // parent
+        ST_Param.@Foo ST_CSimple sp_ss; // both
+        @Bar
+        ST_Simple.@Foo DYN_CParam<Integer> ss_dp; // me
+        @Bar
+        ST_Simple.@Foo DYN_CSimple ss_ds; // me
+        ST_Simple.@Foo ST_CParam<Integer> ss_sp; // parent
+        ST_Simple.@Foo ST_CSimple ss_ss; // both
     }
 }
