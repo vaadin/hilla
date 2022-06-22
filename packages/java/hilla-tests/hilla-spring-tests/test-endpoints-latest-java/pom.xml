@@ -10,11 +10,13 @@
     <artifactId>test-endpoints-latest-java</artifactId>
     <name>ITs for Endpoints / latest Java</name>
     <packaging>jar</packaging>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <formatter.basedir>${project.parent.parent.parent.basedir}</formatter.basedir>
     </properties>
 
     <dependencies>

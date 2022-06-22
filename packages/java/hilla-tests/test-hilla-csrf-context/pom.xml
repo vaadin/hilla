@@ -21,6 +21,7 @@
 
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
+    <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>

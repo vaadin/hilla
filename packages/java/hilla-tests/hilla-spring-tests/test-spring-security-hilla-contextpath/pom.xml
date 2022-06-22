@@ -10,8 +10,10 @@
     <artifactId>test-spring-security-hilla-contextpath</artifactId>
     <name>ITs for Vaadin Spring Security and Hilla / context path</name>
     <packaging>jar</packaging>
+
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <formatter.basedir>${project.parent.parent.parent.basedir}</formatter.basedir>
     </properties>
 
     <dependencies>

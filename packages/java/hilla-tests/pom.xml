@@ -36,6 +36,7 @@
 
     <sonar.skip>true</sonar.skip>
     <testListener></testListener>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>
