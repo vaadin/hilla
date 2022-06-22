@@ -76,15 +76,8 @@ public interface ClassRefSignatureModel
         return new ClassRefSignatureReflectionModel.Bare(origin);
     }
 
-    static ClassRefSignatureModel of(
-            @Nonnull AnnotatedParameterizedType origin) {
-        return new ClassRefSignatureReflectionModel.Regular(origin);
-    }
-
     static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
-        return origin instanceof AnnotatedParameterizedType
-                ? of((AnnotatedParameterizedType) origin)
-                : new ClassRefSignatureReflectionModel.AnnotatedBare(origin);
+        return ClassRefSignatureReflectionModel.Annotated.of(origin);
     }
 
     String getClassName();
