@@ -3,17 +3,17 @@ name: Validation
 on:
   push:
     branches: [ main, '1.1', '1.0' ]
-    paths:
-      - '.github/workflows/java.yml'
-      - 'packages/java/**/*'
-      - 'scripts/**/*'
-      - 'pom.xml'
+    paths-ignore:
+      - 'hilla-logo.svg'
+      - 'README.md'
+      - '.github/ISSUE_TEMPLATE/*'
+      - 'packages/**/README.md'
   pull_request:
-    paths:
-      - '.github/workflows/java.yml'
-      - 'packages/java/**/*'
-      - 'scripts/**/*'
-      - 'pom.xml'
+    paths-ignore:
+      - 'hilla-logo.svg'
+      - 'README.md'
+      - '.github/ISSUE_TEMPLATE/*'
+      - 'packages/**/README.md'
 
 jobs:
   init:
