@@ -37,7 +37,7 @@ const _validationRequestSymbol = Symbol('validationRequest');
 export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   private [_defaultValue]!: T; // Initialized in the `read()` method
 
-  private [_value]: T = this[_emptyValue];
+  private [_value]!: T; // Initialized in the `read()` method
 
   private [_emptyValue]: T;
 
@@ -238,6 +238,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * The Binder extends BinderNode, see the inherited properties and methods below.
    *
    * @param elm the bound element
+   * @param model the bound model
    */
   public getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
     return getDefaultFieldStrategy(elm, model);
@@ -274,9 +275,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   }
 
   protected override update(oldValue: T) {
-    if (this[_onChange]) {
-      this[_onChange]!.call(this.context, oldValue);
-    }
+    this[_onChange]?.call(this.context, oldValue);
   }
 }
 
