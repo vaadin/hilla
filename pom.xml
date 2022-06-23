@@ -16,7 +16,7 @@
   </parent>
 
   <modules>
-    <module>packages/java/fusion-endpoint</module>
+    <module>packages/java/backend-endpoint</module>
     <module>packages/java/hilla-tests</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
