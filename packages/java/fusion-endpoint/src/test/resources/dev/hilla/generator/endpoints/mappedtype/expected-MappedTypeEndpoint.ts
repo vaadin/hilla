@@ -8,24 +8,24 @@ import client from './connect-client.default';
 // @ts-ignore
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Pageable from './dev/hilla/mappedtypes/Pageable';
-function _getPageable(init?: EndpointRequestInit): Promise<Pageable | undefined> {
+function _getPageable(endpointRequestInit?: EndpointRequestInit): Promise<Pageable | undefined> {
   return client.call (
-    'MappedTypeEndpoint', 'getPageable', {}, init
+    'MappedTypeEndpoint', 'getPageable', {}, endpointRequestInit
   );
 }
 function _parameter (
   pageable: Pageable | undefined,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<void> {
   return client.call (
     'MappedTypeEndpoint', 'parameter', {
       pageable
-    }, init
+    }, endpointRequestInit
   );
 }
-function _returnValue(init?: EndpointRequestInit): Promise<Pageable | undefined> {
+function _returnValue(endpointRequestInit?: EndpointRequestInit): Promise<Pageable | undefined> {
   return client.call (
-    'MappedTypeEndpoint', 'returnValue', {}, init
+    'MappedTypeEndpoint', 'returnValue', {}, endpointRequestInit
   );
 }
 export {

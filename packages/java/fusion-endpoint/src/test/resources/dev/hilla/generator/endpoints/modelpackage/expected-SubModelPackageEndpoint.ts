@@ -12,9 +12,9 @@ import type Account from './dev/hilla/generator/endpoints/modelpackage/subpackag
 
 function _getSubAccountPackage(
   name: string | undefined,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<Account | undefined> {
-  return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name}, init);
+  return client.call('SubModelPackageEndpoint', 'getSubAccountPackage', {name}, endpointRequestInit);
 }
 
 export {

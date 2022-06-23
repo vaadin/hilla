@@ -15,56 +15,56 @@ import type VaadinNonNullableModel from './dev/hilla/generator/endpoints/nonnull
 
 function _echoMap(
   shouldBeNotNull: boolean,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<Record<string, NonNullableModel | undefined>> {
-  return client.call('NonNullableEndpoint', 'echoMap', {shouldBeNotNull}, init);
+  return client.call('NonNullableEndpoint', 'echoMap', {shouldBeNotNull}, endpointRequestInit);
 }
 
 function _echoNonNullModel (
   nonNullableModels: Array<NonNullableModel | undefined>,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<NonNullableModel | undefined> {
-  return client.call('NonNullableEndpoint', 'echoNonNullModel', {nonNullableModels}, init);
+  return client.call('NonNullableEndpoint', 'echoNonNullModel', {nonNullableModels}, endpointRequestInit);
 }
 
 function _echoNonNullableMap(
   nonNullableList: Array<string>,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<Record<string, NonNullableModel>> {
-  return client.call('NonNullableEndpoint', 'echoNonNullableMap', {nonNullableList}, init);
+  return client.call('NonNullableEndpoint', 'echoNonNullableMap', {nonNullableList}, endpointRequestInit);
 }
 
 function _echoVaadinNonNullableMap(
   nonNullableParameter: Array<string>,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<Record<string, VaadinNonNullableModel>> {
-  return client.call('NonNullableEndpoint', 'echoVaadinNonNullableMap', {nonNullableParameter}, init);
+  return client.call('NonNullableEndpoint', 'echoVaadinNonNullableMap', {nonNullableParameter}, endpointRequestInit);
 }
 
-function _getNonNullableIndex(init?: EndpointRequestInit): Promise<number> {
-  return client.call('NonNullableEndpoint', 'getNonNullableIndex', {}, init);
+function _getNonNullableIndex(endpointRequestInit?: EndpointRequestInit): Promise<number> {
+  return client.call('NonNullableEndpoint', 'getNonNullableIndex', {}, endpointRequestInit);
 }
 
 function _getNonNullableString(
   input: string | undefined,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<string> {
-  return client.call('NonNullableEndpoint', 'getNonNullableString', {input}, init);
+  return client.call('NonNullableEndpoint', 'getNonNullableString', {input}, endpointRequestInit);
 }
 
-function _getNotNullReturnType(init?: EndpointRequestInit): Promise<ReturnType | undefined> {
-  return client.call('NonNullableEndpoint', 'getNotNullReturnType', {}, init);
+function _getNotNullReturnType(endpointRequestInit?: EndpointRequestInit): Promise<ReturnType | undefined> {
+  return client.call('NonNullableEndpoint', 'getNotNullReturnType', {}, endpointRequestInit);
 }
 
 function _sendParameterType(
   parameterType: ParameterType | undefined,
-  init?: EndpointRequestInit
+  endpointRequestInit?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('NonNullableEndpoint', 'sendParameterType', {parameterType}, init);
+  return client.call('NonNullableEndpoint', 'sendParameterType', {parameterType}, endpointRequestInit);
 }
 
-function _stringNullable(init?: EndpointRequestInit): Promise<string | undefined> {
-  return client.call('NonNullableEndpoint', 'stringNullable', {}, init);
+function _stringNullable(endpointRequestInit?: EndpointRequestInit): Promise<string | undefined> {
+  return client.call('NonNullableEndpoint', 'stringNullable', {}, endpointRequestInit);
 }
 
 export {

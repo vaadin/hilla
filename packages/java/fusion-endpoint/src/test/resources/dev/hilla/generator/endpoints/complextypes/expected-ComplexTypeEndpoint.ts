@@ -12,9 +12,9 @@ import type ComplexTypeModel from './dev/hilla/generator/endpoints/complextypes/
 
 function _getComplexTypeModel(
  data: Array<Record<string, string | undefined> | undefined> | undefined,
- init?: EndpointRequestInit
+ endpointRequestInit?: EndpointRequestInit
 ): Promise<ComplexTypeModel | undefined> {
-  return client.call('ComplexTypeEndpoint', 'getComplexTypeModel', {data}, init);
+  return client.call('ComplexTypeEndpoint', 'getComplexTypeModel', {data}, endpointRequestInit);
 }
 
 export {
