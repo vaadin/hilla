@@ -35,7 +35,7 @@ const _validationRequestSymbol = Symbol('validationRequest');
  * @param <M> is the type of the model that describes the structure of the value
  */
 export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
-  private [_defaultValue]: T = this[_emptyValue];
+  private [_defaultValue]!: T; // Initialized in the `read()` method
 
   private [_value]: T = this[_emptyValue];
 
@@ -156,7 +156,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    */
   public async submit(): Promise<T | void> {
     if (this[_onSubmit] !== undefined) {
-      return this.submitTo(this[_onSubmit]);
+      return this.submitTo(this[_onSubmit]!);
     }
     return undefined;
   }
@@ -275,7 +275,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 
   protected override update(oldValue: T) {
     if (this[_onChange]) {
-      this[_onChange].call(this.context, oldValue);
+      this[_onChange]!.call(this.context, oldValue);
     }
   }
 }
