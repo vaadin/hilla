@@ -10,6 +10,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,24 @@ public class AnnotationInfoModelTests {
             assertTrue(model.isSource());
             break;
         }
+    }
+
+    @DisplayName("It should get class info")
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetClassInfo(AnnotationInfoModel model, ModelKind kind) {
+        assertEquals(ClassInfoModel.of(Sample.Foo.class), model.getClassInfo());
+    }
+
+    @DisplayName("It should get annotations parameters")
+    @ParameterizedTest(name = ModelProvider.testName)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetParameters(AnnotationInfoModel model,
+            ModelKind kind) {
+        var expected = Set.of(new AnnotationParameter("first", "foo1"),
+                new AnnotationParameter("second", 10));
+        var actual = model.getParameters();
+        assertEquals(expected, actual);
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -118,7 +137,7 @@ public class AnnotationInfoModelTests {
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchFieldException {
+                ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -131,12 +150,15 @@ public class AnnotationInfoModelTests {
     }
 
     static final class Sample {
-        @Foo
+        @Foo(first = "foo1")
         private String bar;
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.FIELD)
         @interface Foo {
+            String first() default "bar1";
+
+            int second() default 10;
         }
     }
 
