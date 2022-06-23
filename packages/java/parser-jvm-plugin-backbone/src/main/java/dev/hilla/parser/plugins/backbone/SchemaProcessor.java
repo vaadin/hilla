@@ -154,7 +154,7 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var fullyQualifiedName = ((ClassRefSignatureModel) type).resolve()
+        var fullyQualifiedName = ((ClassRefSignatureModel) type).getClassInfo()
                 .getName();
 
         return nullify(new ComposedSchema(), true)
