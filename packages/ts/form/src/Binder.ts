@@ -35,9 +35,9 @@ const _validationRequestSymbol = Symbol('validationRequest');
  * @param <M> is the type of the model that describes the structure of the value
  */
 export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
-  private [_defaultValue]: T;
+  private [_defaultValue]!: T; // Initialized in the `read()` method
 
-  private [_value]: T;
+  private [_value]!: T; // Initialized in the `read()` method
 
   private [_emptyValue]: T;
 
@@ -45,11 +45,11 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 
   private [_validating] = false;
 
-  private [_validationRequestSymbol]: Promise<void> | undefined = undefined;
+  private [_validationRequestSymbol]?: Promise<void>;
 
-  private [_onChange]: (oldValue?: T) => void;
+  private [_onChange]?: (oldValue?: T) => void;
 
-  private [_onSubmit]: (value: T) => Promise<any>;
+  private [_onSubmit]?: (value: T) => Promise<any>;
 
   private [_validations]: Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>> =
     new Map();
@@ -156,7 +156,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    */
   public async submit(): Promise<T | void> {
     if (this[_onSubmit] !== undefined) {
-      return this.submitTo(this[_onSubmit]);
+      return this.submitTo(this[_onSubmit]!);
     }
     return undefined;
   }
@@ -238,6 +238,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * The Binder extends BinderNode, see the inherited properties and methods below.
    *
    * @param elm the bound element
+   * @param model the bound model
    */
   public getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
     return getDefaultFieldStrategy(elm, model);
@@ -274,9 +275,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   }
 
   protected override update(oldValue: T) {
-    if (this[_onChange]) {
-      this[_onChange].call(this.context, oldValue);
-    }
+    this[_onChange]?.call(this.context, oldValue);
   }
 }
 

@@ -1,0 +1,39 @@
+name: Setup
+description: Common setup workflow steps
+
+inputs:
+  node-version:
+    description: Node.js version
+    required: true
+    default: 'lts/*'
+  java-version:
+    description: Java version
+    required: true
+    default: '11'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: 'temurin'
+        cache: maven
+    - name: Cache node_modules
+      uses: actions/cache@v3
+      id: cache-node_modules
+      with:
+        path: |
+          node_modules
+          packages/ts/*/node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+    - name: Install npm dependencies
+      if: ${{ steps.cache-node_modules.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: npm ci

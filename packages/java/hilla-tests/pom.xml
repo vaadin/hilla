@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-project</artifactId>
+    <version>1.2-SNAPSHOT</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>hilla-tests</artifactId>
+  <name>Hilla Tests</name>
+  <packaging>pom</packaging>
+
+  <properties>
+    <jetty.version>9.4.37.v20210219</jetty.version>
+    <jetty.scantrigger></jetty.scantrigger>
+
+    <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
+
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+
+    <vaadin.allow.appshell.annotations>false</vaadin.allow.appshell.annotations>
+    <vaadin.devmode.liveReload.enabled>false</vaadin.devmode.liveReload.enabled>
+    <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
+    <!-- make sure we do not leave webpack-dev-server running after IT -->
+    <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
+
+    <!-- Used in the tests, should be overridden for each module to support
+    concurrent running of test modules. -->
+    <server.port>8888</server.port>
+    <server.stop.port>8889</server.stop.port>
+
+    <sonar.skip>true</sonar.skip>
+    <testListener></testListener>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-testbench-core</artifactId>
+      <version>${testbench.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-test-util</artifactId>
+      <version>${flow.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+          <enableAssertions>true</enableAssertions>
+          <parallel>all</parallel>
+          <threadCount>2</threadCount>
+          <!-- export test server port to integration tests -->
+          <systemPropertyVariables>
+            <serverPort>${server.port}</serverPort>
+            <webdriver.chrome.driver>${webdriver.chrome.driver}
+            </webdriver.chrome.driver>
+          </systemPropertyVariables>
+          <excludes>
+            <exclude>**/*$*</exclude>
+            <exclude>${exclude.it.tests}</exclude>
+            <exclude>${exclude.windows.failed.it.tests}</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-maven-plugin</artifactId>
+          <version>${flow.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-frontend</goal>
+                <goal>build-frontend</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>${project.basedir}</directory>
+                <includes>
+                  <include>node_modules/**</include>
+                  <include>types.d.ts</include>
+                  <include>tsconfig.json</include>
+                  <include>webpack*.js</include>
+                  <include>vite*.js</include>
+                </includes>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <configuration>
+            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+          </configuration>
+        </plugin>
+        <!-- jetty plugin for those child modules that need it -->
+        <plugin>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-maven-plugin</artifactId>
+          <version>${jetty.version}</version>
+          <executions>
+            <execution>
+              <id>start-jetty</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>start</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>stop-jetty</id>
+              <phase>post-integration-test</phase>
+              <goals>
+                <goal>stop</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <webApp>
+              <containerIncludeJarPattern>^$
+              </containerIncludeJarPattern>
+            </webApp>
+            <httpConnector>
+              <port>${server.port}</port>
+            </httpConnector>
+            <stopPort>${server.stop.port}</stopPort>
+            <stopKey>foo</stopKey>
+            <stopWait>5</stopWait>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>${properties-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>set-system-properties</goal>
+              </goals>
+              <configuration>
+                <properties>
+                  <vaadin.reuseDevServer>${vaadin.reuseDevServer}</vaadin.reuseDevServer>
+                  <vaadin.devmode.liveReload.enabled>${vaadin.devmode.liveReload.enabled}</vaadin.devmode.liveReload.enabled>
+                  <vaadin.allow.appshell.annotations>${vaadin.allow.appshell.annotations}</vaadin.allow.appshell.annotations>
+
+                  <jetty.scantrigger>${jetty.scantrigger}</jetty.scantrigger>-->
+                  <!-- Allow test clients not on localhost to connect to Vite-->
+                  <vaadin.devmode.vite.options>${vaadin.devmode.vite.options}</vaadin.devmode.vite.options>
+                </properties>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <!-- Production mode is activated using -Pproduction -->
+      <id>production</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>com.vaadin</groupId>
+              <artifactId>flow-maven-plugin</artifactId>
+              <version>${flow.version}</version>
+              <configuration>
+                <productionMode>true</productionMode>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
+      <id>it-modules</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <modules>
+        <module>test-hilla-csrf</module>
+        <module>test-hilla-csrf-context</module>
+        <module>hilla-spring-tests</module>
+      </modules>
+    </profile>
+  </profiles>
+</project>
