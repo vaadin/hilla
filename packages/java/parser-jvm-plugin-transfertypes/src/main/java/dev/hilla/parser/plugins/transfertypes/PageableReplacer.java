@@ -1,7 +1,5 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import static dev.hilla.parser.plugins.transfertypes.TransferTypesPluginUtils.createMapper;
-
 import java.util.List;
 
 import dev.hilla.parser.core.ClassMappers;

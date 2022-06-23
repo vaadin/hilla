@@ -8,14 +8,12 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.AnnotationInfo;
 
 public interface AnnotationInfoModel extends Model, NamedModel {
-    static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation,
-            @Nonnull Model parent) {
-        return new AnnotationInfoSourceModel(annotation, parent);
+    static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation) {
+        return new AnnotationInfoSourceModel(annotation);
     }
 
-    static AnnotationInfoModel of(@Nonnull Annotation annotation,
-            @Nonnull Model parent) {
-        return new AnnotationInfoReflectionModel(annotation, parent);
+    static AnnotationInfoModel of(@Nonnull Annotation annotation) {
+        return new AnnotationInfoReflectionModel(annotation);
     }
 
     @Override

@@ -40,8 +40,8 @@ public final class ScanElementsCollector {
                 .collect(Collectors.toList());
 
         entities = endpoints.stream()
-                .flatMap(cls -> cls.getInheritanceChain()
-                        .getDependenciesStream())
+                .flatMap(cls -> cls.getInheritanceChainStream()
+                        .flatMap(ClassInfoModel::getDependenciesStream))
                 .map(classMappers::map).filter(ClassInfoModel::isNonJDKClass)
                 .distinct().collect(Collectors.toList());
 

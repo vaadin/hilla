@@ -8,8 +8,34 @@ import io.github.classgraph.BaseTypeSignature;
 final class BaseSignatureSourceModel
         extends AbstractAnnotatedSourceModel<BaseTypeSignature>
         implements BaseSignatureModel, SourceSignatureModel {
-    public BaseSignatureSourceModel(BaseTypeSignature origin, Model parent) {
-        super(origin, parent);
+    public BaseSignatureSourceModel(BaseTypeSignature origin) {
+        super(origin);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof BaseSignatureModel)) {
+            return false;
+        }
+
+        var other = (BaseSignatureModel) obj;
+
+        return origin.getType().equals(other.getType())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    @Override
+    public Class<?> getType() {
+        return origin.getType();
+    }
+
+    @Override
+    public int hashCode() {
+        return 7 + origin.getType().hashCode();
     }
 
     @Override
@@ -71,6 +97,7 @@ final class BaseSignatureSourceModel
 
     @Override
     protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getTypeAnnotationInfo().stream();
+        var annotations = origin.getTypeAnnotationInfo();
+        return annotations != null ? annotations.stream() : Stream.empty();
     }
 }

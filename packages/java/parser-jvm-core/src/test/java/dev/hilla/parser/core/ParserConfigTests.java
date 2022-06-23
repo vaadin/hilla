@@ -25,18 +25,13 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 
 public class ParserConfigTests {
-    private final ResourceLoader resourceLoader;
+    private final ResourceLoader resourceLoader = new ResourceLoader(
+            getClass());
     private ParserConfig.Builder defaultBuilder;
     private Set<String> defaultClassPathElements;
     private String defaultEndpointAnnotationName;
     private OpenAPI defaultOpenAPI;
     private Path targetDir;
-
-    {
-        var target = getClass();
-        resourceLoader = new ResourceLoader(target::getResource,
-                target::getProtectionDomain);
-    }
 
     @BeforeEach
     public void setup() throws URISyntaxException {
@@ -158,11 +153,6 @@ public class ParserConfigTests {
         private SharedStorage storage;
 
         @Override
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
-        }
-
-        @Override
         public int getOrder() {
             return order;
         }
@@ -170,6 +160,11 @@ public class ParserConfigTests {
         @Override
         public void setOrder(int order) {
             this.order = order;
+        }
+
+        @Override
+        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities) {
         }
 
         @Override
@@ -183,11 +178,6 @@ public class ParserConfigTests {
         private SharedStorage storage;
 
         @Override
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
-        }
-
-        @Override
         public int getOrder() {
             return order;
         }
@@ -195,6 +185,11 @@ public class ParserConfigTests {
         @Override
         public void setOrder(int order) {
             this.order = order;
+        }
+
+        @Override
+        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+                @Nonnull Collection<ClassInfoModel> entities) {
         }
 
         @Override

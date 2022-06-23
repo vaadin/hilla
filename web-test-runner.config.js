@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires,import/no-extraneous-dependencies */
 import { esbuildPlugin } from '@web/dev-server-esbuild';
-import { chromeLauncher } from '@web/test-runner-chrome';
 import { readdir } from 'fs/promises';
 import { URL } from 'url';
 import { importMapsPlugin } from '@web/dev-server-import-maps';
+import { puppeteerLauncher } from '@web/test-runner-puppeteer';
 
 // One of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -46,7 +46,7 @@ export default {
     }),
   ],
   browsers: [
-    chromeLauncher({
+    puppeteerLauncher({
       launchOptions: {
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       },

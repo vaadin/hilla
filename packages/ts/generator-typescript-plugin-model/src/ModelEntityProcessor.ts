@@ -164,6 +164,7 @@ export class ModelEntityProcessor {
 
     const typeT = ts.factory.createIdentifier('T');
     const modelTypeParameters = ts.factory.createTypeParameterDeclaration(
+      undefined,
       typeT,
       ts.factory.createTypeReferenceNode(entity),
       ts.factory.createTypeReferenceNode(entity),

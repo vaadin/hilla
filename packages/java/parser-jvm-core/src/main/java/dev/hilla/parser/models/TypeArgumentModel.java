@@ -9,15 +9,12 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeArgument;
 
 public interface TypeArgumentModel extends SignatureModel {
-    static TypeArgumentModel of(@Nonnull TypeArgument origin,
-            @Nonnull Model parent) {
-        return new TypeArgumentSourceModel(Objects.requireNonNull(origin),
-                Objects.requireNonNull(parent));
+    static TypeArgumentModel of(@Nonnull TypeArgument origin) {
+        return new TypeArgumentSourceModel(Objects.requireNonNull(origin));
     }
 
-    static TypeArgumentModel of(@Nonnull AnnotatedType origin, Model parent) {
-        return new TypeArgumentReflectionModel(Objects.requireNonNull(origin),
-                parent);
+    static TypeArgumentModel of(@Nonnull AnnotatedType origin) {
+        return new TypeArgumentReflectionModel(Objects.requireNonNull(origin));
     }
 
     List<SignatureModel> getAssociatedTypes();
