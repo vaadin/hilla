@@ -7,7 +7,7 @@ import java.util.Set;
 
 final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
         implements AnnotationInfoModel, ReflectionModel {
-    private Set<AnnotationParameter> parameters;
+    private Set<AnnotationParameterModel> parameters;
     private ClassInfoModel resolved;
 
     public AnnotationInfoReflectionModel(Annotation annotation) {
@@ -45,7 +45,7 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
     }
 
     @Override
-    public Set<AnnotationParameter> getParameters() {
+    public Set<AnnotationParameterModel> getParameters() {
         if (parameters == null) {
             var methods = origin.annotationType().getDeclaredMethods();
 
@@ -53,7 +53,7 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
 
             for (var method : methods) {
                 try {
-                    parameters.add(new AnnotationParameter(method.getName(),
+                    parameters.add(AnnotationParameterModel.of(method.getName(),
                             method.invoke(origin)));
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     throw new ModelException(e);

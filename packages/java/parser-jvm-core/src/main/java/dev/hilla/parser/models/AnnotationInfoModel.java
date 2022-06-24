@@ -24,5 +24,5 @@ public interface AnnotationInfoModel extends Model, NamedModel {
         return Stream.empty();
     }
 
-    Set<AnnotationParameter> getParameters();
+    Set<AnnotationParameterModel> getParameters();
 }

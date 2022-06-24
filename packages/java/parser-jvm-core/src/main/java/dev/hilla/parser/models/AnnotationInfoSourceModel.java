@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -8,7 +7,7 @@ import io.github.classgraph.AnnotationInfo;
 
 final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
         implements AnnotationInfoModel, SourceModel {
-    private Set<AnnotationParameter> parameters;
+    private Set<AnnotationParameterModel> parameters;
     private ClassInfoModel resolved;
 
     public AnnotationInfoSourceModel(AnnotationInfo origin) {
@@ -16,17 +15,19 @@ final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (!(other instanceof AnnotationInfoModel)) {
+        if (!(obj instanceof AnnotationInfoModel)) {
             return false;
         }
 
-        return Objects.equals(getName(),
-                ((AnnotationInfoModel) other).getName());
+        var other = (AnnotationInfoModel) obj;
+
+        return getName().equals(other.getName())
+                && getParameters().equals(other.getParameters());
     }
 
     @Override
@@ -44,10 +45,11 @@ final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
     }
 
     @Override
-    public Set<AnnotationParameter> getParameters() {
+    public Set<AnnotationParameterModel> getParameters() {
         if (parameters == null) {
             parameters = origin.getParameterValues().stream()
-                    .map(AnnotationParameter::new).collect(Collectors.toSet());
+                    .map(AnnotationParameterModel::of)
+                    .collect(Collectors.toSet());
         }
 
         return parameters;
