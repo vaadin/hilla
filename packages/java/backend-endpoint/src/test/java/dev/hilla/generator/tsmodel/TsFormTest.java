@@ -117,7 +117,8 @@ public class TsFormTest extends AbstractEndpointGeneratorBaseTest {
         if (matcher.find()) {
             final String uri = matcher.group(0);
             final String updatedUri = uri.replace('\\', '/').replaceAll(
-                    "file://.*/backend-endpoint", "file:///.../backend-endpoint");
+                    "file://.*/backend-endpoint",
+                    "file:///.../backend-endpoint");
             actual = actual.replace(uri, updatedUri);
         }
 
