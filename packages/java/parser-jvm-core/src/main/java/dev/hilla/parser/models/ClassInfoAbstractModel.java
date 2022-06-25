@@ -4,14 +4,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nonnull;
-
-import io.github.classgraph.ClassInfo;
 
 abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements ClassInfoModel {
@@ -34,24 +33,14 @@ abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
 
     protected static <T> boolean isDateAssignable(T actor,
             BiPredicate<Class<?>, T> predicate) {
-        for (var cls : DATE_CLASSES) {
-            if (predicate.test(cls, actor)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Arrays.stream(DATE_CLASSES)
+                .anyMatch(cls -> predicate.test(cls, actor));
     }
 
     protected static <T> boolean isDateTimeAssignable(T actor,
             BiPredicate<Class<?>, T> predicate) {
-        for (var cls : DATE_TIME_CLASSES) {
-            if (predicate.test(cls, actor)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Arrays.stream(DATE_TIME_CLASSES)
+                .anyMatch(cls -> predicate.test(cls, actor));
     }
 
     @Override

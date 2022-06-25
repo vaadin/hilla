@@ -41,7 +41,7 @@ abstract class ClassRefSignatureSourceModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(getOriginAnnotations());
+        return processAnnotations(getOriginAnnotations());
     }
 
     @Override

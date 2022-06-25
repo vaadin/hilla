@@ -75,6 +75,6 @@ final class BaseSignatureSourceModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getTypeAnnotationInfo());
+        return processAnnotations(origin.getTypeAnnotationInfo());
     }
 }

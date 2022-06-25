@@ -38,7 +38,7 @@ final class MethodParameterInfoSourceModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotationInfo());
+        return processAnnotations(origin.getAnnotationInfo());
     }
 
     @Override

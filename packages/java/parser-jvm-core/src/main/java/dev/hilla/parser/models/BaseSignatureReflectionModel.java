@@ -75,7 +75,7 @@ final class BaseSignatureReflectionModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotations());
+        return processAnnotations(origin.getAnnotations());
     }
 
     static class Bare extends BaseSignatureAbstractModel<Class<?>>
@@ -146,7 +146,7 @@ final class BaseSignatureReflectionModel
 
         @Override
         protected List<AnnotationInfoModel> prepareAnnotations() {
-            return AnnotationUtils.convert(origin.getAnnotations());
+            return processAnnotations(origin.getAnnotations());
         }
     }
 }

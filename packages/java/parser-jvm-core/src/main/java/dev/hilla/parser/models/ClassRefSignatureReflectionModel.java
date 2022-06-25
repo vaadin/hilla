@@ -28,7 +28,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotations());
+        return processAnnotations(origin.getAnnotations());
     }
 
     @Override
@@ -92,6 +92,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
             extends ClassRefSignatureReflectionModel<T> {
         protected final List<Annotation[]> ownedAnnotations;
         protected final int ownerIndex;
+        private Optional<ClassRefSignatureModel> owner;
 
         Annotated(T origin, List<Annotation[]> ownedAnnotations,
                 int ownerIndex) {
@@ -114,19 +115,26 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
 
         @Override
         public Optional<ClassRefSignatureModel> getOwner() {
-            var owner = origin.getAnnotatedOwnerType();
-
-            if (owner != null) {
-                return Optional.of(
-                        Annotated.of(owner, ownedAnnotations, ownerIndex + 1));
+            if (owner == null) {
+                owner = prepareOwner();
             }
 
-            return Optional.empty();
+            return owner;
         }
 
         @Override
         protected List<AnnotationInfoModel> prepareAnnotations() {
-            return AnnotationUtils.convert(ownedAnnotations.get(ownerIndex));
+            return AnnotatedAbstractModel
+                    .processAnnotations(ownedAnnotations.get(ownerIndex));
+        }
+
+        private Optional<ClassRefSignatureModel> prepareOwner() {
+            var owner = origin.getAnnotatedOwnerType();
+
+            return owner != null
+                    ? Optional.of(Annotated.of(owner, ownedAnnotations,
+                            ownerIndex + 1))
+                    : Optional.empty();
         }
     }
 }

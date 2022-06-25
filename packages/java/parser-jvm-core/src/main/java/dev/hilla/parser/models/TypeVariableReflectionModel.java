@@ -19,7 +19,7 @@ final class TypeVariableReflectionModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotations());
+        return processAnnotations(origin.getAnnotations());
     }
 
     @Override

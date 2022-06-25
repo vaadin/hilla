@@ -104,7 +104,7 @@ final class MethodInfoSourceModel extends MethodInfoAbstractModel<MethodInfo>
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotationInfo());
+        return processAnnotations(origin.getAnnotationInfo());
     }
 
     @Override

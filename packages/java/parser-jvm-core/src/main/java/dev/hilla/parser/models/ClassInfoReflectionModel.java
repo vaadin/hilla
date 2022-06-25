@@ -1,14 +1,12 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
         implements ReflectionModel {
@@ -63,7 +61,7 @@ final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
 
     @Override
     public boolean isDateTime() {
-        return isDateAssignable(origin, ClassInfoModel::isAssignableFrom);
+        return isDateTimeAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
@@ -173,7 +171,7 @@ final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotations());
+        return processAnnotations(origin.getAnnotations());
     }
 
     @Override
@@ -184,12 +182,15 @@ final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
 
     @Override
     protected List<ClassInfoModel> prepareInheritanceChain() {
-        return Stream
-                .<Class<?>> iterate(origin,
-                        ((Predicate<Class<?>>) Objects::nonNull)
-                                .and(ClassInfoModel::isNonJDKClass),
-                        Class::getSuperclass).map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+        var list = new ArrayList<ClassInfoModel>();
+        var current = origin;
+
+        while (current != null && ClassInfoModel.isNonJDKClass(current)) {
+            list.add(current == origin ? this : ClassInfoModel.of(current));
+            current = current.getSuperclass();
+        }
+
+        return list;
     }
 
     @Override

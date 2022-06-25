@@ -62,7 +62,7 @@ final class FieldInfoSourceModel extends FieldInfoAbstractModel<FieldInfo>
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getAnnotationInfo());
+        return processAnnotations(origin.getAnnotationInfo());
     }
 
     @Override

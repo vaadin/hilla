@@ -13,7 +13,7 @@ final class ArraySignatureSourceModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return AnnotationUtils.convert(origin.getTypeAnnotationInfo());
+        return processAnnotations(origin.getTypeAnnotationInfo());
     }
 
     @Override
