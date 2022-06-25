@@ -1,33 +1,13 @@
 package dev.hilla.parser.models;
 
-import java.util.stream.Stream;
+import java.util.List;
 
-import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.FieldInfo;
 
-final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
-        implements FieldInfoModel, SourceModel {
-    private ClassInfoModel owner;
-    private SignatureModel type;
-
-    public FieldInfoSourceModel(FieldInfo field) {
+final class FieldInfoSourceModel extends FieldInfoAbstractModel<FieldInfo>
+        implements SourceModel {
+    FieldInfoSourceModel(FieldInfo field) {
         super(field);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof FieldInfoModel)) {
-            return false;
-        }
-
-        var other = (FieldInfoModel) obj;
-
-        return origin.getClassName().equals(other.getClassName())
-                && origin.getName().equals(other.getName());
     }
 
     @Override
@@ -38,29 +18,6 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     @Override
     public String getName() {
         return origin.getName();
-    }
-
-    @Override
-    public ClassInfoModel getOwner() {
-        if (owner == null) {
-            owner = ClassInfoModel.of(origin.getClassInfo());
-        }
-
-        return owner;
-    }
-
-    @Override
-    public SignatureModel getType() {
-        if (type == null) {
-            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
-        }
-
-        return type;
-    }
-
-    @Override
-    public int hashCode() {
-        return origin.hashCode();
     }
 
     @Override
@@ -104,7 +61,17 @@ final class FieldInfoSourceModel extends AbstractAnnotatedSourceModel<FieldInfo>
     }
 
     @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return AnnotationUtils.convert(origin.getAnnotationInfo());
+    }
+
+    @Override
+    protected ClassInfoModel prepareOwner() {
+        return ClassInfoModel.of(origin.getClassInfo());
+    }
+
+    @Override
+    protected SignatureModel prepareType() {
+        return SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
     }
 }

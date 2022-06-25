@@ -8,94 +8,12 @@ import java.util.stream.Stream;
 
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassInfo;
 
-final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
-        implements ClassInfoModel, SourceModel {
-    private final ClassInfoModel superClass;
-    private List<ClassInfoModel> chain;
-    private List<FieldInfoModel> fields;
-    private List<ClassInfoModel> innerClasses;
-    private List<ClassInfoModel> interfaces;
-    private List<MethodInfoModel> methods;
-
+final class ClassInfoSourceModel extends ClassInfoAbstractModel<ClassInfo>
+        implements SourceModel {
     public ClassInfoSourceModel(ClassInfo origin) {
         super(origin);
-
-        var originSuperClass = origin.getSuperclass();
-        superClass = originSuperClass != null
-                ? ClassInfoModel.of(originSuperClass)
-                : null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof ClassInfoModel)) {
-            return false;
-        }
-
-        var other = (ClassInfoModel) obj;
-
-        return origin.getName().equals(other.getName());
-    }
-
-    @Override
-    public List<FieldInfoModel> getFields() {
-        if (fields == null) {
-            fields = origin.getDeclaredFieldInfo().stream()
-                    .map(FieldInfoModel::of).collect(Collectors.toList());
-        }
-
-        return fields;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInheritanceChain() {
-        if (chain == null) {
-            chain = Streams
-                    .combine(Stream.of(this),
-                            origin.getSuperclasses().stream()
-                                    .filter(ClassInfoModel::isNonJDKClass)
-                                    .map(ClassInfoModel::of))
-                    .collect(Collectors.toList());
-        }
-
-        return chain;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInnerClasses() {
-        if (innerClasses == null) {
-            innerClasses = origin.getInnerClasses().stream()
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
-        }
-
-        return innerClasses;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInterfaces() {
-        if (interfaces == null) {
-            interfaces = origin.getInterfaces().stream().map(ClassInfoModel::of)
-                    .collect(Collectors.toList());
-        }
-
-        return interfaces;
-    }
-
-    @Override
-    public List<MethodInfoModel> getMethods() {
-        if (methods == null) {
-            methods = origin.getDeclaredMethodInfo().stream()
-                    .map(MethodInfoModel::of).collect(Collectors.toList());
-        }
-
-        return methods;
     }
 
     @Override
@@ -106,16 +24,6 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     @Override
     public String getSimpleName() {
         return origin.getSimpleName();
-    }
-
-    @Override
-    public Optional<ClassInfoModel> getSuperClass() {
-        return Optional.ofNullable(superClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return 3 + origin.hashCode();
     }
 
     @Override
@@ -150,12 +58,12 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
 
     @Override
     public boolean isDate() {
-        return ClassInfoModelUtils.isDateAssignable(origin);
+        return ClassInfoAbstractModel.isDateAssignable(origin);
     }
 
     @Override
     public boolean isDateTime() {
-        return ClassInfoModelUtils.isDateTimeAssignable(origin);
+        return ClassInfoAbstractModel.isDateTimeAssignable(origin);
     }
 
     @Override
@@ -265,7 +173,47 @@ final class ClassInfoSourceModel extends AbstractAnnotatedSourceModel<ClassInfo>
     }
 
     @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return AnnotationUtils.convert(origin.getAnnotationInfo());
+    }
+
+    @Override
+    protected List<FieldInfoModel> prepareFields() {
+        return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInheritanceChain() {
+        return Streams
+                .combine(Stream.of(this),
+                        origin.getSuperclasses().stream()
+                                .filter(ClassInfoModel::isNonJDKClass)
+                                .map(ClassInfoModel::of))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInnerClasses() {
+        return origin.getInnerClasses().stream().map(ClassInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInterfaces() {
+        return origin.getInterfaces().stream().map(ClassInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<MethodInfoModel> prepareMethods() {
+        return origin.getDeclaredMethodInfo().stream().map(MethodInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected ClassInfoModel prepareSuperClass() {
+        var superClass = origin.getSuperclass();
+        return superClass != null ? ClassInfoModel.of(superClass) : null;
     }
 }

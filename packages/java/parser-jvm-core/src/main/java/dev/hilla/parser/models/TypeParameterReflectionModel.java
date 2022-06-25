@@ -7,39 +7,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 final class TypeParameterReflectionModel
-        extends AbstractAnnotatedReflectionModel<AnnotatedTypeVariable>
-        implements TypeParameterModel, ReflectionSignatureModel {
+        extends TypeParameterAbstractModel<AnnotatedTypeVariable>
+        implements ReflectionSignatureModel {
     private List<SignatureModel> bounds;
 
     public TypeParameterReflectionModel(AnnotatedTypeVariable origin) {
         super(origin);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof TypeParameterModel)) {
-            return false;
-        }
-
-        var other = (TypeParameterModel) obj;
-
-        return getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations())
-                && getBounds().equals(other.getBounds());
-    }
-
-    @Override
-    public List<SignatureModel> getBounds() {
-        if (bounds == null) {
-            bounds = Arrays.stream(origin.getAnnotatedBounds())
-                    .map(SignatureModel::of).collect(Collectors.toList());
-        }
-
-        return bounds;
     }
 
     @Override
@@ -48,7 +21,13 @@ final class TypeParameterReflectionModel
     }
 
     @Override
-    public int hashCode() {
-        return getName().hashCode() + 3 * getBounds().hashCode();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return AnnotationUtils.convert(origin.getAnnotations());
+    }
+
+    @Override
+    protected List<SignatureModel> prepareBounds() {
+        return Arrays.stream(origin.getAnnotatedBounds())
+                .map(SignatureModel::of).collect(Collectors.toList());
     }
 }

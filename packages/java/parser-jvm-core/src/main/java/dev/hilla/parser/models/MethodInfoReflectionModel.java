@@ -6,44 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class MethodInfoReflectionModel
-        extends AbstractAnnotatedReflectionModel<Method>
+final class MethodInfoReflectionModel extends MethodInfoAbstractModel<Method>
         implements MethodInfoModel, ReflectionModel {
-    private ClassInfoModel owner;
-    private List<MethodParameterInfoModel> parameters;
-    private SignatureModel resultType;
-
     public MethodInfoReflectionModel(Method method) {
         super(method);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof MethodInfoModel)) {
-            return false;
-        }
-
-        var other = (MethodInfoModel) obj;
-
-        return equalsIgnoreParameters(other)
-                && getParameters().equals(other.getParameters());
-    }
-
-    @Override
-    public boolean equalsIgnoreParameters(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof MethodInfoModel)) {
-            return false;
-        }
-
-        return equalsIgnoreParameters((MethodInfoModel) obj);
     }
 
     @Override
@@ -68,40 +34,6 @@ final class MethodInfoReflectionModel
     @Override
     public String getName() {
         return origin.getName();
-    }
-
-    @Override
-    public ClassInfoModel getOwner() {
-        if (owner == null) {
-            owner = ClassInfoModel.of(origin.getDeclaringClass());
-        }
-
-        return owner;
-    }
-
-    @Override
-    public List<MethodParameterInfoModel> getParameters() {
-        if (parameters == null) {
-            parameters = Arrays.stream(origin.getParameters())
-                    .map(MethodParameterInfoModel::of)
-                    .collect(Collectors.toList());
-        }
-
-        return parameters;
-    }
-
-    @Override
-    public SignatureModel getResultType() {
-        if (resultType == null) {
-            resultType = SignatureModel.of(origin.getAnnotatedReturnType());
-        }
-
-        return resultType;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCodeIgnoreParameters() + 53 * getParameters().hashCode();
     }
 
     @Override
@@ -169,5 +101,26 @@ final class MethodInfoReflectionModel
     @Override
     public boolean isVarArgs() {
         return origin.isVarArgs();
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return AnnotationUtils.convert(origin.getAnnotations());
+    }
+
+    @Override
+    protected ClassInfoModel prepareOwner() {
+        return ClassInfoModel.of(origin.getDeclaringClass());
+    }
+
+    @Override
+    protected List<MethodParameterInfoModel> prepareParameters() {
+        return Arrays.stream(origin.getParameters())
+                .map(MethodParameterInfoModel::of).collect(Collectors.toList());
+    }
+
+    @Override
+    protected SignatureModel prepareResultType() {
+        return SignatureModel.of(origin.getAnnotatedReturnType());
     }
 }

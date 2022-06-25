@@ -2,30 +2,14 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.TypeVariable;
+import java.util.List;
 
 final class TypeVariableReflectionModel
-        extends AbstractAnnotatedReflectionModel<AnnotatedTypeVariable>
-        implements TypeVariableModel, ReflectionSignatureModel {
-    private TypeParameterModel typeParameter;
+        extends TypeVariableAbstractModel<AnnotatedTypeVariable>
+        implements ReflectionSignatureModel {
 
-    public TypeVariableReflectionModel(AnnotatedTypeVariable origin) {
+    TypeVariableReflectionModel(AnnotatedTypeVariable origin) {
         super(origin);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof TypeVariableModel)) {
-            return false;
-        }
-
-        var other = (TypeVariableModel) obj;
-
-        return getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations());
     }
 
     @Override
@@ -34,16 +18,12 @@ final class TypeVariableReflectionModel
     }
 
     @Override
-    public int hashCode() {
-        return getName().hashCode();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return AnnotationUtils.convert(origin.getAnnotations());
     }
 
     @Override
-    public SignatureModel resolve() {
-        if (typeParameter == null) {
-            typeParameter = TypeParameterModel.of(origin);
-        }
-
-        return typeParameter;
+    protected TypeParameterModel prepareResolved() {
+        return TypeParameterModel.of(origin);
     }
 }

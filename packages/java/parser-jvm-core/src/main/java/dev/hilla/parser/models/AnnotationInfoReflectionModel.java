@@ -5,38 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
-final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
-        implements AnnotationInfoModel, ReflectionModel {
-    private Set<AnnotationParameterModel> parameters;
-    private ClassInfoModel resolved;
-
+final class AnnotationInfoReflectionModel extends
+        AnnotationInfoAbstractModel<Annotation> implements ReflectionModel {
     public AnnotationInfoReflectionModel(Annotation annotation) {
         super(annotation);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof AnnotationInfoModel)) {
-            return false;
-        }
-
-        var other = (AnnotationInfoModel) obj;
-
-        return getName().equals(other.getName())
-                && getParameters().equals(other.getParameters());
-    }
-
-    @Override
-    public ClassInfoModel getClassInfo() {
-        if (resolved == null) {
-            resolved = ClassInfoModel.of(origin.annotationType());
-        }
-
-        return resolved;
     }
 
     @Override
@@ -45,27 +17,26 @@ final class AnnotationInfoReflectionModel extends AbstractModel<Annotation>
     }
 
     @Override
-    public Set<AnnotationParameterModel> getParameters() {
-        if (parameters == null) {
-            var methods = origin.annotationType().getDeclaredMethods();
-
-            parameters = new HashSet<>(methods.length);
-
-            for (var method : methods) {
-                try {
-                    parameters.add(AnnotationParameterModel.of(method.getName(),
-                            method.invoke(origin)));
-                } catch (InvocationTargetException | IllegalAccessException e) {
-                    throw new ModelException(e);
-                }
-            }
-        }
-
-        return parameters;
+    protected ClassInfoModel prepareClassInfo() {
+        return ClassInfoModel.of(origin.annotationType());
     }
 
     @Override
-    public int hashCode() {
-        return getName().hashCode() + 11 * getParameters().hashCode();
+    protected Set<AnnotationParameterModel> prepareParameters() {
+        try {
+            var methods = origin.annotationType().getDeclaredMethods();
+
+            var parameters = new HashSet<AnnotationParameterModel>(
+                    methods.length);
+
+            for (var method : methods) {
+                parameters.add(AnnotationParameterModel.of(method.getName(),
+                        method.invoke(origin)));
+            }
+
+            return parameters;
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new ModelException(e);
+        }
     }
 }
