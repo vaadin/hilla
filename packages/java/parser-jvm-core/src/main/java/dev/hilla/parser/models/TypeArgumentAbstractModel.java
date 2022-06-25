@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class TypeArgumentAbstractModel<T> extends AbstractModel<T>
+abstract class TypeArgumentAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements TypeArgumentModel {
-    private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> associatedTypes;
 
     TypeArgumentAbstractModel(@Nonnull T origin) {
@@ -31,15 +30,6 @@ abstract class TypeArgumentAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public List<SignatureModel> getAssociatedTypes() {
         if (associatedTypes == null) {
             associatedTypes = prepareAssociatedTypes();
@@ -52,8 +42,6 @@ abstract class TypeArgumentAbstractModel<T> extends AbstractModel<T>
     public int hashCode() {
         return getAssociatedTypes().hashCode() + 7 * getWildcard().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract List<SignatureModel> prepareAssociatedTypes();
 }

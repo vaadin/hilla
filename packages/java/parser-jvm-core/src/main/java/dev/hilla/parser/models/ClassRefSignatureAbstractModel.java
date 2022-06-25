@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class ClassRefSignatureAbstractModel<T> extends AbstractModel<T>
+abstract class ClassRefSignatureAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements ClassRefSignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
 
@@ -30,15 +29,6 @@ abstract class ClassRefSignatureAbstractModel<T> extends AbstractModel<T>
                 && getOwner().equals(other.getOwner())
                 && getTypeArguments().equals(other.getTypeArguments())
                 && getAnnotations().equals(other.getAnnotations());
-    }
-
-    @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
     }
 
     @Override

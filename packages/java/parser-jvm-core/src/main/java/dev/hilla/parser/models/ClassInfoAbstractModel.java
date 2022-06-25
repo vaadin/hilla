@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 
-abstract class ClassInfoAbstractModel<T> extends AbstractModel<T>
+abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements ClassInfoModel {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
@@ -21,7 +21,6 @@ abstract class ClassInfoAbstractModel<T> extends AbstractModel<T>
             Instant.class, LocalTime.class };
 
     private final ClassInfoModel superClass;
-    private List<AnnotationInfoModel> annotations;
     private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
@@ -87,15 +86,6 @@ abstract class ClassInfoAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public List<FieldInfoModel> getFields() {
         if (fields == null) {
             fields = prepareFields();
@@ -149,8 +139,6 @@ abstract class ClassInfoAbstractModel<T> extends AbstractModel<T>
     public int hashCode() {
         return 3 + getName().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract List<FieldInfoModel> prepareFields();
 

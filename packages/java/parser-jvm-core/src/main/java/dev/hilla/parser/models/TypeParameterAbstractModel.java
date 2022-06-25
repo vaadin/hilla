@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class TypeParameterAbstractModel<T> extends AbstractModel<T>
+abstract class TypeParameterAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements TypeParameterModel {
-    private List<AnnotationInfoModel> annotations;
     private List<SignatureModel> bounds;
 
     TypeParameterAbstractModel(@Nonnull T origin) {
@@ -31,15 +30,6 @@ abstract class TypeParameterAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public List<SignatureModel> getBounds() {
         if (bounds == null) {
             bounds = prepareBounds();
@@ -52,8 +42,6 @@ abstract class TypeParameterAbstractModel<T> extends AbstractModel<T>
     public int hashCode() {
         return getName().hashCode() + 3 * getBounds().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract List<SignatureModel> prepareBounds();
 }

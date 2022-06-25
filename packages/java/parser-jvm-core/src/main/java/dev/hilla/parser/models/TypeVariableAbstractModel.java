@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class TypeVariableAbstractModel<T> extends AbstractModel<T>
+abstract class TypeVariableAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements TypeVariableModel {
-    private List<AnnotationInfoModel> annotations;
     private TypeParameterModel typeParameter;
 
     TypeVariableAbstractModel(@Nonnull T origin) {
@@ -30,15 +29,6 @@ abstract class TypeVariableAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public int hashCode() {
         return getName().hashCode();
     }
@@ -51,8 +41,6 @@ abstract class TypeVariableAbstractModel<T> extends AbstractModel<T>
 
         return typeParameter;
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract TypeParameterModel prepareResolved();
 }

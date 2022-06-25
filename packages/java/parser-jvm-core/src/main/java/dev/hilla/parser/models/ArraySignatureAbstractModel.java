@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class ArraySignatureAbstractModel<T> extends AbstractModel<T>
+abstract class ArraySignatureAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements ArraySignatureModel {
-    private List<AnnotationInfoModel> annotations;
     private SignatureModel nestedType;
 
     ArraySignatureAbstractModel(@Nonnull T origin) {
@@ -30,15 +29,6 @@ abstract class ArraySignatureAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public SignatureModel getNestedType() {
         if (nestedType == null) {
             nestedType = prepareNestedType();
@@ -51,8 +41,6 @@ abstract class ArraySignatureAbstractModel<T> extends AbstractModel<T>
     public int hashCode() {
         return 1 + getNestedType().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract SignatureModel prepareNestedType();
 }

@@ -5,10 +5,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-abstract class BaseSignatureAbstractModel<T> extends AbstractModel<T>
+abstract class BaseSignatureAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements BaseSignatureModel {
-    private List<AnnotationInfoModel> annotations;
-
     BaseSignatureAbstractModel(@Nonnull T origin) {
         super(origin);
     }
@@ -30,18 +28,7 @@ abstract class BaseSignatureAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public int hashCode() {
         return 7 + getType().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 }

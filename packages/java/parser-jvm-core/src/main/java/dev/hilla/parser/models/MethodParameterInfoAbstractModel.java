@@ -4,9 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-abstract class MethodParameterInfoAbstractModel<T> extends AbstractModel<T>
+abstract class MethodParameterInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         implements MethodParameterInfoModel {
-    private List<AnnotationInfoModel> annotations;
     private MethodInfoModel owner;
     private SignatureModel type;
 
@@ -34,15 +33,6 @@ abstract class MethodParameterInfoAbstractModel<T> extends AbstractModel<T>
     }
 
     @Override
-    public List<AnnotationInfoModel> getAnnotations() {
-        if (annotations == null) {
-            annotations = prepareAnnotations();
-        }
-
-        return annotations;
-    }
-
-    @Override
     public MethodInfoModel getOwner() {
         if (owner == null) {
             owner = prepareOwner();
@@ -66,8 +56,6 @@ abstract class MethodParameterInfoAbstractModel<T> extends AbstractModel<T>
                 + 11 * getAnnotations().hashCode() + 17 * getModifiers()
                 + 23 * getType().hashCode() + 53 * getName().hashCode();
     }
-
-    protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract MethodInfoModel prepareOwner();
 
