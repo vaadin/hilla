@@ -54,7 +54,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
     }
 
     static final class Bare extends ClassRefSignatureReflectionModel<Class<?>> {
-        public Bare(Class<?> origin) {
+        Bare(Class<?> origin) {
             super(origin);
         }
 
@@ -93,7 +93,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         protected final List<Annotation[]> ownedAnnotations;
         protected final int ownerIndex;
 
-        public Annotated(T origin, List<Annotation[]> ownedAnnotations,
+        Annotated(T origin, List<Annotation[]> ownedAnnotations,
                 int ownerIndex) {
             super(origin);
             this.ownedAnnotations = ownedAnnotations;

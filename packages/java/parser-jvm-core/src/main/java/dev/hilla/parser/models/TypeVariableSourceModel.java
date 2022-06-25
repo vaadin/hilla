@@ -7,7 +7,7 @@ import io.github.classgraph.TypeVariableSignature;
 final class TypeVariableSourceModel
         extends TypeVariableAbstractModel<TypeVariableSignature>
         implements SourceSignatureModel {
-    public TypeVariableSourceModel(TypeVariableSignature origin) {
+    TypeVariableSourceModel(TypeVariableSignature origin) {
         super(origin);
     }
 

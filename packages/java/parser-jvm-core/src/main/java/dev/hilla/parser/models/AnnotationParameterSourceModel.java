@@ -6,7 +6,7 @@ import io.github.classgraph.AnnotationParameterValue;
 
 final class AnnotationParameterSourceModel
         extends AnnotationParameterAbstractModel<AnnotationParameterValue>
-        implements AnnotationParameterModel {
+        implements SourceModel {
     AnnotationParameterSourceModel(AnnotationParameterValue origin) {
         super(origin);
     }

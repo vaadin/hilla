@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import io.github.classgraph.MethodInfo;
 
 final class MethodInfoSourceModel extends MethodInfoAbstractModel<MethodInfo>
-        implements MethodInfoModel, SourceModel {
-    public MethodInfoSourceModel(MethodInfo method) {
+        implements SourceModel {
+    MethodInfoSourceModel(MethodInfo method) {
         super(method);
     }
 

@@ -13,7 +13,7 @@ import io.github.classgraph.TypeArgument;
 abstract class ClassRefSignatureSourceModel
         extends ClassRefSignatureAbstractModel<ClassRefTypeSignature>
         implements SourceSignatureModel {
-    public ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
+    ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
         super(origin);
     }
 
@@ -66,11 +66,11 @@ abstract class ClassRefSignatureSourceModel
     static final class Suffixed extends ClassRefSignatureSourceModel {
         private final int currentSuffixIndex;
 
-        public Suffixed(ClassRefTypeSignature origin) {
+        Suffixed(ClassRefTypeSignature origin) {
             this(origin, origin.getSuffixes().size() - 1);
         }
 
-        public Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
+        Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
             super(origin);
             this.currentSuffixIndex = currentSuffixIndex;
         }
@@ -129,7 +129,7 @@ abstract class ClassRefSignatureSourceModel
     }
 
     static final class SuffixedBase extends ClassRefSignatureSourceModel {
-        public SuffixedBase(ClassRefTypeSignature origin) {
+        SuffixedBase(ClassRefTypeSignature origin) {
             super(origin);
         }
 

@@ -7,8 +7,7 @@ import io.github.classgraph.ArrayTypeSignature;
 final class ArraySignatureSourceModel
         extends ArraySignatureAbstractModel<ArrayTypeSignature>
         implements SourceSignatureModel {
-
-    public ArraySignatureSourceModel(ArrayTypeSignature origin) {
+    ArraySignatureSourceModel(ArrayTypeSignature origin) {
         super(origin);
     }
 

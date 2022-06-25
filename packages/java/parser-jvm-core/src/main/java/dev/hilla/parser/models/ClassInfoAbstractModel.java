@@ -32,7 +32,7 @@ abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         superClass = prepareSuperClass();
     }
 
-    static <T> boolean isDateAssignable(T actor,
+    protected static <T> boolean isDateAssignable(T actor,
             BiPredicate<Class<?>, T> predicate) {
         for (var cls : DATE_CLASSES) {
             if (predicate.test(cls, actor)) {
@@ -43,15 +43,7 @@ abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         return false;
     }
 
-    static boolean isDateAssignable(Class<?> actor) {
-        return isDateAssignable(actor, ClassInfoModel::isAssignableFrom);
-    }
-
-    static boolean isDateAssignable(ClassInfo actor) {
-        return isDateAssignable(actor, ClassInfoModel::isAssignableFrom);
-    }
-
-    static <T> boolean isDateTimeAssignable(T actor,
+    protected static <T> boolean isDateTimeAssignable(T actor,
             BiPredicate<Class<?>, T> predicate) {
         for (var cls : DATE_TIME_CLASSES) {
             if (predicate.test(cls, actor)) {
@@ -60,14 +52,6 @@ abstract class ClassInfoAbstractModel<T> extends AnnotatedAbstractModel<T>
         }
 
         return false;
-    }
-
-    static boolean isDateTimeAssignable(Class<?> actor) {
-        return isDateTimeAssignable(actor, ClassInfoModel::isAssignableFrom);
-    }
-
-    static boolean isDateTimeAssignable(ClassInfo actor) {
-        return isDateTimeAssignable(actor, ClassInfoModel::isAssignableFrom);
     }
 
     @Override

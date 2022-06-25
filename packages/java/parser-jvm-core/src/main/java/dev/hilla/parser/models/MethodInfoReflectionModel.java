@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 final class MethodInfoReflectionModel extends MethodInfoAbstractModel<Method>
-        implements MethodInfoModel, ReflectionModel {
-    public MethodInfoReflectionModel(Method method) {
+        implements ReflectionModel {
+    MethodInfoReflectionModel(Method method) {
         super(method);
     }
 

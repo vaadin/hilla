@@ -8,7 +8,7 @@ final class BaseSignatureReflectionModel
         implements ReflectionSignatureModel {
     private final Class<?> inner;
 
-    public BaseSignatureReflectionModel(AnnotatedType origin) {
+    BaseSignatureReflectionModel(AnnotatedType origin) {
         super(origin);
         inner = (Class<?>) origin.getType();
     }

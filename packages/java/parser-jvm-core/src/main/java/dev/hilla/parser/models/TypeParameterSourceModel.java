@@ -11,7 +11,7 @@ import io.github.classgraph.TypeParameter;
 final class TypeParameterSourceModel
         extends TypeParameterAbstractModel<TypeParameter>
         implements SourceSignatureModel {
-    public TypeParameterSourceModel(TypeParameter origin) {
+    TypeParameterSourceModel(TypeParameter origin) {
         super(origin);
     }
 

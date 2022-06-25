@@ -4,7 +4,7 @@ import io.github.classgraph.AnnotationEnumValue;
 
 final class AnnotationParameterEnumValueSourceModel
         extends AnnotationParameterEnumValueAbstractModel<AnnotationEnumValue>
-        implements AnnotationParameterEnumValueModel {
+        implements SourceModel {
     AnnotationParameterEnumValueSourceModel(AnnotationEnumValue origin) {
         super(origin);
     }

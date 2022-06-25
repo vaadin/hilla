@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
         implements ReflectionModel {
-    public ClassInfoReflectionModel(Class<?> origin) {
+    ClassInfoReflectionModel(Class<?> origin) {
         super(origin);
     }
 
@@ -58,12 +58,12 @@ final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
 
     @Override
     public boolean isDate() {
-        return ClassInfoAbstractModel.isDateAssignable(origin);
+        return isDateAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
     public boolean isDateTime() {
-        return ClassInfoAbstractModel.isDateTimeAssignable(origin);
+        return isDateAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
@@ -188,8 +188,7 @@ final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
                 .<Class<?>> iterate(origin,
                         ((Predicate<Class<?>>) Objects::nonNull)
                                 .and(ClassInfoModel::isNonJDKClass),
-                        Class::getSuperclass)
-                .distinct().map(ClassInfoModel::of)
+                        Class::getSuperclass).map(ClassInfoModel::of)
                 .collect(Collectors.toList());
     }
 

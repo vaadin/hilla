@@ -12,7 +12,7 @@ import io.github.classgraph.ClassInfo;
 
 final class ClassInfoSourceModel extends ClassInfoAbstractModel<ClassInfo>
         implements SourceModel {
-    public ClassInfoSourceModel(ClassInfo origin) {
+    ClassInfoSourceModel(ClassInfo origin) {
         super(origin);
     }
 
@@ -58,12 +58,12 @@ final class ClassInfoSourceModel extends ClassInfoAbstractModel<ClassInfo>
 
     @Override
     public boolean isDate() {
-        return ClassInfoAbstractModel.isDateAssignable(origin);
+        return isDateAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
     public boolean isDateTime() {
-        return ClassInfoAbstractModel.isDateTimeAssignable(origin);
+        return isDateTimeAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override

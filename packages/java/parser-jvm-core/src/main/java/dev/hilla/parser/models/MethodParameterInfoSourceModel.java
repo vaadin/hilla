@@ -6,8 +6,8 @@ import io.github.classgraph.MethodParameterInfo;
 
 final class MethodParameterInfoSourceModel
         extends MethodParameterInfoAbstractModel<MethodParameterInfo>
-        implements MethodParameterInfoModel, SourceModel {
-    public MethodParameterInfoSourceModel(MethodParameterInfo parameter) {
+        implements SourceModel {
+    MethodParameterInfoSourceModel(MethodParameterInfo parameter) {
         super(parameter);
     }
 

@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 final class TypeParameterReflectionModel
         extends TypeParameterAbstractModel<AnnotatedTypeVariable>
         implements ReflectionSignatureModel {
-    private List<SignatureModel> bounds;
-
-    public TypeParameterReflectionModel(AnnotatedTypeVariable origin) {
+    TypeParameterReflectionModel(AnnotatedTypeVariable origin) {
         super(origin);
     }
 

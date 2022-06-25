@@ -7,7 +7,7 @@ import java.util.Set;
 
 final class AnnotationInfoReflectionModel extends
         AnnotationInfoAbstractModel<Annotation> implements ReflectionModel {
-    public AnnotationInfoReflectionModel(Annotation annotation) {
+    AnnotationInfoReflectionModel(Annotation annotation) {
         super(annotation);
     }
 

@@ -4,7 +4,7 @@ import java.util.Map;
 
 final class AnnotationParameterReflectionModel<T>
         extends AnnotationParameterAbstractModel<Map.Entry<String, T>>
-        implements AnnotationParameterModel {
+        implements ReflectionModel {
     AnnotationParameterReflectionModel(Map.Entry<String, T> origin) {
         super(origin);
     }

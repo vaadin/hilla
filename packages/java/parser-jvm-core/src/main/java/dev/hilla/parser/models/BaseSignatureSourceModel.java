@@ -7,7 +7,7 @@ import io.github.classgraph.BaseTypeSignature;
 final class BaseSignatureSourceModel
         extends BaseSignatureAbstractModel<BaseTypeSignature>
         implements SourceSignatureModel {
-    public BaseSignatureSourceModel(BaseTypeSignature origin) {
+    BaseSignatureSourceModel(BaseTypeSignature origin) {
         super(origin);
     }
 

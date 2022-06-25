@@ -7,7 +7,7 @@ import java.util.List;
 
 final class MethodParameterInfoReflectionModel
         extends MethodParameterInfoAbstractModel<Parameter>
-        implements MethodParameterInfoModel, ReflectionModel {
+        implements ReflectionModel {
     MethodParameterInfoReflectionModel(Parameter parameter) {
         super(parameter);
     }

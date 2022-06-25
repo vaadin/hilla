@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;

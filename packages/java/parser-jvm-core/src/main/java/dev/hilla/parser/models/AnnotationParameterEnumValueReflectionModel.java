@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 final class AnnotationParameterEnumValueReflectionModel
         extends AnnotationParameterEnumValueAbstractModel<Enum<?>>
-        implements AnnotationParameterEnumValueModel {
+        implements ReflectionModel {
     AnnotationParameterEnumValueReflectionModel(@Nonnull Enum<?> origin) {
         super(origin);
     }

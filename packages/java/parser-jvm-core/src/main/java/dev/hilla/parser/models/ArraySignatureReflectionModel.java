@@ -6,7 +6,7 @@ import java.util.List;
 final class ArraySignatureReflectionModel
         extends ArraySignatureAbstractModel<AnnotatedArrayType>
         implements ReflectionSignatureModel {
-    public ArraySignatureReflectionModel(AnnotatedArrayType origin) {
+    ArraySignatureReflectionModel(AnnotatedArrayType origin) {
         super(origin);
     }
 
