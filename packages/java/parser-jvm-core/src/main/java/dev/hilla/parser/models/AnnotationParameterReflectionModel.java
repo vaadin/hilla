@@ -3,10 +3,16 @@ package dev.hilla.parser.models;
 import java.util.Map;
 
 final class AnnotationParameterReflectionModel<T>
-        extends AnnotationParameterAbstractModel<Map.Entry<String, T>>
-        implements ReflectionModel {
+        extends AnnotationParameterModel implements ReflectionModel {
+    private final Map.Entry<String, T> origin;
+
     AnnotationParameterReflectionModel(Map.Entry<String, T> origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public Map.Entry<String, T> get() {
+        return origin;
     }
 
     @Override

@@ -4,10 +4,17 @@ import java.util.List;
 
 import io.github.classgraph.FieldInfo;
 
-final class FieldInfoSourceModel extends FieldInfoAbstractModel<FieldInfo>
+final class FieldInfoSourceModel extends FieldInfoModel
         implements SourceModel {
-    FieldInfoSourceModel(FieldInfo field) {
-        super(field);
+    private final FieldInfo origin;
+
+    FieldInfoSourceModel(FieldInfo origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public FieldInfo get() {
+        return origin;
     }
 
     @Override

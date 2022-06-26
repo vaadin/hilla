@@ -8,11 +8,17 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeParameter;
 
-final class TypeParameterSourceModel
-        extends TypeParameterAbstractModel<TypeParameter>
+final class TypeParameterSourceModel extends TypeParameterModel
         implements SourceSignatureModel {
+    private final TypeParameter origin;
+
     TypeParameterSourceModel(TypeParameter origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public TypeParameter get() {
+        return origin;
     }
 
     @Override

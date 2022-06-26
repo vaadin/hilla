@@ -1,13 +1,21 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 final class ArraySignatureReflectionModel
-        extends ArraySignatureAbstractModel<AnnotatedArrayType>
+        extends ArraySignatureModel
         implements ReflectionSignatureModel {
+    private final AnnotatedArrayType origin;
+
     ArraySignatureReflectionModel(AnnotatedArrayType origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotatedElement get() {
+        return origin;
     }
 
     @Override

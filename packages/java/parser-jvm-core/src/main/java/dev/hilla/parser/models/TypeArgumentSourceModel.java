@@ -6,11 +6,17 @@ import java.util.stream.Collectors;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentSourceModel
-        extends TypeArgumentAbstractModel<TypeArgument>
+final class TypeArgumentSourceModel extends TypeArgumentModel
         implements SourceSignatureModel {
+    private final TypeArgument origin;
+
     TypeArgumentSourceModel(TypeArgument origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public TypeArgument get() {
+        return origin;
     }
 
     @Override

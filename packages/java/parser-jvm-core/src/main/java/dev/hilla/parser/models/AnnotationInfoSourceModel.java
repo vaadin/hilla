@@ -5,10 +5,17 @@ import java.util.stream.Collectors;
 
 import io.github.classgraph.AnnotationInfo;
 
-final class AnnotationInfoSourceModel extends
-        AnnotationInfoAbstractModel<AnnotationInfo> implements SourceModel {
+final class AnnotationInfoSourceModel extends AnnotationInfoModel
+        implements SourceModel {
+    private final AnnotationInfo origin;
+
     AnnotationInfoSourceModel(AnnotationInfo origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotationInfo get() {
+        return origin;
     }
 
     @Override

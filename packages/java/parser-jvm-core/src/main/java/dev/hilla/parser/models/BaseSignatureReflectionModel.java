@@ -3,14 +3,19 @@ package dev.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
 
-final class BaseSignatureReflectionModel
-        extends BaseSignatureAbstractModel<AnnotatedType>
+final class BaseSignatureReflectionModel extends BaseSignatureModel
         implements ReflectionSignatureModel {
     private final Class<?> inner;
+    private final AnnotatedType origin;
 
     BaseSignatureReflectionModel(AnnotatedType origin) {
-        super(origin);
-        inner = (Class<?>) origin.getType();
+        this.origin = origin;
+        this.inner = (Class<?>) origin.getType();
+    }
+
+    @Override
+    public AnnotatedType get() {
+        return origin;
     }
 
     @Override
@@ -78,10 +83,17 @@ final class BaseSignatureReflectionModel
         return processAnnotations(origin.getAnnotations());
     }
 
-    static class Bare extends BaseSignatureAbstractModel<Class<?>>
+    static class Bare extends BaseSignatureModel
             implements ReflectionSignatureModel {
+        private final Class<?> origin;
+
         public Bare(Class<?> origin) {
-            super(origin);
+            this.origin = origin;
+        }
+
+        @Override
+        public Class<?> get() {
+            return origin;
         }
 
         @Override

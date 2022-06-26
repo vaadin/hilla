@@ -8,10 +8,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-final class ClassInfoReflectionModel extends ClassInfoAbstractModel<Class<?>>
+final class ClassInfoReflectionModel extends ClassInfoModel
         implements ReflectionModel {
+    private final Class<?> origin;
+
     ClassInfoReflectionModel(Class<?> origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public Class<?> get() {
+        return origin;
     }
 
     @Override

@@ -4,11 +4,17 @@ import java.util.List;
 
 import io.github.classgraph.BaseTypeSignature;
 
-final class BaseSignatureSourceModel
-        extends BaseSignatureAbstractModel<BaseTypeSignature>
+final class BaseSignatureSourceModel extends BaseSignatureModel
         implements SourceSignatureModel {
+    private final BaseTypeSignature origin;
+
     BaseSignatureSourceModel(BaseTypeSignature origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public BaseTypeSignature get() {
+        return origin;
     }
 
     @Override

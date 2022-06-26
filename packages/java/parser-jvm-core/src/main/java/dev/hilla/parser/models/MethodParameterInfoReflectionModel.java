@@ -5,11 +5,17 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
-final class MethodParameterInfoReflectionModel
-        extends MethodParameterInfoAbstractModel<Parameter>
+final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
         implements ReflectionModel {
-    MethodParameterInfoReflectionModel(Parameter parameter) {
-        super(parameter);
+    private final Parameter origin;
+
+    MethodParameterInfoReflectionModel(Parameter origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public Parameter get() {
+        return origin;
     }
 
     @Override

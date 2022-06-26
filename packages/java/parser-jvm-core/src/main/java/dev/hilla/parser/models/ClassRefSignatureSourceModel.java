@@ -10,11 +10,17 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.TypeArgument;
 
-abstract class ClassRefSignatureSourceModel
-        extends ClassRefSignatureAbstractModel<ClassRefTypeSignature>
+abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         implements SourceSignatureModel {
+    protected final ClassRefTypeSignature origin;
+
     ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public ClassRefTypeSignature get() {
+        return origin;
     }
 
     @Override

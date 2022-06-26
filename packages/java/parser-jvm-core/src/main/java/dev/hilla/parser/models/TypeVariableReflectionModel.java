@@ -4,12 +4,17 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 
-final class TypeVariableReflectionModel
-        extends TypeVariableAbstractModel<AnnotatedTypeVariable>
+final class TypeVariableReflectionModel extends TypeVariableModel
         implements ReflectionSignatureModel {
+    private final AnnotatedTypeVariable origin;
 
     TypeVariableReflectionModel(AnnotatedTypeVariable origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotatedTypeVariable get() {
+        return origin;
     }
 
     @Override

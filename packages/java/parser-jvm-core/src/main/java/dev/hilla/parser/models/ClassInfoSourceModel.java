@@ -10,10 +10,16 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
-final class ClassInfoSourceModel extends ClassInfoAbstractModel<ClassInfo>
-        implements SourceModel {
+final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
+    private final ClassInfo origin;
+
     ClassInfoSourceModel(ClassInfo origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public Object get() {
+        return origin;
     }
 
     @Override

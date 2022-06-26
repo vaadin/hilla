@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 
 import io.github.classgraph.MethodInfo;
 
-final class MethodInfoSourceModel extends MethodInfoAbstractModel<MethodInfo>
+final class MethodInfoSourceModel extends MethodInfoModel
         implements SourceModel {
-    MethodInfoSourceModel(MethodInfo method) {
-        super(method);
+    private final MethodInfo origin;
+
+    MethodInfoSourceModel(MethodInfo origin) {
+        this.origin = origin;
     }
 
     @Override
@@ -18,6 +20,11 @@ final class MethodInfoSourceModel extends MethodInfoAbstractModel<MethodInfo>
                 && origin.getModifiers() == other.getModifiers()
                 && getResultType().equals(other.getResultType())
                 && origin.getClassName().equals(other.getClassName());
+    }
+
+    @Override
+    public MethodInfo get() {
+        return origin;
     }
 
     @Override

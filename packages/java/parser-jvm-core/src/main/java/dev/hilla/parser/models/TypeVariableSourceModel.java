@@ -4,11 +4,17 @@ import java.util.List;
 
 import io.github.classgraph.TypeVariableSignature;
 
-final class TypeVariableSourceModel
-        extends TypeVariableAbstractModel<TypeVariableSignature>
+final class TypeVariableSourceModel extends TypeVariableModel
         implements SourceSignatureModel {
+    private final TypeVariableSignature origin;
+
     TypeVariableSourceModel(TypeVariableSignature origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public TypeVariableSignature get() {
+        return origin;
     }
 
     @Override

@@ -3,10 +3,16 @@ package dev.hilla.parser.models;
 import io.github.classgraph.AnnotationEnumValue;
 
 final class AnnotationParameterEnumValueSourceModel
-        extends AnnotationParameterEnumValueAbstractModel<AnnotationEnumValue>
-        implements SourceModel {
+        extends AnnotationParameterEnumValueModel implements SourceModel {
+    private final AnnotationEnumValue origin;
+
     AnnotationParameterEnumValueSourceModel(AnnotationEnumValue origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotationEnumValue get() {
+        return origin;
     }
 
     @Override

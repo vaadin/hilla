@@ -6,11 +6,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class TypeParameterReflectionModel
-        extends TypeParameterAbstractModel<AnnotatedTypeVariable>
+final class TypeParameterReflectionModel extends TypeParameterModel
         implements ReflectionSignatureModel {
+    private final AnnotatedTypeVariable origin;
+
     TypeParameterReflectionModel(AnnotatedTypeVariable origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotatedTypeVariable get() {
+        return origin;
     }
 
     @Override

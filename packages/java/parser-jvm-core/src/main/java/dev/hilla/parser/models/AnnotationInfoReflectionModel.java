@@ -5,10 +5,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
-final class AnnotationInfoReflectionModel extends
-        AnnotationInfoAbstractModel<Annotation> implements ReflectionModel {
-    AnnotationInfoReflectionModel(Annotation annotation) {
-        super(annotation);
+final class AnnotationInfoReflectionModel extends AnnotationInfoModel
+        implements ReflectionModel {
+    private final Annotation origin;
+
+    AnnotationInfoReflectionModel(Annotation origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public Annotation get() {
+        return origin;
     }
 
     @Override

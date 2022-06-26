@@ -4,10 +4,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-final class FieldInfoReflectionModel extends FieldInfoAbstractModel<Field>
+final class FieldInfoReflectionModel extends FieldInfoModel
         implements ReflectionModel {
-    FieldInfoReflectionModel(Field field) {
-        super(field);
+    private final Field origin;
+
+    FieldInfoReflectionModel(Field origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public Field get() {
+        return origin;
     }
 
     @Override

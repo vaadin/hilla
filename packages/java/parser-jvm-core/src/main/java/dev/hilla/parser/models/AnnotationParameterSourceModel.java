@@ -4,11 +4,17 @@ import io.github.classgraph.AnnotationClassRef;
 import io.github.classgraph.AnnotationEnumValue;
 import io.github.classgraph.AnnotationParameterValue;
 
-final class AnnotationParameterSourceModel
-        extends AnnotationParameterAbstractModel<AnnotationParameterValue>
+final class AnnotationParameterSourceModel extends AnnotationParameterModel
         implements SourceModel {
+    private final AnnotationParameterValue origin;
+
     AnnotationParameterSourceModel(AnnotationParameterValue origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public AnnotationParameterValue get() {
+        return origin;
     }
 
     @Override

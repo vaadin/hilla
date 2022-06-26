@@ -1,12 +1,16 @@
 package dev.hilla.parser.models;
 
-import javax.annotation.Nonnull;
-
 final class AnnotationParameterEnumValueReflectionModel
-        extends AnnotationParameterEnumValueAbstractModel<Enum<?>>
-        implements ReflectionModel {
-    AnnotationParameterEnumValueReflectionModel(@Nonnull Enum<?> origin) {
-        super(origin);
+        extends AnnotationParameterEnumValueModel implements ReflectionModel {
+    private final Enum<?> origin;
+
+    AnnotationParameterEnumValueReflectionModel(Enum<?> origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public Enum<?> get() {
+        return origin;
     }
 
     @Override

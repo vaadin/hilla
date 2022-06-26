@@ -10,13 +10,9 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-abstract class AnnotatedAbstractModel<T> extends AbstractModel<T>
+abstract class AnnotatedAbstractModel
         implements AnnotatedModel {
     private List<AnnotationInfoModel> annotations;
-
-    AnnotatedAbstractModel(@Nonnull T origin) {
-        super(origin);
-    }
 
     protected static List<AnnotationInfoModel> processAnnotations(
             @Nonnull Annotation[] annotations) {
@@ -43,11 +39,6 @@ abstract class AnnotatedAbstractModel<T> extends AbstractModel<T>
         }
 
         return annotations;
-    }
-
-    @Override
-    public Stream<AnnotationInfoModel> getAnnotationsStream() {
-        return getAnnotations().stream();
     }
 
     protected abstract List<AnnotationInfoModel> prepareAnnotations();

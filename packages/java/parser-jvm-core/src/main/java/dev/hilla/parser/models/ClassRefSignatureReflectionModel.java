@@ -13,10 +13,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
-        extends ClassRefSignatureAbstractModel<T>
+        extends ClassRefSignatureModel
         implements ReflectionSignatureModel {
+    protected final T origin;
+
     ClassRefSignatureReflectionModel(T origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public T get() {
+        return origin;
     }
 
     @Override

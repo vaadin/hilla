@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class MethodInfoReflectionModel extends MethodInfoAbstractModel<Method>
+final class MethodInfoReflectionModel extends MethodInfoModel
         implements ReflectionModel {
-    MethodInfoReflectionModel(Method method) {
-        super(method);
+    private final Method origin;
+
+    MethodInfoReflectionModel(Method origin) {
+        this.origin = origin;
     }
 
     @Override
@@ -19,6 +21,11 @@ final class MethodInfoReflectionModel extends MethodInfoAbstractModel<Method>
                 && getResultType().equals(other.getResultType())
                 && origin.getDeclaringClass().getName()
                         .equals(other.getClassName());
+    }
+
+    @Override
+    public Method get() {
+        return origin;
     }
 
     @Override

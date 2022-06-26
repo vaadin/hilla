@@ -4,11 +4,17 @@ import java.util.List;
 
 import io.github.classgraph.ArrayTypeSignature;
 
-final class ArraySignatureSourceModel
-        extends ArraySignatureAbstractModel<ArrayTypeSignature>
+final class ArraySignatureSourceModel extends ArraySignatureModel
         implements SourceSignatureModel {
+    private final ArrayTypeSignature origin;
+
     ArraySignatureSourceModel(ArrayTypeSignature origin) {
-        super(origin);
+        this.origin = origin;
+    }
+
+    @Override
+    public ArrayTypeSignature get() {
+        return origin;
     }
 
     @Override

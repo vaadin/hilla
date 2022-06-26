@@ -4,11 +4,17 @@ import java.util.List;
 
 import io.github.classgraph.MethodParameterInfo;
 
-final class MethodParameterInfoSourceModel
-        extends MethodParameterInfoAbstractModel<MethodParameterInfo>
+final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
         implements SourceModel {
-    MethodParameterInfoSourceModel(MethodParameterInfo parameter) {
-        super(parameter);
+    private final MethodParameterInfo origin;
+
+    MethodParameterInfoSourceModel(MethodParameterInfo origin) {
+        this.origin = origin;
+    }
+
+    @Override
+    public MethodParameterInfo get() {
+        return origin;
     }
 
     @Override
