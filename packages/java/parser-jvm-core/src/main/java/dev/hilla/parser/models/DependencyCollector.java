@@ -7,6 +7,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -91,10 +92,8 @@ public interface DependencyCollector<S, D> {
                             .getRawType());
 
             if (isNewDependency) {
-                for (var argument : signature
-                        .getAnnotatedActualTypeArguments()) {
-                    collect(argument);
-                }
+                Arrays.stream(signature.getAnnotatedActualTypeArguments())
+                        .forEach(this::collect);
             }
         }
 
@@ -111,13 +110,10 @@ public interface DependencyCollector<S, D> {
 
         private void collectAnnotatedWildcardType(
                 AnnotatedWildcardType signature) {
-            for (var bound : signature.getAnnotatedUpperBounds()) {
-                collect(bound);
-            }
-
-            for (var bound : signature.getAnnotatedLowerBounds()) {
-                collect(bound);
-            }
+            Arrays.stream(signature.getAnnotatedUpperBounds())
+                    .forEach(this::collect);
+            Arrays.stream(signature.getAnnotatedLowerBounds())
+                    .forEach(this::collect);
         }
 
         private boolean collectClass(Class<?> signature) {
