@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.AnnotationInfo;
 
 public abstract class AnnotationInfoModel implements Model, NamedModel {
-    private Set<AnnotationParameterModel> parameters;
     private ClassInfoModel classInfo;
+    private Set<AnnotationParameterModel> parameters;
 
     public static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation) {
         return new AnnotationInfoSourceModel(annotation);

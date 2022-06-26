@@ -9,29 +9,17 @@ import io.github.classgraph.MethodParameterInfo;
 
 public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, OwnedModel<MethodInfoModel> {
-    public static MethodParameterInfoModel of(@Nonnull MethodParameterInfo parameter) {
+    private MethodInfoModel owner;
+    private SignatureModel type;
+
+    public static MethodParameterInfoModel of(
+            @Nonnull MethodParameterInfo parameter) {
         return new MethodParameterInfoSourceModel(parameter);
     }
 
     public static MethodParameterInfoModel of(@Nonnull Parameter parameter) {
         return new MethodParameterInfoReflectionModel(parameter);
     }
-
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getType().getDependenciesStream();
-    }
-
-    public abstract int getModifiers();
-
-    public abstract boolean isFinal();
-
-    public abstract boolean isMandated();
-
-    public abstract boolean isSynthetic();
-
-    private MethodInfoModel owner;
-    private SignatureModel type;
 
     @Override
     public boolean equals(Object obj) {
@@ -51,6 +39,13 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
                 && getType().equals(other.getType())
                 && getName().equals(other.getName());
     }
+
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
+        return getType().getDependenciesStream();
+    }
+
+    public abstract int getModifiers();
 
     @Override
     public MethodInfoModel getOwner() {
@@ -75,6 +70,12 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
                 + 11 * getAnnotations().hashCode() + 17 * getModifiers()
                 + 23 * getType().hashCode() + 53 * getName().hashCode();
     }
+
+    public abstract boolean isFinal();
+
+    public abstract boolean isMandated();
+
+    public abstract boolean isSynthetic();
 
     protected abstract MethodInfoModel prepareOwner();
 

@@ -12,8 +12,8 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
 
-public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
-        Model, NamedModel, OwnedModel<ClassInfoModel> {
+public abstract class MethodInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
     private ClassInfoModel owner;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;

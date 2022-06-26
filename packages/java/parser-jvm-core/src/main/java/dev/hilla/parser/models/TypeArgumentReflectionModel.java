@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.WildcardType;
@@ -12,8 +11,7 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentReflectionModel
-        extends TypeArgumentModel
+final class TypeArgumentReflectionModel extends TypeArgumentModel
         implements ReflectionSignatureModel {
     private final AnnotatedType origin;
     private TypeArgument.Wildcard wildcard;

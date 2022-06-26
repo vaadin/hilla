@@ -13,8 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
-        extends ClassRefSignatureModel
-        implements ReflectionSignatureModel {
+        extends ClassRefSignatureModel implements ReflectionSignatureModel {
     protected final T origin;
 
     ClassRefSignatureReflectionModel(T origin) {

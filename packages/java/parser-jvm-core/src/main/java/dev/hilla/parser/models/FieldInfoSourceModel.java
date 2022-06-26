@@ -4,8 +4,7 @@ import java.util.List;
 
 import io.github.classgraph.FieldInfo;
 
-final class FieldInfoSourceModel extends FieldInfoModel
-        implements SourceModel {
+final class FieldInfoSourceModel extends FieldInfoModel implements SourceModel {
     private final FieldInfo origin;
 
     FieldInfoSourceModel(FieldInfo origin) {

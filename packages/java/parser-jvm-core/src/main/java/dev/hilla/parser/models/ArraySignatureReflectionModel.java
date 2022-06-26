@@ -4,8 +4,7 @@ import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-final class ArraySignatureReflectionModel
-        extends ArraySignatureModel
+final class ArraySignatureReflectionModel extends ArraySignatureModel
         implements ReflectionSignatureModel {
     private final AnnotatedArrayType origin;
 

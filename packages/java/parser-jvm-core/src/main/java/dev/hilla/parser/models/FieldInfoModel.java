@@ -8,8 +8,8 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public abstract class FieldInfoModel extends AnnotatedAbstractModel implements
-        Model, NamedModel, OwnedModel<ClassInfoModel> {
+public abstract class FieldInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
     private ClassInfoModel owner;
     private SignatureModel type;
 
