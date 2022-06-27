@@ -9,10 +9,10 @@ use(sinonChai);
 use(snapshotMatcher);
 
 describe('BackbonePlugin', () => {
-  context('when primitive types are used', () => {
+  context('when the endpoint method contains parameter names which could clash with our `init` one', () => {
     const sectionName = 'NameClash';
 
-    it('correctly generates code', async () => {
+    it('renames the `init` parameter to avoid repetitions', async () => {
       const generator = createGenerator([BackbonePlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
