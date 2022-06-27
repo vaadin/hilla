@@ -33,7 +33,7 @@ export default class EndpointMethodRequestBodyProcessor {
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
     owner: Plugin,
-    endpointRequestInitIdentifier: ts.Identifier,
+    initTypeIdentifier: ts.Identifier,
   ) {
     this.#owner = owner;
     this.#dependencies = dependencies;
