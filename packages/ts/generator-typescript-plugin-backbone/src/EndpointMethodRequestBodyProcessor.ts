@@ -60,9 +60,10 @@ export default class EndpointMethodRequestBodyProcessor {
     }
 
     const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
+    const parameterNames = parameterData.map(([name]) => name);
     let initParamName = this.#defaultInitParamName;
 
-    while (parameterData.find(([name]) => name === initParamName))) {
+    while (parameterNames.includes(initParamName)) {
       initParamName = `_${initParamName}`;
     }
 
