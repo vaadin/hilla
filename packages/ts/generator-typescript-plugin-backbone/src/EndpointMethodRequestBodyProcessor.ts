@@ -49,19 +49,19 @@ export default class EndpointMethodRequestBodyProcessor {
             undefined,
             undefined,
             undefined,
-            this.#defaultInitParamName,
+            EndpointMethodRequestBodyProcessor.#defaultInitParamName,
             ts.factory.createToken(ts.SyntaxKind.QuestionToken),
             ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
           ),
         ],
         packedParameters: ts.factory.createObjectLiteralExpression(),
-        initParam: ts.factory.createIdentifier(this.#defaultInitParamName),
+        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
       };
     }
 
     const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
     const parameterNames = parameterData.map(([name]) => name);
-    let initParamName = this.#defaultInitParamName;
+    let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
 
     while (parameterNames.includes(initParamName)) {
       initParamName = `_${initParamName}`;
