@@ -22,7 +22,7 @@ export type EndpointMethodRequestBodyProcessingResult = Readonly<{
 }>;
 
 export default class EndpointMethodRequestBodyProcessor {
-  readonly #defaultInitParamName = 'init';
+  static readonly #defaultInitParamName = 'init';
 
   readonly #dependencies: DependencyManager;
   readonly #owner: Plugin;
