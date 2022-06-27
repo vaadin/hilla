@@ -8,9 +8,11 @@ import type { CallExpression, Expression, Statement, TypeNode } from 'typescript
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
-import EndpointProcessor from './EndpointProcessor';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
+
+export const INIT_TYPE_NAME = 'EndpointRequestInit';
+export const HILLA_FRONTEND_NAME = '@hilla/frontend';
 
 function wrapCallExpression(callExpression: CallExpression, responseType: TypeNode): Statement {
   if (ts.isUnionTypeNode(responseType)) {
@@ -74,8 +76,8 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
     const endpointRequestInitIdentifier = imports.named.getIdentifier(
-      paths.createBareModulePath(EndpointProcessor.HILLA_FRONTEND_NAME),
-      'EndpointRequestInit',
+      paths.createBareModulePath(HILLA_FRONTEND_NAME),
+      INIT_TYPE_NAME,
     )!;
 
     const { parameters, packedParameters, initParam } = new EndpointMethodRequestBodyProcessor(
