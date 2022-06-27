@@ -75,7 +75,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   public process(): Statement | undefined {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
-    const endpointRequestInitIdentifier = imports.named.getIdentifier(
+    const initTypeIdentifier = imports.named.getIdentifier(
       paths.createBareModulePath(HILLA_FRONTEND_NAME),
       INIT_TYPE_NAME,
     )!;
@@ -84,7 +84,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       this.#operation.requestBody,
       this.#dependencies,
       this.#owner,
-      endpointRequestInitIdentifier,
+      initTypeIdentifier,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);

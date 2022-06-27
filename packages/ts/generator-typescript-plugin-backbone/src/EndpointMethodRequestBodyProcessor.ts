@@ -27,7 +27,7 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #dependencies: DependencyManager;
   readonly #owner: Plugin;
   readonly #requestBody?: EndpointMethodRequestBody;
-  readonly #endpointRequestInitIdentifier: ts.Identifier;
+  readonly #initTypeIdentifier: ts.Identifier;
 
   public constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
@@ -38,7 +38,7 @@ export default class EndpointMethodRequestBodyProcessor {
     this.#owner = owner;
     this.#dependencies = dependencies;
     this.#requestBody = requestBody ? owner.resolver.resolve(requestBody) : undefined;
-    this.#endpointRequestInitIdentifier = endpointRequestInitIdentifier;
+    this.#initTypeIdentifier = initTypeIdentifier;
   }
 
   public process(): EndpointMethodRequestBodyProcessingResult {
@@ -51,7 +51,7 @@ export default class EndpointMethodRequestBodyProcessor {
             undefined,
             this.#defaultInitParamName,
             ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-            ts.factory.createTypeReferenceNode(this.#endpointRequestInitIdentifier),
+            ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
           ),
         ],
         packedParameters: ts.factory.createObjectLiteralExpression(),
@@ -86,7 +86,7 @@ export default class EndpointMethodRequestBodyProcessor {
           undefined,
           initParamName,
           ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-          ts.factory.createTypeReferenceNode(this.#endpointRequestInitIdentifier),
+          ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
         ),
       ],
       packedParameters: ts.factory.createObjectLiteralExpression(
