@@ -9,6 +9,9 @@ import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, { EndpointMethodOperation } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
+  public static readonly HILLA_FRONTEND_NAME = '@hilla/frontend';
+  public static readonly INIT_TYPE_NAME = 'EndpointRequestInit';
+
   readonly #dependencies = new DependencyManager(new PathManager());
   readonly #methods = new Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>();
   readonly #name: string;
@@ -21,6 +24,10 @@ export default class EndpointProcessor {
     this.#dependencies.imports.default.add(
       this.#dependencies.paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME),
       'client',
+    );
+    this.#dependencies.imports.named.add(
+      this.#dependencies.paths.createBareModulePath(EndpointProcessor.HILLA_FRONTEND_NAME),
+      EndpointProcessor.INIT_TYPE_NAME,
     );
   }
 

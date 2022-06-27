@@ -8,6 +8,7 @@ import type { CallExpression, Expression, Statement, TypeNode } from 'typescript
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
+import EndpointProcessor from './EndpointProcessor';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -72,11 +73,16 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   public process(): Statement | undefined {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
+    const endpointRequestInitIdentifier = imports.named.getIdentifier(
+      paths.createBareModulePath(EndpointProcessor.HILLA_FRONTEND_NAME),
+      'EndpointRequestInit',
+    )!;
 
-    const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
+    const { parameters, packedParameters, initParam } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
       this.#owner,
+      endpointRequestInitIdentifier,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
@@ -89,6 +95,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
         ts.factory.createStringLiteral(this.#endpointName),
         ts.factory.createStringLiteral(this.#endpointMethodName),
         packedParameters,
+        initParam,
       ].filter(Boolean) as readonly Expression[],
     );
 
