@@ -66,59 +66,13 @@
   <dependencies>
     <!-- Project dependencies -->
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-html-components</artifactId>
-      <version>${flow.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-lumo-theme</artifactId>
-      <version>${vaadin.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-test-util</artifactId>
-      <version>${flow.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>fusion-endpoint</artifactId>
-      <version>${flow.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-client</artifactId>
-      <version>${flow.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-dev-server</artifactId>
-      <version>${flow.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.hamcrest</groupId>
-          <artifactId>hamcrest-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- JDK 9+ dependencies -->
@@ -130,17 +84,14 @@
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>1.3.2</version>
     </dependency>
     <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
-      <version>2.3.5</version>
     </dependency>
   </dependencies>
 

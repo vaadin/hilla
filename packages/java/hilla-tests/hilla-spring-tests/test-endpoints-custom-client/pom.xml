@@ -20,7 +20,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring</artifactId>
-            <version>${flow.version}</version>
             <exclusions>
                 <!-- There are no vaadin components in the test UIs -->
                 <exclusion>
@@ -33,13 +32,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dev-server</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>fusion-endpoint</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <dependency>

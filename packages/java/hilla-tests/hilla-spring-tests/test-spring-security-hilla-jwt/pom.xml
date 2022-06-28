@@ -28,11 +28,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>fusion-endpoint</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
@@ -87,7 +82,6 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${flow.version}</version>
                 <executions>
                     <execution>
                         <goals>
