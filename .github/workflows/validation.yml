@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
             require('fs').readdirSync('packages/java')
-              .filter(name => name !== 'hilla-tests')
+              .filter(name => name !== 'tests')
           ))")"
       - name: List TypeScript Unit
         id: packages-ts
@@ -62,13 +62,13 @@ jobs:
         run: >-
           echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
             [
-              require('fs').readdirSync('packages/java/hilla-tests/')
-                .filter(name => name !== 'hilla-spring-tests'),
-              require('fs').readdirSync('packages/java/hilla-tests/hilla-spring-tests/')
-                .map(name => 'hilla-spring-tests/' + name)
+              require('fs').readdirSync('packages/java/tests/')
+                .filter(name => name !== 'spring'),
+              require('fs').readdirSync('packages/java/tests/spring/')
+                .map(name => 'spring/' + name)
             ].flat()
               .filter(path =>
-                require('fs').lstatSync('packages/java/hilla-tests/' + path).isDirectory()
+                require('fs').lstatSync('packages/java/tests/' + path).isDirectory()
               )
           ))")"
       - name: Setup
@@ -199,10 +199,10 @@ jobs:
         java-version:
             - 11
         exclude:
-          - package: hilla-spring-tests/test-endpoints-latest-java
+          - package: spring/endpoints-latest-java
             java-version: 11
         include:
-          - package: hilla-spring-tests/test-endpoints-latest-java
+          - package: spring/endpoints-latest-java
             java-version: 17
 
     steps:
@@ -225,7 +225,7 @@ jobs:
       - name: Verify
         run: |
           (
-            cd packages/java/hilla-tests/${{ matrix.package }} && \
+            cd packages/java/tests/${{ matrix.package }} && \
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
@@ -239,8 +239,8 @@ jobs:
         with:
           name: saved-outputs
           path: |
-            packages/java/hilla-tests/**/target/*-reports/*
-            packages/java/hilla-tests/**/error-screenshots/*.png
+            packages/java/tests/**/target/*-reports/*
+            packages/java/tests/**/error-screenshots/*.png
 
   test-all:
     name: Tests Summary

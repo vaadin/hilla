@@ -1,0 +1,1 @@
+../../spring-security/frontend/routes.ts
