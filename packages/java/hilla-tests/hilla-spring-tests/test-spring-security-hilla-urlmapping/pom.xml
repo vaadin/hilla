@@ -28,10 +28,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>fusion-endpoint</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
