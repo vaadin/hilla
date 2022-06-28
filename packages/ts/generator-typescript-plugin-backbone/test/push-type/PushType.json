@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin application",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "PushTypeEndpoint",
+      "description": "This class is used for OpenApi generator test"
+    }
+  ],
+  "paths": {
+    "/PushTypeEndpoint/getAllUsers": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "description": "Get all users",
+        "operationId": "PushTypeEndpoint_getAllUsers_POST",
+        "responses": {
+          "200": {
+            "description": "Return a list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.pushtype.PushTypeEndpoint$UserEntity"
+                      }
+                    ]
+                  },
+                  "x-flux": true
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PushTypeEndpoint/getAllUsersNonnull": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "operationId": "PushTypeEndpoint_getAllUsersNonnull_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "",
+                  "items": {
+                    "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.pushtype.PushTypeEndpoint$UserEntity"
+                  },
+                  "x-flux": true
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.pushtype.PushTypeEndpoint$UserEntity": {
+        "required": ["id"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "vaadin-connect-oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "tokenUrl": "/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

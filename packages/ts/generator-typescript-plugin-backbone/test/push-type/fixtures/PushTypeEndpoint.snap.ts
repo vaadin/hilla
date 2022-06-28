@@ -1,0 +1,6 @@
+import { EndpointRequestInit as EndpointRequestInit_1 } from "@hilla/frontend";
+import client_1 from "./connect-client.default";
+import type UserEntity_1 from "./dev/hilla/parser/plugins/backbone/pushtype/PushTypeEndpoint/UserEntity";
+async function getAllUsers_1(init?: EndpointRequestInit_1): Promise<Array<UserEntity_1 | undefined> | undefined> { return client_1.call("PushTypeEndpoint", "getAllUsers", {}, init); }
+async function getAllUsersNonnull_1(init?: EndpointRequestInit_1): Promise<Array<UserEntity_1>> { return client_1.call("PushTypeEndpoint", "getAllUsersNonnull", {}, init); }
+export { getAllUsers_1 as getAllUsers, getAllUsersNonnull_1 as getAllUsersNonnull };
