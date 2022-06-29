@@ -11,8 +11,8 @@ import client from './connect-client.default';
 // @ts-ignore
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
-function _getAllUsers(init?: EndpointRequestInit): Promise<void> {
-  return client.call('GeneratorTestClass', 'getAllUsers', {}, init);
+function _getAllUsers(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('GeneratorTestClass', 'getAllUsers', {}, __init);
 }
 export {
   _getAllUsers as getAllUsers,

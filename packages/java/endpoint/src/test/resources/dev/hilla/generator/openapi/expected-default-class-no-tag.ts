@@ -13,11 +13,11 @@ import type User from './User';
 /**
  * Get all users
  *
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return list of users
  */
-function _getAllUsers(init?: EndpointRequestInit): Promise<Array<User | undefined>> {
-  return client.call('GeneratorTestClass', 'getAllUsers', {}, init);
+function _getAllUsers(__init?: EndpointRequestInit): Promise<Array<User | undefined>> {
+  return client.call('GeneratorTestClass', 'getAllUsers', {}, __init);
 }
 
 export {

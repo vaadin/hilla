@@ -10,8 +10,8 @@ import client from './connect-client.default';
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Model from './dev/hilla/generator/endpoints/complexhierarchymodel/Model';
 
-function _getModel(init?: EndpointRequestInit): Promise<Model | undefined> {
-  return client.call('ComplexHierarchyEndpoint', 'getModel', {} , init);
+function _getModel(__init?: EndpointRequestInit): Promise<Model | undefined> {
+  return client.call('ComplexHierarchyEndpoint', 'getModel', {} , __init);
 }
 
 export {

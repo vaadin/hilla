@@ -10,8 +10,8 @@ import client from './connect-client.default';
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Account from './dev/hilla/generator/endpoints/model/ModelEndpoint/Account';
 
-function _getAccounts(init?: EndpointRequestInit): Promise<Array<Account | undefined> | undefined> {
-  return client.call('ComplexReturnTypeEndpoint', 'getAccounts', {}, init);
+function _getAccounts(__init?: EndpointRequestInit): Promise<Array<Account | undefined> | undefined> {
+  return client.call('ComplexReturnTypeEndpoint', 'getAccounts', {}, __init);
 }
 
 export {

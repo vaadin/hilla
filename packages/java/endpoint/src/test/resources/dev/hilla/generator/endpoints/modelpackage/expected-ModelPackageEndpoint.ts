@@ -13,25 +13,25 @@ import type Account from './dev/hilla/generator/endpoints/modelpackage/ModelPack
 /**
  * Get a list of user name.
  *
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return list of user name
  */
-function _getListOfUserName(init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
-  return client.call('ModelPackageEndpoint', 'getListOfUserName', {}, init);
+function _getListOfUserName(__init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+  return client.call('ModelPackageEndpoint', 'getListOfUserName', {}, __init);
 }
 
 /**
  * Get a collection by author name. The generator should not mix this type with the Java's Collection type.
  *
  * @param name author name
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return a collection
  */
 function _getSameModelPackage(
   name: string | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<Account | undefined> {
-  return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name}, init);
+  return client.call('ModelPackageEndpoint', 'getSameModelPackage', {name}, __init);
 }
 
 export {
