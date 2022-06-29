@@ -8,14 +8,14 @@ import client from './connect-client.default';
 // @ts-ignore
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Foo from './dev/hilla/generator/endpoints/pageendpoint/PageEndpoint/Foo';
-function _getPageOfObjects(endpointRequestInit?: EndpointRequestInit): Promise<Array<Foo | undefined> | undefined> {
+function _getPageOfObjects(__init?: EndpointRequestInit): Promise<Array<Foo | undefined> | undefined> {
   return client.call (
-    'PageEndpoint', 'getPageOfObjects', {}, endpointRequestInit
+    'PageEndpoint', 'getPageOfObjects', {}, __init
   );
 }
-function _getPageOfStrings(endpointRequestInit?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+function _getPageOfStrings(__init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
   return client.call (
-    'PageEndpoint', 'getPageOfStrings', {}, endpointRequestInit
+    'PageEndpoint', 'getPageOfStrings', {}, __init
   );
 }
 export {

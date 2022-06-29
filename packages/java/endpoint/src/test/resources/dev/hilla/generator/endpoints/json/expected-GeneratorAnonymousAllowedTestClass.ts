@@ -11,16 +11,16 @@ import client from './connect-client.default';
 // @ts-ignore
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
-function _anonymousAllowed(endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('customName', 'anonymousAllowed', {}, endpointRequestInit);
+function _anonymousAllowed(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('customName', 'anonymousAllowed', {}, __init);
 }
 
-function _permissionAltered1(endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('customName', 'permissionAltered1', {}, endpointRequestInit);
+function _permissionAltered1(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('customName', 'permissionAltered1', {}, __init);
 }
 
-function _permissionAltered2(endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('customName', 'permissionAltered2', {}, endpointRequestInit);
+function _permissionAltered2(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('customName', 'permissionAltered2', {}, __init);
 }
 
 export {

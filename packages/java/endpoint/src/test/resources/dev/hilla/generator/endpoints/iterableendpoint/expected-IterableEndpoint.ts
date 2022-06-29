@@ -10,8 +10,8 @@ import client from './connect-client.default';
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type Foo from './dev/hilla/generator/endpoints/iterableendpoint/IterableEndpoint/Foo';
 
-function _getFoos(endpointRequestInit?: EndpointRequestInit): Promise<Array<Foo | undefined> | undefined> {
-  return client.call('IterableEndpoint', 'getFoos', {}, endpointRequestInit);
+function _getFoos(__init?: EndpointRequestInit): Promise<Array<Foo | undefined> | undefined> {
+  return client.call('IterableEndpoint', 'getFoos', {}, __init);
 }
 
 export {

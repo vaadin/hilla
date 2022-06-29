@@ -15,24 +15,24 @@ import type Collection from './dev/hilla/generator/endpoints/collectionendpoint/
  * Get a collection by author name. The generator should not mix this type with the Java's Collection type.
  *
  * @param name author name
- * @param endpointRequestInit an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return a collection
  */
 function _getCollectionByAuthor(
   name: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<Collection | undefined> {
-  return client.call('CollectionEndpoint', 'getCollectionByAuthor', {name}, endpointRequestInit);
+  return client.call('CollectionEndpoint', 'getCollectionByAuthor', {name}, __init);
 }
 
 /**
  * Get a list of user name.
  *
- * @param endpointRequestInit an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return list of user name
  */
-function _getListOfUserName(endpointRequestInit?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
-  return client.call('CollectionEndpoint', 'getListOfUserName', {}, endpointRequestInit);
+function _getListOfUserName(__init?: EndpointRequestInit): Promise<Array<string | undefined> | undefined> {
+  return client.call('CollectionEndpoint', 'getListOfUserName', {}, __init);
 }
 
 export {

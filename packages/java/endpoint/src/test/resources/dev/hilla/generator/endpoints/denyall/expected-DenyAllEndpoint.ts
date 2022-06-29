@@ -9,16 +9,16 @@ import client from './connect-client.default';
 // @ts-ignore
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
-function _shouldBeDisplayed1(endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('DenyAllEndpoint', 'shouldBeDisplayed1', {}, endpointRequestInit);
+function _shouldBeDisplayed1(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('DenyAllEndpoint', 'shouldBeDisplayed1', {}, __init);
 }
 
-function _shouldBeDisplayed2(endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('DenyAllEndpoint', 'shouldBeDisplayed2', {}, endpointRequestInit);
+function _shouldBeDisplayed2(__init?: EndpointRequestInit): Promise<void> {
+  return client.call('DenyAllEndpoint', 'shouldBeDisplayed2', {}, __init);
 }
 
-function _shouldBeDisplayed3 (endpointRequestInit?: EndpointRequestInit): Promise<void> {
-  return client.call('DenyAllEndpoint', 'shouldBeDisplayed3', {}, endpointRequestInit);
+function _shouldBeDisplayed3 (__init?: EndpointRequestInit): Promise<void> {
+  return client.call('DenyAllEndpoint', 'shouldBeDisplayed3', {}, __init);
 }
 
 export{

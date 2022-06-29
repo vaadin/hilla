@@ -10,8 +10,8 @@ import client from './connect-client.default';
 import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 import type SelfReference from './dev/hilla/generator/endpoints/selfreference/SelfReference';
 
-function _getModel(endpointRequestInit?: EndpointRequestInit): Promise<SelfReference | undefined> {
-  return client.call('SelfReferenceEndpoint', 'getModel', {}, endpointRequestInit);
+function _getModel(__init?: EndpointRequestInit): Promise<SelfReference | undefined> {
+  return client.call('SelfReferenceEndpoint', 'getModel', {}, __init);
 }
 export {
   _getModel as getModel,

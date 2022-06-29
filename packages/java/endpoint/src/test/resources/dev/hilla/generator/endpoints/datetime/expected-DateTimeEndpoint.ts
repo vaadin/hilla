@@ -11,51 +11,51 @@ import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
 function _echoDate(
   date: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('DateTimeEndpoint', 'echoDate', {date}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoDate', {date}, __init);
 }
 
 function _echoInstant(
   instant: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('DateTimeEndpoint', 'echoInstant', {instant}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoInstant', {instant}, __init);
 }
 
 function _echoListLocalDateTime(
   localDateTimeList: Array<string | undefined> | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<Array<string | undefined> | undefined> {
-  return client.call('DateTimeEndpoint', 'echoListLocalDateTime', {localDateTimeList}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoListLocalDateTime', {localDateTimeList}, __init);
 }
 
 function _echoLocalDate(
   localDate: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('DateTimeEndpoint', 'echoLocalDate', {localDate}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoLocalDate', {localDate}, __init);
 }
 
 function _echoLocalDateTime(
   localDateTime: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('DateTimeEndpoint', 'echoLocalDateTime', {localDateTime}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoLocalDateTime', {localDateTime}, __init);
 }
 
 function _echoLocalTime(
   localTime: string | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('DateTimeEndpoint', 'echoLocalTime', {localTime}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoLocalTime', {localTime}, __init);
 }
 
 function _echoMapInstant(
   mapInstant: Record<string, string | undefined> | undefined,
-  endpointRequestInit?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<Record<string, string | undefined> | undefined> {
-  return client.call('DateTimeEndpoint', 'echoMapInstant', {mapInstant}, endpointRequestInit);
+  return client.call('DateTimeEndpoint', 'echoMapInstant', {mapInstant}, __init);
 }
 
 export {
