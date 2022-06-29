@@ -106,7 +106,7 @@
 
   <profiles>
     <profile>
-      <id>run-tests</id>
+      <id>it-modules</id>
       <activation>
         <property>
           <name>!skipTests</name>
