@@ -241,3 +241,14 @@ jobs:
           path: |
             packages/java/hilla-tests/**/target/*-reports/*
             packages/java/hilla-tests/**/error-screenshots/*.png
+
+  test-all:
+    name: Tests Summary
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs:
+      - test-it
+    steps:
+      - name: Fail if test jobs did not succeed
+        if: ${{ needs.test-it.result != 'success' }}
+        run: exit 1
