@@ -9,7 +9,7 @@
     <version>1.2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>csrf</artifactId>
+  <artifactId>tests-csrf</artifactId>
   <name>ITs for Hilla CSRF</name>
   <packaging>war</packaging>
 

@@ -7,7 +7,7 @@
     <version>1.2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>csrf-context</artifactId>
+  <artifactId>tests-csrf-context</artifactId>
   <name>ITs for Hilla CSRF / context path</name>
   <description>
     For https://github.com/vaadin/fusion/issues/105.

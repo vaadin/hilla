@@ -9,7 +9,7 @@
     <version>1.2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>spring</artifactId>
+  <artifactId>tests-spring</artifactId>
   <name>Hilla Spring Tests</name>
 
   <packaging>pom</packaging>
@@ -116,10 +116,10 @@
         <module>endpoints</module>
         <module>endpoints-custom-client</module>
 
-        <module>spring-security</module>
-        <module>spring-security-contextpath</module>
-        <module>spring-security-jwt</module>
-        <module>spring-security-urlmapping</module>
+        <module>security</module>
+        <module>security-contextpath</module>
+        <module>security-jwt</module>
+        <module>security-urlmapping</module>
       </modules>
     </profile>
 

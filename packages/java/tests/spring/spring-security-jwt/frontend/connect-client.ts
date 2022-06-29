@@ -1,1 +1,0 @@
-../../spring-security/frontend/connect-client.ts

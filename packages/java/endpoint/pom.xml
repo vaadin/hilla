@@ -10,7 +10,7 @@
     </parent>
     <artifactId>endpoint</artifactId>
     <version>1.2-SNAPSHOT</version>
-    <name>Hilla Backend Endpoint</name>
+    <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
     <properties>

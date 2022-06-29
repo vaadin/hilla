@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.hilla</groupId>
-        <artifactId>spring</artifactId>
+        <artifactId>tests-spring</artifactId>
         <version>1.2-SNAPSHOT</version>
     </parent>
-    <artifactId>endpoints-custom-client</artifactId>
+    <artifactId>tests-spring-endpoints-custom-client</artifactId>
     <name>ITs for Endpoints / custom client</name>
     <packaging>jar</packaging>
 
