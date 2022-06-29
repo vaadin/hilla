@@ -105,7 +105,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
 
     return ts.factory.createFunctionDeclaration(
       undefined,
-      [ts.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
+      undefined,
       undefined,
       methodIdentifier,
       undefined,
