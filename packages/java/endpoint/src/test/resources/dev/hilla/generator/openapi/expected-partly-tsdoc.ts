@@ -15,9 +15,9 @@ import type ComplexResponse from './ComplexResponse';
 
 function _complexEntitiesTest(
   request?: ComplexRequest,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<ComplexResponse> {
-  return client.call('GeneratorTestClass', 'complexEntitiesTest', {request}, init);
+  return client.call('GeneratorTestClass', 'complexEntitiesTest', {request}, __init);
 }
 export {
   _complexEntitiesTest as complexEntitiesTest,

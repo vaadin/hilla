@@ -54,7 +54,8 @@ import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}
  * @param {{name}}{{#description}} {{description}}{{/description}}{{!
  }}{{/each}}{{!
 }}{{^vendorExtensions.x-vaadin-connect-subscribe}}
- * @param init an optional object containing additional parameters for the request{{!
+ * @param __init an optional object containing additional parameters for the request{{!
+ the __init name has been chosen to minimize the risk of collision with user-defined method parameters
 }}{{/vendorExtensions.x-vaadin-connect-subscribe}}
  *{{#responses}}{{#message}} {{message}}{{/message}}{{/responses}}
  */{{/vendorExtensions.x-vaadin-connect-show-tsdoc}}
@@ -65,7 +66,7 @@ function _{{vendorExtensions.x-vaadin-connect-method-name}}(
 {{/if}}{{!
 }}{{/each}}{{^vendorExtensions.x-vaadin-connect-subscribe}}
 {{#each bodyParam.vendorExtensions.x-vaadin-connect-parameters}}{{#if @last}},
-{{/if}}{{/each}} init?: EndpointRequestInit
+{{/if}}{{/each}} __init?: EndpointRequestInit
 {{/vendorExtensions.x-vaadin-connect-subscribe}}{{!
 }}): {{#vendorExtensions.x-vaadin-connect-subscribe}}
 {{!
@@ -93,7 +94,7 @@ Promise<{{!
      %><%name%><%#if @last%><%else%>, <%/if%><%!
    %><%/each%><%!
    %>}<%!
-   %>, init<%!
+   %>, __init<%!
  %>);
 <%/vendorExtensions.x-vaadin-connect-subscribe%>
 }

@@ -13,9 +13,9 @@ import { EndpointRequestInit, Subscription } from '@hilla/frontend';
 
 function _firstMethod(
   value?: boolean,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('FooBarEndpoint', 'firstMethod', {value}, init);
+  return client.call('FooBarEndpoint', 'firstMethod', {value}, __init);
 }
 
 export {
