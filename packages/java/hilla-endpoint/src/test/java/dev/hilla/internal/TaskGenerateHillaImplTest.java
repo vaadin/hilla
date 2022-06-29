@@ -159,7 +159,6 @@ class TaskGenerateHillaImplTest {
             }
         } finally {
             if (tmpDir != null) {
-                Files.deleteIfExists(tmpDir.resolve("build.gradle"));
                 Files.deleteIfExists(tmpDir);
             }
         }
