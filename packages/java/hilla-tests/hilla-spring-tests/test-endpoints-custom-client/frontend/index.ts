@@ -12,7 +12,7 @@ const routes = [
   { path: '/', component: 'main-view' },
 
   // for server-side, the next magic line sends all unmatched routes:
-  ...serverSideRoutes, // IMPORTANT: this must be the last entry in the array
+  ...serverSideRoutes // IMPORTANT: this must be the last entry in the array
 ];
 
 export const router = new Router(document.querySelector('#outlet'));

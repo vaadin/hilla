@@ -1,22 +1,29 @@
-import '@vaadin/button';
-import '@vaadin/text-field';
-import { BalanceEndpoint } from 'Frontend/generated/endpoints';
-import { appStore } from 'Frontend/stores/app-store';
-import { html, PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators';
-import { View } from '../view';
+import "@vaadin/button";
+import "@vaadin/text-field";
+import { BalanceEndpoint } from "Frontend/generated/endpoints";
+import { appStore } from "Frontend/stores/app-store";
+import { html, PropertyValues } from "lit";
+import { customElement, state } from "lit/decorators";
+import { View } from "../view";
 
-@customElement('private-view')
+@customElement("private-view")
 export class PrivateTSView extends View {
   @state()
   private balance: number = 0;
 
   render() {
     return html`
-      <div style="display:flex;flex-direction:column;align-items:flex-start;padding: var(--lumo-space-m);">
-        <span id="balanceText">Hello ${appStore.user!.fullName}, your bank account balance is $${this.balance}.</span>
+      <div
+        style="display:flex;flex-direction:column;align-items:flex-start;padding: var(--lumo-space-m);"
+      >
+        <span id="balanceText"
+          >Hello ${appStore.user!.fullName}, your bank account balance is
+          $${this.balance}.</span
+        >
 
-        <vaadin-button @click="${this.applyForLoan}">Apply for a loan</vaadin-button>
+        <vaadin-button @click="${this.applyForLoan}"
+          >Apply for a loan</vaadin-button
+        >
       </div>
     `;
   }

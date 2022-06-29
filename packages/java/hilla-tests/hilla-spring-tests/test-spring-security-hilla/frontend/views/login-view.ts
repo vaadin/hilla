@@ -1,12 +1,12 @@
-import { LoginResult } from '@hilla/frontend';
-import { AfterEnterObserver, RouterLocation } from '@vaadin/router';
-import '@vaadin/login/vaadin-login-overlay';
-import { html } from 'lit';
-import { customElement, state } from 'lit/decorators';
-import { login } from '../auth';
-import { View } from './view';
+import { LoginResult } from "@hilla/frontend";
+import { AfterEnterObserver, RouterLocation } from "@vaadin/router";
+import "@vaadin/login/vaadin-login-overlay";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators";
+import { login } from "../auth";
+import { View } from "./view";
 
-@customElement('login-view')
+@customElement("login-view")
 export class LoginView extends View implements AfterEnterObserver {
   @state()
   private error = false;
@@ -22,11 +22,19 @@ export class LoginView extends View implements AfterEnterObserver {
     // If login was opened directly, use the default URL provided by the server.
 
     // As we do not know if the target is a resource or a Fusion view or a Flow view, we cannot just use Router.go
-    window.location.href = result.redirectUrl || this.returnUrl || '';
+    window.location.href =
+      result.redirectUrl || this.returnUrl || '';
   };
 
   render() {
-    return html` <vaadin-login-overlay opened .error="${this.error}" @login="${this.login}"> </vaadin-login-overlay> `;
+    return html`
+      <vaadin-login-overlay
+        opened
+        .error="${this.error}"
+        @login="${this.login}"
+      >
+      </vaadin-login-overlay>
+    `;
   }
 
   async login(event: CustomEvent): Promise<LoginResult> {

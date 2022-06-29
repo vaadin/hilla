@@ -2,19 +2,18 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators';
 
 import * as appEndpoint from './generated/AppEndpoint';
-import { AppEndpoint } from './generated/endpoints';
+import {AppEndpoint} from "./generated/endpoints";
 
 @customElement('main-view')
 export class MainView extends LitElement {
+
   @property()
   private content?: string;
 
   render() {
     return html`
-      <button id="helloAnonymous" @click="${this.helloAnonymous}">endpoint helloAnonymous</button><br />
-      <button id="helloAnonymousWrapper" @click="${this.helloAnonymousWrapper}">
-        endpoint AppEndpoint.helloAnonymous</button
-      ><br />
+      <button id="helloAnonymous" @click="${this.helloAnonymous}">endpoint helloAnonymous</button><br/>
+      <button id="helloAnonymousWrapper" @click="${this.helloAnonymousWrapper}">endpoint AppEndpoint.helloAnonymous</button><br/>
       <div id="content">${this.content}</div>
     `;
   }
@@ -46,3 +45,4 @@ export class MainView extends LitElement {
     ];
   }
 }
+

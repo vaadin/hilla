@@ -19,6 +19,8 @@
     "noUnusedParameters": true,
     "experimentalDecorators": true
   },
-  "include": ["frontend/**/*.ts", "frontend/index.js"],
+  "include": [
+    "frontend/**/*.ts", "frontend/index.js"
+  ],
   "exclude": []
 }

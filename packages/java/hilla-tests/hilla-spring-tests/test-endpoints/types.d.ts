@@ -4,6 +4,6 @@
 // It is recommended to commit this file to the VCS.
 // You might want to change the configurations to fit your preferences
 declare module '*.css' {
-  const content: string;
-  export default content;
+    const content: string;
+    export default content;
 }

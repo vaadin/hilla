@@ -1,16 +1,16 @@
-import { Router } from '@vaadin/router';
-import '@vaadin/app-layout';
-import '@vaadin/app-layout/vaadin-drawer-toggle';
-import '@vaadin/avatar/vaadin-avatar';
-import '@vaadin/tabs';
-import '@vaadin/tabs/vaadin-tab';
-import { logout } from 'Frontend/auth';
-import { html, nothing } from 'lit';
-import { customElement } from 'lit/decorators';
-import { router } from '../index';
-import { appStore } from '../stores/app-store';
-import { Layout } from './view';
-import { SessionEndpoint } from 'Frontend/generated/endpoints';
+import { Router } from "@vaadin/router";
+import "@vaadin/app-layout";
+import "@vaadin/app-layout/vaadin-drawer-toggle";
+import "@vaadin/avatar/vaadin-avatar";
+import "@vaadin/tabs";
+import "@vaadin/tabs/vaadin-tab";
+import { logout } from "Frontend/auth";
+import { html, nothing } from "lit";
+import { customElement } from "lit/decorators";
+import { router } from "../index";
+import { appStore } from "../stores/app-store";
+import { Layout } from "./view";
+import {SessionEndpoint} from "Frontend/generated/endpoints";
 
 interface RouteInfo {
   path: string;
@@ -19,7 +19,7 @@ interface RouteInfo {
   requiresRole?: string;
   disable?: boolean;
 }
-@customElement('main-view')
+@customElement("main-view")
 export class MainView extends Layout {
   render() {
     return html`
@@ -28,30 +28,45 @@ export class MainView extends Layout {
           <vaadin-drawer-toggle></vaadin-drawer-toggle>
           <h1>${appStore.currentViewTitle}</h1>
           ${appStore.user
-            ? html`<vaadin-avatar img="${appStore.user.imageUrl}" name="${appStore.user.username}"></vaadin-avatar>`
+            ? html`<vaadin-avatar
+                img="${appStore.user.imageUrl}"
+                name="${appStore.user.username}"
+              ></vaadin-avatar>`
             : html`<a router-ignore href="login">Sign in</a>`}
         </header>
 
         <div slot="drawer">
           <div id="logo">
             <a href="">
-              <img style="text-align: center" src="public/images/logo.jpg" alt="${appStore.applicationName} logo" />
+              <img
+                style="text-align: center"
+                src="public/images/logo.jpg"
+                alt="${appStore.applicationName} logo"
+              />
             </a>
           </div>
           <hr />
-          <vaadin-tabs orientation="vertical" theme="minimal" .selected=${this.getSelectedViewRoute()}>
+          <vaadin-tabs
+            orientation="vertical"
+            theme="minimal"
+            .selected=${this.getSelectedViewRoute()}
+          >
             ${this.getMenuRoutes().map(
               (viewRoute) => html`
                 <vaadin-tab>
                   <a href="${viewRoute.path}" tabindex="-1"
-                    >${viewRoute.title}${viewRoute.disable ? html` (hidden)` : nothing}</a
+                    >${viewRoute.title}${viewRoute.disable
+                      ? html` (hidden)`
+                      : nothing}</a
                   >
                 </vaadin-tab>
-              `,
+              `
             )}
             <vaadin-tab
               ><vaadin-button id="logout" @click=${this.logout} tabindex="-1"
-                >Logout${!appStore.user ? html` (hidden)` : nothing}</vaadin-button
+                >Logout${!appStore.user
+                  ? html` (hidden)`
+                  : nothing}</vaadin-button
               ></vaadin-tab
             >
           </vaadin-tabs>
@@ -68,28 +83,31 @@ export class MainView extends Layout {
   private getMenuRoutes(): RouteInfo[] {
     const views: RouteInfo[] = [
       {
-        path: '',
-        title: 'Public',
+        path: "",
+        title: "Public",
       },
       {
-        path: 'form',
-        title: 'Fusion Form',
+        path: "form",
+        title: "Fusion Form",
       },
       {
-        path: 'private',
-        title: 'Private',
+        path: "private",
+        title: "Private",
         requiresAuthentication: true,
       },
       {
-        path: 'admin',
-        title: 'Admin',
-        requiresRole: 'admin',
+        path: "admin",
+        title: "Admin",
+        requiresRole: "admin",
       },
     ];
     views.forEach((route) => {
       if (route.requiresAuthentication && !appStore.user) {
         route.disable = true;
-      } else if (route.requiresRole && !appStore.isUserInRole(route.requiresRole)) {
+      } else if (
+        route.requiresRole &&
+        !appStore.isUserInRole(route.requiresRole)
+      ) {
         route.disable = true;
       }
     });
@@ -97,15 +115,17 @@ export class MainView extends Layout {
   }
 
   private getSelectedViewRoute(): number {
-    return this.getMenuRoutes().findIndex((viewRoute) => viewRoute.path == appStore.location);
+    return this.getMenuRoutes().findIndex(
+      (viewRoute) => viewRoute.path == appStore.location
+    );
   }
   connectedCallback() {
     super.connectedCallback();
-    this.id = 'main-view';
+    this.id = "main-view";
   }
 
   // Used by SecurityIT#simulateNewServer()
   public async invalidateSessionIfPresent(): Promise<void> {
-    return SessionEndpoint.invalidateSessionIfPresent();
+    return SessionEndpoint.invalidateSessionIfPresent()
   }
 }

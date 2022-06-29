@@ -1,14 +1,14 @@
-import { RouterLocation } from '@vaadin/router';
-import UserInfo from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/data/UserInfo';
-import { UserInfoEndpoint } from 'Frontend/generated/endpoints';
-import { makeAutoObservable } from 'mobx';
+import { RouterLocation } from "@vaadin/router";
+import UserInfo from "Frontend/generated/com/vaadin/flow/spring/fusionsecurity/data/UserInfo";
+import { UserInfoEndpoint } from "Frontend/generated/endpoints";
+import { makeAutoObservable } from "mobx";
 export class AppStore {
-  applicationName = 'Bank of Vaadin';
+  applicationName = "Bank of Vaadin";
 
   // The location, relative to the base path, e.g. "hello" when viewing "/hello"
-  location = '';
+  location = "";
 
-  currentViewTitle = '';
+  currentViewTitle = "";
 
   user: UserInfo | undefined = undefined;
 
@@ -26,7 +26,7 @@ export class AppStore {
     }
     const route = location?.route as any;
 
-    this.currentViewTitle = route?.title || '';
+    this.currentViewTitle = route?.title || "";
   }
 
   async fetchUserInfo() {

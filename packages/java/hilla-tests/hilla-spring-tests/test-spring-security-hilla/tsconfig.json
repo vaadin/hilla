@@ -20,9 +20,15 @@
     "experimentalDecorators": true,
     "baseUrl": "frontend",
     "paths": {
-      "Frontend/*": ["*"]
+      "Frontend/*": [
+        "*"
+      ]
     }
   },
-  "include": ["frontend/**/*.ts", "frontend/index.js", "types.d.ts"],
+  "include": [
+    "frontend/**/*.ts",
+    "frontend/index.js",
+    "types.d.ts"
+  ],
   "exclude": []
 }
