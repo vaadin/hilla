@@ -1,0 +1,1 @@
+../../security/frontend/auth.ts

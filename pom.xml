@@ -16,8 +16,7 @@
   </parent>
 
   <modules>
-    <module>packages/java/fusion-endpoint</module>
-    <module>packages/java/hilla-tests</module>
+    <module>packages/java/endpoint</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
@@ -27,6 +26,7 @@
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
+    <module>packages/java/tests</module>
   </modules>
 
   <properties>
