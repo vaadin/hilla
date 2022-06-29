@@ -12,6 +12,7 @@ import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.j
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
 export const INIT_TYPE_NAME = 'EndpointRequestInit';
+export const SUBSCRIPTION_TYPE_NAME = 'Subscription';
 export const HILLA_FRONTEND_NAME = '@hilla/frontend';
 
 function wrapCallExpression(callExpression: CallExpression, responseType: TypeNode): Statement {

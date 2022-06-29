@@ -10,6 +10,7 @@ import EndpointMethodOperationProcessor, {
   EndpointMethodOperation,
   HILLA_FRONTEND_NAME,
   INIT_TYPE_NAME,
+  SUBSCRIPTION_TYPE_NAME,
 } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
@@ -29,6 +30,10 @@ export default class EndpointProcessor {
     this.#dependencies.imports.named.add(
       this.#dependencies.paths.createBareModulePath(HILLA_FRONTEND_NAME),
       INIT_TYPE_NAME,
+    );
+    this.#dependencies.imports.named.add(
+      this.#dependencies.paths.createBareModulePath(HILLA_FRONTEND_NAME),
+      SUBSCRIPTION_TYPE_NAME,
     );
   }
 

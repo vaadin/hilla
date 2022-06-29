@@ -1,4 +1,4 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@hilla/frontend";
+import { EndpointRequestInit as EndpointRequestInit_1, Subscription as Subscription_1 } from "@hilla/frontend";
 import client_1 from "./connect-client.default";
 import type EnumEntity_1 from "./dev/hilla/parser/plugins/backbone/enumtype/EnumTypeEndpoint/EnumEntity";
 function echoEnum_1(value: EnumEntity_1 | undefined, init?: EndpointRequestInit_1): Promise<EnumEntity_1 | undefined> { return client_1.call("EnumTypeEndpoint", "echoEnum", { value }, init); }

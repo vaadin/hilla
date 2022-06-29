@@ -1,4 +1,4 @@
-import { EndpointRequestInit as EndpointRequestInit_1 } from "@hilla/frontend";
+import { EndpointRequestInit as EndpointRequestInit_1, Subscription as Subscription_1 } from "@hilla/frontend";
 import client_1 from "./connect-client.default";
 function getArray_1(init?: EndpointRequestInit_1): Promise<Array<number> | undefined> { return client_1.call("SimpleTypeEndpoint", "getArray", {}, init); }
 function getBoolean_1(init?: EndpointRequestInit_1): Promise<boolean> { return client_1.call("SimpleTypeEndpoint", "getBoolean", {}, init); }
