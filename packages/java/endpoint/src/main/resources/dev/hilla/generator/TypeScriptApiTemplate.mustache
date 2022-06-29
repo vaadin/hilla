@@ -55,7 +55,7 @@ import type {{~#importAs}} {{importAs}}{{/importAs}}{{~^importAs}} {{className}}
  }}{{/each}}{{!
 }}{{^vendorExtensions.x-vaadin-connect-subscribe}}
  * @param __init an optional object containing additional parameters for the request{{!
- the __init name is willingly complex to minimize the risk of collision with user-defined method parameters
+ the __init name has been chosen to minimize the risk of collision with user-defined method parameters
 }}{{/vendorExtensions.x-vaadin-connect-subscribe}}
  *{{#responses}}{{#message}} {{message}}{{/message}}{{/responses}}
  */{{/vendorExtensions.x-vaadin-connect-show-tsdoc}}
