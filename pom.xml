@@ -26,7 +26,6 @@
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
-    <module>packages/java/tests</module>
   </modules>
 
   <properties>
@@ -353,4 +352,17 @@
       </plugin>
     </plugins>
   </build>
+    <profiles>
+      <profile>
+        <id>default</id>
+        <activation>
+          <property>
+            <name>!release</name>
+          </property>
+        </activation>
+        <modules>
+          <module>packages/java/tests</module>
+        </modules>
+      </profile>
+    </profiles>
 </project>
