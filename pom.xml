@@ -26,8 +26,21 @@
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
-    <module>packages/java/tests</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>it</id>
+      <activation>
+        <property>
+          <name>!release</name>
+        </property>
+      </activation>
+      <modules>
+        <module>packages/java/tests</module>
+      </modules>
+    </profile>
+  </profiles>  
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
