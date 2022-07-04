@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 final class AnnotationInfoReflectionModel extends AnnotationInfoModel
-    implements ReflectionModel {
+        implements ReflectionModel {
     private final Annotation origin;
 
     AnnotationInfoReflectionModel(Annotation origin) {
@@ -31,20 +31,19 @@ final class AnnotationInfoReflectionModel extends AnnotationInfoModel
 
     @Override
     protected Set<AnnotationParameterModel> prepareParameters() {
-        return Arrays
-            .stream(origin.annotationType().getDeclaredMethods())
-            .map(method -> {
-                // Here we go through all the methods/parameters of the
-                // annotation instance and collect their values. Since
-                // annotations methods cannot be private or virtual, we
-                // could simply invoke the method to get a value.
-                try {
-                    return AnnotationParameterModel.of(method.getName(),
-                        method.invoke(origin));
-                } catch (InvocationTargetException
-                         | IllegalAccessException e) {
-                    throw new ModelException(e);
-                }
-            }).collect(Collectors.toSet());
+        return Arrays.stream(origin.annotationType().getDeclaredMethods())
+                .map(method -> {
+                    // Here we go through all the methods/parameters of the
+                    // annotation instance and collect their values. Since
+                    // annotations methods cannot be private or virtual, we
+                    // could simply invoke the method to get a value.
+                    try {
+                        return AnnotationParameterModel.of(method.getName(),
+                                method.invoke(origin));
+                    } catch (InvocationTargetException
+                            | IllegalAccessException e) {
+                        throw new ModelException(e);
+                    }
+                }).collect(Collectors.toSet());
     }
 }
