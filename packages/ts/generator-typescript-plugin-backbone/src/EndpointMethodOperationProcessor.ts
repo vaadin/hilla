@@ -11,6 +11,9 @@ import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.j
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
+export const INIT_TYPE_NAME = 'EndpointRequestInit';
+export const HILLA_FRONTEND_NAME = '@hilla/frontend';
+
 function wrapCallExpression(callExpression: CallExpression, responseType: TypeNode): Statement {
   if (ts.isUnionTypeNode(responseType)) {
     return ts.factory.createReturnStatement(callExpression);
@@ -72,11 +75,16 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   public process(): Statement | undefined {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
+    const initTypeIdentifier = imports.named.getIdentifier(
+      paths.createBareModulePath(HILLA_FRONTEND_NAME),
+      INIT_TYPE_NAME,
+    )!;
 
-    const { parameters, packedParameters } = new EndpointMethodRequestBodyProcessor(
+    const { parameters, packedParameters, initParam } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
       this.#owner,
+      initTypeIdentifier,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
@@ -89,6 +97,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
         ts.factory.createStringLiteral(this.#endpointName),
         ts.factory.createStringLiteral(this.#endpointMethodName),
         packedParameters,
+        initParam,
       ].filter(Boolean) as readonly Expression[],
     );
 
