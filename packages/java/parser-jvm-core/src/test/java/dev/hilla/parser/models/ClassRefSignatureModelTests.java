@@ -116,6 +116,44 @@ public class ClassRefSignatureModelTests {
         assertTrue(ClassRefSignatureModel.is(sourceSimple, classInfoSimple));
     }
 
+    @DisplayName("It should get class info")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetClassInfo(ClassRefSignatureModel model,
+            ModelKind kind) {
+        var cls = ClassInfoModel
+                .of(Sample.DynamicParametrizedDependency.Sub.class);
+
+        assertEquals(cls, model.getClassInfo());
+
+        switch (kind) {
+        case REFLECTION_COMPLETE:
+        case SOURCE: {
+            var owner = ClassInfoModel
+                    .of(Sample.DynamicParametrizedDependency.class);
+            var grandOwner = ClassInfoModel.of(Sample.class);
+            var grandGrandOwner = ClassInfoModel.of(getClass());
+
+            assertEquals(owner, model.getOwner()
+                    .map(ClassRefSignatureModel::getClassInfo).orElse(null));
+
+            assertEquals(grandOwner,
+                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
+                            .map(ClassRefSignatureModel::getClassInfo)
+                            .orElse(null));
+
+            assertEquals(grandGrandOwner,
+                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
+                            .flatMap(ClassRefSignatureModel::getOwner)
+                            .map(ClassRefSignatureModel::getClassInfo)
+                            .orElse(null));
+        }
+            break;
+        case REFLECTION_BARE:
+            break;
+        }
+    }
+
     @DisplayName("It should get type arguments as a stream")
     @Test
     public void should_GetTypeArgumentsAsStream(@Source ScanResult source)
@@ -129,6 +167,41 @@ public class ClassRefSignatureModelTests {
                 .collect(Collectors.toList());
 
         assertEquals(expected, actual);
+    }
+
+    @DisplayName("It should get type owner")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetTypeOwner(ClassRefSignatureModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION_COMPLETE:
+        case SOURCE: {
+            assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
+                    model.getOwner().map(ClassRefSignatureModel::getClassName)
+                            .orElse(null));
+
+            assertEquals(Sample.class.getName(),
+                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
+                            .map(ClassRefSignatureModel::getClassName)
+                            .orElse(null));
+
+            assertEquals(getClass().getName(),
+                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
+                            .flatMap(ClassRefSignatureModel::getOwner)
+                            .map(ClassRefSignatureModel::getClassName)
+                            .orElse(null));
+
+            assertEquals(Optional.empty(),
+                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
+                            .flatMap(ClassRefSignatureModel::getOwner)
+                            .flatMap(ClassRefSignatureModel::getOwner));
+        }
+            break;
+        case REFLECTION_BARE:
+            assertEquals(Optional.empty(), model.getOwner());
+            break;
+        }
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -160,77 +233,6 @@ public class ClassRefSignatureModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
-    }
-
-    @DisplayName("It should resolve class info")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ResolveClassInfo(ClassRefSignatureModel model,
-            ModelKind kind) {
-        var cls = ClassInfoModel
-                .of(Sample.DynamicParametrizedDependency.Sub.class);
-
-        assertEquals(cls, model.resolve());
-
-        switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
-            var owner = ClassInfoModel
-                    .of(Sample.DynamicParametrizedDependency.class);
-            var grandOwner = ClassInfoModel.of(Sample.class);
-            var grandGrandOwner = ClassInfoModel.of(getClass());
-
-            assertEquals(owner, model.getOwner()
-                    .map(ClassRefSignatureModel::resolve).orElse(null));
-
-            assertEquals(grandOwner,
-                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::resolve).orElse(null));
-
-            assertEquals(grandGrandOwner,
-                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::resolve).orElse(null));
-        }
-            break;
-        case REFLECTION_BARE:
-            break;
-        }
-    }
-
-    @DisplayName("It should resolve type owner")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ResolveTypeOwner(ClassRefSignatureModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
-            assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
-                    model.getOwner().map(ClassRefSignatureModel::getClassName)
-                            .orElse(null));
-
-            assertEquals(Sample.class.getName(),
-                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
-                            .orElse(null));
-
-            assertEquals(getClass().getName(),
-                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
-                            .orElse(null));
-
-            assertEquals(Optional.empty(),
-                    model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner));
-        }
-            break;
-        case REFLECTION_BARE:
-            assertEquals(Optional.empty(), model.getOwner());
-            break;
-        }
     }
 
     @DisplayName("It should resolve underlying class correctly")

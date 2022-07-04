@@ -20,7 +20,7 @@ public class ClassMappers extends HashSet<ClassMappers.Mapper> {
     // TODO: remove this mapping because it breaks ClassRefSignatureModel
     // purpose
     public ClassRefSignatureModel map(ClassRefSignatureModel model) {
-        var reference = model.resolve();
+        var reference = model.getClassInfo();
         model.setReference(map(reference));
         return model;
     }

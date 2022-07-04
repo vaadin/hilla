@@ -40,6 +40,17 @@ abstract class ClassRefSignatureSourceModel
     }
 
     @Override
+    public ClassInfoModel getClassInfo() {
+        if (reference == null) {
+            reference = origin.getBaseClassName().equals("java.lang.Object")
+                    ? ClassInfoModel.of(Object.class)
+                    : ClassInfoModel.of(getOriginClassInfo());
+        }
+
+        return reference;
+    }
+
+    @Override
     public String getClassName() {
         return origin.getBaseClassName();
     }
@@ -63,17 +74,6 @@ abstract class ClassRefSignatureSourceModel
     public int hashCode() {
         return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
                 + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
-    }
-
-    @Override
-    public ClassInfoModel resolve() {
-        if (reference == null) {
-            reference = origin.getBaseClassName().equals("java.lang.Object")
-                    ? ClassInfoModel.of(Object.class)
-                    : ClassInfoModel.of(getOriginClassInfo());
-        }
-
-        return reference;
     }
 
     @Override
