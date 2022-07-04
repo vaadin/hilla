@@ -17,73 +17,73 @@ import type User from './dev/hilla/generator/endpoints/json/JsonTestEndpoint/Use
 /**
  * Get number of users
  *
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return number of user
  */
-function _countUser(init?: EndpointRequestInit): Promise<number> {
-  return client.call('JsonTestEndpoint', 'countUser', {}, init);
+function _countUser(__init?: EndpointRequestInit): Promise<number> {
+  return client.call('JsonTestEndpoint', 'countUser', {}, __init);
 }
 
 /**
  * Get instant nano
  *
  * @param input input parameter
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return current time as an Instant
  */
 function _fullFQNMethod(
   input: number | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<string | undefined> {
-  return client.call('JsonTestEndpoint', 'fullFQNMethod', {input}, init);
+  return client.call('JsonTestEndpoint', 'fullFQNMethod', {input}, __init);
 }
 
 /**
  * Get the map of user and roles
  *
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return map of user and roles
  */
-function _getAllUserRolesMap(init?: EndpointRequestInit): Promise<Record<string, User | undefined> | undefined> {
-  return client.call('JsonTestEndpoint', 'getAllUserRolesMap', {}, init);
+function _getAllUserRolesMap(__init?: EndpointRequestInit): Promise<Record<string, User | undefined> | undefined> {
+  return client.call('JsonTestEndpoint', 'getAllUserRolesMap', {}, __init);
 }
 
 /**
  * Get all users
  *
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return list of users
  */
-function _getAllUsers(init?: EndpointRequestInit): Promise<Array<User | undefined> | undefined> {
-  return client.call('JsonTestEndpoint', 'getAllUsers', {}, init);
+function _getAllUsers(__init?: EndpointRequestInit): Promise<Array<User | undefined> | undefined> {
+  return client.call('JsonTestEndpoint', 'getAllUsers', {}, __init);
 }
 
 /**
  * Get array int
  *
  * @param input input string array
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return array of int
  */
 function _getArrayInt(
   input: Array<string | undefined> | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<Array<number> | undefined> {
-  return client.call('JsonTestEndpoint', 'getArrayInt', {input}, init);
+  return client.call('JsonTestEndpoint', 'getArrayInt', {input}, __init);
 }
 
 /**
  * Get boolean value
  *
  * @param input input map
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return boolean value
  */
 function _getBooleanValue(
   input: Record<string, User | undefined> | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<boolean> {
-  return client.call('JsonTestEndpoint', 'getBooleanValue', {input}, init);
+  return client.call('JsonTestEndpoint', 'getBooleanValue', {input}, __init);
 }
 
 /**
@@ -91,76 +91,76 @@ function _getBooleanValue(
  *
  * @param input first input description
  * @param secondInput second input description
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return boolean value
  */
 function _getTwoParameters(
   input: string | undefined,
   secondInput: number,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<boolean> {
-  return client.call('JsonTestEndpoint', 'getTwoParameters', {input, secondInput}, init);
+  return client.call('JsonTestEndpoint', 'getTwoParameters', {input, secondInput}, __init);
 }
 
 /**
  * Get user by id
  *
  * @param id id of user
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  * Return user with given id
  */
 function _getUserById(
   id: number,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<User | undefined> {
-  return client.call('JsonTestEndpoint', 'getUserById', {id}, init);
+  return client.call('JsonTestEndpoint', 'getUserById', {id}, __init);
 }
 
 function _inputBeanTypeDependency(
   input: Version | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call ('JsonTestEndpoint', 'inputBeanTypeDependency', {input}, init);
+  return client.call ('JsonTestEndpoint', 'inputBeanTypeDependency', {input}, __init);
 }
 
 function _inputBeanTypeLocal(
   input: Status | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('JsonTestEndpoint', 'inputBeanTypeLocal', {input}, init);
+  return client.call('JsonTestEndpoint', 'inputBeanTypeLocal', {input}, __init);
 }
 
 function _optionalParameter(
   parameter: Array<string | undefined> | undefined,
   requiredParameter: string | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('JsonTestEndpoint', 'optionalParameter', {parameter, requiredParameter}, init);
+  return client.call('JsonTestEndpoint', 'optionalParameter', {parameter, requiredParameter}, __init);
 }
 
-function _optionalReturn(init?: EndpointRequestInit): Promise<User | undefined> {
-  return client.call('JsonTestEndpoint', 'optionalReturn', {}, init);
+function _optionalReturn(__init?: EndpointRequestInit): Promise<User | undefined> {
+  return client.call('JsonTestEndpoint', 'optionalReturn', {}, __init);
 }
 
 function _reservedWordInParameter(
   _delete: boolean,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('JsonTestEndpoint', 'reservedWordInParameter', {_delete}, init);
+  return client.call('JsonTestEndpoint', 'reservedWordInParameter', {_delete}, __init);
 }
 
 /**
  * Update a user
  *
  * @param user User to be updated
- * @param init an optional object containing additional parameters for the request
+ * @param __init an optional object containing additional parameters for the request
  *
  */
 function _updateUser(
   user: User | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('JsonTestEndpoint', 'updateUser', {user}, init);
+  return client.call('JsonTestEndpoint', 'updateUser', {user}, __init);
 }
 
 export {

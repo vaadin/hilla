@@ -14,17 +14,17 @@ import type Group from './dev/hilla/generator/endpoints/model/ModelEndpoint/Grou
 function _getComplexTypeParams(
   accounts: Array<Account | undefined> | undefined,
   groups: Record<string, Group | undefined> | undefined,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
 ): Promise<void> {
-  return client.call('ComplexTypeParamsEndpoint', 'getComplexTypeParams', {accounts, groups}, init);
+  return client.call('ComplexTypeParamsEndpoint', 'getComplexTypeParams', {accounts, groups}, __init);
 }
 
 function _send(
   text: string | undefined,
   chatPartnerId: number,
-  init?: EndpointRequestInit
+  __init?: EndpointRequestInit
  ): Promise<void> {
-  return client.call('ComplexTypeParamsEndpoint', 'send', {text, chatPartnerId}, init);
+  return client.call('ComplexTypeParamsEndpoint', 'send', {text, chatPartnerId}, __init);
  }
 
 export {
