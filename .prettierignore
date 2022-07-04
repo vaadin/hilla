@@ -3,5 +3,5 @@ packages/ts/*/*.d.ts
 
 # Prevents automatic formatting changes on TypeScript templates and
 # expected test output, they could break tests otherwise.
-packages/java/fusion-endpoint/src/main/resources/**/*.template.ts
-packages/java/fusion-endpoint/src/test/resources/**/expected-*.ts
+packages/java/endpoint/src/main/resources/**/*.template.ts
+packages/java/endpoint/src/test/resources/**/expected-*.ts
