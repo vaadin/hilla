@@ -18,6 +18,7 @@ import {
   FieldStrategy,
   AbstractFieldStrategy,
   ComboBoxFieldStrategy,
+  MultiSelectComboBoxFieldStrategy,
 } from '../src';
 import { OrderModel, TestModel, TestEntity, Order } from './TestModels';
 
@@ -736,6 +737,52 @@ describe('form/Field', () => {
         element.dispatchEvent(new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }));
         expect(currentStrategy.value).to.equal(undefined);
         expect(binderNode.value).to.not.equal(value);
+      });
+    });
+
+    [
+      { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
+      { model: binder.model.fieldArrayModel as AbstractModel<any>, value: [{ idString: 'id' }] },
+    ].forEach(async ({ model, value }) => {
+      it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model.constructor.name}`, async () => {
+        let element;
+        const renderElement = () => {
+          render(html`<vaadin-multi-select-combo-box ${field(model)}></vaadin-multi-select-combo-box>`, div);
+          const result = div.firstElementChild as HTMLInputElement & {
+            invalid?: boolean;
+            required?: boolean;
+            errorMessage?: string;
+            selectedItems?: any;
+          };
+          return result;
+        };
+
+        const binderNode = binder.for(model);
+        binderNode.value = value;
+        await resetBinderNodeValidation(binderNode);
+
+        binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
+        element = renderElement();
+
+        expect(currentStrategy.constructor).to.equal(MultiSelectComboBoxFieldStrategy);
+        expect(currentStrategy.value).to.be.equal(value);
+        expect(currentStrategy.model).to.be.equal(model);
+        expect(element.selectedItems).to.equal(value);
+        expect(element.required).to.be.true;
+        expect(element.invalid).to.be.undefined;
+        expect(element.errorMessage).to.be.undefined;
+
+        await binderNode.validate();
+        element = renderElement();
+        expect(element.invalid).to.be.true;
+        expect(element.errorMessage).to.be.equal('any-err-msg');
+
+        // Simulate user clearing the selection, by clearing the property and dispatching the change event that
+        // the component would fire when the selection is modified by the user
+        element.selectedItems = [];
+        element.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, cancelable: false }));
+        expect(currentStrategy.value).to.eql([]);
+        expect(binderNode.value).to.eql([]);
       });
     });
 
