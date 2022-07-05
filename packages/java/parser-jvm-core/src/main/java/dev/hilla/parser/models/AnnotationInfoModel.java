@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -16,8 +17,12 @@ public interface AnnotationInfoModel extends Model, NamedModel {
         return new AnnotationInfoReflectionModel(annotation);
     }
 
+    ClassInfoModel getClassInfo();
+
     @Override
     default Stream<ClassInfoModel> getDependenciesStream() {
         return Stream.empty();
     }
+
+    Set<AnnotationParameterModel> getParameters();
 }

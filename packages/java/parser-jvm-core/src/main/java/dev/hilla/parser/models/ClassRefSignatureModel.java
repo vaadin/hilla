@@ -80,6 +80,8 @@ public interface ClassRefSignatureModel
         return ClassRefSignatureReflectionModel.Annotated.of(origin);
     }
 
+    ClassInfoModel getClassInfo();
+
     String getClassName();
 
     List<TypeArgumentModel> getTypeArguments();
@@ -90,17 +92,17 @@ public interface ClassRefSignatureModel
 
     @Override
     default boolean isBoolean() {
-        return resolve().isBoolean();
+        return getClassInfo().isBoolean();
     }
 
     @Override
     default boolean isByte() {
-        return resolve().isByte();
+        return getClassInfo().isByte();
     }
 
     @Override
     default boolean isCharacter() {
-        return resolve().isCharacter();
+        return getClassInfo().isCharacter();
     }
 
     @Override
@@ -110,75 +112,73 @@ public interface ClassRefSignatureModel
 
     @Override
     default boolean isDate() {
-        return resolve().isDate();
+        return getClassInfo().isDate();
     }
 
     @Override
     default boolean isDateTime() {
-        return resolve().isDateTime();
+        return getClassInfo().isDateTime();
     }
 
     @Override
     default boolean isDouble() {
-        return resolve().isDouble();
+        return getClassInfo().isDouble();
     }
 
     @Override
     default boolean isEnum() {
-        return resolve().isEnum();
+        return getClassInfo().isEnum();
     }
 
     @Override
     default boolean isFloat() {
-        return resolve().isFloat();
+        return getClassInfo().isFloat();
     }
 
     @Override
     default boolean isInteger() {
-        return resolve().isInteger();
+        return getClassInfo().isInteger();
     }
 
     @Override
     default boolean isIterable() {
-        return resolve().isIterable();
+        return getClassInfo().isIterable();
     }
 
     @Override
     default boolean isJDKClass() {
-        return resolve().isJDKClass();
+        return getClassInfo().isJDKClass();
     }
 
     @Override
     default boolean isLong() {
-        return resolve().isLong();
+        return getClassInfo().isLong();
     }
 
     @Override
     default boolean isMap() {
-        return resolve().isMap();
+        return getClassInfo().isMap();
     }
 
     @Override
     default boolean isNativeObject() {
-        return resolve().isNativeObject();
+        return getClassInfo().isNativeObject();
     }
 
     @Override
     default boolean isOptional() {
-        return resolve().isOptional();
+        return getClassInfo().isOptional();
     }
 
     @Override
     default boolean isShort() {
-        return resolve().isShort();
+        return getClassInfo().isShort();
     }
 
     @Override
     default boolean isString() {
-        return resolve().isString();
+        return getClassInfo().isString();
     }
-
-    ClassInfoModel resolve();
 
     void setReference(ClassInfoModel reference);
 }

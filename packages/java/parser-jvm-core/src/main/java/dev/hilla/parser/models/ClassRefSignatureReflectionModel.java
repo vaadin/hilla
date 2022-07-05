@@ -40,6 +40,15 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
     }
 
     @Override
+    public ClassInfoModel getClassInfo() {
+        if (reference == null) {
+            reference = ClassInfoModel.of(getOriginClassInfo());
+        }
+
+        return reference;
+    }
+
+    @Override
     public String getClassName() {
         return getOriginClassInfo().getName();
     }
@@ -48,15 +57,6 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
     public int hashCode() {
         return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
                 + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
-    }
-
-    @Override
-    public ClassInfoModel resolve() {
-        if (reference == null) {
-            reference = ClassInfoModel.of(getOriginClassInfo());
-        }
-
-        return reference;
     }
 
     @Override
