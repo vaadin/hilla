@@ -75,6 +75,8 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isMandated();
 
+    public abstract boolean isImplicit();
+
     public abstract boolean isSynthetic();
 
     protected abstract MethodInfoModel prepareOwner();

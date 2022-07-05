@@ -35,7 +35,12 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
 
     @Override
     public boolean isMandated() {
-        return (origin.getModifiers() & '耀') != 0;
+        return origin.isImplicit();
+    }
+
+    @Override
+    public boolean isImplicit() {
+        return origin.isImplicit();
     }
 
     @Override

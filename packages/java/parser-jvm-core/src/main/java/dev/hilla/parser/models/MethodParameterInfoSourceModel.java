@@ -38,6 +38,11 @@ final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
     }
 
     @Override
+    public boolean isImplicit() {
+        return origin.isMandated();
+    }
+
+    @Override
     public boolean isSynthetic() {
         return origin.isSynthetic();
     }
