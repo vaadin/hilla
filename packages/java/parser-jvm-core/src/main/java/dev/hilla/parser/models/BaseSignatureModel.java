@@ -7,24 +7,46 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.BaseTypeSignature;
 
-public interface BaseSignatureModel extends SignatureModel {
-    static BaseSignatureModel of(@Nonnull BaseTypeSignature origin) {
+public abstract class BaseSignatureModel extends AnnotatedAbstractModel
+        implements SignatureModel {
+    public static BaseSignatureModel of(@Nonnull BaseTypeSignature origin) {
         return new BaseSignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    static BaseSignatureModel of(@Nonnull AnnotatedType origin) {
+    public static BaseSignatureModel of(@Nonnull AnnotatedType origin) {
         return new BaseSignatureReflectionModel(Objects.requireNonNull(origin));
     }
 
-    static BaseSignatureModel of(@Nonnull Class<?> origin) {
+    public static BaseSignatureModel of(@Nonnull Class<?> origin) {
         return new BaseSignatureReflectionModel.Bare(
                 Objects.requireNonNull(origin));
     }
 
-    Class<?> getType();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof BaseSignatureModel)) {
+            return false;
+        }
+
+        var other = (BaseSignatureModel) obj;
+
+        return getType().equals(other.getType())
+                && Objects.equals(getAnnotations(), other.getAnnotations());
+    }
+
+    public abstract Class<?> getType();
 
     @Override
-    default boolean isBase() {
+    public int hashCode() {
+        return 7 + getType().hashCode();
+    }
+
+    @Override
+    public boolean isBase() {
         return true;
     }
 }

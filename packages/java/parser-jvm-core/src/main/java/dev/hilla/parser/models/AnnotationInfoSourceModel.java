@@ -5,38 +5,17 @@ import java.util.stream.Collectors;
 
 import io.github.classgraph.AnnotationInfo;
 
-final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
-        implements AnnotationInfoModel, SourceModel {
-    private Set<AnnotationParameterModel> parameters;
-    private ClassInfoModel resolved;
+final class AnnotationInfoSourceModel extends AnnotationInfoModel
+        implements SourceModel {
+    private final AnnotationInfo origin;
 
-    public AnnotationInfoSourceModel(AnnotationInfo origin) {
-        super(origin);
+    AnnotationInfoSourceModel(AnnotationInfo origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof AnnotationInfoModel)) {
-            return false;
-        }
-
-        var other = (AnnotationInfoModel) obj;
-
-        return getName().equals(other.getName())
-                && getParameters().equals(other.getParameters());
-    }
-
-    @Override
-    public ClassInfoModel getClassInfo() {
-        if (resolved == null) {
-            resolved = ClassInfoModel.of(origin.getClassInfo());
-        }
-
-        return resolved;
+    public AnnotationInfo get() {
+        return origin;
     }
 
     @Override
@@ -45,18 +24,13 @@ final class AnnotationInfoSourceModel extends AbstractModel<AnnotationInfo>
     }
 
     @Override
-    public Set<AnnotationParameterModel> getParameters() {
-        if (parameters == null) {
-            parameters = origin.getParameterValues().stream()
-                    .map(AnnotationParameterModel::of)
-                    .collect(Collectors.toSet());
-        }
-
-        return parameters;
+    protected ClassInfoModel prepareClassInfo() {
+        return ClassInfoModel.of(origin.getClassInfo());
     }
 
     @Override
-    public int hashCode() {
-        return getName().hashCode() + 11 * getParameters().hashCode();
+    protected Set<AnnotationParameterModel> prepareParameters() {
+        return origin.getParameterValues().stream()
+                .map(AnnotationParameterModel::of).collect(Collectors.toSet());
     }
 }

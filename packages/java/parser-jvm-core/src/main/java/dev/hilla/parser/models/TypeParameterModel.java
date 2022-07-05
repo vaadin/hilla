@@ -8,25 +8,58 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeParameter;
 
-public interface TypeParameterModel extends SignatureModel {
-    static TypeParameterModel of(@Nonnull TypeParameter origin) {
+public abstract class TypeParameterModel extends AnnotatedAbstractModel
+        implements SignatureModel {
+    private List<SignatureModel> bounds;
+
+    public static TypeParameterModel of(@Nonnull TypeParameter origin) {
         return new TypeParameterSourceModel(origin);
     }
 
-    static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
+    public static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
         return new TypeParameterReflectionModel(origin);
     }
 
-    List<SignatureModel> getBounds();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
 
-    default Stream<SignatureModel> getBoundsStream() {
+        if (!(obj instanceof TypeParameterModel)) {
+            return false;
+        }
+
+        var other = (TypeParameterModel) obj;
+
+        return getName().equals(other.getName())
+                && getAnnotations().equals(other.getAnnotations())
+                && getBounds().equals(other.getBounds());
+    }
+
+    public List<SignatureModel> getBounds() {
+        if (bounds == null) {
+            bounds = prepareBounds();
+        }
+
+        return bounds;
+    }
+
+    public Stream<SignatureModel> getBoundsStream() {
         return getBounds().stream();
     }
 
-    String getName();
+    public abstract String getName();
 
     @Override
-    default boolean isTypeParameter() {
+    public int hashCode() {
+        return getName().hashCode() + 3 * getBounds().hashCode();
+    }
+
+    @Override
+    public boolean isTypeParameter() {
         return true;
     }
+
+    protected abstract List<SignatureModel> prepareBounds();
 }

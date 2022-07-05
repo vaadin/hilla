@@ -13,172 +13,223 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
-public interface ClassRefSignatureModel
-        extends SignatureModel, OwnedModel<Optional<ClassRefSignatureModel>> {
-    static boolean is(AnnotatedParameterizedType actor, Class<?> target) {
+public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
+        implements SignatureModel,
+        OwnedModel<Optional<ClassRefSignatureModel>> {
+    private ClassInfoModel reference;
+    private List<TypeArgumentModel> typeArguments;
+
+    public static boolean is(AnnotatedParameterizedType actor,
+            Class<?> target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(AnnotatedParameterizedType actor, ClassInfo target) {
+    public static boolean is(AnnotatedParameterizedType actor,
+            ClassInfo target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(AnnotatedParameterizedType actor, String target) {
+    public static boolean is(AnnotatedParameterizedType actor, String target) {
         return ((Class<?>) ((ParameterizedType) actor.getType()).getRawType())
                 .getName().equals(target);
     }
 
-    static boolean is(AnnotatedType actor, Class<?> target) {
+    public static boolean is(AnnotatedType actor, Class<?> target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(AnnotatedType actor, ClassInfo target) {
+    public static boolean is(AnnotatedType actor, ClassInfo target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(AnnotatedType actor, String target) {
+    public static boolean is(AnnotatedType actor, String target) {
         return actor instanceof AnnotatedParameterizedType
                 ? is((AnnotatedParameterizedType) actor, target)
                 : ((Class<?>) actor.getType()).getName().equals(target);
     }
 
-    static boolean is(Class<?> actor, Class<?> target) {
+    public static boolean is(Class<?> actor, Class<?> target) {
         return actor.equals(target);
     }
 
-    static boolean is(Class<?> actor, ClassInfo target) {
+    public static boolean is(Class<?> actor, ClassInfo target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(Class<?> actor, String target) {
+    public static boolean is(Class<?> actor, String target) {
         return actor.getName().equals(target);
     }
 
-    static boolean is(ClassRefTypeSignature actor, Class<?> target) {
+    public static boolean is(ClassRefTypeSignature actor, Class<?> target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(ClassRefTypeSignature actor, ClassInfo target) {
+    public static boolean is(ClassRefTypeSignature actor, ClassInfo target) {
         return is(actor, target.getName());
     }
 
-    static boolean is(ClassRefTypeSignature actor, String target) {
+    public static boolean is(ClassRefTypeSignature actor, String target) {
         return actor.getFullyQualifiedClassName().equals(target);
     }
 
-    static ClassRefSignatureModel of(@Nonnull ClassRefTypeSignature origin) {
+    public static ClassRefSignatureModel of(
+            @Nonnull ClassRefTypeSignature origin) {
         return Objects.requireNonNull(origin).getSuffixes().size() > 0
                 ? new ClassRefSignatureSourceModel.Suffixed(origin)
                 : new ClassRefSignatureSourceModel.Regular(origin);
     }
 
-    static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
+    public static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
         return new ClassRefSignatureReflectionModel.Bare(origin);
     }
 
-    static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
+    public static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
         return ClassRefSignatureReflectionModel.Annotated.of(origin);
     }
 
-    ClassInfoModel getClassInfo();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
 
-    String getClassName();
+        if (!(obj instanceof ClassRefSignatureModel)) {
+            return false;
+        }
 
-    List<TypeArgumentModel> getTypeArguments();
+        var other = (ClassRefSignatureModel) obj;
 
-    default Stream<TypeArgumentModel> getTypeArgumentsStream() {
+        return getClassName().equals(other.getClassName())
+                && getOwner().equals(other.getOwner())
+                && getTypeArguments().equals(other.getTypeArguments())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    public ClassInfoModel getClassInfo() {
+        if (reference == null) {
+            reference = prepareClassInfo();
+        }
+
+        return reference;
+    }
+
+    public abstract String getClassName();
+
+    public List<TypeArgumentModel> getTypeArguments() {
+        if (typeArguments == null) {
+            typeArguments = prepareTypeArguments();
+        }
+
+        return typeArguments;
+    }
+
+    public Stream<TypeArgumentModel> getTypeArgumentsStream() {
         return getTypeArguments().stream();
     }
 
     @Override
-    default boolean isBoolean() {
+    public int hashCode() {
+        return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
+                + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
+    }
+
+    @Override
+    public boolean isBoolean() {
         return getClassInfo().isBoolean();
     }
 
     @Override
-    default boolean isByte() {
+    public boolean isByte() {
         return getClassInfo().isByte();
     }
 
     @Override
-    default boolean isCharacter() {
+    public boolean isCharacter() {
         return getClassInfo().isCharacter();
     }
 
     @Override
-    default boolean isClassRef() {
+    public boolean isClassRef() {
         return true;
     }
 
     @Override
-    default boolean isDate() {
+    public boolean isDate() {
         return getClassInfo().isDate();
     }
 
     @Override
-    default boolean isDateTime() {
+    public boolean isDateTime() {
         return getClassInfo().isDateTime();
     }
 
     @Override
-    default boolean isDouble() {
+    public boolean isDouble() {
         return getClassInfo().isDouble();
     }
 
     @Override
-    default boolean isEnum() {
+    public boolean isEnum() {
         return getClassInfo().isEnum();
     }
 
     @Override
-    default boolean isFloat() {
+    public boolean isFloat() {
         return getClassInfo().isFloat();
     }
 
     @Override
-    default boolean isInteger() {
+    public boolean isInteger() {
         return getClassInfo().isInteger();
     }
 
     @Override
-    default boolean isIterable() {
+    public boolean isIterable() {
         return getClassInfo().isIterable();
     }
 
     @Override
-    default boolean isJDKClass() {
+    public boolean isJDKClass() {
         return getClassInfo().isJDKClass();
     }
 
     @Override
-    default boolean isLong() {
+    public boolean isLong() {
         return getClassInfo().isLong();
     }
 
     @Override
-    default boolean isMap() {
+    public boolean isMap() {
         return getClassInfo().isMap();
     }
 
     @Override
-    default boolean isNativeObject() {
+    public boolean isNativeObject() {
         return getClassInfo().isNativeObject();
     }
 
     @Override
-    default boolean isOptional() {
+    public boolean isOptional() {
         return getClassInfo().isOptional();
     }
 
     @Override
-    default boolean isShort() {
+    public boolean isShort() {
         return getClassInfo().isShort();
     }
 
     @Override
-    default boolean isString() {
+    public boolean isString() {
         return getClassInfo().isString();
     }
 
-    void setReference(ClassInfoModel reference);
+    public void setReference(ClassInfoModel reference) {
+        this.reference = reference;
+    }
+
+    protected abstract List<AnnotationInfoModel> prepareAnnotations();
+
+    protected abstract ClassInfoModel prepareClassInfo();
+
+    protected abstract List<TypeArgumentModel> prepareTypeArguments();
 }

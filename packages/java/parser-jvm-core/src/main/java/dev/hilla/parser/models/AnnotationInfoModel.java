@@ -8,21 +8,61 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-public interface AnnotationInfoModel extends Model, NamedModel {
-    static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation) {
+public abstract class AnnotationInfoModel implements Model, NamedModel {
+    private ClassInfoModel classInfo;
+    private Set<AnnotationParameterModel> parameters;
+
+    public static AnnotationInfoModel of(@Nonnull AnnotationInfo annotation) {
         return new AnnotationInfoSourceModel(annotation);
     }
 
-    static AnnotationInfoModel of(@Nonnull Annotation annotation) {
+    public static AnnotationInfoModel of(@Nonnull Annotation annotation) {
         return new AnnotationInfoReflectionModel(annotation);
     }
 
-    ClassInfoModel getClassInfo();
-
     @Override
-    default Stream<ClassInfoModel> getDependenciesStream() {
-        return Stream.empty();
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof AnnotationInfoModel)) {
+            return false;
+        }
+
+        var other = (AnnotationInfoModel) obj;
+
+        return getName().equals(other.getName())
+                && getParameters().equals(other.getParameters());
     }
 
-    Set<AnnotationParameterModel> getParameters();
+    public ClassInfoModel getClassInfo() {
+        if (classInfo == null) {
+            classInfo = prepareClassInfo();
+        }
+
+        return classInfo;
+    }
+
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
+        return getClassInfo().getDependenciesStream();
+    }
+
+    public Set<AnnotationParameterModel> getParameters() {
+        if (parameters == null) {
+            parameters = prepareParameters();
+        }
+
+        return parameters;
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode() + 11 * getParameters().hashCode();
+    }
+
+    protected abstract ClassInfoModel prepareClassInfo();
+
+    protected abstract Set<AnnotationParameterModel> prepareParameters();
 }

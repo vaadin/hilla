@@ -4,50 +4,23 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.TypeArgument;
 
-abstract class ClassRefSignatureSourceModel
-        extends AbstractAnnotatedSourceModel<ClassRefTypeSignature>
-        implements ClassRefSignatureModel, SourceSignatureModel {
-    protected ClassInfoModel reference;
-    private List<TypeArgumentModel> typeArguments;
+abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
+        implements SourceSignatureModel {
+    protected final ClassRefTypeSignature origin;
 
-    public ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
-        super(origin);
+    ClassRefSignatureSourceModel(ClassRefTypeSignature origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof ClassRefSignatureModel)) {
-            return false;
-        }
-
-        var other = (ClassRefSignatureModel) obj;
-
-        return getClassName().equals(other.getClassName())
-                && getOwner().equals(other.getOwner())
-                && getTypeArguments().equals(other.getTypeArguments())
-                && getAnnotations().equals(other.getAnnotations());
-    }
-
-    @Override
-    public ClassInfoModel getClassInfo() {
-        if (reference == null) {
-            reference = origin.getBaseClassName().equals("java.lang.Object")
-                    ? ClassInfoModel.of(Object.class)
-                    : ClassInfoModel.of(getOriginClassInfo());
-        }
-
-        return reference;
+    public ClassRefTypeSignature get() {
+        return origin;
     }
 
     @Override
@@ -60,32 +33,8 @@ abstract class ClassRefSignatureSourceModel
         return Optional.empty();
     }
 
-    @Override
-    public List<TypeArgumentModel> getTypeArguments() {
-        if (typeArguments == null) {
-            typeArguments = getOriginTypeArguments().stream()
-                    .map(TypeArgumentModel::of).collect(Collectors.toList());
-        }
-
-        return typeArguments;
-    }
-
-    @Override
-    public int hashCode() {
-        return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
-                + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
-    }
-
-    @Override
-    public void setReference(ClassInfoModel reference) {
-        this.reference = reference;
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        var annotations = origin.getTypeAnnotationInfo();
-
-        return annotations != null ? annotations.stream() : Stream.empty();
+    protected List<AnnotationInfo> getOriginAnnotations() {
+        return origin.getTypeAnnotationInfo();
     }
 
     protected ClassInfo getOriginClassInfo() {
@@ -94,6 +43,24 @@ abstract class ClassRefSignatureSourceModel
 
     protected List<TypeArgument> getOriginTypeArguments() {
         return origin.getTypeArguments();
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(getOriginAnnotations());
+    }
+
+    @Override
+    protected ClassInfoModel prepareClassInfo() {
+        return origin.getBaseClassName().equals("java.lang.Object")
+                ? ClassInfoModel.of(Object.class)
+                : ClassInfoModel.of(getOriginClassInfo());
+    }
+
+    @Override
+    protected List<TypeArgumentModel> prepareTypeArguments() {
+        return getOriginTypeArguments().stream().map(TypeArgumentModel::of)
+                .collect(Collectors.toList());
     }
 
     static final class Regular extends ClassRefSignatureSourceModel {
@@ -105,11 +72,11 @@ abstract class ClassRefSignatureSourceModel
     static final class Suffixed extends ClassRefSignatureSourceModel {
         private final int currentSuffixIndex;
 
-        public Suffixed(ClassRefTypeSignature origin) {
+        Suffixed(ClassRefTypeSignature origin) {
             this(origin, origin.getSuffixes().size() - 1);
         }
 
-        public Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
+        Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
             super(origin);
             this.currentSuffixIndex = currentSuffixIndex;
         }
@@ -134,13 +101,13 @@ abstract class ClassRefSignatureSourceModel
         }
 
         @Override
-        protected Stream<AnnotationInfo> getOriginAnnotations() {
+        protected List<AnnotationInfo> getOriginAnnotations() {
             var suffixAnnotations = origin.getSuffixTypeAnnotationInfo();
 
             return suffixAnnotations != null
                     ? origin.getSuffixTypeAnnotationInfo()
-                            .get(currentSuffixIndex).stream()
-                    : Stream.empty();
+                            .get(currentSuffixIndex)
+                    : null;
         }
 
         @Override
@@ -168,7 +135,7 @@ abstract class ClassRefSignatureSourceModel
     }
 
     static final class SuffixedBase extends ClassRefSignatureSourceModel {
-        public SuffixedBase(ClassRefTypeSignature origin) {
+        SuffixedBase(ClassRefTypeSignature origin) {
             super(origin);
         }
 

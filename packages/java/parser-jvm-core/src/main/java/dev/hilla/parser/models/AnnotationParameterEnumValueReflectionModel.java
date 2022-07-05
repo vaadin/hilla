@@ -1,45 +1,16 @@
 package dev.hilla.parser.models;
 
-import java.util.stream.Stream;
+final class AnnotationParameterEnumValueReflectionModel
+        extends AnnotationParameterEnumValueModel implements ReflectionModel {
+    private final Enum<?> origin;
 
-import javax.annotation.Nonnull;
-
-final class AnnotationParameterEnumValueReflectionModel extends
-        AbstractModel<Enum<?>> implements AnnotationParameterEnumValueModel {
-    private ClassInfoModel classInfo;
-
-    AnnotationParameterEnumValueReflectionModel(@Nonnull Enum<?> origin) {
-        super(origin);
+    AnnotationParameterEnumValueReflectionModel(Enum<?> origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof AnnotationParameterEnumValueModel)) {
-            return false;
-        }
-
-        var other = (AnnotationParameterEnumValueModel) obj;
-
-        return getClassInfo().equals(other.getClassInfo())
-                && getValueName().equals(other.getValueName());
-    }
-
-    @Override
-    public ClassInfoModel getClassInfo() {
-        if (classInfo == null) {
-            classInfo = ClassInfoModel.of(origin.getClass());
-        }
-
-        return classInfo;
-    }
-
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Stream.of(getClassInfo());
+    public Enum<?> get() {
+        return origin;
     }
 
     @Override
@@ -48,7 +19,7 @@ final class AnnotationParameterEnumValueReflectionModel extends
     }
 
     @Override
-    public int hashCode() {
-        return getClassInfo().hashCode() + 13 * getValueName().hashCode();
+    protected ClassInfoModel prepareClassInfo() {
+        return ClassInfoModel.of(origin.getClass());
     }
 }

@@ -13,39 +13,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
-        extends AbstractAnnotatedReflectionModel<T>
-        implements ClassRefSignatureModel, ReflectionSignatureModel {
-    private ClassInfoModel reference;
+        extends ClassRefSignatureModel implements ReflectionSignatureModel {
+    protected final T origin;
 
-    public ClassRefSignatureReflectionModel(T origin) {
-        super(origin);
+    ClassRefSignatureReflectionModel(T origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof ClassRefSignatureModel)) {
-            return false;
-        }
-
-        var other = (ClassRefSignatureModel) obj;
-
-        return getClassName().equals(other.getClassName())
-                && getOwner().equals(other.getOwner())
-                && getTypeArguments().equals(other.getTypeArguments())
-                && getAnnotations().equals(other.getAnnotations());
-    }
-
-    @Override
-    public ClassInfoModel getClassInfo() {
-        if (reference == null) {
-            reference = ClassInfoModel.of(getOriginClassInfo());
-        }
-
-        return reference;
+    public T get() {
+        return origin;
     }
 
     @Override
@@ -53,28 +30,27 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         return getOriginClassInfo().getName();
     }
 
-    @Override
-    public int hashCode() {
-        return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
-                + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
-    }
-
-    @Override
-    public void setReference(ClassInfoModel reference) {
-        this.reference = reference;
-    }
-
     protected abstract Class<?> getOriginClassInfo();
 
-    static final class AnnotatedBare extends Annotated<AnnotatedType> {
-        public AnnotatedBare(AnnotatedType origin,
-                List<Annotation[]> annotations, int ownerIndex) {
-            super(origin, annotations, ownerIndex);
-        }
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
 
-        @Override
-        public List<TypeArgumentModel> getTypeArguments() {
-            return List.of();
+    @Override
+    protected ClassInfoModel prepareClassInfo() {
+        return ClassInfoModel.of(getOriginClassInfo());
+    }
+
+    @Override
+    protected List<TypeArgumentModel> prepareTypeArguments() {
+        return List.of();
+    }
+
+    static final class AnnotatedBare extends Annotated<AnnotatedType> {
+        AnnotatedBare(AnnotatedType origin, List<Annotation[]> annotations,
+                int ownerIndex) {
+            super(origin, annotations, ownerIndex);
         }
 
         @Override
@@ -84,7 +60,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
     }
 
     static final class Bare extends ClassRefSignatureReflectionModel<Class<?>> {
-        public Bare(Class<?> origin) {
+        Bare(Class<?> origin) {
             super(origin);
         }
 
@@ -94,34 +70,15 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public List<TypeArgumentModel> getTypeArguments() {
-            return List.of();
-        }
-
-        @Override
         protected Class<?> getOriginClassInfo() {
             return origin;
         }
     }
 
     static final class Regular extends Annotated<AnnotatedParameterizedType> {
-        private List<TypeArgumentModel> typeArguments;
-
         private Regular(AnnotatedParameterizedType origin,
                 List<Annotation[]> annotations, int ownerIndex) {
             super(origin, annotations, ownerIndex);
-        }
-
-        @Override
-        public List<TypeArgumentModel> getTypeArguments() {
-            if (typeArguments == null) {
-                typeArguments = Arrays
-                        .stream(origin.getAnnotatedActualTypeArguments())
-                        .map(TypeArgumentModel::of)
-                        .collect(Collectors.toList());
-            }
-
-            return typeArguments;
         }
 
         @Override
@@ -129,14 +86,21 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
             return (Class<?>) ((ParameterizedType) origin.getType())
                     .getRawType();
         }
+
+        @Override
+        protected List<TypeArgumentModel> prepareTypeArguments() {
+            return Arrays.stream(origin.getAnnotatedActualTypeArguments())
+                    .map(TypeArgumentModel::of).collect(Collectors.toList());
+        }
     }
 
     static abstract class Annotated<T extends AnnotatedType>
             extends ClassRefSignatureReflectionModel<T> {
         protected final List<Annotation[]> ownedAnnotations;
         protected final int ownerIndex;
+        private Optional<ClassRefSignatureModel> owner;
 
-        public Annotated(T origin, List<Annotation[]> ownedAnnotations,
+        Annotated(T origin, List<Annotation[]> ownedAnnotations,
                 int ownerIndex) {
             super(origin);
             this.ownedAnnotations = ownedAnnotations;
@@ -156,26 +120,27 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public List<AnnotationInfoModel> getAnnotations() {
-            if (annotations == null) {
-                annotations = Arrays.stream(ownedAnnotations.get(ownerIndex))
-                        .map(AnnotationInfoModel::of)
-                        .collect(Collectors.toList());
+        public Optional<ClassRefSignatureModel> getOwner() {
+            if (owner == null) {
+                owner = prepareOwner();
             }
 
-            return annotations;
+            return owner;
         }
 
         @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
+        protected List<AnnotationInfoModel> prepareAnnotations() {
+            return AnnotatedAbstractModel
+                    .processAnnotations(ownedAnnotations.get(ownerIndex));
+        }
+
+        private Optional<ClassRefSignatureModel> prepareOwner() {
             var owner = origin.getAnnotatedOwnerType();
 
-            if (owner != null) {
-                return Optional.of(
-                        Annotated.of(owner, ownedAnnotations, ownerIndex + 1));
-            }
-
-            return Optional.empty();
+            return owner != null
+                    ? Optional.of(Annotated.of(owner, ownedAnnotations,
+                            ownerIndex + 1))
+                    : Optional.empty();
         }
     }
 }
