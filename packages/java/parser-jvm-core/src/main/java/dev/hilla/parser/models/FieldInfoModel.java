@@ -8,38 +8,81 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 
-public interface FieldInfoModel
-        extends Model, NamedModel, AnnotatedModel, OwnedModel<ClassInfoModel> {
-    static FieldInfoModel of(@Nonnull FieldInfo field) {
+public abstract class FieldInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+    private ClassInfoModel owner;
+    private SignatureModel type;
+
+    public static FieldInfoModel of(@Nonnull FieldInfo field) {
         return new FieldInfoSourceModel(Objects.requireNonNull(field));
     }
 
-    static FieldInfoModel of(@Nonnull Field field) {
+    public static FieldInfoModel of(@Nonnull Field field) {
         return new FieldInfoReflectionModel(field);
     }
 
-    String getClassName();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof FieldInfoModel)) {
+            return false;
+        }
+
+        var other = (FieldInfoModel) obj;
+
+        return getClassName().equals(other.getClassName())
+                && getName().equals(other.getName());
+    }
+
+    public abstract String getClassName();
 
     @Override
-    default Stream<ClassInfoModel> getDependenciesStream() {
+    public Stream<ClassInfoModel> getDependenciesStream() {
         return getType().getDependenciesStream();
     }
 
-    SignatureModel getType();
+    @Override
+    public ClassInfoModel getOwner() {
+        if (owner == null) {
+            owner = prepareOwner();
+        }
 
-    boolean isEnum();
+        return owner;
+    }
 
-    boolean isFinal();
+    public SignatureModel getType() {
+        if (type == null) {
+            type = prepareType();
+        }
 
-    boolean isPrivate();
+        return type;
+    }
 
-    boolean isProtected();
+    @Override
+    public int hashCode() {
+        return getName().hashCode() + 11 * getClassName().hashCode();
+    }
 
-    boolean isPublic();
+    public abstract boolean isEnum();
 
-    boolean isStatic();
+    public abstract boolean isFinal();
 
-    boolean isSynthetic();
+    public abstract boolean isPrivate();
 
-    boolean isTransient();
+    public abstract boolean isProtected();
+
+    public abstract boolean isPublic();
+
+    public abstract boolean isStatic();
+
+    public abstract boolean isSynthetic();
+
+    public abstract boolean isTransient();
+
+    protected abstract ClassInfoModel prepareOwner();
+
+    protected abstract SignatureModel prepareType();
 }

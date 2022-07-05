@@ -11,51 +11,21 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.TypeArgument;
 
-final class TypeArgumentReflectionModel
-        extends AbstractAnnotatedReflectionModel<AnnotatedType>
-        implements TypeArgumentModel, ReflectionSignatureModel {
-    private List<SignatureModel> associatedTypes;
+final class TypeArgumentReflectionModel extends TypeArgumentModel
+        implements ReflectionSignatureModel {
+    private final AnnotatedType origin;
     private TypeArgument.Wildcard wildcard;
 
-    public TypeArgumentReflectionModel(AnnotatedType origin) {
-        super(origin);
+    TypeArgumentReflectionModel(AnnotatedType origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof TypeArgumentModel)) {
-            return false;
-        }
-
-        var other = (TypeArgumentModel) obj;
-
-        return getAnnotations().equals(other.getAnnotations())
-                && getAssociatedTypes().equals(other.getAssociatedTypes())
-                && getWildcard().equals(other.getWildcard());
+    public AnnotatedType get() {
+        return origin;
     }
 
     @Override
-    public List<SignatureModel> getAssociatedTypes() {
-        if (associatedTypes == null) {
-            var stream = origin instanceof AnnotatedWildcardType
-                    ? Streams.combine(
-                            ((AnnotatedWildcardType) origin)
-                                    .getAnnotatedLowerBounds(),
-                            ((AnnotatedWildcardType) origin)
-                                    .getAnnotatedUpperBounds())
-                    : Stream.of(origin);
-
-            associatedTypes = stream.map(SignatureModel::of).distinct()
-                    .collect(Collectors.toList());
-        }
-
-        return associatedTypes;
-    }
-
     public TypeArgument.Wildcard getWildcard() {
         if (wildcard == null) {
             if (origin instanceof WildcardType) {
@@ -77,7 +47,18 @@ final class TypeArgumentReflectionModel
     }
 
     @Override
-    public int hashCode() {
-        return getAssociatedTypes().hashCode() + 7 * getWildcard().hashCode();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
+
+    @Override
+    protected List<SignatureModel> prepareAssociatedTypes() {
+        var stream = origin instanceof AnnotatedWildcardType ? Streams.combine(
+                ((AnnotatedWildcardType) origin).getAnnotatedLowerBounds(),
+                ((AnnotatedWildcardType) origin).getAnnotatedUpperBounds())
+                : Stream.of(origin);
+
+        return stream.map(SignatureModel::of).distinct()
+                .collect(Collectors.toList());
     }
 }

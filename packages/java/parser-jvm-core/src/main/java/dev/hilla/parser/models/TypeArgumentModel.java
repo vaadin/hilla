@@ -8,21 +8,54 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeArgument;
 
-public interface TypeArgumentModel extends SignatureModel {
-    static TypeArgumentModel of(@Nonnull TypeArgument origin) {
+public abstract class TypeArgumentModel extends AnnotatedAbstractModel
+        implements SignatureModel {
+    private List<SignatureModel> associatedTypes;
+
+    public static TypeArgumentModel of(@Nonnull TypeArgument origin) {
         return new TypeArgumentSourceModel(Objects.requireNonNull(origin));
     }
 
-    static TypeArgumentModel of(@Nonnull AnnotatedType origin) {
+    public static TypeArgumentModel of(@Nonnull AnnotatedType origin) {
         return new TypeArgumentReflectionModel(Objects.requireNonNull(origin));
     }
 
-    List<SignatureModel> getAssociatedTypes();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
 
-    TypeArgument.Wildcard getWildcard();
+        if (!(obj instanceof TypeArgumentModel)) {
+            return false;
+        }
+
+        var other = (TypeArgumentModel) obj;
+
+        return getAnnotations().equals(other.getAnnotations())
+                && getAssociatedTypes().equals(other.getAssociatedTypes())
+                && getWildcard().equals(other.getWildcard());
+    }
+
+    public List<SignatureModel> getAssociatedTypes() {
+        if (associatedTypes == null) {
+            associatedTypes = prepareAssociatedTypes();
+        }
+
+        return associatedTypes;
+    }
+
+    public abstract TypeArgument.Wildcard getWildcard();
 
     @Override
-    default boolean isTypeArgument() {
+    public int hashCode() {
+        return getAssociatedTypes().hashCode() + 7 * getWildcard().hashCode();
+    }
+
+    @Override
+    public boolean isTypeArgument() {
         return true;
     }
+
+    protected abstract List<SignatureModel> prepareAssociatedTypes();
 }

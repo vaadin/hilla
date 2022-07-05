@@ -12,79 +12,141 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
 
-public interface MethodInfoModel
-        extends Model, NamedModel, AnnotatedModel, OwnedModel<ClassInfoModel> {
-    static MethodInfoModel of(@Nonnull MethodInfo method) {
+public abstract class MethodInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+    private ClassInfoModel owner;
+    private List<MethodParameterInfoModel> parameters;
+    private SignatureModel resultType;
+
+    public static MethodInfoModel of(@Nonnull MethodInfo method) {
         return new MethodInfoSourceModel(Objects.requireNonNull(method));
     }
 
-    static MethodInfoModel of(@Nonnull Method method) {
+    public static MethodInfoModel of(@Nonnull Method method) {
         return new MethodInfoReflectionModel(method);
     }
 
-    boolean equalsIgnoreParameters(Object obj);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
 
-    boolean equalsIgnoreParameters(MethodInfoModel obj);
+        if (!(obj instanceof MethodInfoModel)) {
+            return false;
+        }
 
-    String getClassName();
+        var other = (MethodInfoModel) obj;
+
+        return equalsIgnoreParameters(other)
+                && getParameters().equals(other.getParameters());
+    }
+
+    public abstract boolean equalsIgnoreParameters(MethodInfoModel obj);
+
+    public boolean equalsIgnoreParameters(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof MethodInfoModel)) {
+            return false;
+        }
+
+        return equalsIgnoreParameters((MethodInfoModel) obj);
+    }
+
+    public abstract String getClassName();
 
     @Override
-    default Stream<ClassInfoModel> getDependenciesStream() {
+    public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(getResultDependenciesStream(),
                 getParameterDependenciesStream());
     }
 
-    int getModifiers();
+    public abstract int getModifiers();
 
-    default List<ClassInfoModel> getParameterDependencies() {
+    @Override
+    public ClassInfoModel getOwner() {
+        if (owner == null) {
+            owner = prepareOwner();
+        }
+
+        return owner;
+    }
+
+    public List<ClassInfoModel> getParameterDependencies() {
         return getParameterDependenciesStream().collect(Collectors.toList());
     }
 
-    default Stream<ClassInfoModel> getParameterDependenciesStream() {
+    public Stream<ClassInfoModel> getParameterDependenciesStream() {
         return getParametersStream()
                 .flatMap(MethodParameterInfoModel::getDependenciesStream)
                 .distinct();
     }
 
-    List<MethodParameterInfoModel> getParameters();
+    public List<MethodParameterInfoModel> getParameters() {
+        if (parameters == null) {
+            parameters = prepareParameters();
+        }
 
-    default Stream<MethodParameterInfoModel> getParametersStream() {
+        return parameters;
+    }
+
+    public Stream<MethodParameterInfoModel> getParametersStream() {
         return getParameters().stream();
     }
 
-    default List<ClassInfoModel> getResultDependencies() {
+    public List<ClassInfoModel> getResultDependencies() {
         return getResultDependenciesStream().collect(Collectors.toList());
     }
 
-    default Stream<ClassInfoModel> getResultDependenciesStream() {
+    public Stream<ClassInfoModel> getResultDependenciesStream() {
         return getResultType().getDependenciesStream();
     }
 
-    SignatureModel getResultType();
+    public SignatureModel getResultType() {
+        if (resultType == null) {
+            resultType = prepareResultType();
+        }
 
-    int hashCodeIgnoreParameters();
+        return resultType;
+    }
 
-    boolean isAbstract();
+    @Override
+    public int hashCode() {
+        return hashCodeIgnoreParameters() + 53 * getParameters().hashCode();
+    }
 
-    boolean isBridge();
+    public abstract int hashCodeIgnoreParameters();
 
-    boolean isFinal();
+    public abstract boolean isAbstract();
 
-    boolean isNative();
+    public abstract boolean isBridge();
 
-    boolean isPrivate();
+    public abstract boolean isFinal();
 
-    boolean isProtected();
+    public abstract boolean isNative();
 
-    boolean isPublic();
+    public abstract boolean isPrivate();
 
-    boolean isStatic();
+    public abstract boolean isProtected();
 
-    boolean isStrict();
+    public abstract boolean isPublic();
 
-    boolean isSynchronized();
+    public abstract boolean isStatic();
 
-    boolean isSynthetic();
+    public abstract boolean isStrict();
 
-    boolean isVarArgs();
+    public abstract boolean isSynchronized();
+
+    public abstract boolean isSynthetic();
+
+    public abstract boolean isVarArgs();
+
+    protected abstract ClassInfoModel prepareOwner();
+
+    protected abstract List<MethodParameterInfoModel> prepareParameters();
+
+    protected abstract SignatureModel prepareResultType();
 }

@@ -1,104 +1,24 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-final class ClassInfoReflectionModel
-        extends AbstractAnnotatedReflectionModel<Class<?>>
-        implements ClassInfoModel, ReflectionModel {
-    private final ClassInfoModel superClass;
-    private List<ClassInfoModel> chain;
-    private List<FieldInfoModel> fields;
-    private List<ClassInfoModel> innerClasses;
-    private List<ClassInfoModel> interfaces;
-    private List<MethodInfoModel> methods;
+final class ClassInfoReflectionModel extends ClassInfoModel
+        implements ReflectionModel {
+    private final Class<?> origin;
 
-    public ClassInfoReflectionModel(Class<?> origin) {
-        super(origin);
-
-        var superClass = origin.getSuperclass();
-
-        this.superClass = superClass != null
-                && ClassInfoModel.isNonJDKClass(superClass)
-                        ? ClassInfoModel.of(superClass)
-                        : null;
+    ClassInfoReflectionModel(Class<?> origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof ClassInfoModel)) {
-            return false;
-        }
-
-        var other = (ClassInfoModel) obj;
-
-        return origin.getName().equals(other.getName());
-    }
-
-    @Override
-    public List<FieldInfoModel> getFields() {
-        if (fields == null) {
-            fields = Arrays.stream(origin.getDeclaredFields())
-                    .map(FieldInfoModel::of).collect(Collectors.toList());
-        }
-
-        return fields;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInheritanceChain() {
-        if (chain == null) {
-            chain = Stream
-                    .<Class<?>> iterate(origin,
-                            ((Predicate<Class<?>>) Objects::nonNull)
-                                    .and(ClassInfoModel::isNonJDKClass),
-                            Class::getSuperclass)
-                    .distinct().map(ClassInfoModel::of)
-                    .collect(Collectors.toList());
-        }
-
-        return chain;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInnerClasses() {
-        if (innerClasses == null) {
-            innerClasses = Arrays.stream(origin.getDeclaredClasses())
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
-        }
-
-        return innerClasses;
-    }
-
-    @Override
-    public List<ClassInfoModel> getInterfaces() {
-        if (interfaces == null) {
-            interfaces = Arrays.stream(origin.getInterfaces())
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
-        }
-
-        return interfaces;
-    }
-
-    @Override
-    public List<MethodInfoModel> getMethods() {
-        if (methods == null) {
-            methods = Arrays.stream(origin.getDeclaredMethods())
-                    .map(MethodInfoModel::of).collect(Collectors.toList());
-        }
-
-        return methods;
+    public Class<?> get() {
+        return origin;
     }
 
     @Override
@@ -109,16 +29,6 @@ final class ClassInfoReflectionModel
     @Override
     public String getSimpleName() {
         return origin.getSimpleName();
-    }
-
-    @Override
-    public Optional<ClassInfoModel> getSuperClass() {
-        return Optional.ofNullable(superClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return 3 + origin.getName().hashCode();
     }
 
     @Override
@@ -153,12 +63,12 @@ final class ClassInfoReflectionModel
 
     @Override
     public boolean isDate() {
-        return ClassInfoModelUtils.isDateAssignable(origin);
+        return isDateAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
     public boolean isDateTime() {
-        return ClassInfoModelUtils.isDateTimeAssignable(origin);
+        return isDateTimeAssignable(origin, ClassInfoModel::isAssignableFrom);
     }
 
     @Override
@@ -264,5 +174,56 @@ final class ClassInfoReflectionModel
     @Override
     public boolean isSynthetic() {
         return origin.isSynthetic();
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
+
+    @Override
+    protected List<FieldInfoModel> prepareFields() {
+        return Arrays.stream(origin.getDeclaredFields()).map(FieldInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInheritanceChain() {
+        var list = new ArrayList<ClassInfoModel>();
+        var current = origin;
+
+        while (current != null && ClassInfoModel.isNonJDKClass(current)) {
+            list.add(current == origin ? this : ClassInfoModel.of(current));
+            current = current.getSuperclass();
+        }
+
+        return list;
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInnerClasses() {
+        return Arrays.stream(origin.getDeclaredClasses())
+                .map(ClassInfoModel::of).collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<ClassInfoModel> prepareInterfaces() {
+        return Arrays.stream(origin.getInterfaces()).map(ClassInfoModel::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected List<MethodInfoModel> prepareMethods() {
+        return Arrays.stream(origin.getDeclaredMethods())
+                .map(MethodInfoModel::of).collect(Collectors.toList());
+    }
+
+    @Override
+    protected ClassInfoModel prepareSuperClass() {
+        var superClass = origin.getSuperclass();
+
+        return superClass != null && ClassInfoModel.isNonJDKClass(superClass)
+                ? ClassInfoModel.of(superClass)
+                : null;
     }
 }

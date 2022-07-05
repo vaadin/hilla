@@ -1,44 +1,29 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
+import java.util.List;
 
-final class ArraySignatureReflectionModel
-        extends AbstractAnnotatedReflectionModel<AnnotatedArrayType>
-        implements ArraySignatureModel, ReflectionSignatureModel {
-    private SignatureModel nestedType;
+final class ArraySignatureReflectionModel extends ArraySignatureModel
+        implements ReflectionSignatureModel {
+    private final AnnotatedArrayType origin;
 
-    public ArraySignatureReflectionModel(AnnotatedArrayType origin) {
-        super(origin);
+    ArraySignatureReflectionModel(AnnotatedArrayType origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof ArraySignatureModel)) {
-            return false;
-        }
-
-        var other = (ArraySignatureModel) obj;
-
-        return getNestedType().equals(other.getNestedType())
-                && getAnnotations().equals(other.getAnnotations());
+    public AnnotatedElement get() {
+        return origin;
     }
 
     @Override
-    public SignatureModel getNestedType() {
-        if (nestedType == null) {
-            nestedType = SignatureModel
-                    .of(origin.getAnnotatedGenericComponentType());
-        }
-
-        return nestedType;
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
     }
 
     @Override
-    public int hashCode() {
-        return 1 + getNestedType().hashCode();
+    protected SignatureModel prepareNestedType() {
+        return SignatureModel.of(origin.getAnnotatedGenericComponentType());
     }
 }

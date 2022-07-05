@@ -113,12 +113,13 @@ public class AnnotationInfoModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
-    @DisplayName("It should provide no dependencies")
+    @DisplayName("It should provide dependencies")
     @ParameterizedTest(name = ModelProvider.testName)
     @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideNoDependencies(AnnotationInfoModel model,
+    public void should_ProvideDependencies(AnnotationInfoModel model,
             ModelKind kind) {
-        assertEquals(0, model.getDependencies().size());
+        assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
+                model.getDependencies());
     }
 
     static final class Context {

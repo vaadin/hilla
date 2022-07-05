@@ -4,31 +4,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-final class FieldInfoReflectionModel
-        extends AbstractAnnotatedReflectionModel<Field>
-        implements FieldInfoModel, ReflectionModel {
-    private List<AnnotationInfoModel> annotations;
-    private ClassInfoModel owner;
-    private SignatureModel type;
+final class FieldInfoReflectionModel extends FieldInfoModel
+        implements ReflectionModel {
+    private final Field origin;
 
-    public FieldInfoReflectionModel(Field field) {
-        super(field);
+    FieldInfoReflectionModel(Field origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof FieldInfoModel)) {
-            return false;
-        }
-
-        var other = (FieldInfoModel) obj;
-
-        return origin.getDeclaringClass().getName().equals(other.getClassName())
-                && origin.getName().equals(other.getName());
+    public Field get() {
+        return origin;
     }
 
     @Override
@@ -39,30 +25,6 @@ final class FieldInfoReflectionModel
     @Override
     public String getName() {
         return origin.getName();
-    }
-
-    @Override
-    public ClassInfoModel getOwner() {
-        if (owner == null) {
-            owner = ClassInfoModel.of(origin.getDeclaringClass());
-        }
-
-        return owner;
-    }
-
-    @Override
-    public SignatureModel getType() {
-        if (type == null) {
-            type = SignatureModel.of(origin.getAnnotatedType());
-        }
-
-        return type;
-    }
-
-    @Override
-    public int hashCode() {
-        return origin.getName().hashCode()
-                + 11 * origin.getDeclaringClass().getName().hashCode();
     }
 
     @Override
@@ -103,5 +65,20 @@ final class FieldInfoReflectionModel
     @Override
     public boolean isTransient() {
         return Modifier.isTransient(origin.getModifiers());
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
+
+    @Override
+    protected ClassInfoModel prepareOwner() {
+        return ClassInfoModel.of(origin.getDeclaringClass());
+    }
+
+    @Override
+    protected SignatureModel prepareType() {
+        return SignatureModel.of(origin.getAnnotatedType());
     }
 }
