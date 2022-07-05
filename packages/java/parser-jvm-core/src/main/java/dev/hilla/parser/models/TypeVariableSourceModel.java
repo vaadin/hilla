@@ -1,33 +1,20 @@
 package dev.hilla.parser.models;
 
-import java.util.stream.Stream;
+import java.util.List;
 
-import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.TypeVariableSignature;
 
-final class TypeVariableSourceModel
-        extends AbstractAnnotatedSourceModel<TypeVariableSignature>
-        implements TypeVariableModel, SourceSignatureModel {
-    private TypeParameterModel typeParameter;
+final class TypeVariableSourceModel extends TypeVariableModel
+        implements SourceSignatureModel {
+    private final TypeVariableSignature origin;
 
-    public TypeVariableSourceModel(TypeVariableSignature origin) {
-        super(origin);
+    TypeVariableSourceModel(TypeVariableSignature origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof TypeVariableModel)) {
-            return false;
-        }
-
-        var other = (TypeVariableModel) obj;
-
-        return origin.getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations());
+    public TypeVariableSignature get() {
+        return origin;
     }
 
     @Override
@@ -36,22 +23,12 @@ final class TypeVariableSourceModel
     }
 
     @Override
-    public int hashCode() {
-        return origin.getName().hashCode();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getTypeAnnotationInfo());
     }
 
     @Override
-    public TypeParameterModel resolve() {
-        if (typeParameter == null) {
-            typeParameter = TypeParameterModel.of(origin.resolve());
-        }
-
-        return typeParameter;
-    }
-
-    @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        var annotations = origin.getTypeAnnotationInfo();
-        return annotations != null ? annotations.stream() : Stream.empty();
+    protected TypeParameterModel prepareResolved() {
+        return TypeParameterModel.of(origin.resolve());
     }
 }

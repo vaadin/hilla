@@ -3,34 +3,19 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.List;
 
-final class MethodParameterInfoReflectionModel
-        extends AbstractAnnotatedReflectionModel<Parameter>
-        implements MethodParameterInfoModel, ReflectionModel {
-    private MethodInfoModel owner;
-    private SignatureModel type;
+final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
+        implements ReflectionModel {
+    private final Parameter origin;
 
-    public MethodParameterInfoReflectionModel(Parameter parameter) {
-        super(parameter);
+    MethodParameterInfoReflectionModel(Parameter origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof MethodParameterInfoModel)) {
-            return false;
-        }
-
-        var other = (MethodParameterInfoModel) obj;
-
-        return getOwner().equalsIgnoreParameters(other.getOwner())
-                && getAnnotations().equals(other.getAnnotations())
-                && origin.getModifiers() == other.getModifiers()
-                && getType().equals(other.getType())
-                && origin.getName().equals(other.getName());
+    public Parameter get() {
+        return origin;
     }
 
     @Override
@@ -44,43 +29,37 @@ final class MethodParameterInfoReflectionModel
     }
 
     @Override
-    public MethodInfoModel getOwner() {
-        if (owner == null) {
-            owner = MethodInfoModel
-                    .of((Method) origin.getDeclaringExecutable());
-        }
-
-        return owner;
-    }
-
-    @Override
-    public SignatureModel getType() {
-        if (type == null) {
-            type = SignatureModel.of(origin.getAnnotatedType());
-        }
-
-        return type;
-    }
-
-    @Override
-    public int hashCode() {
-        return getOwner().hashCodeIgnoreParameters()
-                + 11 * getAnnotations().hashCode() + 17 * origin.getModifiers()
-                + 23 * getType().hashCode() + 53 * origin.getName().hashCode();
-    }
-
-    @Override
     public boolean isFinal() {
         return Modifier.isFinal(origin.getModifiers());
     }
 
     @Override
     public boolean isMandated() {
-        return (origin.getModifiers() & '耀') != 0;
+        return origin.isImplicit();
+    }
+
+    @Override
+    public boolean isImplicit() {
+        return origin.isImplicit();
     }
 
     @Override
     public boolean isSynthetic() {
         return origin.isSynthetic();
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
+
+    @Override
+    protected MethodInfoModel prepareOwner() {
+        return MethodInfoModel.of((Method) origin.getDeclaringExecutable());
+    }
+
+    @Override
+    protected SignatureModel prepareType() {
+        return SignatureModel.of(origin.getAnnotatedType());
     }
 }

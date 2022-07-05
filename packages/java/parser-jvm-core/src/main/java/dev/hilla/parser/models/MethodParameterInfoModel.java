@@ -7,28 +7,79 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodParameterInfo;
 
-public interface MethodParameterInfoModel
-        extends Model, NamedModel, AnnotatedModel, OwnedModel<MethodInfoModel> {
-    static MethodParameterInfoModel of(@Nonnull MethodParameterInfo parameter) {
+public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, OwnedModel<MethodInfoModel> {
+    private MethodInfoModel owner;
+    private SignatureModel type;
+
+    public static MethodParameterInfoModel of(
+            @Nonnull MethodParameterInfo parameter) {
         return new MethodParameterInfoSourceModel(parameter);
     }
 
-    static MethodParameterInfoModel of(@Nonnull Parameter parameter) {
+    public static MethodParameterInfoModel of(@Nonnull Parameter parameter) {
         return new MethodParameterInfoReflectionModel(parameter);
     }
 
     @Override
-    default Stream<ClassInfoModel> getDependenciesStream() {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof MethodParameterInfoModel)) {
+            return false;
+        }
+
+        var other = (MethodParameterInfoModel) obj;
+
+        return getOwner().equalsIgnoreParameters(other.getOwner())
+                && getAnnotations().equals(other.getAnnotations())
+                && getModifiers() == other.getModifiers()
+                && getType().equals(other.getType())
+                && getName().equals(other.getName());
+    }
+
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
         return getType().getDependenciesStream();
     }
 
-    int getModifiers();
+    public abstract int getModifiers();
 
-    SignatureModel getType();
+    @Override
+    public MethodInfoModel getOwner() {
+        if (owner == null) {
+            owner = prepareOwner();
+        }
 
-    boolean isFinal();
+        return owner;
+    }
 
-    boolean isMandated();
+    public SignatureModel getType() {
+        if (type == null) {
+            type = prepareType();
+        }
 
-    boolean isSynthetic();
+        return type;
+    }
+
+    @Override
+    public int hashCode() {
+        return getOwner().hashCodeIgnoreParameters()
+                + 11 * getAnnotations().hashCode() + 17 * getModifiers()
+                + 23 * getType().hashCode() + 53 * getName().hashCode();
+    }
+
+    public abstract boolean isFinal();
+
+    public abstract boolean isMandated();
+
+    public abstract boolean isImplicit();
+
+    public abstract boolean isSynthetic();
+
+    protected abstract MethodInfoModel prepareOwner();
+
+    protected abstract SignatureModel prepareType();
 }

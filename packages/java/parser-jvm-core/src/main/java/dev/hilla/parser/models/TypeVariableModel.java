@@ -7,21 +7,53 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeVariableSignature;
 
-public interface TypeVariableModel extends SignatureModel {
-    static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
+public abstract class TypeVariableModel extends AnnotatedAbstractModel
+        implements SignatureModel {
+    private TypeParameterModel typeParameter;
+
+    public static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
         return new TypeVariableSourceModel(Objects.requireNonNull(origin));
     }
 
-    static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin) {
+    public static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin) {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 
-    String getName();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof TypeVariableModel)) {
+            return false;
+        }
+
+        var other = (TypeVariableModel) obj;
+
+        return getName().equals(other.getName())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    public abstract String getName();
 
     @Override
-    default boolean isTypeVariable() {
+    public int hashCode() {
+        return getName().hashCode();
+    }
+
+    @Override
+    public boolean isTypeVariable() {
         return true;
     }
 
-    SignatureModel resolve();
+    public SignatureModel resolve() {
+        if (typeParameter == null) {
+            typeParameter = prepareResolved();
+        }
+
+        return typeParameter;
+    }
+
+    protected abstract TypeParameterModel prepareResolved();
 }

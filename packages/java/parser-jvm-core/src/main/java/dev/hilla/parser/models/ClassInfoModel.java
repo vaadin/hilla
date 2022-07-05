@@ -1,10 +1,16 @@
 package dev.hilla.parser.models;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,33 +20,44 @@ import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
-public interface ClassInfoModel
-        extends Model, NamedModel, AnnotatedModel, SpecializedModel {
-    static boolean is(Class<?> actor, String target) {
+public abstract class ClassInfoModel extends AnnotatedAbstractModel
+        implements Model, NamedModel, SpecializedModel {
+    private static final Class<?>[] DATE_CLASSES = { Date.class,
+            LocalDate.class };
+    private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
+            Instant.class, LocalTime.class };
+    private List<ClassInfoModel> chain;
+    private List<FieldInfoModel> fields;
+    private List<ClassInfoModel> innerClasses;
+    private List<ClassInfoModel> interfaces;
+    private List<MethodInfoModel> methods;
+    private Optional<ClassInfoModel> superClass;
+
+    public static boolean is(Class<?> actor, String target) {
         return Objects.equals(actor.getName(), target);
     }
 
-    static boolean is(ClassInfo actor, String target) {
+    public static boolean is(ClassInfo actor, String target) {
         return Objects.equals(actor.getName(), target);
     }
 
-    static boolean is(Class<?> actor, Class<?> target) {
+    public static boolean is(Class<?> actor, Class<?> target) {
         return Objects.equals(actor, target);
     }
 
-    static boolean is(ClassInfo actor, Class<?> target) {
+    public static boolean is(ClassInfo actor, Class<?> target) {
         return Objects.equals(actor.getName(), target.getName());
     }
 
-    static boolean is(Class<?> actor, ClassInfo target) {
+    public static boolean is(Class<?> actor, ClassInfo target) {
         return Objects.equals(actor.getName(), target.getName());
     }
 
-    static boolean is(ClassInfo actor, ClassInfo target) {
+    public static boolean is(ClassInfo actor, ClassInfo target) {
         return Objects.equals(actor, target);
     }
 
-    static boolean isAssignableFrom(String target, Class<?> actor) {
+    public static boolean isAssignableFrom(String target, Class<?> actor) {
         while (actor != null) {
             if (Objects.equals(target, actor.getName())) {
                 return true;
@@ -52,28 +69,29 @@ public interface ClassInfoModel
         return false;
     }
 
-    static boolean isAssignableFrom(String target, ClassInfo actor) {
+    public static boolean isAssignableFrom(String target, ClassInfo actor) {
         return is(actor, target) || actor.implementsInterface(target)
                 || actor.extendsSuperclass(target);
     }
 
-    static boolean isAssignableFrom(Class<?> target, Class<?> actor) {
+    public static boolean isAssignableFrom(Class<?> target, Class<?> actor) {
         return target.isAssignableFrom(actor);
     }
 
-    static boolean isAssignableFrom(Class<?> target, ClassInfo actor) {
+    public static boolean isAssignableFrom(Class<?> target, ClassInfo actor) {
         return isAssignableFrom(target.getName(), actor);
     }
 
-    static boolean isAssignableFrom(ClassInfo target, Class<?> actor) {
+    public static boolean isAssignableFrom(ClassInfo target, Class<?> actor) {
         return isAssignableFrom(target.getName(), actor);
     }
 
-    static boolean isAssignableFrom(ClassInfo target, ClassInfo actor) {
+    public static boolean isAssignableFrom(ClassInfo target, ClassInfo actor) {
         return isAssignableFrom(target.getName(), actor);
     }
 
-    static boolean isAssignableFrom(String target, ClassInfoModel actor) {
+    public static boolean isAssignableFrom(String target,
+            ClassInfoModel actor) {
         var _actor = actor.get();
 
         return _actor instanceof ClassInfo
@@ -81,7 +99,8 @@ public interface ClassInfoModel
                 : isAssignableFrom(target, (Class<?>) _actor);
     }
 
-    static boolean isAssignableFrom(Class<?> target, ClassInfoModel actor) {
+    public static boolean isAssignableFrom(Class<?> target,
+            ClassInfoModel actor) {
         var _actor = actor.get();
 
         return _actor instanceof ClassInfo
@@ -89,7 +108,8 @@ public interface ClassInfoModel
                 : isAssignableFrom(target, (Class<?>) _actor);
     }
 
-    static boolean isAssignableFrom(ClassInfo target, ClassInfoModel actor) {
+    public static boolean isAssignableFrom(ClassInfo target,
+            ClassInfoModel actor) {
         var _actor = actor.get();
 
         return _actor instanceof ClassInfo
@@ -97,147 +117,214 @@ public interface ClassInfoModel
                 : isAssignableFrom(target, (Class<?>) _actor);
     }
 
-    static boolean isJDKClass(ClassInfo cls) {
+    public static boolean isJDKClass(ClassInfo cls) {
         return isJDKClass(cls.getName());
     }
 
-    static boolean isJDKClass(String name) {
+    public static boolean isJDKClass(String name) {
         return name.startsWith("java") || name.startsWith("com.sun")
                 || name.startsWith("sun") || name.startsWith("oracle")
                 || name.startsWith("org.xml") || name.startsWith("com.oracle");
     }
 
-    static boolean isJDKClass(Class<?> cls) {
+    public static boolean isJDKClass(Class<?> cls) {
         return isJDKClass(cls.getName());
     }
 
-    static boolean isNonJDKClass(String name) {
+    public static boolean isNonJDKClass(String name) {
         return !isJDKClass(name);
     }
 
-    static boolean isNonJDKClass(ClassInfo cls) {
+    public static boolean isNonJDKClass(ClassInfo cls) {
         return !isJDKClass(cls);
     }
 
-    static boolean isNonJDKClass(Class<?> cls) {
+    public static boolean isNonJDKClass(Class<?> cls) {
         return !isJDKClass(cls);
     }
 
-    static ClassInfoModel of(@Nonnull ClassInfo origin) {
+    public static ClassInfoModel of(@Nonnull ClassInfo origin) {
         return new ClassInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    static ClassInfoModel of(@Nonnull Class<?> origin) {
+    public static ClassInfoModel of(@Nonnull Class<?> origin) {
         return new ClassInfoReflectionModel(Objects.requireNonNull(origin));
     }
 
+    protected static <T> boolean isDateAssignable(T actor,
+            BiPredicate<Class<?>, T> predicate) {
+        return Arrays.stream(DATE_CLASSES)
+                .anyMatch(cls -> predicate.test(cls, actor));
+    }
+
+    protected static <T> boolean isDateTimeAssignable(T actor,
+            BiPredicate<Class<?>, T> predicate) {
+        return Arrays.stream(DATE_TIME_CLASSES)
+                .anyMatch(cls -> predicate.test(cls, actor));
+    }
+
     @Override
-    default Stream<ClassInfoModel> getDependenciesStream() {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof ClassInfoModel)) {
+            return false;
+        }
+
+        var other = (ClassInfoModel) obj;
+
+        return getName().equals(other.getName());
+    }
+
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(getFieldDependenciesStream(),
                 getMethodDependenciesStream(), getInnerClassesStream(),
                 getSuperClassStream()).distinct();
     }
 
-    default Set<ClassInfoModel> getFieldDependencies() {
+    public Set<ClassInfoModel> getFieldDependencies() {
         return getFieldDependenciesStream().collect(Collectors.toSet());
     }
 
-    default Stream<ClassInfoModel> getFieldDependenciesStream() {
+    public Stream<ClassInfoModel> getFieldDependenciesStream() {
         return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream)
                 .distinct();
     }
 
-    List<FieldInfoModel> getFields();
+    public List<FieldInfoModel> getFields() {
+        if (fields == null) {
+            fields = prepareFields();
+        }
 
-    default Stream<FieldInfoModel> getFieldsStream() {
+        return fields;
+    }
+
+    public Stream<FieldInfoModel> getFieldsStream() {
         return getFields().stream();
     }
 
-    List<ClassInfoModel> getInheritanceChain();
+    public List<ClassInfoModel> getInheritanceChain() {
+        if (chain == null) {
+            chain = prepareInheritanceChain();
+        }
 
-    default Stream<ClassInfoModel> getInheritanceChainStream() {
+        return chain;
+    }
+
+    public Stream<ClassInfoModel> getInheritanceChainStream() {
         return getInheritanceChain().stream();
     }
 
-    default Set<ClassInfoModel> getInnerClassDependencies() {
+    public Set<ClassInfoModel> getInnerClassDependencies() {
         return getInnerClassDependenciesStream().collect(Collectors.toSet());
     }
 
-    default Stream<ClassInfoModel> getInnerClassDependenciesStream() {
+    public Stream<ClassInfoModel> getInnerClassDependenciesStream() {
         return getInnerClassesStream()
                 .flatMap(ClassInfoModel::getDependenciesStream).distinct();
     }
 
-    List<ClassInfoModel> getInnerClasses();
+    public List<ClassInfoModel> getInnerClasses() {
+        if (innerClasses == null) {
+            innerClasses = prepareInnerClasses();
+        }
 
-    default Stream<ClassInfoModel> getInnerClassesStream() {
+        return innerClasses;
+    }
+
+    public Stream<ClassInfoModel> getInnerClassesStream() {
         return getInnerClasses().stream();
     }
 
-    List<ClassInfoModel> getInterfaces();
+    public List<ClassInfoModel> getInterfaces() {
+        if (interfaces == null) {
+            interfaces = prepareInterfaces();
+        }
 
-    default Stream<ClassInfoModel> getInterfacesStream() {
+        return interfaces;
+    }
+
+    public Stream<ClassInfoModel> getInterfacesStream() {
         return getInterfaces().stream();
     }
 
-    default Set<ClassInfoModel> getMethodDependencies() {
+    public Set<ClassInfoModel> getMethodDependencies() {
         return getMethodDependenciesStream().collect(Collectors.toSet());
     }
 
-    default Stream<ClassInfoModel> getMethodDependenciesStream() {
+    public Stream<ClassInfoModel> getMethodDependenciesStream() {
         return getMethodsStream()
                 .flatMap(MethodInfoModel::getDependenciesStream).distinct();
     }
 
-    List<MethodInfoModel> getMethods();
+    public List<MethodInfoModel> getMethods() {
+        if (methods == null) {
+            methods = prepareMethods();
+        }
 
-    default Stream<MethodInfoModel> getMethodsStream() {
+        return methods;
+    }
+
+    public Stream<MethodInfoModel> getMethodsStream() {
         return getMethods().stream();
     }
 
-    String getSimpleName();
+    public abstract String getSimpleName();
 
-    Optional<ClassInfoModel> getSuperClass();
+    public Optional<ClassInfoModel> getSuperClass() {
+        if (superClass == null) {
+            superClass = Optional.ofNullable(prepareSuperClass());
+        }
 
-    default Stream<ClassInfoModel> getSuperClassStream() {
+        return superClass;
+    }
+
+    public Stream<ClassInfoModel> getSuperClassStream() {
         return getSuperClass().stream();
     }
 
-    default boolean is(String name) {
+    public int hashCode() {
+        return 3 + getName().hashCode();
+    }
+
+    public boolean is(String name) {
         var origin = get();
 
         return origin instanceof ClassInfo ? is((ClassInfo) origin, name)
                 : is((Class<?>) origin, name);
     }
 
-    default boolean is(Class<?> cls) {
+    public boolean is(Class<?> cls) {
         var origin = get();
 
         return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
                 : is((Class<?>) origin, cls);
     }
 
-    default boolean is(ClassInfo cls) {
+    public boolean is(ClassInfo cls) {
         var origin = get();
 
         return origin instanceof ClassInfo ? is((ClassInfo) origin, cls)
                 : is((Class<?>) origin, cls);
     }
 
-    default boolean is(ClassInfoModel model) {
+    public boolean is(ClassInfoModel model) {
         var cls = model.get();
 
         return cls instanceof ClassInfo ? is((ClassInfo) cls)
                 : is((Class<?>) cls);
     }
 
-    boolean isAbstract();
+    public abstract boolean isAbstract();
 
-    boolean isAnnotation();
+    public abstract boolean isAnnotation();
 
-    boolean isArrayClass();
+    public abstract boolean isArrayClass();
 
-    default boolean isAssignableFrom(ClassInfoModel model) {
+    public boolean isAssignableFrom(ClassInfoModel model) {
         var _model = model.get();
 
         return _model instanceof ClassInfo
@@ -245,7 +332,7 @@ public interface ClassInfoModel
                 : isAssignableFrom((Class<?>) _model);
     }
 
-    default boolean isAssignableFrom(ClassInfo cls) {
+    public boolean isAssignableFrom(ClassInfo cls) {
         var origin = get();
 
         return origin instanceof ClassInfo
@@ -253,7 +340,7 @@ public interface ClassInfoModel
                 : isAssignableFrom((Class<?>) origin, cls);
     }
 
-    default boolean isAssignableFrom(Class<?> cls) {
+    public boolean isAssignableFrom(Class<?> cls) {
         var origin = get();
 
         return origin instanceof ClassInfo
@@ -261,36 +348,39 @@ public interface ClassInfoModel
                 : isAssignableFrom((Class<?>) origin, cls);
     }
 
-    boolean isEnum();
+    public abstract boolean isEnum();
 
-    boolean isFinal();
+    public abstract boolean isFinal();
 
-    boolean isInterface();
+    public abstract boolean isInterface();
 
-    boolean isInterfaceOrAnnotation();
+    public abstract boolean isInterfaceOrAnnotation();
 
-    default boolean isNative() {
+    public boolean isNative() {
         return false;
     }
 
-    boolean isPrivate();
+    public abstract boolean isPrivate();
 
-    boolean isProtected();
+    public abstract boolean isProtected();
 
-    boolean isPublic();
+    public abstract boolean isPublic();
 
-    boolean isStandardClass();
+    public abstract boolean isStandardClass();
 
-    boolean isStatic();
+    public abstract boolean isStatic();
 
-    boolean isSynthetic();
+    public abstract boolean isSynthetic();
 
-    @FunctionalInterface
-    interface ArrayFn<T> extends Function<Object, T[]> {
+    protected abstract List<FieldInfoModel> prepareFields();
 
-    }
+    protected abstract List<ClassInfoModel> prepareInheritanceChain();
 
-    @FunctionalInterface
-    interface CollectionFn<T> extends Function<Object, List<T>> {
-    }
+    protected abstract List<ClassInfoModel> prepareInnerClasses();
+
+    protected abstract List<ClassInfoModel> prepareInterfaces();
+
+    protected abstract List<MethodInfoModel> prepareMethods();
+
+    protected abstract ClassInfoModel prepareSuperClass();
 }

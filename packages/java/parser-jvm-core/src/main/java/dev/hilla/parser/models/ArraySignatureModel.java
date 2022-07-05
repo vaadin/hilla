@@ -7,20 +7,52 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.ArrayTypeSignature;
 
-public interface ArraySignatureModel extends SignatureModel {
-    static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin) {
+public abstract class ArraySignatureModel extends AnnotatedAbstractModel
+        implements SignatureModel {
+    private SignatureModel nestedType;
+
+    public static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin) {
         return new ArraySignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin) {
+    public static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin) {
         return new ArraySignatureReflectionModel(
                 Objects.requireNonNull(origin));
     }
 
-    SignatureModel getNestedType();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof ArraySignatureModel)) {
+            return false;
+        }
+
+        var other = (ArraySignatureModel) obj;
+
+        return getNestedType().equals(other.getNestedType())
+                && getAnnotations().equals(other.getAnnotations());
+    }
+
+    public SignatureModel getNestedType() {
+        if (nestedType == null) {
+            nestedType = prepareNestedType();
+        }
+
+        return nestedType;
+    }
 
     @Override
-    default boolean isArray() {
+    public int hashCode() {
+        return 1 + getNestedType().hashCode();
+    }
+
+    @Override
+    public boolean isArray() {
         return true;
     }
+
+    protected abstract SignatureModel prepareNestedType();
 }

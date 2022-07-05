@@ -129,6 +129,16 @@ export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
   }
 }
 
+export class MultiSelectComboBoxFieldStrategy extends VaadinFieldStrategy {
+  public override get value() {
+    return (this.element as any).selectedItems;
+  }
+
+  public override set value(val: any) {
+    (this.element as any).selectedItems = val;
+  }
+}
+
 export class SelectedFieldStrategy extends GenericFieldStrategy {
   public override set value(val: any) {
     (this.element as any).selected = val;
@@ -148,6 +158,8 @@ export function getDefaultFieldStrategy<T>(elm: any, model?: AbstractModel<T>): 
       return new ComboBoxFieldStrategy(elm, model);
     case 'vaadin-list-box':
       return new SelectedFieldStrategy(elm, model);
+    case 'vaadin-multi-select-combo-box':
+      return new MultiSelectComboBoxFieldStrategy(elm, model);
     case 'vaadin-rich-text-editor':
       return new GenericFieldStrategy(elm, model);
     default:

@@ -1,42 +1,26 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedType;
-import java.util.Objects;
+import java.util.List;
 
-final class BaseSignatureReflectionModel
-        extends AbstractAnnotatedReflectionModel<AnnotatedType>
-        implements BaseSignatureModel, ReflectionSignatureModel {
+final class BaseSignatureReflectionModel extends BaseSignatureModel
+        implements ReflectionSignatureModel {
     private final Class<?> inner;
+    private final AnnotatedType origin;
 
-    public BaseSignatureReflectionModel(AnnotatedType origin) {
-        super(origin);
-        inner = (Class<?>) origin.getType();
+    BaseSignatureReflectionModel(AnnotatedType origin) {
+        this.origin = origin;
+        this.inner = (Class<?>) origin.getType();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof BaseSignatureModel)) {
-            return false;
-        }
-
-        var other = (BaseSignatureModel) obj;
-
-        return inner.equals(other.getType())
-                && Objects.equals(getAnnotations(), other.getAnnotations());
+    public AnnotatedType get() {
+        return origin;
     }
 
     @Override
     public Class<?> getType() {
         return inner;
-    }
-
-    @Override
-    public int hashCode() {
-        return 7 + inner.hashCode();
     }
 
     @Override
@@ -94,36 +78,27 @@ final class BaseSignatureReflectionModel
         return inner == Void.TYPE;
     }
 
-    static class Bare extends AbstractAnnotatedReflectionModel<Class<?>>
-            implements BaseSignatureModel, ReflectionSignatureModel {
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotations());
+    }
+
+    static class Bare extends BaseSignatureModel
+            implements ReflectionSignatureModel {
+        private final Class<?> origin;
+
         public Bare(Class<?> origin) {
-            super(origin);
+            this.origin = origin;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (!(obj instanceof BaseSignatureModel)) {
-                return false;
-            }
-
-            var other = (BaseSignatureModel) obj;
-
-            return origin.equals(other.getType())
-                    && getAnnotations().equals(other.getAnnotations());
+        public Class<?> get() {
+            return origin;
         }
 
         @Override
         public Class<?> getType() {
             return origin;
-        }
-
-        @Override
-        public int hashCode() {
-            return 7 + origin.hashCode();
         }
 
         @Override
@@ -179,6 +154,11 @@ final class BaseSignatureReflectionModel
         @Override
         public boolean isVoid() {
             return origin == Void.TYPE;
+        }
+
+        @Override
+        protected List<AnnotationInfoModel> prepareAnnotations() {
+            return processAnnotations(origin.getAnnotations());
         }
     }
 }

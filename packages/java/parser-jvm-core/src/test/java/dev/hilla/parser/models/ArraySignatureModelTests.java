@@ -71,12 +71,6 @@ public class ArraySignatureModelTests {
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-        if (isJDK11) {
-            log.info(
-                    "Disabled due to a bug in JDK 11 (https://bugs.openjdk.org/browse/JDK-8217102)");
-            return;
-        }
-
         var reflectionModel = ArraySignatureModel.of(ctx.getReflectionOrigin());
         var sourceModel = ArraySignatureModel.of(ctx.getSourceOrigin());
 
@@ -90,20 +84,13 @@ public class ArraySignatureModelTests {
         var sourceModel = ArraySignatureModel.of(ctx.getSourceOrigin());
 
         assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
 
         assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
-
-        if (isJDK11) {
-            log.info(
-                    "Comparison between models of a different origin is disabled due "
-                            + "to a bug in JDK 11 (https://bugs.openjdk.org/browse/JDK-8217102)");
-        } else {
-            assertEquals(reflectionModel, sourceModel);
-            assertEquals(sourceModel, reflectionModel);
-        }
     }
 
     @DisplayName("It should provide dependencies")

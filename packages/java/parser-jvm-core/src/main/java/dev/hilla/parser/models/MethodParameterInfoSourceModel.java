@@ -1,37 +1,20 @@
 package dev.hilla.parser.models;
 
-import java.util.stream.Stream;
+import java.util.List;
 
-import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.MethodParameterInfo;
 
-final class MethodParameterInfoSourceModel
-        extends AbstractAnnotatedSourceModel<MethodParameterInfo>
-        implements MethodParameterInfoModel, SourceModel {
-    private MethodInfoModel owner;
-    private SignatureModel type;
+final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
+        implements SourceModel {
+    private final MethodParameterInfo origin;
 
-    public MethodParameterInfoSourceModel(MethodParameterInfo parameter) {
-        super(parameter);
+    MethodParameterInfoSourceModel(MethodParameterInfo origin) {
+        this.origin = origin;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof MethodParameterInfoModel)) {
-            return false;
-        }
-
-        var other = (MethodParameterInfoModel) obj;
-
-        return getOwner().equalsIgnoreParameters(other.getOwner())
-                && getAnnotations().equals(other.getAnnotations())
-                && origin.getModifiers() == other.getModifiers()
-                && getType().equals(other.getType())
-                && origin.getName().equals(other.getName());
+    public MethodParameterInfo get() {
+        return origin;
     }
 
     @Override
@@ -45,31 +28,6 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
-    public MethodInfoModel getOwner() {
-        if (owner == null) {
-            owner = MethodInfoModel.of(origin.getMethodInfo());
-        }
-
-        return owner;
-    }
-
-    @Override
-    public SignatureModel getType() {
-        if (type == null) {
-            type = SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
-        }
-
-        return type;
-    }
-
-    @Override
-    public int hashCode() {
-        return getOwner().hashCodeIgnoreParameters()
-                + 11 * getAnnotations().hashCode() + 17 * origin.getModifiers()
-                + 23 * getType().hashCode() + 53 * origin.getName().hashCode();
-    }
-
-    @Override
     public boolean isFinal() {
         return origin.isFinal();
     }
@@ -80,12 +38,27 @@ final class MethodParameterInfoSourceModel
     }
 
     @Override
+    public boolean isImplicit() {
+        return origin.isMandated();
+    }
+
+    @Override
     public boolean isSynthetic() {
         return origin.isSynthetic();
     }
 
     @Override
-    protected Stream<AnnotationInfo> getOriginAnnotations() {
-        return origin.getAnnotationInfo().stream();
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return processAnnotations(origin.getAnnotationInfo());
+    }
+
+    @Override
+    protected MethodInfoModel prepareOwner() {
+        return MethodInfoModel.of(origin.getMethodInfo());
+    }
+
+    @Override
+    protected SignatureModel prepareType() {
+        return SignatureModel.of(origin.getTypeSignatureOrTypeDescriptor());
     }
 }
