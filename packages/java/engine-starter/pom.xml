@@ -10,7 +10,7 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hilla-endpoint</artifactId>
+  <artifactId>engine-starter</artifactId>
   <packaging>jar</packaging>
   <name>Hilla Endpoint</name>
 
