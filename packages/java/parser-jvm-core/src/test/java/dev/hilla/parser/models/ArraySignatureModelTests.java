@@ -52,7 +52,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(ArraySignatureModel model,
             ModelKind kind) {
@@ -94,7 +94,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(ArraySignatureModel model,
             ModelKind kind) {
@@ -105,7 +105,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should provide nested type")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
             ModelKind kind) {
@@ -167,7 +167,7 @@ public class ArraySignatureModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -195,7 +195,7 @@ public class ArraySignatureModelTests {
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
         @DisplayName("It should access annotations")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotations(ArraySignatureModel model,
                 ModelKind kind) {
@@ -210,7 +210,7 @@ public class ArraySignatureModelTests {
         private final ModelProvider.Checker checker = new ModelProvider.Checker();
 
         @DisplayName("It should have an array specialization")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveArraySpecialization(ArraySignatureModel model,
                 ModelKind kind) {

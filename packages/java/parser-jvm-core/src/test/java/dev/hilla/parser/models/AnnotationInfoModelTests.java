@@ -50,7 +50,7 @@ public class AnnotationInfoModelTests {
     }
 
     @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CreateCorrectModel(AnnotationInfoModel model,
             ModelKind kind) {
@@ -67,14 +67,14 @@ public class AnnotationInfoModelTests {
     }
 
     @DisplayName("It should get class info")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInfo(AnnotationInfoModel model, ModelKind kind) {
         assertEquals(ClassInfoModel.of(Sample.Foo.class), model.getClassInfo());
     }
 
     @DisplayName("It should get annotations parameters")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetParameters(AnnotationInfoModel model,
             ModelKind kind) {
@@ -114,7 +114,7 @@ public class AnnotationInfoModelTests {
     }
 
     @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(AnnotationInfoModel model,
             ModelKind kind) {
@@ -183,7 +183,7 @@ public class AnnotationInfoModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -226,7 +226,7 @@ public class AnnotationInfoModelTests {
     @DisplayName("As a NamedModel")
     public class AsNamedModel {
         @DisplayName("It should have name")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveName(AnnotationInfoModel model, ModelKind kind) {
             assertEquals(Sample.Foo.class.getName(), model.getName());

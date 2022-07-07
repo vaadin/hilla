@@ -48,7 +48,7 @@ public class FieldInfoModelTests {
     }
 
     @DisplayName("It should provide field dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetDependencies(FieldInfoModel model, ModelKind kind) {
         var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class));
@@ -58,14 +58,14 @@ public class FieldInfoModelTests {
     }
 
     @DisplayName("It should provide field name")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetName(FieldInfoModel model, ModelKind kind) {
         assertEquals("field", model.getName());
     }
 
     @DisplayName("It should get the field's type")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetType(FieldInfoModel model, ModelKind kind) {
         SignatureModel expected = null;
@@ -110,7 +110,7 @@ public class FieldInfoModelTests {
     }
 
     public static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -125,7 +125,7 @@ public class FieldInfoModelTests {
         }
 
         public static final class Characteristics implements ArgumentsProvider {
-            public static final String testName = "{2} [{3}]";
+            public static final String testNamePattern = "{2} [{3}]";
 
             @Override
             public Stream<? extends Arguments> provideArguments(
@@ -178,7 +178,7 @@ public class FieldInfoModelTests {
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
         @DisplayName("It should access annotation")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotation(FieldInfoModel model,
                 ModelKind kind) {
@@ -193,7 +193,7 @@ public class FieldInfoModelTests {
         private final ModelProvider.CharacterizedChecker checker = new ModelProvider.CharacterizedChecker();
 
         @DisplayName("It should detect field characteristics correctly")
-        @ParameterizedTest(name = ModelProvider.Characteristics.testName)
+        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
         @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(FieldInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
