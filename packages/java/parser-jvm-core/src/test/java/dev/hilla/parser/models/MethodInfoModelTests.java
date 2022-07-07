@@ -43,7 +43,7 @@ public class MethodInfoModelTests {
     }
 
     @DisplayName("It should provide method dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetDependencies(MethodInfoModel model, ModelKind kind) {
         var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class),
@@ -84,7 +84,7 @@ public class MethodInfoModelTests {
         private final CharacteristicsModelProvider.Checker checker = new CharacteristicsModelProvider.Checker();
 
         @DisplayName("It should detect method characteristics correctly")
-        @ParameterizedTest(name = CharacteristicsModelProvider.testName)
+        @ParameterizedTest(name = CharacteristicsModelProvider.testNamePattern)
         @ArgumentsSource(CharacteristicsModelProvider.class)
         public void should_DetectCharacteristics(MethodInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
@@ -94,11 +94,11 @@ public class MethodInfoModelTests {
 
     public static class CharacteristicsModelProvider
             implements ArgumentsProvider {
-        public static final String testName = "{2} [{3}]";
+        public static final String testNamePattern = "{2} [{3}]";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchMethodException {
+                ExtensionContext context) {
             var ctx = new Context.Characteristics(context);
 
             return Streams.combine(
@@ -130,7 +130,7 @@ public class MethodInfoModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -161,6 +161,9 @@ public class MethodInfoModelTests {
 
             static {
                 var refClass = Sample.Characteristics.class;
+                var bridgeMethod = getDeclaredMethod(
+                        Sample.Characteristics.Bridge.class, "compareTo",
+                        List.of(Object.class));
                 reflectionCharacteristics = Map.ofEntries(
                         entry(getDeclaredMethod(refClass, "abstractMethod"),
                                 "isPublic", "isAbstract"),
@@ -177,7 +180,9 @@ public class MethodInfoModelTests {
                         entry(getDeclaredMethod(refClass, "synchronizedMethod"),
                                 "isPublic", "isSynchronized"),
                         entry(getDeclaredMethod(refClass, "varArgsMethod",
-                                String[].class), "isPublic", "isVarArgs"));
+                                List.of(String[].class)), "isPublic",
+                                "isVarArgs"),
+                        entry(bridgeMethod, "isPublic", "isBridge", "isSynthetic"));
             }
 
             private final Map<MethodInfo, String[]> sourceCharacteristics;
@@ -208,8 +213,8 @@ public class MethodInfoModelTests {
         static final class Default extends Context {
             private static final String methodName = "method";
             private static final Method reflectionOrigin = getDeclaredMethod(
-                    Sample.class, methodName, String.class,
-                    Sample.ParamDependency.class);;
+                    Sample.class, methodName,
+                    List.of(String.class, Sample.ParamDependency.class));
             private final MethodInfo sourceOrigin;
 
             Default(ExtensionContext context) {
@@ -232,12 +237,19 @@ public class MethodInfoModelTests {
         }
     }
 
-    private static class Sample {
+    static class Sample {
         public Dependency method(String first, ParamDependency second) {
             return null;
         }
 
-        private static abstract class Characteristics {
+        static abstract class Characteristics {
+            static class Bridge implements Comparable<Bridge> {
+                @Override
+                public int compareTo(Bridge o) {
+                    return 0;
+                }
+            }
+
             public static String staticMethod() {
                 return "";
             }
@@ -267,10 +279,10 @@ public class MethodInfoModelTests {
             }
         }
 
-        private static class Dependency {
+        static class Dependency {
         }
 
-        private static class ParamDependency {
+        static class ParamDependency {
         }
     }
 }
