@@ -98,6 +98,28 @@
 
     <pluginManagement>
       <plugins>
+        <!-- The `tsgen` symlink is needed during tests, but it is created too late -->
+        <!-- This plugin is used to force the creation of the symlink and allow tests to pass on a fresh clone -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <execution>
+              <id>tsgen</id>
+              <phase>process-classes</phase>
+              <configuration>
+                <target>
+                  <symlink link="${project.basedir}/node_modules/.bin/tsgen"
+                   resource="../@hilla/generator-typescript-cli/bin/index.js" overwrite="true" />
+                </target>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>dev.hilla</groupId>
           <artifactId>generator-maven-plugin</artifactId>
