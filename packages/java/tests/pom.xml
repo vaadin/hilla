@@ -99,17 +99,20 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>com.vaadin</groupId>
-          <artifactId>flow-maven-plugin</artifactId>
-          <version>${flow.version}</version>
+          <groupId>dev.hilla</groupId>
+          <artifactId>generator-maven-plugin</artifactId>
+          <version>${project.version}</version>
           <executions>
             <execution>
               <goals>
-                <goal>prepare-frontend</goal>
-                <goal>build-frontend</goal>
+                <goal>generate</goal>
               </goals>
             </execution>
           </executions>
+          <configuration>
+            <!-- `npm install` is already run by the build process -->
+            <runNpmInstall>false</runNpmInstall>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
@@ -198,25 +201,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <!-- Production mode is activated using -Pproduction -->
-      <id>production</id>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>com.vaadin</groupId>
-              <artifactId>flow-maven-plugin</artifactId>
-              <version>${flow.version}</version>
-              <configuration>
-                <productionMode>true</productionMode>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
     <profile>
       <id>it-modules</id>
       <activation>

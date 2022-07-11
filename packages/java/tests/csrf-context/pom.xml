@@ -41,8 +41,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.vaadin</groupId>
-        <artifactId>flow-maven-plugin</artifactId>
+        <groupId>dev.hilla</groupId>
+        <artifactId>generator-maven-plugin</artifactId>
       </plugin>
 
       <!-- This module is mapped to default web context -->
