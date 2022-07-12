@@ -98,6 +98,19 @@
 
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>com.vaadin</groupId>
+          <artifactId>flow-maven-plugin</artifactId>
+          <version>${flow.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-frontend</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
         <!-- The `tsgen` symlink is needed during tests, but it is created too late -->
         <!-- This plugin is used to force the creation of the symlink and allow tests to pass on a fresh clone -->
         <plugin>
@@ -120,6 +133,7 @@
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <groupId>dev.hilla</groupId>
           <artifactId>generator-maven-plugin</artifactId>

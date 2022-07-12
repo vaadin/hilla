@@ -40,6 +40,11 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-maven-plugin</artifactId>
+      </plugin>
+
       <!-- create tsgen symlink (see pluginManagement) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
