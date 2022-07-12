@@ -14,7 +14,7 @@ import dev.hilla.parser.utils.PluginException;
 
 public final class TransferTypesPlugin implements Plugin.Preprocessor {
     private final List<Replacer> replacers = List.of(new PageableReplacer(),
-            new UUIDReplacer());
+            new UUIDReplacer(), new FluxReplacer());
     private int order = -100;
 
     @Override
