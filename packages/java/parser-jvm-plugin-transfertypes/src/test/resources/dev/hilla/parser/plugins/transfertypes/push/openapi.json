@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "PushTypeEndpoint"
+    }
+  ],
+  "paths": {
+    "/PushTypeEndpoint/getMessageFlux": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "operationId": "PushTypeEndpoint_getMessageFlux_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "x-class-name": "reactor.core.publisher.Flux"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PushTypeEndpoint/getMessageSubscription": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "operationId": "PushTypeEndpoint_getMessageSubscription_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "x-class-name": "dev.hilla.EndpointSubscription"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {}
+}

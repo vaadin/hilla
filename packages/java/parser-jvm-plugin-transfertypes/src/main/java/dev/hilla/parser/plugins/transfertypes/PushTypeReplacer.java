@@ -1,12 +1,10 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import java.util.List;
-
 import dev.hilla.parser.core.ClassMappers;
 import dev.hilla.runtime.transfertypes.EndpointSubscription;
 import dev.hilla.runtime.transfertypes.Flux;
 
-public class FluxReplacer implements Replacer {
+public class PushTypeReplacer implements Replacer {
     private ClassMappers classMappers;
 
     @Override

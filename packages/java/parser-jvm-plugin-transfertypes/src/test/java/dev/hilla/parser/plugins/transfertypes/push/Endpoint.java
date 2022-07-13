@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.transfertypes.flux;
+package dev.hilla.parser.plugins.transfertypes.push;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
