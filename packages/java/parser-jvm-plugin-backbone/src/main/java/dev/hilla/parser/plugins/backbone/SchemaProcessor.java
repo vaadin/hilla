@@ -8,12 +8,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.models.ArraySignatureModel;
-import dev.hilla.parser.models.ClassRefSignatureModel;
-import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.models.TypeArgumentModel;
-import dev.hilla.parser.models.TypeParameterModel;
-import dev.hilla.parser.models.TypeVariableModel;
+import dev.hilla.parser.models.*;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
@@ -82,6 +77,11 @@ final class SchemaProcessor {
             result = typeVariableSchema();
         } else {
             result = anySchema();
+        }
+
+        if (type.isNonJDKClass() && type instanceof ClassRefSignatureModel) {
+            result.addExtension("x-class-name",
+                    ((ClassRefSignatureModel) type).getClassName());
         }
 
         storage.getAssociationMap().addType(result, type);
