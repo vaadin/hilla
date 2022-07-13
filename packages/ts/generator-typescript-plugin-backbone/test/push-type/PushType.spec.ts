@@ -17,16 +17,14 @@ describe('BackbonePlugin', () => {
       const generator = createGenerator([BackbonePlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(2);
+      expect(files.length).to.equal(1);
 
-      const t = await files[1].text();
+      const t = await files[0].text();
       expect(t).to.exist;
 
-      const [endpointFile, userEntity] = files;
+      const [endpointFile] = files;
       await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
-      await expect(await userEntity.text()).toMatchSnapshot('UserEntity.entity', import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
-      expect(userEntity.name).to.equal(`${modelSectionPath}/UserEntity.ts`);
     });
   });
 });
