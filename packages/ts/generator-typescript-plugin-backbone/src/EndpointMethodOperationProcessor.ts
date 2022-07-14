@@ -8,6 +8,7 @@ import type { CallExpression, Expression, Statement, TypeNode } from 'typescript
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
+import { defaultMediaType, xClassName } from './utils.js';
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
@@ -80,19 +81,56 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       paths.createBareModulePath(HILLA_FRONTEND_NAME),
       INIT_TYPE_NAME,
     )!;
+    const subscriptionTypeIdentifier = imports.named.getIdentifier(
+      paths.createBareModulePath(HILLA_FRONTEND_NAME),
+      SUBSCRIPTION_TYPE_NAME,
+    )!;
+
+    const pushOperation = Object.entries(this.#operation.responses)
+      .map(([_code, response]) => {
+        const content = this.#owner.resolver.resolve(response).content?.[defaultMediaType];
+        // @ts-ignore
+        return content?.schema?.[xClassName] as string | undefined;
+      })
+      .filter(Boolean)
+      .map((x) => x!)
+      .some((x) => ['reactor.core.publisher.Flux', 'dev.hilla.EndpointSubscription'].includes(x));
+
+    const responseType = this.#prepareResponseType();
+
+    // In case of push operations, the endpoint method call must be altered heavily.
+    // All modified values are redefined here
+    const [optionalInitTypeIdentifier, callMethod, patchResponseType, functionType] = pushOperation
+      ? [
+          undefined, // 'init' is suppressed
+          'subscribe', // 'client.subscribe' is called instead of 'client.call'
+          (rt: TypeNode) => {
+            // @ts-ignore
+            rt.types[0].typeName = subscriptionTypeIdentifier;
+          }, // response is patched to replace 'Array' with 'Subscription'
+          responseType, // type is returned directly without a 'Promise'
+        ]
+      : [
+          initTypeIdentifier,
+          'call',
+          (rt: TypeNode) => rt,
+          ts.factory.createTypeReferenceNode('Promise', [responseType]),
+        ];
+
+    patchResponseType(responseType);
 
     const { parameters, packedParameters, initParam } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
       this.#owner,
-      initTypeIdentifier,
+      optionalInitTypeIdentifier,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
     const clientLibIdentifier = imports.default.getIdentifier(paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME))!;
 
     const callExpression = ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier('call')),
+      ts.factory.createPropertyAccessExpression(clientLibIdentifier, ts.factory.createIdentifier(callMethod)),
       undefined,
       [
         ts.factory.createStringLiteral(this.#endpointName),
@@ -102,8 +140,6 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       ].filter(Boolean) as readonly Expression[],
     );
 
-    const responseType = this.#prepareResponseType();
-
     return ts.factory.createFunctionDeclaration(
       undefined,
       undefined,
@@ -111,7 +147,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       methodIdentifier,
       undefined,
       parameters,
-      ts.factory.createTypeReferenceNode('Promise', [responseType]),
+      functionType,
       ts.factory.createBlock([wrapCallExpression(callExpression, responseType)]),
     );
   }
