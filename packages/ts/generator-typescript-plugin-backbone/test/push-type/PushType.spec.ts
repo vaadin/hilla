@@ -3,7 +3,7 @@ import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotM
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
 import BackbonePlugin from '../../src/index.js';
-import { createGenerator, loadInput, pathBase } from '../utils/common.js';
+import { createGenerator, loadInput } from '../utils/common.js';
 
 use(sinonChai);
 use(snapshotMatcher);
@@ -11,7 +11,6 @@ use(snapshotMatcher);
 describe('BackbonePlugin', () => {
   context('when the endpoint method has a return type related to push support', () => {
     const sectionName = 'PushType';
-    const modelSectionPath = `${pathBase}/${sectionName.toLowerCase()}/${sectionName}Endpoint`;
 
     it('correctly replaces types', async () => {
       const generator = createGenerator([BackbonePlugin]);
