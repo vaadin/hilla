@@ -70,11 +70,5 @@
       <artifactId>reactor-core</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>endpoint</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>

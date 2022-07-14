@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import dev.hilla.EndpointSubscription;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
@@ -19,8 +18,7 @@ public class PushTypeTest {
     @Test
     public void should_ReplacePushTypes()
             throws IOException, URISyntaxException {
-        var classpath = helper.getExtendedClassPath(Flux.class,
-                EndpointSubscription.class);
+        var classpath = helper.getExtendedClassPath(Flux.class);
 
         var config = new ParserConfig.Builder()
                 .classPath(classpath.split(File.pathSeparator))

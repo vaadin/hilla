@@ -39,30 +39,6 @@
           }
         }
       }
-    },
-    "/PushTypeEndpoint/getMessageSubscription": {
-      "post": {
-        "tags": ["PushTypeEndpoint"],
-        "operationId": "PushTypeEndpoint_getMessageSubscription_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "type": "string",
-                    "nullable": true
-                  },
-                  "x-class-name": "dev.hilla.EndpointSubscription"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {}
