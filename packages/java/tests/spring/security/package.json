@@ -155,8 +155,8 @@
   "vaadin": {
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
-      "@hilla/form": "../../../../ts/",
-      "@hilla/frontend": "../../../../ts/",
+      "@hilla/form": "1.2.0-alpha1",
+      "@hilla/frontend": "1.2.0-alpha1",
       "@polymer/iron-icon": "3.0.1",
       "@polymer/iron-iconset-svg": "3.0.1",
       "@polymer/iron-list": "3.1.0",
