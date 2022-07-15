@@ -145,10 +145,6 @@
               </goals>
             </execution>
           </executions>
-          <configuration>
-            <!-- `npm install` is already run by the build process -->
-            <runNpmInstall>false</runNpmInstall>
-          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
