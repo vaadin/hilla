@@ -80,8 +80,11 @@ final class SchemaProcessor {
         }
 
         if (type.isNonJDKClass() && type instanceof ClassRefSignatureModel) {
-            result.addExtension("x-class-name",
-                    ((ClassRefSignatureModel) type).getClassName());
+            var className = ((ClassRefSignatureModel) type).getClassName();
+
+            if (!result.toString().contains(className)) {
+                result.addExtension("x-class-name", className);
+            }
         }
 
         storage.getAssociationMap().addType(result, type);
