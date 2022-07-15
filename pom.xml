@@ -273,6 +273,7 @@
           </execution>
           <execution>
             <id>npm-run-build</id>
+            <inherited>false</inherited>
             <goals>
               <goal>exec</goal>
             </goals>
