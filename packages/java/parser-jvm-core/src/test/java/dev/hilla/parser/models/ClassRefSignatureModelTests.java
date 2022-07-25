@@ -208,10 +208,10 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
+            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
             String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(origins.getKey());
-        var sourceModel = ClassRefSignatureModel.of(origins.getValue());
+        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
+        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
@@ -220,10 +220,10 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSourceAndReflectionModelsEqual(
-            Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
+            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
             String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(origins.getKey());
-        var sourceModel = ClassRefSignatureModel.of(origins.getValue());
+        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
+        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -319,7 +319,7 @@ public class ClassRefSignatureModelTests {
         }
 
         static final class Equality implements ArgumentsProvider {
-            public static final String testNamePattern = "BOTH [{1}]";
+            public static final String testNamePattern = "BOTH [{2}]";
 
             @Override
             public Stream<? extends Arguments> provideArguments(
@@ -330,7 +330,7 @@ public class ClassRefSignatureModelTests {
                     var complete = ctx.getCompleteReflectionOrigin(name);
                     var source = ctx.getSourceOrigin(name);
 
-                    return Arguments.of(Map.entry(complete, source), name);
+                    return Arguments.of(complete, source, name);
                 });
             }
         }

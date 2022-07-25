@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
+import dev.hilla.parser.models.NamedModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
@@ -135,7 +136,13 @@ final class SchemaProcessor {
         var values = new SchemaProcessor(typeArguments.get(1), storage)
                 .process();
 
-        return nullify(new MapSchema(), true).additionalProperties(values);
+        var schema = nullify(new MapSchema(), true).additionalProperties(values);
+
+        if (!type.isJDKClass()) {
+            schema.addExtension("x-classname", ((NamedModel) type).getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> numberSchema() {

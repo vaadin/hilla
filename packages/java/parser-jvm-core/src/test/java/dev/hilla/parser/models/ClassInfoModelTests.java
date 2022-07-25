@@ -285,7 +285,7 @@ public class ClassInfoModelTests {
     @DisplayName("It should check equality")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_GetCheckEquality(ClassInfoModel model, ModelKind kind) {
+    public void should_CheckEquality(ClassInfoModel model, ModelKind kind) {
         var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
         var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
 

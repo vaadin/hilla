@@ -1,9 +1,11 @@
 package dev.hilla.parser.test.helpers;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,6 +20,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.FieldInfo;
 import io.github.classgraph.MethodInfo;
+import io.github.classgraph.MethodParameterInfo;
 import io.github.classgraph.ScanResult;
 import io.github.classgraph.TypeSignature;
 
@@ -38,6 +41,39 @@ public final class ClassMemberUtils {
     public static Stream<ClassInfo> getDeclaredClasses(Class<?> cls,
             ScanResult source) {
         return getClassInfo(cls, source).getInnerClasses().stream();
+    }
+
+    public static Constructor<?> getDeclaredConstructor(Class<?> cls) {
+        return getDeclaredConstructor(cls, List.of());
+    }
+
+    public static Constructor<?> getDeclaredConstructor(Class<?> cls,
+            List<Class<?>> parameterTypes) {
+        try {
+            return cls.getDeclaredConstructor(
+                    parameterTypes.toArray(Class<?>[]::new));
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static MethodInfo getDeclaredConstructor(Class<?> cls,
+            ScanResult source) {
+        return getDeclaredConstructor(cls, List.of(), source);
+    }
+
+    public static MethodInfo getDeclaredConstructor(Class<?> cls,
+            List<Class<?>> parameterTypes, ScanResult source) {
+        return getDeclaredMethod(cls, "<init>", parameterTypes, source);
+    }
+
+    public static Stream<Constructor<?>> getDeclaredConstructors(Class<?> cls) {
+        return Arrays.stream(cls.getDeclaredConstructors());
+    }
+
+    public static Stream<MethodInfo> getDeclaredConstructors(Class<?> cls,
+            ScanResult source) {
+        return getClassInfo(cls, source).getDeclaredConstructorInfo().stream();
     }
 
     public static Field getDeclaredField(Class<?> cls, String name) {
@@ -66,15 +102,6 @@ public final class ClassMemberUtils {
     public static Stream<FieldInfo> getDeclaredFields(Class<?> cls,
             ScanResult source) {
         return getClassInfo(cls, source).getDeclaredFieldInfo().stream();
-    }
-
-    public static Constructor<?> getDeclaredConstructor(Class<?> cls) {
-        return getDeclaredConstructor(cls, 0);
-    }
-
-    public static Constructor<?> getDeclaredConstructor(Class<?> cls,
-            int index) {
-        return cls.getDeclaredConstructors()[index];
     }
 
     public static Method getDeclaredMethod(Class<?> cls, String name) {
@@ -119,9 +146,10 @@ public final class ClassMemberUtils {
                 "No method with specified parameter types found");
     }
 
-    public static MethodInfo getDeclaredMethod(Method method,
+    public static MethodInfo getDeclaredMethod(Executable method,
             ScanResult source) {
-        return getDeclaredMethod(method.getDeclaringClass(), method.getName(),
+        return getDeclaredMethod(method.getDeclaringClass(),
+                method instanceof Constructor ? "<init>" : method.getName(),
                 List.of(method.getParameterTypes()), source);
     }
 
@@ -135,33 +163,44 @@ public final class ClassMemberUtils {
         return getClassInfo(cls, source).getDeclaredMethodInfo().stream();
     }
 
-    private static boolean skipJacoco(MethodInfoModel model) {
-        return !model.getName().contains("jacoco");
+    public static Parameter getParameter(Executable method, int index) {
+        return method.getParameters()[index];
+    }
+
+    public static MethodParameterInfo getParameter(MethodInfo method,
+            int index) {
+        return method.getParameterInfo()[index];
+    }
+
+    public static MethodParameterInfo getParameter(Parameter parameter,
+            ScanResult source) {
+        var method = parameter.getDeclaringExecutable();
+
+        return Arrays
+                .stream(getDeclaredMethod(method, source).getParameterInfo())
+                .filter(param -> param.getName().equals(parameter.getName()))
+                .findFirst().orElseThrow();
+    }
+
+    private static boolean areParameterTypesEqual(TypeSignature type,
+            Class<?> expectedType) {
+        return (type instanceof ClassRefTypeSignature
+                && ((ClassRefTypeSignature) type).getFullyQualifiedClassName()
+                        .equals(expectedType.getName()))
+                || (type instanceof BaseTypeSignature
+                        && ((BaseTypeSignature) type).getType()
+                                .equals(expectedType))
+                || (type instanceof ArrayTypeSignature && expectedType.isArray()
+                        && areParameterTypesEqual(
+                                ((ArrayTypeSignature) type).getNestedType(),
+                                expectedType.getComponentType()));
     }
 
     private static boolean skipJacoco(Member member) {
         return !member.getName().contains("jacoco");
     }
 
-    private static boolean areParameterTypesEqual(TypeSignature type,
-            Class<?> expectedType) {
-        try {
-            return (type instanceof ClassRefTypeSignature
-                    && ((ClassRefTypeSignature) type)
-                            .getFullyQualifiedClassName()
-                            .equals(expectedType.getName()))
-                    || (type instanceof BaseTypeSignature
-                            && ((BaseTypeSignature) type).getType()
-                                    .equals(expectedType
-                                            .getDeclaredField("TYPE")
-                                            .get(null)))
-                    || (type instanceof ArrayTypeSignature
-                            && expectedType.isArray()
-                            && areParameterTypesEqual(
-                                    ((ArrayTypeSignature) type).getNestedType(),
-                                    expectedType.getComponentType()));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+    private static boolean skipJacoco(MethodInfoModel model) {
+        return !model.getName().contains("jacoco");
     }
 }

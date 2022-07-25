@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -13,11 +14,11 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     private List<SignatureModel> bounds;
 
     public static TypeParameterModel of(@Nonnull TypeParameter origin) {
-        return new TypeParameterSourceModel(origin);
+        return new TypeParameterSourceModel(Objects.requireNonNull(origin));
     }
 
     public static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
-        return new TypeParameterReflectionModel(origin);
+        return new TypeParameterReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override

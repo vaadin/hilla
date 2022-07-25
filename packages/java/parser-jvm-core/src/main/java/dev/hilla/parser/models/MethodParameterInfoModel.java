@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -13,12 +14,12 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
     private SignatureModel type;
 
     public static MethodParameterInfoModel of(
-            @Nonnull MethodParameterInfo parameter) {
-        return new MethodParameterInfoSourceModel(parameter);
+            @Nonnull MethodParameterInfo origin) {
+        return new MethodParameterInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static MethodParameterInfoModel of(@Nonnull Parameter parameter) {
-        return new MethodParameterInfoReflectionModel(parameter);
+    public static MethodParameterInfoModel of(@Nonnull Parameter origin) {
+        return new MethodParameterInfoReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override

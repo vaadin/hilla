@@ -80,11 +80,11 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     }
 
     public static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
-        return new ClassRefSignatureReflectionModel.Bare(origin);
+        return new ClassRefSignatureReflectionModel.Bare(Objects.requireNonNull(origin));
     }
 
     public static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
-        return ClassRefSignatureReflectionModel.Annotated.of(origin);
+        return ClassRefSignatureReflectionModel.Annotated.of(Objects.requireNonNull(origin));
     }
 
     @Override

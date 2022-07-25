@@ -1,11 +1,13 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredConstructor;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -81,51 +83,14 @@ public class MethodInfoModelTests {
     @DisplayName("As a method model with characteristics")
     @Nested
     public class AsCharacterizedMethodModel {
-        private final CharacteristicsModelProvider.Checker checker = new CharacteristicsModelProvider.Checker();
+        private final ModelProvider.Characteristics.Checker checker = new ModelProvider.Characteristics.Checker();
 
         @DisplayName("It should detect method characteristics correctly")
-        @ParameterizedTest(name = CharacteristicsModelProvider.testNamePattern)
-        @ArgumentsSource(CharacteristicsModelProvider.class)
+        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
+        @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(MethodInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
-        }
-    }
-
-    public static class CharacteristicsModelProvider
-            implements ArgumentsProvider {
-        public static final String testNamePattern = "{2} [{3}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
-            var ctx = new Context.Characteristics(context);
-
-            return Streams.combine(
-                    ctx.getReflectionCharacteristics().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    MethodInfoModel.of(entry.getKey()),
-                                    entry.getValue(), ModelKind.REFLECTION,
-                                    entry.getKey().getName())),
-                    ctx.getSourceCharacteristics().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    MethodInfoModel.of(entry.getKey()),
-                                    entry.getValue(), ModelKind.SOURCE,
-                                    entry.getKey().getName())));
-        }
-
-        public static final class Checker
-                extends SpecializationChecker<MethodInfoModel> {
-            private static final List<String> allowedMethods = List.of(
-                    "isAbstract", "isBridge", "isFinal", "isNative",
-                    "isPrivate", "isProtected", "isPublic", "isStatic",
-                    "isStrict", "isSynchronized", "isSynthetic", "isVarArgs");
-
-            public Checker() {
-                super(MethodInfoModel.class,
-                        getDeclaredMethods(MethodInfoModel.class),
-                        allowedMethods);
-            }
         }
     }
 
@@ -143,6 +108,43 @@ public class MethodInfoModelTests {
                     Arguments.of(MethodInfoModel.of(ctx.getSourceOrigin()),
                             ModelKind.SOURCE));
         }
+
+        public static class Characteristics implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            @Override
+            public Stream<? extends Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Characteristics(context);
+
+                return Streams.combine(ctx.getReflectionCharacteristics()
+                        .entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                MethodInfoModel.of(entry.getKey()),
+                                entry.getValue(), ModelKind.REFLECTION,
+                                entry.getKey().getName())),
+                        ctx.getSourceCharacteristics().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        MethodInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getName())));
+            }
+
+            public static final class Checker
+                    extends SpecializationChecker<MethodInfoModel> {
+                private static final List<String> allowedMethods = List.of(
+                        "isAbstract", "isBridge", "isConstructor", "isFinal",
+                        "isNative", "isPrivate", "isProtected", "isPublic",
+                        "isStatic", "isStrict", "isSynchronized", "isSynthetic",
+                        "isVarArgs");
+
+                public Checker() {
+                    super(MethodInfoModel.class,
+                            getDeclaredMethods(MethodInfoModel.class),
+                            allowedMethods);
+                }
+            }
+        }
     }
 
     static abstract class Context {
@@ -157,14 +159,18 @@ public class MethodInfoModelTests {
         }
 
         static final class Characteristics extends Context {
-            private static final Map<Method, String[]> reflectionCharacteristics;
+            private static final Map<Executable, String[]> reflectionCharacteristics;
 
             static {
                 var refClass = Sample.Characteristics.class;
+
                 var bridgeMethod = getDeclaredMethod(
                         Sample.Characteristics.Bridge.class, "compareTo",
                         List.of(Object.class));
+
                 reflectionCharacteristics = Map.ofEntries(
+                        entry(getDeclaredConstructor(refClass), "isConstructor",
+                                "isPublic"),
                         entry(getDeclaredMethod(refClass, "abstractMethod"),
                                 "isPublic", "isAbstract"),
                         entry(getDeclaredMethod(refClass, "finalMethod"),
@@ -182,7 +188,8 @@ public class MethodInfoModelTests {
                         entry(getDeclaredMethod(refClass, "varArgsMethod",
                                 List.of(String[].class)), "isPublic",
                                 "isVarArgs"),
-                        entry(bridgeMethod, "isPublic", "isBridge", "isSynthetic"));
+                        entry(bridgeMethod, "isPublic", "isBridge",
+                                "isSynthetic"));
             }
 
             private final Map<MethodInfo, String[]> sourceCharacteristics;
@@ -201,7 +208,7 @@ public class MethodInfoModelTests {
                                         Map.Entry::getValue));
             }
 
-            public Map<Method, String[]> getReflectionCharacteristics() {
+            public Map<Executable, String[]> getReflectionCharacteristics() {
                 return reflectionCharacteristics;
             }
 
@@ -243,11 +250,7 @@ public class MethodInfoModelTests {
         }
 
         static abstract class Characteristics {
-            static class Bridge implements Comparable<Bridge> {
-                @Override
-                public int compareTo(Bridge o) {
-                    return 0;
-                }
+            public Characteristics() {
             }
 
             public static String staticMethod() {
@@ -276,6 +279,13 @@ public class MethodInfoModelTests {
 
             private String privateMethod() {
                 return "";
+            }
+
+            static class Bridge implements Comparable<Bridge> {
+                @Override
+                public int compareTo(Bridge o) {
+                    return 0;
+                }
             }
         }
 
