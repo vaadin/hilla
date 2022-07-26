@@ -31,6 +31,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassInfoModel> innerClasses;
     private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
+    private PackageInfoModel pkg;
     private Optional<ClassInfoModel> superClass;
 
     public static boolean is(Class<?> actor, String target) {
@@ -272,6 +273,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getMethods().stream();
     }
 
+    public PackageInfoModel getPackage() {
+        if (pkg == null) {
+            pkg = preparePackage();
+        }
+
+        return pkg;
+    }
+
     public abstract String getSimpleName();
 
     public Optional<ClassInfoModel> getSuperClass() {
@@ -381,6 +390,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     protected abstract List<ClassInfoModel> prepareInterfaces();
 
     protected abstract List<MethodInfoModel> prepareMethods();
+
+    protected abstract PackageInfoModel preparePackage();
 
     protected abstract ClassInfoModel prepareSuperClass();
 }
