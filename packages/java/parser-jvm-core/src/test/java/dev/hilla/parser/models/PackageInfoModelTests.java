@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,6 +56,31 @@ public class PackageInfoModelTests {
                 model.getAnnotationsStream()
                         .map(AnnotationInfoModel::getClassInfo)
                         .collect(Collectors.toList()));
+    }
+
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
+        var reflectionModel = PackageInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = PackageInfoModel.of(ctx.getSourceOrigin());
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
+    @DisplayName("It should have source and reflection models equal")
+    @Test
+    public void should_HaveSourceAndReflectionModelsEqual() {
+        var reflectionModel = PackageInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = PackageInfoModel.of(ctx.getSourceOrigin());
+
+        assertEquals(reflectionModel, reflectionModel);
+        assertEquals(reflectionModel, sourceModel);
+
+        assertEquals(sourceModel, sourceModel);
+        assertEquals(sourceModel, reflectionModel);
+
+        assertNotEquals(sourceModel, new Object());
+        assertNotEquals(reflectionModel, new Object());
     }
 
     static class Context {
