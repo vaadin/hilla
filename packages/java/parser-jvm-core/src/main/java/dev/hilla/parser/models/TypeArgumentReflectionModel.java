@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedWildcardType;
-import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,12 +27,13 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
     @Override
     public TypeArgument.Wildcard getWildcard() {
         if (wildcard == null) {
-            if (origin instanceof WildcardType) {
-                var upperBounds = ((WildcardType) origin).getUpperBounds();
+            if (origin instanceof AnnotatedWildcardType) {
+                var specific = (AnnotatedWildcardType) origin;
 
-                if (((WildcardType) origin).getLowerBounds().length > 0) {
+                if (specific.getAnnotatedLowerBounds().length > 0) {
                     wildcard = TypeArgument.Wildcard.SUPER;
-                } else if (!upperBounds[0].equals(Object.class)) {
+                } else if (!specific.getAnnotatedUpperBounds()[0].getType()
+                        .equals(Object.class)) {
                     wildcard = TypeArgument.Wildcard.EXTENDS;
                 } else {
                     wildcard = TypeArgument.Wildcard.ANY;
@@ -48,7 +48,11 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return processAnnotations(origin.getAnnotations());
+        // TODO: This is a temporary limitation of ClassGraph; when it is fixed,
+        // the condition should be removed.
+        return getWildcard() == TypeArgument.Wildcard.NONE
+                ? processAnnotations(origin.getAnnotations())
+                : List.of();
     }
 
     @Override
@@ -58,7 +62,8 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
                 ((AnnotatedWildcardType) origin).getAnnotatedUpperBounds())
                 : Stream.of(origin);
 
-        return stream.map(SignatureModel::of).distinct()
+        return stream.filter(type -> type.getType() != Object.class)
+                .map(SignatureModel::of).distinct()
                 .collect(Collectors.toList());
     }
 }
