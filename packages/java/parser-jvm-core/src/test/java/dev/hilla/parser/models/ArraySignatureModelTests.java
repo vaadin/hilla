@@ -128,17 +128,12 @@ public class ArraySignatureModelTests {
         }
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
-    @interface Bar {
-    }
-
     static final class Context {
         private static final String fieldName = "foo";
         private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType())
                         .getAnnotatedGenericComponentType()
-                        .getAnnotation(Bar.class);
+                        .getAnnotation(Sample.Bar.class);
         private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;
@@ -170,8 +165,7 @@ public class ArraySignatureModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchFieldException {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -224,5 +218,10 @@ public class ArraySignatureModelTests {
     static class Sample {
         @Bar
         private Dependency[] foo;
+
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.TYPE_USE)
+        @interface Bar {
+        }
     }
 }
