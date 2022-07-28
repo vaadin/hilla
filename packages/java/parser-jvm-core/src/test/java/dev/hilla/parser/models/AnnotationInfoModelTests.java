@@ -186,7 +186,7 @@ public class AnnotationInfoModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) {
             var ctx = new Context(context);
 
@@ -364,7 +364,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) {
             var ctx = new Context(context);
 
@@ -384,7 +384,7 @@ public class AnnotationInfoModelTests {
         public static final String testNamePattern = "{2}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) {
             var ctx = new Context(context);
 
@@ -404,7 +404,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1} [{2}]";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) {
             var ctx = new Context(context);
 

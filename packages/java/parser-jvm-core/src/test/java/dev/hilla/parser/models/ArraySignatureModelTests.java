@@ -170,7 +170,7 @@ public class ArraySignatureModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) throws NoSuchFieldException {
             var ctx = new Context(context);
 

@@ -638,7 +638,7 @@ public class ClassInfoModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
+        public Stream<Arguments> provideArguments(
                 ExtensionContext context) {
             var ctx = new Context.Default(context);
 
@@ -653,7 +653,7 @@ public class ClassInfoModelTests {
             public static final String testNamePattern = "{2} [{3}]";
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Specializations(context);
 
@@ -675,7 +675,7 @@ public class ClassInfoModelTests {
             public static final String testNamePattern = "{2} [{3}]";
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
