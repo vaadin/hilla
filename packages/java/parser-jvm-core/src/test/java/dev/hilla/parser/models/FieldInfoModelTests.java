@@ -5,6 +5,7 @@ import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -107,6 +108,23 @@ public class FieldInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(FieldInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     public static final class ModelProvider implements ArgumentsProvider {

@@ -6,6 +6,7 @@ import static dev.hilla.parser.test.helpers.ClassMemberUtils.getParameter;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,6 +50,17 @@ public class MethodParameterInfoModelTests {
         ctx = new Context.Default(source);
     }
 
+    @DisplayName("It should have the same hashCode for source and reflection models")
+    @Test
+    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
+        var reflectionModel = MethodParameterInfoModel
+                .of(ctx.getReflectionOrigin(defaultParameterName));
+        var sourceModel = MethodParameterInfoModel
+                .of(ctx.getSourceOrigin(defaultParameterName));
+
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
     @DisplayName("It should have source and reflection models equal")
     @Test
     public void should_HaveSourceAndReflectionModelsEqual() {
@@ -67,36 +79,41 @@ public class MethodParameterInfoModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
-    @DisplayName("It should have the same hashCode for source and reflection models")
-    @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-        var reflectionModel = MethodParameterInfoModel
-                .of(ctx.getReflectionOrigin(defaultParameterName));
-        var sourceModel = MethodParameterInfoModel
-                .of(ctx.getSourceOrigin(defaultParameterName));
-
-        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
-    }
-
-    @DisplayName("As a method parameter model with characteristics")
-    @Nested
-    public class AsCharacterizedMethodModel {
-        private final ModelProvider.Characteristics.Checker checker = new ModelProvider.Characteristics.Checker();
-
-        @DisplayName("It should detect method characteristics correctly")
-        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
-        @ArgumentsSource(ModelProvider.Characteristics.class)
-        public void should_DetectCharacteristics(MethodParameterInfoModel model,
-                String[] characteristics, ModelKind kind, String testName) {
-            checker.apply(model, characteristics);
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(MethodParameterInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(defaultParameterName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(defaultParameterName),
+                    model.get());
+            assertTrue(model.isSource());
+            break;
         }
     }
 
     static final class ModelProvider implements ArgumentsProvider {
+        public static final String testNamePattern = "{1}";
+
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext extensionContext) {
-            return null;
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
+            var ctx = new Context.Default(context);
+
+            return Stream.of(
+                    Arguments.of(
+                            MethodParameterInfoModel.of(ctx
+                                    .getReflectionOrigin(defaultParameterName)),
+                            ModelKind.REFLECTION),
+                    Arguments.of(
+                            MethodParameterInfoModel.of(
+                                    ctx.getSourceOrigin(defaultParameterName)),
+                            ModelKind.SOURCE));
         }
 
         static final class Characteristics implements ArgumentsProvider {
@@ -133,6 +150,20 @@ public class MethodParameterInfoModelTests {
                             allowedMethods);
                 }
             }
+        }
+    }
+
+    @DisplayName("As a method parameter model with characteristics")
+    @Nested
+    public class AsCharacterizedMethodModel {
+        private final ModelProvider.Characteristics.Checker checker = new ModelProvider.Characteristics.Checker();
+
+        @DisplayName("It should detect method characteristics correctly")
+        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
+        @ArgumentsSource(ModelProvider.Characteristics.class)
+        public void should_DetectCharacteristics(MethodParameterInfoModel model,
+                String[] characteristics, ModelKind kind, String testName) {
+            checker.apply(model, characteristics);
         }
     }
 
@@ -255,13 +286,13 @@ public class MethodParameterInfoModelTests {
     }
 
     static class Sample {
+        enum Enum {
+            FOO, BAR
+        }
+
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.TYPE_USE)
         @interface Foo {
-        }
-
-        enum Enum {
-            FOO, BAR
         }
 
         class Dyn {

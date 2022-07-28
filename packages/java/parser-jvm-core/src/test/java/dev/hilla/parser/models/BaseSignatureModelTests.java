@@ -53,10 +53,10 @@ public class BaseSignatureModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
+    @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(BaseSignatureModel model,
+    public void should_ProvideCorrectOrigin(BaseSignatureModel model,
             ModelKind kind, String methodName) {
         switch (kind) {
         case REFLECTION_BARE:

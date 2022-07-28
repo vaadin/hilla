@@ -149,6 +149,26 @@ public class ClassInfoModelTests {
         }
     }
 
+    @DisplayName("It should check equality")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CheckEquality(ClassInfoModel model, ModelKind kind) {
+        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
+
+        var otherReflectionModel = ClassInfoModel
+                .of(Dependency.SampleChild.class);
+        var otherSourceModel = ClassInfoModel.of(ctx.getSource()
+                .getClassInfo(Dependency.SampleChild.class.getName()));
+
+        assertEquals(model, model);
+        assertEquals(model, reflectionModel);
+        assertEquals(model, sourceModel);
+        assertNotEquals(model, otherReflectionModel);
+        assertNotEquals(model, otherSourceModel);
+        assertNotEquals(model, mock(MethodInfoModel.class));
+    }
+
     @DisplayName("It should check if the class belongs to JDK")
     @Test
     public void should_CheckJDKBelonging() {
@@ -250,25 +270,6 @@ public class ClassInfoModelTests {
         assertFalse(model.is(ClassInfoModel.of(anotherSourceClass)));
     }
 
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(ClassInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION: {
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-        }
-            break;
-        case SOURCE: {
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-        }
-            break;
-        }
-    }
-
     @DisplayName("It should get all inner classes of the class")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
@@ -280,26 +281,6 @@ public class ClassInfoModelTests {
         var actual = new HashSet<>(model.getInnerClasses());
 
         assertEquals(expected, actual);
-    }
-
-    @DisplayName("It should check equality")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CheckEquality(ClassInfoModel model, ModelKind kind) {
-        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
-
-        var otherReflectionModel = ClassInfoModel
-                .of(Dependency.SampleChild.class);
-        var otherSourceModel = ClassInfoModel.of(ctx.getSource()
-                .getClassInfo(Dependency.SampleChild.class.getName()));
-
-        assertEquals(model, model);
-        assertEquals(model, reflectionModel);
-        assertEquals(model, sourceModel);
-        assertNotEquals(model, otherReflectionModel);
-        assertNotEquals(model, otherSourceModel);
-        assertNotEquals(model, mock(MethodInfoModel.class));
     }
 
     @DisplayName("It should get all fields of the class")
@@ -391,6 +372,23 @@ public class ClassInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ClassInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     static final class Characteristics {

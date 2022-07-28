@@ -6,6 +6,7 @@ import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -78,6 +79,23 @@ public class MethodInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(MethodInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     @DisplayName("As a method model with characteristics")

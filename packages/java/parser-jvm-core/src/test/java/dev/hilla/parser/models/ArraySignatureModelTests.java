@@ -51,10 +51,10 @@ public class ArraySignatureModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
+    @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(ArraySignatureModel model,
+    public void should_ProvideCorrectOrigin(ArraySignatureModel model,
             ModelKind kind) {
         switch (kind) {
         case REFLECTION:

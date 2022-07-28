@@ -49,10 +49,10 @@ public class AnnotationInfoModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
+    @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(AnnotationInfoModel model,
+    public void should_ProvideCorrectOrigin(AnnotationInfoModel model,
             ModelKind kind) {
         switch (kind) {
         case REFLECTION:

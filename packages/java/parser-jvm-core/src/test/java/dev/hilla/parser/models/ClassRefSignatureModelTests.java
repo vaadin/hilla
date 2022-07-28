@@ -235,6 +235,31 @@ public class ClassRefSignatureModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ClassRefSignatureModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION_COMPLETE:
+            assertEquals(
+                    ctx.getCompleteReflectionOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case REFLECTION_BARE:
+            assertEquals(ctx.getBareReflectionOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isSource());
+            break;
+        }
+    }
+
     @DisplayName("It should resolve underlying class correctly")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
