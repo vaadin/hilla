@@ -199,7 +199,8 @@ public class ClassInfoModelTests {
             ModelKind kind) {
         var expected = Stream
                 .of(ctx.getFieldDependencies(), ctx.getMethodDependencies(),
-                        ctx.getParentClass(), ctx.getInnerClasses())
+                        ctx.getParentClass(), ctx.getInterfaces(),
+                        ctx.getInnerClasses(), ctx.getInterfaceDependencies())
                 .flatMap(Collection::stream).map(ClassInfoModel::of)
                 .collect(Collectors.toSet());
 
@@ -425,7 +426,7 @@ public class ClassInfoModelTests {
         @interface Annotation {
         }
 
-        interface Interface {
+        interface Interface<TypeArgument extends ParametrizedDependency> {
         }
 
         static class FieldPrivate {
@@ -494,6 +495,9 @@ public class ClassInfoModelTests {
         static class MethodStaticPublic {
         }
 
+        static class ParametrizedDependency {
+        }
+
         static class Parent extends GrandParent {
             public ParentFieldPublic fieldPublic;
         }
@@ -502,7 +506,8 @@ public class ClassInfoModelTests {
         }
 
         @Annotation
-        static class Sample extends Parent implements Interface {
+        static class Sample extends Parent
+                implements Interface<ParametrizedDependency> {
             public static FieldStaticPublic fieldStaticPublic;
             protected static FieldStaticProtected fieldStaticProtected;
             private static FieldStaticPrivate fieldStaticPrivate;
@@ -553,7 +558,7 @@ public class ClassInfoModelTests {
         }
     }
 
-    private static final class Specialization {
+    static final class Specialization {
         private static class Sample {
             public Boolean getBoolean() {
                 return true;
@@ -638,8 +643,7 @@ public class ClassInfoModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -814,6 +818,10 @@ public class ClassInfoModelTests {
                     .of(Dependency.Sample.class, Dependency.InnerMethod.class,
                             Dependency.InnerField.class,
                             Dependency.InnerParent.class);
+            private static final Set<Class<?>> interfaces = Set
+                    .of(Dependency.Interface.class);
+            private static final Set<Class<?>> interfacesDependencies = Set
+                    .of(Dependency.ParametrizedDependency.class);
             private static final Set<Class<?>> methodDependencies = Set.of(
                     Dependency.MethodStaticPublic.class,
                     Dependency.MethodStaticProtected.class,
@@ -856,6 +864,14 @@ public class ClassInfoModelTests {
 
             public Set<Class<?>> getInnerClassesDependencies() {
                 return innerClassesDependencies;
+            }
+
+            public Set<Class<?>> getInterfaceDependencies() {
+                return interfacesDependencies;
+            }
+
+            public Set<Class<?>> getInterfaces() {
+                return interfaces;
             }
 
             public Set<Class<?>> getMethodDependencies() {
