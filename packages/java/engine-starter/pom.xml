@@ -12,7 +12,7 @@
 
   <artifactId>engine-starter</artifactId>
   <packaging>jar</packaging>
-  <name>Hilla Endpoint</name>
+  <name>Hilla Engine Starter</name>
 
   <properties>
     <flow.version>23.2-SNAPSHOT</flow.version>
