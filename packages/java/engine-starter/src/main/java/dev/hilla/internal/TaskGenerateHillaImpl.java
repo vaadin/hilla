@@ -1,7 +1,7 @@
 package dev.hilla.internal;
 
+import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -16,11 +16,16 @@ import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "1.2.0-alpha1")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0-alpha1")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
+    private File projectDirectory;
+
+    @Override
+    public void configure(File projectDirectory, String buildDirectoryName) {
+        this.projectDirectory = projectDirectory;
+    }
 
     @Override
     public void execute() throws ExecutionFailedException {
-        var baseDir = System.getProperty("user.dir", ".");
-        var command = prepareCommand(baseDir);
+        var command = prepareCommand();
         runCodeGeneration(command);
     }
 
@@ -49,9 +54,9 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         return path.resolve("build.gradle").toFile().exists();
     }
 
-    List<String> prepareCommand(String baseDir) {
-        var path = Paths.get(baseDir);
-        if (path.toFile().isDirectory()) {
+    List<String> prepareCommand() {
+        if (projectDirectory.isDirectory()) {
+            var path = projectDirectory.toPath();
             if (isMavenProject(path)) {
                 return prepareMavenCommand();
             } else if (isGradleProject(path)) {
@@ -61,7 +66,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         throw new IllegalStateException(String
                 .format("Failed to determine project directory for dev mode. "
                         + "Directory '%s' does not look like a Maven or "
-                        + "Gradle project.", path.toString()));
+                        + "Gradle project.", projectDirectory));
     }
 
     List<String> prepareMavenCommand() {
