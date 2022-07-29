@@ -219,6 +219,11 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
+    protected PackageInfoModel preparePackage() {
+        return PackageInfoModel.of(origin.getPackage());
+    }
+
+    @Override
     protected ClassInfoModel prepareSuperClass() {
         var superClass = origin.getSuperclass();
 
