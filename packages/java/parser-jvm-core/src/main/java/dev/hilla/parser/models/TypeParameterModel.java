@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -17,7 +17,7 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
         return new TypeParameterSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
+    public static TypeParameterModel of(@Nonnull TypeVariable<?> origin) {
         return new TypeParameterReflectionModel(Objects.requireNonNull(origin));
     }
 
@@ -48,6 +48,11 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
 
     public Stream<SignatureModel> getBoundsStream() {
         return getBounds().stream();
+    }
+
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
+        return getBoundsStream().flatMap(SignatureModel::getDependenciesStream);
     }
 
     public abstract String getName();

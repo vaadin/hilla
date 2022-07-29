@@ -32,6 +32,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
     private Optional<ClassInfoModel> superClass;
+    private List<TypeParameterModel> typeParameters;
 
     public static boolean is(Class<?> actor, String target) {
         return Objects.equals(actor.getName(), target);
@@ -182,7 +183,9 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(getFieldDependenciesStream(),
                 getMethodDependenciesStream(), getInnerClassesStream(),
-                getSuperClassStream()).distinct();
+                getSuperClassStream(), getInterfacesStream(),
+                getInterfaceDependenciesStream(),
+                getTypeParameterDependenciesStream()).distinct();
     }
 
     public Set<ClassInfoModel> getFieldDependencies() {
@@ -239,6 +242,15 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getInnerClasses().stream();
     }
 
+    public Set<ClassInfoModel> getInterfaceDependencies() {
+        return getInterfaceDependenciesStream().collect(Collectors.toSet());
+    }
+
+    public Stream<ClassInfoModel> getInterfaceDependenciesStream() {
+        return getInterfacesStream()
+                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
+    }
+
     public List<ClassInfoModel> getInterfaces() {
         if (interfaces == null) {
             interfaces = prepareInterfaces();
@@ -284,6 +296,23 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public Stream<ClassInfoModel> getSuperClassStream() {
         return getSuperClass().stream();
+    }
+
+    public Stream<ClassInfoModel> getTypeParameterDependenciesStream() {
+        return getTypeParameterStream()
+                .flatMap(TypeParameterModel::getDependenciesStream).distinct();
+    }
+
+    public Stream<TypeParameterModel> getTypeParameterStream() {
+        return getTypeParameters().stream();
+    }
+
+    public List<TypeParameterModel> getTypeParameters() {
+        if (typeParameters == null) {
+            typeParameters = prepareTypeParameters();
+        }
+
+        return typeParameters;
     }
 
     public int hashCode() {
@@ -383,4 +412,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     protected abstract List<MethodInfoModel> prepareMethods();
 
     protected abstract ClassInfoModel prepareSuperClass();
+
+    protected abstract List<TypeParameterModel> prepareTypeParameters();
 }

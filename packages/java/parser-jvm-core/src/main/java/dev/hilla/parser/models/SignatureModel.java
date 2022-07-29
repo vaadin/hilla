@@ -4,8 +4,8 @@ import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
+import java.lang.reflect.TypeVariable;
 
 import javax.annotation.Nonnull;
 
@@ -38,8 +38,8 @@ public interface SignatureModel
                     .of((AnnotatedParameterizedType) signature);
         } else if (signature instanceof AnnotatedArrayType) {
             return ArraySignatureModel.of((AnnotatedArrayType) signature);
-        } else if (signature instanceof AnnotatedTypeVariable) {
-            return TypeVariableModel.of((AnnotatedTypeVariable) signature);
+        } else if (signature instanceof TypeVariable<?>) {
+            return TypeVariableModel.of((TypeVariable<?>) signature);
         } else if (signature instanceof AnnotatedWildcardType) {
             return TypeArgumentModel.of((AnnotatedWildcardType) signature);
         } else if (signature instanceof AnnotatedType) {

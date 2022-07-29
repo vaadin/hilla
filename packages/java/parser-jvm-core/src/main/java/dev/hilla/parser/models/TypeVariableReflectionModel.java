@@ -1,25 +1,24 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 
 final class TypeVariableReflectionModel extends TypeVariableModel
         implements ReflectionSignatureModel {
-    private final AnnotatedTypeVariable origin;
+    private final TypeVariable<?> origin;
 
-    TypeVariableReflectionModel(AnnotatedTypeVariable origin) {
+    TypeVariableReflectionModel(TypeVariable<?> origin) {
         this.origin = origin;
     }
 
     @Override
-    public AnnotatedTypeVariable get() {
+    public TypeVariable<?> get() {
         return origin;
     }
 
     @Override
     public String getName() {
-        return ((TypeVariable<?>) origin.getType()).getName();
+        return origin.getName();
     }
 
     @Override
