@@ -69,6 +69,17 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
+    public void preprocess() {
+        for (var plugin : plugins) {
+            if (plugin instanceof Plugin.Preprocessor) {
+                logger.debug("Executing preprocessor plugin "
+                        + plugin.getClass().getName());
+
+                ((Plugin.Preprocessor) plugin).preprocess();
+            }
+        }
+    }
+
     public void process(ScanElementsCollector collector) {
         listener.onChange(collector::collect);
 

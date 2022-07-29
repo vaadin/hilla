@@ -21,6 +21,10 @@ public interface Plugin {
 
     void setStorage(@Nonnull SharedStorage storage);
 
+    interface Preprocessor extends Plugin {
+        void preprocess();
+    }
+
     interface Processor extends Plugin {
         void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities);
