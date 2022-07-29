@@ -33,7 +33,8 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
             throws ExecutionFailedException {
         var exitCode = 0;
         try {
-            ProcessBuilder builder = new ProcessBuilder(command).inheritIO();
+            ProcessBuilder builder = new ProcessBuilder(command)
+                    .directory(projectDirectory).inheritIO();
             exitCode = builder.start().waitFor();
         } catch (Exception e) {
             throw new ExecutionFailedException(
