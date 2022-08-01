@@ -29,11 +29,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassRefTypeSignature;

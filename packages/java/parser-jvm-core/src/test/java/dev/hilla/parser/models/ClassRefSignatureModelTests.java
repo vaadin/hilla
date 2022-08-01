@@ -183,14 +183,12 @@ public class ClassRefSignatureModelTests {
 
             assertEquals(Sample.class.getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getName)
-                            .orElse(null));
+                            .map(ClassRefSignatureModel::getName).orElse(null));
 
             assertEquals(getClass().getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
                             .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getName)
-                            .orElse(null));
+                            .map(ClassRefSignatureModel::getName).orElse(null));
 
             assertEquals(Optional.empty(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
@@ -318,8 +316,7 @@ public class ClassRefSignatureModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             var complete = ctx.getCompleteReflectionOrigin(fieldName);

@@ -113,13 +113,13 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
         }
 
         @Override
-        public boolean isConstructor() {
-            return true;
+        public boolean isBridge() {
+            return false;
         }
 
         @Override
-        public boolean isBridge() {
-            return false;
+        public boolean isConstructor() {
+            return true;
         }
 
         @Override
@@ -146,13 +146,13 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
         }
 
         @Override
-        public boolean isConstructor() {
-            return false;
+        public boolean isBridge() {
+            return origin.isBridge();
         }
 
         @Override
-        public boolean isBridge() {
-            return origin.isBridge();
+        public boolean isConstructor() {
+            return false;
         }
 
         @Override

@@ -49,23 +49,6 @@ public class AnnotationInfoModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should provide correct origin")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideCorrectOrigin(AnnotationInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
-    }
-
     @DisplayName("It should get class info")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
@@ -111,6 +94,23 @@ public class AnnotationInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(AnnotationInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     @DisplayName("It should provide dependencies")
@@ -186,8 +186,7 @@ public class AnnotationInfoModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -364,8 +363,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -384,8 +382,7 @@ public class AnnotationInfoModelTests {
         public static final String testNamePattern = "{2}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             var reflectionOrigins = ctx.getReflectionParameterOrigins();
@@ -404,8 +401,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1} [{2}]";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Streams.combine(

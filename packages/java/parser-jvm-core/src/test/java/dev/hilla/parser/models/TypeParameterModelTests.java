@@ -48,6 +48,17 @@ public class TypeParameterModelTests {
         this.ctx = new Context(source);
     }
 
+    @DisplayName("It should get annotations")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    @Disabled("Bug in ClassGraph: collected annotations are inaccessible")
+    public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
+            String name) {
+        assertEquals(List.of(Sample.Foo.class.getName()),
+                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                        .collect(Collectors.toList()));
+    }
+
     @DisplayName("It should get bounds")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
@@ -127,31 +138,6 @@ public class TypeParameterModelTests {
         }
     }
 
-    @DisplayName("It should get annotations")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    @Disabled("Bug in ClassGraph: collected annotations are inaccessible")
-    public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
-            String name) {
-        assertEquals(List.of(Sample.Foo.class.getName()),
-                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
-                        .collect(Collectors.toList()));
-    }
-
-    @Nested
-    @DisplayName("As a SpecializedModel")
-    public class AsSpecializedModel {
-        private final ModelProvider.Checker checker = new ModelProvider.Checker();
-
-        @DisplayName("It should have a type argument specialization")
-        @ParameterizedTest(name = ModelProvider.testNamePattern)
-        @ArgumentsSource(ModelProvider.class)
-        public void should_HaveSpecialization(TypeParameterModel model,
-                ModelKind kind, String name) {
-            checker.apply(model, "isTypeParameter", "isNonJDKClass");
-        }
-    }
-
     static final class Context
             extends AbstractContext<TypeVariable<?>, TypeParameter> {
         private static final Map<String, TypeVariable<?>> reflectionOrigins = Arrays
@@ -223,6 +209,20 @@ public class TypeParameterModelTests {
         }
 
         static class Bound {
+        }
+    }
+
+    @Nested
+    @DisplayName("As a SpecializedModel")
+    public class AsSpecializedModel {
+        private final ModelProvider.Checker checker = new ModelProvider.Checker();
+
+        @DisplayName("It should have a type argument specialization")
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
+        @ArgumentsSource(ModelProvider.class)
+        public void should_HaveSpecialization(TypeParameterModel model,
+                ModelKind kind, String name) {
+            checker.apply(model, "isTypeParameter", "isNonJDKClass");
         }
     }
 }

@@ -234,6 +234,7 @@ public class MethodInfoModelTests {
                     .stream(Sample.class.getDeclaredMethods())
                     .collect(Collectors.toMap(Method::getName,
                             Function.identity()));
+
             Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }

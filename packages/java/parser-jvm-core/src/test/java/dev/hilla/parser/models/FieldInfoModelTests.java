@@ -289,8 +289,8 @@ public class FieldInfoModelTests {
         }
 
         static final class Default extends AbstractContext<Field, FieldInfo> {
-            private static final String defaultFieldName = "field";
             private static final Annotation annotation;
+            private static final String defaultFieldName = "field";
             private static final Map<String, Field> reflectionOrigins = Arrays
                     .stream(Sample.class.getDeclaredFields()).collect(Collectors
                             .toMap(Field::getName, Function.identity()));

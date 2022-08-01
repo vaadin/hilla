@@ -35,11 +35,6 @@ final class MethodInfoSourceModel extends MethodInfoModel
     }
 
     @Override
-    public boolean isConstructor() {
-        return origin.isConstructor();
-    }
-
-    @Override
     public boolean isAbstract() {
         return origin.isAbstract();
     }
@@ -47,6 +42,11 @@ final class MethodInfoSourceModel extends MethodInfoModel
     @Override
     public boolean isBridge() {
         return origin.isBridge();
+    }
+
+    @Override
+    public boolean isConstructor() {
+        return origin.isConstructor();
     }
 
     @Override

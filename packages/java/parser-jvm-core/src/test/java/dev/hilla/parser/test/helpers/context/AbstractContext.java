@@ -5,7 +5,8 @@ import java.util.Map;
 
 import io.github.classgraph.ScanResult;
 
-public abstract class AbstractContext<ReflectionOrigin extends AnnotatedElement, SourceOrigin> extends BaseContext {
+public abstract class AbstractContext<ReflectionOrigin extends AnnotatedElement, SourceOrigin>
+        extends BaseContext {
     private final Map<String, ReflectionOrigin> reflectionOrigins;
     private final Map<String, SourceOrigin> sourceOrigins;
 

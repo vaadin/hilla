@@ -15,11 +15,13 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public static MethodParameterInfoModel of(
             @Nonnull MethodParameterInfo origin) {
-        return new MethodParameterInfoSourceModel(Objects.requireNonNull(origin));
+        return new MethodParameterInfoSourceModel(
+                Objects.requireNonNull(origin));
     }
 
     public static MethodParameterInfoModel of(@Nonnull Parameter origin) {
-        return new MethodParameterInfoReflectionModel(Objects.requireNonNull(origin));
+        return new MethodParameterInfoReflectionModel(
+                Objects.requireNonNull(origin));
     }
 
     @Override
@@ -74,9 +76,9 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isFinal();
 
-    public abstract boolean isMandated();
-
     public abstract boolean isImplicit();
+
+    public abstract boolean isMandated();
 
     public abstract boolean isSynthetic();
 

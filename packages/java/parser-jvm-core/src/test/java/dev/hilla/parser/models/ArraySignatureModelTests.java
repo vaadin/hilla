@@ -51,23 +51,6 @@ public class ArraySignatureModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should provide correct origin")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideCorrectOrigin(ArraySignatureModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {
@@ -91,6 +74,23 @@ public class ArraySignatureModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ArraySignatureModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     @DisplayName("It should provide dependencies")

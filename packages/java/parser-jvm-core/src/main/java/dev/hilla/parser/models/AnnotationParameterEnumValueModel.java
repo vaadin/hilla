@@ -12,12 +12,14 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
 
     public static AnnotationParameterEnumValueModel of(
             @Nonnull AnnotationEnumValue origin) {
-        return new AnnotationParameterEnumValueSourceModel(Objects.requireNonNull(origin));
+        return new AnnotationParameterEnumValueSourceModel(
+                Objects.requireNonNull(origin));
     }
 
     public static AnnotationParameterEnumValueModel of(
             @Nonnull Enum<?> origin) {
-        return new AnnotationParameterEnumValueReflectionModel(Objects.requireNonNull(origin));
+        return new AnnotationParameterEnumValueReflectionModel(
+                Objects.requireNonNull(origin));
     }
 
     @Override
