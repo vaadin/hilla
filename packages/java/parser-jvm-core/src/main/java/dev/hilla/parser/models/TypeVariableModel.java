@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -15,7 +15,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return new TypeVariableSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static TypeVariableModel of(@Nonnull TypeVariable<?> origin) {
+    public static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin) {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 

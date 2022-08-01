@@ -4,6 +4,7 @@ import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.TypeVariable;
 
@@ -14,6 +15,7 @@ import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.HierarchicalTypeSignature;
 import io.github.classgraph.TypeArgument;
+import io.github.classgraph.TypeParameter;
 import io.github.classgraph.TypeVariableSignature;
 
 public interface SignatureModel
@@ -23,6 +25,8 @@ public interface SignatureModel
             return BaseSignatureModel.of((BaseTypeSignature) signature);
         } else if (signature instanceof ArrayTypeSignature) {
             return ArraySignatureModel.of((ArrayTypeSignature) signature);
+        } else if (signature instanceof TypeParameter) {
+            return TypeParameterModel.of((TypeParameter) signature);
         } else if (signature instanceof TypeVariableSignature) {
             return TypeVariableModel.of((TypeVariableSignature) signature);
         } else if (signature instanceof TypeArgument) {
@@ -39,7 +43,9 @@ public interface SignatureModel
         } else if (signature instanceof AnnotatedArrayType) {
             return ArraySignatureModel.of((AnnotatedArrayType) signature);
         } else if (signature instanceof TypeVariable<?>) {
-            return TypeVariableModel.of((TypeVariable<?>) signature);
+            return TypeParameterModel.of((TypeVariable<?>) signature);
+        } else if (signature instanceof AnnotatedTypeVariable) {
+            return TypeVariableModel.of((AnnotatedTypeVariable) signature);
         } else if (signature instanceof AnnotatedWildcardType) {
             return TypeArgumentModel.of((AnnotatedWildcardType) signature);
         } else if (signature instanceof AnnotatedType) {
