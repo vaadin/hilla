@@ -26,7 +26,7 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
     }
 
     @Override
-    public String getClassName() {
+    public String getName() {
         return getOriginClassInfo().getName();
     }
 

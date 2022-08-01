@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeParameter;
 
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
-        implements SignatureModel {
+        implements SignatureModel, NamedModel {
     private List<SignatureModel> bounds;
 
     public static TypeParameterModel of(@Nonnull TypeParameter origin) {
@@ -54,8 +54,6 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     public Stream<ClassInfoModel> getDependenciesStream() {
         return getBoundsStream().flatMap(SignatureModel::getDependenciesStream);
     }
-
-    public abstract String getName();
 
     @Override
     public int hashCode() {

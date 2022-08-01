@@ -178,18 +178,18 @@ public class ClassRefSignatureModelTests {
         case REFLECTION_COMPLETE:
         case SOURCE: {
             assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
-                    model.getOwner().map(ClassRefSignatureModel::getClassName)
+                    model.getOwner().map(ClassRefSignatureModel::getName)
                             .orElse(null));
 
             assertEquals(Sample.class.getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
+                            .map(ClassRefSignatureModel::getName)
                             .orElse(null));
 
             assertEquals(getClass().getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
                             .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
+                            .map(ClassRefSignatureModel::getName)
                             .orElse(null));
 
             assertEquals(Optional.empty(),
@@ -266,7 +266,7 @@ public class ClassRefSignatureModelTests {
     public void should_ResolveUnderlyingClass(ClassRefSignatureModel model,
             ModelKind kind) {
         assertEquals(Sample.DynamicParametrizedDependency.Sub.class.getName(),
-                model.getClassName());
+                model.getName());
     }
 
     @DisplayName("It should resolve underlying type arguments")
