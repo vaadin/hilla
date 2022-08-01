@@ -9,17 +9,17 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.AnnotatedParameterizedType;
-import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.Field;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,65 +29,50 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.ClassRefTypeSignature;
 import io.github.classgraph.FieldInfo;
 import io.github.classgraph.ScanResult;
-import io.github.classgraph.TypeArgument;
+import io.github.classgraph.TypeVariableSignature;
 
 @ExtendWith(SourceExtension.class)
-public class TypeArgumentModelTests {
-    private static final String defaultFieldName = "regularTypeArgument";
+public class TypeVariableModelTests {
     private Context ctx;
 
     @BeforeEach
     public void setUp(@Source ScanResult source) {
-        this.ctx = new Context(source);
+        ctx = new Context(source);
     }
 
     @DisplayName("It should get annotations")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    @Disabled("ClassGraph bug: you cannot extract annotations for a wildcard")
-    public void should_GetAnnotations(TypeArgumentModel model, ModelKind kind,
+    public void should_GetAnnotations(TypeVariableModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
                 model.getAnnotationsStream().map(AnnotationInfoModel::getName)
                         .collect(Collectors.toList()));
     }
 
-    @DisplayName("It should have correct widlcard")
+    @DisplayName("It should resolve to type parameters")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_HaveCorrectWildcard(TypeArgumentModel model,
+    public void should_GetResolveToTypeParameters(TypeVariableModel model,
             ModelKind kind, String name) {
-        switch (name) {
-        case "anyTypeArgument":
-            assertEquals(TypeArgument.Wildcard.ANY, model.getWildcard());
-            break;
-        case "extendsTypeArgument":
-            assertEquals(TypeArgument.Wildcard.EXTENDS, model.getWildcard());
-            break;
-        case "regularTypeArgument":
-            assertEquals(TypeArgument.Wildcard.NONE, model.getWildcard());
-            break;
-        case "superTypeArgument":
-            assertEquals(TypeArgument.Wildcard.SUPER, model.getWildcard());
-            break;
-        }
+        assertEquals(TypeParameterModel.of(ctx.getParameter(name)),
+                model.resolve());
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            TypeArgumentModel reflectionModel, TypeArgumentModel sourceModel,
+            TypeVariableModel reflectionModel, TypeVariableModel sourceModel,
             String name) {
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
@@ -96,7 +81,7 @@ public class TypeArgumentModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSourceAndReflectionModelsEqual(
-            TypeArgumentModel reflectionModel, TypeArgumentModel sourceModel,
+            TypeVariableModel reflectionModel, TypeVariableModel sourceModel,
             String name) {
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -111,7 +96,7 @@ public class TypeArgumentModelTests {
     @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideCorrectOrigin(TypeArgumentModel model,
+    public void should_ProvideCorrectOrigin(TypeVariableModel model,
             ModelKind kind, String name) {
         switch (kind) {
         case REFLECTION:
@@ -125,69 +110,81 @@ public class TypeArgumentModelTests {
         }
     }
 
-    static final class Context
-            extends AbstractContext<AnnotatedType, TypeArgument> {
-        private static final Map<String, AnnotatedType> reflectionOrigins = Arrays
+    static final class Context extends
+            AbstractContext<AnnotatedTypeVariable, TypeVariableSignature> {
+        private static final Map<String, TypeVariable<?>> parameters = Arrays
+                .stream(Sample.class.getTypeParameters()).collect(Collectors
+                        .toMap(TypeVariable::getName, Function.identity()));
+        private static final Map<String, AnnotatedTypeVariable> reflectionOrigins = Arrays
                 .stream(Sample.class.getDeclaredFields())
-                .collect(Collectors.toMap(Field::getName,
-                        field -> ((AnnotatedParameterizedType) field
-                                .getAnnotatedType())
-                                        .getAnnotatedActualTypeArguments()[0]));
+                .map(Field::getAnnotatedType)
+                .map(AnnotatedTypeVariable.class::cast)
+                .collect(Collectors.toMap(
+                        variable -> ((TypeVariable<?>) variable.getType())
+                                .getName(),
+                        Function.identity()));
 
         Context(ScanResult source) {
-            super(source, reflectionOrigins, source
-                    .getClassInfo(Sample.class.getName()).getDeclaredFieldInfo()
-                    .stream()
-                    .collect(Collectors.toMap(FieldInfo::getName,
-                            field -> ((ClassRefTypeSignature) field
-                                    .getTypeSignatureOrTypeDescriptor())
-                                            .getTypeArguments().get(0))));
+            super(source, reflectionOrigins,
+                    source.getClassInfo(Sample.class.getName())
+                            .getDeclaredFieldInfo().stream()
+                            .map(FieldInfo::getTypeSignatureOrTypeDescriptor)
+                            .map(TypeVariableSignature.class::cast)
+                            .collect(Collectors.toMap(
+                                    TypeVariableSignature::getName,
+                                    Function.identity())));
         }
 
         Context(ExtensionContext context) {
             this(SourceExtension.getSource(context));
         }
+
+        public TypeVariable<?> getParameter(String name) {
+            return parameters.get(name);
+        }
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1} [{2}]";
+        private static final String testNamePattern = "{1} [{2}]";
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context)
+                throws Exception {
             var ctx = new Context(context);
 
             return Streams.combine(
                     ctx.getReflectionOrigins().entrySet().stream()
                             .map(entry -> Arguments.of(
-                                    TypeArgumentModel.of(entry.getValue()),
+                                    TypeVariableModel.of(entry.getValue()),
                                     ModelKind.REFLECTION, entry.getKey())),
                     ctx.getSourceOrigins().entrySet().stream()
                             .map(entry -> Arguments.of(
-                                    TypeArgumentModel.of(entry.getValue()),
+                                    TypeVariableModel.of(entry.getValue()),
                                     ModelKind.SOURCE, entry.getKey())));
+        }
+
+        static final class Checker
+                extends SpecializationChecker<SpecializedModel> {
+            Checker() {
+                super(SpecializedModel.class,
+                        getDeclaredMethods(SpecializedModel.class));
+            }
         }
 
         static final class Equality implements ArgumentsProvider {
             private static final String testNamePattern = "{2}";
 
             @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+            public Stream<Arguments> provideArguments(ExtensionContext context)
+                    throws Exception {
                 var ctx = new Context(context);
 
                 return ctx.getReflectionOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
-                                TypeArgumentModel.of(entry.getValue()),
-                                TypeArgumentModel.of(
+                                TypeVariableModel.of(entry.getValue()),
+                                TypeVariableModel.of(
                                         ctx.getSourceOrigin(entry.getKey())),
                                 entry.getKey()));
-            }
-        }
-
-        static class Checker extends SpecializationChecker<SpecializedModel> {
-            Checker() {
-                super(SpecializedModel.class,
-                        getDeclaredMethods(SpecializedModel.class));
             }
         }
     }
@@ -200,24 +197,24 @@ public class TypeArgumentModelTests {
         @DisplayName("It should have a type argument specialization")
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
-        public void should_HaveSpecialization(TypeArgumentModel model,
+        public void should_HaveSpecialization(TypeVariableModel model,
                 ModelKind kind, String name) {
-            checker.apply(model, "isTypeArgument", "isNonJDKClass");
+            checker.apply(model, "isTypeVariable", "isNonJDKClass");
         }
     }
 
-    static class Sample {
-        List<@Foo ?> anyTypeArgument;
-        List<@Foo ? extends Association> extendsTypeArgument;
-        List<@Foo Association> regularTypeArgument;
-        List<@Foo ? super Association> superTypeArgument;
+    static class Sample<RegularTypeVariable, BoundedTypeVariable extends Sample.Bound> {
+        @Foo
+        private BoundedTypeVariable boundedTypeVariableField;
+        @Foo
+        private RegularTypeVariable regularTypeVariableField;
 
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.TYPE_USE)
         @interface Foo {
         }
 
-        static class Association {
+        static class Bound {
         }
     }
 }

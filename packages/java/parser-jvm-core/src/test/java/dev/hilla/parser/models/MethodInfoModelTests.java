@@ -10,9 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +33,8 @@ import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractCharacteristics;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
@@ -116,8 +120,7 @@ public class MethodInfoModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -176,7 +179,8 @@ public class MethodInfoModelTests {
             return source;
         }
 
-        static final class Characteristics extends Context {
+        static final class Characteristics
+                extends AbstractCharacteristics<Executable, MethodInfo> {
             private static final Map<Executable, String[]> reflectionCharacteristics;
 
             static {
@@ -210,54 +214,44 @@ public class MethodInfoModelTests {
                                 "isSynthetic"));
             }
 
-            private final Map<MethodInfo, String[]> sourceCharacteristics;
-
             Characteristics(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Characteristics(ScanResult source) {
-                super(source);
-                sourceCharacteristics = reflectionCharacteristics.entrySet()
-                        .stream().collect(
-                                Collectors.toMap(
+                super(source, reflectionCharacteristics,
+                        reflectionCharacteristics.entrySet().stream()
+                                .collect(Collectors.toMap(
                                         entry -> getDeclaredMethod(
                                                 entry.getKey(), source),
-                                        Map.Entry::getValue));
-            }
-
-            public Map<Executable, String[]> getReflectionCharacteristics() {
-                return reflectionCharacteristics;
-            }
-
-            public Map<MethodInfo, String[]> getSourceCharacteristics() {
-                return sourceCharacteristics;
+                                        Map.Entry::getValue)));
             }
         }
 
-        static final class Default extends Context {
+        static final class Default extends AbstractContext<Method, MethodInfo> {
             private static final String methodName = "method";
-            private static final Method reflectionOrigin = getDeclaredMethod(
-                    Sample.class, methodName,
-                    List.of(String.class, Sample.ParamDependency.class));
-            private final MethodInfo sourceOrigin;
-
+            private static final Map<String, Method> reflectionOrigins = Arrays
+                    .stream(Sample.class.getDeclaredMethods())
+                    .collect(Collectors.toMap(Method::getName,
+                            Function.identity()));
             Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Default(ScanResult source) {
-                super(source);
-                sourceOrigin = getDeclaredMethod(Sample.class, methodName,
-                        source);
+                super(source, reflectionOrigins,
+                        source.getClassInfo(Sample.class.getName())
+                                .getDeclaredMethodInfo().stream()
+                                .collect(Collectors.toMap(MethodInfo::getName,
+                                        Function.identity())));
             }
 
             public Method getReflectionOrigin() {
-                return reflectionOrigin;
+                return getReflectionOrigin(methodName);
             }
 
             public MethodInfo getSourceOrigin() {
-                return sourceOrigin;
+                return getSourceOrigin(methodName);
             }
         }
     }

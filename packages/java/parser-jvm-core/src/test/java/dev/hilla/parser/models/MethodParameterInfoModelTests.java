@@ -35,6 +35,8 @@ import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractCharacteristics;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodParameterInfo;
@@ -178,7 +180,8 @@ public class MethodParameterInfoModelTests {
             return source;
         }
 
-        static class Characteristics extends Context {
+        static class Characteristics extends
+                AbstractCharacteristics<Parameter, MethodParameterInfo> {
             private static final Map<Parameter, String[]> reflectionCharacteristics;
 
             static {
@@ -218,31 +221,23 @@ public class MethodParameterInfoModelTests {
                         entry(getParameter(enumConstructor, 1), "isSynthetic"));
             }
 
-            private final Map<MethodParameterInfo, String[]> sourceCharacteristics;
-
             Characteristics(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Characteristics(ScanResult source) {
-                super(source);
-                sourceCharacteristics = reflectionCharacteristics.entrySet()
-                        .stream()
-                        .collect(Collectors.toMap(
-                                entry -> getParameter(entry.getKey(), source),
-                                Map.Entry::getValue));
-            }
-
-            public Map<Parameter, String[]> getReflectionCharacteristics() {
-                return reflectionCharacteristics;
-            }
-
-            public Map<MethodParameterInfo, String[]> getSourceCharacteristics() {
-                return sourceCharacteristics;
+                super(source, reflectionCharacteristics,
+                        reflectionCharacteristics.entrySet().stream()
+                                .collect(
+                                        Collectors.toMap(
+                                                entry -> getParameter(
+                                                        entry.getKey(), source),
+                                                Map.Entry::getValue)));
             }
         }
 
-        static class Default extends Context {
+        static class Default
+                extends AbstractContext<Parameter, MethodParameterInfo> {
             private static final List<Class<?>> constructorParams = List
                     .of(Sample.class, String.class, int.class);
 
@@ -252,35 +247,16 @@ public class MethodParameterInfoModelTests {
                     .collect(Collectors.toMap(Parameter::getName,
                             Function.identity()));
 
-            private final Map<String, MethodParameterInfo> sourceOrigins;
-
             Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Default(ScanResult source) {
-                super(source);
-                sourceOrigins = Arrays
+                super(source, reflectionOrigins, Arrays
                         .stream(getDeclaredConstructor(Sample.Dyn.class,
                                 constructorParams, source).getParameterInfo())
                         .collect(Collectors.toMap(MethodParameterInfo::getName,
-                                Function.identity()));
-            }
-
-            public Parameter getReflectionOrigin(String name) {
-                return reflectionOrigins.get(name);
-            }
-
-            public Map<String, Parameter> getReflectionOrigins() {
-                return reflectionOrigins;
-            }
-
-            public MethodParameterInfo getSourceOrigin(String name) {
-                return sourceOrigins.get(name);
-            }
-
-            public Map<String, MethodParameterInfo> getSourceOrigins() {
-                return sourceOrigins;
+                                Function.identity())));
             }
         }
     }

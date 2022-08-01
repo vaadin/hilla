@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ScanResult;
@@ -125,6 +127,17 @@ public class TypeParameterModelTests {
         }
     }
 
+    @DisplayName("It should get annotations")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    @Disabled("Bug in ClassGraph: collected annotations are inaccessible")
+    public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
+            String name) {
+        assertEquals(List.of(Sample.Foo.class.getName()),
+                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                        .collect(Collectors.toList()));
+    }
+
     @Nested
     @DisplayName("As a SpecializedModel")
     public class AsSpecializedModel {
@@ -139,44 +152,23 @@ public class TypeParameterModelTests {
         }
     }
 
-    static final class Context {
+    static final class Context
+            extends AbstractContext<TypeVariable<?>, TypeParameter> {
         private static final Map<String, TypeVariable<?>> reflectionOrigins = Arrays
                 .stream(Sample.class.getTypeParameters()).collect(Collectors
                         .toMap(TypeVariable::getName, Function.identity()));
 
-        private final ScanResult source;
-        private final Map<String, TypeParameter> sourceOrigins;
-
         Context(ScanResult source) {
-            this.source = source;
-            this.sourceOrigins = source.getClassInfo(Sample.class.getName())
-                    .getTypeSignatureOrTypeDescriptor().getTypeParameters()
-                    .stream().collect(Collectors.toMap(TypeParameter::getName,
-                            Function.identity()));
+            super(source, reflectionOrigins,
+                    source.getClassInfo(Sample.class.getName())
+                            .getTypeSignatureOrTypeDescriptor()
+                            .getTypeParameters().stream()
+                            .collect(Collectors.toMap(TypeParameter::getName,
+                                    Function.identity())));
         }
 
         Context(ExtensionContext context) {
             this(SourceExtension.getSource(context));
-        }
-
-        public TypeVariable<?> getReflectionOrigin(String name) {
-            return reflectionOrigins.get(name);
-        }
-
-        public Map<String, TypeVariable<?>> getReflectionOrigins() {
-            return reflectionOrigins;
-        }
-
-        public ScanResult getSource() {
-            return source;
-        }
-
-        public TypeParameter getSourceOrigin(String name) {
-            return sourceOrigins.get(name);
-        }
-
-        public Map<String, TypeParameter> getSourceOrigins() {
-            return sourceOrigins;
         }
     }
 
