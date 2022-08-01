@@ -1,7 +1,8 @@
 package dev.hilla.parser.plugins.nonnull;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AssociationMap;
@@ -14,12 +15,13 @@ import dev.hilla.parser.models.SignatureModel;
 import io.swagger.v3.oas.models.media.Schema;
 
 final class NonnullProcessor {
-    private final Collection<String> annotations;
+    private final Map<String, AnnotationMatcher> annotations;
     private final AssociationMap map;
 
-    public NonnullProcessor(Collection<String> annotations,
+    public NonnullProcessor(Collection<AnnotationMatcher> annotations,
             AssociationMap map) {
-        this.annotations = annotations;
+        this.annotations = annotations.stream().collect(Collectors
+                .toMap(AnnotationMatcher::getName, Function.identity()));
         this.map = map;
     }
 
@@ -31,20 +33,28 @@ final class NonnullProcessor {
     }
 
     private boolean isNonNull(Stream<AnnotationInfoModel> annotationsStream) {
-        return annotationsStream.anyMatch(
-                annotation -> annotations.contains(annotation.getName()));
+        var x = annotationsStream
+                .map(annotation -> annotations.get(annotation.getName()))
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                .orElse(AnnotationMatcher.DEFAULT);
+        return x.isNonNull();
     }
 
     private boolean isNonNull(FieldInfoModel field) {
-        return isNonNull(field.getAnnotationsStream());
+        return isNonNull(Stream.concat(field.getAnnotationsStream(),
+                field.getOwner().getPackage().getAnnotationsStream()));
     }
 
     private boolean isNonNull(MethodInfoModel method) {
-        return isNonNull(method.getAnnotationsStream());
+        return isNonNull(Stream.concat(method.getAnnotationsStream(),
+                method.getOwner().getPackage().getAnnotationsStream()));
     }
 
     private boolean isNonNull(MethodParameterInfoModel parameter) {
-        return isNonNull(parameter.getAnnotationsStream());
+        return isNonNull(Stream.concat(parameter.getAnnotationsStream(),
+                parameter.getOwner().getOwner().getPackage()
+                        .getAnnotationsStream()));
     }
 
     private boolean isNonNull(SignatureModel signature) {
