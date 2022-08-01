@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,12 +13,14 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,6 +31,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
+import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ScanResult;
@@ -35,7 +39,6 @@ import io.github.classgraph.TypeParameter;
 
 @ExtendWith(SourceExtension.class)
 public class TypeParameterModelTests {
-    private static final String defaultParameterName = "RegularTypeParameter";
     private Context ctx;
 
     @BeforeEach
@@ -44,16 +47,38 @@ public class TypeParameterModelTests {
     }
 
     @DisplayName("It should get bounds")
-    @ParameterizedTest(name = ModelProvider.All.testNamePattern)
-    @ArgumentsSource(ModelProvider.All.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_GetBounds(TypeParameterModel model, ModelKind kind,
             String name) {
         switch (name) {
         case "RegularTypeParameter":
-            assertEquals(List.of(), model.getBounds());
+            assertEquals(List.of(Object.class.getName()),
+                    model.getBoundsStream().map(NamedModel.class::cast)
+                            .map(NamedModel::getName)
+                            .collect(Collectors.toList()));
             break;
         case "BoundedTypeParameter":
-            assertEquals(List.of(), model.getBounds());
+            assertEquals(List.of(Sample.Bound.class.getName()),
+                    model.getBoundsStream().map(NamedModel.class::cast)
+                            .map(NamedModel::getName)
+                            .collect(Collectors.toList()));
+            break;
+        }
+    }
+
+    @DisplayName("It should get bounds")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_GetDependencies(TypeParameterModel model, ModelKind kind,
+            String name) {
+        switch (name) {
+        case "RegularTypeParameter":
+            assertEquals(Set.of(), model.getDependencies());
+            break;
+        case "BoundedTypeParameter":
+            assertEquals(Set.of(ClassInfoModel.of(Sample.Bound.class)),
+                    model.getDependencies());
             break;
         }
     }
@@ -87,18 +112,30 @@ public class TypeParameterModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(TypeParameterModel model,
-            ModelKind kind) {
+            ModelKind kind, String name) {
         switch (kind) {
         case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(defaultParameterName),
-                    model.get());
+            assertEquals(ctx.getReflectionOrigin(name), model.get());
             assertTrue(model.isReflection());
             break;
         case SOURCE:
-            assertEquals(ctx.getSourceOrigin(defaultParameterName),
-                    model.get());
+            assertEquals(ctx.getSourceOrigin(name), model.get());
             assertTrue(model.isSource());
             break;
+        }
+    }
+
+    @Nested
+    @DisplayName("As a SpecializedModel")
+    public class AsSpecializedModel {
+        private final ModelProvider.Checker checker = new ModelProvider.Checker();
+
+        @DisplayName("It should have a type argument specialization")
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
+        @ArgumentsSource(ModelProvider.class)
+        public void should_HaveSpecialization(TypeParameterModel model,
+                ModelKind kind, String name) {
+            checker.apply(model, "isTypeParameter", "isNonJDKClass");
         }
     }
 
@@ -144,40 +181,28 @@ public class TypeParameterModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1}";
+        public static final String testNamePattern = "{1} [{2}]";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
-            return Stream.of(
-                    Arguments.of(
-                            TypeParameterModel.of(ctx
-                                    .getReflectionOrigin(defaultParameterName)),
-                            ModelKind.REFLECTION),
-                    Arguments.of(
-                            TypeParameterModel.of(
-                                    ctx.getSourceOrigin(defaultParameterName)),
-                            ModelKind.SOURCE));
+            return Streams.combine(
+                    ctx.getReflectionOrigins().entrySet().stream()
+                            .map(entry -> Arguments.of(
+                                    TypeParameterModel.of(entry.getValue()),
+                                    ModelKind.REFLECTION, entry.getKey())),
+                    ctx.getSourceOrigins().entrySet().stream()
+                            .map(entry -> Arguments.of(
+                                    TypeParameterModel.of(entry.getValue()),
+                                    ModelKind.SOURCE, entry.getKey())));
         }
 
-        static final class All implements ArgumentsProvider {
-            public static final String testNamePattern = "{2}";
-
-            @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
-                var ctx = new Context(context);
-
-                return Streams.combine(
-                        ctx.getReflectionOrigins().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        TypeParameterModel.of(entry.getValue()),
-                                        ModelKind.REFLECTION, entry.getKey())),
-                        ctx.getSourceOrigins().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        TypeParameterModel.of(entry.getValue()),
-                                        ModelKind.SOURCE, entry.getKey())));
+        static final class Checker
+                extends SpecializationChecker<SpecializedModel> {
+            Checker() {
+                super(SpecializedModel.class,
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
 

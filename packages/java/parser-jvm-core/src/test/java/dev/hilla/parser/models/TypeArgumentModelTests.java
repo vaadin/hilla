@@ -51,8 +51,8 @@ public class TypeArgumentModelTests {
     }
 
     @DisplayName("It should get annotations")
-    @ParameterizedTest(name = ModelProvider.All.testNamePattern)
-    @ArgumentsSource(ModelProvider.All.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     @Disabled("ClassGraph bug: you cannot extract annotations for a wildcard")
     public void should_GetAnnotations(TypeArgumentModel model, ModelKind kind,
             String name) {
@@ -62,8 +62,8 @@ public class TypeArgumentModelTests {
     }
 
     @DisplayName("It should have correct widlcard")
-    @ParameterizedTest(name = ModelProvider.All.testNamePattern)
-    @ArgumentsSource(ModelProvider.All.class)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectWildcard(TypeArgumentModel model,
             ModelKind kind, String name) {
         switch (name) {
@@ -111,15 +111,15 @@ public class TypeArgumentModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(TypeArgumentModel model,
-            ModelKind kind) {
+            ModelKind kind, String name) {
         switch (kind) {
         case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(defaultFieldName),
+            assertEquals(ctx.getReflectionOrigin(name),
                     model.get());
             assertTrue(model.isReflection());
             break;
         case SOURCE:
-            assertEquals(ctx.getSourceOrigin(defaultFieldName), model.get());
+            assertEquals(ctx.getSourceOrigin(name), model.get());
             assertTrue(model.isSource());
             break;
         }
@@ -172,41 +172,22 @@ public class TypeArgumentModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        private static final String testNamePattern = "{1}";
+        public static final String testNamePattern = "{1} [{2}]";
 
         @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context) {
+        public Stream<Arguments> provideArguments(
+            ExtensionContext context) {
             var ctx = new Context(context);
 
-            return Stream.of(
-                    Arguments.of(
-                            TypeArgumentModel.of(
-                                    ctx.getReflectionOrigin(defaultFieldName)),
-                            ModelKind.REFLECTION),
-                    Arguments.of(
-                            TypeArgumentModel
-                                    .of(ctx.getSourceOrigin(defaultFieldName)),
-                            ModelKind.SOURCE));
-        }
-
-        static final class All implements ArgumentsProvider {
-            public static final String testNamePattern = "{1} [{2}]";
-
-            @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
-                var ctx = new Context(context);
-
-                return Streams.combine(
-                        ctx.getReflectionOrigins().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        TypeArgumentModel.of(entry.getValue()),
-                                        ModelKind.REFLECTION, entry.getKey())),
-                        ctx.getSourceOrigins().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        TypeArgumentModel.of(entry.getValue()),
-                                        ModelKind.SOURCE, entry.getKey())));
-            }
+            return Streams.combine(
+                ctx.getReflectionOrigins().entrySet().stream()
+                    .map(entry -> Arguments.of(
+                        TypeArgumentModel.of(entry.getValue()),
+                        ModelKind.REFLECTION, entry.getKey())),
+                ctx.getSourceOrigins().entrySet().stream()
+                    .map(entry -> Arguments.of(
+                        TypeArgumentModel.of(entry.getValue()),
+                        ModelKind.SOURCE, entry.getKey())));
         }
 
         static final class Equality implements ArgumentsProvider {
@@ -240,8 +221,8 @@ public class TypeArgumentModelTests {
         private final ModelProvider.Checker checker = new ModelProvider.Checker();
 
         @DisplayName("It should have a type argument specialization")
-        @ParameterizedTest(name = ModelProvider.All.testNamePattern)
-        @ArgumentsSource(ModelProvider.All.class)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
+        @ArgumentsSource(ModelProvider.class)
         public void should_HaveSpecialization(TypeArgumentModel model,
                 ModelKind kind, String name) {
             checker.apply(model, "isTypeArgument", "isNonJDKClass");
@@ -250,7 +231,7 @@ public class TypeArgumentModelTests {
 
     static class Sample {
         List<@Foo ?> anyTypeArgument;
-        List<@Foo ? extends @Foo Association> extendsTypeArgument;
+        List<@Foo ? extends Association> extendsTypeArgument;
         List<@Foo Association> regularTypeArgument;
         List<@Foo ? super Association> superTypeArgument;
 
