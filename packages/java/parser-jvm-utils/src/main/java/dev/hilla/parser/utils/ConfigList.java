@@ -103,10 +103,8 @@ public interface ConfigList<Item> {
                         stream);
             }
 
-            return Collections.unmodifiableCollection(stream
-                    .collect(Collectors.toMap(Object::hashCode,
-                            Function.identity(), (oldValue, value) -> value))
-                    .values());
+            return Collections
+                    .unmodifiableCollection(stream.collect(Collectors.toSet()));
         }
     }
 }

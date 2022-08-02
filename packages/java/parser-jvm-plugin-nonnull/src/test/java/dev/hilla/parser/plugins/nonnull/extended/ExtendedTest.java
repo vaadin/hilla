@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
+import dev.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
@@ -19,8 +20,9 @@ public class ExtendedTest {
     public void should_ApplyNonNullAnnotation()
             throws IOException, URISyntaxException {
         var plugin = new NonnullPlugin();
-        plugin.setConfig(
-                new NonnullPluginConfig(Set.of(Nonnull.class.getName()), null));
+        plugin.setConfig(new NonnullPluginConfig(Set
+                .of(new AnnotationMatcher(Nonnull.class.getName(), false, 0)),
+                null));
 
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(helper.getTargetDir().toString()))

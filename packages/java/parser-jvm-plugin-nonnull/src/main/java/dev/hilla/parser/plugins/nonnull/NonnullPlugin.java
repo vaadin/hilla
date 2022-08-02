@@ -14,7 +14,7 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
 public final class NonnullPlugin implements Plugin.Processor {
-    private Collection<String> annotations = NonnullPluginConfig.Processor.defaults;
+    private Collection<AnnotationMatcher> annotations = NonnullPluginConfig.Processor.defaults;
     private int order = 100;
     private SharedStorage storage;
 
