@@ -182,11 +182,13 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(getFieldDependenciesStream(),
-                getMethodDependenciesStream(), getInnerClassesStream(),
-                getSuperClassStream(), getInterfacesStream(),
-                getInterfaceDependenciesStream(),
-                getTypeParameterDependenciesStream()).distinct();
+        return Streams
+                .combine(getFieldDependenciesStream(),
+                        getMethodDependenciesStream(), getInnerClassesStream(),
+                        getSuperClassStream(), getInterfacesStream(),
+                        getInterfaceDependenciesStream(),
+                        getTypeParameterDependenciesStream())
+                .filter(ClassInfoModel::isNonJDKClass).distinct();
     }
 
     public Set<ClassInfoModel> getFieldDependencies() {
