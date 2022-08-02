@@ -38,6 +38,17 @@
 
   <build>
     <plugins>
+      <!-- create tsgen symlink (see pluginManagement) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>dev.hilla</groupId>
+        <artifactId>generator-maven-plugin</artifactId>
+      </plugin>
+
       <plugin>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-maven-plugin</artifactId>
