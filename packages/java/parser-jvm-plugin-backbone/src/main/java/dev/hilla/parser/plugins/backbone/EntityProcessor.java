@@ -124,8 +124,8 @@ final class EntityProcessor {
 
         public ComponentSchemaPropertyProcessor(FieldInfoModel field) {
             this.key = field.getName();
-            this.value = new SchemaProcessor(field.getType(), new SignatureInfo(field), storage)
-                    .process();
+            this.value = new SchemaProcessor(field.getType(),
+                    new SignatureInfo(field), storage).process();
         }
 
         public String getKey() {

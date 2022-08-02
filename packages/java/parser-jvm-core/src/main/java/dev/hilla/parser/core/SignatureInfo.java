@@ -1,8 +1,8 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
-
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.Model;
 

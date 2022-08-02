@@ -99,8 +99,8 @@ final class EndpointProcessor {
             var requestMap = new ObjectSchema();
 
             for (var parameter : method.getParameters()) {
-                var schema = new SchemaProcessor(parameter.getType(), new SignatureInfo(parameter), storage)
-                        .process();
+                var schema = new SchemaProcessor(parameter.getType(),
+                        new SignatureInfo(parameter), storage).process();
                 requestMap.addProperties(parameter.getName(), schema);
                 storage.getAssociationMap().addParameter(schema, parameter);
             }
@@ -115,7 +115,8 @@ final class EndpointProcessor {
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                var schema = new SchemaProcessor(resultType, new SignatureInfo(method), storage).process();
+                var schema = new SchemaProcessor(resultType,
+                        new SignatureInfo(method), storage).process();
 
                 content.addMediaType("application/json",
                         new MediaType().schema(schema));
