@@ -11,7 +11,6 @@ import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
-import dev.hilla.parser.models.NamedModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
@@ -133,14 +132,16 @@ final class SchemaProcessor {
     }
 
     private Schema<?> mapSchema() {
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
         var values = new SchemaProcessor(typeArguments.get(1), info, storage)
                 .process();
 
-        var schema = nullify(new MapSchema(), true).additionalProperties(values);
+        var schema = nullify(new MapSchema(), true)
+                .additionalProperties(values);
 
-        if (!type.isJDKClass()) {
-            schema.addExtension("x-classname", ((NamedModel) type).getName());
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-classname", _type.getName());
         }
 
         return schema;
