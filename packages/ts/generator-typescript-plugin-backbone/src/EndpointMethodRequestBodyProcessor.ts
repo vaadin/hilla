@@ -18,7 +18,7 @@ export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject
 export type EndpointMethodRequestBodyProcessingResult = Readonly<{
   parameters: readonly ParameterDeclaration[];
   packedParameters?: ObjectLiteralExpression;
-  initParam: ts.Identifier;
+  initParam: ts.Identifier | undefined;
 }>;
 
 export default class EndpointMethodRequestBodyProcessor {
@@ -27,13 +27,13 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #dependencies: DependencyManager;
   readonly #owner: Plugin;
   readonly #requestBody?: EndpointMethodRequestBody;
-  readonly #initTypeIdentifier: ts.Identifier;
+  readonly #initTypeIdentifier: ts.Identifier | undefined;
 
   public constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
     owner: Plugin,
-    initTypeIdentifier: ts.Identifier,
+    initTypeIdentifier: ts.Identifier | undefined,
   ) {
     this.#owner = owner;
     this.#dependencies = dependencies;
@@ -42,24 +42,9 @@ export default class EndpointMethodRequestBodyProcessor {
   }
 
   public process(): EndpointMethodRequestBodyProcessingResult {
-    if (!this.#requestBody) {
-      return {
-        parameters: [
-          ts.factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            undefined,
-            EndpointMethodRequestBodyProcessor.#defaultInitParamName,
-            ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-            ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
-          ),
-        ],
-        packedParameters: ts.factory.createObjectLiteralExpression(),
-        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
-      };
-    }
-
-    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
+    const parameterData = this.#requestBody
+      ? this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema)
+      : [];
     const parameterNames = parameterData.map(([name]) => name);
     let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
 
@@ -67,20 +52,21 @@ export default class EndpointMethodRequestBodyProcessor {
       initParamName = `_${initParamName}`;
     }
 
-    return {
-      parameters: [
-        ...parameterData.map(([name, schema]) => {
-          const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
+    const parameterDeclarations = parameterData.map(([name, schema]) => {
+      const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
-          return ts.factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            undefined,
-            name,
-            undefined,
-            ts.factory.createUnionTypeNode(nodes),
-          );
-        }),
+      return ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        undefined,
+        name,
+        undefined,
+        ts.factory.createUnionTypeNode(nodes),
+      );
+    });
+
+    if (this.#initTypeIdentifier) {
+      parameterDeclarations.push(
         ts.factory.createParameterDeclaration(
           undefined,
           undefined,
@@ -89,11 +75,15 @@ export default class EndpointMethodRequestBodyProcessor {
           ts.factory.createToken(ts.SyntaxKind.QuestionToken),
           ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
         ),
-      ],
+      );
+    }
+
+    return {
+      parameters: parameterDeclarations,
       packedParameters: ts.factory.createObjectLiteralExpression(
         parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
       ),
-      initParam: ts.factory.createIdentifier(initParamName),
+      initParam: this.#initTypeIdentifier ? ts.factory.createIdentifier(initParamName) : undefined,
     };
   }
 

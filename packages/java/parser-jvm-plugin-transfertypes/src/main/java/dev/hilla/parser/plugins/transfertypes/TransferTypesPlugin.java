@@ -1,6 +1,5 @@
 package dev.hilla.parser.plugins.transfertypes;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -8,13 +7,12 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
 public final class TransferTypesPlugin implements Plugin.Preprocessor {
     private final List<Replacer> replacers = List.of(new PageableReplacer(),
-            new UUIDReplacer());
+            new UUIDReplacer(), new PushTypeReplacer());
     private int order = -100;
 
     @Override

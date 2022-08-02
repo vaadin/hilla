@@ -31,7 +31,8 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
                     }
-                  ]
+                  ],
+                  "x-class-name": "org.springframework.data.domain.Sort"
                 }
               }
             }

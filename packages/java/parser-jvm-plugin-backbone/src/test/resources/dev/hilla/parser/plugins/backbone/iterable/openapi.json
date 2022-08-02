@@ -35,7 +35,8 @@
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
-                  }
+                  },
+                  "x-class-name": "dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$AnotherCustomIterable"
                 }
               }
             }
@@ -89,7 +90,8 @@
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
                       }
                     ]
-                  }
+                  },
+                  "x-class-name": "dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint$CustomIterable"
                 }
               }
             }

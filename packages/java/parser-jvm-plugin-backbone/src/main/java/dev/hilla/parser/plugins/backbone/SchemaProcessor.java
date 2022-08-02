@@ -85,6 +85,14 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
+        if (type.isNonJDKClass() && type instanceof ClassRefSignatureModel) {
+            var className = ((ClassRefSignatureModel) type).getClassName();
+
+            if (!result.toString().contains(className)) {
+                result.addExtension("x-class-name", className);
+            }
+        }
+
         storage.getAssociationMap().addSignature(result, type, info);
 
         return result;
