@@ -12,7 +12,7 @@ import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
-public final class TransferTypesPlugin implements Plugin.Processor {
+public final class TransferTypesPlugin implements Plugin.Preprocessor {
     private final List<Replacer> replacers = List.of(new PageableReplacer(),
             new UUIDReplacer());
     private int order = -100;
@@ -28,8 +28,7 @@ public final class TransferTypesPlugin implements Plugin.Processor {
     }
 
     @Override
-    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-            @Nonnull Collection<ClassInfoModel> entities) {
+    public void preprocess() {
         for (var replacer : replacers) {
             replacer.process();
         }

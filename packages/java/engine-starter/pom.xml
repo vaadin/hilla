@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-project</artifactId>
+    <version>1.2-SNAPSHOT</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>engine-starter</artifactId>
+  <packaging>jar</packaging>
+  <name>Hilla Engine Starter</name>
+
+  <properties>
+    <flow.version>23.2-SNAPSHOT</flow.version>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>vaadin-prereleases</id>
+      <url>
+        https://maven.vaadin.com/vaadin-prereleases/
+      </url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-server</artifactId>
+      <version>${flow.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

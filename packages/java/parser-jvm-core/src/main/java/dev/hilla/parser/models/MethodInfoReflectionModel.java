@@ -157,7 +157,7 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
 
         @Override
         protected SignatureModel prepareResultType() {
-            return SignatureModel.of(get().getAnnotatedReturnType());
+            return SignatureModel.of(origin.getAnnotatedReturnType());
         }
     }
 }

@@ -28,7 +28,6 @@ final class TypeParameterReflectionModel extends TypeParameterModel
         // TODO: Temporary limitation because ClassGraph doesn't provide stored
         // annotations for TypeParameter.
         return List.of();
-        // return processAnnotations(origin.getAnnotations());
     }
 
     @Override

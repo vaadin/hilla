@@ -17,6 +17,7 @@
 
   <modules>
     <module>packages/java/endpoint</module>
+    <module>packages/java/engine-starter</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
@@ -339,7 +340,7 @@
           <executions>
               <execution>
                   <id>attach-sources</id>
-                  <phase>verify</phase>
+                  <phase>package</phase>
                   <goals>
                       <goal>jar-no-fork</goal>
                   </goals>
@@ -354,7 +355,7 @@
           <executions>
               <execution>
                   <id>attach-javadocs</id>
-                  <phase>verify</phase>
+                  <phase>package</phase>
                   <goals>
                       <goal>jar</goal>
                   </goals>

@@ -218,6 +218,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
+    protected PackageInfoModel preparePackage() {
+        return PackageInfoModel.of(origin.getPackageInfo());
+    }
+
+    @Override
     protected ClassInfoModel prepareSuperClass() {
         var superClass = origin.getSuperclass();
         return superClass != null ? ClassInfoModel.of(superClass) : null;

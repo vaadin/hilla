@@ -19,6 +19,10 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
         this.origin = origin;
     }
 
+    private static boolean isNonNativeObjectType(AnnotatedType type) {
+        return type.getType() != Object.class;
+    }
+
     @Override
     public AnnotatedType get() {
         return origin;
@@ -62,7 +66,7 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
                 ((AnnotatedWildcardType) origin).getAnnotatedUpperBounds())
                 : Stream.of(origin);
 
-        return stream.filter(type -> type.getType() != Object.class)
+        return stream.filter(TypeArgumentReflectionModel::isNonNativeObjectType)
                 .map(SignatureModel::of).distinct()
                 .collect(Collectors.toList());
     }
