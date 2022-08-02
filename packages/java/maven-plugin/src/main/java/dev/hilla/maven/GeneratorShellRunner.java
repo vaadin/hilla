@@ -66,4 +66,18 @@ final class GeneratorShellRunner {
                     "Generator execution failed with exit code " + exitCode);
         }
     }
+
+    public void runNpmInstall() throws InterruptedException, IOException {
+        var builder = new ProcessBuilder().command(List.of("npm", "install"))
+                .inheritIO();
+
+        var process = builder.start();
+
+        var exitCode = process.waitFor();
+
+        if (exitCode != 0) {
+            throw new GeneratorException(
+                    "`npm install` failed with exit code " + exitCode);
+        }
+    }
 }

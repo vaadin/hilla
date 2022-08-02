@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 
@@ -123,8 +124,8 @@ final class EntityProcessor {
 
         public ComponentSchemaPropertyProcessor(FieldInfoModel field) {
             this.key = field.getName();
-            this.value = new SchemaProcessor(field.getType(), storage)
-                    .process();
+            this.value = new SchemaProcessor(field.getType(),
+                    new SignatureInfo(field), storage).process();
         }
 
         public String getKey() {
