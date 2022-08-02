@@ -27,7 +27,7 @@ final class NonnullProcessor {
         map.getFields().forEach(this::processField);
         map.getMethods().forEach(this::processMethod);
         map.getParameters().forEach(this::processParameter);
-        map.getTypes().forEach(this::processSchema);
+        map.getSignatures().forEach(this::processSchema);
     }
 
     private boolean isNonNull(Stream<AnnotationInfoModel> annotationsStream) {
