@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,7 +54,8 @@ public class AnnotationInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInfo(AnnotationInfoModel model, ModelKind kind) {
-        assertEquals(ClassInfoModel.of(Sample.Foo.class), model.getClassInfo());
+        assertEquals(Optional.of(ClassInfoModel.of(Sample.Foo.class)),
+                model.getClassInfo());
     }
 
     @DisplayName("It should get annotations parameters")
@@ -118,7 +120,9 @@ public class AnnotationInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(AnnotationInfoModel model,
             ModelKind kind) {
-        assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
+        assertEquals(
+                Set.of(ClassInfoModel.of(Sample.class),
+                        ClassInfoModel.of(Sample.Enum.class)),
                 model.getDependencies());
     }
 
