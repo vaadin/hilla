@@ -50,7 +50,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.147</classgraph.version>
+    <classgraph.version>4.8.148</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.34</swagger.codegen.version>
