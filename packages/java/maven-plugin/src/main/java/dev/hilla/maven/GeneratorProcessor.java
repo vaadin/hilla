@@ -28,15 +28,18 @@ final class GeneratorProcessor {
 
     private final Log logger;
     private final MavenProject project;
+    private final boolean runNpmInstall;
     private String input;
     private String outputDir = "frontend/generated";
     private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
             DEFAULT_PLUGINS);
     private boolean verbose = false;
 
-    public GeneratorProcessor(MavenProject project, Log logger) {
+    public GeneratorProcessor(MavenProject project, Log logger,
+            boolean runNpmInstall) {
         this.logger = logger;
         this.project = project;
+        this.runNpmInstall = runNpmInstall;
     }
 
     public GeneratorProcessor input(@Nonnull String input) {
@@ -72,6 +75,11 @@ final class GeneratorProcessor {
         preparePlugins(runner);
         prepareVerbose(runner);
         prepareInput(runner);
+
+        if (runNpmInstall) {
+            runner.runNpmInstall();
+        }
+
         runner.run();
     }
 
