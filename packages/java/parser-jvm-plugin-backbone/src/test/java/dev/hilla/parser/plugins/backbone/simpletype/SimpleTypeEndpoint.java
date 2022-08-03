@@ -73,4 +73,8 @@ public class SimpleTypeEndpoint {
     public String getString() {
         return "test";
     }
+
+    public void doSomething() {
+        // no-op
+    };
 }
