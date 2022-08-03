@@ -21,7 +21,10 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     private final ParserConfiguration parser = new ParserConfiguration();
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
+    @Parameter(defaultValue = "false")
+    private boolean runNpmInstall;
 
+    @Override
     public void execute() throws EndpointCodeGeneratorMojoException {
         var result = parseJavaCode();
         generateTypeScriptCode(result);
@@ -31,8 +34,9 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
             throws EndpointCodeGeneratorMojoException {
         var logger = getLog();
         try {
-            var executor = new GeneratorProcessor(project, logger)
-                    .input(openAPI).verbose(logger.isDebugEnabled());
+            var executor = new GeneratorProcessor(project, logger,
+                    runNpmInstall).input(openAPI)
+                            .verbose(logger.isDebugEnabled());
 
             generator.getOutputDir().ifPresent(executor::outputDir);
             generator.getPlugins().ifPresent(executor::plugins);

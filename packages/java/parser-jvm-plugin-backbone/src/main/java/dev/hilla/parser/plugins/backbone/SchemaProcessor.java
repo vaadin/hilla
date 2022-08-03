@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
@@ -29,14 +30,14 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
     private static final Schema<?> anySchemaSample = new ObjectSchema();
-
+    private final SignatureInfo info;
     private final SharedStorage storage;
     private final SignatureModel type;
 
     public SchemaProcessor(@Nonnull SignatureModel type,
-            @Nonnull SharedStorage storage) {
+            @Nonnull SignatureInfo info, @Nonnull SharedStorage storage) {
         this.storage = Objects.requireNonNull(storage);
-
+        this.info = Objects.requireNonNull(info);
         this.type = Objects
                 .requireNonNull(type) instanceof ClassRefSignatureModel
                         ? storage.getClassMappers()
@@ -84,7 +85,7 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
-        storage.getAssociationMap().addType(result, type);
+        storage.getAssociationMap().addSignature(result, type, info);
 
         return result;
     }
@@ -95,7 +96,7 @@ final class SchemaProcessor {
 
     private Schema<?> arraySchema() {
         var nestedType = ((ArraySignatureModel) type).getNestedType();
-        var items = new SchemaProcessor(nestedType, storage).process();
+        var items = new SchemaProcessor(nestedType, info, storage).process();
 
         return nullify(new ArraySchema().items(items), true);
     }
@@ -122,8 +123,8 @@ final class SchemaProcessor {
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
 
         if (typeArguments.size() > 0) {
-            return schema
-                    .items(new SchemaProcessor(typeArguments.get(0), storage)
+            return schema.items(
+                    new SchemaProcessor(typeArguments.get(0), info, storage)
                             .process());
         }
 
@@ -132,7 +133,7 @@ final class SchemaProcessor {
 
     private Schema<?> mapSchema() {
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
-        var values = new SchemaProcessor(typeArguments.get(1), storage)
+        var values = new SchemaProcessor(typeArguments.get(1), info, storage)
                 .process();
 
         return nullify(new MapSchema(), true).additionalProperties(values);
@@ -146,7 +147,8 @@ final class SchemaProcessor {
     private Schema<?> optionalSchema() {
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), storage).process();
+        return new SchemaProcessor(typeArguments.get(0), info, storage)
+                .process();
     }
 
     private Schema<?> refSchema() {
@@ -170,7 +172,7 @@ final class SchemaProcessor {
         var types = ((TypeArgumentModel) type).getAssociatedTypes();
 
         return types.size() > 0
-                ? new SchemaProcessor(types.get(0), storage).process()
+                ? new SchemaProcessor(types.get(0), info, storage).process()
                 : anySchema();
     }
 
@@ -179,13 +181,14 @@ final class SchemaProcessor {
                 .filter(Objects::nonNull)
                 .filter(bound -> !bound.isNativeObject())
                 .<Schema<?>> map(
-                        bound -> new SchemaProcessor(bound, storage).process())
+                        bound -> new SchemaProcessor(bound, info, storage)
+                                .process())
                 .filter(schema -> !Objects.equals(schema, anySchemaSample))
                 .findFirst().orElseGet(this::anySchema);
     }
 
     private Schema<?> typeVariableSchema() {
-        return new SchemaProcessor(((TypeVariableModel) type).resolve(),
+        return new SchemaProcessor(((TypeVariableModel) type).resolve(), info,
                 storage).process();
     }
 }

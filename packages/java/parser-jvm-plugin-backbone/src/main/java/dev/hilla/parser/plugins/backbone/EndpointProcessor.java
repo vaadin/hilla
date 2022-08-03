@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
@@ -98,8 +99,8 @@ final class EndpointProcessor {
             var requestMap = new ObjectSchema();
 
             for (var parameter : method.getParameters()) {
-                var schema = new SchemaProcessor(parameter.getType(), storage)
-                        .process();
+                var schema = new SchemaProcessor(parameter.getType(),
+                        new SignatureInfo(parameter), storage).process();
                 requestMap.addProperties(parameter.getName(), schema);
                 storage.getAssociationMap().addParameter(schema, parameter);
             }
@@ -114,7 +115,8 @@ final class EndpointProcessor {
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                var schema = new SchemaProcessor(resultType, storage).process();
+                var schema = new SchemaProcessor(resultType,
+                        new SignatureInfo(method), storage).process();
 
                 content.addMediaType("application/json",
                         new MediaType().schema(schema));
