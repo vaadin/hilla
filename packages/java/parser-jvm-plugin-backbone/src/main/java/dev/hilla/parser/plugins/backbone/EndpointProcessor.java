@@ -110,7 +110,7 @@ final class EndpointProcessor {
         }
 
         private ApiResponses createResponses() {
-            var content = new Content();
+            var response = new ApiResponse().description("");
 
             var resultType = method.getResultType();
 
@@ -118,13 +118,13 @@ final class EndpointProcessor {
                 var schema = new SchemaProcessor(resultType,
                         new SignatureInfo(method), storage).process();
 
-                content.addMediaType("application/json",
-                        new MediaType().schema(schema));
+                response.setContent(new Content().addMediaType(
+                        "application/json", new MediaType().schema(schema)));
+
                 storage.getAssociationMap().addMethod(schema, method);
             }
 
-            return new ApiResponses().addApiResponse("200",
-                    new ApiResponse().content(content).description(""));
+            return new ApiResponses().addApiResponse("200", response);
         }
     }
 }
