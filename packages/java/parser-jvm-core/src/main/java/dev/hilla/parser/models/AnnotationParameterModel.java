@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -12,17 +13,20 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
 
     public static AnnotationParameterModel of(@Nonnull String name,
             @Nonnull Object value) {
-        return of(Map.entry(name, value));
+        return of(Map.entry(Objects.requireNonNull(name),
+                Objects.requireNonNull(value)));
     }
 
     public static <T> AnnotationParameterModel of(
             @Nonnull Map.Entry<String, T> origin) {
-        return new AnnotationParameterReflectionModel<>(origin);
+        return new AnnotationParameterReflectionModel<>(
+                Objects.requireNonNull(origin));
     }
 
     public static AnnotationParameterModel of(
             @Nonnull AnnotationParameterValue origin) {
-        return new AnnotationParameterSourceModel(origin);
+        return new AnnotationParameterSourceModel(
+                Objects.requireNonNull(origin));
     }
 
     @Override

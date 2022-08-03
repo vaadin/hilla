@@ -132,11 +132,19 @@ final class SchemaProcessor {
     }
 
     private Schema<?> mapSchema() {
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
         var values = new SchemaProcessor(typeArguments.get(1), info, storage)
                 .process();
 
-        return nullify(new MapSchema(), true).additionalProperties(values);
+        var schema = nullify(new MapSchema(), true)
+                .additionalProperties(values);
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-classname", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> numberSchema() {

@@ -15,14 +15,6 @@ final class MethodInfoSourceModel extends MethodInfoModel
     }
 
     @Override
-    public boolean equalsIgnoreParameters(MethodInfoModel other) {
-        return origin.getName().equals(other.getName())
-                && origin.getModifiers() == other.getModifiers()
-                && getResultType().equals(other.getResultType())
-                && origin.getClassName().equals(other.getClassName());
-    }
-
-    @Override
     public MethodInfo get() {
         return origin;
     }
@@ -43,13 +35,6 @@ final class MethodInfoSourceModel extends MethodInfoModel
     }
 
     @Override
-    public int hashCodeIgnoreParameters() {
-        return origin.getName().hashCode() + 11 * getResultType().hashCode()
-                + 17 * origin.getModifiers()
-                + 23 * origin.getClassName().hashCode();
-    }
-
-    @Override
     public boolean isAbstract() {
         return origin.isAbstract();
     }
@@ -57,6 +42,11 @@ final class MethodInfoSourceModel extends MethodInfoModel
     @Override
     public boolean isBridge() {
         return origin.isBridge();
+    }
+
+    @Override
+    public boolean isConstructor() {
+        return origin.isConstructor();
     }
 
     @Override

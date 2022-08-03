@@ -227,4 +227,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
         var superClass = origin.getSuperclass();
         return superClass != null ? ClassInfoModel.of(superClass) : null;
     }
+
+    @Override
+    protected List<TypeParameterModel> prepareTypeParameters() {
+        return origin.getTypeSignatureOrTypeDescriptor().getTypeParameters()
+                .stream().map(TypeParameterModel::of)
+                .collect(Collectors.toList());
+    }
 }

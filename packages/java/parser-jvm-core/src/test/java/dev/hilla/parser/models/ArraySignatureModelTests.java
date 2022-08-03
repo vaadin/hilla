@@ -51,23 +51,6 @@ public class ArraySignatureModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(ArraySignatureModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {
@@ -93,8 +76,25 @@ public class ArraySignatureModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ArraySignatureModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
+    }
+
     @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(ArraySignatureModel model,
             ModelKind kind) {
@@ -105,7 +105,7 @@ public class ArraySignatureModelTests {
     }
 
     @DisplayName("It should provide nested type")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
             ModelKind kind) {
@@ -128,17 +128,12 @@ public class ArraySignatureModelTests {
         }
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
-    @interface Bar {
-    }
-
     static final class Context {
         private static final String fieldName = "foo";
         private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType())
                         .getAnnotatedGenericComponentType()
-                        .getAnnotation(Bar.class);
+                        .getAnnotation(Sample.Bar.class);
         private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;
@@ -167,11 +162,10 @@ public class ArraySignatureModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchFieldException {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -195,7 +189,7 @@ public class ArraySignatureModelTests {
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
         @DisplayName("It should access annotations")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotations(ArraySignatureModel model,
                 ModelKind kind) {
@@ -210,7 +204,7 @@ public class ArraySignatureModelTests {
         private final ModelProvider.Checker checker = new ModelProvider.Checker();
 
         @DisplayName("It should have an array specialization")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveArraySpecialization(ArraySignatureModel model,
                 ModelKind kind) {
@@ -224,5 +218,10 @@ public class ArraySignatureModelTests {
     static class Sample {
         @Bar
         private Dependency[] foo;
+
+        @Retention(RetentionPolicy.RUNTIME)
+        @Target(ElementType.TYPE_USE)
+        @interface Bar {
+        }
     }
 }

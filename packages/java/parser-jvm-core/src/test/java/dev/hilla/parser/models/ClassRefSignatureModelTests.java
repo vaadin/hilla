@@ -178,19 +178,17 @@ public class ClassRefSignatureModelTests {
         case REFLECTION_COMPLETE:
         case SOURCE: {
             assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
-                    model.getOwner().map(ClassRefSignatureModel::getClassName)
+                    model.getOwner().map(ClassRefSignatureModel::getName)
                             .orElse(null));
 
             assertEquals(Sample.class.getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
-                            .orElse(null));
+                            .map(ClassRefSignatureModel::getName).orElse(null));
 
             assertEquals(getClass().getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
                             .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassName)
-                            .orElse(null));
+                            .map(ClassRefSignatureModel::getName).orElse(null));
 
             assertEquals(Optional.empty(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
@@ -208,10 +206,10 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
+            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
             String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(origins.getKey());
-        var sourceModel = ClassRefSignatureModel.of(origins.getValue());
+        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
+        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
@@ -220,10 +218,10 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSourceAndReflectionModelsEqual(
-            Map.Entry<AnnotatedType, ClassRefTypeSignature> origins,
+            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
             String testName) {
-        var reflectionModel = ClassRefSignatureModel.of(origins.getKey());
-        var sourceModel = ClassRefSignatureModel.of(origins.getValue());
+        var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
+        var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -235,13 +233,38 @@ public class ClassRefSignatureModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ClassRefSignatureModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION_COMPLETE:
+            assertEquals(
+                    ctx.getCompleteReflectionOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case REFLECTION_BARE:
+            assertEquals(ctx.getBareReflectionOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(ModelProvider.fieldName),
+                    model.get());
+            assertTrue(model.isSource());
+            break;
+        }
+    }
+
     @DisplayName("It should resolve underlying class correctly")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ResolveUnderlyingClass(ClassRefSignatureModel model,
             ModelKind kind) {
         assertEquals(Sample.DynamicParametrizedDependency.Sub.class.getName(),
-                model.getClassName());
+                model.getName());
     }
 
     @DisplayName("It should resolve underlying type arguments")
@@ -293,8 +316,7 @@ public class ClassRefSignatureModelTests {
         public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             var complete = ctx.getCompleteReflectionOrigin(fieldName);
@@ -319,10 +341,10 @@ public class ClassRefSignatureModelTests {
         }
 
         static final class Equality implements ArgumentsProvider {
-            public static final String testNamePattern = "BOTH [{1}]";
+            public static final String testNamePattern = "BOTH [{2}]";
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Default(context);
 
@@ -330,7 +352,7 @@ public class ClassRefSignatureModelTests {
                     var complete = ctx.getCompleteReflectionOrigin(name);
                     var source = ctx.getSourceOrigin(name);
 
-                    return Arguments.of(Map.entry(complete, source), name);
+                    return Arguments.of(complete, source, name);
                 });
             }
         }
@@ -374,7 +396,7 @@ public class ClassRefSignatureModelTests {
                                     "isClassRef", "isJDKClass"));
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 

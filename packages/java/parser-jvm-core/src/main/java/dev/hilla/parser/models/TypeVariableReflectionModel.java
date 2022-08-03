@@ -29,6 +29,6 @@ final class TypeVariableReflectionModel extends TypeVariableModel
 
     @Override
     protected TypeParameterModel prepareResolved() {
-        return TypeParameterModel.of(origin);
+        return TypeParameterModel.of((TypeVariable<?>) origin.getType());
     }
 }

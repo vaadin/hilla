@@ -1,15 +1,20 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredConstructor;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +33,8 @@ import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
+import dev.hilla.parser.test.helpers.context.AbstractCharacteristics;
+import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
@@ -43,7 +50,7 @@ public class MethodInfoModelTests {
     }
 
     @DisplayName("It should provide method dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetDependencies(MethodInfoModel model, ModelKind kind) {
         var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class),
@@ -78,63 +85,42 @@ public class MethodInfoModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(MethodInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
+    }
+
     @DisplayName("As a method model with characteristics")
     @Nested
     public class AsCharacterizedMethodModel {
-        private final CharacteristicsModelProvider.Checker checker = new CharacteristicsModelProvider.Checker();
+        private final ModelProvider.Characteristics.Checker checker = new ModelProvider.Characteristics.Checker();
 
         @DisplayName("It should detect method characteristics correctly")
-        @ParameterizedTest(name = CharacteristicsModelProvider.testName)
-        @ArgumentsSource(CharacteristicsModelProvider.class)
+        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
+        @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(MethodInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
         }
     }
 
-    public static class CharacteristicsModelProvider
-            implements ArgumentsProvider {
-        public static final String testName = "{2} [{3}]";
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) throws NoSuchMethodException {
-            var ctx = new Context.Characteristics(context);
-
-            return Streams.combine(
-                    ctx.getReflectionCharacteristics().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    MethodInfoModel.of(entry.getKey()),
-                                    entry.getValue(), ModelKind.REFLECTION,
-                                    entry.getKey().getName())),
-                    ctx.getSourceCharacteristics().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    MethodInfoModel.of(entry.getKey()),
-                                    entry.getValue(), ModelKind.SOURCE,
-                                    entry.getKey().getName())));
-        }
-
-        public static final class Checker
-                extends SpecializationChecker<MethodInfoModel> {
-            private static final List<String> allowedMethods = List.of(
-                    "isAbstract", "isBridge", "isFinal", "isNative",
-                    "isPrivate", "isProtected", "isPublic", "isStatic",
-                    "isStrict", "isSynchronized", "isSynthetic", "isVarArgs");
-
-            public Checker() {
-                super(MethodInfoModel.class,
-                        getDeclaredMethods(MethodInfoModel.class),
-                        allowedMethods);
-            }
-        }
-    }
-
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -142,6 +128,43 @@ public class MethodInfoModelTests {
                             ModelKind.REFLECTION),
                     Arguments.of(MethodInfoModel.of(ctx.getSourceOrigin()),
                             ModelKind.SOURCE));
+        }
+
+        public static class Characteristics implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            @Override
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Characteristics(context);
+
+                return Streams.combine(ctx.getReflectionCharacteristics()
+                        .entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                MethodInfoModel.of(entry.getKey()),
+                                entry.getValue(), ModelKind.REFLECTION,
+                                entry.getKey().getName())),
+                        ctx.getSourceCharacteristics().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        MethodInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getName())));
+            }
+
+            public static final class Checker
+                    extends SpecializationChecker<MethodInfoModel> {
+                private static final List<String> allowedMethods = List.of(
+                        "isAbstract", "isBridge", "isConstructor", "isFinal",
+                        "isNative", "isPrivate", "isProtected", "isPublic",
+                        "isStatic", "isStrict", "isSynchronized", "isSynthetic",
+                        "isVarArgs");
+
+                public Checker() {
+                    super(MethodInfoModel.class,
+                            getDeclaredMethods(MethodInfoModel.class),
+                            allowedMethods);
+                }
+            }
         }
     }
 
@@ -156,12 +179,20 @@ public class MethodInfoModelTests {
             return source;
         }
 
-        static final class Characteristics extends Context {
-            private static final Map<Method, String[]> reflectionCharacteristics;
+        static final class Characteristics
+                extends AbstractCharacteristics<Executable, MethodInfo> {
+            private static final Map<Executable, String[]> reflectionCharacteristics;
 
             static {
                 var refClass = Sample.Characteristics.class;
+
+                var bridgeMethod = getDeclaredMethod(
+                        Sample.Characteristics.Bridge.class, "compareTo",
+                        List.of(Object.class));
+
                 reflectionCharacteristics = Map.ofEntries(
+                        entry(getDeclaredConstructor(refClass), "isConstructor",
+                                "isPublic"),
                         entry(getDeclaredMethod(refClass, "abstractMethod"),
                                 "isPublic", "isAbstract"),
                         entry(getDeclaredMethod(refClass, "finalMethod"),
@@ -177,67 +208,64 @@ public class MethodInfoModelTests {
                         entry(getDeclaredMethod(refClass, "synchronizedMethod"),
                                 "isPublic", "isSynchronized"),
                         entry(getDeclaredMethod(refClass, "varArgsMethod",
-                                String[].class), "isPublic", "isVarArgs"));
+                                List.of(String[].class)), "isPublic",
+                                "isVarArgs"),
+                        entry(bridgeMethod, "isPublic", "isBridge",
+                                "isSynthetic"));
             }
-
-            private final Map<MethodInfo, String[]> sourceCharacteristics;
 
             Characteristics(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Characteristics(ScanResult source) {
-                super(source);
-                sourceCharacteristics = reflectionCharacteristics.entrySet()
-                        .stream().collect(
-                                Collectors.toMap(
+                super(source, reflectionCharacteristics,
+                        reflectionCharacteristics.entrySet().stream()
+                                .collect(Collectors.toMap(
                                         entry -> getDeclaredMethod(
                                                 entry.getKey(), source),
-                                        Map.Entry::getValue));
-            }
-
-            public Map<Method, String[]> getReflectionCharacteristics() {
-                return reflectionCharacteristics;
-            }
-
-            public Map<MethodInfo, String[]> getSourceCharacteristics() {
-                return sourceCharacteristics;
+                                        Map.Entry::getValue)));
             }
         }
 
-        static final class Default extends Context {
+        static final class Default extends AbstractContext<Method, MethodInfo> {
             private static final String methodName = "method";
-            private static final Method reflectionOrigin = getDeclaredMethod(
-                    Sample.class, methodName, String.class,
-                    Sample.ParamDependency.class);;
-            private final MethodInfo sourceOrigin;
+            private static final Map<String, Method> reflectionOrigins = Arrays
+                    .stream(Sample.class.getDeclaredMethods())
+                    .collect(Collectors.toMap(Method::getName,
+                            Function.identity()));
 
             Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
             }
 
             Default(ScanResult source) {
-                super(source);
-                sourceOrigin = getDeclaredMethod(Sample.class, methodName,
-                        source);
+                super(source, reflectionOrigins,
+                        source.getClassInfo(Sample.class.getName())
+                                .getDeclaredMethodInfo().stream()
+                                .collect(Collectors.toMap(MethodInfo::getName,
+                                        Function.identity())));
             }
 
             public Method getReflectionOrigin() {
-                return reflectionOrigin;
+                return getReflectionOrigin(methodName);
             }
 
             public MethodInfo getSourceOrigin() {
-                return sourceOrigin;
+                return getSourceOrigin(methodName);
             }
         }
     }
 
-    private static class Sample {
+    static class Sample {
         public Dependency method(String first, ParamDependency second) {
             return null;
         }
 
-        private static abstract class Characteristics {
+        static abstract class Characteristics {
+            public Characteristics() {
+            }
+
             public static String staticMethod() {
                 return "";
             }
@@ -265,12 +293,19 @@ public class MethodInfoModelTests {
             private String privateMethod() {
                 return "";
             }
+
+            static class Bridge implements Comparable<Bridge> {
+                @Override
+                public int compareTo(Bridge o) {
+                    return 0;
+                }
+            }
         }
 
-        private static class Dependency {
+        static class Dependency {
         }
 
-        private static class ParamDependency {
+        static class ParamDependency {
         }
     }
 }

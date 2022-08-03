@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,11 @@ final class AnnotationInfoSourceModel extends AnnotationInfoModel
     }
 
     @Override
-    protected ClassInfoModel prepareClassInfo() {
-        return ClassInfoModel.of(origin.getClassInfo());
+    protected Optional<ClassInfoModel> prepareClassInfo() {
+        var cls = origin.getClassInfo();
+
+        return cls != null ? Optional.of(ClassInfoModel.of(cls))
+                : Optional.empty();
     }
 
     @Override

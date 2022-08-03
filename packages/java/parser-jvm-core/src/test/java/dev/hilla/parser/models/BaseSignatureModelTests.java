@@ -53,28 +53,6 @@ public class BaseSignatureModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(BaseSignatureModel model,
-            ModelKind kind, String methodName) {
-        switch (kind) {
-        case REFLECTION_BARE:
-            assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case REFLECTION_COMPLETE:
-            assertEquals(ctx.getCompleteReflectionOrigin(methodName),
-                    model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(methodName), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {
@@ -121,6 +99,28 @@ public class BaseSignatureModelTests {
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
         assertNotEquals(bareReflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(BaseSignatureModel model,
+            ModelKind kind, String methodName) {
+        switch (kind) {
+        case REFLECTION_BARE:
+            assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case REFLECTION_COMPLETE:
+            assertEquals(ctx.getCompleteReflectionOrigin(methodName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(methodName), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     @DisplayName("It should provide no dependencies")

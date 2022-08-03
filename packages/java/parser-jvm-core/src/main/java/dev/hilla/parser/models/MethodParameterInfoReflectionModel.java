@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
@@ -34,12 +33,12 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
     }
 
     @Override
-    public boolean isMandated() {
+    public boolean isImplicit() {
         return origin.isImplicit();
     }
 
     @Override
-    public boolean isImplicit() {
+    public boolean isMandated() {
         return origin.isImplicit();
     }
 
@@ -55,7 +54,7 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
 
     @Override
     protected MethodInfoModel prepareOwner() {
-        return MethodInfoModel.of((Method) origin.getDeclaringExecutable());
+        return MethodInfoModel.of(origin.getDeclaringExecutable());
     }
 
     @Override

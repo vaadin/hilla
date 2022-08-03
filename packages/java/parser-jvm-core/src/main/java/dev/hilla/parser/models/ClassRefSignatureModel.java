@@ -14,7 +14,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
 
 public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
-        implements SignatureModel,
+        implements SignatureModel, NamedModel,
         OwnedModel<Optional<ClassRefSignatureModel>> {
     private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
@@ -80,11 +80,13 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     }
 
     public static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
-        return new ClassRefSignatureReflectionModel.Bare(origin);
+        return new ClassRefSignatureReflectionModel.Bare(
+                Objects.requireNonNull(origin));
     }
 
     public static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
-        return ClassRefSignatureReflectionModel.Annotated.of(origin);
+        return ClassRefSignatureReflectionModel.Annotated
+                .of(Objects.requireNonNull(origin));
     }
 
     @Override
@@ -99,7 +101,7 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
         var other = (ClassRefSignatureModel) obj;
 
-        return getClassName().equals(other.getClassName())
+        return getName().equals(other.getName())
                 && getOwner().equals(other.getOwner())
                 && getTypeArguments().equals(other.getTypeArguments())
                 && getAnnotations().equals(other.getAnnotations());
@@ -112,8 +114,6 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
         return reference;
     }
-
-    public abstract String getClassName();
 
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
@@ -129,7 +129,7 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return getClassName().hashCode() + 7 * getTypeArguments().hashCode()
+        return getName().hashCode() + 7 * getTypeArguments().hashCode()
                 + 23 * getAnnotations().hashCode() + 53 * getOwner().hashCode();
     }
 

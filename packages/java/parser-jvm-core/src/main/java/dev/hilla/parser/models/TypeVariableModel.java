@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeVariableSignature;
 
 public abstract class TypeVariableModel extends AnnotatedAbstractModel
-        implements SignatureModel {
+        implements SignatureModel, NamedModel {
     private TypeParameterModel typeParameter;
 
     public static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
@@ -34,8 +34,6 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return getName().equals(other.getName())
                 && getAnnotations().equals(other.getAnnotations());
     }
-
-    public abstract String getName();
 
     @Override
     public int hashCode() {

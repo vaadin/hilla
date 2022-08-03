@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,32 +50,16 @@ public class AnnotationInfoModelTests {
         ctx = new Context(source);
     }
 
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(AnnotationInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
-    }
-
     @DisplayName("It should get class info")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInfo(AnnotationInfoModel model, ModelKind kind) {
-        assertEquals(ClassInfoModel.of(Sample.Foo.class), model.getClassInfo());
+        assertEquals(Optional.of(ClassInfoModel.of(Sample.Foo.class)),
+                model.getClassInfo());
     }
 
     @DisplayName("It should get annotations parameters")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetParameters(AnnotationInfoModel model,
             ModelKind kind) {
@@ -113,12 +98,31 @@ public class AnnotationInfoModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(AnnotationInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
+    }
+
     @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideDependencies(AnnotationInfoModel model,
             ModelKind kind) {
-        assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
+        assertEquals(
+                Set.of(ClassInfoModel.of(Sample.class),
+                        ClassInfoModel.of(Sample.Enum.class)),
                 model.getDependencies());
     }
 
@@ -183,11 +187,10 @@ public class AnnotationInfoModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -226,7 +229,7 @@ public class AnnotationInfoModelTests {
     @DisplayName("As a NamedModel")
     public class AsNamedModel {
         @DisplayName("It should have name")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveName(AnnotationInfoModel model, ModelKind kind) {
             assertEquals(Sample.Foo.class.getName(), model.getName());
@@ -364,8 +367,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
@@ -384,8 +386,7 @@ public class AnnotationInfoModelTests {
         public static final String testNamePattern = "{2}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             var reflectionOrigins = ctx.getReflectionParameterOrigins();
@@ -404,8 +405,7 @@ public class AnnotationInfoModelTests {
         private static final String testNamePattern = "{1} [{2}]";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context(context);
 
             return Streams.combine(

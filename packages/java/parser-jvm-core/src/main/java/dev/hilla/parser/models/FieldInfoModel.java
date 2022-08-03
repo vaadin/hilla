@@ -13,12 +13,12 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     private ClassInfoModel owner;
     private SignatureModel type;
 
-    public static FieldInfoModel of(@Nonnull FieldInfo field) {
-        return new FieldInfoSourceModel(Objects.requireNonNull(field));
+    public static FieldInfoModel of(@Nonnull FieldInfo origin) {
+        return new FieldInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static FieldInfoModel of(@Nonnull Field field) {
-        return new FieldInfoReflectionModel(field);
+    public static FieldInfoModel of(@Nonnull Field origin) {
+        return new FieldInfoReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override
