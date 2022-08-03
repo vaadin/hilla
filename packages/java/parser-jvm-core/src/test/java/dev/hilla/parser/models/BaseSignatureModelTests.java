@@ -14,6 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -265,6 +266,8 @@ public class BaseSignatureModelTests {
             public static final String testNamePattern = "{2} [{3}]";
             private static final Map<Class<?>, String[]> specializations = Map
                     .ofEntries(
+                            entry(BigDecimal.class, "isBase", "isJDKClass",
+                                    "isBigDecimal"),
                             entry(Boolean.TYPE, "isBase", "isJDKClass",
                                     "isBoolean", "isPrimitive"),
                             entry(Byte.TYPE, "isBase", "isJDKClass", "isByte",
