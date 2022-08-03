@@ -59,7 +59,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should check assignability from other classes")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CheckAssignability(ClassInfoModel model,
             ModelKind kind) {
@@ -149,6 +149,26 @@ public class ClassInfoModelTests {
         }
     }
 
+    @DisplayName("It should check equality")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_CheckEquality(ClassInfoModel model, ModelKind kind) {
+        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
+
+        var otherReflectionModel = ClassInfoModel
+                .of(Dependency.SampleChild.class);
+        var otherSourceModel = ClassInfoModel.of(ctx.getSource()
+                .getClassInfo(Dependency.SampleChild.class.getName()));
+
+        assertEquals(model, model);
+        assertEquals(model, reflectionModel);
+        assertEquals(model, sourceModel);
+        assertNotEquals(model, otherReflectionModel);
+        assertNotEquals(model, otherSourceModel);
+        assertNotEquals(model, mock(MethodInfoModel.class));
+    }
+
     @DisplayName("It should check if the class belongs to JDK")
     @Test
     public void should_CheckJDKBelonging() {
@@ -173,13 +193,14 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect all dependencies from the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassDependencies(ClassInfoModel model,
             ModelKind kind) {
         var expected = Stream
                 .of(ctx.getFieldDependencies(), ctx.getMethodDependencies(),
-                        ctx.getParentClass(), ctx.getInnerClasses())
+                        ctx.getParentClass(), ctx.getInterfaces(),
+                        ctx.getInnerClasses(), ctx.getInterfaceDependencies())
                 .flatMap(Collection::stream).map(ClassInfoModel::of)
                 .collect(Collectors.toSet());
 
@@ -189,7 +210,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect field dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassFieldDependencies(ClassInfoModel model,
             ModelKind kind) {
@@ -201,7 +222,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect method dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectClassMethodDependencies(ClassInfoModel model,
             ModelKind kind) {
@@ -213,7 +234,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should collect inner class dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CollectInnerClassDependencies(ClassInfoModel model,
             ModelKind kind) {
@@ -225,7 +246,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should be able to compare model with classes and other models")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CompareClasses(ClassInfoModel model, ModelKind kind) {
         var sameReflectionClass = Dependency.Sample.class;
@@ -250,27 +271,8 @@ public class ClassInfoModelTests {
         assertFalse(model.is(ClassInfoModel.of(anotherSourceClass)));
     }
 
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(ClassInfoModel model,
-            ModelKind kind) {
-        switch (kind) {
-        case REFLECTION: {
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-        }
-            break;
-        case SOURCE: {
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-        }
-            break;
-        }
-    }
-
     @DisplayName("It should get all inner classes of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetAllInnerClasses(ClassInfoModel model,
             ModelKind kind) {
@@ -282,28 +284,8 @@ public class ClassInfoModelTests {
         assertEquals(expected, actual);
     }
 
-    @DisplayName("It should check equality")
-    @ParameterizedTest(name = ModelProvider.testName)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetCheckEquality(ClassInfoModel model, ModelKind kind) {
-        var reflectionModel = ClassInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
-
-        var otherReflectionModel = ClassInfoModel
-                .of(Dependency.SampleChild.class);
-        var otherSourceModel = ClassInfoModel.of(ctx.getSource()
-                .getClassInfo(Dependency.SampleChild.class.getName()));
-
-        assertEquals(model, model);
-        assertEquals(model, reflectionModel);
-        assertEquals(model, sourceModel);
-        assertNotEquals(model, otherReflectionModel);
-        assertNotEquals(model, otherSourceModel);
-        assertNotEquals(model, mock(MethodInfoModel.class));
-    }
-
     @DisplayName("It should get all fields of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredFields(Dependency.Sample.class)
@@ -314,7 +296,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get the whole inheritance chain of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInheritanceChain(ClassInfoModel model,
             ModelKind kind) {
@@ -330,7 +312,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get all methods of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassMethods(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredMethods(Dependency.Sample.class)
@@ -342,7 +324,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get interfaces the class implements")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetInterfaces(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
@@ -353,7 +335,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get simple name of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetSimpleName(ClassInfoModel model, ModelKind kind) {
         assertEquals(Dependency.Sample.class.getSimpleName(),
@@ -361,7 +343,7 @@ public class ClassInfoModelTests {
     }
 
     @DisplayName("It should get superclass of the class")
-    @ParameterizedTest(name = ModelProvider.testName)
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetSuperclass(ClassInfoModel model, ModelKind kind) {
         assertEquals(Dependency.Sample.class.getSuperclass().getName(), model
@@ -391,6 +373,23 @@ public class ClassInfoModelTests {
 
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(ClassInfoModel model,
+            ModelKind kind) {
+        switch (kind) {
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     static final class Characteristics {
@@ -427,7 +426,7 @@ public class ClassInfoModelTests {
         @interface Annotation {
         }
 
-        interface Interface {
+        interface Interface<TypeArgument extends ParametrizedDependency> {
         }
 
         static class FieldPrivate {
@@ -496,6 +495,9 @@ public class ClassInfoModelTests {
         static class MethodStaticPublic {
         }
 
+        static class ParametrizedDependency {
+        }
+
         static class Parent extends GrandParent {
             public ParentFieldPublic fieldPublic;
         }
@@ -504,7 +506,8 @@ public class ClassInfoModelTests {
         }
 
         @Annotation
-        static class Sample extends Parent implements Interface {
+        static class Sample extends Parent
+                implements Interface<ParametrizedDependency> {
             public static FieldStaticPublic fieldStaticPublic;
             protected static FieldStaticProtected fieldStaticProtected;
             private static FieldStaticPrivate fieldStaticPrivate;
@@ -555,7 +558,7 @@ public class ClassInfoModelTests {
         }
     }
 
-    private static final class Specialization {
+    static final class Specialization {
         private static class Sample {
             public Boolean getBoolean() {
                 return true;
@@ -599,7 +602,7 @@ public class ClassInfoModelTests {
     @DisplayName("As an AnnotatedModel")
     public class AsAnnotatedModel {
         @DisplayName("It should get a class annotation")
-        @ParameterizedTest(name = ModelProvider.testName)
+        @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_GetClassAnnotation(ClassInfoModel model,
                 ModelKind kind) {
@@ -614,7 +617,7 @@ public class ClassInfoModelTests {
         private final ModelProvider.CharacteristicsChecker checker = new ModelProvider.CharacteristicsChecker();
 
         @DisplayName("It should detect class characteristics correctly")
-        @ParameterizedTest(name = ModelProvider.Characteristics.testName)
+        @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
         @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(ClassInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
@@ -628,7 +631,7 @@ public class ClassInfoModelTests {
         private final ModelProvider.Checker checker = new ModelProvider.Checker();
 
         @DisplayName("It should detect class specialization correctly")
-        @ParameterizedTest(name = ModelProvider.Specialization.testName)
+        @ParameterizedTest(name = ModelProvider.Specialization.testNamePattern)
         @ArgumentsSource(ModelProvider.Specialization.class)
         public void should_DetectClassSpecialization(ClassInfoModel model,
                 String[] specializations, ModelKind kind, String testName) {
@@ -637,11 +640,10 @@ public class ClassInfoModelTests {
     }
 
     public static class ModelProvider implements ArgumentsProvider {
-        public static final String testName = "{1}";
+        public static final String testNamePattern = "{1}";
 
         @Override
-        public Stream<? extends Arguments> provideArguments(
-                ExtensionContext context) {
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
             var ctx = new Context.Default(context);
 
             return Stream.of(
@@ -652,10 +654,10 @@ public class ClassInfoModelTests {
         }
 
         public static final class Specialization implements ArgumentsProvider {
-            public static final String testName = "{2} [{3}]";
+            public static final String testNamePattern = "{2} [{3}]";
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Specializations(context);
 
@@ -674,10 +676,10 @@ public class ClassInfoModelTests {
         }
 
         static final class Characteristics implements ArgumentsProvider {
-            public static final String testName = "{2} [{3}]";
+            public static final String testNamePattern = "{2} [{3}]";
 
             @Override
-            public Stream<? extends Arguments> provideArguments(
+            public Stream<Arguments> provideArguments(
                     ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
@@ -816,6 +818,10 @@ public class ClassInfoModelTests {
                     .of(Dependency.Sample.class, Dependency.InnerMethod.class,
                             Dependency.InnerField.class,
                             Dependency.InnerParent.class);
+            private static final Set<Class<?>> interfaces = Set
+                    .of(Dependency.Interface.class);
+            private static final Set<Class<?>> interfacesDependencies = Set
+                    .of(Dependency.ParametrizedDependency.class);
             private static final Set<Class<?>> methodDependencies = Set.of(
                     Dependency.MethodStaticPublic.class,
                     Dependency.MethodStaticProtected.class,
@@ -858,6 +864,14 @@ public class ClassInfoModelTests {
 
             public Set<Class<?>> getInnerClassesDependencies() {
                 return innerClassesDependencies;
+            }
+
+            public Set<Class<?>> getInterfaceDependencies() {
+                return interfacesDependencies;
+            }
+
+            public Set<Class<?>> getInterfaces() {
+                return interfaces;
             }
 
             public Set<Class<?>> getMethodDependencies() {
