@@ -1,133 +1,163 @@
 package dev.hilla.parser.models;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class MethodInfoReflectionModel extends MethodInfoModel
+abstract class MethodInfoReflectionModel extends MethodInfoModel
         implements ReflectionModel {
-    private final Method origin;
-
-    MethodInfoReflectionModel(Method origin) {
-        this.origin = origin;
-    }
-
     @Override
-    public boolean equalsIgnoreParameters(MethodInfoModel other) {
-        return origin.getName().equals(other.getName())
-                && origin.getModifiers() == other.getModifiers()
-                && getResultType().equals(other.getResultType())
-                && origin.getDeclaringClass().getName()
-                        .equals(other.getClassName());
-    }
-
-    @Override
-    public Method get() {
-        return origin;
-    }
+    public abstract Executable get();
 
     @Override
     public String getClassName() {
-        return origin.getDeclaringClass().getName();
+        return get().getDeclaringClass().getName();
     }
 
     @Override
     public int getModifiers() {
-        return origin.getModifiers();
-    }
-
-    @Override
-    public String getName() {
-        return origin.getName();
-    }
-
-    @Override
-    public int hashCodeIgnoreParameters() {
-        return origin.getName().hashCode() + 11 * getResultType().hashCode()
-                + 17 * origin.getModifiers()
-                + 23 * origin.getDeclaringClass().getName().hashCode();
+        return get().getModifiers();
     }
 
     @Override
     public boolean isAbstract() {
-        return Modifier.isAbstract(origin.getModifiers());
-    }
-
-    @Override
-    public boolean isBridge() {
-        return origin.isBridge();
+        return Modifier.isAbstract(getModifiers());
     }
 
     @Override
     public boolean isFinal() {
-        return Modifier.isFinal(origin.getModifiers());
+        return Modifier.isFinal(getModifiers());
     }
 
     @Override
     public boolean isNative() {
-        return Modifier.isNative(origin.getModifiers());
+        return Modifier.isNative(getModifiers());
     }
 
     @Override
     public boolean isPrivate() {
-        return Modifier.isPrivate(origin.getModifiers());
+        return Modifier.isPrivate(getModifiers());
     }
 
     @Override
     public boolean isProtected() {
-        return Modifier.isProtected(origin.getModifiers());
+        return Modifier.isProtected(getModifiers());
     }
 
     @Override
     public boolean isPublic() {
-        return Modifier.isPublic(origin.getModifiers());
+        return Modifier.isPublic(getModifiers());
     }
 
     @Override
     public boolean isStatic() {
-        return Modifier.isStatic(origin.getModifiers());
+        return Modifier.isStatic(getModifiers());
     }
 
     @Override
     public boolean isStrict() {
-        return Modifier.isStrict(origin.getModifiers());
+        return Modifier.isStrict(getModifiers());
     }
 
     @Override
     public boolean isSynchronized() {
-        return Modifier.isSynchronized(origin.getModifiers());
+        return Modifier.isSynchronized(getModifiers());
     }
 
     @Override
     public boolean isSynthetic() {
-        return origin.isSynthetic();
+        return get().isSynthetic();
     }
 
     @Override
     public boolean isVarArgs() {
-        return origin.isVarArgs();
+        return get().isVarArgs();
     }
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return processAnnotations(origin.getAnnotations());
+        return processAnnotations(get().getAnnotations());
     }
 
     @Override
     protected ClassInfoModel prepareOwner() {
-        return ClassInfoModel.of(origin.getDeclaringClass());
+        return ClassInfoModel.of(get().getDeclaringClass());
     }
 
     @Override
     protected List<MethodParameterInfoModel> prepareParameters() {
-        return Arrays.stream(origin.getParameters())
+        return Arrays.stream(get().getParameters())
                 .map(MethodParameterInfoModel::of).collect(Collectors.toList());
     }
 
-    @Override
-    protected SignatureModel prepareResultType() {
-        return SignatureModel.of(origin.getAnnotatedReturnType());
+    static final class Constructor extends MethodInfoReflectionModel {
+        private static final String constructorName = "<init>";
+
+        private final java.lang.reflect.Constructor<?> origin;
+
+        Constructor(java.lang.reflect.Constructor<?> origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        public java.lang.reflect.Constructor<?> get() {
+            return origin;
+        }
+
+        @Override
+        public String getName() {
+            return constructorName;
+        }
+
+        @Override
+        public boolean isBridge() {
+            return false;
+        }
+
+        @Override
+        public boolean isConstructor() {
+            return true;
+        }
+
+        @Override
+        protected SignatureModel prepareResultType() {
+            return BaseSignatureModel.of(Void.TYPE);
+        }
+    }
+
+    static final class Regular extends MethodInfoReflectionModel {
+        private final Method origin;
+
+        Regular(Method origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        public Method get() {
+            return origin;
+        }
+
+        @Override
+        public String getName() {
+            return origin.getName();
+        }
+
+        @Override
+        public boolean isBridge() {
+            return origin.isBridge();
+        }
+
+        @Override
+        public boolean isConstructor() {
+            return false;
+        }
+
+        @Override
+        protected SignatureModel prepareResultType() {
+            return SignatureModel.of(origin.getAnnotatedReturnType());
+        }
     }
 }

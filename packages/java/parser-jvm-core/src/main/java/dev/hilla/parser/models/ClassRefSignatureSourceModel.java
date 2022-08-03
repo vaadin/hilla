@@ -24,7 +24,7 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
     }
 
     @Override
-    public String getClassName() {
+    public String getName() {
         return origin.getBaseClassName();
     }
 
@@ -82,7 +82,7 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         }
 
         @Override
-        public String getClassName() {
+        public String getName() {
             var builder = new StringBuilder(origin.getBaseClassName());
 
             for (var i = 0; i <= currentSuffixIndex; i++) {
