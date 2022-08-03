@@ -1,20 +1,57 @@
 package dev.hilla.parser.plugins.nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 /**
- * Describes a (not)null-related annotations: its name, meaning, and score
+ * Describes annotations that make class members and their signatures nullable
+ * and non-nullable: their name, meaning, and score
  */
-public class AnnotationMatcher {
+public final class AnnotationMatcher {
+    /**
+     * A default annotation, which corresponds to not having any annotation
+     */
+    public static final AnnotationMatcher DEFAULT = new AnnotationMatcher(
+            "(default)", true, 0);
+    private final boolean makesNullable;
     private final String name;
-    private final boolean isNull;
     private final int score;
 
-    public AnnotationMatcher(@Nonnull String name, boolean isNull, int score) {
+    public AnnotationMatcher(@Nonnull String name, boolean makesNullable,
+            int score) {
         this.name = Objects.requireNonNull(name);
-        this.isNull = isNull;
+        this.makesNullable = makesNullable;
         this.score = score;
+    }
+
+    /**
+     * Returns true if the annotation makes a member/signature non-nullable,
+     * false if nullable
+     */
+    public boolean doesMakeNonNull() {
+        return !makesNullable;
+    }
+
+    /**
+     * Returns true if the annotation makes a member/signature nullable, false
+     * if non-nullable
+     */
+    public boolean doesMakeNullable() {
+        return makesNullable;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        return name.equals(((AnnotationMatcher) obj).name);
     }
 
     /**
@@ -25,20 +62,6 @@ public class AnnotationMatcher {
     }
 
     /**
-     * Returns true if the annotation means nullable, false if it means notnull
-     */
-    public boolean isNull() {
-        return isNull;
-    }
-
-    /**
-     * Returns true if the annotation means notnull, false if it means nullable
-     */
-    public boolean isNonNull() {
-        return !isNull;
-    }
-
-    /**
      * Returns a score that allows to compare the priority between annotations
      */
     public int getScore() {
@@ -46,26 +69,7 @@ public class AnnotationMatcher {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        return name.equals(((AnnotationMatcher) o).name);
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return name.hashCode();
     }
-
-    /**
-     * A default annotation, which corresponds to not having any annotation
-     */
-    public static final AnnotationMatcher DEFAULT = new AnnotationMatcher(
-            "(default)", true, 0);
 }
