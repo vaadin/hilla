@@ -4,7 +4,7 @@ import type DependencyManager from '@hilla/generator-typescript-utils/dependenci
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { CallExpression, Expression, Statement, TypeNode } from 'typescript';
+import type { Expression, Statement, TypeNode } from 'typescript';
 import ts from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
@@ -13,14 +13,6 @@ export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
 export const INIT_TYPE_NAME = 'EndpointRequestInit';
 export const HILLA_FRONTEND_NAME = '@hilla/frontend';
-
-function wrapCallExpression(callExpression: CallExpression, responseType: TypeNode): Statement {
-  if (ts.isUnionTypeNode(responseType)) {
-    return ts.factory.createReturnStatement(callExpression);
-  }
-
-  return ts.factory.createExpressionStatement(callExpression);
-}
 
 export default abstract class EndpointMethodOperationProcessor {
   public static createProcessor(
@@ -111,7 +103,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       undefined,
       parameters,
       ts.factory.createTypeReferenceNode('Promise', [responseType]),
-      ts.factory.createBlock([wrapCallExpression(callExpression, responseType)]),
+      ts.factory.createBlock([ts.factory.createReturnStatement(callExpression)]),
     );
   }
 
