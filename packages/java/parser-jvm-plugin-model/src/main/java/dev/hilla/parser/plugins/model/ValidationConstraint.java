@@ -43,7 +43,7 @@ public final class ValidationConstraint {
         }
 
         public void process() {
-            map.getTypes().forEach(this::processSchema);
+            map.getSignatures().forEach(this::processSchema);
         }
 
         private ValidationConstraint convertAnnotation(
