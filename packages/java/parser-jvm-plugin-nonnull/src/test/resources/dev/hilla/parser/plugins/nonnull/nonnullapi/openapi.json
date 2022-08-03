@@ -16,17 +16,17 @@
     }
   ],
   "paths": {
-    "/NonNullApiEndpoint/hello": {
+    "/NonNullApiEndpoint/defaultMethod": {
       "post": {
         "tags": ["NonNullApiEndpoint"],
-        "operationId": "NonNullApiEndpoint_hello_POST",
+        "operationId": "NonNullApiEndpoint_defaultMethod_POST",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "hello": {
+                  "param": {
                     "type": "string"
                   }
                 }
@@ -40,7 +40,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                    }
+                  ]
                 }
               }
             }
@@ -48,44 +52,10 @@
         }
       }
     },
-    "/NonNullApiEndpoint/helloNullable": {
+    "/NonNullApiEndpoint/nestedSignatureMethod": {
       "post": {
         "tags": ["NonNullApiEndpoint"],
-        "operationId": "NonNullApiEndpoint_helloNullable_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "hello": {
-                    "type": "string",
-                    "nullable": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "nullable": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/NonNullApiEndpoint/helloNestedTypes": {
-      "post": {
-        "tags": ["NonNullApiEndpoint"],
-        "operationId": "NonNullApiEndpoint_helloNestedTypes_POST",
+        "operationId": "NonNullApiEndpoint_nestedSignatureMethod_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -93,12 +63,13 @@
                 "type": "object",
                 "properties": {
                   "param": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                        }
+                      ]
                     }
                   }
                 }
@@ -116,10 +87,11 @@
                   "additionalProperties": {
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                        }
+                      ]
                     }
                   }
                 }
@@ -128,7 +100,154 @@
           }
         }
       }
+    },
+    "/NonNullApiEndpoint/nullableMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_nullableMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "param": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullApiEndpoint/nullableNestedSignatureMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_nullableNestedSignatureMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "param": {
+                    "type": "array",
+                    "items": {
+                      "nullable": true,
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "nullable": true,
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullApiEndpoint/nullableSignature": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_nullableSignature_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "param": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
-  "components": {}
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency": {
+        "type": "object",
+        "properties": {
+          "defaultField": {
+            "type": "string"
+          },
+          "nullableField": {
+            "type": "string",
+            "nullable": true
+          },
+          "nullableSignatureField": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
 }

@@ -1,23 +1,39 @@
 package dev.hilla.parser.plugins.nonnull.nonnullapi;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Endpoint
 public class NonNullApiEndpoint {
-    public String hello(String hello) {
-        return "Hello " + hello;
-    }
-
-    @Nullable
-    public String helloNullable(@Nullable String hello) {
+    public Dependency defaultMethod(String param) {
         return null;
     }
 
-    public Map<List<String>, Set<Map<Integer, String>>> helloNestedTypes(
-            Map<Integer, List<String>> param) {
-        return new HashMap<>();
+    public Map<String, Set<Dependency>> nestedSignatureMethod(
+            Set<Dependency> param) {
+        return null;
+    }
+
+    @NullableMethod
+    public Dependency nullableMethod(@NullableParameter String param) {
+        return null;
+    }
+
+    public Map<String, @NullableSignature Set<@NullableSignature Dependency>> nullableNestedSignatureMethod(
+            Set<@NullableSignature Dependency> param) {
+        return null;
+    }
+
+    @NullableSignature
+    public Dependency nullableSignature(@NullableSignature String param) {
+        return null;
+    }
+
+    static class Dependency {
+        String defaultField;
+        @NullableField
+        String nullableField;
+        @NullableSignature
+        String nullableSignatureField;
     }
 }

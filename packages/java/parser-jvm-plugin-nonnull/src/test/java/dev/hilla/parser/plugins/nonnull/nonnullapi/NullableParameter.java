@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER,
-        ElementType.TYPE_USE })
-public @interface Nullable {
+@Target(ElementType.PARAMETER)
+public @interface NullableParameter {
 }
