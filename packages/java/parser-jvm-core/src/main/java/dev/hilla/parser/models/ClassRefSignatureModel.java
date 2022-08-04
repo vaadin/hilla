@@ -134,6 +134,11 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public boolean isBigDecimal() {
+        return getClassInfo().isBigDecimal();
+    }
+
+    @Override
     public boolean isBoolean() {
         return getClassInfo().isBoolean();
     }

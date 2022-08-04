@@ -59,7 +59,7 @@ final class SchemaProcessor {
             result = booleanSchema();
         } else if (type.hasIntegerType()) {
             result = integerSchema();
-        } else if (type.hasFloatType()) {
+        } else if (type.hasFloatType() || type.isBigDecimal()) {
             result = numberSchema();
         } else if (type.isArray()) {
             result = arraySchema();
@@ -149,7 +149,7 @@ final class SchemaProcessor {
 
     private Schema<?> numberSchema() {
         return nullify(new NumberSchema(), !type.isPrimitive())
-                .format(type.isDouble() ? "double" : "float");
+                .format(type.isFloat() ? "float" : "double");
     }
 
     private Schema<?> optionalSchema() {

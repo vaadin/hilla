@@ -17,6 +17,10 @@ public interface SpecializedModel {
         return false;
     }
 
+    default boolean isBigDecimal() {
+        return false;
+    }
+
     default boolean isBoolean() {
         return false;
     }

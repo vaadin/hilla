@@ -39,6 +39,26 @@
         }
       }
     },
+    "/SimpleTypeEndpoint/getBigDecimal": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getBigDecimal_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/SimpleTypeEndpoint/getBoolean": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],

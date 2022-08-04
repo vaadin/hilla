@@ -18,6 +18,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -362,6 +363,8 @@ public class ClassRefSignatureModelTests {
 
             private static final Map<String, String[]> specializations = Map
                     .ofEntries(
+                            entry(BigDecimal.class.getName(), "isBigDecimal",
+                                    "isClassRef", "isJDKClass"),
                             entry(Boolean.class.getName(), "isBoolean",
                                     "isClassRef", "isJDKClass"),
                             entry(Byte.class.getName(), "hasIntegerType",
