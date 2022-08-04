@@ -1,132 +1,55 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
-import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
-import ts from 'typescript';
+import PushProcessor from './PushProcessor.js';
+
+type ExtendedMediaTypeSchema = ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> &
+  Readonly<{ 'x-class-name': string }>;
+
+const classesToReplace: readonly string[] = ['reactor.core.publisher.Flux', 'dev.hilla.EndpointSubscription'];
 
 export default class PushPlugin extends Plugin {
-  get path(): string {
+  /**
+   * Collects methods that must be patched by checking their `x-class-name` value
+   */
+  static #collectPatchableMethods(paths: ReadonlyObjectDeep<OpenAPIV3.PathsObject>) {
+    return Object.entries(paths).reduce((acc, [key, path]) => {
+      const response = path?.post?.responses[200] as ReadonlyObjectDeep<OpenAPIV3.ResponseObject> | undefined;
+      const schema = response?.content?.['application/json']?.schema as ExtendedMediaTypeSchema | undefined;
+      const className = schema?.['x-class-name'];
+
+      if (className && classesToReplace.includes(className)) {
+        const [, endpoint, method] = key.split('/');
+
+        if (acc.has(endpoint)) {
+          acc.get(endpoint)!.push(method);
+        } else {
+          acc.set(endpoint, [method]);
+        }
+      }
+
+      return acc;
+    }, new Map<string, string[]>());
+  }
+
+  declare ['constructor']: typeof PushPlugin;
+
+  override get path(): string {
     return import.meta.url;
   }
 
-  public async execute(storage: SharedStorage): Promise<void> {
-    const endpointMethods: Map<string, string[]> = new Map();
+  async execute(storage: SharedStorage): Promise<void> {
+    const { api, sources } = storage;
+    const endpointMethodMap = this.constructor.#collectPatchableMethods(api.paths);
 
-    // Collect the methods that must be patched by checking their `x-class-name` value
-    Object.entries(storage.api.paths).forEach(([key, path]) => {
-      const post = path?.post;
+    for (let i = 0; i < sources.length; i++) {
+      const { fileName } = sources[i];
+      const endpoint = fileName.substring(0, fileName.indexOf('.ts'));
 
-      if (post) {
-        const { content } = post!.responses[200] as ReadonlyObjectDeep<OpenAPIV3.ResponseObject>;
-
-        if (content) {
-          const schema = content!['application/json']?.schema;
-
-          if (schema) {
-            // @ts-ignore
-            const className = schema!['x-class-name'];
-
-            if (className && ['reactor.core.publisher.Flux', 'dev.hilla.EndpointSubscription'].includes(className)) {
-              const [endpoint, method] = key.split('/').slice(1);
-              const methodNames = endpointMethods.get(endpoint) || [];
-              methodNames.push(method);
-              endpointMethods.set(endpoint, methodNames);
-            }
-          }
-        }
+      if (endpointMethodMap.has(endpoint)) {
+        sources[i] = new PushProcessor(sources[i], endpointMethodMap.get(endpoint)!).process();
       }
-    });
-
-    endpointMethods.forEach((methodNames, endpoint) => {
-      const subscriptionIdentifier = ts.factory.createUniqueName('Subscription');
-      const endpointFilename = `${endpoint}.ts`;
-      const source = storage.sources.find((s) => s.fileName === endpointFilename)!;
-      const updatedStatements: ts.Statement[] = [];
-
-      for (let i = 0; i < source.statements.length; i++) {
-        const statement = source.statements[i];
-        let modifiedStatement: ts.Statement | undefined;
-
-        if (ts.isImportDeclaration(statement)) {
-          const importClause = statement.importClause!;
-
-          if (importClause.namedBindings) {
-            const namedImports = importClause.namedBindings as ts.NamedImports;
-            modifiedStatement = ts.factory.createImportDeclaration(
-              statement.decorators,
-              statement.modifiers,
-              ts.factory.createImportClause(
-                importClause.isTypeOnly,
-                importClause.name,
-                ts.factory.createNamedImports([
-                  ...namedImports.elements,
-                  ts.factory.createImportSpecifier(
-                    false,
-                    ts.factory.createIdentifier('Subscription'),
-                    subscriptionIdentifier,
-                  ),
-                ]),
-              ),
-              statement.moduleSpecifier,
-              statement.assertClause,
-            );
-          }
-        } else if (ts.isFunctionDeclaration(statement)) {
-          const statementName = statement.name?.escapedText;
-
-          // Checks if the method is in the list of methods to patch
-          if (statementName && methodNames.includes(statementName)) {
-            const { parameters } = statement;
-            const [lastParam] = parameters.slice(-1);
-            const paramType = lastParam.type as ts.TypeReferenceNode;
-
-            const initParamFound = (paramType.typeName as ts.Identifier).escapedText === 'EndpointRequestInit';
-            const returnStatement = statement.body!.statements[0] as ts.ReturnStatement;
-            const returnClient = returnStatement.expression! as ts.CallExpression;
-            const call = returnClient.expression! as ts.PropertyAccessExpression;
-            const promise = (statement.type as ts.TypeReferenceNode).typeArguments![0] as ts.UnionTypeNode;
-            const promiseType = promise.types[0] as ts.TypeReferenceNode;
-
-            modifiedStatement = ts.factory.createFunctionDeclaration(
-              statement.decorators,
-              undefined, // no async
-              statement.asteriskToken,
-              statement.name,
-              statement.typeParameters,
-              // remove the `init` parameter
-              initParamFound ? parameters.slice(0, -1) : parameters,
-              // The returned `Promise<Array<T>>` is replaced by the `Subscription<T>` type
-              ts.factory.createUnionTypeNode([
-                ts.factory.createTypeReferenceNode(subscriptionIdentifier, promiseType.typeArguments),
-                promise.types[1],
-              ]),
-              ts.factory.createBlock([
-                ts.factory.createReturnStatement(
-                  ts.factory.createCallExpression(
-                    ts.factory.createPropertyAccessExpression(
-                      call.expression,
-                      // `subscribe` instead of `call`
-                      ts.factory.createIdentifier('subscribe'),
-                    ),
-                    returnClient.typeArguments,
-                    // remove the `init` parameter
-                    initParamFound ? returnClient.arguments.slice(0, -1) : returnClient.arguments,
-                  ),
-                ),
-              ]),
-            );
-          }
-        }
-
-        updatedStatements.push(modifiedStatement ?? statement);
-      }
-
-      for (let i = 0; i < storage.sources.length; i++) {
-        if (storage.sources[i].fileName === endpointFilename) {
-          storage.sources[i] = createSourceFile(updatedStatements, endpointFilename);
-        }
-      }
-    });
+    }
   }
 }
