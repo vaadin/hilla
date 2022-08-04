@@ -1,8 +1,8 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
-import { OpenAPIV3 } from 'openapi-types';
-import { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
 import ts from 'typescript';
 
 export default class PushPlugin extends Plugin {
@@ -23,6 +23,7 @@ export default class PushPlugin extends Plugin {
           const schema = content!['application/json']?.schema;
 
           if (schema) {
+            // @ts-ignore
             const className = schema!['x-class-name'];
 
             if (className && ['reactor.core.publisher.Flux', 'dev.hilla.EndpointSubscription'].includes(className)) {
