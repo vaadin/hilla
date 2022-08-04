@@ -1,7 +1,8 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.AnnotatedTypeVariable;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -9,15 +10,15 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.TypeParameter;
 
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
-        implements SignatureModel {
+        implements SignatureModel, NamedModel {
     private List<SignatureModel> bounds;
 
     public static TypeParameterModel of(@Nonnull TypeParameter origin) {
-        return new TypeParameterSourceModel(origin);
+        return new TypeParameterSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static TypeParameterModel of(@Nonnull AnnotatedTypeVariable origin) {
-        return new TypeParameterReflectionModel(origin);
+    public static TypeParameterModel of(@Nonnull TypeVariable<?> origin) {
+        return new TypeParameterReflectionModel(Objects.requireNonNull(origin));
     }
 
     @Override
@@ -49,7 +50,10 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
         return getBounds().stream();
     }
 
-    public abstract String getName();
+    @Override
+    public Stream<ClassInfoModel> getDependenciesStream() {
+        return getBoundsStream().flatMap(SignatureModel::getDependenciesStream);
+    }
 
     @Override
     public int hashCode() {

@@ -231,4 +231,10 @@ final class ClassInfoReflectionModel extends ClassInfoModel
                 ? ClassInfoModel.of(superClass)
                 : null;
     }
+
+    @Override
+    protected List<TypeParameterModel> prepareTypeParameters() {
+        return Arrays.stream(origin.getTypeParameters())
+                .map(TypeParameterModel::of).collect(Collectors.toList());
+    }
 }

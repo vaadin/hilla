@@ -33,12 +33,12 @@ final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
     }
 
     @Override
-    public boolean isMandated() {
+    public boolean isImplicit() {
         return origin.isMandated();
     }
 
     @Override
-    public boolean isImplicit() {
+    public boolean isMandated() {
         return origin.isMandated();
     }
 
