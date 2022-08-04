@@ -13,6 +13,7 @@ export default class PushPlugin extends Plugin {
   public async execute(storage: SharedStorage): Promise<void> {
     const endpointMethods: Map<string, string[]> = new Map();
 
+    // Collect the methods that must be patched by checking their `x-class-name` value
     Object.entries(storage.api.paths).forEach(([key, path]) => {
       const post = path?.post;
 
@@ -74,6 +75,7 @@ export default class PushPlugin extends Plugin {
         } else if (ts.isFunctionDeclaration(statement)) {
           const statementName = statement.name?.escapedText;
 
+          // Checks if the method is in the list of methods to patch
           if (statementName && methodNames.includes(statementName)) {
             const { parameters } = statement;
             const [lastParam] = parameters.slice(-1);
@@ -83,8 +85,8 @@ export default class PushPlugin extends Plugin {
             const returnStatement = statement.body!.statements[0] as ts.ReturnStatement;
             const returnClient = returnStatement.expression! as ts.CallExpression;
             const call = returnClient.expression! as ts.PropertyAccessExpression;
-            const unionType = (statement.type as ts.TypeReferenceNode).typeArguments![0] as ts.UnionTypeNode;
-            const referenceType = unionType.types[0] as ts.TypeReferenceNode;
+            const promise = (statement.type as ts.TypeReferenceNode).typeArguments![0] as ts.UnionTypeNode;
+            const promiseType = promise.types[0] as ts.TypeReferenceNode;
 
             modifiedStatement = ts.factory.createFunctionDeclaration(
               statement.decorators,
@@ -92,19 +94,23 @@ export default class PushPlugin extends Plugin {
               statement.asteriskToken,
               statement.name,
               statement.typeParameters,
+              // remove the `init` parameter
               initParamFound ? parameters.slice(0, -1) : parameters,
+              // The returned `Promise<Array<T>>` is replaced by the `Subscription<T>` type
               ts.factory.createUnionTypeNode([
-                ts.factory.createTypeReferenceNode(subscriptionIdentifier, referenceType.typeArguments),
-                unionType.types[1],
+                ts.factory.createTypeReferenceNode(subscriptionIdentifier, promiseType.typeArguments),
+                promise.types[1],
               ]),
               ts.factory.createBlock([
                 ts.factory.createReturnStatement(
                   ts.factory.createCallExpression(
                     ts.factory.createPropertyAccessExpression(
                       call.expression,
+                      // `subscribe` instead of `call`
                       ts.factory.createIdentifier('subscribe'),
                     ),
                     returnClient.typeArguments,
+                    // remove the `init` parameter
                     initParamFound ? returnClient.arguments.slice(0, -1) : returnClient.arguments,
                   ),
                 ),
@@ -113,7 +119,7 @@ export default class PushPlugin extends Plugin {
           }
         }
 
-        updatedStatements.push(modifiedStatement || statement);
+        updatedStatements.push(modifiedStatement ?? statement);
       }
 
       for (let i = 0; i < storage.sources.length; i++) {
