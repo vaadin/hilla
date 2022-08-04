@@ -120,12 +120,19 @@ final class SchemaProcessor {
 
     private Schema<?> iterableSchema() {
         var schema = nullify(new ArraySchema(), true);
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
 
-        return typeArguments.isEmpty() ? schema
+        schema = typeArguments.isEmpty() ? schema
                 : schema.items(
                         new SchemaProcessor(typeArguments.get(0), info, storage)
                                 .process());
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> mapSchema() {
@@ -138,7 +145,7 @@ final class SchemaProcessor {
                 .additionalProperties(values);
 
         if (type.isNonJDKClass()) {
-            schema.addExtension("x-classname", _type.getName());
+            schema.addExtension("x-class-name", _type.getName());
         }
 
         return schema;
@@ -150,10 +157,17 @@ final class SchemaProcessor {
     }
 
     private Schema<?> optionalSchema() {
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), info, storage)
+        var schema = new SchemaProcessor(typeArguments.get(0), info, storage)
                 .process();
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> refSchema() {
@@ -161,12 +175,18 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var fullyQualifiedName = ((ClassRefSignatureModel) type).getClassInfo()
-                .getName();
+        var _type = (ClassRefSignatureModel) type;
+        var fullyQualifiedName = _type.getClassInfo().getName();
 
-        return nullify(new ComposedSchema(), true)
+        var schema = nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
                         .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)));
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> stringSchema() {

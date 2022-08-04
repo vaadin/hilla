@@ -123,7 +123,8 @@
               {
                 "$ref": "#/components/schemas/org.springframework.data.domain.Sort$Direction"
               }
-            ]
+            ],
+            "x-class-name": "org.springframework.data.domain.Sort$Direction"
           },
           "ignoreCase": {
             "type": "boolean"
@@ -134,7 +135,8 @@
               {
                 "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
               }
-            ]
+            ],
+            "x-class-name": "org.springframework.data.domain.Sort$NullHandling"
           },
           "property": {
             "type": "string",
@@ -159,7 +161,8 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
               }
-            ]
+            ],
+            "x-class-name": "dev.hilla.runtime.transfertypes.Sort"
           }
         }
       },
@@ -175,7 +178,8 @@
                 {
                   "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
                 }
-              ]
+              ],
+              "x-class-name": "dev.hilla.runtime.transfertypes.Order"
             }
           }
         }

@@ -35,7 +35,8 @@
                           {
                             "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                           }
-                        ]
+                        ],
+                        "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                       }
                     }
                   }
@@ -58,7 +59,8 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                         }
-                      ]
+                      ],
+                      "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel"
                     }
                   }
                 }
@@ -219,7 +221,8 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                         }
-                      ]
+                      ],
+                      "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                     }
                   }
                 }
@@ -240,7 +243,8 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                       }
-                    ]
+                    ],
+                    "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                   }
                 }
               }
@@ -291,7 +295,8 @@
                   {
                     "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
                   }
-                ]
+                ],
+                "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
               }
             }
           },

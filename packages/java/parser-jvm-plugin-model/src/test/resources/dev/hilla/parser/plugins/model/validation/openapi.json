@@ -31,7 +31,8 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
                     }
-                  ]
+                  ],
+                  "x-class-name": "dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
                 }
               }
             }
@@ -226,7 +227,8 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
               }
-            ]
+            ],
+            "x-class-name": "dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
           },
           "past": {
             "type": "string",

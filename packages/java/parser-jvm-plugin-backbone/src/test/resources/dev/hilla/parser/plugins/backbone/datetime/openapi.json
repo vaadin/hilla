@@ -28,8 +28,7 @@
                 "schema": {
                   "type": "string",
                   "format": "date",
-                  "nullable": true,
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.datetime.DateTimeEndpoint$CustomDate"
+                  "nullable": true
                 }
               }
             }

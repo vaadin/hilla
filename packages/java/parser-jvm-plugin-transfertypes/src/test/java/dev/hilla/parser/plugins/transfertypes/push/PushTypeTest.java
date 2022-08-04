@@ -19,7 +19,8 @@ public class PushTypeTest {
     @Test
     public void should_ReplacePushTypes()
             throws IOException, URISyntaxException {
-        var classpath = helper.getExtendedClassPath(Flux.class, EndpointSubscription.class);
+        var classpath = helper.getExtendedClassPath(Flux.class,
+                EndpointSubscription.class);
 
         var config = new ParserConfig.Builder()
                 .classPath(classpath.split(File.pathSeparator))
