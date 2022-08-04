@@ -1,9 +1,15 @@
 package dev.hilla.parser.plugins.backbone.simpletype;
 
+import java.math.BigDecimal;
+
 @Endpoint
 public class SimpleTypeEndpoint {
     public int[] getArray() {
         return new int[] { 1, 2, 3 };
+    }
+
+    public BigDecimal getBigDecimal() {
+        return BigDecimal.valueOf(0);
     }
 
     public boolean getBoolean() {

@@ -16,6 +16,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -905,7 +906,10 @@ public class ClassInfoModelTests {
 
         static class Specializations extends Context {
             private static final Map<Class<?>, String[]> reflectionSpecializations = Map
-                    .ofEntries(entry(Boolean.class, "isJDKClass", "isBoolean"),
+                    .ofEntries(
+                            entry(BigDecimal.class, "isJDKClass",
+                                    "isBigDecimal"),
+                            entry(Boolean.class, "isJDKClass", "isBoolean"),
                             entry(Byte.class, "isJDKClass", "isByte",
                                     "hasIntegerType"),
                             entry(Character.class, "isJDKClass", "isCharacter"),

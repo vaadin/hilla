@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +46,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     public boolean isArrayClass() {
         return origin.isArrayClass();
+    }
+
+    @Override
+    public boolean isBigDecimal() {
+        return ClassInfoModel.isAssignableFrom(BigDecimal.class, origin);
     }
 
     @Override
