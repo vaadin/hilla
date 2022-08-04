@@ -52,15 +52,13 @@ export default class PushPlugin extends Plugin {
 
           if (importClause.namedBindings) {
             const namedImports = importClause.namedBindings as ts.NamedImports;
-            modifiedStatement = ts.factory.updateImportDeclaration(
-              statement,
+            modifiedStatement = ts.factory.createImportDeclaration(
               statement.decorators,
               statement.modifiers,
-              ts.factory.updateImportClause(
-                importClause,
+              ts.factory.createImportClause(
                 importClause.isTypeOnly,
                 importClause.name,
-                ts.factory.updateNamedImports(namedImports, [
+                ts.factory.createNamedImports([
                   ...namedImports.elements,
                   ts.factory.createImportSpecifier(
                     false,
@@ -88,8 +86,7 @@ export default class PushPlugin extends Plugin {
             const unionType = (statement.type as ts.TypeReferenceNode).typeArguments![0] as ts.UnionTypeNode;
             const referenceType = unionType.types[0] as ts.TypeReferenceNode;
 
-            modifiedStatement = ts.factory.updateFunctionDeclaration(
-              statement,
+            modifiedStatement = ts.factory.createFunctionDeclaration(
               statement.decorators,
               undefined, // no async
               statement.asteriskToken,
@@ -97,16 +94,13 @@ export default class PushPlugin extends Plugin {
               statement.typeParameters,
               initParamFound ? parameters.slice(0, -1) : parameters,
               ts.factory.createUnionTypeNode([
-                ts.factory.updateTypeReferenceNode(referenceType, subscriptionIdentifier, referenceType.typeArguments),
+                ts.factory.createTypeReferenceNode(subscriptionIdentifier, referenceType.typeArguments),
                 unionType.types[1],
               ]),
-              ts.factory.updateBlock(statement.body!, [
-                ts.factory.updateReturnStatement(
-                  returnStatement,
-                  ts.factory.updateCallExpression(
-                    returnClient,
-                    ts.factory.updatePropertyAccessExpression(
-                      call,
+              ts.factory.createBlock([
+                ts.factory.createReturnStatement(
+                  ts.factory.createCallExpression(
+                    ts.factory.createPropertyAccessExpression(
                       call.expression,
                       ts.factory.createIdentifier('subscribe'),
                     ),
