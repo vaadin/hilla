@@ -85,14 +85,6 @@ final class SchemaProcessor {
             result = anySchema();
         }
 
-        if (type.isNonJDKClass() && type instanceof ClassRefSignatureModel) {
-            var className = ((ClassRefSignatureModel) type).getClassName();
-
-            if (!result.toString().contains(className)) {
-                result.addExtension("x-class-name", className);
-            }
-        }
-
         storage.getAssociationMap().addSignature(result, type, info);
 
         return result;
@@ -130,13 +122,10 @@ final class SchemaProcessor {
         var schema = nullify(new ArraySchema(), true);
         var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
 
-        if (typeArguments.size() > 0) {
-            return schema.items(
-                    new SchemaProcessor(typeArguments.get(0), info, storage)
-                            .process());
-        }
-
-        return schema;
+        return typeArguments.isEmpty() ? schema
+                : schema.items(
+                        new SchemaProcessor(typeArguments.get(0), info, storage)
+                                .process());
     }
 
     private Schema<?> mapSchema() {
@@ -179,9 +168,8 @@ final class SchemaProcessor {
     private Schema<?> typeArgumentSchema() {
         var types = ((TypeArgumentModel) type).getAssociatedTypes();
 
-        return types.size() > 0
-                ? new SchemaProcessor(types.get(0), info, storage).process()
-                : anySchema();
+        return types.isEmpty() ? anySchema()
+                : new SchemaProcessor(types.get(0), info, storage).process();
     }
 
     private Schema<?> typeParameterSchema() {

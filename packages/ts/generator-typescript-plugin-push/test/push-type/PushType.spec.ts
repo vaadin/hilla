@@ -1,8 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
+import BackbonePlugin from '@hilla/generator-typescript-plugin-backbone/index.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
-import BackbonePlugin from '../../src/index.js';
+import PushPlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
 
 use(sinonChai);
@@ -13,15 +14,16 @@ describe('BackbonePlugin', () => {
     const sectionName = 'PushType';
 
     it('correctly replaces types', async () => {
-      const generator = createGenerator([BackbonePlugin]);
+      const generator = createGenerator([BackbonePlugin, PushPlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(1);
+      expect(files.length).to.equal(2);
 
-      const t = await files[0].text();
+      const t = await files[1].text();
       expect(t).to.exist;
 
-      const [endpointFile] = files;
+      const endpointFile = files.find((f) => f.name === 'PushTypeEndpoint.ts')!;
+      expect(endpointFile).to.exist;
       await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
