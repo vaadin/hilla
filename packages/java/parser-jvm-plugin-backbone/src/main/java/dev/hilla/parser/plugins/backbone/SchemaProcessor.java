@@ -123,10 +123,11 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var typeArguments = _type.getTypeArguments();
 
-        schema = typeArguments.isEmpty() ? schema
-                : schema.items(
-                        new SchemaProcessor(typeArguments.get(0), info, storage)
-                                .process());
+        if (!typeArguments.isEmpty()) {
+            schema = schema.items(
+                    new SchemaProcessor(typeArguments.get(0), info, storage)
+                            .process());
+        }
 
         if (type.isNonJDKClass()) {
             schema.addExtension("x-class-name", _type.getName());
