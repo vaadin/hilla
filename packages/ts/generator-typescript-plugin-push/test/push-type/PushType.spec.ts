@@ -9,7 +9,7 @@ import { createGenerator, loadInput } from '../utils/common.js';
 use(sinonChai);
 use(snapshotMatcher);
 
-describe('BackbonePlugin', () => {
+describe('PushPlugin', () => {
   context('when the endpoint method has a return type related to push support', () => {
     const sectionName = 'PushType';
 

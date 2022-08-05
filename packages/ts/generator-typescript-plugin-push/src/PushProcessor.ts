@@ -59,13 +59,12 @@ export default class PushProcessor {
    * @private
    */
   #replacePromiseType(declaration: ts.FunctionDeclaration) {
-    const promise = (declaration.type as ts.TypeReferenceNode).typeArguments![0] as ts.UnionTypeNode;
-    const promiseType = promise.types[0] as ts.TypeReferenceNode;
+    const promiseType = (declaration.type as ts.TypeReferenceNode).typeArguments![0];
+    const promiseArray = (
+      ts.isUnionTypeNode(promiseType) ? (promiseType as ts.UnionTypeNode).types[0] : promiseType
+    ) as ts.TypeReferenceNode;
 
-    return ts.factory.createUnionTypeNode([
-      ts.factory.createTypeReferenceNode(this.#subscriptionId, promiseType.typeArguments),
-      promise.types[1],
-    ]);
+    return ts.factory.createTypeReferenceNode(this.#subscriptionId, promiseArray.typeArguments);
   }
 
   #updateFunction(declaration: ts.FunctionDeclaration): ts.FunctionDeclaration {

@@ -116,6 +116,28 @@
         }
       }
     },
+    "/PushTypeEndpoint/getNonNullMessageFlux": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "operationId": "PushTypeEndpoint_getMessageFlux_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-class-name": "reactor.core.publisher.Flux"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PushTypeEndpoint/getSubscription": {
       "post": {
         "tags": ["PushTypeEndpoint"],
