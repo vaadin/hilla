@@ -3,7 +3,6 @@ package dev.hilla.maven;
 import java.io.IOException;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -13,7 +12,7 @@ import org.apache.maven.project.MavenProject;
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "generate", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();

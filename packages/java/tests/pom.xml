@@ -130,13 +130,6 @@
           <groupId>dev.hilla</groupId>
           <artifactId>generator-maven-plugin</artifactId>
           <version>${project.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>generate</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
 
         <plugin>
