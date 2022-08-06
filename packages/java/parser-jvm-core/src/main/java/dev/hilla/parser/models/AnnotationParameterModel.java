@@ -46,6 +46,11 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
     }
 
     @Override
+    public Class<AnnotationParameterModel> getCommonModelClass() {
+        return AnnotationParameterModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         var value = getValue();
 

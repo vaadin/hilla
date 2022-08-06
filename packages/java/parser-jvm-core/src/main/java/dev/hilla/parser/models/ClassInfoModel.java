@@ -181,6 +181,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public Class<ClassInfoModel> getCommonModelClass() {
+        return ClassInfoModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams
                 .combine(getFieldDependenciesStream(),
@@ -310,11 +315,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     public Stream<ClassInfoModel> getTypeParameterDependenciesStream() {
-        return getTypeParameterStream()
+        return getTypeParametersStream()
                 .flatMap(TypeParameterModel::getDependenciesStream).distinct();
     }
 
-    public Stream<TypeParameterModel> getTypeParameterStream() {
+    public Stream<TypeParameterModel> getTypeParametersStream() {
         return getTypeParameters().stream();
     }
 

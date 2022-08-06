@@ -40,6 +40,11 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     public abstract String getClassName();
 
     @Override
+    public Class<FieldInfoModel> getCommonModelClass() {
+        return FieldInfoModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return getType().getDependenciesStream();
     }

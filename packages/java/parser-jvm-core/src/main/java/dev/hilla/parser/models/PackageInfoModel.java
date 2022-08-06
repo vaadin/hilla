@@ -31,6 +31,11 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public Class<PackageInfoModel> getCommonModelClass() {
+        return PackageInfoModel.class;
+    }
+
+    @Override
     public Set<ClassInfoModel> getDependencies() {
         return Set.of();
     }

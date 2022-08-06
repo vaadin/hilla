@@ -50,6 +50,11 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     }
 
     @Override
+    public Class<AnnotationInfoModel> getCommonModelClass() {
+        return AnnotationInfoModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(
                 getClassInfo().map(ClassInfoModel::getDependenciesStream)

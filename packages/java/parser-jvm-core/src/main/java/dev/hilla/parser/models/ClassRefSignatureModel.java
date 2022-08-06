@@ -115,6 +115,11 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return reference;
     }
 
+    @Override
+    public Class<ClassRefSignatureModel> getCommonModelClass() {
+        return ClassRefSignatureModel.class;
+    }
+
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
             typeArguments = prepareTypeArguments();

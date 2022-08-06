@@ -36,6 +36,11 @@ public abstract class ArraySignatureModel extends AnnotatedAbstractModel
                 && getAnnotations().equals(other.getAnnotations());
     }
 
+    @Override
+    public Class<ArraySignatureModel> getCommonModelClass() {
+        return ArraySignatureModel.class;
+    }
+
     public SignatureModel getNestedType() {
         if (nestedType == null) {
             nestedType = prepareNestedType();

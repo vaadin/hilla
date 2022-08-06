@@ -1,7 +1,10 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,30 +72,8 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
-    public void preprocess() {
-        for (var plugin : plugins) {
-            if (plugin instanceof Plugin.Preprocessor) {
-                logger.debug("Executing preprocessor plugin "
-                        + plugin.getClass().getName());
-
-                ((Plugin.Preprocessor) plugin).preprocess();
-            }
-        }
-    }
-
-    public void process(ScanElementsCollector collector) {
-        listener.onChange(collector::collect);
-
-        for (var plugin : plugins) {
-            if (plugin instanceof Plugin.Processor) {
-                logger.debug("Executing processor plugin "
-                        + plugin.getClass().getName());
-
-                ((Plugin.Processor) plugin).process(collector.getEndpoints(),
-                        collector.getEntities());
-
-                listener.poll();
-            }
-        }
+    public List<Visitor> getVisitors() {
+        return plugins.stream().map(Plugin::getVisitors)
+                .flatMap(Collection::stream).collect(Collectors.toList());
     }
 }

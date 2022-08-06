@@ -36,6 +36,11 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public Class<TypeVariableModel> getCommonModelClass() {
+        return TypeVariableModel.class;
+    }
+
+    @Override
     public int hashCode() {
         return getName().hashCode();
     }

@@ -44,6 +44,11 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public Class<MethodParameterInfoModel> getCommonModelClass() {
+        return MethodParameterInfoModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return getType().getDependenciesStream();
     }

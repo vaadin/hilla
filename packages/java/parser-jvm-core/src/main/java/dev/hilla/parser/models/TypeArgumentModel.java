@@ -45,6 +45,11 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         return associatedTypes;
     }
 
+    @Override
+    public Class<TypeArgumentModel> getCommonModelClass() {
+        return TypeArgumentModel.class;
+    }
+
     public abstract TypeArgument.Wildcard getWildcard();
 
     @Override

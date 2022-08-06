@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.models.ClassInfoModel;
-
 public interface Plugin {
     int getOrder();
 
     void setOrder(int order);
+
+    Collection<Visitor> getVisitors();
 
     default void setConfig(PluginConfiguration config) {
         if (config != null) {
@@ -20,13 +20,4 @@ public interface Plugin {
     }
 
     void setStorage(@Nonnull SharedStorage storage);
-
-    interface Preprocessor extends Plugin {
-        void preprocess();
-    }
-
-    interface Processor extends Plugin {
-        void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities);
-    }
 }

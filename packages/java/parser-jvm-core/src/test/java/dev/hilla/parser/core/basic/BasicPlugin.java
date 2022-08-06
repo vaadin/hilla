@@ -1,22 +1,19 @@
 package dev.hilla.parser.core.basic;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.utils.Streams;
+import dev.hilla.parser.core.Visitor;
 
-public class BasicPlugin implements Plugin.Processor {
+public class BasicPlugin implements Plugin {
     public static final String STORAGE_KEY = "BasicPluginResult";
-
     private int order = 0;
     private SharedStorage storage;
+    private List<Visitor> visitors;
 
     @Override
     public int getOrder() {
@@ -29,20 +26,17 @@ public class BasicPlugin implements Plugin.Processor {
     }
 
     @Override
-    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-            @Nonnull Collection<ClassInfoModel> entities) {
-        storage.getPluginStorage().put(STORAGE_KEY,
-                endpoints.stream().flatMap(endpoint -> Streams.combine(
-                        endpoint.getFieldsStream().map(FieldInfoModel::getName),
-                        endpoint.getMethodsStream()
-                                .map(MethodInfoModel::getName),
-                        endpoint.getInnerClassesStream()
-                                .map(ClassInfoModel::getName)))
-                        .collect(Collectors.toList()));
+    public Collection<Visitor> getVisitors() {
+        return visitors;
     }
 
     @Override
     public void setStorage(@Nonnull SharedStorage storage) {
         this.storage = storage;
+        this.visitors = List.of(new AddVisitor(this::getOrder),
+                new ReplaceVisitor(this::getOrder),
+                new RemoveVisitor(this::getOrder),
+                new FinalizeVisitor(storage, this::getOrder));
     }
+
 }

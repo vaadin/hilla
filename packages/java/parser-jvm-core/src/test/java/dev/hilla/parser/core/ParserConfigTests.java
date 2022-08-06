@@ -148,7 +148,7 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
-    private static class BarPlugin implements Plugin.Processor {
+    private static class BarPlugin implements Plugin {
         private int order = 1;
         private SharedStorage storage;
 
@@ -163,6 +163,10 @@ public class ParserConfigTests {
         }
 
         @Override
+        public Collection<Visitor> getVisitors() {
+            return List.of();
+        }
+
         public void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities) {
         }
@@ -173,7 +177,7 @@ public class ParserConfigTests {
         }
     }
 
-    private static class FooPlugin implements Plugin.Processor {
+    private static class FooPlugin implements Plugin {
         private int order = 0;
         private SharedStorage storage;
 
@@ -188,6 +192,10 @@ public class ParserConfigTests {
         }
 
         @Override
+        public Collection<Visitor> getVisitors() {
+            return List.of();
+        }
+
         public void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities) {
         }

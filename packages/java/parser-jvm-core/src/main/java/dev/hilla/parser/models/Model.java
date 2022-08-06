@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 public interface Model {
     Object get();
 
+    Class<? extends Model> getCommonModelClass();
+
     default Set<ClassInfoModel> getDependencies() {
         return getDependenciesStream().collect(Collectors.toSet());
     }

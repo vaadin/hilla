@@ -47,6 +47,11 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
     }
 
     @Override
+    public Class<AnnotationParameterEnumValueModel> getCommonModelClass() {
+        return AnnotationParameterEnumValueModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return Stream.of(getClassInfo());
     }

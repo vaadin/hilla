@@ -1,7 +1,7 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -42,8 +42,6 @@ public final class Parser {
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
         var pluginManager = new PluginManager(config, storage);
-        pluginManager.preprocess();
-        var replaceMap = storage.getClassMappers();
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "
@@ -52,36 +50,50 @@ public final class Parser {
         try (var result = new ClassGraph().enableAllInfo()
                 .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan()) {
-            var endpointAnnotationName = config.getEndpointAnnotationName();
 
-            logger.debug(
-                    "Collecting project endpoints with the endpoint annotation: "
-                            + endpointAnnotationName);
+            var dependencies = result
+                    .getClassesWithAnnotation(
+                            config.getEndpointAnnotationName())
+                    .stream().map(ClassInfoModel::of)
+                    .collect(Collectors.toCollection(LinkedList::new));
 
-            var collector = new ScanElementsCollector(result,
-                    endpointAnnotationName, replaceMap).collect();
+            var controller = new DependencyController(dependencies);
 
-            var endpoints = new LinkedHashSet<>(collector.getEndpoints());
+            var walker = new Walker(pluginManager.getVisitors(), controller);
 
-            logger.debug("Collected project endpoints: "
-                    + endpoints.stream().map(ClassInfoModel::getName)
-                            .collect(Collectors.joining(", ")));
+            while (!dependencies.isEmpty()) {
+                walker.traverse(dependencies.poll());
+            }
 
-            var entities = new LinkedHashSet<>(collector.getEntities());
-
-            logger.debug("Collected project data entities: "
-                    + entities.stream().map(ClassInfoModel::getName)
-                            .collect(Collectors.joining(", ")));
-
-            logger.debug(
-                    "Checking if the compiler is run with -parameters option enabled");
-            checkIfJavaCompilerParametersFlagIsEnabled(
-                    collector.getEndpoints());
-
-            logger.debug("Executing parser plugins");
-            pluginManager.process(collector);
-
-            logger.debug("Parsing process successfully finished");
+            // logger.debug(
+            // "Collecting project endpoints with the endpoint annotation: "
+            // + endpointAnnotationName);
+            //
+            // var collector = new ScanElementsCollector(result,
+            // endpointAnnotationName, replaceMap).collect();
+            //
+            // var endpoints = new LinkedHashSet<>(collector.getEndpoints());
+            //
+            // logger.debug("Collected project endpoints: "
+            // + endpoints.stream().map(ClassInfoModel::getName)
+            // .collect(Collectors.joining(", ")));
+            //
+            // var entities = new LinkedHashSet<>(collector.getEntities());
+            //
+            // logger.debug("Collected project data entities: "
+            // + entities.stream().map(ClassInfoModel::getName)
+            // .collect(Collectors.joining(", ")));
+            //
+            // logger.debug(
+            // "Checking if the compiler is run with -parameters option
+            // enabled");
+            // checkIfJavaCompilerParametersFlagIsEnabled(
+            // collector.getEndpoints());
+            //
+            // logger.debug("Executing parser plugins");
+            // pluginManager.process(collector);
+            //
+            // logger.debug("Parsing process successfully finished");
             return storage.getOpenAPI();
         }
     }

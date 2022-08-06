@@ -69,6 +69,11 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     public abstract String getClassName();
 
     @Override
+    public Class<MethodInfoModel> getCommonModelClass() {
+        return MethodInfoModel.class;
+    }
+
+    @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
         return Streams.combine(getResultDependenciesStream(),
                 getParameterDependenciesStream());
