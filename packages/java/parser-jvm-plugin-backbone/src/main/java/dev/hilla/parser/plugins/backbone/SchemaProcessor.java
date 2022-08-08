@@ -120,12 +120,17 @@ final class SchemaProcessor {
 
     private Schema<?> iterableSchema() {
         var schema = nullify(new ArraySchema(), true);
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
 
-        if (typeArguments.size() > 0) {
-            return schema.items(
+        if (!typeArguments.isEmpty()) {
+            schema = schema.items(
                     new SchemaProcessor(typeArguments.get(0), info, storage)
                             .process());
+        }
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
         }
 
         return schema;
@@ -141,7 +146,7 @@ final class SchemaProcessor {
                 .additionalProperties(values);
 
         if (type.isNonJDKClass()) {
-            schema.addExtension("x-classname", _type.getName());
+            schema.addExtension("x-class-name", _type.getName());
         }
 
         return schema;
@@ -153,7 +158,8 @@ final class SchemaProcessor {
     }
 
     private Schema<?> optionalSchema() {
-        var typeArguments = ((ClassRefSignatureModel) type).getTypeArguments();
+        var _type = (ClassRefSignatureModel) type;
+        var typeArguments = _type.getTypeArguments();
 
         return new SchemaProcessor(typeArguments.get(0), info, storage)
                 .process();
@@ -164,8 +170,8 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var fullyQualifiedName = ((ClassRefSignatureModel) type).getClassInfo()
-                .getName();
+        var _type = (ClassRefSignatureModel) type;
+        var fullyQualifiedName = _type.getClassInfo().getName();
 
         return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
@@ -179,9 +185,8 @@ final class SchemaProcessor {
     private Schema<?> typeArgumentSchema() {
         var types = ((TypeArgumentModel) type).getAssociatedTypes();
 
-        return types.size() > 0
-                ? new SchemaProcessor(types.get(0), info, storage).process()
-                : anySchema();
+        return types.isEmpty() ? anySchema()
+                : new SchemaProcessor(types.get(0), info, storage).process();
     }
 
     private Schema<?> typeParameterSchema() {

@@ -35,4 +35,6 @@ export default abstract class StatementRecordManager<T extends Statement> implem
 
     return records.map(([, statement]) => statement);
   }
+
+  public abstract clear(): void;
 }
