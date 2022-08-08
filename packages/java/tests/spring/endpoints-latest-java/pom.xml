@@ -60,7 +60,7 @@
 
             <plugin>
                 <groupId>dev.hilla</groupId>
-                <artifactId>generator-maven-plugin</artifactId>
+                <artifactId>engine-maven-plugin</artifactId>
             </plugin>
 
             <plugin>

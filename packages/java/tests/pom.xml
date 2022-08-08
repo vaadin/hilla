@@ -63,7 +63,7 @@
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
-      <artifactId>engine-starter</artifactId>
+      <artifactId>engine-runtime</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
@@ -128,7 +128,7 @@
 
         <plugin>
           <groupId>dev.hilla</groupId>
-          <artifactId>generator-maven-plugin</artifactId>
+          <artifactId>engine-maven-plugin</artifactId>
           <version>${project.version}</version>
         </plugin>
 
