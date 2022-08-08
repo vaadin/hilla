@@ -17,7 +17,7 @@
 
   <modules>
     <module>packages/java/endpoint</module>
-    <module>packages/java/engine-starter</module>
+    <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>

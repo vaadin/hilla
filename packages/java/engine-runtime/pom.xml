@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>engine-starter</artifactId>
+  <artifactId>engine-runtime</artifactId>
   <packaging>jar</packaging>
-  <name>Hilla Engine Starter</name>
+  <name>Hilla Engine Runtime</name>
 
   <properties>
     <flow.version>23.2-SNAPSHOT</flow.version>
