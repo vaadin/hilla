@@ -24,7 +24,9 @@ final class GeneratorProcessor {
                     new GeneratorConfiguration.Plugin(
                             "@hilla/generator-typescript-plugin-barrel"),
                     new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-model"));
+                            "@hilla/generator-typescript-plugin-model"),
+                    new GeneratorConfiguration.Plugin(
+                            "@hilla/generator-typescript-plugin-push"));
 
     private final Log logger;
     private final MavenProject project;

@@ -1,5 +1,5 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
-import ts from 'typescript';
+import ts, { NamedImports } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
@@ -25,6 +25,10 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     }
 
     return record.id;
+  }
+
+  public override clear() {
+    this.#map.clear();
   }
 
   public getIdentifier(path: string, specifier: string): Identifier | undefined {
@@ -91,6 +95,10 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     return id;
   }
 
+  public override clear() {
+    this.#map.clear();
+  }
+
   public getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path);
   }
@@ -131,6 +139,10 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   public getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path)?.id;
+  }
+
+  public override clear() {
+    this.#map.clear();
   }
 
   public *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
@@ -185,5 +197,37 @@ export default class ImportManager implements CodeConvertable<readonly Statement
     records.sort(StatementRecordManager.createComparator(this.#collator));
 
     return records.map(([, statement]) => statement);
+  }
+
+  public fromCode(source: ts.SourceFile) {
+    this.default.clear();
+    this.named.clear();
+    this.namespace.clear();
+
+    const imports = source.statements.filter((statement): statement is ImportDeclaration =>
+      ts.isImportDeclaration(statement),
+    );
+
+    for (const { importClause, moduleSpecifier } of imports) {
+      if (!importClause) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      const { name, namedBindings } = importClause;
+      const path = (moduleSpecifier as ts.StringLiteral).text;
+
+      if (namedBindings) {
+        if (ts.isNamespaceImport(namedBindings)) {
+          this.namespace.add(path, namedBindings.name.text, namedBindings.name);
+        } else {
+          for (const { name: specifier, isTypeOnly } of (namedBindings as NamedImports).elements) {
+            this.named.add(path, specifier.text, isTypeOnly, specifier);
+          }
+        }
+      } else if (name) {
+        this.default.add(path, name.text, importClause.isTypeOnly, name);
+      }
+    }
   }
 }

@@ -1,1 +1,1 @@
-# Hilla TypeScript Generator Barrel Plugin
+# Hilla TypeScript Generator Client Plugin
