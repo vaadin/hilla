@@ -72,7 +72,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     }
 
     List<String> prepareMavenCommand() {
-        return List.of("mvn", "generator:generate");
+        return List.of("mvn", "engine:generate");
     }
 
     List<String> prepareGradleCommand() {

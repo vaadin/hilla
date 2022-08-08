@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>generator-maven-plugin</artifactId>
+  <artifactId>engine-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maven Plugin for Code Generation</name>
+  <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
     <maven.version>3.8.6</maven.version>
