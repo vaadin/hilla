@@ -15,6 +15,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "1.2.0-alpha3")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "1.2.0-alpha3")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0-alpha3")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "1.2.0-alpha3")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     private File projectDirectory;
 

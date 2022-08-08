@@ -88,7 +88,7 @@ final class EndpointProcessor {
                             endpointName + '_' + method.getName() + "_POST")
                     .addTagsItem(endpointName).responses(createResponses());
 
-            if (method.getParameters().size() > 0) {
+            if (!method.getParameters().isEmpty()) {
                 operation.requestBody(createRequestBody());
             }
 
