@@ -44,8 +44,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                  ]
                 }
               }
             }
@@ -70,8 +69,7 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                         }
-                      ],
-                      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                      ]
                     }
                   }
                 }
@@ -93,8 +91,7 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                         }
-                      ],
-                      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                      ]
                     }
                   }
                 }
@@ -134,8 +131,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                  ]
                 }
               }
             }
@@ -161,8 +157,7 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                         }
-                      ],
-                      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                      ]
                     }
                   }
                 }
@@ -186,8 +181,7 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                         }
-                      ],
-                      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                      ]
                     }
                   }
                 }
@@ -227,8 +221,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Dependency"
+                  ]
                 }
               }
             }

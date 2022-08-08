@@ -155,8 +155,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    ]
                   }
                 }
               }
@@ -174,8 +173,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                  ]
                 }
               }
             }
@@ -231,8 +229,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    ]
                   }
                 }
               }
@@ -250,8 +247,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                  ]
                 }
               }
             }
@@ -275,8 +271,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                    ]
                   }
                 }
               }
@@ -294,8 +289,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                  ]
                 }
               }
             }
@@ -323,8 +317,7 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
               }
-            ],
-            "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+            ]
           }
         }
       }

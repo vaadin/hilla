@@ -32,8 +32,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                    ]
                   }
                 }
               }
@@ -51,8 +50,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                  ]
                 }
               }
             }
@@ -79,8 +77,7 @@
                         {
                           "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                         }
-                      ],
-                      "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      ]
                     }
                   }
                 }
@@ -102,8 +99,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                    ]
                   }
                 }
               }
@@ -127,8 +123,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                  ]
                 }
               }
             }
@@ -152,8 +147,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                    ]
                   }
                 }
               }

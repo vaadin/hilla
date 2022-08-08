@@ -31,8 +31,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
+                  ]
                 }
               }
             }

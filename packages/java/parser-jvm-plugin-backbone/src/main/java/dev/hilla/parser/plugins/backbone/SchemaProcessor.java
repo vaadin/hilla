@@ -161,14 +161,8 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var typeArguments = _type.getTypeArguments();
 
-        var schema = new SchemaProcessor(typeArguments.get(0), info, storage)
+        return new SchemaProcessor(typeArguments.get(0), info, storage)
                 .process();
-
-        if (type.isNonJDKClass()) {
-            schema.addExtension("x-class-name", _type.getName());
-        }
-
-        return schema;
     }
 
     private Schema<?> refSchema() {
@@ -179,15 +173,9 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var fullyQualifiedName = _type.getClassInfo().getName();
 
-        var schema = nullify(new ComposedSchema(), true)
+        return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
                         .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)));
-
-        if (type.isNonJDKClass()) {
-            schema.addExtension("x-class-name", _type.getName());
-        }
-
-        return schema;
     }
 
     private Schema<?> stringSchema() {

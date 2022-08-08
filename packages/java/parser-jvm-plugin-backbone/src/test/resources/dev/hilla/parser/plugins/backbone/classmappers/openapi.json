@@ -32,8 +32,7 @@
                       {
                         "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
                       }
-                    ],
-                    "x-class-name": "dev.hilla.parser.plugins.backbone.classmappers.Replace$From"
+                    ]
                   }
                 }
               }
@@ -51,8 +50,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.classmappers.Replace$From"
+                  ]
                 }
               }
             }
@@ -75,8 +73,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity"
                     }
-                  ],
-                  "x-class-name": "dev.hilla.parser.plugins.backbone.classmappers.ClassMappersEndpoint$ReplaceMapEntity"
+                  ]
                 }
               }
             }
@@ -100,8 +97,7 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz"
               }
-            ],
-            "x-class-name": "dev.hilla.parser.plugins.backbone.classmappers.Replace$Baz"
+            ]
           },
           "foo": {
             "type": "string",
@@ -118,8 +114,7 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.classmappers.Replace$To"
               }
-            ],
-            "x-class-name": "dev.hilla.parser.plugins.backbone.classmappers.Replace$From"
+            ]
           }
         }
       },
