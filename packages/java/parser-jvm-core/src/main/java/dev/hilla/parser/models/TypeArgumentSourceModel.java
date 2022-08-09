@@ -1,6 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +34,7 @@ final class TypeArgumentSourceModel extends TypeArgumentModel
     protected List<SignatureModel> prepareAssociatedTypes() {
         var signature = origin.getTypeSignature();
 
-        return signature == null ? Collections.emptyList()
+        return signature == null ? List.of()
                 : List.of(SignatureModel.of(signature));
     }
 }

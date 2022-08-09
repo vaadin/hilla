@@ -156,8 +156,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
-            "content": {}
+            "description": ""
           }
         }
       }

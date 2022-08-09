@@ -1,5 +1,7 @@
 package dev.hilla.parser.models;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
@@ -18,12 +20,15 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
 
-    public static MethodInfoModel of(@Nonnull MethodInfo method) {
-        return new MethodInfoSourceModel(Objects.requireNonNull(method));
+    public static MethodInfoModel of(@Nonnull MethodInfo origin) {
+        return new MethodInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static MethodInfoModel of(@Nonnull Method method) {
-        return new MethodInfoReflectionModel(method);
+    public static MethodInfoModel of(@Nonnull Executable origin) {
+        return Objects.requireNonNull(origin) instanceof Constructor<?>
+                ? new MethodInfoReflectionModel.Constructor(
+                        (Constructor<?>) origin)
+                : new MethodInfoReflectionModel.Regular((Method) origin);
     }
 
     @Override
@@ -42,7 +47,12 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
                 && getParameters().equals(other.getParameters());
     }
 
-    public abstract boolean equalsIgnoreParameters(MethodInfoModel obj);
+    public boolean equalsIgnoreParameters(MethodInfoModel other) {
+        return getName().equals(other.getName())
+                && getModifiers() == other.getModifiers()
+                && getResultType().equals(other.getResultType())
+                && getClassName().equals(other.getClassName());
+    }
 
     public boolean equalsIgnoreParameters(Object obj) {
         if (this == obj) {
@@ -118,11 +128,16 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return hashCodeIgnoreParameters() + 53 * getParameters().hashCode();
     }
 
-    public abstract int hashCodeIgnoreParameters();
+    public int hashCodeIgnoreParameters() {
+        return getName().hashCode() + 11 * getResultType().hashCode()
+                + 17 * getModifiers() + 23 * getClassName().hashCode();
+    }
 
     public abstract boolean isAbstract();
 
     public abstract boolean isBridge();
+
+    public abstract boolean isConstructor();
 
     public abstract boolean isFinal();
 

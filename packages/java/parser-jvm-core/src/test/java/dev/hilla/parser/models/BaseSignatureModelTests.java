@@ -14,6 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,28 +52,6 @@ public class BaseSignatureModelTests {
     @BeforeEach
     public void setUp(@Source ScanResult source) {
         ctx = new Context(source);
-    }
-
-    @DisplayName("It should create correct model")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CreateCorrectModel(BaseSignatureModel model,
-            ModelKind kind, String methodName) {
-        switch (kind) {
-        case REFLECTION_BARE:
-            assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case REFLECTION_COMPLETE:
-            assertEquals(ctx.getCompleteReflectionOrigin(methodName),
-                    model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(methodName), model.get());
-            assertTrue(model.isSource());
-            break;
-        }
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -121,6 +100,28 @@ public class BaseSignatureModelTests {
         assertNotEquals(sourceModel, new Object());
         assertNotEquals(reflectionModel, new Object());
         assertNotEquals(bareReflectionModel, new Object());
+    }
+
+    @DisplayName("It should provide correct origin")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectOrigin(BaseSignatureModel model,
+            ModelKind kind, String methodName) {
+        switch (kind) {
+        case REFLECTION_BARE:
+            assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case REFLECTION_COMPLETE:
+            assertEquals(ctx.getCompleteReflectionOrigin(methodName),
+                    model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(methodName), model.get());
+            assertTrue(model.isSource());
+            break;
+        }
     }
 
     @DisplayName("It should provide no dependencies")
@@ -265,6 +266,8 @@ public class BaseSignatureModelTests {
             public static final String testNamePattern = "{2} [{3}]";
             private static final Map<Class<?>, String[]> specializations = Map
                     .ofEntries(
+                            entry(BigDecimal.class, "isBase", "isJDKClass",
+                                    "isBigDecimal"),
                             entry(Boolean.TYPE, "isBase", "isJDKClass",
                                     "isBoolean", "isPrimitive"),
                             entry(Byte.TYPE, "isBase", "isJDKClass", "isByte",
