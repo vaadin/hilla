@@ -89,6 +89,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>3.6.1</version>
+          <configuration>
+            <goalPrefix>hilla</goalPrefix>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
