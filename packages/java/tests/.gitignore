@@ -1,7 +1,7 @@
 webpack.config.js
 webpack.generated.js
-vite.config.js
-vite.generated.js
+vite.config.ts
+vite.generated.ts
 tsconfig.json
 types.d.ts
 **/frontend/generated/*
