@@ -3,14 +3,14 @@ package dev.hilla.parser.core.basic;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.core.Command;
+import dev.hilla.parser.core.Path;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.Model;
 
 final class ReplaceVisitor implements Visitor {
-    private static final int step = 100;
+    private static final int shift = 1;
 
     private final Supplier<Integer> orderProvider;
 
@@ -19,22 +19,21 @@ final class ReplaceVisitor implements Visitor {
     }
 
     @Override
-    public Command enter(Model model, Model parent)
-            throws NoSuchFieldException {
+    public void enter(Path path) throws NoSuchFieldException {
+        var model = path.getModel();
+
         if (model instanceof MethodInfoModel
                 && ((MethodInfoModel) model).getName().equals("bar")) {
-            return Command.REPLACE(Stream
+            path.replace(Stream
                     .of(Sample.class.getDeclaredField("fieldFoo"),
                             Sample.class.getDeclaredField("fieldBar"))
                     .map(FieldInfoModel::of).toArray(Model[]::new));
         }
-
-        return Command.DO_NOTHING();
     }
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + step;
+        return orderProvider.get() + shift;
     }
 
     static class Sample {

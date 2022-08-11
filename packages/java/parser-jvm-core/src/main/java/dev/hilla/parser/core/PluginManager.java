@@ -6,24 +6,17 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
-    private static final Logger logger = LoggerFactory
-            .getLogger(PluginManager.class);
-    private final ChangeListener<Integer> listener;
     private final SortedSet<Plugin> plugins;
 
     PluginManager(ParserConfig config, SharedStorage storage) {
         plugins = config.getPlugins();
-        listener = new ChangeListener<>(
-                () -> storage.getClassMappers().hashCode());
 
         for (var plugin : plugins) {
             plugin.setStorage(storage);
+            plugin.setParserConfig(config);
         }
     }
 

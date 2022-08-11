@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import dev.hilla.parser.core.Path;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.NamedModel;
 
 final class FinalizeVisitor implements Visitor {
-    private static final int step = 300;
+    private static final int shift = 3;
     private final List<String> members = new ArrayList<>();
     private final Supplier<Integer> orderProvider;
 
@@ -23,7 +23,9 @@ final class FinalizeVisitor implements Visitor {
     }
 
     @Override
-    public void exit(Model model, Model parent) {
+    public void exit(Path path) {
+        var model = path.getModel();
+
         if (model instanceof FieldInfoModel || model instanceof MethodInfoModel
                 || model instanceof ClassInfoModel) {
             members.add(model.getCommonModelClass().getSimpleName() + " "
@@ -33,6 +35,6 @@ final class FinalizeVisitor implements Visitor {
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + step;
+        return orderProvider.get() + shift;
     }
 }

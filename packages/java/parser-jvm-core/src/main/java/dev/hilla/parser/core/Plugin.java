@@ -19,5 +19,7 @@ public interface Plugin {
         }
     }
 
+    default void setParserConfig(ParserConfig config) {}
+
     void setStorage(@Nonnull SharedStorage storage);
 }

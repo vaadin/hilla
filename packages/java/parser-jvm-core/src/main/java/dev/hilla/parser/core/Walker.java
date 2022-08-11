@@ -1,7 +1,5 @@
 package dev.hilla.parser.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -17,7 +15,6 @@ import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.MethodParameterInfoModel;
-import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
@@ -35,205 +32,241 @@ final class Walker {
     }
 
     public void traverse(ClassInfoModel target) {
-        visit(target.getPackage(), null);
-        target.getTypeParameters()
-                .forEach(typeParameter -> visit(typeParameter, target));
-        target.getSuperClass().ifPresent(cls -> visit(cls, target));
-        target.getInterfaces().forEach(iface -> visit(iface, target));
-        target.getFields().forEach(field -> visit(field, target));
-        target.getMethods().forEach(method -> visit(method, target));
-        target.getInnerClasses().forEach(cls -> visit(cls, target));
-    }
+        var packagePath = new Path<>(target.getPackage(), List.of());
+        enter(packagePath);
 
-    private List<Command> enter(Model model, Model parent) {
-        try {
-            var commands = new ArrayList<Command>();
+        if (!packagePath.isRemoved()) {
+            var classPath = new Path<>(target, List.of(packagePath), true);
+            enter(classPath);
 
-            for (var visitor : visitors) {
-                var command = visitor.enter(model, parent);
-                commands.add(command);
-                // If the current node is removed or replaced, we stop visitor
-                // loop
-                // immediately
-                if (command instanceof Command.Replace
-                        || command instanceof Command.Remove) {
-                    return commands;
-                }
+            if (!classPath.isRemoved()) {
+                var ascendants = classPath.getAscendantsForChild();
+
+                target.getTypeParametersStream()
+                        .map(m -> new Path<SignatureModel>(m, ascendants))
+                        .forEach(this::visitSignature);
+                target.getSuperClass().map(m -> new Path<>(m, ascendants))
+                        .ifPresent(this::visitClass);
+                target.getInterfacesStream().map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitClass);
+                target.getFieldsStream().map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitField);
+                target.getMethodsStream().map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitMethod);
+                target.getInnerClassesStream()
+                        .map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitClass);
             }
 
-            return commands;
+            exit(classPath);
+        }
+        exit(packagePath);
+    }
+
+    private void enter(Path<?> path) {
+        try {
+            for (var visitor : visitors) {
+                visitor.enter(path);
+            }
         } catch (Exception e) {
             throw new WalkerException(e);
         }
     }
 
-    private void exit(Model model, Model parent) {
+    private void exit(Path<?> path) {
         try {
             for (var visitor : visitors) {
-                visitor.exit(model, parent);
+                visitor.exit(path);
             }
         } catch (Exception e) {
             throw new WalkerException(e);
         }
     }
 
-    private boolean hasNoRemovingCommand(Collection<Command> commands) {
-        return commands.stream().noneMatch(Command::isRemovingCommand);
-    }
+    private void visitAnnotation(Path<AnnotationInfoModel> path) {
+        enter(path);
 
-    private void processCommandResult(Collection<Command> commands,
-            Model parent) {
-        // Added nodes will always be the current node siblings, so we use
-        // `parent` variable here
-        commands.stream().flatMap(cmd -> Arrays.stream(cmd.getContent()))
-                .forEach(model -> unknownVisit(model, parent));
-    }
+        if (!path.isRemoved()) {
+            var model = path.getModel();
+            var ascendants = path.getAscendantsForChild();
 
-    private void unknownVisit(Model model, Model parent) {
-        if (model instanceof AnnotationInfoModel) {
-            visit((AnnotationInfoModel) model, parent);
-        } else if (model instanceof AnnotationParameterEnumValueModel) {
-            visit((AnnotationParameterEnumValueModel) model, parent);
-        } else if (model instanceof AnnotationParameterModel) {
-            visit((AnnotationParameterModel) model, parent);
-        } else if (model instanceof SignatureModel) {
-            visit((SignatureModel) model, parent);
-        } else if (model instanceof ClassInfoModel) {
-            visit((ClassInfoModel) model, parent);
-        } else if (model instanceof FieldInfoModel) {
-            visit((FieldInfoModel) model, parent);
-        } else if (model instanceof MethodInfoModel) {
-            visit((MethodInfoModel) model, parent);
-        } else if (model instanceof MethodParameterInfoModel) {
-            visit((MethodParameterInfoModel) model, parent);
-        } else if (model instanceof PackageInfoModel) {
-            visit((PackageInfoModel) model, parent);
-        }
-    }
-
-    private void visit(MethodParameterInfoModel model, Model parent) {
-        var commands = enter(model, parent);
-
-        if (hasNoRemovingCommand(commands)) {
-            visit(model.getType(), model);
-            exit(model, parent);
+            model.getParametersStream().map(m -> new Path<>(m, ascendants))
+                    .forEach(this::visitAnnotationParameter);
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(AnnotationInfoModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitAnnotationParameter(Path<AnnotationParameterModel> path) {
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
-            model.getParameters().forEach(parameter -> visit(parameter, model));
-            exit(model, parent);
-        }
-
-        processCommandResult(commands, parent);
-    }
-
-    private void visit(AnnotationParameterModel model, Model parent) {
-        var commands = enter(model, parent);
-
-        if (hasNoRemovingCommand(commands)) {
+        if (!path.isRemoved()) {
+            var model = path.getModel();
+            var ascendants = path.getAscendantsForChild();
             var value = model.getValue();
 
             if (value instanceof AnnotationParameterEnumValueModel) {
-                visit((AnnotationParameterEnumValueModel) value, model);
+                visitAnnotationParameterEnumValue(new Path<>(
+                        (AnnotationParameterEnumValueModel) value, ascendants));
             } else if (value instanceof ClassInfoModel) {
-                visit((ClassInfoModel) value, model);
+                visitClass(new Path<>((ClassInfoModel) value, ascendants));
             }
-
-            exit(model, parent);
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(AnnotationParameterEnumValueModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitAnnotationParameterEnumValue(
+            Path<AnnotationParameterEnumValueModel> path) {
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
-            visit(model.getClassInfo(), model);
-            exit(model, parent);
+        if (!path.isRemoved()) {
+            var model = path.getModel();
+
+            visitClass(new Path<>(model.getClassInfo(),
+                    path.getAscendantsForChild()));
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(PackageInfoModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitClass(Path<ClassInfoModel> path) {
+        var model = path.getModel();
 
-        if (hasNoRemovingCommand(commands)) {
-            exit(model, parent);
-        }
-
-        processCommandResult(commands, parent);
-    }
-
-    private void visit(ClassInfoModel model, Model parent) {
         if (model.isJDKClass() || controller.isVisited(model)) {
             return;
         }
 
-        var commands = enter(model, parent);
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
+        if (!path.isRemoved()) {
             controller.register(model);
-            exit(model, parent);
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(FieldInfoModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitField(Path<FieldInfoModel> path) {
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
-            visit(model.getType(), model);
-            exit(model, parent);
+        if (!path.isRemoved()) {
+            visitSignature(new Path<>(path.getModel().getType(),
+                    path.getAscendantsForChild()));
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(MethodInfoModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitMethod(Path<MethodInfoModel> path) {
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
-            model.getParameters().forEach(param -> visit(param, model));
-            visit(model.getResultType(), model);
-            exit(model, parent);
+        if (!path.isRemoved()) {
+            var model = path.getModel();
+            var ascendants = path.getAscendantsForChild();
+            model.getParametersStream().map(m -> new Path<>(m, ascendants))
+                    .forEach(this::visitMethodParameter);
+            visitSignature(new Path<>(model.getResultType(), ascendants));
         }
 
-        processCommandResult(commands, parent);
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
     }
 
-    private void visit(SignatureModel model, Model parent) {
-        var commands = enter(model, parent);
+    private void visitMethodParameter(Path<MethodParameterInfoModel> path) {
+        enter(path);
 
-        if (hasNoRemovingCommand(commands)) {
+        if (!path.isRemoved()) {
+            visitSignature(new Path<>(path.getModel().getType(),
+                    path.getAscendantsForChild()));
+        }
+
+        exit(path);
+
+        path.forEachAddedNode(this::visitUnknown);
+    }
+
+    private void visitPackage(Path<PackageInfoModel> path) {
+        enter(path);
+
+        if (!path.isRemoved()) {
+            exit(path);
+        }
+
+        path.forEachAddedNode(this::visitUnknown);
+    }
+
+    private void visitSignature(Path<SignatureModel> path) {
+        enter(path);
+
+        if (!path.isRemoved()) {
+            var model = path.getModel();
+            var ascendants = path.getAscendantsForChild();
+
             if (model instanceof ArraySignatureModel) {
-                visit(((ArraySignatureModel) model).getNestedType(), model);
+                visitSignature(new Path<>(
+                        ((ArraySignatureModel) model).getNestedType(),
+                        ascendants));
             } else if (model instanceof ClassRefSignatureModel) {
-                visit(((ClassRefSignatureModel) model).getClassInfo(), model);
-                ((ClassRefSignatureModel) model).getTypeArguments()
-                        .forEach(arg -> visit(arg, model));
+                visitClass(new Path<>(
+                        ((ClassRefSignatureModel) model).getClassInfo(),
+                        ascendants));
+                ((ClassRefSignatureModel) model).getTypeArgumentsStream()
+                        .map(m -> new Path<SignatureModel>(m, ascendants))
+                        .forEach(this::visitSignature);
             } else if (model instanceof TypeArgumentModel) {
-                ((TypeArgumentModel) model).getAssociatedTypes()
-                        .forEach(type -> visit(type, model));
+                ((TypeArgumentModel) model).getAssociatedTypesStream()
+                        .map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitSignature);
             } else if (model instanceof TypeParameterModel) {
-                ((TypeParameterModel) model).getBounds()
-                        .forEach(type -> visit(type, model));
+                ((TypeParameterModel) model).getBoundsStream()
+                        .map(m -> new Path<>(m, ascendants))
+                        .forEach(this::visitSignature);
             } else if (model instanceof TypeVariableModel) {
-                visit(((TypeVariableModel) model).resolve(), model);
+                visitSignature(new Path<>(((TypeVariableModel) model).resolve(),
+                        ascendants));
             } // Skipping BaseSignatureModel because it could have no nested
               // signatures
 
-            exit(model, parent);
+            exit(path);
         }
 
-        processCommandResult(commands, parent);
+        path.forEachAddedNode(this::visitUnknown);
     }
+
+    private void visitUnknown(Path<?> path) {
+        var model = path.getModel();
+
+        if (model instanceof AnnotationInfoModel) {
+            visitAnnotation((Path<AnnotationInfoModel>) path);
+        } else if (model instanceof AnnotationParameterEnumValueModel) {
+            visitAnnotationParameterEnumValue(
+                    (Path<AnnotationParameterEnumValueModel>) path);
+        } else if (model instanceof AnnotationParameterModel) {
+            visitAnnotationParameter((Path<AnnotationParameterModel>) path);
+        } else if (model instanceof SignatureModel) {
+            visitSignature((Path<SignatureModel>) path);
+        } else if (model instanceof ClassInfoModel) {
+            visitClass((Path<ClassInfoModel>) path);
+        } else if (model instanceof FieldInfoModel) {
+            visitField((Path<FieldInfoModel>) path);
+        } else if (model instanceof MethodInfoModel) {
+            visitMethod((Path<MethodInfoModel>) path);
+        } else if (model instanceof MethodParameterInfoModel) {
+            visitMethodParameter((Path<MethodParameterInfoModel>) path);
+        } else if (model instanceof PackageInfoModel) {
+            visitPackage((Path<PackageInfoModel>) path);
+        }
+    }
+
 }

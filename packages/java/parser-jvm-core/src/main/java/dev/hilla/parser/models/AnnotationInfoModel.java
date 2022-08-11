@@ -71,6 +71,10 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         return parameters;
     }
 
+    public Stream<AnnotationParameterModel> getParametersStream() {
+        return getParameters().stream();
+    }
+
     @Override
     public int hashCode() {
         return getName().hashCode() + 11 * getParameters().hashCode();

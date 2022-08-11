@@ -2,13 +2,12 @@ package dev.hilla.parser.core.basic;
 
 import java.util.function.Supplier;
 
-import dev.hilla.parser.core.Command;
+import dev.hilla.parser.core.Path;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.Model;
 
 final class RemoveVisitor implements Visitor {
-    private static final int step = 200;
+    private static final int shift = 2;
 
     private final Supplier<Integer> orderProvider;
 
@@ -17,17 +16,17 @@ final class RemoveVisitor implements Visitor {
     }
 
     @Override
-    public Command enter(Model model, Model parent) {
+    public void enter(Path path) {
+        var model = path.getModel();
+
         if (model instanceof ClassInfoModel
                 && ((ClassInfoModel) model).getSimpleName().equals("Baz")) {
-            return Command.REMOVE();
+            path.remove();
         }
-
-        return Command.DO_NOTHING();
     }
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + step;
+        return orderProvider.get() + shift;
     }
 }

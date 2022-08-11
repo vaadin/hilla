@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import dev.hilla.parser.core.Path;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.NamedModel;
-import dev.hilla.parser.models.OwnedModel;
 
 class DependencyVisitor implements Visitor {
     private final List<String> allDependencies = new ArrayList<>();
@@ -28,10 +27,13 @@ class DependencyVisitor implements Visitor {
     }
 
     @Override
-    public void exit(Model model, Model parent) {
+    public void exit(Path path) {
+        var model = path.getModel();
+        var parent = path.getParent().getModel();
+
         if ((model instanceof FieldInfoModel
                 || model instanceof MethodInfoModel)
-                && !isEndpointClassMember((OwnedModel<ClassInfoModel>) model)) {
+                && !isParentClassEndpoint((ClassInfoModel) parent)) {
             allDependencyMembers.add(((NamedModel) model).getName());
         } else if (model instanceof ClassInfoModel) {
             allDependencies.add(((ClassInfoModel) model).getName());
@@ -48,9 +50,8 @@ class DependencyVisitor implements Visitor {
         return orderProvider.get();
     }
 
-    private boolean isEndpointClassMember(OwnedModel<ClassInfoModel> model) {
-        return model.getOwner().getAnnotationsStream()
-                .anyMatch(annotation -> annotation.getName()
-                        .equals(Endpoint.class.getName()));
+    private boolean isParentClassEndpoint(ClassInfoModel parent) {
+        return parent.getAnnotationsStream().anyMatch(annotation -> annotation
+                .getName().equals(Endpoint.class.getName()));
     }
 }

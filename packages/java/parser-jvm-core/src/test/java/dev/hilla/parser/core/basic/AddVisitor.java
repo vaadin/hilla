@@ -3,14 +3,14 @@ package dev.hilla.parser.core.basic;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.core.Command;
+import dev.hilla.parser.core.Path;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.Model;
 
 final class AddVisitor implements Visitor {
-    private static final int step = 0;
+    private static final int shift = 0;
     private final Supplier<Integer> orderProvider;
 
     AddVisitor(Supplier<Integer> orderProvider) {
@@ -18,22 +18,21 @@ final class AddVisitor implements Visitor {
     }
 
     @Override
-    public Command enter(Model model, Model parent)
-            throws NoSuchMethodException {
+    public void enter(Path path) throws NoSuchMethodException {
+        var model = path.getModel();
+
         if (model instanceof FieldInfoModel
                 && ((FieldInfoModel) model).getName().equals("foo")) {
-            return Command.ADD(Stream
+            path.add(Stream
                     .of(Sample.class.getDeclaredMethod("methodFoo"),
                             Sample.class.getDeclaredMethod("methodBar"))
                     .map(MethodInfoModel::of).toArray(Model[]::new));
         }
-
-        return Command.DO_NOTHING();
     }
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + step;
+        return orderProvider.get() + shift;
     }
 
     static class Sample {

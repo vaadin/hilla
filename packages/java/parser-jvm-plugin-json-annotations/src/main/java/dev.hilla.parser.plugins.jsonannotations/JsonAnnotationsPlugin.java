@@ -1,7 +1,6 @@
-package dev.hilla.parser.plugins.transfertypes;
+package dev.hilla.parser.plugins.jsonannotations;
 
 import java.util.Collection;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -9,13 +8,13 @@ import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
 
-public final class TransferTypesPlugin implements Plugin {
-    private final List<Replacer> replacers = List.of(new PageableReplacer(),
-            new UUIDReplacer());
-    private int order = -100;
+public class JsonAnnotationsPlugin implements Plugin {
+    private int order = 300;
+    private SharedStorage storage;
 
     @Override
     public int getOrder() {
@@ -29,13 +28,13 @@ public final class TransferTypesPlugin implements Plugin {
 
     @Override
     public Collection<Visitor> getVisitors() {
-        return List.of();
+        return null;
     }
 
-    public void preprocess() {
-        for (var replacer : replacers) {
-            replacer.process();
-        }
+    @Override
+    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull Collection<ClassInfoModel> entities) {
+
     }
 
     @Override
@@ -44,16 +43,12 @@ public final class TransferTypesPlugin implements Plugin {
                 storage.getParserConfig().getPlugins());
 
         if (toolset.comparePluginOrders(this, BackbonePlugin.class)
-                .map(result -> result >= 0).orElse(true)) {
-            throw new PluginException(String.format(
-                    "%s should be run before %s", getClass().getSimpleName(),
+                .map(result -> result <= 0).orElse(true)) {
+            throw new PluginException(String.format("%s should be run after %s",
+                    getClass().getSimpleName(),
                     BackbonePlugin.class.getSimpleName()));
         }
 
-        var classMappers = storage.getClassMappers();
-
-        for (var replacer : replacers) {
-            replacer.setClassMappers(classMappers);
-        }
+        this.storage = storage;
     }
 }
