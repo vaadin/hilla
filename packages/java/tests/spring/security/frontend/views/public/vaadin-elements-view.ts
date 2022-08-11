@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { customElement, query, state } from 'lit/decorators';
+import { customElement, query, state } from 'lit/decorators.js';
 import { until } from 'lit/directives/until';
 import { repeat } from 'lit/directives/repeat';
 

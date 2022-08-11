@@ -6,7 +6,7 @@ import '@vaadin/tabs';
 import '@vaadin/tabs/vaadin-tab';
 import { logout } from 'Frontend/auth';
 import { html, nothing } from 'lit';
-import { customElement } from 'lit/decorators';
+import { customElement } from 'lit/decorators.js';
 import { router } from '../index';
 import { appStore } from '../stores/app-store';
 import { Layout } from './view';

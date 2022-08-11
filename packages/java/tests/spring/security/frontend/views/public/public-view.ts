@@ -2,7 +2,7 @@ import '@vaadin/button';
 import '@vaadin/text-field';
 import { PublicEndpoint } from 'Frontend/generated/endpoints';
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators';
+import { customElement, state } from 'lit/decorators.js';
 import { View } from '../view';
 
 @customElement('public-view')
