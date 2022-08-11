@@ -1,6 +1,7 @@
 package dev.hilla.frontend;
 
 import static com.vaadin.flow.server.Constants.TARGET;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_FLOW_RESOURCES_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 import static org.junit.Assert.assertTrue;
@@ -54,6 +55,8 @@ public class NodeTasksEndpointTest {
                 .when(mockLookup).lookup(ClassFinder.class);
         builder = new Builder(mockLookup, dir, TARGET)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
+                .withFlowResourcesFolder(new File(new File(dir, TARGET),
+                    DEFAULT_FLOW_RESOURCES_FOLDER))
                 .withEmbeddableWebComponents(false)
                 .withEndpointSourceFolder(src)
                 .withEndpointGeneratedOpenAPIFile(json)
