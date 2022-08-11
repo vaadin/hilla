@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>generator-maven-plugin</artifactId>
+  <artifactId>engine-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maven Plugin for Code Generation</name>
+  <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
     <maven.version>3.8.6</maven.version>
@@ -89,6 +89,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>3.6.1</version>
+          <configuration>
+            <goalPrefix>hilla</goalPrefix>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

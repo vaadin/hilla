@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -11,12 +12,14 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
 
     public static AnnotationParameterEnumValueModel of(
             @Nonnull AnnotationEnumValue origin) {
-        return new AnnotationParameterEnumValueSourceModel(origin);
+        return new AnnotationParameterEnumValueSourceModel(
+                Objects.requireNonNull(origin));
     }
 
     public static AnnotationParameterEnumValueModel of(
             @Nonnull Enum<?> origin) {
-        return new AnnotationParameterEnumValueReflectionModel(origin);
+        return new AnnotationParameterEnumValueReflectionModel(
+                Objects.requireNonNull(origin));
     }
 
     @Override

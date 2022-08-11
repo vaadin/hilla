@@ -3,6 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,8 @@ final class AnnotationInfoReflectionModel extends AnnotationInfoModel
     }
 
     @Override
-    protected ClassInfoModel prepareClassInfo() {
-        return ClassInfoModel.of(origin.annotationType());
+    protected Optional<ClassInfoModel> prepareClassInfo() {
+        return Optional.of(ClassInfoModel.of(origin.annotationType()));
     }
 
     @Override

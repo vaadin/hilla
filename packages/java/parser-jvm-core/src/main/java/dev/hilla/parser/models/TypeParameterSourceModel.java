@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,9 +37,7 @@ final class TypeParameterSourceModel extends TypeParameterModel
         return Streams
                 .combine(Stream.of(origin.getClassBound()),
                         origin.getInterfaceBounds().stream())
-                .map(signature -> signature != null
-                        ? SignatureModel.of(signature)
-                        : null)
-                .distinct().collect(Collectors.toList());
+                .filter(Objects::nonNull).map(SignatureModel::of).distinct()
+                .collect(Collectors.toList());
     }
 }

@@ -31,7 +31,9 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassInfoModel> innerClasses;
     private List<ClassInfoModel> interfaces;
     private List<MethodInfoModel> methods;
+    private PackageInfoModel pkg;
     private Optional<ClassInfoModel> superClass;
+    private List<TypeParameterModel> typeParameters;
 
     public static boolean is(Class<?> actor, String target) {
         return Objects.equals(actor.getName(), target);
@@ -180,9 +182,13 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     @Override
     public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(getFieldDependenciesStream(),
-                getMethodDependenciesStream(), getInnerClassesStream(),
-                getSuperClassStream()).distinct();
+        return Streams
+                .combine(getFieldDependenciesStream(),
+                        getMethodDependenciesStream(), getInnerClassesStream(),
+                        getSuperClassStream(), getInterfacesStream(),
+                        getInterfaceDependenciesStream(),
+                        getTypeParameterDependenciesStream())
+                .filter(ClassInfoModel::isNonJDKClass).distinct();
     }
 
     public Set<ClassInfoModel> getFieldDependencies() {
@@ -239,6 +245,15 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getInnerClasses().stream();
     }
 
+    public Set<ClassInfoModel> getInterfaceDependencies() {
+        return getInterfaceDependenciesStream().collect(Collectors.toSet());
+    }
+
+    public Stream<ClassInfoModel> getInterfaceDependenciesStream() {
+        return getInterfacesStream()
+                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
+    }
+
     public List<ClassInfoModel> getInterfaces() {
         if (interfaces == null) {
             interfaces = prepareInterfaces();
@@ -272,6 +287,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getMethods().stream();
     }
 
+    public PackageInfoModel getPackage() {
+        if (pkg == null) {
+            pkg = preparePackage();
+        }
+
+        return pkg;
+    }
+
     public abstract String getSimpleName();
 
     public Optional<ClassInfoModel> getSuperClass() {
@@ -284,6 +307,23 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public Stream<ClassInfoModel> getSuperClassStream() {
         return getSuperClass().stream();
+    }
+
+    public Stream<ClassInfoModel> getTypeParameterDependenciesStream() {
+        return getTypeParameterStream()
+                .flatMap(TypeParameterModel::getDependenciesStream).distinct();
+    }
+
+    public Stream<TypeParameterModel> getTypeParameterStream() {
+        return getTypeParameters().stream();
+    }
+
+    public List<TypeParameterModel> getTypeParameters() {
+        if (typeParameters == null) {
+            typeParameters = prepareTypeParameters();
+        }
+
+        return typeParameters;
     }
 
     public int hashCode() {
@@ -382,5 +422,9 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     protected abstract List<MethodInfoModel> prepareMethods();
 
+    protected abstract PackageInfoModel preparePackage();
+
     protected abstract ClassInfoModel prepareSuperClass();
+
+    protected abstract List<TypeParameterModel> prepareTypeParameters();
 }

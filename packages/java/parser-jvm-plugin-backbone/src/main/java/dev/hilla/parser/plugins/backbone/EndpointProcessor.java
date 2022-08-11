@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
@@ -87,7 +88,7 @@ final class EndpointProcessor {
                             endpointName + '_' + method.getName() + "_POST")
                     .addTagsItem(endpointName).responses(createResponses());
 
-            if (method.getParameters().size() > 0) {
+            if (!method.getParameters().isEmpty()) {
                 operation.requestBody(createRequestBody());
             }
 
@@ -98,8 +99,8 @@ final class EndpointProcessor {
             var requestMap = new ObjectSchema();
 
             for (var parameter : method.getParameters()) {
-                var schema = new SchemaProcessor(parameter.getType(), storage)
-                        .process();
+                var schema = new SchemaProcessor(parameter.getType(),
+                        new SignatureInfo(parameter), storage).process();
                 requestMap.addProperties(parameter.getName(), schema);
                 storage.getAssociationMap().addParameter(schema, parameter);
             }
@@ -109,20 +110,21 @@ final class EndpointProcessor {
         }
 
         private ApiResponses createResponses() {
-            var content = new Content();
+            var response = new ApiResponse().description("");
 
             var resultType = method.getResultType();
 
             if (!resultType.isVoid()) {
-                var schema = new SchemaProcessor(resultType, storage).process();
+                var schema = new SchemaProcessor(resultType,
+                        new SignatureInfo(method), storage).process();
 
-                content.addMediaType("application/json",
-                        new MediaType().schema(schema));
+                response.setContent(new Content().addMediaType(
+                        "application/json", new MediaType().schema(schema)));
+
                 storage.getAssociationMap().addMethod(schema, method);
             }
 
-            return new ApiResponses().addApiResponse("200",
-                    new ApiResponse().content(content).description(""));
+            return new ApiResponses().addApiResponse("200", response);
         }
     }
 }
