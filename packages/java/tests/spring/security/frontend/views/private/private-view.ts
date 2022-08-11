@@ -3,7 +3,7 @@ import '@vaadin/text-field';
 import { BalanceEndpoint } from 'Frontend/generated/endpoints';
 import { appStore } from 'Frontend/stores/app-store';
 import { html, PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators';
+import { customElement, state } from 'lit/decorators.js';
 import { View } from '../view';
 
 @customElement('private-view')

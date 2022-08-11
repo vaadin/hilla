@@ -1,11 +1,13 @@
 package dev.hilla.frontend;
 
 import static com.vaadin.flow.server.Constants.TARGET;
+import static com.vaadin.flow.server.frontend.FrontendUtils.DEFAULT_FLOW_RESOURCES_FOLDER;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -57,7 +59,10 @@ public class NodeTasksEndpointTest {
                 .withEmbeddableWebComponents(false)
                 .withEndpointSourceFolder(src)
                 .withEndpointGeneratedOpenAPIFile(json)
-                .withFrontendGeneratedFolder(new File(dir, "api"));
+                .withFrontendGeneratedFolder(new File(dir, "api"))
+                .withFlowResourcesFolder(new File(userDir,
+                        Paths.get(TARGET, DEFAULT_FLOW_RESOURCES_FOLDER)
+                                .toString()));
     }
 
     @Test

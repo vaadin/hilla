@@ -1,7 +1,7 @@
 import { html } from 'lit';
-import { customElement, query, state } from 'lit/decorators';
-import { until } from 'lit/directives/until';
-import { repeat } from 'lit/directives/repeat';
+import { customElement, query, state } from 'lit/decorators.js';
+import { until } from 'lit/directives/until.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import '@vaadin/form-layout';
 import '@vaadin/checkbox';
