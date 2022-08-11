@@ -2,7 +2,7 @@ import { LoginResult } from '@hilla/frontend';
 import { AfterEnterObserver, RouterLocation } from '@vaadin/router';
 import '@vaadin/login/vaadin-login-overlay';
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators';
+import { customElement, state } from 'lit/decorators.js';
 import { login } from '../auth';
 import { View } from './view';
 
