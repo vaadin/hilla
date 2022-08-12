@@ -65,35 +65,6 @@ public final class Parser {
                 walker.traverse(dependencies.poll());
             }
 
-            // logger.debug(
-            // "Collecting project endpoints with the endpoint annotation: "
-            // + endpointAnnotationName);
-            //
-            // var collector = new ScanElementsCollector(result,
-            // endpointAnnotationName, replaceMap).collect();
-            //
-            // var endpoints = new LinkedHashSet<>(collector.getEndpoints());
-            //
-            // logger.debug("Collected project endpoints: "
-            // + endpoints.stream().map(ClassInfoModel::getName)
-            // .collect(Collectors.joining(", ")));
-            //
-            // var entities = new LinkedHashSet<>(collector.getEntities());
-            //
-            // logger.debug("Collected project data entities: "
-            // + entities.stream().map(ClassInfoModel::getName)
-            // .collect(Collectors.joining(", ")));
-            //
-            // logger.debug(
-            // "Checking if the compiler is run with -parameters option
-            // enabled");
-            // checkIfJavaCompilerParametersFlagIsEnabled(
-            // collector.getEndpoints());
-            //
-            // logger.debug("Executing parser plugins");
-            // pluginManager.process(collector);
-            //
-            // logger.debug("Parsing process successfully finished");
             return storage.getOpenAPI();
         }
     }
