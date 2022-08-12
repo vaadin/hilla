@@ -2,7 +2,7 @@ package dev.hilla.parser.core.basic;
 
 import java.util.function.Supplier;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
 
@@ -16,7 +16,7 @@ final class RemoveVisitor implements Visitor {
     }
 
     @Override
-    public void enter(Path path) {
+    public void enter(NodePath path) {
         var model = path.getModel();
 
         if (model instanceof ClassInfoModel

@@ -56,11 +56,6 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getBoundsStream().flatMap(SignatureModel::getDependenciesStream);
-    }
-
-    @Override
     public int hashCode() {
         return getName().hashCode() + 3 * getBounds().hashCode();
     }

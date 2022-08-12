@@ -99,15 +99,6 @@ public class PackageInfoModelTests {
         }
     }
 
-    @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideNoDependencies(PackageInfoModel model,
-            ModelKind kind) {
-        assertEquals(Set.of(), model.getDependencies());
-        assertEquals(0, model.getDependenciesStream().count());
-    }
-
     static class Context {
         private static final Package reflectionOrigin = PackageInfoModelSample.class
                 .getPackage();

@@ -45,11 +45,6 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getType().getDependenciesStream();
-    }
-
-    @Override
     public ClassInfoModel getOwner() {
         if (owner == null) {
             owner = prepareOwner();

@@ -51,11 +51,6 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
         return AnnotationParameterEnumValueModel.class;
     }
 
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Stream.of(getClassInfo());
-    }
-
     public abstract String getValueName();
 
     @Override

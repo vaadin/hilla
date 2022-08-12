@@ -49,17 +49,6 @@ public class MethodInfoModelTests {
         ctx = new Context.Default(source);
     }
 
-    @DisplayName("It should provide method dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(MethodInfoModel model, ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class),
-                ClassInfoModel.of(Sample.ParamDependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
     @Test
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {

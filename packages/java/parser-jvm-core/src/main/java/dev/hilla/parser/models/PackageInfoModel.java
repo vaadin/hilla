@@ -36,16 +36,6 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Set<ClassInfoModel> getDependencies() {
-        return Set.of();
-    }
-
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Stream.empty();
-    }
-
-    @Override
     public int hashCode() {
         return getName().hashCode();
     }

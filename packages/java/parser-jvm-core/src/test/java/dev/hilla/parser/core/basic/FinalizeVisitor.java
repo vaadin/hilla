@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
@@ -23,7 +23,7 @@ final class FinalizeVisitor implements Visitor {
     }
 
     @Override
-    public void exit(Path path) {
+    public void exit(NodePath path) {
         var model = path.getModel();
 
         if (model instanceof FieldInfoModel || model instanceof MethodInfoModel

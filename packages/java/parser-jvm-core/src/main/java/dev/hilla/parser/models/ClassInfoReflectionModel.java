@@ -213,9 +213,9 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInterfaces() {
-        return Arrays.stream(origin.getInterfaces()).map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+    protected List<ClassRefSignatureModel> prepareInterfaces() {
+        return Arrays.stream(origin.getInterfaces())
+                .map(ClassRefSignatureModel::of).collect(Collectors.toList());
     }
 
     @Override
@@ -230,11 +230,11 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected ClassInfoModel prepareSuperClass() {
+    protected ClassRefSignatureModel prepareSuperClass() {
         var superClass = origin.getSuperclass();
 
         return superClass != null && ClassInfoModel.isNonJDKClass(superClass)
-                ? ClassInfoModel.of(superClass)
+                ? ClassRefSignatureModel.of(superClass)
                 : null;
     }
 

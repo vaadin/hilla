@@ -80,22 +80,6 @@ public class TypeParameterModelTests {
         }
     }
 
-    @DisplayName("It should get bounds")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(TypeParameterModel model, ModelKind kind,
-            String name) {
-        switch (name) {
-        case "RegularTypeParameter":
-            assertEquals(Set.of(), model.getDependencies());
-            break;
-        case "BoundedTypeParameter":
-            assertEquals(Set.of(ClassInfoModel.of(Sample.Bound.class)),
-                    model.getDependencies());
-            break;
-        }
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)

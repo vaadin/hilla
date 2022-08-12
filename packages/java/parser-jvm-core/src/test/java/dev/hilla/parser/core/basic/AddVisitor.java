@@ -3,7 +3,7 @@ package dev.hilla.parser.core.basic;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
@@ -18,7 +18,7 @@ final class AddVisitor implements Visitor {
     }
 
     @Override
-    public void enter(Path path) throws NoSuchMethodException {
+    public void enter(NodePath path) throws NoSuchMethodException {
         var model = path.getModel();
 
         if (model instanceof FieldInfoModel

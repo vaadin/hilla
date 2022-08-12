@@ -52,16 +52,6 @@ public class FieldInfoModelTests {
         ctx = new Context.Default(source);
     }
 
-    @DisplayName("It should provide field dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(FieldInfoModel model, ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
-    }
-
     @DisplayName("It should provide field name")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)

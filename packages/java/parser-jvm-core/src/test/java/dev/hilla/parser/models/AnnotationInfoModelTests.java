@@ -115,17 +115,6 @@ public class AnnotationInfoModelTests {
         }
     }
 
-    @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideDependencies(AnnotationInfoModel model,
-            ModelKind kind) {
-        assertEquals(
-                Set.of(ClassInfoModel.of(Sample.class),
-                        ClassInfoModel.of(Sample.Enum.class)),
-                model.getDependencies());
-    }
-
     static final class Context {
         private static final String fieldName = "bar";
         private static final Enum<?> reflectionEnumValue;
@@ -249,15 +238,6 @@ public class AnnotationInfoModelTests {
             assertEquals("VALUE", model.getValueName());
         }
 
-        @DisplayName("It should provide all dependencies")
-        @ParameterizedTest(name = EnumValueProvider.testNamePattern)
-        @ArgumentsSource(EnumValueProvider.class)
-        public void should_GetDependencies(
-                AnnotationParameterEnumValueModel model, ModelKind kind) {
-            assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
-                    model.getDependencies());
-        }
-
         @DisplayName("It should have the same hashCode for source and reflection models")
         @Test
         public void should_HaveSameHashCodeForSourceAndReflectionModels() {
@@ -291,26 +271,6 @@ public class AnnotationInfoModelTests {
     @DisplayName("Annotation parameter")
     @Nested
     public class Parameter {
-        @DisplayName("It should get parameter dependencies")
-        @ParameterizedTest(name = ParameterProvider.testNamePattern)
-        @ArgumentsSource(ParameterProvider.class)
-        public void should_GetDependencies(AnnotationParameterModel model,
-                ModelKind kind, String name) {
-            switch (name) {
-            case "classParameter":
-                assertEquals(Set.of(ClassInfoModel.of(Sample.class)),
-                        model.getDependencies());
-                break;
-            case "enumParameter":
-                assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
-                        model.getDependencies());
-                break;
-            default:
-                assertEquals(Set.of(), model.getDependencies());
-                break;
-            }
-        }
-
         @DisplayName("It should get name and value correctly")
         @ParameterizedTest(name = ParameterProvider.testNamePattern)
         @ArgumentsSource(ParameterProvider.class)

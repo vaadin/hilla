@@ -124,14 +124,6 @@ public class BaseSignatureModelTests {
         }
     }
 
-    @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideNoDependencies(BaseSignatureModel model,
-            ModelKind kind, String methodName) {
-        assertEquals(Set.of(), model.getDependencies());
-    }
-
     private enum ModelKind {
         SOURCE("SOURCE"), REFLECTION_COMPLETE(
                 "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");

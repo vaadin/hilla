@@ -212,9 +212,10 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInterfaces() {
-        return origin.getInterfaces().stream().map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+    protected List<ClassRefSignatureModel> prepareInterfaces() {
+        return origin.getTypeSignatureOrTypeDescriptor()
+                .getSuperinterfaceSignatures().stream()
+                .map(ClassRefSignatureModel::of).collect(Collectors.toList());
     }
 
     @Override
@@ -229,9 +230,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected ClassInfoModel prepareSuperClass() {
-        var superClass = origin.getSuperclass();
-        return superClass != null ? ClassInfoModel.of(superClass) : null;
+    protected ClassRefSignatureModel prepareSuperClass() {
+        var superClass = origin.getTypeSignatureOrTypeDescriptor()
+                .getSuperclassSignature();
+        return superClass != null ? ClassRefSignatureModel.of(superClass)
+                : null;
     }
 
     @Override

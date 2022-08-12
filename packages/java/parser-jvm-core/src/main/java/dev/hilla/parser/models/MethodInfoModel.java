@@ -73,12 +73,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return MethodInfoModel.class;
     }
 
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(getResultDependenciesStream(),
-                getParameterDependenciesStream());
-    }
-
     public abstract int getModifiers();
 
     @Override
@@ -88,16 +82,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         }
 
         return owner;
-    }
-
-    public List<ClassInfoModel> getParameterDependencies() {
-        return getParameterDependenciesStream().collect(Collectors.toList());
-    }
-
-    public Stream<ClassInfoModel> getParameterDependenciesStream() {
-        return getParametersStream()
-                .flatMap(MethodParameterInfoModel::getDependenciesStream)
-                .distinct();
     }
 
     public List<MethodParameterInfoModel> getParameters() {
@@ -110,14 +94,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
 
     public Stream<MethodParameterInfoModel> getParametersStream() {
         return getParameters().stream();
-    }
-
-    public List<ClassInfoModel> getResultDependencies() {
-        return getResultDependenciesStream().collect(Collectors.toList());
-    }
-
-    public Stream<ClassInfoModel> getResultDependenciesStream() {
-        return getResultType().getDependenciesStream();
     }
 
     public SignatureModel getResultType() {

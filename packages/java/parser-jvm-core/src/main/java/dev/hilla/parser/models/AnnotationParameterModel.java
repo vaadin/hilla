@@ -50,20 +50,6 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
         return AnnotationParameterModel.class;
     }
 
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        var value = getValue();
-
-        if (value instanceof ClassInfoModel) {
-            return Stream.of((ClassInfoModel) value);
-        } else if (value instanceof AnnotationParameterEnumValueModel) {
-            return Stream.of(
-                    ((AnnotationParameterEnumValueModel) value).getClassInfo());
-        }
-
-        return Stream.empty();
-    }
-
     public Object getValue() {
         if (value == null) {
             value = prepareValue();

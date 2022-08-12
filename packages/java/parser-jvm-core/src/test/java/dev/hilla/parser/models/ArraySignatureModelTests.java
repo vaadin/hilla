@@ -93,17 +93,6 @@ public class ArraySignatureModelTests {
         }
     }
 
-    @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideDependencies(ArraySignatureModel model,
-            ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Dependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
-    }
-
     @DisplayName("It should provide nested type")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)

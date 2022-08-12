@@ -54,15 +54,6 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         return AnnotationInfoModel.class;
     }
 
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(
-                getClassInfo().map(ClassInfoModel::getDependenciesStream)
-                        .orElse(Stream.empty()),
-                getParameters().stream().flatMap(
-                        AnnotationParameterModel::getDependenciesStream));
-    }
-
     public Set<AnnotationParameterModel> getParameters() {
         if (parameters == null) {
             parameters = prepareParameters();
