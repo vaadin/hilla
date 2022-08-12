@@ -16,9 +16,10 @@
 package dev.hilla.parser.plugins.backbone.complexhierarchy;
 
 import dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel;
+import dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyParentEndpoint;
 
 @Endpoint
-public class ComplexHierarchyEndpoint {
+public class ComplexHierarchyEndpoint extends ComplexHierarchyParentEndpoint {
     // Using ComplexHierarchyModel from another package is intentional here to
     // verify the generator's parsing logic for that case
     public ComplexHierarchyModel getModel() {

@@ -3,7 +3,7 @@ package dev.hilla.parser.plugins.backbone;
 import java.util.HashSet;
 import java.util.Set;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
@@ -24,13 +24,14 @@ class PathRecognizer {
         dependenciesToIgnore.add(model);
     }
 
-    public boolean isClassReferencedByUsedMembers(Path<?> path) {
+    public boolean isClassReferencedByUsedMembers(NodePath path) {
         return path.getAscendants().stream()
                 .anyMatch(ascendant -> isEndpointMethodReference(ascendant)
-                        || isEntityFieldReference(ascendant));
+                        || isEntityFieldReference(ascendant))
+                || isEntitySuperclass(path);
     }
 
-    public boolean isEndpointClass(Path<?> path) {
+    public boolean isEndpointClass(NodePath path) {
         var model = path.getModel();
 
         return model instanceof ClassInfoModel
@@ -42,7 +43,7 @@ class PathRecognizer {
                 .getName().equals(endpointAnnotationName));
     }
 
-    public boolean isEndpointMethodReference(Path<?> path) {
+    public boolean isEndpointMethodReference(NodePath path) {
         return path.getModel() instanceof MethodInfoModel
                 && isEndpointClass(path.getParent());
     }
@@ -54,8 +55,18 @@ class PathRecognizer {
                 && !model.isMap();
     }
 
-    public boolean isEntityFieldReference(Path<?> path) {
+    public boolean isEntityFieldReference(NodePath path) {
         return path.getModel() instanceof FieldInfoModel
                 && !isEndpointClass(path.getParent());
+    }
+
+    private boolean isEntitySuperclass(NodePath path) {
+        var model = path.getModel();
+        var parentModel = path.getParent().getModel();
+
+        return model instanceof ClassInfoModel
+                && parentModel instanceof ClassInfoModel
+                && !isEndpointClass((ClassInfoModel) parentModel)
+                && !dependenciesToIgnore.contains(parentModel);
     }
 }

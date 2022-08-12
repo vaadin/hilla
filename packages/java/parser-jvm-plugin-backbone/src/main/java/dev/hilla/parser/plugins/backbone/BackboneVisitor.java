@@ -2,7 +2,7 @@ package dev.hilla.parser.plugins.backbone;
 
 import java.util.function.Supplier;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
 
@@ -23,7 +23,7 @@ final class BackboneVisitor implements Visitor {
     }
 
     @Override
-    public void enter(Path<?> path) {
+    public void enter(NodePath path) {
         if (path.isRemoved()) {
             return;
         }
@@ -33,16 +33,23 @@ final class BackboneVisitor implements Visitor {
         if (model instanceof ClassInfoModel) {
             var cls = (ClassInfoModel) model;
 
-            if (!path.isDependency() && !recognizer.isClassReferencedByUsedMembers(path)) {
-                recognizer.ignoreDependency(cls);
-            }
+            if (path instanceof NodePath.ClassDeclaration) {
+                // We are exploring a class declaration; the only parent is a
+                // PackageInfoModel.
+                if (recognizer.isEndpointClass(cls)) {
+                    endpointProcessor.process(cls);
+                }
 
-            if (recognizer.isEndpointClass(cls)) {
-                endpointProcessor.process(cls);
-            }
-
-            if (recognizer.isEntityClass(cls)) {
-                entityProcessor.process(cls);
+                if (recognizer.isEntityClass(cls)) {
+                    entityProcessor.process(cls);
+                }
+            } else {
+                // We entered a class mention, either by class reference or as
+                // an inner class declaration; it means that we know when and
+                // by which node this class is mentioned.
+                if (!recognizer.isClassReferencedByUsedMembers(path)) {
+                    recognizer.ignoreDependency(cls);
+                }
             }
         }
     }
