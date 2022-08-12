@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
@@ -37,24 +37,27 @@ final class NonnullVisitor implements Visitor {
     }
 
     @Override
-    public void enter(Path<?> path) {
+    public void enter(NodePath path) {
         if (path.isRemoved()) {
             return;
         }
 
         var model = path.getModel();
 
-        if (model instanceof SignatureModel && associationMap.getSignatures().containsKey(model)) {
+        if (model instanceof SignatureModel
+                && associationMap.getSignatures().containsKey(model)) {
             var schema = associationMap.getSignatures().get(model);
 
-            var matcher = Streams.combine(
-                    ((SignatureModel) path.getModel()).getAnnotationsStream(),
-                    getParentAnnotationStream((Path<SignatureModel>) path),
-                    getPackageAnnotationStream((Path<SignatureModel>) path))
-                .map(annotation -> annotations.get(annotation.getName()))
-                .filter(Objects::nonNull)
-                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
-                .orElse(AnnotationMatcher.DEFAULT);
+            var matcher = Streams
+                    .combine(
+                            ((SignatureModel) path.getModel())
+                                    .getAnnotationsStream(),
+                            getParentAnnotationStream(path),
+                            getPackageAnnotationStream(path))
+                    .map(annotation -> annotations.get(annotation.getName()))
+                    .filter(Objects::nonNull)
+                    .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                    .orElse(AnnotationMatcher.DEFAULT);
 
             schema.setNullable(matcher.doesMakeNonNull() ? null : true);
         }
@@ -66,9 +69,10 @@ final class NonnullVisitor implements Visitor {
     }
 
     private Stream<AnnotationInfoModel> getPackageAnnotationStream(
-            Path<SignatureModel> path) {
-        return ((PackageInfoModel) path.getAscendants().get(0).getModel())
-                .getAnnotationsStream();
+            NodePath path) {
+        var packageModel = (PackageInfoModel) path.getAscendants().get(0)
+                .getModel();
+        return packageModel.getAnnotationsStream();
     }
 
     /**
@@ -80,7 +84,7 @@ final class NonnullVisitor implements Visitor {
      * @return a stream of parent annotations
      */
     private Stream<AnnotationInfoModel> getParentAnnotationStream(
-            Path<SignatureModel> path) {
+            NodePath path) {
         var parent = path.getParent().getModel();
 
         if (parent instanceof FieldInfoModel) {

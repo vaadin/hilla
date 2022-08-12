@@ -3,7 +3,7 @@ package dev.hilla.parser.plugins.model;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import dev.hilla.parser.core.Path;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
@@ -48,7 +48,7 @@ final class ModelVisitor implements Visitor {
     }
 
     @Override
-    public void enter(Path<?> path) {
+    public void enter(NodePath path) {
         if (path.isRemoved()) {
             return;
         }
