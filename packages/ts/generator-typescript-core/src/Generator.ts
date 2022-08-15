@@ -13,11 +13,13 @@ export default class Generator {
   readonly #logger: LoggerFactory;
   readonly #manager: PluginManager;
   readonly #parser: SwaggerParser;
+  readonly #outputDir: string;
 
-  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory) {
+  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory, outputDir: string) {
     this.#parser = new SwaggerParser();
     this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), logger);
     this.#logger = logger;
+    this.#outputDir = outputDir;
   }
 
   public async process(input: string): Promise<readonly File[]> {
@@ -29,6 +31,7 @@ export default class Generator {
       apiRefs: this.#parser.$refs,
       pluginStorage: new Map(),
       sources: [],
+      outputDir: this.#outputDir,
     };
 
     this.#logger.global.debug('Executing plugins');

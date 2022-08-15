@@ -46,7 +46,7 @@ export default class BackbonePlugin extends Plugin {
       if (endpoints.has(endpointName)) {
         endpointProcessor = endpoints.get(endpointName)!;
       } else {
-        endpointProcessor = new EndpointProcessor(endpointName, this);
+        endpointProcessor = new EndpointProcessor(endpointName, this, storage.outputDir);
         endpoints.set(endpointName, endpointProcessor);
       }
 

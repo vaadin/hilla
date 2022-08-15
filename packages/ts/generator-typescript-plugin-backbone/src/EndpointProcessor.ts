@@ -18,12 +18,14 @@ export default class EndpointProcessor {
   readonly #name: string;
   readonly #owner: Plugin;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
+  readonly #outputDir: string;
 
-  public constructor(name: string, owner: Plugin) {
+  public constructor(name: string, owner: Plugin, outputDir: string) {
     this.#owner = owner;
     this.#name = name;
+    this.#outputDir = outputDir;
     this.#dependencies.imports.default.add(
-      this.#dependencies.paths.createRelativePath(ClientPlugin.CLIENT_FILE_NAME),
+      this.#dependencies.paths.createRelativePath(ClientPlugin.clientFile(outputDir).name),
       'client',
     );
     this.#dependencies.imports.named.add(
@@ -64,7 +66,7 @@ export default class EndpointProcessor {
           pathItem[httpMethod] as EndpointMethodOperation,
           this.#dependencies,
           this.#owner,
-        )?.process(),
+        )?.process(this.#outputDir),
       )
       .filter(Boolean) as readonly Statement[];
   }
