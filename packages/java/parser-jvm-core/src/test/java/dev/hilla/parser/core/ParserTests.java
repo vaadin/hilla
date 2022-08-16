@@ -63,8 +63,7 @@ public class ParserTests {
 
         var expected = List.of(
                 "dev.hilla.parser.core.dependency.DependencyEntityOne",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo$InnerClass");
+                "dev.hilla.parser.core.dependency.DependencyEntityTwo");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
                 .get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
