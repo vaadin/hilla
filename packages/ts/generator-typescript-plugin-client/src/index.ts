@@ -22,7 +22,11 @@ export default class ClientPlugin extends Plugin {
   }
 
   public static clientFile(path: string): { name: string; custom: boolean } {
-    return path && existsSync(fileURLToPath(`${path}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`))
+    if (path && path.startsWith('file:')) {
+      path = fileURLToPath(path);
+    }
+
+    return path && existsSync(`${path}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`)
       ? { name: ClientPlugin.CUSTOM_CLIENT_FILE_NAME, custom: true }
       : { name: ClientPlugin.CLIENT_FILE_NAME, custom: false };
   }
