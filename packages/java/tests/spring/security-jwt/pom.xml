@@ -69,12 +69,6 @@
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
-            <!-- create tsgen symlink (see pluginManagement) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-
             <plugin>
                 <groupId>dev.hilla</groupId>
                 <artifactId>engine-maven-plugin</artifactId>
