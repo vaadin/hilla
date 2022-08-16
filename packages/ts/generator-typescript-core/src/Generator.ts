@@ -13,9 +13,9 @@ export default class Generator {
   readonly #logger: LoggerFactory;
   readonly #manager: PluginManager;
   readonly #parser: SwaggerParser;
-  readonly #outputDir: string;
+  readonly #outputDir: string | undefined;
 
-  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory, outputDir: string) {
+  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory, outputDir?: string) {
     this.#parser = new SwaggerParser();
     this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), logger);
     this.#logger = logger;

@@ -39,7 +39,7 @@ export default abstract class EndpointMethodOperationProcessor {
     }
   }
 
-  public abstract process(outputDir: string): Statement | undefined;
+  public abstract process(outputDir?: string): Statement | undefined;
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
@@ -64,7 +64,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     this.#operation = operation;
   }
 
-  public process(outputDir: string): Statement | undefined {
+  public process(outputDir?: string): Statement | undefined {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
     const initTypeIdentifier = imports.named.getIdentifier(

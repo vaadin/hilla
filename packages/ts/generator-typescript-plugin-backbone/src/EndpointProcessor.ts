@@ -18,9 +18,9 @@ export default class EndpointProcessor {
   readonly #name: string;
   readonly #owner: Plugin;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
-  readonly #outputDir: string;
+  readonly #outputDir: string | undefined;
 
-  public constructor(name: string, owner: Plugin, outputDir: string) {
+  public constructor(name: string, owner: Plugin, outputDir?: string) {
     this.#owner = owner;
     this.#name = name;
     this.#outputDir = outputDir;

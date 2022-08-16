@@ -6,7 +6,7 @@ import { URL } from 'url';
 
 export const pathBase = 'dev/hilla/parser/plugins/backbone';
 
-export function createGenerator(plugins: readonly PluginConstructor[], outputDir: string): Generator {
+export function createGenerator(plugins: readonly PluginConstructor[], outputDir?: string): Generator {
   return new Generator(plugins, new LoggerFactory({ name: 'tsgen-test', verbose: true }), outputDir);
 }
 

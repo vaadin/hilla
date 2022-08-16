@@ -8,7 +8,7 @@ type SharedStorage = Readonly<{
   apiRefs: $Refs;
   sources: SourceFile[];
   pluginStorage: Map<string, unknown>;
-  outputDir: string;
+  outputDir?: string;
 }>;
 
 export default SharedStorage;

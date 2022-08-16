@@ -15,18 +15,17 @@ export default class ClientPlugin extends Plugin {
   }
 
   public override async execute({ sources, outputDir }: SharedStorage): Promise<void> {
-    if (!ClientPlugin.clientFile(outputDir).custom) {
+    // the client file is created only if a custom client file is not found
+    if (!(outputDir && ClientPlugin.clientFile(outputDir).custom)) {
       const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this).process();
       sources.push(clientFile);
     }
   }
 
-  public static clientFile(path: string): { name: string; custom: boolean } {
-    if (path && path.startsWith('file:')) {
-      path = fileURLToPath(path);
-    }
+  public static clientFile(path?: string): { name: string; custom: boolean } {
+    const dir = path && path.startsWith('file:') ? fileURLToPath(path) : path;
 
-    return path && existsSync(`${path}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`)
+    return dir && existsSync(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`)
       ? { name: ClientPlugin.CUSTOM_CLIENT_FILE_NAME, custom: true }
       : { name: ClientPlugin.CLIENT_FILE_NAME, custom: false };
   }
