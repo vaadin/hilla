@@ -91,14 +91,13 @@ public final class ScanElementsCollector {
         for (var i = 0; i < entities.size(); i++) {
             var entity = entities.get(i);
 
-            Streams
-                .combine(entity.getFieldDependenciesStream(),
+            Streams.combine(entity.getFieldDependenciesStream(),
                     entity.getSuperClassStream(),
                     entity.getTypeParameterDependenciesStream())
-                .filter(ClassInfoModel::isNonJDKClass).distinct()
-                .map(classMappers::map)
-                .filter(ClassInfoModel::isNonJDKClass)
-                .filter(e -> !entities.contains(e)).forEach(entities::add);
+                    .filter(ClassInfoModel::isNonJDKClass).distinct()
+                    .map(classMappers::map)
+                    .filter(ClassInfoModel::isNonJDKClass)
+                    .filter(e -> !entities.contains(e)).forEach(entities::add);
         }
 
         return this;
