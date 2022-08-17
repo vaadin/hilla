@@ -93,7 +93,8 @@ public final class ScanElementsCollector {
         for (var i = 0; i < entities.size(); i++) {
             var entity = entities.get(i);
 
-            Streams.combine(entity.getFieldDependenciesStream(),
+            Streams.combine(
+                    entity.getFieldDependenciesStream(f -> !f.isTransient()),
                     entity.getSuperClassStream())
                     .filter(ClassInfoModel::isNonJDKClass).distinct()
                     .map(classMappers::map)

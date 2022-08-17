@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -195,9 +196,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getFieldDependenciesStream().collect(Collectors.toSet());
     }
 
-    public Stream<ClassInfoModel> getFieldDependenciesStream() {
-        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream)
-                .distinct();
+    public Stream<ClassInfoModel> getFieldDependenciesStream(
+            Predicate<FieldInfoModel>... filters) {
+        return getFieldsStream(filters)
+                .flatMap(FieldInfoModel::getDependenciesStream).distinct();
     }
 
     public List<FieldInfoModel> getFields() {
@@ -208,8 +210,15 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return fields;
     }
 
-    public Stream<FieldInfoModel> getFieldsStream() {
-        return getFields().stream();
+    public Stream<FieldInfoModel> getFieldsStream(
+            Predicate<FieldInfoModel>... filters) {
+        Stream<FieldInfoModel> stream = getFields().stream();
+
+        for (var filter : filters) {
+            stream = stream.filter(filter);
+        }
+
+        return stream;
     }
 
     public List<ClassInfoModel> getInheritanceChain() {
@@ -326,6 +335,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return typeParameters;
     }
 
+    @Override
     public int hashCode() {
         return 3 + getName().hashCode();
     }
@@ -388,6 +398,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
                 : isAssignableFrom((Class<?>) origin, cls);
     }
 
+    @Override
     public abstract boolean isEnum();
 
     public abstract boolean isFinal();

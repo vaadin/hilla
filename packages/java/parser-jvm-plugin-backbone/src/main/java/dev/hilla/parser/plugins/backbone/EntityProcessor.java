@@ -84,7 +84,7 @@ final class EntityProcessor {
         private Schema<?> processClass() {
             var schema = new ObjectSchema();
 
-            entity.getFieldsStream().forEach(field -> {
+            entity.getFieldsStream(f -> !f.isTransient()).forEach(field -> {
                 var processor = new ComponentSchemaPropertyProcessor(field);
 
                 schema.addProperties(processor.getKey(), processor.getValue());
