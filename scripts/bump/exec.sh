@@ -4,7 +4,8 @@
 set -eu
 
 bump_scripts_dir=$(dirname -- "$0")
-packages_dir="$PWD/packages/ts"
+ts_packages_dir="$PWD/packages/ts"
+java_packages_dir="$PWD/packages/java"
 
 # Convert X.Y.Z.suffix git tag to X.Y.Z-suffix npm version
 IFS=. read -ra version_tag_split <<< "${VERSION_TAG}"
@@ -27,12 +28,13 @@ ghr_put () {
 }
 
 # Updating the registration version for all packages
-find "$packages_dir"/*/src/index.ts -exec sed -i -e "s/version:.\+\,/version: \/* updated-by-script *\/ \'$version_tag_npm\',/" {} +
+find "$ts_packages_dir"/*/src/index.ts -type f -exec sed -i -e "s/version:.\+\,/version: \/* updated-by-script *\/ \'$version_tag_npm\',/" {} +
+find "$java_packages_dir" -type f -name "*.java" -exec sed -i -r -e "s/(@NpmPackage.value = .@hilla.+ version = .)([^"\""]+)/\1$version_tag_npm/g"  {} +
 
 npx lerna version "$version_tag_npm" --no-git-tag-version --no-push --yes
 
 # Updating the peer dependencies in packages
-find "$packages_dir"/*/package.json -exec node "$bump_scripts_dir"/package-update.js -v "$version_tag_npm" {} +
+find "$ts_packages_dir"/*/package.json -type f -exec node "$bump_scripts_dir"/package-update.js -v "$version_tag_npm" {} +
 
 # Updating package-lock.json to reflect results of the previous command
 npm install --package-lock-only --ignore-scripts
