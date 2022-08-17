@@ -27,7 +27,9 @@ describe('FormPlugin', () => {
         'FormNonnullTypesModel',
       ];
 
-      const generator = new Generator([ModelPlugin], new LoggerFactory({ name: 'model-plugin-test', verbose: true }));
+      const generator = new Generator([ModelPlugin], {
+        logger: new LoggerFactory({ name: 'model-plugin-test', verbose: true }),
+      });
       const input = await readFile(new URL('./Model.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
       expect(files.length).to.equal(modelNames.length);

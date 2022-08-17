@@ -15,11 +15,11 @@ export default class Generator {
   readonly #parser: SwaggerParser;
   readonly #outputDir: string | undefined;
 
-  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory, outputDir?: string) {
+  public constructor(plugins: readonly PluginConstructor[], context: { logger: LoggerFactory; outputDir?: string }) {
     this.#parser = new SwaggerParser();
-    this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), logger);
-    this.#logger = logger;
-    this.#outputDir = outputDir;
+    this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), context.logger);
+    this.#logger = context.logger;
+    this.#outputDir = context.outputDir;
   }
 
   public async process(input: string): Promise<readonly File[]> {
