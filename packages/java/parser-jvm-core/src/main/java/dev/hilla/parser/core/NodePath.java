@@ -1,9 +1,8 @@
 package dev.hilla.parser.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import dev.hilla.parser.models.ClassInfoModel;
@@ -11,9 +10,12 @@ import dev.hilla.parser.models.Model;
 import dev.hilla.parser.utils.Lists;
 
 public abstract class NodePath {
+    private final List<Model> added = new ArrayList<>();
     private final List<NodePath> ascendants;
-    private final List<Command> commands = new ArrayList<>();
     private final Model model;
+    private final List<Visitor> skipped = new ArrayList<>();
+    private Visitor currentVisitor;
+    private boolean removed = false;
 
     private NodePath(Model model, List<NodePath> ascendants) {
         this.model = model;
@@ -32,7 +34,7 @@ public abstract class NodePath {
     }
 
     public void add(Model... nodes) {
-        commands.add(new Command.Add(nodes));
+        Collections.addAll(added, nodes);
     }
 
     @Override
@@ -47,8 +49,7 @@ public abstract class NodePath {
 
         var other = (NodePath) obj;
 
-        return ascendants.equals(other.ascendants) && model.equals(other.model)
-                && commands.equals(other.commands);
+        return ascendants.equals(other.ascendants) && model.equals(other.model);
     }
 
     public List<NodePath> getAscendants() {
@@ -63,29 +64,41 @@ public abstract class NodePath {
         return Lists.getLastElement(ascendants);
     }
 
+    public boolean hasSkippedAscendant(Visitor visitor) {
+        return ascendants.stream()
+                .anyMatch(ascendant -> ascendant.skipped.contains(visitor));
+    }
+
     @Override
     public int hashCode() {
-        return model.hashCode() + 7 * ascendants.hashCode()
-                + 11 * commands.hashCode();
+        return model.hashCode() + 7 * ascendants.hashCode();
     }
 
     public boolean isRemoved() {
-        return commands.stream().anyMatch(cmd -> cmd instanceof Command.Replace
-                || cmd instanceof Command.Remove);
+        return removed;
+    }
+
+    public boolean isSkipped(Visitor visitor) {
+        return skipped.contains(visitor);
     }
 
     public void remove() {
-        commands.add(new Command.Remove());
+        removed = true;
     }
 
     public void replace(Model... models) {
-        commands.add(new Command.Replace(models));
+        removed = true;
+        add(models);
+    }
+
+    public void skip() {
+        if (currentVisitor != null) {
+            skipped.add(currentVisitor);
+        }
     }
 
     void forEachAddedNode(Consumer<NodePath> consumer) {
-        commands.stream().map(Command::getContent).filter(Objects::nonNull)
-                .flatMap(Arrays::stream)
-                .map(model -> NodePath.of(model, getAscendantsForChild()))
+        added.stream().map(model -> NodePath.of(model, getAscendantsForChild()))
                 .forEach(consumer);
     }
 
@@ -93,8 +106,8 @@ public abstract class NodePath {
         return Lists.append(ascendants, this);
     }
 
-    List<Command> getCommands() {
-        return commands;
+    void setCurrentVisitor(Visitor currentVisitor) {
+        this.currentVisitor = currentVisitor;
     }
 
     public static final class ClassDeclaration extends NodePath {

@@ -11,6 +11,32 @@ interface Command {
         return null;
     }
 
+    class Skip implements Command {
+        private final Visitor visitor;
+
+        Skip(Visitor visitor) {
+            this.visitor = visitor;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            return obj != null && getClass() == obj.getClass();
+        }
+
+        public Visitor getVisitor() {
+            return visitor;
+        }
+
+        @Override
+        public int hashCode() {
+            return getClass().getName().hashCode();
+        }
+    }
+
     class Add implements Command {
         private final Model[] content;
 

@@ -67,7 +67,17 @@ final class Walker {
     private void enter(NodePath path) {
         try {
             for (var visitor : visitors) {
-                visitor.enter(path);
+                if (!path.hasSkippedAscendant(visitor)) {
+                    path.setCurrentVisitor(visitor);
+                    visitor.enter(path);
+                    path.setCurrentVisitor(null);
+
+                    // If we skipped the path during the `enter`, we exit it
+                    // immediately
+                    if (path.isSkipped(visitor)) {
+                        visitor.exit(path);
+                    }
+                }
             }
         } catch (Exception e) {
             throw new WalkerException(e);
@@ -77,7 +87,9 @@ final class Walker {
     private void exit(NodePath path) {
         try {
             for (var visitor : visitors) {
-                visitor.exit(path);
+                if (path.hasSkippedAscendant(visitor)) {
+                    visitor.exit(path);
+                }
             }
         } catch (Exception e) {
             throw new WalkerException(e);
