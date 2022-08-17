@@ -65,8 +65,8 @@ import dev.hilla.exception.EndpointException;
  */
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
-@NpmPackage(value = "@hilla/frontend", version = "1.2.0-alpha1")
-@NpmPackage(value = "@hilla/form", version = "1.2.0-alpha1")
+@NpmPackage(value = "@hilla/frontend", version = "1.2.0-beta1")
+@NpmPackage(value = "@hilla/form", version = "1.2.0-beta1")
 public class EndpointController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
