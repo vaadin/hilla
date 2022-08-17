@@ -39,7 +39,7 @@ export default class PushPlugin extends Plugin {
     return import.meta.url;
   }
 
-  async execute(storage: SharedStorage): Promise<void> {
+  public override async execute(storage: SharedStorage): Promise<void> {
     const { api, sources } = storage;
     const endpointMethodMap = this.constructor.#collectPatchableMethods(api.paths);
 

@@ -39,7 +39,7 @@ export default abstract class EndpointMethodOperationProcessor {
     }
   }
 
-  public abstract process(outputDir?: string): Statement | undefined;
+  public abstract process(outputDir?: string): Promise<Statement | undefined>;
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
@@ -64,7 +64,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     this.#operation = operation;
   }
 
-  public process(outputDir?: string): Statement | undefined {
+  public async process(outputDir?: string): Promise<Statement | undefined> {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
     const initTypeIdentifier = imports.named.getIdentifier(
@@ -81,7 +81,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
     const clientLibIdentifier = imports.default.getIdentifier(
-      paths.createRelativePath(ClientPlugin.clientFile(outputDir).name),
+      paths.createRelativePath(await ClientPlugin.clientFileName(outputDir)),
     )!;
 
     const callExpression = ts.factory.createCallExpression(
