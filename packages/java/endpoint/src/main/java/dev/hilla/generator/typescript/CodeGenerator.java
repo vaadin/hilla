@@ -318,8 +318,8 @@ public class CodeGenerator extends AbstractTypeScriptClientCodegen {
             Schema inner = arraySchema.getItems();
             if (schema.getExtensions() != null
                     && schema.getExtensions().containsKey("x-flux")) {
-                return String.format("Subscription<%s>%s",
-                        this.getTypeDeclaration(inner), optionalSuffix);
+                return String.format("Subscription<%s>",
+                        this.getTypeDeclaration(inner));
             } else {
                 return String.format("Array<%s>%s",
                         this.getTypeDeclaration(inner), optionalSuffix);
