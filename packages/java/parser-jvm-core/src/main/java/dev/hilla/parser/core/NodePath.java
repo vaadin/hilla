@@ -10,11 +10,9 @@ import dev.hilla.parser.models.Model;
 import dev.hilla.parser.utils.Lists;
 
 public abstract class NodePath {
+    protected final Model model;
     private final List<Model> added = new ArrayList<>();
     private final List<NodePath> ascendants;
-    private final Model model;
-    private final List<Visitor> skipped = new ArrayList<>();
-    private Visitor currentVisitor;
     private boolean removed = false;
 
     private NodePath(Model model, List<NodePath> ascendants) {
@@ -64,11 +62,6 @@ public abstract class NodePath {
         return Lists.getLastElement(ascendants);
     }
 
-    public boolean hasSkippedAscendant(Visitor visitor) {
-        return ascendants.stream()
-                .anyMatch(ascendant -> ascendant.skipped.contains(visitor));
-    }
-
     @Override
     public int hashCode() {
         return model.hashCode() + 7 * ascendants.hashCode();
@@ -76,10 +69,6 @@ public abstract class NodePath {
 
     public boolean isRemoved() {
         return removed;
-    }
-
-    public boolean isSkipped(Visitor visitor) {
-        return skipped.contains(visitor);
     }
 
     public void remove() {
@@ -91,12 +80,6 @@ public abstract class NodePath {
         add(models);
     }
 
-    public void skip() {
-        if (currentVisitor != null) {
-            skipped.add(currentVisitor);
-        }
-    }
-
     void forEachAddedNode(Consumer<NodePath> consumer) {
         added.stream().map(model -> NodePath.of(model, getAscendantsForChild()))
                 .forEach(consumer);
@@ -104,10 +87,6 @@ public abstract class NodePath {
 
     List<NodePath> getAscendantsForChild() {
         return Lists.append(ascendants, this);
-    }
-
-    void setCurrentVisitor(Visitor currentVisitor) {
-        this.currentVisitor = currentVisitor;
     }
 
     public static final class ClassDeclaration extends NodePath {

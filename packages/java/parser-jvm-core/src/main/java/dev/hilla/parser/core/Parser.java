@@ -57,9 +57,7 @@ public final class Parser {
                     .stream().map(ClassInfoModel::of)
                     .collect(Collectors.toCollection(LinkedList::new));
 
-            var controller = new DependencyController(dependencies);
-
-            var walker = new Walker(pluginManager.getVisitors(), controller);
+            var walker = new Walker(pluginManager.getVisitors(), dependencies);
 
             while (!dependencies.isEmpty()) {
                 walker.traverse(dependencies.poll());

@@ -2,7 +2,10 @@ package dev.hilla.parser.core;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -24,12 +27,13 @@ import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
 
 final class Walker {
-    private final DependencyController controller;
+    private final Queue<ClassInfoModel> dependencies;
+    private final Set<Model> visitedNodes = new HashSet<>();
     private final SortedSet<Visitor> visitors = new TreeSet<>(
             Comparator.comparing(Visitor::getOrder));
 
-    Walker(Collection<Visitor> visitors, DependencyController controller) {
-        this.controller = controller;
+    Walker(Collection<Visitor> visitors, Queue<ClassInfoModel> dependencies) {
+        this.dependencies = dependencies;
         this.visitors.addAll(visitors);
     }
 
@@ -39,6 +43,7 @@ final class Walker {
 
         if (!packagePath.isRemoved()) {
             var classPath = NodePath.of(target, List.of(packagePath), true);
+
             enter(classPath);
 
             if (!classPath.isRemoved()) {
@@ -67,17 +72,7 @@ final class Walker {
     private void enter(NodePath path) {
         try {
             for (var visitor : visitors) {
-                if (!path.hasSkippedAscendant(visitor)) {
-                    path.setCurrentVisitor(visitor);
-                    visitor.enter(path);
-                    path.setCurrentVisitor(null);
-
-                    // If we skipped the path during the `enter`, we exit it
-                    // immediately
-                    if (path.isSkipped(visitor)) {
-                        visitor.exit(path);
-                    }
-                }
+                visitor.enter(path);
             }
         } catch (Exception e) {
             throw new WalkerException(e);
@@ -87,9 +82,7 @@ final class Walker {
     private void exit(NodePath path) {
         try {
             for (var visitor : visitors) {
-                if (path.hasSkippedAscendant(visitor)) {
-                    visitor.exit(path);
-                }
+                visitor.exit(path);
             }
         } catch (Exception e) {
             throw new WalkerException(e);
@@ -151,14 +144,15 @@ final class Walker {
     private void visitClass(NodePath path) {
         var model = (ClassInfoModel) path.getModel();
 
-        if (model.isJDKClass() || controller.isVisited(model)) {
+        if (model.isJDKClass()) {
             return;
         }
 
         enter(path);
 
-        if (!path.isRemoved()) {
-            controller.register(model);
+        if (!visitedNodes.contains(model) && !path.isRemoved()) {
+            dependencies.add(model);
+            visitedNodes.add(model);
         }
 
         exit(path);
