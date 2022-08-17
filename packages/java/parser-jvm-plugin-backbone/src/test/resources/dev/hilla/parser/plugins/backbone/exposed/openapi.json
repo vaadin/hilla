@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ExposedEndpoint"
+    }
+  ],
+  "paths": {
+    "/ExposedEndpoint/methodFromEndpoint": {
+      "post": {
+        "tags": ["ExposedEndpoint"],
+        "operationId": "ExposedEndpoint_methodFromEndpoint_POST",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/ExposedSuperclass/methodFromExposedSuperclass": {
+      "post": {
+        "tags": ["ExposedSuperclass"],
+        "operationId": "ExposedSuperclass_methodFromExposedSuperclass_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ExposedInterface/methodFromExposedInterface": {
+      "post": {
+        "tags": ["ExposedInterface"],
+        "operationId": "ExposedInterface_methodFromExposedInterface_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.exposed.ExposedEntity": {
+        "type": "object"
+      }
+    }
+  }
+}
