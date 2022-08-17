@@ -23,7 +23,7 @@ Subscription<User> {
 * Return a list of users
 */
 function _getAllUsers():
-Subscription<User | undefined> | undefined {
+Subscription<User | undefined> {
   return client.subscribe (
     'FluxTestEndpoint', 'getAllUsers',{}
   );
