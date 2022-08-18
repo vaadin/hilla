@@ -1,5 +1,7 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
@@ -18,8 +20,8 @@ export default class BackbonePlugin extends Plugin {
     return import.meta.url;
   }
 
-  public async execute(storage: SharedStorage): Promise<void> {
-    const endpointSourceFiles = this.#processEndpoints(storage);
+  public override async execute(storage: SharedStorage): Promise<void> {
+    const endpointSourceFiles = await this.#processEndpoints(storage);
     const entitySourceFiles = this.#processEntities(storage);
 
     endpointSourceFiles.forEach((file) => this.#tags.set(file, BackbonePluginSourceType.Endpoint));
@@ -29,31 +31,34 @@ export default class BackbonePlugin extends Plugin {
     storage.pluginStorage.set(this.constructor.BACKBONE_PLUGIN_FILE_TAGS, this.#tags);
   }
 
-  #processEndpoints(storage: SharedStorage): readonly SourceFile[] {
+  async #processEndpoints(storage: SharedStorage): Promise<readonly SourceFile[]> {
     this.logger.debug('Processing endpoints');
-    const endpoints = new Map<string, EndpointProcessor>();
+    const endpoints = new Map<string, Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>>();
 
-    for (const [path, pathItem] of Object.entries(storage.api.paths)) {
-      if (!pathItem) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
+    Object.entries(storage.api.paths)
+      .filter(([, pathItem]) => !!pathItem)
+      .forEach(([path, pathItem]) => {
+        const [, endpointName, endpointMethodName] = path.split('/');
 
-      const [, endpointName, endpointMethodName] = path.split('/');
+        let methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
 
-      let endpointProcessor: EndpointProcessor;
+        if (endpoints.has(endpointName)) {
+          methods = endpoints.get(endpointName)!;
+        } else {
+          methods = new Map();
+          endpoints.set(endpointName, methods);
+        }
 
-      if (endpoints.has(endpointName)) {
-        endpointProcessor = endpoints.get(endpointName)!;
-      } else {
-        endpointProcessor = new EndpointProcessor(endpointName, this);
-        endpoints.set(endpointName, endpointProcessor);
-      }
+        methods.set(endpointMethodName, pathItem!);
+      });
 
-      endpointProcessor.add(endpointMethodName, pathItem);
-    }
+    const processors = await Promise.all(
+      [...endpoints.entries()].map(([endpointName, methods]) =>
+        EndpointProcessor.create(endpointName, this, methods, storage.outputDir),
+      ),
+    );
 
-    return Array.from(endpoints.values(), (processor) => processor.process());
+    return Promise.all(processors.map((processor) => processor.process()));
   }
 
   #processEntities(storage: SharedStorage): readonly SourceFile[] {

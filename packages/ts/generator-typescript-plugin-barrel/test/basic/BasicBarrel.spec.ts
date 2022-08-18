@@ -16,10 +16,9 @@ describe('BarrelPlugin', () => {
   const sectionName = 'BasicBarrel';
 
   it('correctly generates code', async () => {
-    const generator = new Generator(
-      [BackbonePlugin, BarrelPlugin],
-      new LoggerFactory({ name: 'barrel-plugin-test', verbose: true }),
-    );
+    const generator = new Generator([BackbonePlugin, BarrelPlugin], {
+      logger: new LoggerFactory({ name: 'barrel-plugin-test', verbose: true }),
+    });
     const input = await readFile(new URL(`./${sectionName}.json`, import.meta.url), 'utf8');
     const files = await generator.process(input);
 
