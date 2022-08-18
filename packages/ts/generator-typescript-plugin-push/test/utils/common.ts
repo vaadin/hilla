@@ -7,7 +7,7 @@ import { URL } from 'url';
 export const pathBase = 'dev/hilla/parser/plugins/push';
 
 export function createGenerator(plugins: readonly PluginConstructor[]): Generator {
-  return new Generator(plugins, new LoggerFactory({ name: 'tsgen-test-push', verbose: true }));
+  return new Generator(plugins, { logger: new LoggerFactory({ name: 'tsgen-test-push', verbose: true }) });
 }
 
 export async function loadInput(name: string, importMeta: string): Promise<string> {
