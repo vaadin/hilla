@@ -27,7 +27,7 @@ jobs:
       packages-it: ${{ steps.packages-it.outputs.packages }}
 
     steps:
-      - uses: actions-cool/check-user-permission@v2
+      - uses: ZheSun88/check-user-permission@triggering-actor
         id: check
         with:
           require: 'write'
