@@ -14,7 +14,9 @@ describe('ClientPlugin', () => {
   const sectionName = 'BasicClient';
 
   it('correctly generates code', async () => {
-    const generator = new Generator([ClientPlugin], new LoggerFactory({ name: 'client-plugin-test', verbose: true }));
+    const generator = new Generator([ClientPlugin], {
+      logger: new LoggerFactory({ name: 'client-plugin-test', verbose: true }),
+    });
     const input = await readFile(new URL(`./${sectionName}.json`, import.meta.url), 'utf8');
     const files = await generator.process(input);
 

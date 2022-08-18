@@ -9,15 +9,22 @@ import PluginManager from './PluginManager.js';
 import ReferenceResolver from './ReferenceResolver.js';
 import type SharedStorage from './SharedStorage.js';
 
+export type GeneratorContext = Readonly<{
+  logger: LoggerFactory;
+  outputDir?: string;
+}>;
+
 export default class Generator {
   readonly #logger: LoggerFactory;
   readonly #manager: PluginManager;
   readonly #parser: SwaggerParser;
+  readonly #outputDir: string | undefined;
 
-  public constructor(plugins: readonly PluginConstructor[], logger: LoggerFactory) {
+  public constructor(plugins: readonly PluginConstructor[], context: GeneratorContext) {
     this.#parser = new SwaggerParser();
-    this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), logger);
-    this.#logger = logger;
+    this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), context.logger);
+    this.#logger = context.logger;
+    this.#outputDir = context.outputDir;
   }
 
   public async process(input: string): Promise<readonly File[]> {
@@ -29,6 +36,7 @@ export default class Generator {
       apiRefs: this.#parser.$refs,
       pluginStorage: new Map(),
       sources: [],
+      outputDir: this.#outputDir,
     };
 
     this.#logger.global.debug('Executing plugins');
