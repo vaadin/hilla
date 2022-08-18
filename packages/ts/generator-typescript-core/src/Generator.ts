@@ -9,13 +9,18 @@ import PluginManager from './PluginManager.js';
 import ReferenceResolver from './ReferenceResolver.js';
 import type SharedStorage from './SharedStorage.js';
 
+export type GeneratorContext = Readonly<{
+  logger: LoggerFactory;
+  outputDir?: string;
+}>;
+
 export default class Generator {
   readonly #logger: LoggerFactory;
   readonly #manager: PluginManager;
   readonly #parser: SwaggerParser;
   readonly #outputDir: string | undefined;
 
-  public constructor(plugins: readonly PluginConstructor[], context: { logger: LoggerFactory; outputDir?: string }) {
+  public constructor(plugins: readonly PluginConstructor[], context: GeneratorContext) {
     this.#parser = new SwaggerParser();
     this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), context.logger);
     this.#logger = context.logger;
