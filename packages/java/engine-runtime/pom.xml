@@ -30,6 +30,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>engine-maven-plugin</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
       <version>${flow.version}</version>

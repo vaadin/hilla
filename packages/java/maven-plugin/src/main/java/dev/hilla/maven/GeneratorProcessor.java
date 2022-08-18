@@ -1,6 +1,7 @@
 package dev.hilla.maven;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -13,7 +14,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 final class GeneratorProcessor {
     private static final List<GeneratorConfiguration.Plugin> DEFAULT_PLUGINS = Arrays
@@ -28,8 +28,8 @@ final class GeneratorProcessor {
                     new GeneratorConfiguration.Plugin(
                             "@hilla/generator-typescript-plugin-push"));
 
+    private final Path baseDir;
     private final Log logger;
-    private final MavenProject project;
     private final boolean runNpmInstall;
     private String input;
     private String outputDir = "frontend/generated";
@@ -37,10 +37,9 @@ final class GeneratorProcessor {
             DEFAULT_PLUGINS);
     private boolean verbose = false;
 
-    public GeneratorProcessor(MavenProject project, Log logger,
-            boolean runNpmInstall) {
+    public GeneratorProcessor(Path baseDir, Log logger, boolean runNpmInstall) {
+        this.baseDir = baseDir;
         this.logger = logger;
-        this.project = project;
         this.runNpmInstall = runNpmInstall;
     }
 
@@ -72,7 +71,7 @@ final class GeneratorProcessor {
     }
 
     public void process() throws IOException, InterruptedException {
-        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
+        var runner = new GeneratorShellRunner(baseDir, logger);
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
@@ -98,7 +97,7 @@ final class GeneratorProcessor {
     private void prepareOutputDir(GeneratorShellRunner runner) {
         var outputDirPath = Paths.get(outputDir);
         var result = outputDirPath.isAbsolute() ? outputDirPath
-                : project.getBasedir().toPath().resolve(outputDir);
+                : baseDir.resolve(outputDir);
         runner.add("-o", result.toString());
     }
 

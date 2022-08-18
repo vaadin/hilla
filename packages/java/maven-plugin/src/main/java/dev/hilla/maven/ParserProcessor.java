@@ -2,7 +2,7 @@ package dev.hilla.maven;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -11,9 +11,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
@@ -21,25 +19,17 @@ import dev.hilla.parser.core.PluginManager;
 import dev.hilla.parser.utils.OpenAPIPrinter;
 
 final class ParserProcessor {
+    private final Path baseDir;
     private final Log logger;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
-    private final MavenProject project;
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String openAPIPath;
 
-    public ParserProcessor(MavenProject project, Log logger) {
-        this.project = project;
+    public ParserProcessor(Path baseDir, Set<String> classPath, Log logger) {
+        this.baseDir = baseDir;
+        this.classPath = classPath;
         this.logger = logger;
-
-        try {
-            classPath = Stream
-                    .of(project.getCompileClasspathElements(),
-                            project.getRuntimeClasspathElements())
-                    .flatMap(Collection::stream).collect(Collectors.toSet());
-        } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException("Failed collecting Maven class path", e);
-        }
     }
 
     public ParserProcessor classPath(
@@ -105,8 +95,7 @@ final class ParserProcessor {
         }
 
         try {
-            var path = Paths.get(project.getBasedir().getAbsolutePath(),
-                    openAPIPath);
+            var path = baseDir.resolve(openAPIPath);
             var fileName = path.getFileName().toString();
 
             if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")

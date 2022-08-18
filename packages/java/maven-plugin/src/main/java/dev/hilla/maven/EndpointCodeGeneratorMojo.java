@@ -1,7 +1,13 @@
 package dev.hilla.maven;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -13,7 +19,7 @@ import org.apache.maven.project.MavenProject;
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
@@ -26,15 +32,35 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
 
     @Override
     public void execute() throws EndpointCodeGeneratorMojoException {
-        var result = parseJavaCode();
-        generateTypeScriptCode(result);
+        try {
+            PluginConfiguration conf = new PluginConfiguration();
+            conf.setBaseDir(project.getBasedir().toPath());
+            conf.setClassPath(Stream
+                    .of(project.getCompileClasspathElements(),
+                            project.getRuntimeClasspathElements())
+                    .flatMap(Collection::stream).collect(Collectors.toSet()));
+            conf.setGenerator(generator);
+            conf.setParser(parser);
+            execute(conf);
+        } catch (DependencyResolutionRequiredException ex) {
+            throw new EndpointCodeGeneratorMojoException("Configuration failed",
+                    ex);
+        }
     }
 
-    private void generateTypeScriptCode(String openAPI)
+    public void execute(PluginConfiguration conf)
+            throws EndpointCodeGeneratorMojoException {
+        var result = parseJavaCode(conf.getParser(), conf.getBaseDir(),
+                conf.getClassPath());
+        generateTypeScriptCode(result, conf.getGenerator(), conf.getBaseDir());
+    }
+
+    private void generateTypeScriptCode(String openAPI,
+            GeneratorConfiguration generator, Path baseDir)
             throws EndpointCodeGeneratorMojoException {
         var logger = getLog();
         try {
-            var executor = new GeneratorProcessor(project, logger,
+            var executor = new GeneratorProcessor(baseDir, logger,
                     runNpmInstall).input(openAPI)
                             .verbose(logger.isDebugEnabled());
 
@@ -48,9 +74,10 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
         }
     }
 
-    private String parseJavaCode() throws EndpointCodeGeneratorMojoException {
+    private String parseJavaCode(ParserConfiguration parser, Path baseDir,
+            Set<String> classPath) throws EndpointCodeGeneratorMojoException {
         try {
-            var executor = new ParserProcessor(project, getLog());
+            var executor = new ParserProcessor(baseDir, classPath, getLog());
 
             parser.getClassPath().ifPresent(executor::classPath);
             parser.getEndpointAnnotation()

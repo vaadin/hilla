@@ -1,17 +1,17 @@
 package dev.hilla.maven;
 
-import org.apache.maven.plugin.logging.Log;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.maven.plugin.logging.Log;
+
 final class GeneratorShellRunner {
     private static final boolean IS_WINDOWS;
-    private static final Pattern jsonEscapePattern = Pattern
+    private static final Pattern JSON_ESCAPE_PATTERN = Pattern
             .compile("[\r\n\b\f\t\"']");
 
     static {
@@ -22,7 +22,7 @@ final class GeneratorShellRunner {
     private final List<String> arguments = new ArrayList<>();
     private final Log logger;
 
-    public GeneratorShellRunner(File baseDir, Log logger) {
+    public GeneratorShellRunner(Path baseDir, Log logger) {
         this.logger = logger;
 
         if (IS_WINDOWS) {
@@ -31,16 +31,22 @@ final class GeneratorShellRunner {
         }
 
         if (IS_WINDOWS) {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen.cmd").toString());
+            arguments
+                    .add(Paths
+                            .get(baseDir.toAbsolutePath().toString(),
+                                    "node_modules", ".bin", "tsgen.cmd")
+                            .toString());
         } else {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen").toString());
+            arguments
+                    .add(Paths
+                            .get(baseDir.toAbsolutePath().toString(),
+                                    "node_modules", ".bin", "tsgen")
+                            .toString());
         }
     }
 
     public static String prepareJSONForCLI(String json) {
-        return IS_WINDOWS ? jsonEscapePattern.matcher(json)
+        return IS_WINDOWS ? JSON_ESCAPE_PATTERN.matcher(json)
                 .replaceAll(match -> "\\\\" + match.group(0)) : json;
     }
 
