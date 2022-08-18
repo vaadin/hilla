@@ -307,7 +307,7 @@ export class Digits extends AbstractValidator<string> {
 
   public override validate(value: any) {
     return (
-      String(toFloat(`${value}`)).replace(/(.*)\.\d+/, '$1').length === this.integer &&
+      String(toFloat(`${value}`)).replace(/(.*)\.\d+/, '$1').length <= this.integer &&
       isDecimal(`${value}`, { decimal_digits: `0,${this.fraction}` })
     );
   }
