@@ -81,7 +81,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
     const clientLibIdentifier = imports.default.getIdentifier(
-      paths.createRelativePath(await ClientPlugin.clientFileName(outputDir)),
+      paths.createRelativePath(await ClientPlugin.getClientFileName(outputDir)),
     )!;
 
     const callExpression = ts.factory.createCallExpression(

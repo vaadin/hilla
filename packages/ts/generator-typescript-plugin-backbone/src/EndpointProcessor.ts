@@ -40,7 +40,7 @@ export default class EndpointProcessor {
   ): Promise<EndpointProcessor> {
     const endpoint = new EndpointProcessor(name, owner, methods, outputDir);
     endpoint.#dependencies.imports.default.add(
-      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.clientFileName(outputDir)),
+      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.getClientFileName(outputDir)),
       'client',
     );
     endpoint.#dependencies.imports.named.add(
