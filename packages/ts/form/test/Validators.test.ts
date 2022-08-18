@@ -241,7 +241,10 @@ describe('form/Validators', () => {
     const validator = new Digits({ integer: 2, fraction: 3 });
     assert.isNotTrue(validator.impliesRequired);
     assert.isTrue(validator.validate('11.111'));
-    assert.isFalse(validator.validate('1.1'));
+    assert.isTrue(validator.validate('1.1'));
+    assert.isTrue(validator.validate('1'));
+    assert.isFalse(validator.validate('1.1111'));
+    assert.isFalse(validator.validate('111.111'));
     assert.isFalse(validator.validate('111.1111'));
   });
 
