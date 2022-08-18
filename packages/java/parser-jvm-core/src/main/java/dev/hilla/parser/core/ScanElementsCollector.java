@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -41,8 +42,9 @@ public final class ScanElementsCollector {
                 .collect(Collectors.toList());
 
         entities = endpoints.stream()
-                .flatMap(cls -> cls.getInheritanceChainStream()
-                        .flatMap(ClassInfoModel::getMethodDependenciesStream))
+                .flatMap(cls -> Streams.combine(cls.getInheritanceChainStream(),
+                        cls.getInterfacesStream()))
+                .flatMap(ClassInfoModel::getMethodDependenciesStream)
                 .map(classMappers::map).filter(ClassInfoModel::isNonJDKClass)
                 .distinct().collect(Collectors.toList());
 
@@ -92,8 +94,7 @@ public final class ScanElementsCollector {
             var entity = entities.get(i);
 
             Streams.combine(entity.getFieldDependenciesStream(),
-                    entity.getSuperClassStream(),
-                    entity.getTypeParameterDependenciesStream())
+                    entity.getSuperClassStream())
                     .filter(ClassInfoModel::isNonJDKClass).distinct()
                     .map(classMappers::map)
                     .filter(ClassInfoModel::isNonJDKClass)
