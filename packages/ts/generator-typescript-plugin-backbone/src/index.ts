@@ -36,7 +36,7 @@ export default class BackbonePlugin extends Plugin {
     const endpoints = new Map<string, Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>>();
 
     Object.entries(storage.api.paths)
-      .filter(([, pathItem]) => Boolean(pathItem))
+      .filter(([, pathItem]) => !!pathItem)
       .forEach(([path, pathItem]) => {
         const [, endpointName, endpointMethodName] = path.split('/');
 

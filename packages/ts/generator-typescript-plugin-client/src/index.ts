@@ -24,7 +24,7 @@ export default class ClientPlugin extends Plugin {
 
   private static async checkForCustomClientFile(path?: string): Promise<boolean> {
     const dir = path && path.startsWith('file:') ? fileURLToPath(path) : path;
-    return Boolean(dir && (await open(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`, 'r')));
+    return !!(dir && (await open(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`, 'r')));
   }
 
   public static async getClientFileName(path?: string): Promise<string> {
