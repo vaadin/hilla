@@ -53,7 +53,7 @@
     "socket.io-client": "^4.4.1"
   },
   "peerDependencies": {
-    "lit": "^2.0.0"
+    "lit": "^2.3.0"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",
