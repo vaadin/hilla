@@ -34,6 +34,7 @@ final class Walker {
 
     Walker(Collection<Visitor> visitors, Queue<ClassInfoModel> dependencies) {
         this.dependencies = dependencies;
+        this.visitedNodes.addAll(dependencies);
         this.visitors.addAll(visitors);
     }
 
