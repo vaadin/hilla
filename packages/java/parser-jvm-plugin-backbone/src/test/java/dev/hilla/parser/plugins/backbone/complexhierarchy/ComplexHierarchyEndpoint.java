@@ -20,9 +20,13 @@ import dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarch
 
 @Endpoint
 public class ComplexHierarchyEndpoint extends ComplexHierarchyParentEndpoint {
+    private EndpointDependencyToIgnore fieldToIgnore;
+
     // Using ComplexHierarchyModel from another package is intentional here to
     // verify the generator's parsing logic for that case
     public ComplexHierarchyModel getModel() {
         return new ComplexHierarchyModel();
     }
+
+    public static class EndpointDependencyToIgnore {}
 }

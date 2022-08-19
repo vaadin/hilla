@@ -13,6 +13,9 @@
   "tags": [
     {
       "name": "ComplexHierarchyEndpoint"
+    },
+    {
+      "name": "ComplexHierarchyGrandParentEndpoint"
     }
   ],
   "paths": {
@@ -32,6 +35,63 @@
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyModel"
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ComplexHierarchyEndpoint/executeParentEndpointMethod": {
+      "post": {
+        "tags": ["ComplexHierarchyEndpoint"],
+        "operationId": "ComplexHierarchyEndpoint_executeParentEndpointMethod_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ComplexHierarchyEndpoint/executeGrandParentEndpointMethod": {
+      "post": {
+        "tags": ["ComplexHierarchyEndpoint"],
+        "operationId": "ComplexHierarchyEndpoint_executeGrandParentEndpointMethod_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ComplexHierarchyGrandParentEndpoint/executeGrandParentEndpointMethod": {
+      "post": {
+        "tags": ["ComplexHierarchyGrandParentEndpoint"],
+        "operationId": "ComplexHierarchyGrandParentEndpoint_executeGrandParentEndpointMethod_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
                 }
               }
             }

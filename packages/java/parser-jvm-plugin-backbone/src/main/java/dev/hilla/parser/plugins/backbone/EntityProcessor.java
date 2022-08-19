@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 
 import io.swagger.v3.oas.models.Components;
@@ -49,8 +50,8 @@ final class EntityProcessor {
 
         entity.getFieldsStream().filter(field -> !field.isTransient())
                 .forEach(field -> {
-                    var fieldSchema = new SchemaProcessor(field.getType(), context)
-                            .process();
+                    var fieldSchema = new SchemaProcessor(field.getType(),
+                            context).process();
                     schema.addProperties(field.getName(), fieldSchema);
                     context.getAssociationMap().addField(field, fieldSchema);
                 });
@@ -70,11 +71,13 @@ final class EntityProcessor {
     private Schema<?> processExtendedClass(ClassInfoModel entity) {
         var processed = processClass(entity);
 
-        return entity.getSuperClass().<Schema<?>> map(
-                cls -> new ComposedSchema().anyOf(Arrays.asList(
-                        new Schema<>()
-                                .$ref(COMPONENTS_SCHEMAS_REF + cls.getName()),
-                        processed)))
+        return entity.getSuperClass()
+                .filter(ClassRefSignatureModel::isNonJDKClass)
+                .<Schema<?>> map(
+                        cls -> new ComposedSchema().anyOf(Arrays.asList(
+                                new Schema<>().$ref(
+                                        COMPONENTS_SCHEMAS_REF + cls.getName()),
+                                processed)))
                 .orElse(processed);
     }
 }

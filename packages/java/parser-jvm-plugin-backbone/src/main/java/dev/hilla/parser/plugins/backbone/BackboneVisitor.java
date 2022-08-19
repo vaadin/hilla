@@ -38,18 +38,14 @@ final class BackboneVisitor implements Visitor {
                 // PackageInfoModel.
                 if (recognizer.isEndpointClass(cls)) {
                     endpointProcessor.process(cls);
-                }
-
-                if (recognizer.isEntityClass(cls)) {
+                } else if (recognizer.isEntityClass(cls)) {
                     entityProcessor.process(cls);
                 }
             } else {
                 // We entered a class mention, either by class reference or as
                 // an inner class declaration; it means that we know when and
                 // by which node this class is mentioned.
-                if (!recognizer.isClassReferencedByUsedMembers(path)) {
-                    recognizer.ignoreDependency(cls);
-                }
+                recognizer.addClassMention(path);
             }
         }
     }
