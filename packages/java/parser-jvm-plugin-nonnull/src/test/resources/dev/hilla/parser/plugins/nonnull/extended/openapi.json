@@ -328,9 +328,6 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint": {
-        "type": "object"
-      },
       "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
         "anyOf": [
           {

@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +37,7 @@ public class ParserTests {
     }
 
     @Test
-    public void should_ResolveDependenciesCorrectly_When_GetEndpointDirectDependencies() {
+    public void should_ResolveDependenciesCorrectly_When_PluginResolvesDependencies() {
         var parser = new Parser(
                 new ParserConfig.Builder().classPath(defaultClassPathElements)
                         .endpointAnnotation(dependencyPluginEndpointName)
@@ -44,7 +47,8 @@ public class ParserTests {
 
         var expected = List.of(
                 "dev.hilla.parser.core.dependency.DependencyEntityOne",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo");
+                "dev.hilla.parser.core.dependency.DependencyEntityTwo",
+                "dev.hilla.parser.core.dependency.PluginDependencyEntity");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
                 .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
@@ -64,10 +68,10 @@ public class ParserTests {
         var expected = List.of(
                 "dev.hilla.parser.core.dependency.DependencyEntityOne",
                 "dev.hilla.parser.core.dependency.DependencyEntityTwo",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo$InnerClass");
+                "dev.hilla.parser.core.dependency.DependencyEntityThree");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-                .get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
+                .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
@@ -81,9 +85,8 @@ public class ParserTests {
 
         parser.execute();
 
-        var expected = List.of("foo", "bar", "foo", "circular", "getFoo",
-                "setBar", "circular",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo$InnerClass");
+        var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
+                "foo3");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
                 .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
