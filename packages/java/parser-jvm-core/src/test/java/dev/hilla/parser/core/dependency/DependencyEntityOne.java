@@ -4,6 +4,8 @@ public class DependencyEntityOne {
     public String foo;
     private int bar;
 
+    private DependencyEntityThree dependencyEntityThree = new DependencyEntityThree();
+
     public DependencyEntityTwo circular() {
         return new DependencyEntityTwo();
     }
@@ -14,5 +16,9 @@ public class DependencyEntityOne {
 
     public void setBar(int value) {
         bar = value;
+    }
+
+    public DependencyEntityThree getDependencyEntityThree() {
+        return dependencyEntityThree;
     }
 }
