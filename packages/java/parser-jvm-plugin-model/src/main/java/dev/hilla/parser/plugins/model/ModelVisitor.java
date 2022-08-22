@@ -55,7 +55,8 @@ final class ModelVisitor implements Visitor {
 
         var model = path.getModel();
 
-        if (model instanceof SignatureModel) {
+        if (model instanceof SignatureModel
+                && associationMap.getSignatures().containsKey(model)) {
             var signature = (SignatureModel) model;
 
             if (!signature.isTypeArgument() && !signature.isTypeParameter()
