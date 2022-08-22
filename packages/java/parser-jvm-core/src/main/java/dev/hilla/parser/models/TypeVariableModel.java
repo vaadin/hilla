@@ -50,7 +50,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return true;
     }
 
-    public SignatureModel resolve() {
+    public TypeParameterModel resolve() {
         if (typeParameter == null) {
             typeParameter = prepareResolved();
         }
