@@ -27,6 +27,15 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     private static final Logger logger = LoggerFactory
             .getLogger(TaskGenerateHillaImpl.class);
 
+    static final boolean IS_WINDOWS;
+    static final String MAVEN_COMMAND;
+
+    static {
+        var osName = System.getProperty("os.name").toLowerCase();
+        IS_WINDOWS = osName.contains("windows");
+        MAVEN_COMMAND = IS_WINDOWS ? "mvn.cmd" : "mvn";
+    }
+
     private File projectDirectory;
     private String buildDirectoryName;
 
@@ -108,7 +117,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     }
 
     List<String> prepareMavenCommand() {
-        return List.of("mvn", "hilla:generate");
+        return List.of(MAVEN_COMMAND, "hilla:generate");
     }
 
     List<String> prepareGradleCommand() {
