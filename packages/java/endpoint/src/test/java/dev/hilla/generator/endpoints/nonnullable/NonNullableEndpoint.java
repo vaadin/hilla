@@ -23,6 +23,8 @@ import java.util.Optional;
 
 import dev.hilla.Endpoint;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
 
 @Endpoint
 public class NonNullableEndpoint {
@@ -68,6 +70,11 @@ public class NonNullableEndpoint {
 
     public String stringNullable() {
         return "";
+    }
+
+    @dev.hilla.Nonnull
+    public Page<@dev.hilla.Nonnull String> returnNonnullMappedType() {
+        return Mockito.mock(Page.class);
     }
 
     public static class NonNullableModel {

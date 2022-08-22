@@ -148,20 +148,19 @@ class GeneratorType {
         if (isPrimitive()) {
             return true;
         }
-        if (!hasType()) {
-            return false;
-        }
         List<AnnotationExpr> allAnnotations = new ArrayList<>();
-        List<AnnotationExpr> typeAnnotations = type.getAnnotations();
-        if (typeAnnotations != null) {
-            allAnnotations.addAll(typeAnnotations);
+        if (type != null) {
+            List<AnnotationExpr> typeAnnotations = type.getAnnotations();
+            if (typeAnnotations != null) {
+                allAnnotations.addAll(typeAnnotations);
+            }
         }
         if (additionalAnnotations != null) {
             allAnnotations.addAll(additionalAnnotations);
         }
 
-        return hasType() && ExplicitNullableTypeChecker
-                .isRequired(requiredByContext, allAnnotations);
+        return ExplicitNullableTypeChecker.isRequired(requiredByContext,
+                allAnnotations);
     }
 
     boolean isString() {

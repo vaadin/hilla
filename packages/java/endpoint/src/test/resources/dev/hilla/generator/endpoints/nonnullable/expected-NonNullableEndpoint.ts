@@ -56,6 +56,10 @@ function _getNotNullReturnType(__init?: EndpointRequestInit): Promise<ReturnType
   return client.call('NonNullableEndpoint', 'getNotNullReturnType', {}, __init);
 }
 
+function _returnNonnullMappedType(__init?: EndpointRequestInit): Promise<Array<string>> {
+  return client.call('NonNullableEndpoint', 'returnNonnullMappedType', {}, __init);
+}
+
 function _sendParameterType(
   parameterType: ParameterType | undefined,
   __init?: EndpointRequestInit
@@ -75,6 +79,7 @@ export {
   _getNonNullableIndex as getNonNullableIndex,
   _getNonNullableString as getNonNullableString,
   _getNotNullReturnType as getNotNullReturnType,
+  _returnNonnullMappedType as returnNonnullMappedType,
   _sendParameterType as sendParameterType,
   _stringNullable as stringNullable,
 };
