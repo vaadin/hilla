@@ -1,5 +1,7 @@
 package dev.hilla.internal;
 
+import java.io.File;
+
 import com.vaadin.flow.server.ExecutionFailedException;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +13,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskGenerateHillaImplTest {
+    private static final File DIR = new File(
+            System.getProperty("user.dir", "."));
+
     @Test
     void executeShouldBeAbleToListFilesInProjectDir() {
         var gen = new TaskGenerateHillaImpl() {
@@ -21,6 +26,7 @@ class TaskGenerateHillaImplTest {
         };
 
         try {
+            gen.configure(DIR, null);
             gen.execute();
         } catch (ExecutionFailedException e) {
             fail("Shouldn't have thrown an exception", e);
@@ -48,6 +54,7 @@ class TaskGenerateHillaImplTest {
         };
 
         try {
+            gen.configure(DIR, null);
             gen.execute();
             fail("Should have thrown exception");
         } catch (ExecutionFailedException e) {
