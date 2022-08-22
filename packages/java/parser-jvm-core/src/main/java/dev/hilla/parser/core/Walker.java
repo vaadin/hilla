@@ -38,6 +38,43 @@ final class Walker {
         this.visitors.addAll(visitors);
     }
 
+    // TODO: fixme
+    // ClassGraph's TypeVariable throws an exception on resolve which is
+    // probably a bug. This function fixes it by manual search the owner and
+    // getting the correct type parameter.
+    private static TypeParameterModel resolveTypeVariableFixed(
+            TypeVariableModel model, List<NodePath> ascendants) {
+        TypeParameterModel typeParameter;
+
+        try {
+            typeParameter = model.resolve();
+        } catch (IllegalArgumentException e) {
+            List<TypeParameterModel> typeParameters = null;
+
+            for (var i = ascendants.size() - 1; i >= 0; i--) {
+                var owner = ascendants.get(i).getModel();
+
+                if (owner instanceof ClassInfoModel) {
+                    typeParameters = ((ClassInfoModel) owner)
+                            .getTypeParameters();
+                    break;
+                } else if (owner instanceof MethodInfoModel) {
+                    typeParameters = ((MethodInfoModel) owner)
+                            .getTypeParameters();
+                    break;
+                }
+            }
+
+            typeParameter = typeParameters != null
+                    ? typeParameters.stream()
+                            .filter(p -> p.getName().equals(model.getName()))
+                            .findFirst().orElse(null)
+                    : null;
+        }
+
+        return typeParameter;
+    }
+
     public void traverse(ClassInfoModel target) {
         var packagePath = NodePath.of(target.getPackage(), List.of());
         enter(packagePath);
@@ -242,8 +279,11 @@ final class Walker {
                         .map(m -> NodePath.of(m, ascendants))
                         .forEach(this::visitSignature);
             } else if (model instanceof TypeVariableModel) {
-                visitSignature(NodePath
-                        .of(((TypeVariableModel) model).resolve(), ascendants));
+                var typeParameter = resolveTypeVariableFixed(
+                        (TypeVariableModel) model, ascendants);
+                if (typeParameter != null) {
+                    visitSignature(NodePath.of(typeParameter, ascendants));
+                }
             } // Skipping BaseSignatureModel because it could have no nested
               // signatures
 
