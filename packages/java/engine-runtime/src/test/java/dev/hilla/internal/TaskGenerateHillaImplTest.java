@@ -19,7 +19,8 @@ class TaskGenerateHillaImplTest {
     @Test
     void shouldThrowExeptionIfNotConfigured() {
         var gen = new TaskGenerateHillaImpl();
-        var e = assertThrowsExactly(ExecutionFailedException.class, () -> gen.execute());
+        var e = assertThrowsExactly(ExecutionFailedException.class,
+                () -> gen.execute());
         assertEquals("Project directory not set", e.getMessage());
     }
 
