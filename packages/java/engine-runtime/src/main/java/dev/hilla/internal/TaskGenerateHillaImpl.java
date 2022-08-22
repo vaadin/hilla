@@ -17,6 +17,15 @@ import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0-beta2")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "1.2.0-beta2")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
+    static final boolean IS_WINDOWS;
+    static final String MAVEN_COMMAND;
+
+    static {
+        var osName = System.getProperty("os.name").toLowerCase();
+        IS_WINDOWS = osName.contains("windows");
+        MAVEN_COMMAND = IS_WINDOWS ? "mvn.cmd" : "mvn";
+    }
+
     private File projectDirectory;
 
     @Override
@@ -72,7 +81,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     }
 
     List<String> prepareMavenCommand() {
-        return List.of("mvn", "hilla:generate");
+        return List.of(MAVEN_COMMAND, "hilla:generate");
     }
 
     List<String> prepareGradleCommand() {
