@@ -17,6 +17,13 @@ class TaskGenerateHillaImplTest {
             System.getProperty("user.dir", "."));
 
     @Test
+    void shouldThrowExeptionIfNotConfigured() {
+        var gen = new TaskGenerateHillaImpl();
+        var e = assertThrowsExactly(ExecutionFailedException.class, () -> gen.execute());
+        assertEquals("Project directory not set", e.getMessage());
+    }
+
+    @Test
     void executeShouldBeAbleToListFilesInProjectDir() {
         var gen = new TaskGenerateHillaImpl() {
             @Override
