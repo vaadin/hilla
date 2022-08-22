@@ -107,13 +107,6 @@
           <groupId>dev.hilla</groupId>
           <artifactId>engine-maven-plugin</artifactId>
           <version>${project.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>gather-configuration</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
 
         <plugin>
