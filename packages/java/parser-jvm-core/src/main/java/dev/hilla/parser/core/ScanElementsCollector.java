@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.models.NamedModel;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ScanResult;
@@ -18,33 +20,34 @@ public final class ScanElementsCollector {
     private final ClassMappers classMappers;
     private List<ClassInfoModel> endpoints;
     private List<ClassInfoModel> entities;
+    private String endpointAnnotationName;
+    private String endpointExposedAnnotationName;
 
     public ScanElementsCollector(@Nonnull ScanResult result,
-            @Nonnull String endpointAnnotationName, ClassMappers classMappers) {
-        this(Objects.requireNonNull(result)
-                .getClassesWithAnnotation(
-                        Objects.requireNonNull(endpointAnnotationName))
-                .stream().map(ClassInfoModel::of).collect(Collectors.toList()),
-                classMappers);
-    }
-
-    public ScanElementsCollector(@Nonnull Collection<ClassInfoModel> endpoints,
+            @Nonnull String endpointAnnotationName,
+            @Nonnull String endpointExposedAnnotationName,
             ClassMappers classMappers) {
-        this.endpoints = Objects.requireNonNull(endpoints) instanceof ArrayList
-                ? (ArrayList<ClassInfoModel>) endpoints
-                : new ArrayList<>(endpoints);
+        this.endpointAnnotationName = Objects
+                .requireNonNull(endpointAnnotationName);
+        this.endpointExposedAnnotationName = Objects
+                .requireNonNull(endpointExposedAnnotationName);
+        this.endpoints = Objects.requireNonNull(result)
+                .getClassesWithAnnotation(this.endpointAnnotationName).stream()
+                .map(ClassInfoModel::of).filter(ClassInfoModel::isNonJDKClass)
+                .collect(Collectors.toList());
         this.classMappers = classMappers;
     }
 
     public ScanElementsCollector collect() {
-        endpoints = endpoints.stream().map(classMappers::map)
-                .filter(ClassInfoModel::isNonJDKClass)
-                .collect(Collectors.toList());
-
         entities = endpoints.stream()
                 .flatMap(cls -> Streams.combine(cls.getInheritanceChainStream(),
                         cls.getInterfacesStream()))
-                .flatMap(ClassInfoModel::getMethodDependenciesStream)
+                .flatMap(cls -> cls.getMethodsStream()
+                        .filter(method -> isEndpointExposedMethod(method,
+                                endpointAnnotationName,
+                                endpointExposedAnnotationName)))
+                .flatMap(MethodInfoModel::getDependenciesStream)
+                .filter(ClassInfoModel::isNonJDKClass).distinct()
                 .map(classMappers::map).filter(ClassInfoModel::isNonJDKClass)
                 .distinct().collect(Collectors.toList());
 
@@ -110,5 +113,19 @@ public final class ScanElementsCollector {
 
     public List<ClassInfoModel> getEntities() {
         return entities;
+    }
+
+    public static boolean isEndpointExposedMethod(MethodInfoModel method,
+            String endpointAnnotatonName,
+            String endpointExposedAnnotationName) {
+        final ClassInfoModel owner = method.getOwner();
+        return hasClassAnnotation(owner, endpointAnnotatonName)
+                || hasClassAnnotation(owner, endpointExposedAnnotationName);
+    }
+
+    private static boolean hasClassAnnotation(ClassInfoModel classInfoModel,
+            String annotationName) {
+        return classInfoModel.getAnnotationsStream().map(NamedModel::getName)
+                .anyMatch(annotationName::equals);
     }
 }

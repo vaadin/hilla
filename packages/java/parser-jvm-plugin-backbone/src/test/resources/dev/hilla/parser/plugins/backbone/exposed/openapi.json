@@ -27,10 +27,10 @@
         }
       }
     },
-    "/ExposedSuperclass/methodFromExposedSuperclass": {
+    "/ExposedEndpoint/methodFromExposedSuperclass": {
       "post": {
-        "tags": ["ExposedSuperclass"],
-        "operationId": "ExposedSuperclass_methodFromExposedSuperclass_POST",
+        "tags": ["ExposedEndpoint"],
+        "operationId": "ExposedEndpoint_methodFromExposedSuperclass_POST",
         "responses": {
           "200": {
             "description": "",
@@ -40,7 +40,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedSuperclassEntity"
                     }
                   ]
                 }
@@ -50,10 +50,10 @@
         }
       }
     },
-    "/ExposedInterface/methodFromExposedInterface": {
+    "/ExposedEndpoint/methodFromExposedInterface": {
       "post": {
-        "tags": ["ExposedInterface"],
-        "operationId": "ExposedInterface_methodFromExposedInterface_POST",
+        "tags": ["ExposedEndpoint"],
+        "operationId": "ExposedEndpoint_methodFromExposedInterface_POST",
         "responses": {
           "200": {
             "description": "",
@@ -63,7 +63,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedInterfaceEntity"
                     }
                   ]
                 }
@@ -76,7 +76,10 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.exposed.ExposedEntity": {
+      "dev.hilla.parser.plugins.backbone.exposed.ExposedSuperclassEntity": {
+        "type": "object"
+      },
+      "dev.hilla.parser.plugins.backbone.exposed.ExposedInterfaceEntity": {
         "type": "object"
       }
     }

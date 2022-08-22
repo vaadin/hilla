@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.ScanElementsCollector;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.SignatureInfo;
 import dev.hilla.parser.models.ClassInfoModel;
@@ -44,7 +45,13 @@ final class EndpointProcessor {
         return classes.stream()
                 .flatMap(cls -> cls.getInheritanceChainStream()
                         .flatMap(ClassInfoModel::getMethodsStream))
-                .filter(MethodInfoModel::isPublic).map(MethodProcessor::new)
+                .filter(MethodInfoModel::isPublic)
+                .filter(method -> ScanElementsCollector.isEndpointExposedMethod(
+                        method,
+                        storage.getParserConfig().getEndpointAnnotationName(),
+                        storage.getParserConfig()
+                                .getEndpointExposedAnnotationName()))
+                .map(MethodProcessor::new)
                 .collect(Collectors.toMap(MethodProcessor::getPathKey,
                         MethodProcessor::getPathItem, (o1, o2) -> o1,
                         Paths::new));

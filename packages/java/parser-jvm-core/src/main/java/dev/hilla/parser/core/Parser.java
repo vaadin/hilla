@@ -53,13 +53,16 @@ public final class Parser {
                 .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan()) {
             var endpointAnnotationName = config.getEndpointAnnotationName();
+            var endpointExposedAnnotationName = config
+                    .getEndpointExposedAnnotationName();
 
             logger.debug(
                     "Collecting project endpoints with the endpoint annotation: "
                             + endpointAnnotationName);
 
             var collector = new ScanElementsCollector(result,
-                    endpointAnnotationName, replaceMap).collect();
+                    endpointAnnotationName, endpointExposedAnnotationName,
+                    replaceMap).collect();
 
             var endpoints = new LinkedHashSet<>(collector.getEndpoints());
 
