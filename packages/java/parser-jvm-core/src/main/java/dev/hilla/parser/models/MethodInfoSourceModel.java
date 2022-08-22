@@ -120,4 +120,11 @@ final class MethodInfoSourceModel extends MethodInfoModel
         return SignatureModel
                 .of(origin.getTypeSignatureOrTypeDescriptor().getResultType());
     }
+
+    @Override
+    protected List<TypeParameterModel> prepareTypeParameters() {
+        return origin.getTypeSignatureOrTypeDescriptor().getTypeParameters()
+                .stream().map(TypeParameterModel::of)
+                .collect(Collectors.toList());
+    }
 }

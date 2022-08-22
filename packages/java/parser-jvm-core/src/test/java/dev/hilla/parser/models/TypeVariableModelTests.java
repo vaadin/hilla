@@ -145,7 +145,7 @@ public class TypeVariableModelTests {
     }
 
     static final class ModelProvider implements ArgumentsProvider {
-        private static final String testNamePattern = "{1} [{2}]";
+        public static final String testNamePattern = "{1} [{2}]";
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context)
@@ -172,7 +172,7 @@ public class TypeVariableModelTests {
         }
 
         static final class Equality implements ArgumentsProvider {
-            private static final String testNamePattern = "{2}";
+            public static final String testNamePattern = "{2}";
 
             @Override
             public Stream<Arguments> provideArguments(ExtensionContext context)
