@@ -14,7 +14,7 @@ import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
 public class DependencyPlugin implements Plugin.Processor {
-    public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
+    public static final String ENTITY_DEPS_STORAGE_KEY = "DependencyPlugin_EntityDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
     private int order = 0;
@@ -35,8 +35,8 @@ public class DependencyPlugin implements Plugin.Processor {
             @Nonnull Collection<ClassInfoModel> entities) {
         var collector = new DependencyCollector(endpoints, entities);
 
-        storage.getPluginStorage().put(ALL_DEPS_STORAGE_KEY,
-                collector.collectAllDependencyNames());
+        storage.getPluginStorage().put(ENTITY_DEPS_STORAGE_KEY,
+                collector.collectEntityDependencyNames());
 
         storage.getPluginStorage().put(DEPS_MEMBERS_STORAGE_KEY,
                 collector.collectDependencyMemberNames());
@@ -60,21 +60,14 @@ public class DependencyPlugin implements Plugin.Processor {
             this.entities = entities;
         }
 
-        public Collection<String> collectAllDependencyNames() {
+        public Collection<String> collectEntityDependencyNames() {
             return entities.stream().map(ClassInfoModel::getName)
                     .collect(Collectors.toList());
         }
 
         public Collection<String> collectDependencyMemberNames() {
-            return Stream.of(
-                    entities.stream().flatMap(ClassInfoModel::getFieldsStream)
-                            .map(FieldInfoModel::getName),
-                    entities.stream().flatMap(ClassInfoModel::getMethodsStream)
-                            .map(MethodInfoModel::getName),
-                    entities.stream()
-                            .flatMap(ClassInfoModel::getInnerClassesStream)
-                            .map(ClassInfoModel::getName))
-                    .flatMap(Function.identity()).collect(Collectors.toList());
+            return entities.stream().flatMap(ClassInfoModel::getFieldsStream)
+                    .map(FieldInfoModel::getName).collect(Collectors.toList());
         }
 
         public Collection<String> collectEndpointDirectDependencyNames() {
