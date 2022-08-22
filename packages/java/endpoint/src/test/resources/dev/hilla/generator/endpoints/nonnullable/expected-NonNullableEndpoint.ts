@@ -56,7 +56,7 @@ function _getNotNullReturnType(__init?: EndpointRequestInit): Promise<ReturnType
   return client.call('NonNullableEndpoint', 'getNotNullReturnType', {}, __init);
 }
 
-function _returnNonnullMappedType(__init?: EndpointRequestInit): Promise<Array<string | undefined>> {
+function _returnNonnullMappedType(__init?: EndpointRequestInit): Promise<Array<string>> {
   return client.call('NonNullableEndpoint', 'returnNonnullMappedType', {}, __init);
 }
 
