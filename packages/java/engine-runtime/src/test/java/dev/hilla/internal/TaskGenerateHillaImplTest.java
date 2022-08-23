@@ -3,7 +3,6 @@ package dev.hilla.internal;
 import com.vaadin.flow.server.ExecutionFailedException;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,14 +11,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskGenerateHillaImplTest {
-    private static final String DIR = System.getProperty("user.dir", ".");
-
     @Test
     void executeShouldBeAbleToListFilesInProjectDir() {
         var gen = new TaskGenerateHillaImpl() {
             @Override
             List<String> prepareCommand() {
-                return List.of("ls", DIR);
+                return List.of(TaskGenerateHillaImpl.MAVEN_COMMAND, "-v");
             }
         };
 
@@ -32,7 +29,7 @@ class TaskGenerateHillaImplTest {
 
     @Test
     void executeShouldNotCatchExecutionFailedException() {
-        final var dir = System.getProperty("user.dir", ".");
+        final var cmd = "not-a-real-command";
         final var errorMessage = "Generated error";
 
         var gen = new TaskGenerateHillaImpl() {
@@ -40,13 +37,13 @@ class TaskGenerateHillaImplTest {
             void runCodeGeneration(List<String> command)
                     throws ExecutionFailedException {
                 assertEquals(1, command.size());
-                assertEquals(dir, command.get(0));
+                assertEquals(cmd, command.get(0));
                 throw new ExecutionFailedException(errorMessage);
             }
 
             @Override
             List<String> prepareCommand() {
-                return List.of(DIR);
+                return List.of(cmd);
             }
         };
 
@@ -61,7 +58,8 @@ class TaskGenerateHillaImplTest {
     @Test
     void runCodeGenerationShouldExecuteMaven() throws ExecutionFailedException {
         var gen = new TaskGenerateHillaImpl();
-        gen.runCodeGeneration(List.of("mvn", "-v"));
+        gen.runCodeGeneration(
+                List.of(TaskGenerateHillaImpl.MAVEN_COMMAND, "-v"));
     }
 
     @Test
@@ -82,7 +80,8 @@ class TaskGenerateHillaImplTest {
         var gen = new TaskGenerateHillaImpl();
 
         try {
-            gen.runCodeGeneration(List.of("ls", "thisDirectoryShouldNotExist"));
+            gen.runCodeGeneration(List.of(TaskGenerateHillaImpl.MAVEN_COMMAND,
+                    "thisOptionDoesNotExist"));
             fail("Should throw exception for a shell command that exits with error code");
         } catch (ExecutionFailedException ex) {
             assertNull(ex.getCause());
@@ -101,7 +100,7 @@ class TaskGenerateHillaImplTest {
             gen.configure(tmpDir.toFile(), null);
             var command = gen.prepareCommand();
             assertEquals(2, command.size());
-            assertEquals("mvn", command.get(0));
+            assertEquals(TaskGenerateHillaImpl.MAVEN_COMMAND, command.get(0));
         } finally {
             if (tmpDir != null) {
                 Files.deleteIfExists(tmpDir.resolve("pom.xml"));
