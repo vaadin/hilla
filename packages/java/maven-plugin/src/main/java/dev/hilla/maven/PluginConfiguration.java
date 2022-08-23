@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PluginConfiguration {
-    public static final String RESOURCE_NAME = "hilla-generator-configuration.json";
+    public static final String RESOURCE_NAME = "hilla-engine-configuration.json";
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD,
