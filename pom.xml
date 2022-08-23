@@ -255,41 +255,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>npm-install</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>initialize</phase>
-            <configuration>
-              <executable>npm</executable>
-              <arguments>
-                <argument>install</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm-run-build</id>
-            <inherited>false</inherited>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <executable>npm</executable>
-              <arguments>
-                <argument>run</argument>
-                <argument>build</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.7</version>
