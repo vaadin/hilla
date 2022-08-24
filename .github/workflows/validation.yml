@@ -120,7 +120,7 @@ jobs:
         include:
           - package: spring/endpoints-latest-java
             java-version: 17
-    environment:
+    env:
       vaadin-hillaEngine: ${{ matrix.hillaEngine }}
 
     steps:
