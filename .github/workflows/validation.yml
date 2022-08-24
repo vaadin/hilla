@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        hillaEngine: [true, false]
+        hillaEngine: ['true', 'false']
         package: ${{ fromJSON(needs.init.outputs.packages-it) }}
         java-version:
             - 11
