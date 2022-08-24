@@ -9,7 +9,8 @@ import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.core.Walker;
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.AssociationMap;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
@@ -20,6 +21,18 @@ public final class NonnullPlugin implements Plugin {
     private SharedStorage storage;
 
     @Override
+    public void execute(List<ClassInfoModel> endpoints) {
+        var associationMap = (AssociationMap) storage.getPluginStorage()
+                .get(BackbonePlugin.ASSOCIATION_MAP);
+
+        var walker = new Walker(
+                List.of(new NonnullVisitor(annotations, associationMap, 0)),
+                endpoints);
+
+        walker.traverse();
+    }
+
+    @Override
     public int getOrder() {
         return order;
     }
@@ -27,15 +40,6 @@ public final class NonnullPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    @Override
-    public Collection<Visitor> getVisitors() {
-        var associationMap = (AssociationMap) storage.getPluginStorage()
-                .get(BackbonePlugin.ASSOCIATION_MAP);
-
-        return List.of(new NonnullVisitor(annotations, associationMap,
-                this::getOrder, 0));
     }
 
     @Override

@@ -192,17 +192,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    protected List<ClassInfoModel> prepareInheritanceChain() {
-        return Streams
-                .combine(Stream.of(this),
-                        origin.getSuperclasses().stream()
-                                .filter(ClassInfoModel::isNonJDKClass)
-                                .map(ClassInfoModel::of))
-                .collect(Collectors.toList());
+                .collect(MemberList.collectWithOwner(this));
     }
 
     @Override
@@ -221,7 +211,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return origin.getDeclaredMethodInfo().stream().map(MethodInfoModel::of)
-                .collect(Collectors.toList());
+                .collect(MemberList.collectWithOwner(this));
     }
 
     @Override

@@ -4,19 +4,17 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-
-import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
@@ -26,7 +24,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
-    private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<ClassRefSignatureModel> interfaces;
@@ -193,13 +190,23 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return fields;
     }
 
+    public void setFields(Collection<FieldInfoModel> fields) {
+        this.fields = new MemberList<>(fields, this);
+    }
+
     public Stream<FieldInfoModel> getFieldsStream() {
         return getFields().stream();
     }
 
     public List<ClassInfoModel> getInheritanceChain() {
-        if (chain == null) {
-            chain = prepareInheritanceChain();
+        var chain = new ArrayList<ClassInfoModel>();
+
+        var current = this;
+
+        while (current != null && isNonJDKClass(current.getName())) {
+            chain.add(current);
+            current = current.getSuperClass()
+                    .map(ClassRefSignatureModel::getClassInfo).orElse(null);
         }
 
         return chain;
@@ -217,6 +224,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return innerClasses;
     }
 
+    public void setInnerClasses(List<ClassInfoModel> innerClasses) {
+        this.innerClasses = innerClasses;
+    }
+
     public Stream<ClassInfoModel> getInnerClassesStream() {
         return getInnerClasses().stream();
     }
@@ -229,6 +240,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return interfaces;
     }
 
+    public void setInterfaces(List<ClassRefSignatureModel> interfaces) {
+        this.interfaces = interfaces;
+    }
+
     public Stream<ClassRefSignatureModel> getInterfacesStream() {
         return getInterfaces().stream();
     }
@@ -239,6 +254,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         }
 
         return methods;
+    }
+
+    public void setMethods(Collection<MethodInfoModel> methods) {
+        this.methods = new MemberList<>(methods, this);
     }
 
     public Stream<MethodInfoModel> getMethodsStream() {
@@ -263,6 +282,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return superClass;
     }
 
+    public void setSuperClass(Optional<ClassRefSignatureModel> superClass) {
+        this.superClass = superClass;
+    }
+
     public Stream<ClassRefSignatureModel> getSuperClassStream() {
         return getSuperClass().stream();
     }
@@ -273,6 +296,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         }
 
         return typeParameters;
+    }
+
+    public void setTypeParameters(List<TypeParameterModel> typeParameters) {
+        this.typeParameters = typeParameters;
     }
 
     public Stream<TypeParameterModel> getTypeParametersStream() {
@@ -366,8 +393,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     public abstract boolean isSynthetic();
 
     protected abstract List<FieldInfoModel> prepareFields();
-
-    protected abstract List<ClassInfoModel> prepareInheritanceChain();
 
     protected abstract List<ClassInfoModel> prepareInnerClasses();
 

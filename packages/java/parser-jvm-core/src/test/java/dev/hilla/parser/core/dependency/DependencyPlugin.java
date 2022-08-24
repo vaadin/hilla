@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.models.ClassInfoModel;
 
 public class DependencyPlugin implements Plugin {
     public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
@@ -27,8 +28,8 @@ public class DependencyPlugin implements Plugin {
     }
 
     @Override
-    public Collection<Visitor> getVisitors() {
-        return visitors;
+    public void execute(List<ClassInfoModel> endpoints) {
+
     }
 
     @Override

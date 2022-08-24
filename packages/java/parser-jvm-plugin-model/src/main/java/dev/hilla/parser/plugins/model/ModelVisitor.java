@@ -1,6 +1,5 @@
 package dev.hilla.parser.plugins.model;
 
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import dev.hilla.parser.core.NodePath;
@@ -14,14 +13,11 @@ final class ModelVisitor implements Visitor {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
     private final AssociationMap associationMap;
-    private final Supplier<Integer> orderProvider;
-    private final int shift;
+    private final int order;
 
-    ModelVisitor(AssociationMap associationMap, Supplier<Integer> orderProvider,
-            int shift) {
+    ModelVisitor(AssociationMap associationMap, int order) {
         this.associationMap = associationMap;
-        this.orderProvider = orderProvider;
-        this.shift = shift;
+        this.order = order;
     }
 
     private static ValidationConstraint convertAnnotation(
@@ -49,7 +45,7 @@ final class ModelVisitor implements Visitor {
 
     @Override
     public void enter(NodePath path) {
-        if (path.isRemoved()) {
+        if (path.isSkipped()) {
             return;
         }
 
@@ -78,6 +74,6 @@ final class ModelVisitor implements Visitor {
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + shift;
+        return order;
     }
 }

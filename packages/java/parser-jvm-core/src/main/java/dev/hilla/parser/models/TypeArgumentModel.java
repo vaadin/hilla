@@ -46,6 +46,10 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         return associatedTypes;
     }
 
+    public void setAssociatedTypes(List<SignatureModel> associatedTypes) {
+        this.associatedTypes = associatedTypes;
+    }
+
     public Stream<SignatureModel> getAssociatedTypesStream() {
         return getAssociatedTypes().stream();
     }

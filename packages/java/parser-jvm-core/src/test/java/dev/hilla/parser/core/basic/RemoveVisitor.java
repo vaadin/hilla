@@ -21,7 +21,6 @@ final class RemoveVisitor implements Visitor {
 
         if (model instanceof ClassInfoModel
                 && ((ClassInfoModel) model).getSimpleName().equals("Baz")) {
-            path.remove();
         }
     }
 

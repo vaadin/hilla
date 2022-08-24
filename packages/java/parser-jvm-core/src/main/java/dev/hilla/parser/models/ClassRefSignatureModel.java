@@ -16,6 +16,7 @@ import io.github.classgraph.ClassRefTypeSignature;
 public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel,
         OwnedModel<Optional<ClassRefSignatureModel>> {
+    private Optional<ClassRefSignatureModel> owner;
     private ClassInfoModel reference;
     private List<TypeArgumentModel> typeArguments;
 
@@ -120,12 +121,30 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return ClassRefSignatureModel.class;
     }
 
+    @Override
+    public String getName() {
+        return getClassInfo().getName();
+    }
+
+    @Override
+    public Optional<ClassRefSignatureModel> getOwner() {
+        if (owner == null) {
+            owner = prepareOwner();
+        }
+
+        return owner;
+    }
+
     public List<TypeArgumentModel> getTypeArguments() {
         if (typeArguments == null) {
             typeArguments = prepareTypeArguments();
         }
 
         return typeArguments;
+    }
+
+    public void setTypeArguments(List<TypeArgumentModel> typeArguments) {
+        this.typeArguments = typeArguments;
     }
 
     public Stream<TypeArgumentModel> getTypeArgumentsStream() {
@@ -240,6 +259,8 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     protected abstract List<AnnotationInfoModel> prepareAnnotations();
 
     protected abstract ClassInfoModel prepareClassInfo();
+
+    protected abstract Optional<ClassRefSignatureModel> prepareOwner();
 
     protected abstract List<TypeArgumentModel> prepareTypeArguments();
 }

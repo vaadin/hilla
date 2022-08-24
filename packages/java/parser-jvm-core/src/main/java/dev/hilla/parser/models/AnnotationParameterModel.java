@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -56,6 +55,14 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
         }
 
         return value;
+    }
+
+    public void setValue(AnnotationParameterEnumValueModel value) {
+        this.value = value;
+    }
+
+    public void setValue(ClassInfoModel value) {
+        this.value = value;
     }
 
     @Override

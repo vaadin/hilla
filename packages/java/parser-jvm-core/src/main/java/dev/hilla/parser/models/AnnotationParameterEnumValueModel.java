@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -44,6 +43,10 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
         }
 
         return classInfo;
+    }
+
+    public void setClassInfo(ClassInfoModel classInfo) {
+        this.classInfo = classInfo;
     }
 
     @Override

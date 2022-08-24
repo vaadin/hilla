@@ -19,15 +19,15 @@ final class AddVisitor implements Visitor {
 
     @Override
     public void enter(NodePath path) throws NoSuchMethodException {
-        var model = path.getModel();
-
-        if (model instanceof FieldInfoModel
-                && ((FieldInfoModel) model).getName().equals("foo")) {
-            path.add(Stream
-                    .of(Sample.class.getDeclaredMethod("methodFoo"),
-                            Sample.class.getDeclaredMethod("methodBar"))
-                    .map(MethodInfoModel::of).toArray(Model[]::new));
-        }
+//        var model = path.getModel();
+//
+//        if (model instanceof FieldInfoModel
+//                && ((FieldInfoModel) model).getName().equals("foo")) {
+//            path.add(Stream
+//                    .of(Sample.class.getDeclaredMethod("methodFoo"),
+//                            Sample.class.getDeclaredMethod("methodBar"))
+//                    .map(MethodInfoModel::of).toArray(Model[]::new));
+//        }
     }
 
     @Override

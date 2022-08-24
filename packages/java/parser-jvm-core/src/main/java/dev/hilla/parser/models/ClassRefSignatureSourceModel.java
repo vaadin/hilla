@@ -24,12 +24,7 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
     }
 
     @Override
-    public String getName() {
-        return origin.getBaseClassName();
-    }
-
-    @Override
-    public Optional<ClassRefSignatureModel> getOwner() {
+    protected Optional<ClassRefSignatureModel> prepareOwner() {
         return Optional.empty();
     }
 
@@ -82,19 +77,7 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         }
 
         @Override
-        public String getName() {
-            var builder = new StringBuilder(origin.getBaseClassName());
-
-            for (var i = 0; i <= currentSuffixIndex; i++) {
-                builder.append('$');
-                builder.append(origin.getSuffixes().get(i));
-            }
-
-            return builder.toString();
-        }
-
-        @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
             return currentSuffixIndex > 0
                     ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
                     : Optional.of(new SuffixedBase(origin));

@@ -1,10 +1,10 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
+
+import dev.hilla.parser.models.ClassInfoModel;
 
 public final class PluginManager {
     private static final ClassLoader loader = PluginManager.class
@@ -65,8 +65,9 @@ public final class PluginManager {
                 cls.getName(), Plugin.class.getName()));
     }
 
-    public List<Visitor> getVisitors() {
-        return plugins.stream().map(Plugin::getVisitors)
-                .flatMap(Collection::stream).collect(Collectors.toList());
+    public void execute(List<ClassInfoModel> endpoints) {
+        for (var plugin : plugins) {
+            plugin.execute(endpoints);
+        }
     }
 }

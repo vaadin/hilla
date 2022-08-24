@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -190,20 +189,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return Arrays.stream(origin.getDeclaredFields()).map(FieldInfoModel::of)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    protected List<ClassInfoModel> prepareInheritanceChain() {
-        var list = new ArrayList<ClassInfoModel>();
-        var current = origin;
-
-        while (current != null && ClassInfoModel.isNonJDKClass(current)) {
-            list.add(current == origin ? this : ClassInfoModel.of(current));
-            current = current.getSuperclass();
-        }
-
-        return list;
+                .collect(MemberList.collectWithOwner(this));
     }
 
     @Override
@@ -221,7 +207,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return Arrays.stream(origin.getDeclaredMethods())
-                .map(MethodInfoModel::of).collect(Collectors.toList());
+                .map(MethodInfoModel::of).collect(MemberList.collectWithOwner(this));
     }
 
     @Override

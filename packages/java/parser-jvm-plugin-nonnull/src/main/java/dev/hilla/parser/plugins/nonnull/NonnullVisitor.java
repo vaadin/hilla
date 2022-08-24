@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,22 +22,19 @@ import dev.hilla.parser.utils.Streams;
 final class NonnullVisitor implements Visitor {
     private final Map<String, AnnotationMatcher> annotations;
     private final AssociationMap associationMap;
-    private final Supplier<Integer> orderProvider;
-    private final int shift;
+    private final int order;
 
     NonnullVisitor(Collection<AnnotationMatcher> annotations,
-            AssociationMap associationMap, Supplier<Integer> orderProvider,
-            int shift) {
+            AssociationMap associationMap, int order) {
         this.annotations = annotations.stream().collect(Collectors
                 .toMap(AnnotationMatcher::getName, Function.identity()));
         this.associationMap = associationMap;
-        this.orderProvider = orderProvider;
-        this.shift = shift;
+        this.order = order;
     }
 
     @Override
     public void enter(NodePath path) {
-        if (path.isRemoved()) {
+        if (path.isSkipped()) {
             return;
         }
 
@@ -65,7 +61,7 @@ final class NonnullVisitor implements Visitor {
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + shift;
+        return order;
     }
 
     private Stream<AnnotationInfoModel> getPackageAnnotationStream(

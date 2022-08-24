@@ -40,5 +40,10 @@ abstract class AnnotatedAbstractModel implements AnnotatedModel {
         return annotations;
     }
 
+    @Override
+    public void setAnnotations(List<AnnotationInfoModel> annotations) {
+        this.annotations = annotations;
+    }
+
     protected abstract List<AnnotationInfoModel> prepareAnnotations();
 }

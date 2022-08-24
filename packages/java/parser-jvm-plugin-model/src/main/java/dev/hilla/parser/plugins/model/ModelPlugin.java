@@ -1,6 +1,5 @@
 package dev.hilla.parser.plugins.model;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -8,7 +7,8 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.core.Walker;
+import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.AssociationMap;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.utils.PluginException;
@@ -18,6 +18,17 @@ public final class ModelPlugin implements Plugin {
     private SharedStorage storage;
 
     @Override
+    public void execute(List<ClassInfoModel> endpoints) {
+        var associationMap = (AssociationMap) storage.getPluginStorage()
+                .get(BackbonePlugin.ASSOCIATION_MAP);
+
+        var walker = new Walker(List.of(new ModelVisitor(associationMap, 0)),
+                endpoints);
+
+        walker.traverse();
+    }
+
+    @Override
     public int getOrder() {
         return order;
     }
@@ -25,14 +36,6 @@ public final class ModelPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    @Override
-    public Collection<Visitor> getVisitors() {
-        var associationMap = (AssociationMap) storage.getPluginStorage()
-                .get(BackbonePlugin.ASSOCIATION_MAP);
-
-        return List.of(new ModelVisitor(associationMap, this::getOrder, 0));
     }
 
     @Override

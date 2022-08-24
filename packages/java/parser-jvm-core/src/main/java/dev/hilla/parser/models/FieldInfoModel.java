@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -53,12 +52,20 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
         return owner;
     }
 
+    void setOwner(ClassInfoModel owner) {
+        this.owner = owner;
+    }
+
     public SignatureModel getType() {
         if (type == null) {
             type = prepareType();
         }
 
         return type;
+    }
+
+    public void setType(SignatureModel type) {
+        this.type = type;
     }
 
     @Override

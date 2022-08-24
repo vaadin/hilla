@@ -24,10 +24,10 @@ final class ReplaceVisitor implements Visitor {
 
         if (model instanceof MethodInfoModel
                 && ((MethodInfoModel) model).getName().equals("bar")) {
-            path.replace(Stream
-                    .of(Sample.class.getDeclaredField("fieldFoo"),
-                            Sample.class.getDeclaredField("fieldBar"))
-                    .map(FieldInfoModel::of).toArray(Model[]::new));
+//            path.replace(Stream
+//                    .of(Sample.class.getDeclaredField("fieldFoo"),
+//                            Sample.class.getDeclaredField("fieldBar"))
+//                    .map(FieldInfoModel::of).toArray(Model[]::new));
         }
     }
 

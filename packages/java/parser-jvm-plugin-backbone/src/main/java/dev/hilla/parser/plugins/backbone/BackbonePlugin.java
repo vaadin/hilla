@@ -1,6 +1,5 @@
 package dev.hilla.parser.plugins.backbone;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -8,13 +7,28 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.core.Walker;
+import dev.hilla.parser.models.ClassInfoModel;
 
 public final class BackbonePlugin implements Plugin {
     public static final String ASSOCIATION_MAP = "BackbonePlugin_AssociationMap";
     private ParserConfig config;
     private int order = 0;
     private SharedStorage storage;
+
+    public void execute(List<ClassInfoModel> endpoints) {
+        var associationMap = new AssociationMap();
+        var context = new Context(storage.getOpenAPI(),
+                config.getEndpointAnnotationName(), associationMap);
+
+        storage.getPluginStorage().put(ASSOCIATION_MAP, associationMap);
+
+        var walker = new Walker(
+                List.of(new BackboneVisitor(context, this::getOrder, 0)),
+                endpoints);
+
+        walker.traverse();
+    }
 
     @Override
     public int getOrder() {
@@ -24,17 +38,6 @@ public final class BackbonePlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    @Override
-    public Collection<Visitor> getVisitors() {
-        var associationMap = new AssociationMap();
-        var context = new Context(storage.getOpenAPI(),
-                config.getEndpointAnnotationName(), associationMap);
-
-        storage.getPluginStorage().put(ASSOCIATION_MAP, associationMap);
-
-        return List.of(new BackboneVisitor(context, this::getOrder, 0));
     }
 
     @Override

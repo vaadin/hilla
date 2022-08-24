@@ -24,10 +24,6 @@ final class BackboneVisitor implements Visitor {
 
     @Override
     public void enter(NodePath path) {
-        if (path.isRemoved()) {
-            return;
-        }
-
         var model = path.getModel();
 
         if (model instanceof ClassInfoModel) {

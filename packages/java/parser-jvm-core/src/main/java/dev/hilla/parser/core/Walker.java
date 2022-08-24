@@ -3,6 +3,7 @@ package dev.hilla.parser.core;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -26,15 +27,16 @@ import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
 
-final class Walker {
+public class Walker {
     private final Queue<ClassInfoModel> dependencies;
-    private final Set<Model> visitedNodes = new HashSet<>();
+    private final Set<Model> visitedNodes;
     private final SortedSet<Visitor> visitors = new TreeSet<>(
             Comparator.comparing(Visitor::getOrder));
 
-    Walker(Collection<Visitor> visitors, Queue<ClassInfoModel> dependencies) {
-        this.dependencies = dependencies;
-        this.visitedNodes.addAll(dependencies);
+    public Walker(Collection<? extends Visitor> visitors,
+            Collection<ClassInfoModel> dependencies) {
+        this.dependencies = new LinkedList<>(dependencies);
+        this.visitedNodes = new HashSet<>(dependencies);
         this.visitors.addAll(visitors);
     }
 
@@ -70,41 +72,17 @@ final class Walker {
                             .filter(p -> p.getName().equals(model.getName()))
                             .findFirst().orElse(null)
                     : null;
+
+            model.setTypeParameter(typeParameter);
         }
 
         return typeParameter;
     }
 
-    public void traverse(ClassInfoModel target) {
-        var packagePath = NodePath.of(target.getPackage(), List.of());
-        enter(packagePath);
-
-        if (!packagePath.isRemoved()) {
-            var classPath = NodePath.of(target, List.of(packagePath), true);
-
-            enter(classPath);
-
-            if (!classPath.isRemoved()) {
-                var ascendants = classPath.getAscendantsForChild();
-                Function<Model, NodePath> mapper = m -> NodePath.of(m,
-                        ascendants);
-
-                target.getTypeParametersStream().map(mapper)
-                        .forEach(this::visitSignature);
-                target.getSuperClass().map(mapper)
-                        .ifPresent(this::visitSignature);
-                target.getInterfacesStream().map(mapper)
-                        .forEach(this::visitSignature);
-                target.getFieldsStream().map(mapper).forEach(this::visitField);
-                target.getMethodsStream().map(mapper)
-                        .forEach(this::visitMethod);
-                target.getInnerClassesStream().map(mapper)
-                        .forEach(this::visitClass);
-            }
-
-            exit(classPath);
+    public void traverse() {
+        while (!dependencies.isEmpty()) {
+            visitClassDeclaration(dependencies.poll());
         }
-        exit(packagePath);
     }
 
     private void enter(NodePath path) {
@@ -130,7 +108,7 @@ final class Walker {
     private void visitAnnotation(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (AnnotationInfoModel) path.getModel();
             var ascendants = path.getAscendantsForChild();
 
@@ -139,14 +117,12 @@ final class Walker {
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitAnnotationParameter(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (AnnotationParameterModel) path.getModel();
             var ascendants = path.getAscendantsForChild();
             var value = model.getValue();
@@ -160,14 +136,12 @@ final class Walker {
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitAnnotationParameterEnumValue(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (AnnotationParameterEnumValueModel) path.getModel();
 
             visitClass(NodePath.of(model.getClassInfo(),
@@ -175,8 +149,6 @@ final class Walker {
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitClass(NodePath path) {
@@ -188,34 +160,62 @@ final class Walker {
 
         enter(path);
 
-        if (!visitedNodes.contains(model) && !path.isRemoved()) {
+        if (!visitedNodes.contains(model) && !path.isSkipped()) {
             dependencies.add(model);
             visitedNodes.add(model);
         }
 
         exit(path);
+    }
 
-        path.forEachAddedNode(this::visitUnknown);
+    private void visitClassDeclaration(ClassInfoModel target) {
+        var packagePath = NodePath.of(target.getPackage(), List.of());
+        enter(packagePath);
+
+        if (!packagePath.isSkipped()) {
+            var classPath = NodePath.of(target, List.of(packagePath), true);
+
+            enter(classPath);
+
+            if (!classPath.isSkipped()) {
+                var ascendants = classPath.getAscendantsForChild();
+                Function<Model, NodePath> mapper = m -> NodePath.of(m,
+                        ascendants);
+
+                target.getTypeParametersStream().map(mapper)
+                        .forEach(this::visitSignature);
+                target.getSuperClass().map(mapper)
+                        .ifPresent(this::visitSignature);
+                target.getInterfacesStream().map(mapper)
+                        .forEach(this::visitSignature);
+                target.getFieldsStream().map(mapper).forEach(this::visitField);
+                target.getMethodsStream().map(mapper)
+                        .forEach(this::visitMethod);
+                target.getInnerClassesStream().map(mapper)
+                        .forEach(this::visitClass);
+            }
+
+            exit(classPath);
+        }
+        exit(packagePath);
     }
 
     private void visitField(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (FieldInfoModel) path.getModel();
             visitSignature(
                     NodePath.of(model.getType(), path.getAscendantsForChild()));
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitMethod(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (MethodInfoModel) path.getModel();
             var ascendants = path.getAscendantsForChild();
             model.getParametersStream().map(m -> NodePath.of(m, ascendants))
@@ -224,38 +224,32 @@ final class Walker {
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitMethodParameter(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = (MethodParameterInfoModel) path.getModel();
             visitSignature(
                     NodePath.of(model.getType(), path.getAscendantsForChild()));
         }
 
         exit(path);
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitPackage(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             exit(path);
         }
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitSignature(NodePath path) {
         enter(path);
 
-        if (!path.isRemoved()) {
+        if (!path.isSkipped()) {
             var model = path.getModel();
             var ascendants = path.getAscendantsForChild();
 
@@ -289,8 +283,6 @@ final class Walker {
 
             exit(path);
         }
-
-        path.forEachAddedNode(this::visitUnknown);
     }
 
     private void visitUnknown(NodePath path) {

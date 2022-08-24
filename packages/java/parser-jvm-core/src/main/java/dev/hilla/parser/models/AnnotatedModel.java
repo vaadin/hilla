@@ -9,4 +9,6 @@ public interface AnnotatedModel {
     default Stream<AnnotationInfoModel> getAnnotationsStream() {
         return getAnnotations().stream();
     }
+
+    void setAnnotations(List<AnnotationInfoModel> annotations);
 }

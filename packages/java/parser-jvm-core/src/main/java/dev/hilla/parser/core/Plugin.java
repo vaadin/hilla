@@ -1,15 +1,18 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nonnull;
+
+import dev.hilla.parser.models.ClassInfoModel;
 
 public interface Plugin {
     int getOrder();
 
     void setOrder(int order);
 
-    Collection<Visitor> getVisitors();
+    void execute(List<ClassInfoModel> endpoints);
 
     default void setConfig(PluginConfiguration config) {
         if (config != null) {

@@ -163,8 +163,8 @@ public class ParserConfigTests {
         }
 
         @Override
-        public Collection<Visitor> getVisitors() {
-            return List.of();
+        public void execute(List<ClassInfoModel> endpoints) {
+
         }
 
         public void process(@Nonnull Collection<ClassInfoModel> endpoints,
@@ -192,8 +192,8 @@ public class ParserConfigTests {
         }
 
         @Override
-        public Collection<Visitor> getVisitors() {
-            return List.of();
+        public void execute(List<ClassInfoModel> endpoints) {
+
         }
 
         public void process(@Nonnull Collection<ClassInfoModel> endpoints,

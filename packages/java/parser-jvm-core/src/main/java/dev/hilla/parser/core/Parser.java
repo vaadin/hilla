@@ -51,17 +51,14 @@ public final class Parser {
                 .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan()) {
 
-            var dependencies = result
+            var endpoints = result
                     .getClassesWithAnnotation(
                             config.getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of)
-                    .collect(Collectors.toCollection(LinkedList::new));
+                    .collect(Collectors.toList());
 
-            var walker = new Walker(pluginManager.getVisitors(), dependencies);
 
-            while (!dependencies.isEmpty()) {
-                walker.traverse(dependencies.poll());
-            }
+            pluginManager.execute(endpoints);
 
             return storage.getOpenAPI();
         }
