@@ -198,6 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        hillaEngine: [true, false]
         package: ${{ fromJSON(needs.init.outputs.packages-it) }}
         java-version:
             - 11
@@ -207,6 +208,8 @@ jobs:
         include:
           - package: spring/endpoints-latest-java
             java-version: 17
+    environment:
+      vaadin-hillaEngine: ${{ matrix.hillaEngine }}
 
     steps:
       - name: Checkout Project Code
