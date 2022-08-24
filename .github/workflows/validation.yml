@@ -8,7 +8,7 @@ on:
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
-  pull_request_target:
+  pull_request:
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -27,7 +27,7 @@ jobs:
       packages-it: ${{ steps.packages-it.outputs.packages }}
 
     steps:
-      - uses: ZheSun88/check-user-permission@triggering-actor
+      - uses: actions-cool/check-user-permission@v2
         id: check
         with:
           require: 'write'
@@ -43,7 +43,6 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: List Java Unit
         id: packages-java
@@ -128,7 +127,6 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
