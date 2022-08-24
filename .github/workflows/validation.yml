@@ -101,9 +101,96 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
+  test-java:
+    needs: init
+    name: Test Java
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.init.outputs.packages-java) }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Test
+        run: (cd packages/java/${{ matrix.package }} && mvn -B -am -P\!it-modules verify)
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
+      - name: Send Coverage to Codecov
+        if: ${{ env.COVFILES != '' }}
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.COVFILES }}
+          flags: unittests
+          fail_ci_if_error: true
+          root_dir: ${{ github.workspace }}
+
+  test-typescript:
+    needs: init
+    name: Test TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.init.outputs.packages-ts) }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Test
+        run: (cd packages/ts/${{ matrix.package }} && npm run test:coverage)
+        env:
+          CI: true
+      - name: Collect Coverage
+        run: |
+          COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
+          echo "COVFILES=$COVFILES" >> $GITHUB_ENV
+      - name: Send Coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.COVFILES }}
+          flags: unittests
+          fail_ci_if_error: true
+          root_dir: ${{ github.workspace }}
+
   test-it:
     needs:
       - init
+      - test-java
+      - test-typescript
     name: ITs
     runs-on: ubuntu-latest
     timeout-minutes: 15
