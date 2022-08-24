@@ -16,6 +16,8 @@
 
 package dev.hilla.startup;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import dev.hilla.auth.CsrfIndexHtmlRequestListener;
@@ -26,6 +28,9 @@ import dev.hilla.auth.CsrfIndexHtmlRequestListener;
 public class CsrfServiceInitListener implements VaadinServiceInitListener {
     @Override
     public void serviceInit(ServiceInitEvent event) {
+        LoggerFactory.getLogger(CsrfServiceInitListener.class).info(
+                "vaadin-hillaEngine: {}",
+                System.getProperty("vaadin-hillaEngine"));
         event.addIndexHtmlRequestListener(new CsrfIndexHtmlRequestListener());
     }
 }
