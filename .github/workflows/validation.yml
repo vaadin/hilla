@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        hillaEngine: ['true', 'false']
+        hillaEngine: ['false', 'true']
         package: ${{ fromJSON(needs.init.outputs.packages-it) }}
         java-version:
             - 11
@@ -120,6 +120,10 @@ jobs:
         include:
           - package: spring/endpoints-latest-java
             java-version: 17
+            hilla-engine: false
+          - package: spring/endpoints-latest-java
+            java-version: 17
+            hilla-engine: true
     env:
       vaadin-hillaEngine: ${{ matrix.hillaEngine }}
 
