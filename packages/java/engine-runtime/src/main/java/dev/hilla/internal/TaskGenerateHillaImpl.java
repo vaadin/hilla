@@ -4,9 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateHilla;
@@ -20,9 +17,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0-beta2")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "1.2.0-beta2")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(TaskGenerateHillaImpl.class);
-
     static final boolean IS_WINDOWS;
     static final String MAVEN_COMMAND;
 
@@ -49,8 +43,6 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
             throws ExecutionFailedException {
         var exitCode = 0;
         try {
-            LOGGER.info("Launch code generation trough the {} command",
-                    command.get(0));
             ProcessBuilder builder = new ProcessBuilder(command)
                     .directory(projectDirectory).inheritIO();
             exitCode = builder.start().waitFor();
