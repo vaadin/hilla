@@ -61,6 +61,11 @@
       <artifactId>endpoint</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>engine-runtime</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -99,6 +104,12 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>dev.hilla</groupId>
+          <artifactId>engine-maven-plugin</artifactId>
+          <version>${project.version}</version>
+        </plugin>
+
+        <plugin>
           <groupId>com.vaadin</groupId>
           <artifactId>flow-maven-plugin</artifactId>
           <version>${flow.version}</version>
@@ -111,6 +122,7 @@
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.2.0</version>
@@ -198,25 +210,6 @@
   </build>
 
   <profiles>
-    <profile>
-      <!-- Production mode is activated using -Pproduction -->
-      <id>production</id>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>com.vaadin</groupId>
-              <artifactId>flow-maven-plugin</artifactId>
-              <version>${flow.version}</version>
-              <configuration>
-                <productionMode>true</productionMode>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
     <profile>
       <id>it-modules</id>
       <activation>

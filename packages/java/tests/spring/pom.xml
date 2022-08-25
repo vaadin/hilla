@@ -96,6 +96,31 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring.boot.version}</version>
+          <executions>
+            <!-- start and stop application when running integration tests -->
+            <execution>
+              <id>pre-integration-test</id>
+              <goals>
+                <goal>start</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>post-integration-test</id>
+              <goals>
+                <goal>stop</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.eclipse.jetty</groupId>

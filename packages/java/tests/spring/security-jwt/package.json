@@ -6,7 +6,7 @@
     "@hilla/form": "../../../../ts/form",
     "@hilla/frontend": "../../../../ts/hilla-frontend",
     "@hilla/generator-typescript-cli": "../../../../ts/generator-typescript-cli",
-    "@hilla/generator-typescript-core": "../../../..@/ts/generator-typescript-core",
+    "@hilla/generator-typescript-core": "../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "../../../../ts/generator-typescript-plugin-backbone",
     "@hilla/generator-typescript-plugin-barrel": "../../../../ts/generator-typescript-plugin-barrel",
     "@hilla/generator-typescript-plugin-client": "../../../../ts/generator-typescript-plugin-client",
@@ -287,7 +287,7 @@
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0"
     },
-    "hash": "dce98c37f34ff492b89d8e25808026c862ab3ae91f20a5b74d2a74696306c24a"
+    "hash": "4fac23d709d0617b0cfbea232a62ef5264ac9a173804abd12a59ba9bbff67683"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
