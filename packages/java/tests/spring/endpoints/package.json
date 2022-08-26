@@ -4,6 +4,14 @@
   "dependencies": {
     "@hilla/form": "../../../../ts/form",
     "@hilla/frontend": "../../../../ts/hilla-frontend",
+    "@hilla/generator-typescript-cli": "../../../../ts/generator-typescript-cli",
+    "@hilla/generator-typescript-core": "../../../../ts/generator-typescript-core",
+    "@hilla/generator-typescript-plugin-backbone": "../../../../ts/generator-typescript-plugin-backbone",
+    "@hilla/generator-typescript-plugin-barrel": "../../../../ts/generator-typescript-plugin-barrel",
+    "@hilla/generator-typescript-plugin-client": "../../../../ts/generator-typescript-plugin-client",
+    "@hilla/generator-typescript-plugin-model": "../../../../ts/generator-typescript-plugin-model",
+    "@hilla/generator-typescript-plugin-push": "../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-utils": "../../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.17",
     "@vaadin/flow-frontend": "./target/flow-frontend",
@@ -29,6 +37,14 @@
     "dependencies": {
       "@hilla/form": "1.2.0-alpha1",
       "@hilla/frontend": "1.2.0-alpha1",
+      "@hilla/generator-typescript-cli": "1.2.0-alpha3",
+      "@hilla/generator-typescript-core": "1.2.0-alpha3",
+      "@hilla/generator-typescript-plugin-backbone": "1.2.0-alpha3",
+      "@hilla/generator-typescript-plugin-barrel": "1.2.0-alpha3",
+      "@hilla/generator-typescript-plugin-client": "1.2.0-alpha3",
+      "@hilla/generator-typescript-plugin-model": "1.2.0-alpha3",
+      "@hilla/generator-typescript-plugin-push": "1.2.0-alpha3",
+      "@hilla/generator-typescript-utils": "1.2.0-alpha3",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.17",
       "@vaadin/router": "1.7.4",
@@ -49,7 +65,7 @@
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0"
     },
-    "hash": "79f0c90b70b8e29c0268c4e53ce55e36b291c059710466eb536dfb8e0b85cdca"
+    "hash": "1cd375020cc282501e6165466e24728ac64c721a1d111b2aa149487cc922c23c"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -58,6 +74,14 @@
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@hilla/form": "$@hilla/form",
-    "@hilla/frontend": "$@hilla/frontend"
+    "@hilla/frontend": "$@hilla/frontend",
+    "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli",
+    "@hilla/generator-typescript-core": "$@hilla/generator-typescript-core",
+    "@hilla/generator-typescript-plugin-backbone": "$@hilla/generator-typescript-plugin-backbone",
+    "@hilla/generator-typescript-plugin-barrel": "$@hilla/generator-typescript-plugin-barrel",
+    "@hilla/generator-typescript-plugin-client": "$@hilla/generator-typescript-plugin-client",
+    "@hilla/generator-typescript-plugin-model": "$@hilla/generator-typescript-plugin-model",
+    "@hilla/generator-typescript-plugin-push": "$@hilla/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-utils": "$@hilla/generator-typescript-utils"
   }
 }

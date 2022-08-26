@@ -198,6 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        hillaEngine: [false, true]
         package: ${{ fromJSON(needs.init.outputs.packages-it) }}
         java-version:
             - 11
@@ -207,6 +208,7 @@ jobs:
         include:
           - package: spring/endpoints-latest-java
             java-version: 17
+            hilla-engine: false
 
     steps:
       - name: Checkout Project Code
@@ -241,6 +243,7 @@ jobs:
               -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
+              -Dvaadin.hillaEngine=${{ matrix.hillaEngine }} \
               verify
           )
       - uses: actions/upload-artifact@v3
