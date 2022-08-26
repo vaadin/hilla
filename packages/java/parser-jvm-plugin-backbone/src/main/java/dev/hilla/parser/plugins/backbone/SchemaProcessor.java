@@ -26,8 +26,8 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
     private static final Schema<?> anySchemaSample = new ObjectSchema();
-    private final SignatureModel signature;
     private final Context context;
+    private final SignatureModel signature;
 
     public SchemaProcessor(SignatureModel signature, Context context) {
         this.signature = signature;
@@ -109,11 +109,12 @@ final class SchemaProcessor {
 
     private Schema<?> iterableSchema() {
         var schema = nullify(new ArraySchema(), true);
-        var typeArguments = ((ClassRefSignatureModel) signature).getTypeArguments();
+        var typeArguments = ((ClassRefSignatureModel) signature)
+                .getTypeArguments();
 
         if (typeArguments.size() > 0) {
-            return schema.items(
-                    new SchemaProcessor(typeArguments.get(0), context)
+            return schema
+                    .items(new SchemaProcessor(typeArguments.get(0), context)
                             .process());
         }
 
@@ -142,10 +143,10 @@ final class SchemaProcessor {
     }
 
     private Schema<?> optionalSchema() {
-        var typeArguments = ((ClassRefSignatureModel) signature).getTypeArguments();
+        var typeArguments = ((ClassRefSignatureModel) signature)
+                .getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), context)
-                .process();
+        return new SchemaProcessor(typeArguments.get(0), context).process();
     }
 
     private Schema<?> refSchema() {
@@ -153,12 +154,12 @@ final class SchemaProcessor {
             return anySchema();
         }
 
-        var fullyQualifiedName = ((ClassRefSignatureModel) signature).getClassInfo()
-                .getName();
+        var cls = ((ClassRefSignatureModel) signature).getClassInfo();
+        context.getDependencies().add(cls);
 
         return nullify(new ComposedSchema(), true)
                 .anyOf(Collections.singletonList(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName)));
+                        .$ref(COMPONENTS_SCHEMAS_REF + cls.getName())));
     }
 
     private Schema<?> stringSchema() {
@@ -178,13 +179,13 @@ final class SchemaProcessor {
                 .filter(Objects::nonNull)
                 .filter(bound -> !bound.isNativeObject())
                 .<Schema<?>> map(
-                        bound -> new SchemaProcessor(bound, context)
-                                .process())
+                        bound -> new SchemaProcessor(bound, context).process())
                 .filter(schema -> !Objects.equals(schema, anySchemaSample))
                 .findFirst().orElseGet(this::anySchema);
     }
 
     private Schema<?> typeVariableSchema() {
-        return new SchemaProcessor(((TypeVariableModel) signature).resolve(), context).process();
+        return new SchemaProcessor(((TypeVariableModel) signature).resolve(),
+                context).process();
     }
 }

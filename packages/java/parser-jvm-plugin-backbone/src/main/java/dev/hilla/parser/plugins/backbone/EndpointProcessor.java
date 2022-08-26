@@ -23,6 +23,7 @@ final class EndpointProcessor {
 
     public void process(ClassInfoModel endpoint) {
         var paths = getPaths();
+        var associationMap = context.getAssociationMap();
 
         endpoint.getInheritanceChainStream()
             .flatMap(ClassInfoModel::getMethodsStream)
@@ -95,6 +96,7 @@ final class EndpointProcessor {
                 var schema = new SchemaProcessor(parameter.getType(), context)
                         .process();
                 requestMap.addProperties(parameter.getName(), schema);
+                context.getAssociationMap().addParameter(parameter, schema);
             }
 
             return new RequestBody().content(new Content().addMediaType(
@@ -111,6 +113,8 @@ final class EndpointProcessor {
 
                 response.setContent(new Content().addMediaType(
                         "application/json", new MediaType().schema(schema)));
+
+                context.getAssociationMap().addMethod(method, schema);
             }
 
             return new ApiResponses().addApiResponse("200", response);

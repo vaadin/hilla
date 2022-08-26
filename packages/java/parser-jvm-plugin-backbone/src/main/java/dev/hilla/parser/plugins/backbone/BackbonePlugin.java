@@ -7,7 +7,6 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Walker;
 import dev.hilla.parser.models.ClassInfoModel;
 
 public final class BackbonePlugin implements Plugin {
@@ -18,16 +17,22 @@ public final class BackbonePlugin implements Plugin {
 
     public void execute(List<ClassInfoModel> endpoints) {
         var associationMap = new AssociationMap();
-        var context = new Context(storage.getOpenAPI(),
-                config.getEndpointAnnotationName(), associationMap);
+        var context = new Context(storage.getOpenAPI(), associationMap);
+
+        var endpointProcessor = new EndpointProcessor(context);
+
+        for (var endpoint : endpoints) {
+            endpointProcessor.process(endpoint);
+        }
+
+        var entityProcessor = new EntityProcessor(context);
+        var dependencies = context.getDependencies();
+
+        while (!dependencies.isEmpty()) {
+            entityProcessor.process(dependencies.poll());
+        }
 
         storage.getPluginStorage().put(ASSOCIATION_MAP, associationMap);
-
-        var walker = new Walker(
-                List.of(new BackboneVisitor(context, this::getOrder, 0)),
-                endpoints);
-
-        walker.traverse();
     }
 
     @Override

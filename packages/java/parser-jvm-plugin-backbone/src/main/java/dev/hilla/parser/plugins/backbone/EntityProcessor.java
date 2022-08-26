@@ -71,13 +71,15 @@ final class EntityProcessor {
     private Schema<?> processExtendedClass(ClassInfoModel entity) {
         var processed = processClass(entity);
 
-        return entity.getSuperClass()
+        return entity.getSuperClass().stream()
                 .filter(ClassRefSignatureModel::isNonJDKClass)
+                .map(ClassRefSignatureModel::getClassInfo)
+                .peek(context.getDependencies()::add)
                 .<Schema<?>> map(
                         cls -> new ComposedSchema().anyOf(Arrays.asList(
                                 new Schema<>().$ref(
                                         COMPONENTS_SCHEMAS_REF + cls.getName()),
                                 processed)))
-                .orElse(processed);
+                .findFirst().orElse(processed);
     }
 }
