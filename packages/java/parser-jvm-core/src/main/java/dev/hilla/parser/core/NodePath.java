@@ -77,6 +77,12 @@ public abstract class NodePath {
         setter.accept(additionalNodes[0]);
     }
 
+    @SafeVarargs
+    public final <M extends Model> void replace(M... models) {
+        removeOrReplace(models);
+        skip();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -143,28 +149,26 @@ public abstract class NodePath {
                 removeOrReplaceOptional(_parent::setClassInfo,
                         (ClassInfoModel[]) additionalNodes);
             }
-        } else if (parent instanceof AnnotationParameterEnumValueModel) {
-            if (model instanceof ClassInfoModel) {
-                removeOrReplaceRequired(
-                        ((AnnotationParameterEnumValueModel) parent)::setClassInfo,
-                        (ClassInfoModel[]) additionalNodes);
-            }
+        } else if (parent instanceof AnnotationParameterEnumValueModel
+                && model instanceof ClassInfoModel) {
+            removeOrReplaceRequired(
+                    ((AnnotationParameterEnumValueModel) parent)::setClassInfo,
+                    (ClassInfoModel[]) additionalNodes);
         } else if (parent instanceof AnnotationParameterModel) {
+            var _parent = (AnnotationParameterModel) parent;
+
             if (model instanceof ClassInfoModel) {
-                removeOrReplaceRequired(
-                        ((AnnotationParameterModel) parent)::setValue,
+                removeOrReplaceRequired(_parent::setValue,
                         (ClassInfoModel[]) additionalNodes);
             } else if (model instanceof AnnotationParameterEnumValueModel) {
-                removeOrReplaceRequired(
-                        ((AnnotationParameterModel) parent)::setValue,
+                removeOrReplaceRequired(_parent::setValue,
                         (AnnotationParameterEnumValueModel[]) additionalNodes);
             }
-        } else if (parent instanceof ArraySignatureModel) {
-            if (model instanceof SignatureModel) {
-                removeOrReplaceRequired(
-                        ((ArraySignatureModel) parent)::setNestedType,
-                        (SignatureModel[]) additionalNodes);
-            }
+        } else if (parent instanceof ArraySignatureModel
+                && model instanceof SignatureModel) {
+            removeOrReplaceRequired(
+                    ((ArraySignatureModel) parent)::setNestedType,
+                    (SignatureModel[]) additionalNodes);
         } else if (parent instanceof ClassInfoModel) {
             var _parent = (ClassInfoModel) parent;
 
@@ -206,56 +210,46 @@ public abstract class NodePath {
                         ((ClassRefSignatureModel) parent).getTypeArguments(),
                         (TypeArgumentModel[]) additionalNodes);
             }
-        } else if (parent instanceof FieldInfoModel) {
-            if (model instanceof SignatureModel) {
-                removeOrReplaceRequired(((FieldInfoModel) parent)::setType,
-                        (SignatureModel[]) additionalNodes);
-            }
+        } else if (parent instanceof FieldInfoModel
+                && model instanceof SignatureModel) {
+            removeOrReplaceRequired(((FieldInfoModel) parent)::setType,
+                    (SignatureModel[]) additionalNodes);
         } else if (parent instanceof MethodInfoModel) {
+            var _parent = (MethodInfoModel) parent;
+
             if (model instanceof MethodParameterInfoModel) {
                 removeOrReplaceInCollection((MethodParameterInfoModel) model,
-                        ((MethodInfoModel) parent).getParameters(),
+                        _parent.getParameters(),
                         (MethodParameterInfoModel[]) additionalNodes);
             } else if (model instanceof TypeParameterModel) {
                 removeOrReplaceInCollection((TypeParameterModel) model,
-                        ((MethodInfoModel) parent).getTypeParameters(),
+                        _parent.getTypeParameters(),
                         (TypeParameterModel[]) additionalNodes);
             } else if (model instanceof SignatureModel) {
-                removeOrReplaceRequired(
-                        ((MethodInfoModel) parent)::setResultType,
+                removeOrReplaceRequired(_parent::setResultType,
                         (SignatureModel[]) additionalNodes);
             }
-        } else if (parent instanceof MethodParameterInfoModel) {
-            if (model instanceof SignatureModel) {
-                removeOrReplaceRequired(
-                        ((MethodParameterInfoModel) parent)::setType,
-                        (SignatureModel[]) additionalNodes);
-            }
-        } else if (parent instanceof TypeArgumentModel) {
-            if (model instanceof SignatureModel) {
-                removeOrReplaceInCollection((SignatureModel) model,
-                        ((TypeArgumentModel) parent).getAssociatedTypes(),
-                        (SignatureModel[]) additionalNodes);
-            }
-        } else if (parent instanceof TypeParameterModel) {
-            if (model instanceof SignatureModel) {
-                removeOrReplaceInCollection((SignatureModel) model,
-                        ((TypeParameterModel) parent).getBounds(),
-                        (SignatureModel[]) additionalNodes);
-            }
-        } else if (parent instanceof TypeVariableModel) {
-            if (model instanceof TypeParameterModel) {
-                removeOrReplaceRequired(
-                        ((TypeVariableModel) parent)::setTypeParameter,
-                        (TypeParameterModel[]) additionalNodes);
-            }
+        } else if (parent instanceof MethodParameterInfoModel
+                && model instanceof SignatureModel) {
+            removeOrReplaceRequired(
+                    ((MethodParameterInfoModel) parent)::setType,
+                    (SignatureModel[]) additionalNodes);
+        } else if (parent instanceof TypeArgumentModel
+                && model instanceof SignatureModel) {
+            removeOrReplaceInCollection((SignatureModel) model,
+                    ((TypeArgumentModel) parent).getAssociatedTypes(),
+                    (SignatureModel[]) additionalNodes);
+        } else if (parent instanceof TypeParameterModel
+                && model instanceof SignatureModel) {
+            removeOrReplaceInCollection((SignatureModel) model,
+                    ((TypeParameterModel) parent).getBounds(),
+                    (SignatureModel[]) additionalNodes);
+        } else if (parent instanceof TypeVariableModel
+                && model instanceof TypeParameterModel) {
+            removeOrReplaceRequired(
+                    ((TypeVariableModel) parent)::setTypeParameter,
+                    (TypeParameterModel[]) additionalNodes);
         }
-    }
-
-    @SafeVarargs
-    public final <M extends Model> void replace(M... models) {
-        removeOrReplace(models);
-        skip();
     }
 
     public void skip() {
