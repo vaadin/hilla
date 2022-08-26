@@ -23,11 +23,6 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         return origin;
     }
 
-    @Override
-    protected Optional<ClassRefSignatureModel> prepareOwner() {
-        return Optional.empty();
-    }
-
     protected List<AnnotationInfo> getOriginAnnotations() {
         return origin.getTypeAnnotationInfo();
     }
@@ -53,6 +48,11 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
     }
 
     @Override
+    protected Optional<ClassRefSignatureModel> prepareOwner() {
+        return Optional.empty();
+    }
+
+    @Override
     protected List<TypeArgumentModel> prepareTypeArguments() {
         return getOriginTypeArguments().stream().map(TypeArgumentModel::of)
                 .collect(Collectors.toList());
@@ -74,13 +74,6 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
             super(origin);
             this.currentSuffixIndex = currentSuffixIndex;
-        }
-
-        @Override
-        protected Optional<ClassRefSignatureModel> prepareOwner() {
-            return currentSuffixIndex > 0
-                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
-                    : Optional.of(new SuffixedBase(origin));
         }
 
         @Override
@@ -114,6 +107,13 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         @Override
         protected List<TypeArgument> getOriginTypeArguments() {
             return origin.getSuffixTypeArguments().get(currentSuffixIndex);
+        }
+
+        @Override
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
+            return currentSuffixIndex > 0
+                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
+                    : Optional.of(new SuffixedBase(origin));
         }
     }
 

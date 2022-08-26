@@ -59,13 +59,13 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
             super(origin);
         }
 
-        protected Optional<ClassRefSignatureModel> prepareOwner() {
-            return Optional.empty();
-        }
-
         @Override
         protected Class<?> getOriginClassInfo() {
             return origin;
+        }
+
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
+            return Optional.empty();
         }
     }
 

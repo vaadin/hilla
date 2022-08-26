@@ -1,6 +1,5 @@
 package dev.hilla.parser.core;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -8,11 +7,11 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.models.ClassInfoModel;
 
 public interface Plugin {
+    void execute(List<ClassInfoModel> endpoints);
+
     int getOrder();
 
     void setOrder(int order);
-
-    void execute(List<ClassInfoModel> endpoints);
 
     default void setConfig(PluginConfiguration config) {
         if (config != null) {
@@ -22,7 +21,8 @@ public interface Plugin {
         }
     }
 
-    default void setParserConfig(ParserConfig config) {}
+    default void setParserConfig(ParserConfig config) {
+    }
 
     void setStorage(@Nonnull SharedStorage storage);
 }

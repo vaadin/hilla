@@ -1,6 +1,5 @@
 package dev.hilla.parser.core.dependency;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -18,6 +17,11 @@ public class DependencyPlugin implements Plugin {
     private List<Visitor> visitors;
 
     @Override
+    public void execute(List<ClassInfoModel> endpoints) {
+
+    }
+
+    @Override
     public int getOrder() {
         return order;
     }
@@ -25,11 +29,6 @@ public class DependencyPlugin implements Plugin {
     @Override
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    @Override
-    public void execute(List<ClassInfoModel> endpoints) {
-
     }
 
     @Override

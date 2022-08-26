@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-final class MemberList<E extends OwnedModel<O>, O extends Model> extends ArrayList<E> {
+final class MemberList<E extends OwnedModel<O>, O extends Model>
+        extends ArrayList<E> {
     private final O owner;
 
     MemberList(O owner) {

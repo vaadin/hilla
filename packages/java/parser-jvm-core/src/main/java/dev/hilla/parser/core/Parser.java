@@ -1,7 +1,6 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -56,7 +55,6 @@ public final class Parser {
                             config.getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of)
                     .collect(Collectors.toList());
-
 
             pluginManager.execute(endpoints);
 

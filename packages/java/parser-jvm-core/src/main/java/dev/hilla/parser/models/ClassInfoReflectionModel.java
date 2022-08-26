@@ -207,7 +207,8 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return Arrays.stream(origin.getDeclaredMethods())
-                .map(MethodInfoModel::of).collect(MemberList.collectWithOwner(this));
+                .map(MethodInfoModel::of)
+                .collect(MemberList.collectWithOwner(this));
     }
 
     @Override

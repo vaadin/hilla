@@ -8,5 +8,6 @@ public class BasicEndpoint {
         return 10;
     }
 
-    private static final class Baz {}
+    private static final class Baz {
+    }
 }

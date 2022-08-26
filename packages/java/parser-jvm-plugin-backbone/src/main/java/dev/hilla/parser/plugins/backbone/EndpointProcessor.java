@@ -1,5 +1,8 @@
 package dev.hilla.parser.plugins.backbone;
 
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
@@ -10,9 +13,6 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
-
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.MethodInfoModel;
 
 final class EndpointProcessor {
     private final Context context;
@@ -26,16 +26,14 @@ final class EndpointProcessor {
         var associationMap = context.getAssociationMap();
 
         endpoint.getInheritanceChainStream()
-            .flatMap(ClassInfoModel::getMethodsStream)
-            .filter(MethodInfoModel::isPublic)
-            .map(method -> new MethodProcessor(endpoint, method,
-                context))
-            .forEach(processor -> paths.addPathItem(
-                processor.createPathKey(),
-                processor.createPathItem()));
+                .flatMap(ClassInfoModel::getMethodsStream)
+                .filter(MethodInfoModel::isPublic)
+                .map(method -> new MethodProcessor(endpoint, method, context))
+                .forEach(processor -> paths.addPathItem(
+                        processor.createPathKey(), processor.createPathItem()));
 
         context.getOpenAPI()
-            .addTagsItem(new Tag().name(endpoint.getSimpleName()));
+                .addTagsItem(new Tag().name(endpoint.getSimpleName()));
     }
 
     private Paths getPaths() {

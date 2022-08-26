@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
-import dev.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import dev.hilla.parser.plugins.nonnull.NonnullPlugin;
 import dev.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import dev.hilla.parser.plugins.nonnull.test.helpers.TestHelper;

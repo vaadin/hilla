@@ -1,8 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
 import io.github.classgraph.PackageInfo;
 
 public abstract class PackageInfoModel extends AnnotatedAbstractModel

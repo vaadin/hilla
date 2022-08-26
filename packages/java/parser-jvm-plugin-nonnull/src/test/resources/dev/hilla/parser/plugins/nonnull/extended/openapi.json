@@ -80,10 +80,10 @@
         }
       }
     },
-    "/BasicEndpoint/complexType": {
+    "/ExtendedEndpoint/complexType": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_complexType_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_complexType_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -138,10 +138,10 @@
         }
       }
     },
-    "/BasicEndpoint/mixedAnnotations": {
+    "/ExtendedEndpoint/mixedAnnotations": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_mixedAnnotations_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_mixedAnnotations_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -175,10 +175,10 @@
         }
       }
     },
-    "/BasicEndpoint/nonTypeAnnotation": {
+    "/ExtendedEndpoint/nonTypeAnnotation": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_nonTypeAnnotation_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_nonTypeAnnotation_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -207,10 +207,10 @@
         }
       }
     },
-    "/BasicEndpoint/nullableType": {
+    "/ExtendedEndpoint/nullableType": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_nullableType_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_nullableType_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -241,10 +241,10 @@
         }
       }
     },
-    "/BasicEndpoint/simpleType": {
+    "/ExtendedEndpoint/simpleType": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_simpleType_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_simpleType_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -275,10 +275,10 @@
         }
       }
     },
-    "/BasicEndpoint/typeWithTypeArgument": {
+    "/ExtendedEndpoint/typeWithTypeArgument": {
       "post": {
-        "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_typeWithTypeArgument_POST",
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_typeWithTypeArgument_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -328,9 +328,6 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint": {
-        "type": "object"
-      },
       "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$ExtendedNonNullableModel": {
         "anyOf": [
           {
@@ -341,13 +338,15 @@
             "properties": {
               "mixedAnnotations": {
                 "type": "array",
+                "nullable": true,
                 "items": {
                   "type": "string",
                   "nullable": true
                 }
               },
               "nonTypeAnnotation": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               }
             }
           }

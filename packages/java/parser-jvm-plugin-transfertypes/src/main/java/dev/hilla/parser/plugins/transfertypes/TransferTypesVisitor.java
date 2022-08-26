@@ -6,7 +6,6 @@ import java.util.UUID;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.runtime.transfertypes.Order;
 import dev.hilla.runtime.transfertypes.Pageable;
 import dev.hilla.runtime.transfertypes.Sort;
