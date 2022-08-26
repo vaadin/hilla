@@ -11,12 +11,14 @@ import java.util.regex.Pattern;
 
 final class GeneratorShellRunner {
     private static final boolean IS_WINDOWS;
-    private static final Pattern jsonEscapePattern = Pattern
+    private static final String TSGEN;
+    private static final Pattern JSON_ESCAPE_PATTERN = Pattern
             .compile("[\r\n\b\f\t\"']");
 
     static {
         var osName = System.getProperty("os.name").toLowerCase();
         IS_WINDOWS = osName.contains("windows");
+        TSGEN = IS_WINDOWS ? "tsgen.cmd" : "tsgen";
     }
 
     private final List<String> arguments = new ArrayList<>();
@@ -30,18 +32,15 @@ final class GeneratorShellRunner {
             arguments.add("/c");
         }
 
-        if (IS_WINDOWS) {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen.cmd").toString());
-        } else {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen").toString());
-        }
+        arguments.add(Paths.get("node_modules", ".bin", TSGEN).toString());
     }
 
-    public static String prepareJSONForCLI(String json) {
-        return IS_WINDOWS ? jsonEscapePattern.matcher(json)
-                .replaceAll(match -> "\\\\" + match.group(0)) : json;
+    public void addEscapedJSON(String json) {
+        arguments
+                .add("'" + (IS_WINDOWS
+                        ? JSON_ESCAPE_PATTERN.matcher(json)
+                                .replaceAll(match -> "\\\\" + match.group(0))
+                        : json) + "'");
     }
 
     public void add(String... args) {
