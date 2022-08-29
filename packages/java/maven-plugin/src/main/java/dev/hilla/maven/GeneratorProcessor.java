@@ -91,7 +91,7 @@ final class GeneratorProcessor {
     }
 
     private void prepareInput(GeneratorShellRunner runner) {
-        runner.addEscapedJSON(Objects.requireNonNull(input));
+        runner.setOpenAPI(Objects.requireNonNull(input));
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {

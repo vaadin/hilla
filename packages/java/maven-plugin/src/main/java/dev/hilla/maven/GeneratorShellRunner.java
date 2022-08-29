@@ -4,6 +4,7 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ final class GeneratorShellRunner {
     }
 
     private final List<String> arguments = new ArrayList<>();
+    private String openAPI;
     private final Log logger;
 
     public GeneratorShellRunner(File baseDir, Log logger) {
@@ -35,12 +37,9 @@ final class GeneratorShellRunner {
         arguments.add(Paths.get("node_modules", ".bin", TSGEN).toString());
     }
 
-    public void addEscapedJSON(String json) {
-        arguments
-                .add("'" + (IS_WINDOWS
-                        ? JSON_ESCAPE_PATTERN.matcher(json)
-                                .replaceAll(match -> "\\\\" + match.group(0))
-                        : json) + "'");
+    public void setOpenAPI(String json) {
+        openAPI = (IS_WINDOWS ? JSON_ESCAPE_PATTERN.matcher(json)
+                .replaceAll(match -> "\\\\" + match.group(0)) : json);
     }
 
     public void add(String... args) {
@@ -48,12 +47,23 @@ final class GeneratorShellRunner {
     }
 
     public void run() throws InterruptedException, IOException {
+        if (openAPI == null) {
+            throw new IllegalStateException(
+                    "`setOpenAPI` should have been called before");
+        }
+
         logger.debug(String.format("Executing command: %s",
                 String.join(" ", arguments)));
 
-        var builder = new ProcessBuilder().command(arguments).inheritIO();
+        var builder = new ProcessBuilder().command(arguments)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
 
         var process = builder.start();
+
+        try (var stdin = process.getOutputStream()) {
+            stdin.write(openAPI.getBytes(StandardCharsets.UTF_8));
+        }
 
         var exitCode = process.waitFor();
 
