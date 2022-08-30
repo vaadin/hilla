@@ -76,22 +76,17 @@ final class GeneratorProcessor {
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
-        prepareInput(runner);
 
         if (runNpmInstall) {
             runner.runNpmInstall();
         }
 
-        runner.run();
+        runner.run(input);
     }
 
     public GeneratorProcessor verbose(boolean verbose) {
         this.verbose = verbose;
         return this;
-    }
-
-    private void prepareInput(GeneratorShellRunner runner) {
-        runner.addEscapedJSON(Objects.requireNonNull(input));
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {
