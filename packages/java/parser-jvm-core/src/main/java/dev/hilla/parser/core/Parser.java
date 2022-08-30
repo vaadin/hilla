@@ -1,8 +1,11 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -19,12 +22,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
-    private final ParserConfig config;
-    private final SharedStorage storage;
+    private ParserConfig config;
+    private SharedStorage storage;
 
     public Parser(@Nonnull ParserConfig config) {
         this.config = Objects.requireNonNull(config);
-        storage = new SharedStorage(config);
     }
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
@@ -41,9 +43,6 @@ public final class Parser {
 
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
-        var pluginManager = new PluginManager(config, storage);
-        pluginManager.preprocess();
-        var replaceMap = storage.getClassMappers();
 
         var classPathElements = config.getClassPathElements();
         logger.debug("Scanning JVM classpath: "
@@ -52,45 +51,47 @@ public final class Parser {
         try (var result = new ClassGraph().enableAllInfo()
                 .enableSystemJarsAndModules()
                 .overrideClasspath(classPathElements).scan()) {
-            var endpointAnnotationName = config.getEndpointAnnotationName();
-            var endpointExposedAnnotationName = config
-                    .getEndpointExposedAnnotationName();
+            var storage = new SharedStorage(config, result);
+            var pluginManager = new PluginManager(config, storage);
 
-            logger.debug(
-                    "Collecting project endpoints with the endpoint annotation: "
-                            + endpointAnnotationName);
+            pluginManager.preprocess();
 
-            var collector = new ScanElementsCollector(result,
-                    endpointAnnotationName, endpointExposedAnnotationName,
-                    replaceMap).collect();
+            pluginManager.process();
 
-            var endpoints = new LinkedHashSet<>(collector.getEndpoints());
+//            logger.debug(
+//                    "Collecting project endpoints with the endpoint annotation: "
+//                            + endpointAnnotationName);
 
-            logger.debug("Collected project endpoints: "
-                    + endpoints.stream().map(ClassInfoModel::getName)
-                            .collect(Collectors.joining(", ")));
+//            var collector = new ScanElementsCollector(result,
+//                    endpointAnnotationName, endpointExposedAnnotationName,
+//                    replaceMap).collect();
+//
+//            var endpoints = new LinkedHashSet<>(collector.getEndpoints());
+//
+//            logger.debug("Collected project endpoints: "
+//                    + endpoints.stream().map(ClassInfoModel::getName)
+//                            .collect(Collectors.joining(", ")));
 
-            var entities = new LinkedHashSet<>(collector.getEntities());
+//            var entities = new LinkedHashSet<>(collector.getEntities());
 
-            logger.debug("Collected project data entities: "
-                    + entities.stream().map(ClassInfoModel::getName)
-                            .collect(Collectors.joining(", ")));
+//            logger.debug("Collected project data entities: "
+//                    + entities.stream().map(ClassInfoModel::getName)
+//                            .collect(Collectors.joining(", ")));
+//
+//            logger.debug(
+//                    "Checking if the compiler is run with -parameters option enabled");
+//            checkIfJavaCompilerParametersFlagIsEnabled(
+//                    collector.getEndpoints());
 
-            logger.debug(
-                    "Checking if the compiler is run with -parameters option enabled");
-            checkIfJavaCompilerParametersFlagIsEnabled(
-                    collector.getEndpoints());
-
-            logger.debug("Executing parser plugins");
-            pluginManager.process(collector);
-
-            logger.debug("Parsing process successfully finished");
+//            logger.debug("Executing parser plugins");
+//            pluginManager.process(collector);
+//
+//            logger.debug("Parsing process successfully finished");
             return storage.getOpenAPI();
         }
     }
 
-    @Nonnull
-    public SharedStorage getStorage() {
-        return storage;
+    public Optional<SharedStorage> getStorage() {
+        return Optional.ofNullable(storage);
     }
 }

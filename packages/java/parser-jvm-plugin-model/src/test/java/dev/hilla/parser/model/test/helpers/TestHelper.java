@@ -31,11 +31,10 @@ public final class TestHelper {
     public void executeParserWithConfig(ParserConfig config)
             throws IOException, URISyntaxException {
         var parser = new Parser(config);
-        parser.execute();
+        var actual = parser.execute();
 
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
                 OpenAPI.class);
-        var actual = parser.getStorage().getOpenAPI();
 
         assertEquals(expected, actual);
     }

@@ -27,29 +27,6 @@
         }
       }
     },
-    "/ExposedEndpoint/methodFromExposedSuperclass": {
-      "post": {
-        "tags": ["ExposedEndpoint"],
-        "operationId": "ExposedEndpoint_methodFromExposedSuperclass_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedSuperclassEntity"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/ExposedEndpoint/methodFromExposedInterface": {
       "post": {
         "tags": ["ExposedEndpoint"],
@@ -64,6 +41,29 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedInterfaceEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ExposedEndpoint/methodFromExposedSuperclass": {
+      "post": {
+        "tags": ["ExposedEndpoint"],
+        "operationId": "ExposedEndpoint_methodFromExposedSuperclass_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.exposed.ExposedSuperclassEntity"
                     }
                   ]
                 }

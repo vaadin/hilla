@@ -1,6 +1,5 @@
 package dev.hilla.parser.core.basic;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
@@ -8,8 +7,6 @@ import java.util.Set;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
-import dev.hilla.parser.core.dependency.DependencyPlugin;
-import dev.hilla.parser.core.hierarchy.HierarchyPlugin;
 import dev.hilla.parser.testutils.ResourceLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +39,7 @@ public class BasicTests {
                 "dev.hilla.parser.core.basic.BasicEndpoint$Bar",
                 "dev.hilla.parser.core.basic.BasicEndpoint$Foo");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = (List<String>) parser.getStorage().get().getPluginStorage()
                 .get(BasicPlugin.STORAGE_KEY);
 
         assertEquals(expected, actual);

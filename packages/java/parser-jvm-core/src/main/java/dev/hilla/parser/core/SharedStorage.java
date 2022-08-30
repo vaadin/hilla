@@ -2,7 +2,9 @@ package dev.hilla.parser.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class SharedStorage {
@@ -10,9 +12,11 @@ public final class SharedStorage {
     private final ClassMappers classMappers = new ClassMappers();
     private final ParserConfig parserConfig;
     private final Map<String, Object> pluginStorage = new HashMap<>();
+    private final ScanResult scanResult;
 
-    SharedStorage(ParserConfig parserConfig) {
+    SharedStorage(ParserConfig parserConfig, ScanResult scanResult) {
         this.parserConfig = parserConfig;
+        this.scanResult = scanResult;
     }
 
     public AssociationMap getAssociationMap() {
@@ -33,5 +37,17 @@ public final class SharedStorage {
 
     public Map<String, Object> getPluginStorage() {
         return pluginStorage;
+    }
+
+    public ScanResult getScanResult() {
+        return scanResult;
+    }
+
+    public String getEndpointAnnotationName() {
+        return parserConfig.getEndpointAnnotationName();
+    }
+
+    public String getEndpointExposedAnnotationName() {
+        return parserConfig.getEndpointExposedAnnotationName();
     }
 }

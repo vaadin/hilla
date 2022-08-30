@@ -8,8 +8,6 @@ import java.util.Set;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
-import dev.hilla.parser.core.basic.BasicPlugin;
-import dev.hilla.parser.core.hierarchy.HierarchyPlugin;
 import dev.hilla.parser.testutils.ResourceLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +41,7 @@ public class DependencyTests {
                 "dev.hilla.parser.core.dependency.DependencyEntityTwo",
                 "dev.hilla.parser.core.dependency.PluginDependencyEntity");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = (List<String>) parser.getStorage().get().getPluginStorage()
                 .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
@@ -64,7 +62,7 @@ public class DependencyTests {
                 "dev.hilla.parser.core.dependency.DependencyEntityTwo",
                 "dev.hilla.parser.core.dependency.DependencyEntityThree");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = (List<String>) parser.getStorage().get().getPluginStorage()
                 .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
@@ -83,7 +81,7 @@ public class DependencyTests {
         var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
                 "foo3");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = (List<String>) parser.getStorage().get().getPluginStorage()
                 .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
         assertEquals(expected, actual);

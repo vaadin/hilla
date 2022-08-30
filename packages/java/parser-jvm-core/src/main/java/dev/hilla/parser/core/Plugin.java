@@ -29,4 +29,13 @@ public interface Plugin {
         void process(@Nonnull Collection<ClassInfoModel> endpoints,
                 @Nonnull Collection<ClassInfoModel> entities);
     }
+
+    interface ScanProcessor extends Plugin {
+        void process(@Nonnull ScanLocation location);
+    }
+
+    interface Scanner extends Plugin {
+        @Nonnull
+        ScanLocation scan(@Nonnull ScanLocation location);
+    }
 }

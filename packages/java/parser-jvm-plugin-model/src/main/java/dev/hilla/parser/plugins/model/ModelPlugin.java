@@ -40,7 +40,7 @@ public final class ModelPlugin implements Plugin.Processor {
         if (toolset.comparePluginOrders(this, BackbonePlugin.class)
                 .map(result -> result <= 0).orElse(true)) {
             throw new PluginException(
-                    "ModelPlugin should be run after BackbonePlugin");
+                    "MethodPlugin should be run after BackbonePlugin");
         }
 
         this.storage = storage;

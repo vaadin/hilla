@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
+import dev.hilla.parser.plugins.backbone.EndpointPlugin;
+import dev.hilla.parser.plugins.backbone.MethodPlugin;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
@@ -20,7 +22,9 @@ public class ExposedTest {
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new EndpointPlugin())
+                .addPlugin(new MethodPlugin())
+                .finish();
 
         helper.executeParserWithConfig(config);
     }
