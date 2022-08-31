@@ -2,7 +2,6 @@ package dev.hilla.parser.core.basic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.SharedStorage;
@@ -13,12 +12,10 @@ import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.NamedModel;
 
 final class FinalizeVisitor implements Visitor {
-    private static final int shift = 3;
+    private static final int order = 3;
     private final List<String> members = new ArrayList<>();
-    private final Supplier<Integer> orderProvider;
 
-    FinalizeVisitor(SharedStorage storage, Supplier<Integer> orderProvider) {
-        this.orderProvider = orderProvider;
+    FinalizeVisitor(SharedStorage storage) {
         storage.getPluginStorage().put(BasicPlugin.STORAGE_KEY, members);
     }
 
@@ -35,6 +32,6 @@ final class FinalizeVisitor implements Visitor {
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + shift;
+        return order;
     }
 }

@@ -1,19 +1,15 @@
 package dev.hilla.parser.core.basic;
 
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
+import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
 final class ReplaceVisitor implements Visitor {
-    private static final int shift = 1;
-
-    private final Supplier<Integer> orderProvider;
-
-    ReplaceVisitor(Supplier<Integer> orderProvider) {
-        this.orderProvider = orderProvider;
-    }
+    private static final int order = 1;
 
     @Override
     public void enter(NodePath path) throws NoSuchFieldException {
@@ -21,16 +17,26 @@ final class ReplaceVisitor implements Visitor {
 
         if (model instanceof MethodInfoModel
                 && ((MethodInfoModel) model).getName().equals("bar")) {
-            // path.replace(Stream
-            // .of(Sample.class.getDeclaredField("fieldFoo"),
-            // Sample.class.getDeclaredField("fieldBar"))
-            // .map(FieldInfoModel::of).toArray(Model[]::new));
+            replaceNodes((MethodInfoModel) model);
+            path.skip();
         }
     }
 
     @Override
     public int getOrder() {
-        return orderProvider.get() + shift;
+        return order;
+    }
+
+    private void replaceNodes(MethodInfoModel method)
+            throws NoSuchFieldException {
+        var cls = method.getOwner();
+
+        cls.getMethods().remove(method);
+
+        Stream.of(Sample.class.getDeclaredField("fieldFoo"),
+                Sample.class.getDeclaredField("fieldBar"))
+                .map(FieldInfoModel::of)
+                .collect(Collectors.toCollection(cls::getFields));
     }
 
     static class Sample {

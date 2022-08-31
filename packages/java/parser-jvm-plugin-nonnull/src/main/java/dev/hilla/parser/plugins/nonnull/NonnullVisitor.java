@@ -17,6 +17,7 @@ import dev.hilla.parser.models.MethodParameterInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.AssociationMap;
+import dev.hilla.parser.utils.Lists;
 import dev.hilla.parser.utils.Streams;
 
 final class NonnullVisitor implements Visitor {
@@ -66,7 +67,7 @@ final class NonnullVisitor implements Visitor {
 
     private Stream<AnnotationInfoModel> getPackageAnnotationStream(
             NodePath path) {
-        var packageModel = (PackageInfoModel) path.getAscendants().get(0)
+        var packageModel = (PackageInfoModel) Lists.getLastElement(path.getAscendants())
                 .getModel();
         return packageModel.getAnnotationsStream();
     }
