@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ScanResult;
@@ -94,7 +95,8 @@ public final class ScanElementsCollector {
             var entity = entities.get(i);
 
             Streams.combine(
-                    entity.getFieldDependenciesStream(f -> !f.isTransient()),
+                    entity.getFieldsStream().filter(f -> !f.isTransient())
+                            .flatMap(FieldInfoModel::getDependenciesStream),
                     entity.getSuperClassStream())
                     .filter(ClassInfoModel::isNonJDKClass).distinct()
                     .map(classMappers::map)

@@ -84,14 +84,17 @@ final class EntityProcessor {
         private Schema<?> processClass() {
             var schema = new ObjectSchema();
 
-            entity.getFieldsStream(f -> !f.isTransient()).forEach(field -> {
-                var processor = new ComponentSchemaPropertyProcessor(field);
+            entity.getFieldsStream().filter(f -> !f.isTransient())
+                    .forEach(field -> {
+                        var processor = new ComponentSchemaPropertyProcessor(
+                                field);
 
-                schema.addProperties(processor.getKey(), processor.getValue());
+                        schema.addProperties(processor.getKey(),
+                                processor.getValue());
 
-                storage.getAssociationMap().addField(processor.getValue(),
-                        field);
-            });
+                        storage.getAssociationMap()
+                                .addField(processor.getValue(), field);
+                    });
 
             return schema;
         }

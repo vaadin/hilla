@@ -196,10 +196,9 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getFieldDependenciesStream().collect(Collectors.toSet());
     }
 
-    public Stream<ClassInfoModel> getFieldDependenciesStream(
-            Predicate<FieldInfoModel>... filters) {
-        return getFieldsStream(filters)
-                .flatMap(FieldInfoModel::getDependenciesStream).distinct();
+    public Stream<ClassInfoModel> getFieldDependenciesStream() {
+        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream)
+                .distinct();
     }
 
     public List<FieldInfoModel> getFields() {
@@ -210,15 +209,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return fields;
     }
 
-    public Stream<FieldInfoModel> getFieldsStream(
-            Predicate<FieldInfoModel>... filters) {
-        Stream<FieldInfoModel> stream = getFields().stream();
-
-        for (var filter : filters) {
-            stream = stream.filter(filter);
-        }
-
-        return stream;
+    public Stream<FieldInfoModel> getFieldsStream() {
+        return getFields().stream();
     }
 
     public List<ClassInfoModel> getInheritanceChain() {

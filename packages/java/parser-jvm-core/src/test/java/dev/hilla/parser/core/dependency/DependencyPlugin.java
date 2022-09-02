@@ -66,8 +66,8 @@ public class DependencyPlugin implements Plugin.Processor {
         }
 
         public Collection<String> collectDependencyMemberNames() {
-            return entities.stream()
-                    .flatMap(e -> e.getFieldsStream(f -> !f.isTransient()))
+            return entities.stream().flatMap(
+                    e -> e.getFieldsStream().filter(f -> !f.isTransient()))
                     .map(FieldInfoModel::getName).collect(Collectors.toList());
         }
 
