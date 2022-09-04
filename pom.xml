@@ -55,7 +55,7 @@
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
-    <jackson.version>2.13.3</jackson.version>
+    <jackson.version>2.13.4</jackson.version>
     <jackson.databind.version>2.13.2.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
