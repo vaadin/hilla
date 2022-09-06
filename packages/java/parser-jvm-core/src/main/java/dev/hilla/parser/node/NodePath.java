@@ -1,50 +1,40 @@
 package dev.hilla.parser.node;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
-public final class NodePath {
-    private final LinkedList<Node<?, ?>> path = new LinkedList<>();
+public final class NodePath<N extends Node<?, ?>> {
+    private final N node;
+    private final NodePath<?> parentPath;
+    private final NodePath<RootNode> rootPath;
 
-    NodePath(@Nonnull Node<?, ?> node, @Nonnull List<Node<?, ?>> ancestors) {
-        this.path.add(Objects.requireNonNull(node));
-        this.path.addAll(Objects.requireNonNull(ancestors));
+    public NodePath(@Nonnull N node, @Nonnull NodePath<?> parentPath) {
+        this.node = Objects.requireNonNull(node);
+        this.parentPath = Objects.requireNonNull(parentPath);
+        this.rootPath = Objects.requireNonNull(parentPath.getRootPath());
     }
 
-    @Nonnull
+    @SuppressWarnings("unchecked")
+    NodePath(@Nonnull N node) {
+        this.node = Objects.requireNonNull(node);
+        this.parentPath = this;
+        this.rootPath = (NodePath<RootNode>) this;
+    }
+
     public Node<?, ?> getNode() {
-        return path.getFirst();
+        return node;
     }
 
-    @Nonnull
-    public RootNode getRootNode() {
-        return (RootNode) path.getLast();
+    public NodePath<?> getParentPath() {
+        return parentPath;
     }
 
-    public boolean isRoot() {
-        return path.size() == 1;
+    public NodePath<RootNode> getRootPath() {
+        return rootPath;
     }
 
-    @Nonnull
-    public NodePath getParentPath() {
-        if (isRoot()) {
-            return this;
-        }
-
-        var parentNode = path.get(1);
-        if (path.size() == 2) {
-            return new NodePath(parentNode, Collections.emptyList());
-        }
-
-        return new NodePath(parentNode, path.subList(2, path.size()));
-    }
-
-    @Override
-    public int hashCode() {
-        return path.hashCode() ^ 0xc859a12d;
+    private boolean hasParentNodes() {
+        return getNode() != getParentPath().getNode();
     }
 
     @Override
@@ -57,7 +47,28 @@ public final class NodePath {
             return false;
         }
 
-        NodePath nodePath = (NodePath) o;
-        return path.equals(nodePath.path);
+        var otherPath = (NodePath<?>) o;
+        var thisPath = (NodePath<?>) this;
+        while (thisPath.getNode().equals(otherPath.getNode())) {
+            if (thisPath.hasParentNodes() || otherPath.hasParentNodes()) {
+                thisPath = thisPath.getParentPath();
+                otherPath = otherPath.getParentPath();
+            } else {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0xa73fc160 ^ node.hashCode();
+        var thisPath = (NodePath<?>) this;
+        while (thisPath.hasParentNodes()) {
+            thisPath = thisPath.getParentPath();
+            hash ^= thisPath.getNode().hashCode();
+        }
+        return hash;
     }
 }
