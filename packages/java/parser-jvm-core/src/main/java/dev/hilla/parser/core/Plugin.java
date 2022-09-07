@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
 
+@Deprecated
 public interface Plugin {
     void execute(List<ClassInfoModel> endpoints);
 

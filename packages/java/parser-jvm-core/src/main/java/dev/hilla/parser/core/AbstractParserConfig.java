@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.plugin.Plugin;
+
 import io.swagger.v3.oas.models.OpenAPI;
 
 public abstract class AbstractParserConfig {

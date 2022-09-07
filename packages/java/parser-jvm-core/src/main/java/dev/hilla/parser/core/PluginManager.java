@@ -1,30 +1,26 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.SortedSet;
 
-import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.plugin.Plugin;
+import dev.hilla.parser.plugin.AbstractCompositePlugin;
 
-public final class PluginManager {
+public final class PluginManager extends
+    AbstractCompositePlugin<PluginConfiguration> {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
-    private final SortedSet<Plugin> plugins;
 
-    PluginManager(ParserConfig config, SharedStorage storage) {
-        plugins = config.getPlugins();
-
-        for (var plugin : plugins) {
-            plugin.setStorage(storage);
-            plugin.setParserConfig(config);
-        }
+    PluginManager(SharedStorage storage) {
+        super(PluginConfiguration.class,
+            storage.getParserConfig().getPlugins().toArray(Plugin[]::new));
     }
 
-    public static Plugin load(String name, Integer order,
-            PluginConfiguration config) {
+    public static Plugin load(String name,
+        Integer order,
+            PluginConfiguration configuration) {
         var cls = processClass(loadClass(name));
         var instance = instantiatePlugin(cls);
-        instance.setConfig(config);
+        instance.setConfiguration(configuration);
 
         if (order != null) {
             instance.setOrder(order);
@@ -55,6 +51,7 @@ public final class PluginManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Class<? extends Plugin> processClass(Class<?> cls) {
         if (Plugin.class.isAssignableFrom(cls)) {
             return (Class<? extends Plugin>) cls;
@@ -63,11 +60,5 @@ public final class PluginManager {
         throw new ParserException(String.format(
                 "Plugin '%s' is not an instance of '%s' interface",
                 cls.getName(), Plugin.class.getName()));
-    }
-
-    public void execute(List<ClassInfoModel> endpoints) {
-        for (var plugin : plugins) {
-            plugin.execute(endpoints);
-        }
     }
 }

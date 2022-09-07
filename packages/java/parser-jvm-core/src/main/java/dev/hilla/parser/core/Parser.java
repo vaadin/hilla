@@ -1,18 +1,30 @@
 package dev.hilla.parser.core;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.node.Node;
+import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.node.RootNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
-import io.github.classgraph.ClassGraph;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class Parser {
@@ -40,26 +52,13 @@ public final class Parser {
 
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
-        var pluginManager = new PluginManager(config, storage);
 
-        var classPathElements = config.getClassPathElements();
-        logger.debug("Scanning JVM classpath: "
-                + String.join(";", classPathElements));
+        var rootNode = new RootNode(storage.getParserConfig(), storage.getOpenAPI());
+        var pluginManager = new PluginManager(storage);
+        var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
+        pluginExecutor.execute();
 
-        try (var result = new ClassGraph().enableAllInfo()
-                .enableSystemJarsAndModules()
-                .overrideClasspath(classPathElements).scan()) {
-
-            var endpoints = result
-                    .getClassesWithAnnotation(
-                            config.getEndpointAnnotationName())
-                    .stream().map(ClassInfoModel::of)
-                    .collect(Collectors.toList());
-
-            pluginManager.execute(endpoints);
-
-            return storage.getOpenAPI();
-        }
+        return storage.getOpenAPI();
     }
 
     @Nonnull

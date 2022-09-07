@@ -15,6 +15,8 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.plugin.Plugin;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -61,6 +61,10 @@ public final class NodePath<N extends Node<?, ?>> {
         return false;
     }
 
+    static public NodePath<RootNode> of(RootNode rootNode) {
+        return new NodePath<>(rootNode);
+    }
+
     @Override
     public int hashCode() {
         int hash = 0xa73fc160 ^ node.hashCode();
