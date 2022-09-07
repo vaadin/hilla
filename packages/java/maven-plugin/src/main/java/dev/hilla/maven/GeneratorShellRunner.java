@@ -4,16 +4,15 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
 final class GeneratorShellRunner {
     private static final boolean IS_WINDOWS;
     private static final String TSGEN;
-    private static final Pattern JSON_ESCAPE_PATTERN = Pattern
-            .compile("[\r\n\b\f\t\"']");
 
     static {
         var osName = System.getProperty("os.name").toLowerCase();
@@ -35,25 +34,24 @@ final class GeneratorShellRunner {
         arguments.add(Paths.get("node_modules", ".bin", TSGEN).toString());
     }
 
-    public void addEscapedJSON(String json) {
-        arguments
-                .add("'" + (IS_WINDOWS
-                        ? JSON_ESCAPE_PATTERN.matcher(json)
-                                .replaceAll(match -> "\\\\" + match.group(0))
-                        : json) + "'");
-    }
-
     public void add(String... args) {
         arguments.addAll(List.of(args));
     }
 
-    public void run() throws InterruptedException, IOException {
+    public void run(String input) throws InterruptedException, IOException {
+        Objects.requireNonNull(input);
         logger.debug(String.format("Executing command: %s",
                 String.join(" ", arguments)));
 
-        var builder = new ProcessBuilder().command(arguments).inheritIO();
+        var builder = new ProcessBuilder().command(arguments)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
 
         var process = builder.start();
+
+        try (var stdin = process.getOutputStream()) {
+            stdin.write(input.getBytes(StandardCharsets.UTF_8));
+        }
 
         var exitCode = process.waitFor();
 

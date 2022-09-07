@@ -10,6 +10,8 @@ const {
 } = meow(
   `
 Usage:
+  tsgen
+    (will read JSON from stdin)
   tsgen <OpenAPI JSON string>
   tsgen <OpenAPI file path>
 
@@ -48,7 +50,7 @@ const io = new GeneratorIO(outputDir, logger);
 const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (pluginPath) => io.loadPlugin(pluginPath)));
 const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
-const files = await generator.process(await processInput(input, io));
+const files = await generator.process(await processInput(io, input));
 await io.cleanOutputDir();
 await io.createFileIndex(files.map((file) => file.name));
 await Promise.all(files.map((file) => io.write(file)));
