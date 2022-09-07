@@ -5,13 +5,11 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Walker;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.plugins.backbone.AssociationMap;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.utils.PluginException;
 
 public final class ModelPlugin implements Plugin {
     private int order = 200;
@@ -40,16 +38,6 @@ public final class ModelPlugin implements Plugin {
 
     @Override
     public void setStorage(@Nonnull SharedStorage storage) {
-        var toolset = new PluginsToolset(
-                storage.getParserConfig().getPlugins());
-
-        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
-                .map(result -> result <= 0).orElse(true)) {
-            throw new PluginException(String.format("%s should be run after %s",
-                    getClass().getSimpleName(),
-                    BackbonePlugin.class.getSimpleName()));
-        }
-
         this.storage = storage;
     }
 }

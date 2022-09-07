@@ -5,12 +5,9 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.PluginsToolset;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.core.Walker;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.utils.PluginException;
 
 public final class TransferTypesPlugin implements Plugin {
     private int order = -100;
@@ -40,14 +37,6 @@ public final class TransferTypesPlugin implements Plugin {
 
     @Override
     public void setStorage(@Nonnull SharedStorage storage) {
-        var toolset = new PluginsToolset(
-                storage.getParserConfig().getPlugins());
 
-        if (toolset.comparePluginOrders(this, BackbonePlugin.class)
-                .map(result -> result >= 0).orElse(true)) {
-            throw new PluginException(String.format(
-                    "%s should be run before %s", getClass().getSimpleName(),
-                    BackbonePlugin.class.getSimpleName()));
-        }
     }
 }
