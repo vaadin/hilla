@@ -361,7 +361,7 @@ export class Future extends AbstractValidator<any> {
 
 function _regexp(attrs: PatternAttributes | string | RegExp) {
   if (typeof attrs === 'string') {
-    return new RegExp(attrs);
+    return new RegExp(attrs, 'u');
   }
 
   if (attrs instanceof RegExp) {
@@ -369,7 +369,7 @@ function _regexp(attrs: PatternAttributes | string | RegExp) {
   }
 
   if (typeof attrs.regexp === 'string') {
-    return new RegExp(attrs.regexp);
+    return new RegExp(attrs.regexp, 'u');
   }
 
   return attrs.regexp;
