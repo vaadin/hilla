@@ -19,6 +19,7 @@ import dev.hilla.parser.node.Node;
 import dev.hilla.parser.node.NodeDependencies;
 import dev.hilla.parser.node.NodePath;
 import dev.hilla.parser.node.RootNode;
+import io.github.classgraph.ClassGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +54,16 @@ public final class Parser {
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
 
-        var rootNode = new RootNode(storage.getParserConfig(), storage.getOpenAPI());
-        var pluginManager = new PluginManager(storage);
-        var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
-        pluginExecutor.execute();
+        try (var scanResult = new ClassGraph().enableAllInfo()
+                .enableSystemJarsAndModules()
+                .overrideClasspath(config.getClassPathElements()).scan()) {
+            var rootNode = new RootNode(scanResult, storage.getOpenAPI());
+            var pluginManager = new PluginManager(storage.getParserConfig()
+                .getPlugins());
+            pluginManager.setStorage(storage);
+            var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
+            pluginExecutor.execute();
+        }
 
         return storage.getOpenAPI();
     }

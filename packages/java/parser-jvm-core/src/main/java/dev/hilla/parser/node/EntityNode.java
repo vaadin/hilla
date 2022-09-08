@@ -3,11 +3,16 @@ package dev.hilla.parser.node;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 
-public final class EntityNode extends NodeImpl<ClassInfoModel, Schema<?>> {
-    public EntityNode(@Nonnull ClassInfoModel source,
-        @Nonnull Schema<?> target) {
+public final class EntityNode extends AbstractNode<ClassInfoModel, ObjectSchema> {
+    private EntityNode(@Nonnull ClassInfoModel source,
+        @Nonnull ObjectSchema target) {
         super(source, target);
+    }
+
+    @Nonnull
+    static public EntityNode of(@Nonnull ClassInfoModel model) {
+        return new EntityNode(model, new ObjectSchema());
     }
 }

@@ -4,11 +4,15 @@ import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.MethodInfoModel;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Schema;
 
-public final class MethodNode extends NodeImpl<MethodInfoModel, PathItem> {
-    public MethodNode(@Nonnull MethodInfoModel source,
+public final class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
+    private MethodNode(@Nonnull MethodInfoModel source,
         @Nonnull PathItem target) {
         super(source, target);
+    }
+
+    @Nonnull
+    static public MethodNode of(@Nonnull MethodInfoModel model) {
+        return new MethodNode(model, new PathItem());
     }
 }

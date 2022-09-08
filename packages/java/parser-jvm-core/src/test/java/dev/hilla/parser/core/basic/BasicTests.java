@@ -3,8 +3,10 @@ package dev.hilla.parser.core.basic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URISyntaxException;
+import java.util.LinkedList;
 import java.util.List;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
@@ -15,6 +17,27 @@ public class BasicTests {
     private final List<String> classPath;
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
+
+    private static final List<String> STEPS = new LinkedList<>();
+
+    static {
+        STEPS.add("-> Root(ScanResult)");
+        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)");
+        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(foo)");
+        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(foo)");
+        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
+        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
+        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
+        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
+        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)");
+        STEPS.add("-> Root(ScanResult)/Entity(Sample)");
+        STEPS.add("-> Root(ScanResult)/Entity(Sample)/Method(methodFoo)");
+        STEPS.add("<- Root(ScanResult)/Entity(Sample)/Method(methodFoo)");
+        STEPS.add("-> Root(ScanResult)/Entity(Sample)/Method(methodBar)");
+        STEPS.add("<- Root(ScanResult)/Entity(Sample)/Method(methodBar)");
+        STEPS.add("<- Root(ScanResult)/Entity(Sample)");
+        STEPS.add("<- Root(ScanResult)");
+    }
 
     {
         try {
@@ -35,10 +58,26 @@ public class BasicTests {
         parser.execute();
 
         assertEquals(
-                List.of("FieldInfoModel foo", "MethodInfoModel methodFoo",
-                        "MethodInfoModel methodBar", "FieldInfoModel fieldFoo",
-                        "FieldInfoModel fieldBar"),
+                List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
+                    "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
+                    "MethodInfoModel methodBar"),
                 parser.getStorage().getPluginStorage()
                         .get(BasicPlugin.STORAGE_KEY));
+    }
+
+    @Test
+    public void should_TraverseInConsistentOrder() {
+        var config = new ParserConfig.Builder().classPath(classPath)
+            .endpointAnnotation(Endpoint.class.getName())
+            .addPlugin(new BasicPlugin()).finish();
+
+        var parser = new Parser(config);
+
+        parser.execute();
+
+        assertEquals(
+            String.join("\n", STEPS),
+            parser.getStorage().getPluginStorage()
+                .get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 }

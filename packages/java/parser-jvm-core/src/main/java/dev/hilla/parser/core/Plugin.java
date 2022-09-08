@@ -1,29 +1,32 @@
 package dev.hilla.parser.core;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.models.ClassInfoModel;
+import java.util.Collection;
+import java.util.Collections;
 
-@Deprecated
+import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.node.NodePath;
+
 public interface Plugin {
-    void execute(List<ClassInfoModel> endpoints);
+    @Nonnull
+    NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);
+
+    void enter(NodePath<?> nodePath);
+
+    void exit(NodePath<?> nodePath);
 
     int getOrder();
 
     void setOrder(int order);
 
-    default void setConfig(PluginConfiguration config) {
-        if (config != null) {
-            throw new IllegalArgumentException(String.format(
-                    "The '%s' plugin does not expect configuration set",
-                    getClass().getName()));
-        }
+    PluginConfiguration getConfiguration();
+
+    void setConfiguration(PluginConfiguration configuration);
+
+    default Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return Collections.emptyList();
     }
 
-    default void setParserConfig(ParserConfig config) {
-    }
-
-    void setStorage(@Nonnull SharedStorage storage);
+    void setStorage(SharedStorage storage);
 }

@@ -1,21 +1,23 @@
 package dev.hilla.parser.node;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class NodePath<N extends Node<?, ?>> {
     private final N node;
     private final NodePath<?> parentPath;
     private final NodePath<RootNode> rootPath;
 
-    public NodePath(@Nonnull N node, @Nonnull NodePath<?> parentPath) {
+    private NodePath(@Nonnull N node, @Nonnull NodePath<?> parentPath) {
         this.node = Objects.requireNonNull(node);
         this.parentPath = Objects.requireNonNull(parentPath);
         this.rootPath = Objects.requireNonNull(parentPath.getRootPath());
     }
 
     @SuppressWarnings("unchecked")
-    NodePath(@Nonnull N node) {
+    private NodePath(@Nonnull N node) {
         this.node = Objects.requireNonNull(node);
         this.parentPath = this;
         this.rootPath = (NodePath<RootNode>) this;
@@ -61,10 +63,6 @@ public final class NodePath<N extends Node<?, ?>> {
         return false;
     }
 
-    static public NodePath<RootNode> of(RootNode rootNode) {
-        return new NodePath<>(rootNode);
-    }
-
     @Override
     public int hashCode() {
         int hash = 0xa73fc160 ^ node.hashCode();
@@ -74,5 +72,26 @@ public final class NodePath<N extends Node<?, ?>> {
             hash ^= thisPath.getNode().hashCode();
         }
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        var list = new LinkedList<String>();
+        var path = (NodePath<?>) this;
+        list.add(path.getNode().toString());
+        while (path.hasParentNodes()) {
+            path = path.getParentPath();
+            list.addFirst("/");
+            list.addFirst(path.getNode().toString());
+        }
+        return String.join("", list);
+    }
+
+    static public NodePath<RootNode> of(@Nonnull RootNode rootNode) {
+        return new NodePath<>(rootNode);
+    }
+
+    public <N extends Node<?, ?>> NodePath<N> of(@Nonnull N node) {
+        return new NodePath<>(node, this);
     }
 }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,10 +13,11 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.node.NodePath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
@@ -150,7 +150,23 @@ public class ParserConfigTests {
 
     private static class BarPlugin implements Plugin {
         private int order = 1;
-        private SharedStorage storage;
+
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+            @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
+        }
+
+        @Override
+        public void enter(NodePath<?> nodePath) {
+
+        }
+
+        @Override
+        public void exit(NodePath<?> nodePath) {
+
+        }
 
         @Override
         public int getOrder() {
@@ -163,23 +179,39 @@ public class ParserConfigTests {
         }
 
         @Override
-        public void execute(List<ClassInfoModel> endpoints) {
-
-        }
-
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
+        public PluginConfiguration getConfiguration() {
+            return null;
         }
 
         @Override
-        public void setStorage(@Nonnull SharedStorage storage) {
-            this.storage = storage;
+        public void setConfiguration(PluginConfiguration configuration) {
+
+        }
+
+        @Override
+        public void setStorage(SharedStorage storage) {
         }
     }
 
     private static class FooPlugin implements Plugin {
         private int order = 0;
-        private SharedStorage storage;
+
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+            @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
+        }
+
+        @Override
+        public void enter(NodePath<?> nodePath) {
+
+        }
+
+        @Override
+        public void exit(NodePath<?> nodePath) {
+
+        }
 
         @Override
         public int getOrder() {
@@ -192,17 +224,18 @@ public class ParserConfigTests {
         }
 
         @Override
-        public void execute(List<ClassInfoModel> endpoints) {
-
-        }
-
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
+        public PluginConfiguration getConfiguration() {
+            return null;
         }
 
         @Override
-        public void setStorage(@Nonnull SharedStorage storage) {
-            this.storage = storage;
+        public void setConfiguration(PluginConfiguration configuration) {
+
+        }
+
+        @Override
+        public void setStorage(SharedStorage storage) {
+
         }
     }
 

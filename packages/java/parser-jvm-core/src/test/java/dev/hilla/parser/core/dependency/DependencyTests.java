@@ -30,8 +30,8 @@ public class DependencyTests {
     public static void setUp() {
         parser = new Parser(new ParserConfig.Builder().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new DependencyPlugin()).finish());
-
+                .addPlugin(new DependencyPlugin())
+                .finish());
         parser.execute();
     }
 
@@ -39,7 +39,7 @@ public class DependencyTests {
     public void should_CollectDependencyMembers() {
         var expected = List.of("foo", "bar", "circular", "getFoo", "setBar",
                 "foo", "circular",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo$InnerClass");
+                "innerClassMember");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
                 .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);

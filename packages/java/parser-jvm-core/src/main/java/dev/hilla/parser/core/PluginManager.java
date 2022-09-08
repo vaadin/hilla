@@ -1,18 +1,15 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-
-import dev.hilla.parser.plugin.Plugin;
-import dev.hilla.parser.plugin.AbstractCompositePlugin;
+import java.util.Collection;
 
 public final class PluginManager extends
     AbstractCompositePlugin<PluginConfiguration> {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
 
-    PluginManager(SharedStorage storage) {
-        super(PluginConfiguration.class,
-            storage.getParserConfig().getPlugins().toArray(Plugin[]::new));
+    PluginManager(Collection<Plugin> plugins) {
+        super(PluginConfiguration.class, plugins.toArray(Plugin[]::new));
     }
 
     public static Plugin load(String name,

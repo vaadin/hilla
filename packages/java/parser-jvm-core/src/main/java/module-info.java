@@ -12,6 +12,5 @@ module dev.hilla.parser.core {
     exports dev.hilla.parser.core;
     exports dev.hilla.parser.models;
     exports dev.hilla.parser.node;
-    exports dev.hilla.parser.plugin;
     opens dev.hilla.parser.node to com.fasterxml.jackson.databind;
 }

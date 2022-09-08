@@ -1,28 +1,26 @@
-package dev.hilla.parser.plugin;
+package dev.hilla.parser.core;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Objects;
-import java.util.NavigableSet;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.node.NodeDependencies;
 import dev.hilla.parser.node.NodePath;
 import dev.hilla.parser.utils.PluginException;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     extends AbstractPlugin<C> {
-    private final NavigableSet<Plugin> plugins = new TreeSet<>(
-        Comparator.comparingInt(Plugin::getOrder));
+    private final LinkedList<Plugin> plugins = new LinkedList<>();
 
     protected AbstractCompositePlugin(Class<? extends C> configurationClass,
         @Nonnull Plugin... plugins) {
         super(configurationClass);
         Stream.of(plugins).map(Objects::requireNonNull)
-            .forEach(this.plugins::add);
+            .sorted(Comparator.comparingInt(Plugin::getOrder))
+            .forEachOrdered(this.plugins::add);
         verifyPluginsOrder();
     }
 
@@ -54,8 +52,15 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
                     throw new PluginException(String.format("Plugin %s must " +
                         "be run after %s", plugin.getClass(), requiredPluginCls));
                 }
-                previous.add(plugin.getClass());
             }
+            previous.add(plugin.getClass());
         }
+    }
+
+    @Override
+    public void setStorage(SharedStorage storage) {
+        super.setStorage(storage);
+        plugins.iterator()
+            .forEachRemaining(plugin -> plugin.setStorage(storage));
     }
 }

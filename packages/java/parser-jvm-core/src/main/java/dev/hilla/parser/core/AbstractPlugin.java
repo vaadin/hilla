@@ -1,19 +1,24 @@
-package dev.hilla.parser.plugin;
+package dev.hilla.parser.core;
 
 import javax.annotation.Nonnull;
 
 import java.util.Objects;
-
-import dev.hilla.parser.core.PluginConfiguration;
 
 public abstract class AbstractPlugin<C extends PluginConfiguration> implements Plugin {
     private final Class<? extends C> configurationClass;
     private C configuration;
     private int order;
 
+    private SharedStorage storage;
+
     protected AbstractPlugin(
         @Nonnull Class<? extends C> configurationClass) {
         this.configurationClass = Objects.requireNonNull(configurationClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractPlugin() {
+        this((Class<? extends C>) PluginConfiguration.class);
     }
 
     @Override
@@ -43,5 +48,14 @@ public abstract class AbstractPlugin<C extends PluginConfiguration> implements P
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    protected SharedStorage getStorage() {
+        return storage;
+    }
+
+    @Override
+    public void setStorage(SharedStorage storage) {
+        this.storage = storage;
     }
 }
