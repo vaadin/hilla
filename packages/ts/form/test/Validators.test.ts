@@ -298,5 +298,10 @@ describe('form/Validators', () => {
     validator = new Pattern({ regexp: /\w+\\/ });
     assert.isFalse(validator.validate('a'));
     assert.isTrue(validator.validate('a\\'));
+    validator = new Pattern({ regexp: "^[\\p{L}\\s\\.,']+$" });
+    assert.isFalse(validator.validate('123'));
+    // https://www.kermitproject.org/utf8.html
+    assert.isTrue(validator.validate("I can eat glass and it doesn't hurt me."));
+    assert.isTrue(validator.validate('Я могу есть стекло, оно мне не вредит.'));
   });
 });
