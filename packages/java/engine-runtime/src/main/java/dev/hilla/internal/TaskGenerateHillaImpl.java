@@ -15,14 +15,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@NpmPackage(value = "@hilla/generator-typescript-core", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-utils", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-cli", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0-beta2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "1.2.0-beta2")
+@NpmPackage(value = "@hilla/generator-typescript-core", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-utils", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-cli", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "1.2.0")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "1.2.0")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     private static final Logger logger = LoggerFactory
             .getLogger(TaskGenerateHillaImpl.class);
