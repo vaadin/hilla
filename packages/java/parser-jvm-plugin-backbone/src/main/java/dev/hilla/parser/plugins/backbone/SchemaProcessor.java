@@ -3,7 +3,6 @@ package dev.hilla.parser.plugins.backbone;
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import dev.hilla.parser.models.ClassRefSignatureModel;
