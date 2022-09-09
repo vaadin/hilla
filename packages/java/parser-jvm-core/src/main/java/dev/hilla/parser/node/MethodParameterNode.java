@@ -14,7 +14,7 @@ public final class MethodParameterNode extends
         super(source, target);
     }
 
-    static public MethodParameterNode of(@Nonnull MethodParameterInfoModel source) {
-        return new MethodParameterNode(source, source.getName());
+    static public MethodParameterNode of(@Nonnull MethodParameterInfoModel source, @Nonnull String target) {
+        return new MethodParameterNode(source, target);
     }
 }

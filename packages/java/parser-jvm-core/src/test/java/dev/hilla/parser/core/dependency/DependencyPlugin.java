@@ -2,6 +2,7 @@ package dev.hilla.parser.core.dependency;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -44,13 +45,12 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
                         getStorage().getParserConfig().getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of).map(EndpointNode::of),
                 Stream.empty());
-        } else if ((node instanceof EndpointNode) || (node instanceof EntityNode)) {
+        } else if ((node instanceof EndpointNode) ||
+            (node instanceof EntityNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return NodeDependencies.of(node,
-                Stream.concat(
-                    cls.getFieldsStream().map(FieldNode::of),
-                    cls.getMethodsStream().map(MethodNode::of)
-                ),
+                Stream.concat(cls.getFieldsStream().map(FieldNode::of),
+                    cls.getMethodsStream().map(MethodNode::of)),
                 cls.getInnerClassesStream().map(EntityNode::of));
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
@@ -58,8 +58,10 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
                 methodNode.getSource().getResultType());
             return NodeDependencies.of(methodNode,
                 Stream.concat(Stream.of(resultTypeNode),
-                    methodNode.getSource().getParametersStream()
-                        .map(MethodParameterNode::of)), Stream.empty());
+                    methodNode.getSource().getParametersStream().map(
+                        param -> MethodParameterNode.of(param,
+                            Optional.ofNullable(param.getName())
+                                .orElse("_unnamed")))), Stream.empty());
         } else if (node instanceof FieldNode) {
             var fieldNode = (FieldNode) node;
             return NodeDependencies.of(fieldNode, Stream.of(

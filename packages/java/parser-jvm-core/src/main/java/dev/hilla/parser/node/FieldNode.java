@@ -5,13 +5,13 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.models.FieldInfoModel;
 import io.swagger.v3.oas.models.media.Schema;
 
-public final class FieldNode extends AbstractNode<FieldInfoModel, Schema<?>> {
+public final class FieldNode extends AbstractNode<FieldInfoModel, String> {
     private FieldNode(@Nonnull FieldInfoModel source,
-        @Nonnull Schema<?> target) {
+        @Nonnull String target) {
         super(source, target);
     }
 
     static public FieldNode of(@Nonnull FieldInfoModel source) {
-        return new FieldNode(source, new Schema<>());
+        return new FieldNode(source, "");
     }
 }
