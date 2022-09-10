@@ -852,16 +852,10 @@ public class OpenAPIObjectGenerator {
             boolean requiredByContext) {
         ResolvedType mappedType = toMappedType(type);
 
-        if (mappedType != null) {
-            resolvedType = mappedType;
-            return new GeneratorType(
-                    resolvedTypeParametersMap.replaceAll(resolvedType),
-                    requiredByContext);
-        } else {
-            return new GeneratorType(type,
-                    resolvedTypeParametersMap.replaceAll(resolvedType),
-                    requiredByContext);
-        }
+        return new GeneratorType(type,
+                resolvedTypeParametersMap.replaceAll(
+                        mappedType == null ? resolvedType : mappedType),
+                requiredByContext);
     }
 
     @SuppressWarnings("squid:S1872")

@@ -9,7 +9,7 @@ public class BasicPlugin extends AbstractCompositePlugin<PluginConfiguration> {
     public static final String FOOTSTEPS_STORAGE_KEY = "BasicPluginFootsteps";
     private int order = 0;
 
-    protected BasicPlugin() {
+    public BasicPlugin() {
         super(PluginConfiguration.class, new AddPlugin(), new ReplacePlugin()
             , new RemovePlugin(), new FinalizePlugin());
     }

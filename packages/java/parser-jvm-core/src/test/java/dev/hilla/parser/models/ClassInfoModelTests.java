@@ -274,8 +274,10 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetInterfaces(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
-                .map(ClassInfoModel::of).collect(Collectors.toList());
-        var actual = model.getInterfaces();
+                .map(ClassInfoModel::of).map(ClassInfoModel::getName)
+                .collect(Collectors.toList());
+        var actual = model.getInterfacesStream()
+                .map(ClassRefSignatureModel::getName).collect(Collectors.toList());
 
         assertEquals(expected, actual);
     }

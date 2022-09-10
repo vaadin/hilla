@@ -3,11 +3,11 @@ package dev.hilla.parser.core.dependency;
 import javax.annotation.Nonnull;
 
 public class DependencyEntityTwo {
-    public DependencyEntityOne foo;
+    public DependencyEntityOne foo2;
 
     @Nonnull
     public DependencyEntityOne circular() {
-        return foo;
+        return foo2;
     }
 
     public static class InnerClass {

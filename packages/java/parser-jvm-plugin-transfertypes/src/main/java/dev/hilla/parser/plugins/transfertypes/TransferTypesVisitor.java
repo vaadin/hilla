@@ -6,6 +6,8 @@ import java.util.UUID;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Visitor;
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.runtime.transfertypes.EndpointSubscription;
+import dev.hilla.runtime.transfertypes.Flux;
 import dev.hilla.runtime.transfertypes.Order;
 import dev.hilla.runtime.transfertypes.Pageable;
 import dev.hilla.runtime.transfertypes.Sort;
@@ -73,6 +75,18 @@ abstract class TransferTypesVisitor implements Visitor {
     static final class UUIDReplacer extends TransferTypesVisitor {
         UUIDReplacer(int order) {
             super(UUID.class, String.class, order);
+        }
+    }
+
+    static final class FluxReplacer extends TransferTypesVisitor {
+        FluxReplacer(int order) {
+            super("reactor.core.publisher.Flux", Flux.class, order);
+        }
+    }
+
+    static final class SubscriptionReplacer extends TransferTypesVisitor {
+        SubscriptionReplacer(int order) {
+            super("dev.hilla.EndpointSubscription", EndpointSubscription.class, order);
         }
     }
 }

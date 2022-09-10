@@ -24,7 +24,9 @@ final class GeneratorProcessor {
                     new GeneratorConfiguration.Plugin(
                             "@hilla/generator-typescript-plugin-barrel"),
                     new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-model"));
+                            "@hilla/generator-typescript-plugin-model"),
+                    new GeneratorConfiguration.Plugin(
+                            "@hilla/generator-typescript-plugin-push"));
 
     private final Log logger;
     private final MavenProject project;
@@ -74,23 +76,17 @@ final class GeneratorProcessor {
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
-        prepareInput(runner);
 
         if (runNpmInstall) {
             runner.runNpmInstall();
         }
 
-        runner.run();
+        runner.run(input);
     }
 
     public GeneratorProcessor verbose(boolean verbose) {
         this.verbose = verbose;
         return this;
-    }
-
-    private void prepareInput(GeneratorShellRunner runner) {
-        runner.add("'" + GeneratorShellRunner
-                .prepareJSONForCLI(Objects.requireNonNull(input)) + "'");
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {

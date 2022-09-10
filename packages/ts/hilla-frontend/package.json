@@ -1,6 +1,6 @@
 {
   "name": "@hilla/frontend",
-  "version": "1.2.0-alpha3",
+  "version": "1.2.0",
   "description": "Hilla frontend utils",
   "main": "index.js",
   "module": "index.js",
@@ -53,7 +53,7 @@
     "socket.io-client": "^4.4.1"
   },
   "peerDependencies": {
-    "lit": "^2.0.0"
+    "lit": "^2.3.0"
   },
   "devDependencies": {
     "@open-wc/testing": "^2.5.33",

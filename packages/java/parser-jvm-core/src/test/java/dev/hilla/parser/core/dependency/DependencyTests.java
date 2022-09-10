@@ -36,26 +36,35 @@ public class DependencyTests {
     }
 
     @Test
-    public void should_CollectDependencyMembers() {
-        var expected = List.of("foo", "bar", "circular", "getFoo", "setBar",
-                "foo", "circular",
-                "innerClassMember");
+    public void should_ResolveDependenciesCorrectly_When_ResolvingMethods() {
+        var expected = List.of("getEntityOne", "getEntityTwo");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-                .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
+            .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    public void should_ResolveDependencies() {
+    public void should_ResolveDependenciesCorrectly_When_ResolvingEntities() {
         var expected = List.of(
-                "dev.hilla.parser.core.dependency.DependencyEntityOne",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo",
-                "dev.hilla.parser.core.dependency.DependencyEntityTwo$InnerClass");
+            "dev.hilla.parser.core.dependency.DependencyEntityOne",
+            "dev.hilla.parser.core.dependency.DependencyEntityTwo",
+            "dev.hilla.parser.core.dependency.DependencyEntityThree");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-                .get(DependencyPlugin.ALL_DEPS_STORAGE_KEY);
+            .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_ResolveDependencyMembersCorrectly() {
+        var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
+            "foo3");
+
+        var actual = (List<String>) parser.getStorage().getPluginStorage()
+            .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }

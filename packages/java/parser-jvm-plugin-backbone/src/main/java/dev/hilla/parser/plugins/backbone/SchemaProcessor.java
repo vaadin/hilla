@@ -21,39 +21,39 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
-    private final SignatureModel signature;
+    private final SignatureModel type;
 
-    public SchemaProcessor(SignatureModel signature) {
-        this.signature = signature;
+    public SchemaProcessor(SignatureModel type) {
+        this.type = type;
     }
 
     private static <T extends Schema<?>> T nullify(T schema,
-        boolean condition) {
+            boolean condition) {
         return (T) schema.nullable(condition ? true : null);
     }
 
     public Schema<?> process() {
         Schema<?> result;
 
-        if (signature.isCharacter() || signature.isString()) {
+        if (type.isCharacter() || type.isString()) {
             result = stringSchema();
-        } else if (signature.isBoolean()) {
+        } else if (type.isBoolean()) {
             result = booleanSchema();
-        } else if (signature.hasIntegerType()) {
+        } else if (type.hasIntegerType()) {
             result = integerSchema();
-        } else if (signature.hasFloatType() || signature.isBigDecimal()) {
+        } else if (type.hasFloatType() || type.isBigDecimal()) {
             result = numberSchema();
-        } else if (signature.isArray()) {
+        } else if (type.isArray()) {
             result = arraySchema();
-        } else if (signature.isIterable()) {
+        } else if (type.isIterable()) {
             result = iterableSchema();
-        } else if (signature.isMap()) {
+        } else if (type.isMap()) {
             result = mapSchema();
-        } else if (signature.isDate()) {
+        } else if (type.isDate()) {
             result = dateSchema();
-        } else if (signature.isDateTime()) {
+        } else if (type.isDateTime()) {
             result = dateTimeSchema();
-        } else if (signature.isClassRef()) {
+        } else if (type.isClassRef()) {
             result = refSchema();
         } else {
             result = anySchema();
@@ -71,7 +71,7 @@ final class SchemaProcessor {
     }
 
     private Schema<?> booleanSchema() {
-        return nullify(new BooleanSchema(), !signature.isPrimitive());
+        return nullify(new BooleanSchema(), !type.isPrimitive());
     }
 
     private Schema<?> dateSchema() {
@@ -83,36 +83,51 @@ final class SchemaProcessor {
     }
 
     private Schema<?> integerSchema() {
-        return nullify(new IntegerSchema(), !signature.isPrimitive()).format(
-            signature.isLong() ? "int64" : "int32");
+        return nullify(new IntegerSchema(), !type.isPrimitive())
+                .format(type.isLong() ? "int64" : "int32");
     }
 
     private Schema<?> iterableSchema() {
-        return nullify(new ArraySchema(), true);
+        var schema = nullify(new ArraySchema(), true);
+        var _type = (ClassRefSignatureModel) type;
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> mapSchema() {
-        return nullify(new MapSchema(), true);
+        var _type = (ClassRefSignatureModel) type;
+        var schema = nullify(new MapSchema(), true);
+
+        if (type.isNonJDKClass()) {
+            schema.addExtension("x-class-name", _type.getName());
+        }
+
+        return schema;
     }
 
     private Schema<?> numberSchema() {
-        return nullify(new NumberSchema(), !signature.isPrimitive()).format(
-            signature.isFloat() ? "float" : "double");
+        return nullify(new NumberSchema(), !type.isPrimitive())
+                .format(type.isFloat() ? "float" : "double");
     }
 
     private Schema<?> refSchema() {
-        if (signature.isJDKClass()) {
+        if (type.isJDKClass()) {
             return anySchema();
         }
 
-        var cls = ((ClassRefSignatureModel) signature).getClassInfo();
+        var _type = (ClassRefSignatureModel) type;
+        var fullyQualifiedName = _type.getClassInfo().getName();
 
-        return nullify(new ComposedSchema(), true).anyOf(new ArrayList<>(
-            List.of(
-                new Schema<>().$ref(COMPONENTS_SCHEMAS_REF + cls.getName()))));
+        return nullify(new ComposedSchema(), true)
+                .anyOf(new ArrayList<>(List.of(new Schema<>()
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName))));
     }
 
     private Schema<?> stringSchema() {
-        return nullify(new StringSchema(), !signature.isPrimitive());
+        return nullify(new StringSchema(), !type.isPrimitive());
     }
 }

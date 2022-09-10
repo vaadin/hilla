@@ -73,6 +73,10 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
     this.#map.set(path, null);
   }
 
+  public override clear() {
+    this.#map.clear();
+  }
+
   public getIdentifier(path: string): Identifier | null | undefined {
     return this.#map.get(path);
   }

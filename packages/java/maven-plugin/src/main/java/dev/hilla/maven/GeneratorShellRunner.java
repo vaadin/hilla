@@ -4,19 +4,20 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
 final class GeneratorShellRunner {
     private static final boolean IS_WINDOWS;
-    private static final Pattern jsonEscapePattern = Pattern
-            .compile("[\r\n\b\f\t\"']");
+    private static final String TSGEN;
 
     static {
         var osName = System.getProperty("os.name").toLowerCase();
         IS_WINDOWS = osName.contains("windows");
+        TSGEN = IS_WINDOWS ? "tsgen.cmd" : "tsgen";
     }
 
     private final List<String> arguments = new ArrayList<>();
@@ -30,31 +31,27 @@ final class GeneratorShellRunner {
             arguments.add("/c");
         }
 
-        if (IS_WINDOWS) {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen.cmd").toString());
-        } else {
-            arguments.add(Paths.get(baseDir.getAbsolutePath(), "node_modules",
-                    ".bin", "tsgen").toString());
-        }
-    }
-
-    public static String prepareJSONForCLI(String json) {
-        return IS_WINDOWS ? jsonEscapePattern.matcher(json)
-                .replaceAll(match -> "\\\\" + match.group(0)) : json;
+        arguments.add(Paths.get("node_modules", ".bin", TSGEN).toString());
     }
 
     public void add(String... args) {
         arguments.addAll(List.of(args));
     }
 
-    public void run() throws InterruptedException, IOException {
+    public void run(String input) throws InterruptedException, IOException {
+        Objects.requireNonNull(input);
         logger.debug(String.format("Executing command: %s",
                 String.join(" ", arguments)));
 
-        var builder = new ProcessBuilder().command(arguments).inheritIO();
+        var builder = new ProcessBuilder().command(arguments)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
 
         var process = builder.start();
+
+        try (var stdin = process.getOutputStream()) {
+            stdin.write(input.getBytes(StandardCharsets.UTF_8));
+        }
 
         var exitCode = process.waitFor();
 

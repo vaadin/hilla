@@ -18,7 +18,9 @@ public final class ExTransferTypesPlugin implements ExPlugin {
                 new TransferTypesVisitor.PageableReplacer(1),
                 new TransferTypesVisitor.SortOrderReplacer(2),
                 new TransferTypesVisitor.SortReplacer(3),
-                new TransferTypesVisitor.UUIDReplacer(4));
+                new TransferTypesVisitor.UUIDReplacer(4),
+                new TransferTypesVisitor.FluxReplacer(5),
+                new TransferTypesVisitor.SubscriptionReplacer(6));
 
         var walker = new Walker(visitors, endpoints);
 

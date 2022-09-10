@@ -24,11 +24,13 @@ import dev.hilla.parser.node.RootNode;
 import dev.hilla.parser.node.TypeSignatureNode;
 
 public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
-    public static final String ALL_DEPS_STORAGE_KEY = "DependencyPlugin_AllDeps";
+    public static final String ENTITY_DEPS_STORAGE_KEY = "DependencyPlugin_EntityDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
+    public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
 
-    private final List<String> allDependencies = new ArrayList<>();
-    private final List<String> allDependencyMembers = new ArrayList<>();
+    private final List<String> entityDependencies = new ArrayList<>();
+    private final List<String> dependencyMembers = new ArrayList<>();
+    private final List<String> endpointDependencies = new ArrayList<>();
 
     public DependencyPlugin() {
         super(PluginConfiguration.class);
@@ -45,13 +47,10 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
                         getStorage().getParserConfig().getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of).map(EndpointNode::of),
                 Stream.empty());
-        } else if ((node instanceof EndpointNode) ||
-            (node instanceof EntityNode)) {
+        } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return NodeDependencies.of(node,
-                Stream.concat(cls.getFieldsStream().map(FieldNode::of),
-                    cls.getMethodsStream().map(MethodNode::of)),
-                cls.getInnerClassesStream().map(EntityNode::of));
+                cls.getMethodsStream().map(MethodNode::of), Stream.empty());
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
             var resultTypeNode = TypeSignatureNode.of(
@@ -62,6 +61,10 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
                         param -> MethodParameterNode.of(param,
                             Optional.ofNullable(param.getName())
                                 .orElse("_unnamed")))), Stream.empty());
+        } else if ((node instanceof EntityNode)) {
+            var cls = (ClassInfoModel) node.getSource();
+            return NodeDependencies.of(node,
+                cls.getFieldsStream().map(FieldNode::of), Stream.empty());
         } else if (node instanceof FieldNode) {
             var fieldNode = (FieldNode) node;
             return NodeDependencies.of(fieldNode, Stream.of(
@@ -87,12 +90,17 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         if (nodePath.getNode().getSource() instanceof NamedModel &&
             (nodePath.getParentPath().getNode() instanceof EntityNode)) {
             var model = (NamedModel) nodePath.getNode().getSource();
-            allDependencyMembers.add(model.getName());
+            dependencyMembers.add(model.getName());
         }
         if ((nodePath.getNode() instanceof EntityNode) &&
             (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
             var model = (ClassInfoModel) nodePath.getNode().getSource();
-            allDependencies.add(model.getName());
+            entityDependencies.add(model.getName());
+        }
+        if (nodePath.getNode().getSource() instanceof NamedModel &&
+            (nodePath.getParentPath().getNode() instanceof EndpointNode)) {
+            var model = (NamedModel) nodePath.getNode().getSource();
+            endpointDependencies.add(model.getName());
         }
     }
 
@@ -100,9 +108,11 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
     public void setStorage(@Nonnull SharedStorage storage) {
         super.setStorage(storage);
         var pluginStorage = storage.getPluginStorage();
-        pluginStorage.put(DependencyPlugin.ALL_DEPS_STORAGE_KEY,
-            allDependencies);
+        pluginStorage.put(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY,
+            entityDependencies);
         pluginStorage.put(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY,
-            allDependencyMembers);
+            dependencyMembers);
+        pluginStorage.put(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
+            endpointDependencies);
     }
 }
