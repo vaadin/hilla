@@ -35,7 +35,7 @@ abstract class TransferTypesVisitor implements Visitor {
 
         if (model instanceof ClassInfoModel
                 && ((ClassInfoModel) model).is(from)) {
-            path.replace(ClassInfoModel.of(to));
+//            path.replace(ClassInfoModel.of(to));
         }
     }
 
