@@ -4,11 +4,11 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-final class ValidationConstraint {
+public final class ValidationConstraint {
     private final Map<String, Object> attributes;
     private final String simpleName;
 
-    ValidationConstraint(@Nonnull String simpleName,
+    public ValidationConstraint(@Nonnull String simpleName,
             Map<String, Object> attributes) {
         this.simpleName = simpleName;
         this.attributes = attributes;

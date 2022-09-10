@@ -51,7 +51,6 @@ public class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypeSignatureNode) {
@@ -109,8 +108,8 @@ public class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguration> {
 
     private void attachSchemaToEntitySubclass(ComposedSchema schema,
         EntityNode entityNode) {
-        var parentSchema = entityNode.getTarget();
-        schema.addAnyOfItem(parentSchema);
+        var subclassSchema = entityNode.getTarget();
+        schema.addAnyOfItem(subclassSchema);
         schema.setNullable(null);
         entityNode.setTarget(schema);
     }

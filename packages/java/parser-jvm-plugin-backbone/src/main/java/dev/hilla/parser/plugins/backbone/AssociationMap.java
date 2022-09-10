@@ -23,7 +23,7 @@ public final class AssociationMap {
     private final Reversed reversed = new Reversed();
     private final Map<SignatureModel, Schema<?>> signatures = new IdentityHashMap<>();
 
-    AssociationMap() {
+    public AssociationMap() {
     }
 
     public void addEntity(@Nonnull ClassInfoModel entity,

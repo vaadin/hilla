@@ -1,43 +1,97 @@
 package dev.hilla.parser.plugins.model;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Walker;
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.plugins.backbone.AssociationMap;
+import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.models.AnnotationParameterModel;
+import dev.hilla.parser.models.SignatureModel;
+import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.node.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import io.swagger.v3.oas.models.media.Schema;
 
-public final class ModelPlugin implements Plugin {
-    private int order = 200;
-    private SharedStorage storage;
+public class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
+    private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
+    private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
 
+    public ModelPlugin() {
+        super();
+        setOrder(200);
+    }
+
+    @Nonnull
     @Override
-    public void execute(List<ClassInfoModel> endpoints) {
-        var associationMap = (AssociationMap) storage.getPluginStorage()
-                .get(BackbonePlugin.ASSOCIATION_MAP);
-
-        var walker = new Walker(List.of(new ModelVisitor(associationMap, 0)),
-                endpoints);
-
-        walker.traverse();
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
     }
 
     @Override
-    public int getOrder() {
-        return order;
+    public void enter(NodePath<?> nodePath) {
+        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
+            return;
+        }
+
+        var signatureNode = (TypeSignatureNode) nodePath.getNode();
+        var signature = (SignatureModel) signatureNode.getSource();
+        if (signature.isTypeArgument() || signature.isTypeParameter()) {
+            return;
+        }
+
+        var schema = signatureNode.getTarget();
+        addConstraintsToSchema(signature, schema);
     }
 
     @Override
-    public void setOrder(int order) {
-        this.order = order;
+    public void exit(NodePath<?> nodePath) {
+
+    }
+
+    private static ValidationConstraint convertAnnotation(
+        AnnotationInfoModel annotation) {
+        var simpleName = extractSimpleName(annotation.getName());
+
+        var attributes = annotation.getParametersStream()
+            .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                AnnotationParameterModel::getValue));
+
+        return new ValidationConstraint(simpleName,
+            !attributes.isEmpty() ? attributes : null);
+    }
+
+    private static String extractSimpleName(String fullyQualifiedName) {
+        return fullyQualifiedName
+            .substring(fullyQualifiedName.lastIndexOf(".") + 1);
+    }
+
+    private static boolean isValidationConstraintAnnotation(
+        AnnotationInfoModel annotation) {
+        return annotation.getName()
+            .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
+    }
+
+    private void addConstraintsToSchema(SignatureModel signature,
+        Schema<?> schema) {
+        var constraints = signature.getAnnotationsStream()
+            .filter(ModelPlugin::isValidationConstraintAnnotation)
+            .map(ModelPlugin::convertAnnotation)
+            .collect(Collectors.toList());
+
+        if (!constraints.isEmpty()) {
+            schema.addExtension(VALIDATION_CONSTRAINTS_KEY,
+                constraints);
+        }
     }
 
     @Override
-    public void setStorage(@Nonnull SharedStorage storage) {
-        this.storage = storage;
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
     }
 }

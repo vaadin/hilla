@@ -40,13 +40,12 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
             return false;
         }
         AbstractNode<?, ?> node = (AbstractNode<?, ?>) o;
-        return source.equals(node.getSource()) &&
-            target.equals(node.getTarget());
+        return source.equals(node.getSource());
     }
 
     @Override
     public int hashCode() {
-        return source.hashCode() ^ target.hashCode() ^ 0x042ebeb0;
+        return source.hashCode() ^ 0x042ebeb0;
     }
 
     @Override
