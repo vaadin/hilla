@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,11 +51,19 @@ public class PluginExecutor {
     }
 
     private void enqueueEnterFirst(NodePath<?> path) {
+        if (enqueued.contains(path)) {
+            return;
+        }
+
         queue.addFirst(new EnterTask(path));
         enqueued.add(path);
     }
 
     private void enqueueEnterLast(NodePath<?> path) {
+        if (enqueued.contains(path)) {
+            return;
+        }
+
         var lastTask = queue.removeLast();
         queue.addLast(new EnterTask(path));
         queue.addLast(lastTask);
@@ -94,14 +101,12 @@ public class PluginExecutor {
             PluginExecutor.this.enqueueExitFirst(getPath());
 
             var reverseChildList = new LinkedList<NodePath<?>>();
-            scanResult.getChildNodes().stream().distinct().map(getPath()::of)
-                .filter(Predicate.not(enqueued::contains))
+            scanResult.getChildNodes().stream().map(getPath()::of)
                 .forEachOrdered(reverseChildList::addFirst);
             reverseChildList.forEach(PluginExecutor.this::enqueueEnterFirst);
 
-            scanResult.getRelatedNodes().stream().distinct()
+            scanResult.getRelatedNodes().stream()
                 .map(getPath().getRootPath()::of)
-                .filter(Predicate.not(enqueued::contains))
                 .forEachOrdered(PluginExecutor.this::enqueueEnterLast);
         }
     }
