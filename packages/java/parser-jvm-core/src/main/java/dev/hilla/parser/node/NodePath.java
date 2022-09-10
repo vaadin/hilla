@@ -35,7 +35,7 @@ public final class NodePath<N extends Node<?, ?>> {
         return rootPath;
     }
 
-    private boolean hasParentNodes() {
+    public boolean hasParentNodes() {
         return getNode() != getParentPath().getNode();
     }
 

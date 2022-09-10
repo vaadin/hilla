@@ -1,63 +1,105 @@
 package dev.hilla.parser.plugins.nonnull;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.core.SharedStorage;
-import dev.hilla.parser.core.Walker;
+import dev.hilla.parser.models.AnnotatedModel;
+import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.plugins.backbone.AssociationMap;
+import dev.hilla.parser.node.Node;
+import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.node.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 
-public final class NonnullPlugin implements Plugin {
-    private Collection<AnnotationMatcher> annotations = NonnullPluginConfig.Processor.defaults;
-    private int order = 100;
-    private SharedStorage storage;
+public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
+    private Map<String, AnnotationMatcher> annotationsMap = mapByName(
+        NonnullPluginConfig.Processor.defaults);
 
+    public NonnullPlugin() {
+        super(NonnullPluginConfig.class);
+        setOrder(100);
+    }
+
+    @Nonnull
     @Override
-    public void execute(List<ClassInfoModel> endpoints) {
-        var associationMap = (AssociationMap) storage.getPluginStorage()
-                .get(BackbonePlugin.ASSOCIATION_MAP);
-
-        var walker = new Walker(
-                List.of(new NonnullVisitor(annotations, associationMap, 0)),
-                endpoints);
-
-        walker.traverse();
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
     }
 
     @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    @Override
-    public void setConfig(PluginConfiguration config) {
-        if (config == null) {
+    public void enter(NodePath<?> nodePath) {
+        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
             return;
         }
 
-        if (!(config instanceof NonnullPluginConfig)) {
-            throw new IllegalArgumentException(String.format(
-                    "Configuration for '%s' plugin should be an instance of '%s'",
-                    getClass().getName(), NonnullPluginConfig.class.getName()));
-        }
+        var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
+        var schema = typeSignatureNode.getTarget();
+        var matcher = Stream.concat(getAnnotationsFromPath(nodePath),
+                getPackageAnnotations(nodePath))
+            .map(annotation -> annotationsMap.get(annotation.getName()))
+            .filter(Objects::nonNull)
+            .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+            .orElse(AnnotationMatcher.DEFAULT);
 
-        annotations = new NonnullPluginConfig.Processor(
-                (NonnullPluginConfig) config).process();
+        schema.setNullable(matcher.doesMakeNonNull() ? null : true);
     }
 
     @Override
-    public void setStorage(@Nonnull SharedStorage storage) {
-        this.storage = storage;
+    public void exit(NodePath<?> nodePath) {
+
+    }
+
+    @Override
+    public void setConfiguration(@Nonnull PluginConfiguration configuration) {
+        super.setConfiguration(configuration);
+        this.annotationsMap = mapByName(
+            new NonnullPluginConfig.Processor(getConfiguration()).process());
+    }
+
+    @Override
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
+    }
+
+    static private Map<String, AnnotationMatcher> mapByName(
+        Collection<AnnotationMatcher> annotations) {
+        return annotations.stream().collect(
+            Collectors.toMap(AnnotationMatcher::getName, Function.identity()));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Stream<Node<?, ?>> getParentNodes(NodePath<?> nodePath) {
+        return Stream.iterate((NodePath) nodePath, NodePath::hasParentNodes,
+            NodePath::getParentPath).map(NodePath::getNode);
+    }
+
+    private Stream<AnnotationInfoModel> getAnnotationsFromPath(
+        NodePath<?> nodePath) {
+        var models = getParentNodes(nodePath).filter(
+                node -> node.getSource() instanceof AnnotatedModel)
+            .map(node -> (AnnotatedModel) node.getSource());
+        return models.flatMap(AnnotatedModel::getAnnotationsStream);
+    }
+
+    private Stream<AnnotationInfoModel> getPackageAnnotations(
+        NodePath<?> nodePath) {
+        var classes = getParentNodes(nodePath).filter(
+                node -> node.getSource() instanceof ClassInfoModel)
+            .map(node -> (ClassInfoModel) node.getSource());
+        return classes.map(ClassInfoModel::getPackage)
+            .flatMap(AnnotatedModel::getAnnotationsStream);
     }
 }

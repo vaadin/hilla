@@ -20,7 +20,7 @@ public class ExtendedTest {
     public void should_ApplyNonNullAnnotation()
             throws IOException, URISyntaxException {
         var plugin = new NonnullPlugin();
-        plugin.setConfig(new NonnullPluginConfig(Set
+        plugin.setConfiguration(new NonnullPluginConfig(Set
                 .of(new AnnotationMatcher(Nonnull.class.getName(), false, 0)),
                 null));
 
