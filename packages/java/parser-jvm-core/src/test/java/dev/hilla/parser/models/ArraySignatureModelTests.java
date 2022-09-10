@@ -41,8 +41,6 @@ import io.github.classgraph.ScanResult;
 public class ArraySignatureModelTests {
     private static final boolean isJDK11 = Runtime.Version
             .parse(System.getProperty("java.version")).feature() <= 11;
-    private static final Logger log = Logger
-            .getLogger(ArraySignatureModelTests.class.getName());
     private Context ctx;
 
     @BeforeEach
