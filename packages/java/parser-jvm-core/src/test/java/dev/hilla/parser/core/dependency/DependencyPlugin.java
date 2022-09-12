@@ -23,7 +23,7 @@ import dev.hilla.parser.node.NodePath;
 import dev.hilla.parser.node.RootNode;
 import dev.hilla.parser.node.TypeSignatureNode;
 
-public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
+final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
     public static final String ENTITY_DEPS_STORAGE_KEY = "DependencyPlugin_EntityDeps";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
@@ -31,10 +31,6 @@ public class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
     private final List<String> entityDependencies = new ArrayList<>();
     private final List<String> dependencyMembers = new ArrayList<>();
     private final List<String> endpointDependencies = new ArrayList<>();
-
-    public DependencyPlugin() {
-        super(PluginConfiguration.class);
-    }
 
     @Nonnull
     @Override

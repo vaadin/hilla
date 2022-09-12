@@ -15,9 +15,7 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     extends AbstractPlugin<C> {
     private final LinkedList<Plugin> plugins = new LinkedList<>();
 
-    protected AbstractCompositePlugin(Class<? extends C> configurationClass,
-        @Nonnull Plugin... plugins) {
-        super(configurationClass);
+    protected AbstractCompositePlugin(@Nonnull Plugin... plugins) {
         Stream.of(plugins).map(Objects::requireNonNull)
             .sorted(Comparator.comparingInt(Plugin::getOrder))
             .forEachOrdered(this.plugins::add);

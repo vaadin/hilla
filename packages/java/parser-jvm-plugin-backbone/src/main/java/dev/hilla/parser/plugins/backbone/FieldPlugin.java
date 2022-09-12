@@ -14,7 +14,7 @@ import dev.hilla.parser.node.FieldNode;
 import dev.hilla.parser.node.NodeDependencies;
 import dev.hilla.parser.node.NodePath;
 
-public class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {

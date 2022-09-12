@@ -2,23 +2,16 @@ package dev.hilla.parser.core;
 
 import javax.annotation.Nonnull;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
 
 public abstract class AbstractPlugin<C extends PluginConfiguration> implements Plugin {
-    private final Class<? extends C> configurationClass;
     private C configuration;
     private int order;
 
     private SharedStorage storage;
 
-    protected AbstractPlugin(
-        @Nonnull Class<? extends C> configurationClass) {
-        this.configurationClass = Objects.requireNonNull(configurationClass);
-    }
-
-    @SuppressWarnings("unchecked")
     protected AbstractPlugin() {
-        this((Class<? extends C>) PluginConfiguration.class);
     }
 
     @Override
@@ -30,11 +23,12 @@ public abstract class AbstractPlugin<C extends PluginConfiguration> implements P
     @Override
     @SuppressWarnings("unchecked")
     public void setConfiguration(@Nonnull PluginConfiguration configuration) {
+        var configClass = (Class<C>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         Objects.requireNonNull(configuration);
-        if (!configurationClass.isAssignableFrom(configuration.getClass())) {
+        if (!configClass.isAssignableFrom(configuration.getClass())) {
             throw new IllegalArgumentException(
-                String.format("Instance of %s " + " required, but got %s",
-                    configurationClass, configuration.getClass()));
+                String.format("Requires instance of %s " + ", but got %s",
+                    configClass, configuration.getClass()));
         }
 
         this.configuration = (C) configuration;

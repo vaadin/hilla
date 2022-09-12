@@ -19,7 +19,7 @@ import io.swagger.v3.oas.models.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     @Nonnull

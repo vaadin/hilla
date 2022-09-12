@@ -18,7 +18,7 @@ import dev.hilla.parser.node.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
 

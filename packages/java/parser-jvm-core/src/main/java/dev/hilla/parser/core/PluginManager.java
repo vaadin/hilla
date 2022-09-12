@@ -9,7 +9,7 @@ public final class PluginManager extends
             .getClassLoader();
 
     PluginManager(Collection<Plugin> plugins) {
-        super(PluginConfiguration.class, plugins.toArray(Plugin[]::new));
+        super(plugins.toArray(Plugin[]::new));
     }
 
     public static Plugin load(String name,

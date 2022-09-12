@@ -30,7 +30,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguration> {
+public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {

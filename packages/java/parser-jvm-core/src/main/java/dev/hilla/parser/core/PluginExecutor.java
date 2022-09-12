@@ -20,7 +20,7 @@ import dev.hilla.parser.node.NodePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PluginExecutor {
+public final class PluginExecutor {
     private static final Logger logger = LoggerFactory.getLogger(
         PluginExecutor.class);
 

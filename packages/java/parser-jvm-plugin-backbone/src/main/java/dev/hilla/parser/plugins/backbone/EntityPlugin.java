@@ -26,7 +26,7 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
-public class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {

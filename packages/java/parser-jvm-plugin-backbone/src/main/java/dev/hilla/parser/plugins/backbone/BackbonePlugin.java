@@ -7,8 +7,8 @@ public final class BackbonePlugin
     extends AbstractCompositePlugin<PluginConfiguration> {
 
     public BackbonePlugin() {
-        super(PluginConfiguration.class, new EndpointPlugin(),
-            new MethodPlugin(), new MethodParameterPlugin(), new EntityPlugin(),
-            new FieldPlugin(), new TypeSignaturePlugin());
+        super(new EndpointPlugin(), new MethodPlugin(),
+            new MethodParameterPlugin(), new EntityPlugin(), new FieldPlugin(),
+            new TypeSignaturePlugin());
     }
 }

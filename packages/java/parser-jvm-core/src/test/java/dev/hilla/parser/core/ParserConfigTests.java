@@ -134,6 +134,13 @@ public class ParserConfigTests {
                 "[JVM Parser] endpointAnnotationName is not provided.");
     }
 
+    @Test
+    public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
+        assertThrows(IllegalArgumentException.class,
+            () -> new BazPlugin().setConfiguration(new PluginConfiguration() {
+            }), "Requires instance of " + BazPluginConfig.class.getName());
+    }
+
     private void testOpenAPISourceFile(String fileName,
             ParserConfig.OpenAPIFileType type)
             throws URISyntaxException, IOException {
@@ -148,8 +155,11 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
-    private static class BarPlugin implements Plugin {
-        private int order = 1;
+    private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
+        BarPlugin() {
+            super();
+            setOrder(1);
+        }
 
         @Nonnull
         @Override
@@ -160,41 +170,17 @@ public class ParserConfigTests {
 
         @Override
         public void enter(NodePath<?> nodePath) {
-
         }
 
         @Override
         public void exit(NodePath<?> nodePath) {
-
-        }
-
-        @Override
-        public int getOrder() {
-            return order;
-        }
-
-        @Override
-        public void setOrder(int order) {
-            this.order = order;
-        }
-
-        @Override
-        public PluginConfiguration getConfiguration() {
-            return null;
-        }
-
-        @Override
-        public void setConfiguration(PluginConfiguration configuration) {
-
-        }
-
-        @Override
-        public void setStorage(SharedStorage storage) {
         }
     }
 
-    private static class FooPlugin implements Plugin {
-        private int order = 0;
+    private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
+        FooPlugin() {
+            setOrder(0);
+        }
 
         @Nonnull
         @Override
@@ -205,37 +191,30 @@ public class ParserConfigTests {
 
         @Override
         public void enter(NodePath<?> nodePath) {
-
         }
 
         @Override
         public void exit(NodePath<?> nodePath) {
+        }
+    }
 
+    private static class BazPluginConfig implements PluginConfiguration {
+    }
+
+    private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+            @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
         }
 
         @Override
-        public int getOrder() {
-            return order;
+        public void enter(NodePath<?> nodePath) {
         }
 
         @Override
-        public void setOrder(int order) {
-            this.order = order;
-        }
-
-        @Override
-        public PluginConfiguration getConfiguration() {
-            return null;
-        }
-
-        @Override
-        public void setConfiguration(PluginConfiguration configuration) {
-
-        }
-
-        @Override
-        public void setStorage(SharedStorage storage) {
-
+        public void exit(NodePath<?> nodePath) {
         }
     }
 
