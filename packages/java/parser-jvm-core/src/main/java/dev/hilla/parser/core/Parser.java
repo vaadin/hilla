@@ -1,6 +1,5 @@
 package dev.hilla.parser.core;
 
-import java.util.Collection;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -9,9 +8,6 @@ import dev.hilla.parser.node.RootNode;
 import io.github.classgraph.ClassGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.MethodInfoModel;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -24,18 +20,6 @@ public final class Parser {
     public Parser(@Nonnull ParserConfig config) {
         this.config = Objects.requireNonNull(config);
         storage = new SharedStorage(config);
-    }
-
-    private static void checkIfJavaCompilerParametersFlagIsEnabled(
-            Collection<ClassInfoModel> endpoints) {
-        endpoints.stream().flatMap(endpoint -> endpoint.getMethods().stream())
-                .flatMap(MethodInfoModel::getParametersStream).findFirst()
-                .ifPresent((parameter) -> {
-                    if (parameter.getName() == null) {
-                        throw new ParserException(
-                                "Hilla Parser requires running java compiler with -parameters flag enabled");
-                    }
-                });
     }
 
     public OpenAPI execute() {

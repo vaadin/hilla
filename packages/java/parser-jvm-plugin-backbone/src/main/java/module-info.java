@@ -6,6 +6,7 @@ module dev.hilla.parser.plugins.backbone {
     requires com.fasterxml.jackson.databind;
     requires dev.hilla.parser.utils;
     requires dev.hilla.parser.core;
+    requires org.slf4j;
 
     exports dev.hilla.parser.plugins.backbone;
     opens dev.hilla.parser.plugins.backbone to dev.hilla.parser.core;

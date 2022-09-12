@@ -2,18 +2,26 @@ package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.node.EndpointNode;
 import dev.hilla.parser.node.NodeDependencies;
 import dev.hilla.parser.node.NodePath;
 import dev.hilla.parser.node.RootNode;
+import io.github.classgraph.ClassInfo;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -23,6 +31,7 @@ public class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
                 .getEndpointAnnotationName();
             var endpoints = rootNode.getSource()
                 .getClassesWithAnnotation(endpointAnnotationName);
+            checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return NodeDependencies.of(rootNode,
                 endpoints.stream().map(ClassInfoModel::of)
                     .filter(ClassInfoModel::isNonJDKClass)
@@ -48,5 +57,20 @@ public class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
             ((RootNode) parentNode).getTarget()
                 .addTagsItem(((EndpointNode) node).getTarget());
         }
+    }
+
+    private static void checkIfJavaCompilerParametersFlagIsEnabled(
+        Collection<ClassInfo> endpoints) {
+        endpoints.stream().map(ClassInfoModel::of)
+            .flatMap(ClassInfoModel::getMethodsStream)
+            .flatMap(MethodInfoModel::getParametersStream).findFirst()
+            .ifPresent((parameter) -> {
+                if (parameter.getName() == null) {
+                    logger.info("Missing endpoint method parameter names" +
+                        "in JVM bytecode, probably because they were not enabled" +
+                        " during compilation. For Java compiler, add the " +
+                        "\"-parameters\" flag to enable those.");
+                }
+            });
     }
 }
