@@ -30,7 +30,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguration> {
+public final class TypeSignaturePlugin
+        extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -45,7 +46,7 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
             return scanField((FieldNode) node);
         } else if (node instanceof TypeSignatureNode) {
             return scanTypeSignature((TypeSignatureNode) node,
-                nodeDependencies);
+                    nodeDependencies);
         }
 
         return nodeDependencies;
@@ -56,7 +57,8 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
         if (nodePath.getNode() instanceof TypeSignatureNode) {
             var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
             typeSignatureNode.setTarget(
-                new SchemaProcessor(typeSignatureNode.getSource()).process());
+                    new SchemaProcessor(typeSignatureNode.getSource())
+                            .process());
         }
     }
 
@@ -70,44 +72,44 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
         var schema = node.getTarget();
         var parentNode = nodePath.getParentPath().getNode();
         var grandParentNode = nodePath.getParentPath().getParentPath()
-            .getNode();
+                .getNode();
         if (parentNode instanceof MethodNode) {
             attachSchemaToMethod(schema, (MethodNode) parentNode);
-        } else if (parentNode instanceof MethodParameterNode &&
-            grandParentNode instanceof MethodNode) {
+        } else if (parentNode instanceof MethodParameterNode
+                && grandParentNode instanceof MethodNode) {
             attachSchemaToParameterOfMethod(schema,
-                ((MethodParameterNode) parentNode),
-                ((MethodNode) grandParentNode));
-        } else if (parentNode instanceof EntityNode &&
-            schema instanceof ComposedSchema) {
+                    ((MethodParameterNode) parentNode),
+                    ((MethodNode) grandParentNode));
+        } else if (parentNode instanceof EntityNode
+                && schema instanceof ComposedSchema) {
             attachSchemaToEntitySubclass((ComposedSchema) schema,
-                (EntityNode) parentNode);
-        } else if (parentNode instanceof FieldNode &&
-            grandParentNode instanceof EntityNode) {
+                    (EntityNode) parentNode);
+        } else if (parentNode instanceof FieldNode
+                && grandParentNode instanceof EntityNode) {
             attachSchemaToFieldOfEntity(schema, (FieldNode) parentNode,
-                (EntityNode) grandParentNode);
+                    (EntityNode) grandParentNode);
         } else if (parentNode instanceof TypeSignatureNode) {
             attachSchemaToNestingParentSignature(schema,
-                (TypeSignatureNode) parentNode);
+                    (TypeSignatureNode) parentNode);
         }
     }
 
     private void attachSchemaToMethod(Schema<?> schema, MethodNode methodNode) {
-        methodNode.getTarget().getPost().getResponses().get("200").setContent(
-            new Content().addMediaType(MethodPlugin.MEDIA_TYPE,
-                new MediaType().schema(schema)));
+        methodNode.getTarget().getPost().getResponses().get("200")
+                .setContent(new Content().addMediaType(MethodPlugin.MEDIA_TYPE,
+                        new MediaType().schema(schema)));
     }
 
     private void attachSchemaToParameterOfMethod(Schema<?> schema,
-        MethodParameterNode methodParameterNode, MethodNode methodNode) {
+            MethodParameterNode methodParameterNode, MethodNode methodNode) {
         var requestMap = (ObjectSchema) methodNode.getTarget().getPost()
-            .getRequestBody().getContent().get(MethodPlugin.MEDIA_TYPE)
-            .getSchema();
+                .getRequestBody().getContent().get(MethodPlugin.MEDIA_TYPE)
+                .getSchema();
         requestMap.addProperties(methodParameterNode.getTarget(), schema);
     }
 
     private void attachSchemaToEntitySubclass(ComposedSchema schema,
-        EntityNode entityNode) {
+            EntityNode entityNode) {
         var subclassSchema = entityNode.getTarget();
         schema.addAnyOfItem(subclassSchema);
         schema.setNullable(null);
@@ -115,13 +117,13 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
     }
 
     private void attachSchemaToFieldOfEntity(Schema<?> schema,
-        FieldNode fieldNode, EntityNode entityNode) {
+            FieldNode fieldNode, EntityNode entityNode) {
         var fieldName = fieldNode.getTarget();
         entityNode.getTarget().addProperties(fieldName, schema);
     }
 
     private void attachSchemaToNestingParentSignature(Schema<?> schema,
-        TypeSignatureNode parentNode) {
+            TypeSignatureNode parentNode) {
         var parentSchema = parentNode.getTarget();
         if (parentSchema instanceof ArraySchema) {
             ((ArraySchema) parentSchema).setItems(schema);
@@ -135,33 +137,36 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
     }
 
     private NodeDependencies scanMethodNode(MethodNode methodNode,
-        NodeDependencies nodeDependencies) {
+            NodeDependencies nodeDependencies) {
         if (methodNode.getSource().getResultType().isVoid()) {
             return nodeDependencies;
         }
 
         return NodeDependencies.of(methodNode,
-            Stream.concat(nodeDependencies.getChildNodes(), Stream.of(
-                TypeSignatureNode.of(methodNode.getSource().getResultType()))),
-            nodeDependencies.getRelatedNodes());
+                Stream.concat(nodeDependencies.getChildNodes(),
+                        Stream.of(TypeSignatureNode
+                                .of(methodNode.getSource().getResultType()))),
+                nodeDependencies.getRelatedNodes());
     }
 
     private NodeDependencies scanMethodParameter(
-        MethodParameterNode methodParameterNode) {
-        return NodeDependencies.of(methodParameterNode, Stream.of(
-                TypeSignatureNode.of(methodParameterNode.getSource().getType())),
-            Stream.empty());
+            MethodParameterNode methodParameterNode) {
+        return NodeDependencies.of(methodParameterNode,
+                Stream.of(TypeSignatureNode
+                        .of(methodParameterNode.getSource().getType())),
+                Stream.empty());
     }
 
     private NodeDependencies scanEntity(EntityNode node,
-        NodeDependencies nodeDependencies) {
+            NodeDependencies nodeDependencies) {
         var cls = node.getSource();
-        if (cls.getSuperClass().isPresent() &&
-            cls.getSuperClass().get().isNonJDKClass()) {
+        if (cls.getSuperClass().isPresent()
+                && cls.getSuperClass().get().isNonJDKClass()) {
             return NodeDependencies.of(node,
-                Stream.concat(nodeDependencies.getChildNodes(),
-                    Stream.of(TypeSignatureNode.of(cls.getSuperClass().get()))),
-                Stream.empty());
+                    Stream.concat(nodeDependencies.getChildNodes(),
+                            Stream.of(TypeSignatureNode
+                                    .of(cls.getSuperClass().get()))),
+                    Stream.empty());
         }
 
         return nodeDependencies;
@@ -169,50 +174,56 @@ public final class TypeSignaturePlugin extends AbstractPlugin<PluginConfiguratio
 
     private NodeDependencies scanField(FieldNode fieldNode) {
         return NodeDependencies.of(fieldNode,
-            Stream.of(TypeSignatureNode.of(fieldNode.getSource().getType())),
-            Stream.empty());
+                Stream.of(
+                        TypeSignatureNode.of(fieldNode.getSource().getType())),
+                Stream.empty());
     }
 
     private NodeDependencies scanTypeSignature(TypeSignatureNode node,
-        NodeDependencies nodeDependencies) {
+            NodeDependencies nodeDependencies) {
         var signature = node.getSource();
         if (signature.isArray()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((ArraySignatureModel) signature).getNestedType());
-        } else if (signature.isIterable() &&
-            !((ClassRefSignatureModel) signature).getTypeArguments()
-                .isEmpty()) {
+                    ((ArraySignatureModel) signature).getNestedType());
+        } else if (signature.isIterable()
+                && !((ClassRefSignatureModel) signature).getTypeArguments()
+                        .isEmpty()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((ClassRefSignatureModel) signature).getTypeArguments().get(0));
+                    ((ClassRefSignatureModel) signature).getTypeArguments()
+                            .get(0));
         } else if (signature.isOptional()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((ClassRefSignatureModel) signature).getTypeArguments().get(0));
+                    ((ClassRefSignatureModel) signature).getTypeArguments()
+                            .get(0));
         } else if (signature.isMap()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((ClassRefSignatureModel) signature).getTypeArguments().get(1));
-        } else if (signature.isTypeArgument() &&
-            !((TypeArgumentModel) signature).getAssociatedTypes().isEmpty()) {
+                    ((ClassRefSignatureModel) signature).getTypeArguments()
+                            .get(1));
+        } else if (signature.isTypeArgument()
+                && !((TypeArgumentModel) signature).getAssociatedTypes()
+                        .isEmpty()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((TypeArgumentModel) signature).getAssociatedTypes().get(0));
+                    ((TypeArgumentModel) signature).getAssociatedTypes()
+                            .get(0));
         } else if (signature.isTypeParameter()) {
             var typeParameterModel = ((TypeParameterModel) signature);
-            return NodeDependencies.of(node,
-                typeParameterModel.getBoundsStream().filter(Objects::nonNull)
+            return NodeDependencies.of(node, typeParameterModel
+                    .getBoundsStream().filter(Objects::nonNull)
                     .filter(Predicate.not(SpecializedModel::isNativeObject))
                     .map(TypeSignatureNode::of), Stream.empty());
         } else if (signature.isTypeVariable()) {
             return scanNestedTypeSignature(nodeDependencies,
-                ((TypeVariableModel) signature).resolve());
+                    ((TypeVariableModel) signature).resolve());
         }
 
         return nodeDependencies;
     }
 
     private NodeDependencies scanNestedTypeSignature(
-        NodeDependencies nodeDependencies,
-        SignatureModel... nestedSignatureModels) {
+            NodeDependencies nodeDependencies,
+            SignatureModel... nestedSignatureModels) {
         return NodeDependencies.of(nodeDependencies.getNode(),
-            Stream.of(nestedSignatureModels).map(TypeSignatureNode::of),
-            Stream.empty());
+                Stream.of(nestedSignatureModels).map(TypeSignatureNode::of),
+                Stream.empty());
     }
 }

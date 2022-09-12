@@ -24,28 +24,33 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodeDependencies.getNode();
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
-            var endpoints = rootNode.getSource().getClassesWithAnnotation(
-                    getStorage().getParserConfig().getEndpointAnnotationName())
-                .stream().map(ClassInfoModel::of).collect(Collectors.toList());
-            return NodeDependencies.of(node, endpoints.stream().map(EndpointNode::of),
-                endpoints.stream().flatMap(ClassInfoModel::getInnerClassesStream)
-                    .map(EntityNode::of));
+            var endpoints = rootNode.getSource()
+                    .getClassesWithAnnotation(getStorage().getParserConfig()
+                            .getEndpointAnnotationName())
+                    .stream().map(ClassInfoModel::of)
+                    .collect(Collectors.toList());
+            return NodeDependencies.of(node,
+                    endpoints.stream().map(EndpointNode::of),
+                    endpoints.stream()
+                            .flatMap(ClassInfoModel::getInnerClassesStream)
+                            .map(EntityNode::of));
         } else if (node instanceof EndpointNode) {
-            return NodeDependencies.of(node, Stream.concat(
-                    ((EndpointNode) node).getSource().getFieldsStream()
-                        .map(FieldNode::of),
-                    ((EndpointNode) node).getSource().getMethodsStream()
-                        .map(MethodNode::of)),
-                Stream.of(EntityNode.of(ClassInfoModel.of(Sample.class))));
-        } else if (node instanceof EntityNode &&
-            ((EntityNode) node).getSource().getName()
-                .equals(Sample.class.getName())) {
+            return NodeDependencies.of(node,
+                    Stream.concat(((EndpointNode) node).getSource()
+                            .getFieldsStream().map(FieldNode::of),
+                            ((EndpointNode) node).getSource().getMethodsStream()
+                                    .map(MethodNode::of)),
+                    Stream.of(EntityNode.of(ClassInfoModel.of(Sample.class))));
+        } else if (node instanceof EntityNode && ((EntityNode) node).getSource()
+                .getName().equals(Sample.class.getName())) {
             try {
-                return NodeDependencies.of(node,
-                    Stream.of(Sample.class.getDeclaredMethod("methodFoo"),
-                            Sample.class.getDeclaredMethod("methodBar"))
-                        .map(MethodInfoModel::of).map(MethodNode::of),
-                    nodeDependencies.getRelatedNodes());
+                return NodeDependencies.of(
+                        node, Stream
+                                .of(Sample.class.getDeclaredMethod("methodFoo"),
+                                        Sample.class
+                                                .getDeclaredMethod("methodBar"))
+                                .map(MethodInfoModel::of).map(MethodNode::of),
+                        nodeDependencies.getRelatedNodes());
             } catch (NoSuchMethodException e) {
                 return nodeDependencies;
             }

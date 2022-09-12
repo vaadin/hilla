@@ -28,12 +28,12 @@ public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         var fields = cls.getFieldsStream()
-            .filter(Predicate.not(FieldInfoModel::isTransient))
-            .map(FieldNode::of);
+                .filter(Predicate.not(FieldInfoModel::isTransient))
+                .map(FieldNode::of);
 
         return NodeDependencies.of(nodeDependencies.getNode(),
-            Stream.concat(nodeDependencies.getChildNodes(), fields),
-            Stream.empty());
+                Stream.concat(nodeDependencies.getChildNodes(), fields),
+                Stream.empty());
     }
 
     @Override

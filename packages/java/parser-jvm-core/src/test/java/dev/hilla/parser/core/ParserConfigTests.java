@@ -136,9 +136,9 @@ public class ParserConfigTests {
 
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
-        assertThrows(IllegalArgumentException.class,
-            () -> new BazPlugin().setConfiguration(new PluginConfiguration() {
-            }), "Requires instance of " + BazPluginConfig.class.getName());
+        assertThrows(IllegalArgumentException.class, () -> new BazPlugin()
+                .setConfiguration(new PluginConfiguration() {
+                }), "Requires instance of " + BazPluginConfig.class.getName());
     }
 
     private void testOpenAPISourceFile(String fileName,
@@ -164,7 +164,7 @@ public class ParserConfigTests {
         @Nonnull
         @Override
         public NodeDependencies scan(
-            @Nonnull NodeDependencies nodeDependencies) {
+                @Nonnull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
 
@@ -185,7 +185,7 @@ public class ParserConfigTests {
         @Nonnull
         @Override
         public NodeDependencies scan(
-            @Nonnull NodeDependencies nodeDependencies) {
+                @Nonnull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
 
@@ -205,7 +205,7 @@ public class ParserConfigTests {
         @Nonnull
         @Override
         public NodeDependencies scan(
-            @Nonnull NodeDependencies nodeDependencies) {
+                @Nonnull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
 

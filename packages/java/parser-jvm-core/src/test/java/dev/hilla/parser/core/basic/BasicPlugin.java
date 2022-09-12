@@ -10,7 +10,7 @@ final class BasicPlugin extends AbstractCompositePlugin<PluginConfiguration> {
 
     BasicPlugin() {
         super(new AddPlugin(), new ReplacePlugin(), new RemovePlugin(),
-            new FinalizePlugin());
+                new FinalizePlugin());
     }
 
     @Override

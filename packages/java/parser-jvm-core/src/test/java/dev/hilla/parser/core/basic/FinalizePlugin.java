@@ -25,14 +25,14 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode().getSource() instanceof Model &&
-            nodePath.getNode().getSource() instanceof NamedModel &&
-            nodePath.getParentPath().getNode()
-                .getSource() instanceof ClassInfoModel) {
+        if (nodePath.getNode().getSource() instanceof Model
+                && nodePath.getNode().getSource() instanceof NamedModel
+                && nodePath.getParentPath().getNode()
+                        .getSource() instanceof ClassInfoModel) {
             var model = nodePath.getNode().getSource();
             members.add(String.format("%s %s",
-                ((Model) model).getCommonModelClass().getSimpleName(),
-                ((NamedModel) model).getName()));
+                    ((Model) model).getCommonModelClass().getSimpleName(),
+                    ((NamedModel) model).getName()));
         }
         footsteps.add(String.format("-> %s", nodePath.toString()));
     }
@@ -41,10 +41,11 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     public void exit(NodePath<?> nodePath) {
         footsteps.add(String.format("<- %s", nodePath.toString()));
         if (nodePath.getNode() instanceof RootNode) {
-            getStorage().getPluginStorage()
-                .put(BasicPlugin.STORAGE_KEY, members);
-            getStorage().getPluginStorage()
-                .put(BasicPlugin.FOOTSTEPS_STORAGE_KEY, String.join("\n", footsteps));
+            getStorage().getPluginStorage().put(BasicPlugin.STORAGE_KEY,
+                    members);
+            getStorage().getPluginStorage().put(
+                    BasicPlugin.FOOTSTEPS_STORAGE_KEY,
+                    String.join("\n", footsteps));
         }
     }
 }

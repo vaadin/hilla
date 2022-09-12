@@ -38,40 +38,45 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodeDependencies.getNode();
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
-            return NodeDependencies.of(rootNode, rootNode.getSource()
-                    .getClassesWithAnnotation(
-                        getStorage().getParserConfig().getEndpointAnnotationName())
-                    .stream().map(ClassInfoModel::of).map(EndpointNode::of),
-                Stream.empty());
+            return NodeDependencies.of(rootNode,
+                    rootNode.getSource().getClassesWithAnnotation(getStorage()
+                            .getParserConfig().getEndpointAnnotationName())
+                            .stream().map(ClassInfoModel::of)
+                            .map(EndpointNode::of),
+                    Stream.empty());
         } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return NodeDependencies.of(node,
-                cls.getMethodsStream().map(MethodNode::of), Stream.empty());
+                    cls.getMethodsStream().map(MethodNode::of), Stream.empty());
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
-            var resultTypeNode = TypeSignatureNode.of(
-                methodNode.getSource().getResultType());
+            var resultTypeNode = TypeSignatureNode
+                    .of(methodNode.getSource().getResultType());
             return NodeDependencies.of(methodNode,
-                Stream.concat(Stream.of(resultTypeNode),
-                    methodNode.getSource().getParametersStream().map(
-                        param -> MethodParameterNode.of(param,
-                            Optional.ofNullable(param.getName())
-                                .orElse("_unnamed")))), Stream.empty());
+                    Stream.concat(Stream.of(resultTypeNode),
+                            methodNode.getSource().getParametersStream()
+                                    .map(param -> MethodParameterNode.of(param,
+                                            Optional.ofNullable(param.getName())
+                                                    .orElse("_unnamed")))),
+                    Stream.empty());
         } else if ((node instanceof EntityNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return NodeDependencies.of(node,
-                cls.getFieldsStream().map(FieldNode::of), Stream.empty());
+                    cls.getFieldsStream().map(FieldNode::of), Stream.empty());
         } else if (node instanceof FieldNode) {
             var fieldNode = (FieldNode) node;
-            return NodeDependencies.of(fieldNode, Stream.of(
-                    TypeSignatureNode.of(fieldNode.getSource().getType())),
-                Stream.empty());
-        } else if ((node instanceof TypeSignatureNode) &&
-            (node.getSource() instanceof ClassRefSignatureModel) &&
-            !(((ClassRefSignatureModel) node.getSource()).isJDKClass())) {
-            var entityCls = ((ClassRefSignatureModel) node.getSource()).getClassInfo();
+            return NodeDependencies.of(fieldNode,
+                    Stream.of(TypeSignatureNode
+                            .of(fieldNode.getSource().getType())),
+                    Stream.empty());
+        } else if ((node instanceof TypeSignatureNode)
+                && (node.getSource() instanceof ClassRefSignatureModel)
+                && !(((ClassRefSignatureModel) node.getSource())
+                        .isJDKClass())) {
+            var entityCls = ((ClassRefSignatureModel) node.getSource())
+                    .getClassInfo();
             return NodeDependencies.of(node, nodeDependencies.getChildNodes(),
-                Stream.of(EntityNode.of(entityCls)));
+                    Stream.of(EntityNode.of(entityCls)));
         }
         return nodeDependencies;
     }
@@ -83,18 +88,18 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode().getSource() instanceof NamedModel &&
-            (nodePath.getParentPath().getNode() instanceof EntityNode)) {
+        if (nodePath.getNode().getSource() instanceof NamedModel
+                && (nodePath.getParentPath().getNode() instanceof EntityNode)) {
             var model = (NamedModel) nodePath.getNode().getSource();
             dependencyMembers.add(model.getName());
         }
-        if ((nodePath.getNode() instanceof EntityNode) &&
-            (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
+        if ((nodePath.getNode() instanceof EntityNode)
+                && (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
             var model = (ClassInfoModel) nodePath.getNode().getSource();
             entityDependencies.add(model.getName());
         }
-        if (nodePath.getNode().getSource() instanceof NamedModel &&
-            (nodePath.getParentPath().getNode() instanceof EndpointNode)) {
+        if (nodePath.getNode().getSource() instanceof NamedModel && (nodePath
+                .getParentPath().getNode() instanceof EndpointNode)) {
             var model = (NamedModel) nodePath.getNode().getSource();
             endpointDependencies.add(model.getName());
         }
@@ -105,10 +110,10 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         super.setStorage(storage);
         var pluginStorage = storage.getPluginStorage();
         pluginStorage.put(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY,
-            entityDependencies);
+                entityDependencies);
         pluginStorage.put(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY,
-            dependencyMembers);
+                dependencyMembers);
         pluginStorage.put(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
-            endpointDependencies);
+                endpointDependencies);
     }
 }

@@ -25,19 +25,20 @@ import dev.hilla.runtime.transfertypes.Order;
 import dev.hilla.runtime.transfertypes.Pageable;
 import dev.hilla.runtime.transfertypes.Sort;
 
-public final class TransferTypesPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class TransferTypesPlugin
+        extends AbstractPlugin<PluginConfiguration> {
     static private final Map<String, Class<?>> classMap = new HashMap<>();
 
     {
         classMap.put("org.springframework.data.domain.Page", List.class);
         classMap.put("org.springframework.data.domain.Pageable",
-            Pageable.class);
+                Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);
         classMap.put("org.springframework.data.domain.Sort", Sort.class);
         classMap.put(UUID.class.getName(), String.class);
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("dev.hilla.EndpointSubscription",
-            EndpointSubscription.class);
+                EndpointSubscription.class);
     }
 
     public TransferTypesPlugin() {
@@ -49,8 +50,8 @@ public final class TransferTypesPlugin extends AbstractPlugin<PluginConfiguratio
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         return NodeDependencies.of(nodeDependencies.getNode(),
-            nodeDependencies.getChildNodes().map(this::mapClassNode),
-            nodeDependencies.getRelatedNodes().map(this::mapClassNode));
+                nodeDependencies.getChildNodes().map(this::mapClassNode),
+                nodeDependencies.getRelatedNodes().map(this::mapClassNode));
     }
 
     @Override

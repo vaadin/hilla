@@ -28,14 +28,15 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
         if (nodeDependencies.getNode() instanceof RootNode) {
             var rootNode = (RootNode) nodeDependencies.getNode();
             var endpointAnnotationName = getStorage().getParserConfig()
-                .getEndpointAnnotationName();
+                    .getEndpointAnnotationName();
             var endpoints = rootNode.getSource()
-                .getClassesWithAnnotation(endpointAnnotationName);
+                    .getClassesWithAnnotation(endpointAnnotationName);
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return NodeDependencies.of(rootNode,
-                endpoints.stream().map(ClassInfoModel::of)
-                    .filter(ClassInfoModel::isNonJDKClass)
-                    .map(EndpointNode::of), Stream.empty());
+                    endpoints.stream().map(ClassInfoModel::of)
+                            .filter(ClassInfoModel::isNonJDKClass)
+                            .map(EndpointNode::of),
+                    Stream.empty());
         }
         return nodeDependencies;
     }
@@ -55,22 +56,22 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
         var parentNode = nodePath.getParentPath().getNode();
         if (node instanceof EndpointNode && parentNode instanceof RootNode) {
             ((RootNode) parentNode).getTarget()
-                .addTagsItem(((EndpointNode) node).getTarget());
+                    .addTagsItem(((EndpointNode) node).getTarget());
         }
     }
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
-        Collection<ClassInfo> endpoints) {
+            Collection<ClassInfo> endpoints) {
         endpoints.stream().map(ClassInfoModel::of)
-            .flatMap(ClassInfoModel::getMethodsStream)
-            .flatMap(MethodInfoModel::getParametersStream).findFirst()
-            .ifPresent((parameter) -> {
-                if (parameter.getName() == null) {
-                    logger.info("Missing endpoint method parameter names" +
-                        "in JVM bytecode, probably because they were not enabled" +
-                        " during compilation. For Java compiler, add the " +
-                        "\"-parameters\" flag to enable those.");
-                }
-            });
+                .flatMap(ClassInfoModel::getMethodsStream)
+                .flatMap(MethodInfoModel::getParametersStream).findFirst()
+                .ifPresent((parameter) -> {
+                    if (parameter.getName() == null) {
+                        logger.info("Missing endpoint method parameter names"
+                                + "in JVM bytecode, probably because they were not enabled"
+                                + " during compilation. For Java compiler, add the "
+                                + "\"-parameters\" flag to enable those.");
+                    }
+                });
     }
 }

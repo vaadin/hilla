@@ -28,5 +28,6 @@ public class ComplexHierarchyEndpoint extends ComplexHierarchyParentEndpoint {
         return new ComplexHierarchyModel();
     }
 
-    public static class EndpointDependencyToIgnore {}
+    public static class EndpointDependencyToIgnore {
+    }
 }

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
     private EntityNode(@Nonnull ClassInfoModel source,
-        @Nonnull ObjectSchema target) {
+            @Nonnull ObjectSchema target) {
         super(source, target);
     }
 

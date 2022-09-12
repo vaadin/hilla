@@ -3,8 +3,8 @@ package dev.hilla.parser.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
-public final class PluginManager extends
-    AbstractCompositePlugin<PluginConfiguration> {
+public final class PluginManager
+        extends AbstractCompositePlugin<PluginConfiguration> {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
 
@@ -12,8 +12,7 @@ public final class PluginManager extends
         super(plugins.toArray(Plugin[]::new));
     }
 
-    public static Plugin load(String name,
-        Integer order,
+    public static Plugin load(String name, Integer order,
             PluginConfiguration configuration) {
         var cls = processClass(loadClass(name));
         var instance = instantiatePlugin(cls);

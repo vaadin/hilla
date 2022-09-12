@@ -59,6 +59,6 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
             sourceName = source.getClass().getSimpleName();
         }
         return String.format("%s(%s)",
-            getClass().getSimpleName().replaceAll("Node$", ""), sourceName);
+                getClass().getSimpleName().replaceAll("Node$", ""), sourceName);
     }
 }

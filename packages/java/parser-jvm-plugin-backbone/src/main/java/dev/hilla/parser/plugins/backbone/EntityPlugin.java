@@ -45,9 +45,9 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         return NodeDependencies.of(nodeDependencies.getNode(),
-            nodeDependencies.getChildNodes(),
-            Stream.concat(Stream.of(EntityNode.of(ref.getClassInfo())),
-                nodeDependencies.getRelatedNodes()));
+                nodeDependencies.getChildNodes(),
+                Stream.concat(Stream.of(EntityNode.of(ref.getClassInfo())),
+                        nodeDependencies.getRelatedNodes()));
     }
 
     @Override
@@ -56,25 +56,25 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = entityNode.getSource();
             entityNode.setTarget(
-                cls.isEnum() ? enumSchema(cls) : new ObjectSchema());
+                    cls.isEnum() ? enumSchema(cls) : new ObjectSchema());
         }
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode &&
-            nodePath.getParentPath().getNode() instanceof RootNode) {
+        if (nodePath.getNode() instanceof EntityNode
+                && nodePath.getParentPath().getNode() instanceof RootNode) {
             var schema = (Schema<?>) nodePath.getNode().getTarget();
             var cls = (ClassInfoModel) nodePath.getNode().getSource();
             var openApi = (OpenAPI) nodePath.getParentPath().getNode()
-                .getTarget();
+                    .getTarget();
 
             attachSchemaWithNameToOpenApi(schema, cls.getName(), openApi);
         }
     }
 
     private void attachSchemaWithNameToOpenApi(Schema<?> schema, String name,
-        OpenAPI openApi) {
+            OpenAPI openApi) {
         var components = openApi.getComponents();
 
         if (components == null) {
@@ -89,7 +89,7 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
         var schema = new StringSchema();
 
         schema.setEnum(entity.getFieldsStream().filter(FieldInfoModel::isPublic)
-            .map(FieldInfoModel::getName).collect(Collectors.toList()));
+                .map(FieldInfoModel::getName).collect(Collectors.toList()));
 
         return schema;
     }

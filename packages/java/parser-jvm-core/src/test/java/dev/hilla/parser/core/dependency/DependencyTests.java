@@ -30,8 +30,7 @@ public class DependencyTests {
     public static void setUp() {
         parser = new Parser(new ParserConfig.Builder().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new DependencyPlugin())
-                .finish());
+                .addPlugin(new DependencyPlugin()).finish());
         parser.execute();
     }
 
@@ -40,7 +39,7 @@ public class DependencyTests {
         var expected = List.of("getEntityOne", "getEntityTwo");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-            .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
+                .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
@@ -48,12 +47,12 @@ public class DependencyTests {
     @Test
     public void should_ResolveDependenciesCorrectly_When_ResolvingEntities() {
         var expected = List.of(
-            "dev.hilla.parser.core.dependency.DependencyEntityOne",
-            "dev.hilla.parser.core.dependency.DependencyEntityTwo",
-            "dev.hilla.parser.core.dependency.DependencyEntityThree");
+                "dev.hilla.parser.core.dependency.DependencyEntityOne",
+                "dev.hilla.parser.core.dependency.DependencyEntityTwo",
+                "dev.hilla.parser.core.dependency.DependencyEntityThree");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-            .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
+                .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }
@@ -61,10 +60,10 @@ public class DependencyTests {
     @Test
     public void should_ResolveDependencyMembersCorrectly() {
         var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
-            "foo3");
+                "foo3");
 
         var actual = (List<String>) parser.getStorage().getPluginStorage()
-            .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
+                .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
         assertEquals(expected, actual);
     }

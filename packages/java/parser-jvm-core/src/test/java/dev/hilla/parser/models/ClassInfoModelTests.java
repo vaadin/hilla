@@ -277,7 +277,8 @@ public class ClassInfoModelTests {
                 .map(ClassInfoModel::of).map(ClassInfoModel::getName)
                 .collect(Collectors.toList());
         var actual = model.getInterfacesStream()
-                .map(ClassRefSignatureModel::getName).collect(Collectors.toList());
+                .map(ClassRefSignatureModel::getName)
+                .collect(Collectors.toList());
 
         assertEquals(expected, actual);
     }

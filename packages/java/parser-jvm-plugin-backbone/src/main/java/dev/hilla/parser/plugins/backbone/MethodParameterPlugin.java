@@ -19,7 +19,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
-public final class MethodParameterPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class MethodParameterPlugin
+        extends AbstractPlugin<PluginConfiguration> {
 
     @Nonnull
     @Override
@@ -27,7 +28,7 @@ public final class MethodParameterPlugin extends AbstractPlugin<PluginConfigurat
         if (nodeDependencies.getNode() instanceof MethodNode) {
             var methodNode = (MethodNode) nodeDependencies.getNode();
             return NodeDependencies.of(methodNode,
-                getParametersStream(methodNode), Stream.empty());
+                    getParametersStream(methodNode), Stream.empty());
         }
         return nodeDependencies;
     }
@@ -36,8 +37,8 @@ public final class MethodParameterPlugin extends AbstractPlugin<PluginConfigurat
     public void enter(NodePath<?> nodePath) {
         var node = nodePath.getNode();
         var parentNode = nodePath.getParentPath().getNode();
-        if (node instanceof MethodParameterNode &&
-            parentNode instanceof MethodNode) {
+        if (node instanceof MethodParameterNode
+                && parentNode instanceof MethodNode) {
             var pathItem = (PathItem) parentNode.getTarget();
             if (pathItem.getPost().getRequestBody() == null) {
                 pathItem.getPost().setRequestBody(createRequestBody());
@@ -51,12 +52,12 @@ public final class MethodParameterPlugin extends AbstractPlugin<PluginConfigurat
 
     private Stream<Node<?, ?>> getParametersStream(MethodNode methodNode) {
         var parameters = new ArrayList<>(
-            methodNode.getSource().getParameters());
+                methodNode.getSource().getParameters());
         var parameterNodes = new ArrayList<Node<?, ?>>(parameters.size());
         for (var i = 0; i < parameters.size(); i++) {
             var parameter = parameters.get(i);
             var name = Optional.ofNullable(parameters.get(i).getName())
-                .orElse(String.format("_param_%d", i));
+                    .orElse(String.format("_param_%d", i));
             parameterNodes.add(i, MethodParameterNode.of(parameter, name));
         }
         return parameterNodes.stream().sequential();
@@ -65,8 +66,7 @@ public final class MethodParameterPlugin extends AbstractPlugin<PluginConfigurat
     private RequestBody createRequestBody() {
         var requestMap = new ObjectSchema();
         return new RequestBody().content(new Content().addMediaType(
-            MethodPlugin.MEDIA_TYPE,
-            new MediaType().schema(requestMap)));
+                MethodPlugin.MEDIA_TYPE, new MediaType().schema(requestMap)));
     }
 
 }

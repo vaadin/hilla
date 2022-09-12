@@ -26,7 +26,7 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     private Map<String, AnnotationMatcher> annotationsMap = mapByName(
-        NonnullPluginConfig.Processor.defaults);
+            NonnullPluginConfig.Processor.defaults);
 
     public NonnullPlugin() {
         super(NonnullPluginConfig.class);
@@ -47,12 +47,13 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
         var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
         var schema = typeSignatureNode.getTarget();
-        var matcher = Stream.concat(getAnnotationsFromPath(nodePath),
-                getPackageAnnotations(nodePath))
-            .map(annotation -> annotationsMap.get(annotation.getName()))
-            .filter(Objects::nonNull)
-            .max(Comparator.comparingInt(AnnotationMatcher::getScore))
-            .orElse(AnnotationMatcher.DEFAULT);
+        var matcher = Stream
+                .concat(getAnnotationsFromPath(nodePath),
+                        getPackageAnnotations(nodePath))
+                .map(annotation -> annotationsMap.get(annotation.getName()))
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                .orElse(AnnotationMatcher.DEFAULT);
 
         schema.setNullable(matcher.doesMakeNonNull() ? null : true);
     }
@@ -66,7 +67,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     public void setConfiguration(@Nonnull PluginConfiguration configuration) {
         super.setConfiguration(configuration);
         this.annotationsMap = mapByName(
-            new NonnullPluginConfig.Processor(getConfiguration()).process());
+                new NonnullPluginConfig.Processor(getConfiguration())
+                        .process());
     }
 
     @Override
@@ -75,31 +77,31 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     static private Map<String, AnnotationMatcher> mapByName(
-        Collection<AnnotationMatcher> annotations) {
-        return annotations.stream().collect(
-            Collectors.toMap(AnnotationMatcher::getName, Function.identity()));
+            Collection<AnnotationMatcher> annotations) {
+        return annotations.stream().collect(Collectors
+                .toMap(AnnotationMatcher::getName, Function.identity()));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Stream<Node<?, ?>> getParentNodes(NodePath<?> nodePath) {
         return Stream.iterate((NodePath) nodePath, NodePath::hasParentNodes,
-            NodePath::getParentPath).map(NodePath::getNode);
+                NodePath::getParentPath).map(NodePath::getNode);
     }
 
     private Stream<AnnotationInfoModel> getAnnotationsFromPath(
-        NodePath<?> nodePath) {
-        var models = getParentNodes(nodePath).filter(
-                node -> node.getSource() instanceof AnnotatedModel)
-            .map(node -> (AnnotatedModel) node.getSource());
+            NodePath<?> nodePath) {
+        var models = getParentNodes(nodePath)
+                .filter(node -> node.getSource() instanceof AnnotatedModel)
+                .map(node -> (AnnotatedModel) node.getSource());
         return models.flatMap(AnnotatedModel::getAnnotationsStream);
     }
 
     private Stream<AnnotationInfoModel> getPackageAnnotations(
-        NodePath<?> nodePath) {
-        var classes = getParentNodes(nodePath).filter(
-                node -> node.getSource() instanceof ClassInfoModel)
-            .map(node -> (ClassInfoModel) node.getSource());
+            NodePath<?> nodePath) {
+        var classes = getParentNodes(nodePath)
+                .filter(node -> node.getSource() instanceof ClassInfoModel)
+                .map(node -> (ClassInfoModel) node.getSource());
         return classes.map(ClassInfoModel::getPackage)
-            .flatMap(AnnotatedModel::getAnnotationsStream);
+                .flatMap(AnnotatedModel::getAnnotationsStream);
     }
 }

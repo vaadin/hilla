@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.PathItem;
 
 public final class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
     private MethodNode(@Nonnull MethodInfoModel source,
-        @Nonnull PathItem target) {
+            @Nonnull PathItem target) {
         super(source, target);
     }
 

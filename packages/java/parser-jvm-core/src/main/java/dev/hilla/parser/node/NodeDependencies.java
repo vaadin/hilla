@@ -10,8 +10,8 @@ public final class NodeDependencies {
     private final Stream<Node<?, ?>> relatedNodes;
 
     private NodeDependencies(@Nonnull Node<?, ?> node,
-        @Nonnull Stream<Node<?, ?>> childNodes,
-        @Nonnull Stream<Node<?, ?>> relatedNodes) {
+            @Nonnull Stream<Node<?, ?>> childNodes,
+            @Nonnull Stream<Node<?, ?>> relatedNodes) {
         this.node = Objects.requireNonNull(node);
         this.childNodes = Objects.requireNonNull(childNodes);
         this.relatedNodes = Objects.requireNonNull(relatedNodes);
@@ -30,8 +30,7 @@ public final class NodeDependencies {
     }
 
     static public NodeDependencies of(Node<?, ?> node,
-        Stream<Node<?, ?>> childNodes,
-        Stream<Node<?, ?>> relatedNodes) {
+            Stream<Node<?, ?>> childNodes, Stream<Node<?, ?>> relatedNodes) {
         return new NodeDependencies(node, childNodes, relatedNodes);
     }
 }

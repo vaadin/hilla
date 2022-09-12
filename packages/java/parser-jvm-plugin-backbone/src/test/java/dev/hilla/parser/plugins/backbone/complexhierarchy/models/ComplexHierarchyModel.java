@@ -19,9 +19,11 @@ package dev.hilla.parser.plugins.backbone.complexhierarchy.models;
 public class ComplexHierarchyModel extends ComplexHierarchyParentModel {
     private String name;
 
-    public EntityDependencyToIgnore methodToIgnore(EntityDependencyToIgnore parameter) {
+    public EntityDependencyToIgnore methodToIgnore(
+            EntityDependencyToIgnore parameter) {
         return parameter;
     }
 
-    public static class EntityDependencyToIgnore {}
+    public static class EntityDependencyToIgnore {
+    }
 }

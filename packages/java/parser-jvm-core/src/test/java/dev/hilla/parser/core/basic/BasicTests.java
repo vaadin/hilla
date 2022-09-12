@@ -25,10 +25,14 @@ public class BasicTests {
         STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)");
         STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(foo)");
         STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(foo)");
-        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
-        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
-        STEPS.add("-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
-        STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
+        STEPS.add(
+                "-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
+        STEPS.add(
+                "<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldFoo)");
+        STEPS.add(
+                "-> Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
+        STEPS.add(
+                "<- Root(ScanResult)/Endpoint(BasicEndpoint)/Field(fieldBar)");
         STEPS.add("<- Root(ScanResult)/Endpoint(BasicEndpoint)");
         STEPS.add("-> Root(ScanResult)/Entity(Sample)");
         STEPS.add("-> Root(ScanResult)/Entity(Sample)/Method(methodFoo)");
@@ -59,8 +63,8 @@ public class BasicTests {
 
         assertEquals(
                 List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
-                    "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
-                    "MethodInfoModel methodBar"),
+                        "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
+                        "MethodInfoModel methodBar"),
                 parser.getStorage().getPluginStorage()
                         .get(BasicPlugin.STORAGE_KEY));
     }
@@ -68,16 +72,14 @@ public class BasicTests {
     @Test
     public void should_TraverseInConsistentOrder() {
         var config = new ParserConfig.Builder().classPath(classPath)
-            .endpointAnnotation(Endpoint.class.getName())
-            .addPlugin(new BasicPlugin()).finish();
+                .endpointAnnotation(Endpoint.class.getName())
+                .addPlugin(new BasicPlugin()).finish();
 
         var parser = new Parser(config);
 
         parser.execute();
 
-        assertEquals(
-            String.join("\n", STEPS),
-            parser.getStorage().getPluginStorage()
-                .get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
+        assertEquals(String.join("\n", STEPS), parser.getStorage()
+                .getPluginStorage().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 }

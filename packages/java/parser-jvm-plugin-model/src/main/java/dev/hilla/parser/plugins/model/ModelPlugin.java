@@ -55,38 +55,37 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private static ValidationConstraint convertAnnotation(
-        AnnotationInfoModel annotation) {
+            AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
 
         var attributes = annotation.getParametersStream()
-            .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                AnnotationParameterModel::getValue));
+                .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                        AnnotationParameterModel::getValue));
 
         return new ValidationConstraint(simpleName,
-            !attributes.isEmpty() ? attributes : null);
+                !attributes.isEmpty() ? attributes : null);
     }
 
     private static String extractSimpleName(String fullyQualifiedName) {
         return fullyQualifiedName
-            .substring(fullyQualifiedName.lastIndexOf(".") + 1);
+                .substring(fullyQualifiedName.lastIndexOf(".") + 1);
     }
 
     private static boolean isValidationConstraintAnnotation(
-        AnnotationInfoModel annotation) {
+            AnnotationInfoModel annotation) {
         return annotation.getName()
-            .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
+                .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
     }
 
     private void addConstraintsToSchema(SignatureModel signature,
-        Schema<?> schema) {
+            Schema<?> schema) {
         var constraints = signature.getAnnotationsStream()
-            .filter(ModelPlugin::isValidationConstraintAnnotation)
-            .map(ModelPlugin::convertAnnotation)
-            .collect(Collectors.toList());
+                .filter(ModelPlugin::isValidationConstraintAnnotation)
+                .map(ModelPlugin::convertAnnotation)
+                .collect(Collectors.toList());
 
         if (!constraints.isEmpty()) {
-            schema.addExtension(VALIDATION_CONSTRAINTS_KEY,
-                constraints);
+            schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
         }
     }
 

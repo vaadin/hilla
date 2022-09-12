@@ -25,10 +25,12 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof EndpointNode) {
             var endpointCls = (ClassInfoModel) nodeDependencies.getNode()
-                .getSource();
+                    .getSource();
             return NodeDependencies.of(nodeDependencies.getNode(),
-                endpointCls.getMethodsStream().filter(MethodInfoModel::isPublic)
-                    .map(MethodNode::of), Stream.empty());
+                    endpointCls.getMethodsStream()
+                            .filter(MethodInfoModel::isPublic)
+                            .map(MethodNode::of),
+                    Stream.empty());
         }
         return nodeDependencies;
     }
@@ -37,12 +39,11 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     public void enter(NodePath<?> nodePath) {
         var node = nodePath.getNode();
         var parentNode = nodePath.getParentPath().getNode();
-        if (node instanceof MethodNode &&
-            parentNode instanceof EndpointNode) {
+        if (node instanceof MethodNode && parentNode instanceof EndpointNode) {
             var methodNode = (MethodNode) node;
             var endpointNode = (EndpointNode) parentNode;
             methodNode.getTarget()
-                .post(createOperation(endpointNode, methodNode));
+                    .post(createOperation(endpointNode, methodNode));
         }
     }
 
@@ -51,31 +52,31 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodePath.getNode();
         var parentNode = nodePath.getParentPath().getNode();
         var grandParentNode = nodePath.getParentPath().getParentPath()
-            .getNode();
-        if (node instanceof MethodNode && parentNode instanceof EndpointNode &&
-            grandParentNode instanceof RootNode) {
+                .getNode();
+        if (node instanceof MethodNode && parentNode instanceof EndpointNode
+                && grandParentNode instanceof RootNode) {
             var endpointName = ((EndpointNode) parentNode).getTarget()
-                .getName();
+                    .getName();
             var methodName = ((MethodNode) node).getSource().getName();
-            ((RootNode) grandParentNode).getTarget()
-                .path(String.format("/%s/%s", endpointName, methodName),
+            ((RootNode) grandParentNode).getTarget().path(
+                    String.format("/%s/%s", endpointName, methodName),
                     ((MethodNode) node).getTarget());
         }
     }
 
     private Operation createOperation(EndpointNode endpointNode,
-        MethodNode methodNode) {
+            MethodNode methodNode) {
         var operation = new Operation();
 
         var endpointName = endpointNode.getTarget().getName();
 
-        operation.operationId(String.format("%s_%s_POST", endpointName,
-                methodNode.getSource().getName())).addTagsItem(endpointName)
-            .responses(createResponses());
+        operation
+                .operationId(String.format("%s_%s_POST", endpointName,
+                        methodNode.getSource().getName()))
+                .addTagsItem(endpointName).responses(createResponses());
 
         return operation;
     }
-
 
     private ApiResponses createResponses() {
         var response = new ApiResponse().description("");

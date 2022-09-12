@@ -15,8 +15,8 @@ final class RemovePlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         return NodeDependencies.of(nodeDependencies.getNode(),
-            nodeDependencies.getChildNodes(),
-            removeBazEntity(nodeDependencies.getRelatedNodes()));
+                nodeDependencies.getChildNodes(),
+                removeBazEntity(nodeDependencies.getRelatedNodes()));
     }
 
     @Override
@@ -30,8 +30,8 @@ final class RemovePlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private Stream<Node<?, ?>> removeBazEntity(Stream<Node<?, ?>> nodes) {
-        return nodes.filter(node -> !((node instanceof EntityNode) &&
-                                          ((EntityNode) node).getSource()
-                                              .getSimpleName().equals("Baz")));
+        return nodes.filter(
+                node -> !((node instanceof EntityNode) && ((EntityNode) node)
+                        .getSource().getSimpleName().equals("Baz")));
     }
 }

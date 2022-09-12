@@ -5,7 +5,8 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
 
-public abstract class AbstractPlugin<C extends PluginConfiguration> implements Plugin {
+public abstract class AbstractPlugin<C extends PluginConfiguration>
+        implements Plugin {
     private C configuration;
     private int order;
 
@@ -23,12 +24,13 @@ public abstract class AbstractPlugin<C extends PluginConfiguration> implements P
     @Override
     @SuppressWarnings("unchecked")
     public void setConfiguration(@Nonnull PluginConfiguration configuration) {
-        var configClass = (Class<C>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        var configClass = (Class<C>) ((ParameterizedType) getClass()
+                .getGenericSuperclass()).getActualTypeArguments()[0];
         Objects.requireNonNull(configuration);
         if (!configClass.isAssignableFrom(configuration.getClass())) {
             throw new IllegalArgumentException(
-                String.format("Requires instance of %s " + ", but got %s",
-                    configClass, configuration.getClass()));
+                    String.format("Requires instance of %s " + ", but got %s",
+                            configClass, configuration.getClass()));
         }
 
         this.configuration = (C) configuration;

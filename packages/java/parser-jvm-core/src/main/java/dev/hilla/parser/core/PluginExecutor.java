@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class PluginExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(
-        PluginExecutor.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(PluginExecutor.class);
 
     private final Plugin plugin;
     private final RootNode rootNode;
@@ -45,9 +45,8 @@ public final class PluginExecutor {
 
     @Nonnull
     private NodeScanResult scanNodeDependencies(Node<?, ?> node) {
-        return scanResults.computeIfAbsent(node,
-            n -> new NodeScanResult(plugin.scan(NodeDependencies.of(n, Stream.empty(),
-             Stream.empty()))));
+        return scanResults.computeIfAbsent(node, n -> new NodeScanResult(plugin
+                .scan(NodeDependencies.of(n, Stream.empty(), Stream.empty()))));
     }
 
     private void enqueueEnterFirst(NodePath<?> path) {
@@ -102,12 +101,12 @@ public final class PluginExecutor {
 
             var reverseChildList = new LinkedList<NodePath<?>>();
             scanResult.getChildNodes().stream().map(getPath()::of)
-                .forEachOrdered(reverseChildList::addFirst);
+                    .forEachOrdered(reverseChildList::addFirst);
             reverseChildList.forEach(PluginExecutor.this::enqueueEnterFirst);
 
             scanResult.getRelatedNodes().stream()
-                .map(getPath().getRootPath()::of)
-                .forEachOrdered(PluginExecutor.this::enqueueEnterLast);
+                    .map(getPath().getRootPath()::of)
+                    .forEachOrdered(PluginExecutor.this::enqueueEnterLast);
         }
     }
 
@@ -129,10 +128,10 @@ public final class PluginExecutor {
         public NodeScanResult(@Nonnull NodeDependencies nodeDependencies) {
             Objects.requireNonNull(nodeDependencies);
             this.node = nodeDependencies.getNode();
-            this.childNodes = nodeDependencies.getChildNodes().collect(
-                Collectors.toList());
-            this.relatedNodes = nodeDependencies.getRelatedNodes().collect(
-                Collectors.toList());
+            this.childNodes = nodeDependencies.getChildNodes()
+                    .collect(Collectors.toList());
+            this.relatedNodes = nodeDependencies.getRelatedNodes()
+                    .collect(Collectors.toList());
         }
 
         @Nonnull

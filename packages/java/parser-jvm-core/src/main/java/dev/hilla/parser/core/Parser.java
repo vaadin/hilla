@@ -29,8 +29,8 @@ public final class Parser {
                 .enableSystemJarsAndModules()
                 .overrideClasspath(config.getClassPathElements()).scan()) {
             var rootNode = new RootNode(scanResult, storage.getOpenAPI());
-            var pluginManager = new PluginManager(storage.getParserConfig()
-                .getPlugins());
+            var pluginManager = new PluginManager(
+                    storage.getParserConfig().getPlugins());
             pluginManager.setStorage(storage);
             var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
             pluginExecutor.execute();

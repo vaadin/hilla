@@ -20,9 +20,10 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
         var node = nodeDependencies.getNode();
         if (node instanceof EndpointNode) {
             return NodeDependencies.of(node,
-                Stream.concat(removeBarMethod(nodeDependencies.getChildNodes()),
-                    getReplacementFields()),
-                nodeDependencies.getRelatedNodes());
+                    Stream.concat(
+                            removeBarMethod(nodeDependencies.getChildNodes()),
+                            getReplacementFields()),
+                    nodeDependencies.getRelatedNodes());
         } else {
             return nodeDependencies;
         }
@@ -40,18 +41,18 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Nonnull
     private Stream<Node<?, ?>> removeBarMethod(
-        @Nonnull Stream<Node<?, ?>> nodes) {
-        return nodes.filter(node -> !((node instanceof MethodNode) &&
-                                          ((MethodNode) node).getSource()
-                                              .getName().equals("bar")));
+            @Nonnull Stream<Node<?, ?>> nodes) {
+        return nodes.filter(node -> !((node instanceof MethodNode)
+                && ((MethodNode) node).getSource().getName().equals("bar")));
     }
 
     @Nonnull
     private Stream<Node<?, ?>> getReplacementFields() {
         try {
-            return Stream.of(Sample.class.getDeclaredField("fieldFoo"),
-                    Sample.class.getDeclaredField("fieldBar"))
-                .map(FieldInfoModel::of).map(FieldNode::of);
+            return Stream
+                    .of(Sample.class.getDeclaredField("fieldFoo"),
+                            Sample.class.getDeclaredField("fieldBar"))
+                    .map(FieldInfoModel::of).map(FieldNode::of);
         } catch (NoSuchFieldException e) {
             return Stream.empty();
         }

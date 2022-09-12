@@ -7,14 +7,15 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public final class MethodParameterNode extends
-        AbstractNode<MethodParameterInfoModel, String> {
+public final class MethodParameterNode
+        extends AbstractNode<MethodParameterInfoModel, String> {
     private MethodParameterNode(@Nonnull MethodParameterInfoModel source,
-        String target) {
+            String target) {
         super(source, target);
     }
 
-    static public MethodParameterNode of(@Nonnull MethodParameterInfoModel source, @Nonnull String target) {
+    static public MethodParameterNode of(
+            @Nonnull MethodParameterInfoModel source, @Nonnull String target) {
         return new MethodParameterNode(source, target);
     }
 }
