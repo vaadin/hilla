@@ -3,7 +3,6 @@ package dev.hilla.parser.node;
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public final class NodePath<N extends Node<?, ?>> {
     private final N node;

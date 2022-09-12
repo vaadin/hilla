@@ -83,6 +83,7 @@ public final class TransferTypesPlugin extends AbstractPlugin<PluginConfiguratio
         }
 
         var mapped = ClassInfoModel.of(classMap.get(className));
+        // TODO: replace the setter call with something cleaner
         classRef.setReference(mapped);
         return node;
     }
