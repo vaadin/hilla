@@ -5,9 +5,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-
 public interface Plugin {
     @Nonnull
     NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);

@@ -1,4 +1,4 @@
-package dev.hilla.parser.node;
+package dev.hilla.parser.core;
 
 public interface Node<S, T> {
     S getSource();

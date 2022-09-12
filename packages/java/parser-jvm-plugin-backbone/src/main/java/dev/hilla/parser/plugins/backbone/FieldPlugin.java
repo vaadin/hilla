@@ -3,16 +3,16 @@ package dev.hilla.parser.plugins.backbone;
 import javax.annotation.Nonnull;
 
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.node.EntityNode;
-import dev.hilla.parser.node.FieldNode;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
+import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodePath;
 
 public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
@@ -29,11 +29,9 @@ public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
 
         var fields = cls.getFieldsStream()
                 .filter(Predicate.not(FieldInfoModel::isTransient))
-                .map(FieldNode::of);
+                .<Node<?, ?>> map(FieldNode::of);
 
-        return NodeDependencies.of(nodeDependencies.getNode(),
-                Stream.concat(nodeDependencies.getChildNodes(), fields),
-                Stream.empty());
+        return nodeDependencies.appendChildNodes(fields);
     }
 
     @Override

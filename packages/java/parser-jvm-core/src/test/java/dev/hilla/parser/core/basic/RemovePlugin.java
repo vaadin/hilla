@@ -5,27 +5,26 @@ import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.node.EntityNode;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.test.nodes.EntityNode;
 
 final class RemovePlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return NodeDependencies.of(nodeDependencies.getNode(),
-                nodeDependencies.getChildNodes(),
-                removeBazEntity(nodeDependencies.getRelatedNodes()));
+        return nodeDependencies.processRelatedNodes(this::removeBazEntity);
     }
 
     @Override
-    public void enter(dev.hilla.parser.node.NodePath<?> nodePath) {
+    public void enter(NodePath<?> nodePath) {
 
     }
 
     @Override
-    public void exit(dev.hilla.parser.node.NodePath<?> nodePath) {
+    public void exit(NodePath<?> nodePath) {
 
     }
 

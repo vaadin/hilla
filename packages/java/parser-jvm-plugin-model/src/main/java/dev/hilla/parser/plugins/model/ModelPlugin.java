@@ -12,9 +12,9 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.TypeSignatureNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import io.swagger.v3.oas.models.media.Schema;
 

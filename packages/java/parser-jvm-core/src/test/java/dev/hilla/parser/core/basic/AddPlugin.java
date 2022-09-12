@@ -8,14 +8,13 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.node.EndpointNode;
-import dev.hilla.parser.node.EntityNode;
-import dev.hilla.parser.node.FieldNode;
-import dev.hilla.parser.node.MethodNode;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.RootNode;
+import dev.hilla.parser.test.nodes.EndpointNode;
+import dev.hilla.parser.test.nodes.EntityNode;
+import dev.hilla.parser.test.nodes.FieldNode;
+import dev.hilla.parser.test.nodes.MethodNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
 
 final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
@@ -29,28 +28,29 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
                             .getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of)
                     .collect(Collectors.toList());
-            return NodeDependencies.of(node,
-                    endpoints.stream().map(EndpointNode::of),
-                    endpoints.stream()
+            return nodeDependencies
+                    .appendChildNodes(endpoints.stream().map(EndpointNode::of))
+                    .appendRelatedNodes(endpoints.stream()
                             .flatMap(ClassInfoModel::getInnerClassesStream)
                             .map(EntityNode::of));
         } else if (node instanceof EndpointNode) {
-            return NodeDependencies.of(node,
-                    Stream.concat(((EndpointNode) node).getSource()
-                            .getFieldsStream().map(FieldNode::of),
+            return nodeDependencies
+                    .appendChildNodes(Stream.concat(
+                            ((EndpointNode) node).getSource().getFieldsStream()
+                                    .map(FieldNode::of),
                             ((EndpointNode) node).getSource().getMethodsStream()
-                                    .map(MethodNode::of)),
-                    Stream.of(EntityNode.of(ClassInfoModel.of(Sample.class))));
+                                    .map(MethodNode::of)))
+                    .appendRelatedNodes(Stream.of(
+                            EntityNode.of(ClassInfoModel.of(Sample.class))));
         } else if (node instanceof EntityNode && ((EntityNode) node).getSource()
                 .getName().equals(Sample.class.getName())) {
             try {
-                return NodeDependencies.of(
-                        node, Stream
+                return nodeDependencies
+                        .appendChildNodes(Stream
                                 .of(Sample.class.getDeclaredMethod("methodFoo"),
                                         Sample.class
                                                 .getDeclaredMethod("methodBar"))
-                                .map(MethodInfoModel::of).map(MethodNode::of),
-                        nodeDependencies.getRelatedNodes());
+                                .map(MethodInfoModel::of).map(MethodNode::of));
             } catch (NoSuchMethodException e) {
                 return nodeDependencies;
             }
@@ -61,12 +61,10 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-
     }
 
     static class Sample {

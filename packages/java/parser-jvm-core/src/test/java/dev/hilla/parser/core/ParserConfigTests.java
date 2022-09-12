@@ -13,8 +13,6 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

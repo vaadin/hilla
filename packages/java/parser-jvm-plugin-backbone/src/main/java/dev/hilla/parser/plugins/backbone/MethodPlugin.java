@@ -2,17 +2,16 @@ package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
 
-import java.util.stream.Stream;
-
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.node.EndpointNode;
-import dev.hilla.parser.node.MethodNode;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.RootNode;
+import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -26,11 +25,10 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         if (nodeDependencies.getNode() instanceof EndpointNode) {
             var endpointCls = (ClassInfoModel) nodeDependencies.getNode()
                     .getSource();
-            return NodeDependencies.of(nodeDependencies.getNode(),
-                    endpointCls.getMethodsStream()
-                            .filter(MethodInfoModel::isPublic)
-                            .map(MethodNode::of),
-                    Stream.empty());
+            var methods = endpointCls.getMethodsStream()
+                    .filter(MethodInfoModel::isPublic)
+                    .<Node<?, ?>> map(MethodNode::of);
+            return nodeDependencies.appendChildNodes(methods);
         }
         return nodeDependencies;
     }

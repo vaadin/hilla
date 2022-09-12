@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.node.EndpointNode;
-import dev.hilla.parser.node.FieldNode;
-import dev.hilla.parser.node.MethodNode;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.test.nodes.EndpointNode;
+import dev.hilla.parser.test.nodes.FieldNode;
+import dev.hilla.parser.test.nodes.MethodNode;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 
 final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
@@ -19,11 +19,8 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
         if (node instanceof EndpointNode) {
-            return NodeDependencies.of(node,
-                    Stream.concat(
-                            removeBarMethod(nodeDependencies.getChildNodes()),
-                            getReplacementFields()),
-                    nodeDependencies.getRelatedNodes());
+            return nodeDependencies.processChildNodes(this::removeBarMethod)
+                    .appendChildNodes(getReplacementFields());
         } else {
             return nodeDependencies;
         }

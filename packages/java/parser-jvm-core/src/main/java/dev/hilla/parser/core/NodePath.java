@@ -1,4 +1,4 @@
-package dev.hilla.parser.node;
+package dev.hilla.parser.core;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
@@ -17,6 +17,9 @@ public final class NodePath<N extends Node<?, ?>> {
 
     @SuppressWarnings("unchecked")
     private NodePath(@Nonnull N node) {
+        if (!(node instanceof RootNode)) {
+            throw new IllegalArgumentException("RootNode instance required");
+        }
         this.node = Objects.requireNonNull(node);
         this.parentPath = this;
         this.rootPath = (NodePath<RootNode>) this;
@@ -86,11 +89,11 @@ public final class NodePath<N extends Node<?, ?>> {
         return String.join("", list);
     }
 
-    static public NodePath<RootNode> of(@Nonnull RootNode rootNode) {
+    static NodePath<RootNode> forRoot(@Nonnull RootNode rootNode) {
         return new NodePath<>(rootNode);
     }
 
-    public <N extends Node<?, ?>> NodePath<N> of(@Nonnull N node) {
+    <N extends Node<?, ?>> NodePath<N> childPath(@Nonnull N node) {
         return new NodePath<>(node, this);
     }
 }

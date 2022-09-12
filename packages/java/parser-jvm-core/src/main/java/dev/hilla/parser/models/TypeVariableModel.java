@@ -32,7 +32,8 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         var other = (TypeVariableModel) obj;
 
         return getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations());
+                && getAnnotations().equals(other.getAnnotations())
+                && resolve().equals(other.resolve());
     }
 
     @Override
@@ -42,7 +43,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return getName().hashCode();
+        return Objects.hash(getName(), resolve().hashCode());
     }
 
     @Override

@@ -2,7 +2,6 @@ package dev.hilla.parser.plugins.nonnull;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,10 +17,10 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.TypeSignatureNode;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
@@ -29,7 +28,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             NonnullPluginConfig.Processor.defaults);
 
     public NonnullPlugin() {
-        super(NonnullPluginConfig.class);
+        super();
         setOrder(100);
     }
 

@@ -9,9 +9,9 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.NamedModel;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.RootNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
 
 final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     private final List<String> footsteps = new ArrayList<>();
@@ -41,10 +41,11 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     public void exit(NodePath<?> nodePath) {
         footsteps.add(String.format("<- %s", nodePath.toString()));
         if (nodePath.getNode() instanceof RootNode) {
-            getStorage().getPluginStorage().put(BasicPlugin.STORAGE_KEY,
-                    members);
-            getStorage().getPluginStorage().put(
-                    BasicPlugin.FOOTSTEPS_STORAGE_KEY,
+            var rootNode = (RootNode) nodePath.getNode();
+            var openApi = rootNode.getTarget();
+            openApi.addExtension(BasicPlugin.STORAGE_KEY,
+                    String.join(", ", members));
+            openApi.addExtension(BasicPlugin.FOOTSTEPS_STORAGE_KEY,
                     String.join("\n", footsteps));
         }
     }

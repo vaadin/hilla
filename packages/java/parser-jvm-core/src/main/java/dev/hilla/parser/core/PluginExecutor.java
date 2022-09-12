@@ -13,10 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.RootNode;
-import dev.hilla.parser.node.NodePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +32,7 @@ public final class PluginExecutor {
     }
 
     public void execute() {
-        var rootPath = dev.hilla.parser.node.NodePath.of(rootNode);
+        var rootPath = NodePath.forRoot(rootNode);
         enqueueEnterFirst(rootPath);
         while (!queue.isEmpty()) {
             queue.removeFirst().execute();
@@ -45,8 +41,9 @@ public final class PluginExecutor {
 
     @Nonnull
     private NodeScanResult scanNodeDependencies(Node<?, ?> node) {
-        return scanResults.computeIfAbsent(node, n -> new NodeScanResult(plugin
-                .scan(NodeDependencies.of(n, Stream.empty(), Stream.empty()))));
+        return scanResults.computeIfAbsent(node,
+                n -> new NodeScanResult(plugin.scan(new NodeDependencies(n,
+                        Stream.empty(), Stream.empty()))));
     }
 
     private void enqueueEnterFirst(NodePath<?> path) {
@@ -100,12 +97,12 @@ public final class PluginExecutor {
             PluginExecutor.this.enqueueExitFirst(getPath());
 
             var reverseChildList = new LinkedList<NodePath<?>>();
-            scanResult.getChildNodes().stream().map(getPath()::of)
+            scanResult.getChildNodes().stream().map(getPath()::childPath)
                     .forEachOrdered(reverseChildList::addFirst);
             reverseChildList.forEach(PluginExecutor.this::enqueueEnterFirst);
 
             scanResult.getRelatedNodes().stream()
-                    .map(getPath().getRootPath()::of)
+                    .map(getPath().getRootPath()::childPath)
                     .forEachOrdered(PluginExecutor.this::enqueueEnterLast);
         }
     }

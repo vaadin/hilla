@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.node.MethodNode;
-import dev.hilla.parser.node.MethodParameterNode;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -27,8 +27,8 @@ public final class MethodParameterPlugin
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof MethodNode) {
             var methodNode = (MethodNode) nodeDependencies.getNode();
-            return NodeDependencies.of(methodNode,
-                    getParametersStream(methodNode), Stream.empty());
+            return nodeDependencies
+                    .appendChildNodes(getParametersStream(methodNode));
         }
         return nodeDependencies;
     }

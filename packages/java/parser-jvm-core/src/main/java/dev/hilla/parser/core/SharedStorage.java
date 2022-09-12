@@ -1,13 +1,9 @@
 package dev.hilla.parser.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class SharedStorage {
     private final ParserConfig parserConfig;
-    private final Map<String, Object> pluginStorage = new HashMap<>();
 
     SharedStorage(ParserConfig parserConfig) {
         this.parserConfig = parserConfig;
@@ -19,9 +15,5 @@ public final class SharedStorage {
 
     public ParserConfig getParserConfig() {
         return parserConfig;
-    }
-
-    public Map<String, Object> getPluginStorage() {
-        return pluginStorage;
     }
 }

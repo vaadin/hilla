@@ -1,4 +1,4 @@
-package dev.hilla.parser.node;
+package dev.hilla.parser.core;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

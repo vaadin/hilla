@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
 import dev.hilla.parser.utils.PluginException;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>

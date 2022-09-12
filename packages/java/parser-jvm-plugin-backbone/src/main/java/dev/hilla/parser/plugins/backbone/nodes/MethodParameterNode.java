@@ -1,11 +1,9 @@
-package dev.hilla.parser.node;
+package dev.hilla.parser.plugins.backbone.nodes;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.MethodParameterInfoModel;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 
 public final class MethodParameterNode
         extends AbstractNode<MethodParameterInfoModel, String> {
@@ -14,6 +12,7 @@ public final class MethodParameterNode
         super(source, target);
     }
 
+    @Nonnull
     static public MethodParameterNode of(
             @Nonnull MethodParameterInfoModel source, @Nonnull String target) {
         return new MethodParameterNode(source, target);

@@ -59,14 +59,13 @@ public class BasicTests {
 
         var parser = new Parser(config);
 
-        parser.execute();
+        var openApi = parser.execute();
 
-        assertEquals(
+        assertEquals(String.join(", ",
                 List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
                         "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
-                        "MethodInfoModel methodBar"),
-                parser.getStorage().getPluginStorage()
-                        .get(BasicPlugin.STORAGE_KEY));
+                        "MethodInfoModel methodBar")),
+                openApi.getExtensions().get(BasicPlugin.STORAGE_KEY));
     }
 
     @Test
@@ -77,9 +76,9 @@ public class BasicTests {
 
         var parser = new Parser(config);
 
-        parser.execute();
+        var openApi = parser.execute();
 
-        assertEquals(String.join("\n", STEPS), parser.getStorage()
-                .getPluginStorage().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
+        assertEquals(String.join("\n", STEPS),
+                openApi.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 }

@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.node.RootNode;
 import io.github.classgraph.ClassGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

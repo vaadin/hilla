@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -14,10 +15,10 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.node.Node;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.TypeSignatureNode;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.runtime.transfertypes.EndpointSubscription;
 import dev.hilla.runtime.transfertypes.Flux;
@@ -42,16 +43,15 @@ public final class TransferTypesPlugin
     }
 
     public TransferTypesPlugin() {
-        super(PluginConfiguration.class);
+        super();
         setOrder(100);
     }
 
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return NodeDependencies.of(nodeDependencies.getNode(),
-                nodeDependencies.getChildNodes().map(this::mapClassNode),
-                nodeDependencies.getRelatedNodes().map(this::mapClassNode));
+        return nodeDependencies.processChildNodes(this::processNodes)
+                .processRelatedNodes(this::processNodes);
     }
 
     @Override
@@ -67,7 +67,11 @@ public final class TransferTypesPlugin
         return List.of(BackbonePlugin.class);
     }
 
-    private Node<?, ?> mapClassNode(Node<?, ?> node) {
+    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
+        return nodes.map(this::mapClassRefNodes);
+    }
+
+    private Node<?, ?> mapClassRefNodes(Node<?, ?> node) {
         if (!(node instanceof TypeSignatureNode)) {
             return node;
         }

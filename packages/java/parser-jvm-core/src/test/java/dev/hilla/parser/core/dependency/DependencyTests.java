@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,7 @@ public class DependencyTests {
     private static final ResourceLoader resourceLoader = new ResourceLoader(
             DependencyTests.class);
     private static Parser parser;
+    private static OpenAPI openApi;
 
     static {
         try {
@@ -31,14 +33,14 @@ public class DependencyTests {
         parser = new Parser(new ParserConfig.Builder().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new DependencyPlugin()).finish());
-        parser.execute();
+        openApi = parser.execute();
     }
 
     @Test
     public void should_ResolveDependenciesCorrectly_When_ResolvingMethods() {
         var expected = List.of("getEntityOne", "getEntityTwo");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = openApi.getExtensions()
                 .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
@@ -51,7 +53,7 @@ public class DependencyTests {
                 "dev.hilla.parser.core.dependency.DependencyEntityTwo",
                 "dev.hilla.parser.core.dependency.DependencyEntityThree");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = openApi.getExtensions()
                 .get(DependencyPlugin.ENTITY_DEPS_STORAGE_KEY);
 
         assertEquals(expected, actual);
@@ -62,7 +64,7 @@ public class DependencyTests {
         var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
                 "foo3");
 
-        var actual = (List<String>) parser.getStorage().getPluginStorage()
+        var actual = openApi.getExtensions()
                 .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
         assertEquals(expected, actual);

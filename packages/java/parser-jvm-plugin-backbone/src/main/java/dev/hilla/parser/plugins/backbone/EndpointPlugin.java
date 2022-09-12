@@ -3,17 +3,16 @@ package dev.hilla.parser.plugins.backbone;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.node.EndpointNode;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.RootNode;
+import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
 import io.github.classgraph.ClassInfo;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.slf4j.Logger;
@@ -32,11 +31,10 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
             var endpoints = rootNode.getSource()
                     .getClassesWithAnnotation(endpointAnnotationName);
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
-            return NodeDependencies.of(rootNode,
-                    endpoints.stream().map(ClassInfoModel::of)
+            return nodeDependencies
+                    .appendChildNodes(endpoints.stream().map(ClassInfoModel::of)
                             .filter(ClassInfoModel::isNonJDKClass)
-                            .map(EndpointNode::of),
-                    Stream.empty());
+                            .map(EndpointNode::of));
         }
         return nodeDependencies;
     }

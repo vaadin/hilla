@@ -1,7 +1,8 @@
-package dev.hilla.parser.node;
+package dev.hilla.parser.test.nodes;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.MethodInfoModel;
 import io.swagger.v3.oas.models.PathItem;
 

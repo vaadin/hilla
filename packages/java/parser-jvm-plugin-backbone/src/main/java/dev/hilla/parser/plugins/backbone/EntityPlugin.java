@@ -2,8 +2,6 @@ package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,19 +10,16 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.node.EntityNode;
-import dev.hilla.parser.node.NodeDependencies;
-import dev.hilla.parser.node.NodePath;
-import dev.hilla.parser.node.RootNode;
-import dev.hilla.parser.node.TypeSignatureNode;
+import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
-
-import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
 public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
@@ -40,14 +35,12 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
         }
 
         var ref = (ClassRefSignatureModel) node.getSource();
-        if (ref.isJDKClass() || ref.isDate()) {
+        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
             return nodeDependencies;
         }
 
-        return NodeDependencies.of(nodeDependencies.getNode(),
-                nodeDependencies.getChildNodes(),
-                Stream.concat(Stream.of(EntityNode.of(ref.getClassInfo())),
-                        nodeDependencies.getRelatedNodes()));
+        return nodeDependencies.appendRelatedNodes(
+                Stream.of(EntityNode.of(ref.getClassInfo())));
     }
 
     @Override
