@@ -24,6 +24,7 @@ import {
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
 import type { Expression, Identifier, TypeNode, TypeReferenceNode } from 'typescript';
 import ts from 'typescript';
+import type { CheckOptionalCallback } from '../ModelSchemaProcessor.js';
 import {
   AnnotatedSchema,
   Annotation,
@@ -81,12 +82,12 @@ export type ModelSchemaExpressionContext = ModelSchemaContext &
     checkOptional?: (schema: Schema) => boolean;
   }>;
 
-export abstract class ModelSchemaPartProcessor<T, C = ModelSchemaContext> {
-  readonly [$context]: C;
+export abstract class ModelSchemaPartProcessor<T> {
+  readonly [$context]: ModelSchemaContext;
   readonly [$originalSchema]: Schema;
   readonly [$schema]: Schema;
 
-  constructor(schema: Schema, context: C) {
+  constructor(schema: Schema, context: ModelSchemaContext) {
     this[$context] = context;
     this[$originalSchema] = schema;
     this[$schema] = isComposedSchema(schema) ? decomposeSchema(schema)[0] : schema;
@@ -268,13 +269,16 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
   }
 }
 
-export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<
-  readonly Expression[],
-  ModelSchemaExpressionContext
-> {
+export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
+  readonly #checkOptional: CheckOptionalCallback;
+
+  constructor(schema: Schema, context: ModelSchemaContext, checkOptional: CheckOptionalCallback = isNullableSchema) {
+    super(schema, context);
+    this.#checkOptional = checkOptional;
+  }
+
   public override process(): readonly ts.Expression[] {
     const schema = this[$schema];
-    const { checkOptional = isNullableSchema } = this[$context];
 
     let result = super.process();
 
@@ -286,7 +290,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<
       result = [...result, ...this.#getValidatorsFromValidationConstraints(schema)];
     }
 
-    return [checkOptional(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
+    return [this.#checkOptional(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
   }
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {

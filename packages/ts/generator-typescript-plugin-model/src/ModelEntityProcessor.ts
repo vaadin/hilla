@@ -100,10 +100,7 @@ export class ModelEntityProcessor {
       };
 
       const type = new ModelSchemaTypeProcessor(schema, ctx).process();
-      const args = new ModelSchemaExpressionProcessor(schema, {
-        ...ctx,
-        checkOptional: (_) => !requiredSet.has(name),
-      }).process();
+      const args = new ModelSchemaExpressionProcessor(schema, ctx, (_) => !requiredSet.has(name)).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
