@@ -145,7 +145,7 @@ export function resolveReference(
 ): Schema | undefined {
   if (schemas) {
     for (const [name, schema] of Object.entries(schemas)) {
-      if (name === $ref) {
+      if ($ref.includes(name)) {
         return schema;
       }
     }

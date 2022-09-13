@@ -78,6 +78,11 @@ export type ModelSchemaContext = Readonly<{
 
 export type OptionalChecker = (schema: Schema) => boolean;
 
+function importBuiltInFormModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
+  const modelPath = paths.createBareModulePath('@hilla/form', false);
+  return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
+}
+
 export abstract class ModelSchemaPartProcessor<T> {
   readonly [$context]: ModelSchemaContext;
   readonly [$originalSchema]: Schema;
@@ -174,52 +179,43 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
 }
 
 class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier> {
-  static importBuiltInFormModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
-    const modelPath = paths.createBareModulePath('@hilla/form', false);
-    return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
-  }
-
-  declare ['constructor']: typeof ModelSchemaIdentifierProcessor;
-
   override [$processArray](_: ArraySchema): Identifier {
-    return this.constructor.importBuiltInFormModel('ArrayModel', this[$context].dependencies);
+    return importBuiltInFormModel('ArrayModel', this[$context].dependencies);
   }
 
   override [$processBoolean](_: BooleanSchema): Identifier {
-    return this.constructor.importBuiltInFormModel('BooleanModel', this[$context].dependencies);
+    return importBuiltInFormModel('BooleanModel', this[$context].dependencies);
   }
 
   override [$processNumber](_: NumberSchema | IntegerSchema): Identifier {
-    return this.constructor.importBuiltInFormModel('NumberModel', this[$context].dependencies);
+    return importBuiltInFormModel('NumberModel', this[$context].dependencies);
   }
 
   override [$processRecord](_: MapSchema): Identifier {
-    return this.constructor.importBuiltInFormModel('ObjectModel', this[$context].dependencies);
+    return importBuiltInFormModel('ObjectModel', this[$context].dependencies);
   }
 
   override [$processReference](schema: ReferenceSchema): Identifier {
     const { dependencies, isReferenceToEnum } = this[$context];
-    const { paths, imports } = dependencies;
 
-    let name = convertReferenceSchemaToSpecifier(schema);
-    let pathBase = convertReferenceSchemaToPath(schema);
-
-    if (!isReferenceToEnum(schema)) {
-      name = `${name}Model`;
-      pathBase = `${pathBase}Model`;
+    if (isReferenceToEnum(schema)) {
+      return importBuiltInFormModel('StringModel', dependencies);
     }
 
-    const path = paths.createRelativePath(pathBase);
+    const { paths, imports } = dependencies;
+
+    const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
+    const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
 
     return imports.default.getIdentifier(path) ?? imports.default.add(path, name);
   }
 
   override [$processString](_: StringSchema): Identifier {
-    return this.constructor.importBuiltInFormModel('StringModel', this[$context].dependencies);
+    return importBuiltInFormModel('StringModel', this[$context].dependencies);
   }
 
   override [$processUnknown](_: Schema): Identifier {
-    return this.constructor.importBuiltInFormModel('ObjectModel', this[$context].dependencies);
+    return importBuiltInFormModel('ObjectModel', this[$context].dependencies);
   }
 }
 
@@ -324,7 +320,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
   #getValidator = (annotation: Annotation): Expression =>
     ts.factory.createNewExpression(
-      ModelSchemaIdentifierProcessor.importBuiltInFormModel(annotation.simpleName, this[$context].dependencies),
+      importBuiltInFormModel(annotation.simpleName, this[$context].dependencies),
       undefined,
       annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [],
     );

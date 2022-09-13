@@ -31,13 +31,13 @@ export type Context = Pick<ModelSchemaContext, 'isReferenceToEnum'> &
     owner: Plugin;
   }>;
 
-export class ModelEntityProcessor {
+export class EntityModelProcessor {
   readonly #component: Schema;
   readonly #dependencies: DependencyManager;
-  readonly #entityName: string;
+  readonly #entityId: Identifier;
   readonly #fullyQualifiedName: string;
-  #getPropertyModelSymbol?: Identifier = undefined;
-  readonly #name: string;
+  readonly #getPropertyModelSymbol: Identifier;
+  readonly #id: Identifier;
   readonly #path: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
   readonly #context: Context;
@@ -47,30 +47,24 @@ export class ModelEntityProcessor {
     this.#context = context;
     this.#fullyQualifiedName = name;
 
-    this.#entityName = simplifyFullyQualifiedName(name);
-    this.#name = `${this.#entityName}Model`;
-    this.#path = convertFullyQualifiedNameToRelativePath(`${name}Model`);
+    const entityName = simplifyFullyQualifiedName(name);
+    const entityPath = convertFullyQualifiedNameToRelativePath(name);
+
+    this.#path = `${entityPath}Model`;
     this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
-  }
 
-  get #id(): Identifier {
-    const id = ts.factory.createIdentifier(this.#name);
+    const { exports, imports, paths } = this.#dependencies;
 
-    this.#dependencies.exports.default.set(id);
+    this.#getPropertyModelSymbol = imports.named.add('@hilla/form', '_getPropertyModel');
+    this.#id = exports.default.set(`${entityName}Model`);
 
-    return id;
+    this.#entityId = imports.default.add(paths.createRelativePath(entityPath), entityName, true);
   }
 
   public process(): SourceFile {
-    this.#context.owner.logger.debug(`Processing model for entity: ${this.#entityName}`);
+    this.#context.owner.logger.debug(`Processing model for entity: ${this.#entityId.text}`);
 
-    const entity = this.#dependencies.imports.default.add(
-      this.#dependencies.paths.createRelativePath(convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName)),
-      this.#entityName,
-      true,
-    );
-
-    const declaration = this.#processExtendedModelClass(this.#component, entity);
+    const declaration = this.#processExtendedModelClass(this.#component, this.#entityId);
 
     const { imports, exports } = this.#dependencies;
     const importStatements = imports.toCode();
@@ -82,23 +76,18 @@ export class ModelEntityProcessor {
     );
   }
 
-  #getGetPropertyModelSymbol(): Identifier {
-    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@hilla/form', '_getPropertyModel');
-    return this.#getPropertyModelSymbol;
-  }
-
   #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
     if (!properties) {
       return [];
     }
 
+    const ctx = {
+      dependencies: this.#dependencies,
+      isReferenceToEnum: this.#context.isReferenceToEnum,
+    };
+
     const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
-      const ctx = {
-        dependencies: this.#dependencies,
-        isReferenceToEnum: this.#context.isReferenceToEnum,
-      };
-
       const type = new ModelSchemaTypeProcessor(schema, ctx).process();
       const args = new ModelSchemaExpressionProcessor(schema, ctx, (_) => !requiredSet.has(name)).process();
 
@@ -113,7 +102,7 @@ export class ModelEntityProcessor {
             ts.factory.createReturnStatement(
               ts.factory.createAsExpression(
                 ts.factory.createCallExpression(
-                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
+                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getPropertyModelSymbol),
                   undefined,
                   [
                     ts.factory.createStringLiteral(name),

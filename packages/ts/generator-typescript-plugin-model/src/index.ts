@@ -4,7 +4,7 @@ import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
-import { Context, ModelEntityProcessor } from './ModelEntityProcessor.js';
+import { Context, EntityModelProcessor } from './EntityModelProcessor.js';
 
 export enum ModelPluginSourceType {
   Model = 'model',
@@ -42,7 +42,9 @@ export default class ModelPlugin extends Plugin {
     };
 
     return schemas
-      ? Object.entries(schemas).map(([name, component]) => new ModelEntityProcessor(name, component, ctx).process())
+      ? Object.entries(schemas)
+          .filter(([, component]) => !isEnumSchema(component))
+          .map(([name, component]) => new EntityModelProcessor(name, component, ctx).process())
       : [];
   }
 }

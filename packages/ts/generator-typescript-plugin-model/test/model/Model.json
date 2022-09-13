@@ -833,13 +833,8 @@
         }
       },
       "com.example.application.endpoints.TsFormEndpoint.FormEnumTypes": {
-        "type": "object",
-        "properties": {
-          "enumProperty": {
-            "type": "string",
-            "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
-          }
-        }
+        "type": "string",
+        "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
       }
     },
     "securitySchemes": {
