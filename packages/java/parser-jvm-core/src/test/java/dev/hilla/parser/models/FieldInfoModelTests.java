@@ -1,25 +1,19 @@
 package dev.hilla.parser.models;
 
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
-import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.FieldInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,8 +33,13 @@ import dev.hilla.parser.test.helpers.context.AbstractCharacteristics;
 import dev.hilla.parser.test.helpers.context.AbstractContext;
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.ScanResult;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SourceExtension.class)
 public class FieldInfoModelTests {
@@ -65,14 +64,14 @@ public class FieldInfoModelTests {
         SignatureModel expected = null;
 
         switch (kind) {
-        case REFLECTION:
-            expected = SignatureModel
+            case REFLECTION:
+                expected = SignatureModel
                     .of(ctx.getReflectionOrigin().getAnnotatedType());
-            break;
-        case SOURCE:
-            expected = SignatureModel.of(
+                break;
+            case SOURCE:
+                expected = SignatureModel.of(
                     ctx.getSourceOrigin().getTypeSignatureOrTypeDescriptor());
-            break;
+                break;
         }
 
         assertEquals(expected, model.getType());
@@ -107,16 +106,16 @@ public class FieldInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(FieldInfoModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
+            case REFLECTION:
+                assertEquals(ctx.getReflectionOrigin(), model.get());
+                assertTrue(model.isReflection());
+                break;
+            case SOURCE:
+                assertEquals(ctx.getSourceOrigin(), model.get());
+                assertTrue(model.isSource());
+                break;
         }
     }
 
@@ -128,10 +127,10 @@ public class FieldInfoModelTests {
             var ctx = new Context.Default(context);
 
             return Stream.of(
-                    Arguments.of(FieldInfoModel.of(ctx.getReflectionOrigin()),
-                            ModelKind.REFLECTION),
-                    Arguments.of(FieldInfoModel.of(ctx.getSourceOrigin()),
-                            ModelKind.SOURCE));
+                Arguments.of(FieldInfoModel.of(ctx.getReflectionOrigin()),
+                    ModelKind.REFLECTION),
+                Arguments.of(FieldInfoModel.of(ctx.getSourceOrigin()),
+                    ModelKind.SOURCE));
         }
 
         public static final class Characteristics implements ArgumentsProvider {
@@ -139,34 +138,34 @@ public class FieldInfoModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
                 return Streams.combine(
-                        ctx.getReflectionCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        FieldInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getName())),
-                        ctx.getSourceCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        FieldInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getName())));
+                    ctx.getReflectionCharacteristics().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            FieldInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.REFLECTION,
+                            entry.getKey().getName())),
+                    ctx.getSourceCharacteristics().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            FieldInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.SOURCE,
+                            entry.getKey().getName())));
             }
 
         }
 
         public static final class CharacterizedChecker
-                extends SpecializationChecker<FieldInfoModel> {
+            extends SpecializationChecker<FieldInfoModel> {
             private static final List<String> allowedMethods = List.of("isEnum",
-                    "isFinal", "isPrivate", "isProtected", "isPublic",
-                    "isStatic", "isSynthetic", "isTransient");
+                "isFinal", "isPrivate", "isProtected", "isPublic",
+                "isStatic", "isSynthetic", "isTransient");
 
             public CharacterizedChecker() {
                 super(FieldInfoModel.class,
-                        getDeclaredMethods(FieldInfoModel.class),
-                        allowedMethods);
+                    getDeclaredMethods(FieldInfoModel.class),
+                    allowedMethods);
             }
         }
     }
@@ -191,9 +190,9 @@ public class FieldInfoModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotation(FieldInfoModel model,
-                ModelKind kind) {
+            ModelKind kind) {
             assertEquals(List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
-                    model.getAnnotations());
+                model.getAnnotations());
         }
     }
 
@@ -206,7 +205,7 @@ public class FieldInfoModelTests {
         @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
         @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(FieldInfoModel model,
-                String[] characteristics, ModelKind kind, String testName) {
+            String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
         }
     }
@@ -237,30 +236,30 @@ public class FieldInfoModelTests {
         }
 
         static final class Characteristics
-                extends AbstractCharacteristics<Field, FieldInfo> {
+            extends AbstractCharacteristics<Field, FieldInfo> {
             private static final Map<Field, String[]> reflectionAssociations;
 
             static {
                 var refClass = FieldInfoModelTests.Characteristics.class;
                 var refEnumClass = FieldInfoModelTests.Characteristics.Enum.class;
                 reflectionAssociations = Map.ofEntries(
-                        entry(getDeclaredField(refClass, "publicField"),
-                                "isPublic"),
-                        entry(getDeclaredField(refClass, "protectedField"),
-                                "isProtected"),
-                        entry(getDeclaredField(refClass, "privateField"),
-                                "isPrivate"),
-                        entry(getDeclaredField(refClass, "staticField"),
-                                "isPrivate", "isStatic"),
-                        entry(getDeclaredField(refClass, "finalField"),
-                                "isFinal", "isPrivate"),
-                        entry(getDeclaredField(refClass,
-                                "publicStaticFinalField"), "isFinal",
-                                "isPublic", "isStatic"),
-                        entry(getDeclaredField(refClass, "transientField"),
-                                "isPublic", "isTransient"),
-                        entry(getDeclaredField(refEnumClass, "ENUM_FIELD"),
-                                "isEnum", "isFinal", "isPublic", "isStatic"));
+                    entry(getDeclaredField(refClass, "publicField"),
+                        "isPublic"),
+                    entry(getDeclaredField(refClass, "protectedField"),
+                        "isProtected"),
+                    entry(getDeclaredField(refClass, "privateField"),
+                        "isPrivate"),
+                    entry(getDeclaredField(refClass, "staticField"),
+                        "isPrivate", "isStatic"),
+                    entry(getDeclaredField(refClass, "finalField"),
+                        "isFinal", "isPrivate"),
+                    entry(getDeclaredField(refClass,
+                            "publicStaticFinalField"), "isFinal",
+                        "isPublic", "isStatic"),
+                    entry(getDeclaredField(refClass, "transientField"),
+                        "isPublic", "isTransient"),
+                    entry(getDeclaredField(refEnumClass, "ENUM_FIELD"),
+                        "isEnum", "isFinal", "isPublic", "isStatic"));
             }
 
             Characteristics(ExtensionContext context) {
@@ -269,24 +268,24 @@ public class FieldInfoModelTests {
 
             Characteristics(ScanResult source) {
                 super(source, reflectionAssociations,
-                        reflectionAssociations.entrySet().stream()
-                                .collect(Collectors.toMap(
-                                        entry -> getDeclaredField(
-                                                entry.getKey(), source),
-                                        Map.Entry::getValue)));
+                    reflectionAssociations.entrySet().stream()
+                        .collect(Collectors.toMap(
+                            entry -> getDeclaredField(
+                                entry.getKey(), source),
+                            Map.Entry::getValue)));
             }
         }
 
         static final class Default extends AbstractContext<Field, FieldInfo> {
             private static final Annotation annotation;
             private static final String defaultFieldName = "field";
-            private static final Map<String, Field> reflectionOrigins = Arrays
-                    .stream(Sample.class.getDeclaredFields()).collect(Collectors
-                            .toMap(Field::getName, Function.identity()));
+            private static final Map<String, Field> reflectionOrigins = getDeclaredFields(Sample.class).collect(
+                Collectors
+                    .toMap(Field::getName, Function.identity()));
 
             static {
                 annotation = reflectionOrigins.get(defaultFieldName)
-                        .getAnnotation(Sample.Foo.class);
+                    .getAnnotation(Sample.Foo.class);
             }
 
             Default(ExtensionContext context) {
@@ -295,10 +294,9 @@ public class FieldInfoModelTests {
 
             Default(ScanResult source) {
                 super(source, reflectionOrigins,
-                        source.getClassInfo(Sample.class.getName())
-                                .getDeclaredFieldInfo().stream()
-                                .collect(Collectors.toMap(FieldInfo::getName,
-                                        Function.identity())));
+                    getDeclaredFields(Sample.class, source)
+                        .collect(Collectors.toMap(FieldInfo::getName,
+                            Function.identity())));
             }
 
             public Annotation getAnnotation() {

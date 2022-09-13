@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -115,8 +116,7 @@ public class TypeVariableModelTests {
         private static final Map<String, TypeVariable<?>> parameters = Arrays
                 .stream(Sample.class.getTypeParameters()).collect(Collectors
                         .toMap(TypeVariable::getName, Function.identity()));
-        private static final Map<String, AnnotatedTypeVariable> reflectionOrigins = Arrays
-                .stream(Sample.class.getDeclaredFields())
+        private static final Map<String, AnnotatedTypeVariable> reflectionOrigins = getDeclaredFields(Sample.class)
                 .map(Field::getAnnotatedType)
                 .map(AnnotatedTypeVariable.class::cast)
                 .collect(Collectors.toMap(
@@ -126,8 +126,7 @@ public class TypeVariableModelTests {
 
         Context(ScanResult source) {
             super(source, reflectionOrigins,
-                    source.getClassInfo(Sample.class.getName())
-                            .getDeclaredFieldInfo().stream()
+                    getDeclaredFields(Sample.class, source)
                             .map(FieldInfo::getTypeSignatureOrTypeDescriptor)
                             .map(TypeVariableSignature.class::cast)
                             .collect(Collectors.toMap(

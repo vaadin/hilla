@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -123,8 +124,7 @@ public class AnnotationInfoModelTests {
         private static final Map<String, Object> reflectionParameterOrigins;
 
         static {
-            reflectionParameterOrigins = Arrays
-                    .stream(Sample.Foo.class.getDeclaredMethods())
+            reflectionParameterOrigins = getDeclaredMethods(Sample.Foo.class)
                     .collect(Collectors.toMap(Method::getName,
                             Failable.asFunction(method -> method
                                     .invoke(reflectionOrigin))));
