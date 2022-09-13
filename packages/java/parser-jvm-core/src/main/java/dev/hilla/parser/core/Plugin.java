@@ -1,29 +1,29 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.Collections;
 
-public interface Plugin {
-    @Nonnull
-    NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);
+import javax.annotation.Nonnull;
 
+public interface Plugin {
     void enter(NodePath<?> nodePath);
 
     void exit(NodePath<?> nodePath);
-
-    int getOrder();
-
-    void setOrder(int order);
 
     PluginConfiguration getConfiguration();
 
     void setConfiguration(PluginConfiguration configuration);
 
+    int getOrder();
+
+    void setOrder(int order);
+
     default Collection<Class<? extends Plugin>> getRequiredPlugins() {
         return Collections.emptyList();
     }
+
+    @Nonnull
+    NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);
 
     void setStorage(SharedStorage storage);
 }

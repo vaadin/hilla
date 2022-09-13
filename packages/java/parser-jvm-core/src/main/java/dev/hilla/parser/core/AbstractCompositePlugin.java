@@ -1,11 +1,12 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.utils.PluginException;
 
@@ -21,6 +22,17 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
+    public void enter(NodePath<?> nodePath) {
+        plugins.iterator().forEachRemaining((plugin) -> plugin.enter(nodePath));
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+        plugins.descendingIterator()
+                .forEachRemaining((plugin) -> plugin.exit(nodePath));
+    }
+
+    @Override
     @Nonnull
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         for (var plugin : plugins) {
@@ -30,14 +42,10 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
-    public void enter(NodePath<?> nodePath) {
-        plugins.iterator().forEachRemaining((plugin) -> plugin.enter(nodePath));
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-        plugins.descendingIterator()
-                .forEachRemaining((plugin) -> plugin.exit(nodePath));
+    public void setStorage(SharedStorage storage) {
+        super.setStorage(storage);
+        plugins.iterator()
+                .forEachRemaining(plugin -> plugin.setStorage(storage));
     }
 
     private void verifyPluginsOrder() {
@@ -52,12 +60,5 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
             }
             previous.add(plugin.getClass());
         }
-    }
-
-    @Override
-    public void setStorage(SharedStorage storage) {
-        super.setStorage(storage);
-        plugins.iterator()
-                .forEachRemaining(plugin -> plugin.setStorage(storage));
     }
 }

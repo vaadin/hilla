@@ -1,8 +1,9 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 public final class NodePath<N extends Node<?, ?>> {
     private final N node;
@@ -25,20 +26,8 @@ public final class NodePath<N extends Node<?, ?>> {
         this.rootPath = (NodePath<RootNode>) this;
     }
 
-    public Node<?, ?> getNode() {
-        return node;
-    }
-
-    public NodePath<?> getParentPath() {
-        return parentPath;
-    }
-
-    public NodePath<RootNode> getRootPath() {
-        return rootPath;
-    }
-
-    public boolean hasParentNodes() {
-        return getNode() != getParentPath().getNode();
+    static NodePath<RootNode> forRoot(@Nonnull RootNode rootNode) {
+        return new NodePath<>(rootNode);
     }
 
     @Override
@@ -65,6 +54,22 @@ public final class NodePath<N extends Node<?, ?>> {
         return false;
     }
 
+    public Node<?, ?> getNode() {
+        return node;
+    }
+
+    public NodePath<?> getParentPath() {
+        return parentPath;
+    }
+
+    public NodePath<RootNode> getRootPath() {
+        return rootPath;
+    }
+
+    public boolean hasParentNodes() {
+        return getNode() != getParentPath().getNode();
+    }
+
     @Override
     public int hashCode() {
         int hash = 0xa73fc160 ^ node.hashCode();
@@ -87,10 +92,6 @@ public final class NodePath<N extends Node<?, ?>> {
             list.addFirst(path.getNode().toString());
         }
         return String.join("", list);
-    }
-
-    static NodePath<RootNode> forRoot(@Nonnull RootNode rootNode) {
-        return new NodePath<>(rootNode);
     }
 
     <N extends Node<?, ?>> NodePath<N> childPath(@Nonnull N node) {

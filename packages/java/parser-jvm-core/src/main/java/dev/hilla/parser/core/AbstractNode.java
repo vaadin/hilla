@@ -1,7 +1,8 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.NamedModel;
@@ -17,6 +18,18 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractNode<?, ?> node = (AbstractNode<?, ?>) o;
+        return source.equals(node.getSource());
+    }
+
+    @Override
     public S getSource() {
         return source;
     }
@@ -29,18 +42,6 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
     @Override
     public void setTarget(T target) {
         this.target = target;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        AbstractNode<?, ?> node = (AbstractNode<?, ?>) o;
-        return source.equals(node.getSource());
     }
 
     @Override

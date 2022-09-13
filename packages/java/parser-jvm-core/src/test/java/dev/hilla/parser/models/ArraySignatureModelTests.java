@@ -1,5 +1,11 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,9 +16,6 @@ import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.github.classgraph.ArrayTypeSignature;
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,16 +32,14 @@ import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.github.classgraph.ArrayTypeSignature;
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ArraySignatureModelTests {
     private static final boolean isJDK11 = Runtime.Version
-        .parse(System.getProperty("java.version")).feature() <= 11;
+            .parse(System.getProperty("java.version")).feature() <= 11;
     private Context ctx;
 
     @BeforeEach
@@ -75,16 +76,16 @@ public class ArraySignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(ArraySignatureModel model,
-        ModelKind kind) {
+            ModelKind kind) {
         switch (kind) {
-            case REFLECTION:
-                assertEquals(ctx.getReflectionOrigin(), model.get());
-                assertTrue(model.isReflection());
-                break;
-            case SOURCE:
-                assertEquals(ctx.getSourceOrigin(), model.get());
-                assertTrue(model.isSource());
-                break;
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertTrue(model.isReflection());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertTrue(model.isSource());
+            break;
         }
     }
 
@@ -92,22 +93,22 @@ public class ArraySignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideNestedType(ArraySignatureModel model,
-        ModelKind kind) {
+            ModelKind kind) {
         var nested = model.getNestedType();
         assertTrue(nested instanceof ClassRefSignatureModel);
 
         switch (kind) {
-            case REFLECTION: {
-                var nestedOrigin = (AnnotatedType) nested.get();
-                assertEquals(nestedOrigin.getType().getTypeName(),
+        case REFLECTION: {
+            var nestedOrigin = (AnnotatedType) nested.get();
+            assertEquals(nestedOrigin.getType().getTypeName(),
                     Dependency.class.getName());
-            }
+        }
             break;
-            case SOURCE: {
-                var nestedOrigin = (ClassRefTypeSignature) nested.get();
-                assertEquals(nestedOrigin.getFullyQualifiedClassName(),
+        case SOURCE: {
+            var nestedOrigin = (ClassRefTypeSignature) nested.get();
+            assertEquals(nestedOrigin.getFullyQualifiedClassName(),
                     Dependency.class.getName());
-            }
+        }
             break;
         }
     }
@@ -115,11 +116,11 @@ public class ArraySignatureModelTests {
     static final class Context {
         private static final String fieldName = "foo";
         private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
-            Sample.class, fieldName).getAnnotatedType())
-            .getAnnotatedGenericComponentType()
-            .getAnnotation(Sample.Bar.class);
+                Sample.class, fieldName).getAnnotatedType())
+                        .getAnnotatedGenericComponentType()
+                        .getAnnotation(Sample.Bar.class);
         private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
-            Sample.class, fieldName).getAnnotatedType();
+                Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;
 
         Context(ExtensionContext context) {
@@ -128,7 +129,7 @@ public class ArraySignatureModelTests {
 
         Context(ScanResult source) {
             sourceOrigin = (ArrayTypeSignature) getDeclaredField(Sample.class,
-                fieldName, source).getTypeSignatureOrTypeDescriptor();
+                    fieldName, source).getTypeSignatureOrTypeDescriptor();
         }
 
         public Annotation getAnnotation() {
@@ -153,18 +154,18 @@ public class ArraySignatureModelTests {
             var ctx = new Context(context);
 
             return Stream.of(
-                Arguments.of(
-                    ArraySignatureModel.of(ctx.getReflectionOrigin()),
-                    ModelKind.REFLECTION),
-                Arguments.of(ArraySignatureModel.of(ctx.getSourceOrigin()),
-                    ModelKind.SOURCE));
+                    Arguments.of(
+                            ArraySignatureModel.of(ctx.getReflectionOrigin()),
+                            ModelKind.REFLECTION),
+                    Arguments.of(ArraySignatureModel.of(ctx.getSourceOrigin()),
+                            ModelKind.SOURCE));
         }
 
         static final class Checker
-            extends SpecializationChecker<SpecializedModel> {
+                extends SpecializationChecker<SpecializedModel> {
             Checker() {
                 super(SpecializedModel.class,
-                    getDeclaredMethods(SpecializedModel.class));
+                        getDeclaredMethods(SpecializedModel.class));
             }
         }
     }
@@ -176,9 +177,9 @@ public class ArraySignatureModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_AccessAnnotations(ArraySignatureModel model,
-            ModelKind kind) {
+                ModelKind kind) {
             assertEquals(List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
-                model.getNestedType().getAnnotations());
+                    model.getNestedType().getAnnotations());
         }
     }
 
@@ -191,7 +192,7 @@ public class ArraySignatureModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_HaveArraySpecialization(ArraySignatureModel model,
-            ModelKind kind) {
+                ModelKind kind) {
             checker.apply(model, "isArray", "isNonJDKClass");
         }
     }

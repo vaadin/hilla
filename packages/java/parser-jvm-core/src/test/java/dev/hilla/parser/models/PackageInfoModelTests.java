@@ -1,11 +1,12 @@
 package dev.hilla.parser.models;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.classgraph.PackageInfo;
-import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +24,8 @@ import dev.hilla.parser.test.helpers.ModelKind;
 import dev.hilla.parser.test.helpers.Source;
 import dev.hilla.parser.test.helpers.SourceExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import io.github.classgraph.PackageInfo;
+import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class PackageInfoModelTests {
@@ -39,10 +40,10 @@ public class PackageInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ContainAnnotation(PackageInfoModel model,
-        ModelKind kind) {
+            ModelKind kind) {
         assertEquals(List.of(Foo.class.getName()),
-            model.getAnnotationsStream().map(AnnotationInfoModel::getName)
-                .collect(Collectors.toList()));
+                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                        .collect(Collectors.toList()));
     }
 
     @DisplayName("It should get annotations with ClassInfo")
@@ -50,11 +51,11 @@ public class PackageInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     @Disabled("Probably, ClassGraph issue: ScanResult is null for package-level annotations for now")
     public void should_GetAnnotationsWithClassInfo(PackageInfoModel model,
-        ModelKind kind) {
+            ModelKind kind) {
         assertEquals(List.of(ClassInfoModel.of(Foo.class)),
-            model.getAnnotationsStream()
-                .map(AnnotationInfoModel::getClassInfo)
-                .collect(Collectors.toList()));
+                model.getAnnotationsStream()
+                        .map(AnnotationInfoModel::getClassInfo)
+                        .collect(Collectors.toList()));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -86,20 +87,20 @@ public class PackageInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(PackageInfoModel model,
-        ModelKind kind) {
+            ModelKind kind) {
         switch (kind) {
-            case REFLECTION:
-                assertEquals(ctx.getReflectionOrigin(), model.get());
-                break;
-            case SOURCE:
-                assertEquals(ctx.getSourceOrigin(), model.get());
-                break;
+        case REFLECTION:
+            assertEquals(ctx.getReflectionOrigin(), model.get());
+            break;
+        case SOURCE:
+            assertEquals(ctx.getSourceOrigin(), model.get());
+            break;
         }
     }
 
     static class Context {
         private static final Package reflectionOrigin = PackageInfoModelSample.class
-            .getPackage();
+                .getPackage();
 
         private final ScanResult source;
         private final PackageInfo sourceOrigin;
@@ -111,8 +112,8 @@ public class PackageInfoModelTests {
         Context(ScanResult source) {
             this.source = source;
             this.sourceOrigin = source
-                .getClassInfo(PackageInfoModelSample.class.getName())
-                .getPackageInfo();
+                    .getClassInfo(PackageInfoModelSample.class.getName())
+                    .getPackageInfo();
         }
 
         public Package getReflectionOrigin() {
@@ -133,14 +134,14 @@ public class PackageInfoModelTests {
 
         @Override
         public Stream<? extends Arguments> provideArguments(
-            ExtensionContext context) {
+                ExtensionContext context) {
             var ctx = new Context(context);
 
             return Stream.of(
-                Arguments.of(PackageInfoModel.of(ctx.getReflectionOrigin()),
-                    ModelKind.REFLECTION),
-                Arguments.of(PackageInfoModel.of(ctx.getSourceOrigin()),
-                    ModelKind.SOURCE));
+                    Arguments.of(PackageInfoModel.of(ctx.getReflectionOrigin()),
+                            ModelKind.REFLECTION),
+                    Arguments.of(PackageInfoModel.of(ctx.getSourceOrigin()),
+                            ModelKind.SOURCE));
         }
     }
 }

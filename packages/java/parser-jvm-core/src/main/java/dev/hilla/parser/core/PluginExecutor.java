@@ -1,7 +1,5 @@
 package dev.hilla.parser.core;
 
-import javax.annotation.Nonnull;
-
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,17 +11,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class PluginExecutor {
     private static final Logger logger = LoggerFactory
             .getLogger(PluginExecutor.class);
-
-    private final Plugin plugin;
-    private final RootNode rootNode;
     private final Set<NodePath<?>> enqueued = new HashSet<>();
+    private final Plugin plugin;
     private final Deque<Task> queue = new LinkedList<>();
+    private final RootNode rootNode;
     private final Map<Node<?, ?>, NodeScanResult> scanResults = new HashMap<>();
 
     public PluginExecutor(@Nonnull Plugin plugin, @Nonnull RootNode rootNode) {
@@ -37,13 +36,6 @@ public final class PluginExecutor {
         while (!queue.isEmpty()) {
             queue.removeFirst().execute();
         }
-    }
-
-    @Nonnull
-    private NodeScanResult scanNodeDependencies(Node<?, ?> node) {
-        return scanResults.computeIfAbsent(node,
-                n -> new NodeScanResult(plugin.scan(new NodeDependencies(n,
-                        Stream.empty(), Stream.empty()))));
     }
 
     private void enqueueEnterFirst(NodePath<?> path) {
@@ -70,18 +62,11 @@ public final class PluginExecutor {
         queue.addFirst(new ExitTask(path));
     }
 
-    private static abstract class Task {
-        private final NodePath<?> path;
-
-        public Task(@Nonnull NodePath<?> path) {
-            this.path = Objects.requireNonNull(path);
-        }
-
-        protected NodePath<?> getPath() {
-            return path;
-        }
-
-        abstract void execute();
+    @Nonnull
+    private NodeScanResult scanNodeDependencies(Node<?, ?> node) {
+        return scanResults.computeIfAbsent(node,
+                n -> new NodeScanResult(plugin.scan(new NodeDependencies(n,
+                        Stream.empty(), Stream.empty()))));
     }
 
     private class EnterTask extends Task {
@@ -118,8 +103,8 @@ public final class PluginExecutor {
     }
 
     private static class NodeScanResult {
-        private final Node<?, ?> node;
         private final List<Node<?, ?>> childNodes;
+        private final Node<?, ?> node;
         private final List<Node<?, ?>> relatedNodes;
 
         public NodeScanResult(@Nonnull NodeDependencies nodeDependencies) {
@@ -132,18 +117,32 @@ public final class PluginExecutor {
         }
 
         @Nonnull
-        public Node<?, ?> getNode() {
-            return node;
+        public List<Node<?, ?>> getChildNodes() {
+            return childNodes;
         }
 
         @Nonnull
-        public List<Node<?, ?>> getChildNodes() {
-            return childNodes;
+        public Node<?, ?> getNode() {
+            return node;
         }
 
         @Nonnull
         public List<Node<?, ?>> getRelatedNodes() {
             return relatedNodes;
         }
+    }
+
+    private static abstract class Task {
+        private final NodePath<?> path;
+
+        public Task(@Nonnull NodePath<?> path) {
+            this.path = Objects.requireNonNull(path);
+        }
+
+        protected NodePath<?> getPath() {
+            return path;
+        }
+
+        abstract void execute();
     }
 }
