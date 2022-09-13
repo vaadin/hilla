@@ -24,7 +24,6 @@ import {
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
 import type { Expression, Identifier, TypeNode, TypeReferenceNode } from 'typescript';
 import ts from 'typescript';
-import type { CheckOptionalCallback } from '../ModelSchemaProcessor.js';
 import {
   AnnotatedSchema,
   Annotation,
@@ -77,10 +76,7 @@ export type ModelSchemaContext = Readonly<{
   isReferenceToEnum: (schema: ReferenceSchema) => boolean;
 }>;
 
-export type ModelSchemaExpressionContext = ModelSchemaContext &
-  Readonly<{
-    checkOptional?: (schema: Schema) => boolean;
-  }>;
+export type OptionalChecker = (schema: Schema) => boolean;
 
 export abstract class ModelSchemaPartProcessor<T> {
   readonly [$context]: ModelSchemaContext;
@@ -270,9 +266,9 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 }
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #checkOptional: CheckOptionalCallback;
+  readonly #checkOptional: OptionalChecker;
 
-  constructor(schema: Schema, context: ModelSchemaContext, checkOptional: CheckOptionalCallback = isNullableSchema) {
+  constructor(schema: Schema, context: ModelSchemaContext, checkOptional: OptionalChecker = isNullableSchema) {
     super(schema, context);
     this.#checkOptional = checkOptional;
   }
