@@ -1,12 +1,5 @@
 package dev.hilla.parser.models;
 
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
-import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,6 +16,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.BaseTypeSignature;
+import io.github.classgraph.MethodInfo;
+import io.github.classgraph.ScanResult;
 import org.apache.commons.lang3.function.Failable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,9 +36,12 @@ import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.BaseTypeSignature;
-import io.github.classgraph.MethodInfo;
-import io.github.classgraph.ScanResult;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SourceExtension.class)
 public class BaseSignatureModelTests {
@@ -58,14 +57,14 @@ public class BaseSignatureModelTests {
     public void should_HaveSameHashCodeForSourceAndReflectionModels() {
         var methodName = "getByte";
         var reflectionModel = BaseSignatureModel
-                .of(ctx.getCompleteReflectionOrigin(methodName));
+            .of(ctx.getCompleteReflectionOrigin(methodName));
         var bareReflectionModel = BaseSignatureModel
-                .of(ctx.getBareReflectionOrigin(methodName));
+            .of(ctx.getBareReflectionOrigin(methodName));
         var sourceModel = BaseSignatureModel
-                .of(ctx.getSourceOrigin(methodName));
+            .of(ctx.getSourceOrigin(methodName));
 
         assertEquals(reflectionModel.hashCode(),
-                bareReflectionModel.hashCode());
+            bareReflectionModel.hashCode());
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
         assertEquals(bareReflectionModel.hashCode(), sourceModel.hashCode());
     }
@@ -75,11 +74,11 @@ public class BaseSignatureModelTests {
     public void should_HaveSourceAndReflectionModelsEqual() {
         var methodName = "getByte";
         var reflectionModel = BaseSignatureModel
-                .of(ctx.getCompleteReflectionOrigin(methodName));
+            .of(ctx.getCompleteReflectionOrigin(methodName));
         var bareReflectionModel = BaseSignatureModel
-                .of(ctx.getBareReflectionOrigin(methodName));
+            .of(ctx.getBareReflectionOrigin(methodName));
         var sourceModel = BaseSignatureModel
-                .of(ctx.getSourceOrigin(methodName));
+            .of(ctx.getSourceOrigin(methodName));
 
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
@@ -105,27 +104,27 @@ public class BaseSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(BaseSignatureModel model,
-            ModelKind kind, String methodName) {
+        ModelKind kind, String methodName) {
         switch (kind) {
-        case REFLECTION_BARE:
-            assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case REFLECTION_COMPLETE:
-            assertEquals(ctx.getCompleteReflectionOrigin(methodName),
+            case REFLECTION_BARE:
+                assertEquals(ctx.getBareReflectionOrigin(methodName), model.get());
+                assertTrue(model.isReflection());
+                break;
+            case REFLECTION_COMPLETE:
+                assertEquals(ctx.getCompleteReflectionOrigin(methodName),
                     model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(methodName), model.get());
-            assertTrue(model.isSource());
-            break;
+                assertTrue(model.isReflection());
+                break;
+            case SOURCE:
+                assertEquals(ctx.getSourceOrigin(methodName), model.get());
+                assertTrue(model.isSource());
+                break;
         }
     }
 
     private enum ModelKind {
         SOURCE("SOURCE"), REFLECTION_COMPLETE(
-                "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");
+            "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");
 
         private final String text;
 
@@ -146,16 +145,16 @@ public class BaseSignatureModelTests {
 
     static final class Context {
         private static final Annotation annotation = getDeclaredMethod(
-                Sample.class, "getByte").getAnnotatedReturnType()
-                        .getAnnotation(Bar.class);
+            Sample.class, "getByte").getAnnotatedReturnType()
+            .getAnnotation(Bar.class);
         private static final Map<String, Class<?>> bareReflectionOrigins = getDeclaredMethods(
-                Sample.class)
-                        .collect(Collectors.toMap(Method::getName,
-                                Method::getReturnType));
+            Sample.class)
+            .collect(Collectors.toMap(Method::getName,
+                Method::getReturnType));
         private static final Map<String, AnnotatedType> completeReflectionOrigins = getDeclaredMethods(
-                Sample.class)
-                        .collect(Collectors.toMap(Method::getName,
-                                Method::getAnnotatedReturnType));
+            Sample.class)
+            .collect(Collectors.toMap(Method::getName,
+                Method::getAnnotatedReturnType));
         private final Map<String, BaseTypeSignature> sourceOrigins;
 
         Context(ExtensionContext context) {
@@ -164,10 +163,10 @@ public class BaseSignatureModelTests {
 
         Context(ScanResult source) {
             sourceOrigins = getDeclaredMethods(Sample.class, source)
-                    .collect(Collectors.toMap(MethodInfo::getName,
-                            method -> (BaseTypeSignature) method
-                                    .getTypeSignatureOrTypeDescriptor()
-                                    .getResultType()));
+                .collect(Collectors.toMap(MethodInfo::getName,
+                    method -> (BaseTypeSignature) method
+                        .getTypeSignatureOrTypeDescriptor()
+                        .getResultType()));
         }
 
         public Annotation getAnnotation() {
@@ -204,23 +203,23 @@ public class BaseSignatureModelTests {
 
         static Stream<Arguments> getBareReflectionArguments(Context ctx) {
             return ctx.getBareReflectionOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            BaseSignatureModel.of(entry.getValue()),
-                            ModelKind.REFLECTION_BARE, entry.getKey()));
+                .map(entry -> Arguments.of(
+                    BaseSignatureModel.of(entry.getValue()),
+                    ModelKind.REFLECTION_BARE, entry.getKey()));
         }
 
         static Stream<Arguments> getCompleteReflectionArguments(Context ctx) {
             return ctx.getCompleteReflectionOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            BaseSignatureModel.of(entry.getValue()),
-                            ModelKind.REFLECTION_COMPLETE, entry.getKey()));
+                .map(entry -> Arguments.of(
+                    BaseSignatureModel.of(entry.getValue()),
+                    ModelKind.REFLECTION_COMPLETE, entry.getKey()));
         }
 
         static Stream<Arguments> getSourceArguments(Context ctx) {
             return ctx.getSourceOrigins().entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            BaseSignatureModel.of(entry.getValue()),
-                            ModelKind.SOURCE, entry.getKey()));
+                .map(entry -> Arguments.of(
+                    BaseSignatureModel.of(entry.getValue()),
+                    ModelKind.SOURCE, entry.getKey()));
         }
 
         @Override
@@ -228,7 +227,7 @@ public class BaseSignatureModelTests {
             var ctx = new Context(context);
 
             return Streams.combine(getCompleteReflectionArguments(ctx),
-                    getBareReflectionArguments(ctx), getSourceArguments(ctx));
+                getBareReflectionArguments(ctx), getSourceArguments(ctx));
         }
 
         // BareSignatureModel.Bare is not supposed to be annotated, so we can
@@ -238,53 +237,53 @@ public class BaseSignatureModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context(context);
 
                 return Streams.combine(getCompleteReflectionArguments(ctx),
-                        getSourceArguments(ctx));
+                    getSourceArguments(ctx));
             }
         }
 
         static class Checker extends SpecializationChecker<SpecializedModel> {
             Checker() {
                 super(SpecializedModel.class,
-                        getDeclaredMethods(SpecializedModel.class));
+                    getDeclaredMethods(SpecializedModel.class));
             }
         }
 
         static class Specialized implements ArgumentsProvider {
             public static final String testNamePattern = "{2} [{3}]";
             private static final Map<Class<?>, String[]> specializations = Map
-                    .ofEntries(
-                            entry(BigDecimal.class, "isBase", "isJDKClass",
-                                    "isBigDecimal"),
-                            entry(Boolean.TYPE, "isBase", "isJDKClass",
-                                    "isBoolean", "isPrimitive"),
-                            entry(Byte.TYPE, "isBase", "isJDKClass", "isByte",
-                                    "isPrimitive", "hasIntegerType"),
-                            entry(Character.TYPE, "isBase", "isJDKClass",
-                                    "isCharacter", "isPrimitive"),
-                            entry(Double.TYPE, "isBase", "isJDKClass",
-                                    "isDouble", "isPrimitive", "hasFloatType"),
-                            entry(Float.TYPE, "isBase", "isJDKClass", "isFloat",
-                                    "isPrimitive", "hasFloatType"),
-                            entry(Integer.TYPE, "isBase", "isJDKClass",
-                                    "isInteger", "isPrimitive",
-                                    "hasIntegerType"),
-                            entry(Long.TYPE, "isBase", "isJDKClass", "isLong",
-                                    "isPrimitive", "hasIntegerType"),
-                            entry(Short.TYPE, "isBase", "isJDKClass", "isShort",
-                                    "isPrimitive", "hasIntegerType"),
-                            entry(Void.TYPE, "isBase", "isJDKClass", "isVoid"));
+                .ofEntries(
+                    entry(BigDecimal.class, "isBase", "isJDKClass",
+                        "isBigDecimal"),
+                    entry(Boolean.TYPE, "isBase", "isJDKClass",
+                        "isBoolean", "isPrimitive"),
+                    entry(Byte.TYPE, "isBase", "isJDKClass", "isByte",
+                        "isPrimitive", "hasIntegerType"),
+                    entry(Character.TYPE, "isBase", "isJDKClass",
+                        "isCharacter", "isPrimitive"),
+                    entry(Double.TYPE, "isBase", "isJDKClass",
+                        "isDouble", "isPrimitive", "hasFloatType"),
+                    entry(Float.TYPE, "isBase", "isJDKClass", "isFloat",
+                        "isPrimitive", "hasFloatType"),
+                    entry(Integer.TYPE, "isBase", "isJDKClass",
+                        "isInteger", "isPrimitive",
+                        "hasIntegerType"),
+                    entry(Long.TYPE, "isBase", "isJDKClass", "isLong",
+                        "isPrimitive", "hasIntegerType"),
+                    entry(Short.TYPE, "isBase", "isJDKClass", "isShort",
+                        "isPrimitive", "hasIntegerType"),
+                    entry(Void.TYPE, "isBase", "isJDKClass", "isVoid"));
             private static final Function<Arguments, Arguments> failableInsert = Failable
-                    .asFunction(Specialized::insert);
+                .asFunction(Specialized::insert);
 
             private static Arguments insert(Arguments args) {
                 var list = new ArrayList<>(Arrays.asList(args.get()));
                 var methodName = (String) list.get(list.size() - 1);
                 var type = getDeclaredMethod(Sample.class, methodName)
-                        .getReturnType();
+                    .getReturnType();
 
                 list.add(1, specializations.get(type));
 
@@ -293,13 +292,13 @@ public class BaseSignatureModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context(context);
 
                 return Streams.combine(
-                        getCompleteReflectionArguments(ctx).map(failableInsert),
-                        getBareReflectionArguments(ctx).map(failableInsert),
-                        getSourceArguments(ctx).map(failableInsert));
+                    getCompleteReflectionArguments(ctx).map(failableInsert),
+                    getBareReflectionArguments(ctx).map(failableInsert),
+                    getSourceArguments(ctx).map(failableInsert));
             }
         }
     }
@@ -311,11 +310,11 @@ public class BaseSignatureModelTests {
         @ParameterizedTest(name = ModelProvider.Annotated.testNamePattern)
         @ArgumentsSource(ModelProvider.Annotated.class)
         public void should_AccessAnnotations(BaseSignatureModel model,
-                ModelKind kind, String methodName) {
+            ModelKind kind, String methodName) {
             if (methodName.equals("getByte")) {
                 assertEquals(
-                        List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
-                        model.getAnnotations());
+                    List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
+                    model.getAnnotations());
             } else {
                 assertEquals(List.of(), model.getAnnotations());
             }
@@ -331,7 +330,7 @@ public class BaseSignatureModelTests {
         @ParameterizedTest(name = ModelProvider.Specialized.testNamePattern)
         @ArgumentsSource(ModelProvider.Specialized.class)
         public void should_HaveSpecialization(BaseSignatureModel model,
-                String[] specializations, ModelKind kind, String methodName) {
+            String[] specializations, ModelKind kind, String methodName) {
             checker.apply(model, specializations);
         }
     }

@@ -1,14 +1,5 @@
 package dev.hilla.parser.models;
 
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
-import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,6 +19,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.FieldInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,9 +38,14 @@ import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.ScanResult;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SourceExtension.class)
 public class ClassRefSignatureModelTests {
@@ -67,32 +66,32 @@ public class ClassRefSignatureModelTests {
         var bareParametrized = ctx.getBareReflectionOrigin(fieldName);
 
         var completeParametrizedHidden = ctx
-                .getCompleteReflectionOrigin(fieldName);
+            .getCompleteReflectionOrigin(fieldName);
         var completeParametrized = (AnnotatedParameterizedType) completeParametrizedHidden;
 
         var sourceParametrized = ctx.getSourceOrigin(fieldName);
 
         var classParametrized = Sample.StaticParametrizedDependency.Sub.class;
         var classInfoParametrized = getClassInfo(classParametrized,
-                ctx.getSource());
+            ctx.getSource());
 
         assertTrue(
-                ClassRefSignatureModel.is(bareParametrized, classParametrized));
+            ClassRefSignatureModel.is(bareParametrized, classParametrized));
         assertTrue(ClassRefSignatureModel.is(completeParametrized,
-                classParametrized));
+            classParametrized));
         assertTrue(ClassRefSignatureModel.is(completeParametrizedHidden,
-                classParametrized));
+            classParametrized));
         assertTrue(ClassRefSignatureModel.is(sourceParametrized,
-                classParametrized));
+            classParametrized));
 
         assertTrue(ClassRefSignatureModel.is(bareParametrized,
-                classInfoParametrized));
+            classInfoParametrized));
         assertTrue(ClassRefSignatureModel.is(completeParametrized,
-                classInfoParametrized));
+            classInfoParametrized));
         assertTrue(ClassRefSignatureModel.is(completeParametrizedHidden,
-                classInfoParametrized));
+            classInfoParametrized));
         assertTrue(ClassRefSignatureModel.is(sourceParametrized,
-                classInfoParametrized));
+            classInfoParametrized));
     }
 
     @DisplayName("It should compare simple class reference signature with its class info")
@@ -106,7 +105,7 @@ public class ClassRefSignatureModelTests {
 
         var classSimple = Sample.StaticDependency.Sub.class;
         var classInfoSimple = ctx.getSource()
-                .getClassInfo(classSimple.getName());
+            .getClassInfo(classSimple.getName());
 
         assertTrue(ClassRefSignatureModel.is(bareSimple, classSimple));
         assertTrue(ClassRefSignatureModel.is(completeSimple, classSimple));
@@ -121,51 +120,51 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInfo(ClassRefSignatureModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         var cls = ClassInfoModel
-                .of(Sample.DynamicParametrizedDependency.Sub.class);
+            .of(Sample.DynamicParametrizedDependency.Sub.class);
 
         assertEquals(cls, model.getClassInfo());
 
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
-            var owner = ClassInfoModel
+            case REFLECTION_COMPLETE:
+            case SOURCE: {
+                var owner = ClassInfoModel
                     .of(Sample.DynamicParametrizedDependency.class);
-            var grandOwner = ClassInfoModel.of(Sample.class);
-            var grandGrandOwner = ClassInfoModel.of(getClass());
+                var grandOwner = ClassInfoModel.of(Sample.class);
+                var grandGrandOwner = ClassInfoModel.of(getClass());
 
-            assertEquals(owner, model.getOwner()
+                assertEquals(owner, model.getOwner()
                     .map(ClassRefSignatureModel::getClassInfo).orElse(null));
 
-            assertEquals(grandOwner,
+                assertEquals(grandOwner,
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassInfo)
-                            .orElse(null));
+                        .map(ClassRefSignatureModel::getClassInfo)
+                        .orElse(null));
 
-            assertEquals(grandGrandOwner,
+                assertEquals(grandGrandOwner,
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getClassInfo)
-                            .orElse(null));
-        }
+                        .flatMap(ClassRefSignatureModel::getOwner)
+                        .map(ClassRefSignatureModel::getClassInfo)
+                        .orElse(null));
+            }
             break;
-        case REFLECTION_BARE:
-            break;
+            case REFLECTION_BARE:
+                break;
         }
     }
 
     @DisplayName("It should get type arguments as a stream")
     @Test
     public void should_GetTypeArgumentsAsStream(@Source ScanResult source)
-            throws NoSuchFieldException {
+        throws NoSuchFieldException {
         var ctx = new Context.Default(source);
         var model = ClassRefSignatureModel
-                .of(ctx.getCompleteReflectionOrigin(ModelProvider.fieldName));
+            .of(ctx.getCompleteReflectionOrigin(ModelProvider.fieldName));
         var expected = List.of(TypeArgumentModel
-                .of(matches.getTypeArgument("intTypeArgument")));
+            .of(matches.getTypeArgument("intTypeArgument")));
         var actual = model.getTypeArgumentsStream()
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
 
         assertEquals(expected, actual);
     }
@@ -174,32 +173,32 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetTypeOwner(ClassRefSignatureModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
-            assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
+            case REFLECTION_COMPLETE:
+            case SOURCE: {
+                assertEquals(Sample.DynamicParametrizedDependency.class.getName(),
                     model.getOwner().map(ClassRefSignatureModel::getName)
-                            .orElse(null));
+                        .orElse(null));
 
-            assertEquals(Sample.class.getName(),
+                assertEquals(Sample.class.getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getName).orElse(null));
+                        .map(ClassRefSignatureModel::getName).orElse(null));
 
-            assertEquals(getClass().getName(),
+                assertEquals(getClass().getName(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .map(ClassRefSignatureModel::getName).orElse(null));
+                        .flatMap(ClassRefSignatureModel::getOwner)
+                        .map(ClassRefSignatureModel::getName).orElse(null));
 
-            assertEquals(Optional.empty(),
+                assertEquals(Optional.empty(),
                     model.getOwner().flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner)
-                            .flatMap(ClassRefSignatureModel::getOwner));
-        }
+                        .flatMap(ClassRefSignatureModel::getOwner)
+                        .flatMap(ClassRefSignatureModel::getOwner));
+            }
             break;
-        case REFLECTION_BARE:
-            assertEquals(Optional.empty(), model.getOwner());
-            break;
+            case REFLECTION_BARE:
+                assertEquals(Optional.empty(), model.getOwner());
+                break;
         }
     }
 
@@ -207,8 +206,8 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSameHashCodeForSourceAndReflectionModels(
-            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
-            String testName) {
+        AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
+        String testName) {
         var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
         var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
@@ -219,8 +218,8 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
     @ArgumentsSource(ModelProvider.Equality.class)
     public void should_HaveSourceAndReflectionModelsEqual(
-            AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
-            String testName) {
+        AnnotatedType reflectionOrigin, ClassRefTypeSignature sourceOrigin,
+        String testName) {
         var reflectionModel = ClassRefSignatureModel.of(reflectionOrigin);
         var sourceModel = ClassRefSignatureModel.of(sourceOrigin);
 
@@ -238,24 +237,24 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(ClassRefSignatureModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         switch (kind) {
-        case REFLECTION_COMPLETE:
-            assertEquals(
+            case REFLECTION_COMPLETE:
+                assertEquals(
                     ctx.getCompleteReflectionOrigin(ModelProvider.fieldName),
                     model.get());
-            assertTrue(model.isReflection());
-            break;
-        case REFLECTION_BARE:
-            assertEquals(ctx.getBareReflectionOrigin(ModelProvider.fieldName),
+                assertTrue(model.isReflection());
+                break;
+            case REFLECTION_BARE:
+                assertEquals(ctx.getBareReflectionOrigin(ModelProvider.fieldName),
                     model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(ModelProvider.fieldName),
+                assertTrue(model.isReflection());
+                break;
+            case SOURCE:
+                assertEquals(ctx.getSourceOrigin(ModelProvider.fieldName),
                     model.get());
-            assertTrue(model.isSource());
-            break;
+                assertTrue(model.isSource());
+                break;
         }
     }
 
@@ -263,42 +262,42 @@ public class ClassRefSignatureModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ResolveUnderlyingClass(ClassRefSignatureModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         assertEquals(Sample.DynamicParametrizedDependency.Sub.class.getName(),
-                model.getName());
+            model.getName());
     }
 
     @DisplayName("It should resolve underlying type arguments")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ResolveUnderlyingTypeArguments(
-            ClassRefSignatureModel model, ModelKind kind)
-            throws NoSuchFieldException {
+        ClassRefSignatureModel model, ModelKind kind)
+        throws NoSuchFieldException {
         switch (kind) {
-        case REFLECTION_COMPLETE:
-        case SOURCE: {
-            var intTypeArgument = TypeArgumentModel
+            case REFLECTION_COMPLETE:
+            case SOURCE: {
+                var intTypeArgument = TypeArgumentModel
                     .of(matches.getTypeArgument("intTypeArgument"));
-            var stringTypeArgument = TypeArgumentModel
+                var stringTypeArgument = TypeArgumentModel
                     .of(matches.getTypeArgument("stringTypeArgument"));
 
-            assertEquals(List.of(intTypeArgument), model.getTypeArguments());
+                assertEquals(List.of(intTypeArgument), model.getTypeArguments());
 
-            assertEquals(List.of(stringTypeArgument),
+                assertEquals(List.of(stringTypeArgument),
                     model.getOwner()
-                            .map(ClassRefSignatureModel::getTypeArguments)
-                            .orElseGet(List::of));
-        }
+                        .map(ClassRefSignatureModel::getTypeArguments)
+                        .orElseGet(List::of));
+            }
             break;
-        case REFLECTION_BARE:
-            assertEquals(List.of(), model.getTypeArguments());
-            break;
+            case REFLECTION_BARE:
+                assertEquals(List.of(), model.getTypeArguments());
+                break;
         }
     }
 
     enum ModelKind {
         SOURCE("SOURCE"), REFLECTION_COMPLETE(
-                "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");
+            "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");
 
         private final String text;
 
@@ -325,19 +324,19 @@ public class ClassRefSignatureModelTests {
             var source = ctx.getSourceOrigin(fieldName);
 
             return Stream.of(
-                    Arguments.of(ClassRefSignatureModel.of(complete),
-                            ModelKind.REFLECTION_COMPLETE),
-                    Arguments.of(ClassRefSignatureModel.of(bare),
-                            ModelKind.REFLECTION_BARE),
-                    Arguments.of(ClassRefSignatureModel.of(source),
-                            ModelKind.SOURCE));
+                Arguments.of(ClassRefSignatureModel.of(complete),
+                    ModelKind.REFLECTION_COMPLETE),
+                Arguments.of(ClassRefSignatureModel.of(bare),
+                    ModelKind.REFLECTION_BARE),
+                Arguments.of(ClassRefSignatureModel.of(source),
+                    ModelKind.SOURCE));
         }
 
         static final class Checker
-                extends SpecializationChecker<SpecializedModel> {
+            extends SpecializationChecker<SpecializedModel> {
             public Checker() {
                 super(SpecializedModel.class,
-                        getDeclaredMethods(SpecializedModel.class));
+                    getDeclaredMethods(SpecializedModel.class));
             }
         }
 
@@ -346,7 +345,7 @@ public class ClassRefSignatureModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context.Default(context);
 
                 return ctx.getNames().stream().map(name -> {
@@ -362,73 +361,73 @@ public class ClassRefSignatureModelTests {
             public static final String testNamePattern = "{2} [{3}]";
 
             private static final Map<String, String[]> specializations = Map
-                    .ofEntries(
-                            entry(BigDecimal.class.getName(), "isBigDecimal",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Boolean.class.getName(), "isBoolean",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Byte.class.getName(), "hasIntegerType",
-                                    "isByte", "isClassRef", "isJDKClass"),
-                            entry(Character.class.getName(), "isCharacter",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Double.class.getName(), "hasFloatType",
-                                    "isDouble", "isClassRef", "isJDKClass"),
-                            entry(Float.class.getName(), "hasFloatType",
-                                    "isFloat", "isClassRef", "isJDKClass"),
-                            entry(List.class.getName(), "isIterable",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Long.class.getName(), "hasIntegerType",
-                                    "isLong", "isClassRef", "isJDKClass"),
-                            entry(Short.class.getName(), "hasIntegerType",
-                                    "isShort", "isClassRef", "isJDKClass"),
-                            entry(Sample.Characteristics.Enum.class.getName(),
-                                    "isEnum", "isClassRef", "isNonJDKClass"),
-                            entry(Integer.class.getName(), "hasIntegerType",
-                                    "isInteger", "isClassRef", "isJDKClass"),
-                            entry(Date.class.getName(), "isDate", "isClassRef",
-                                    "isJDKClass"),
-                            entry(LocalDateTime.class.getName(), "isDateTime",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Map.class.getName(), "isMap", "isClassRef",
-                                    "isJDKClass"),
-                            entry(Object.class.getName(), "isNativeObject",
-                                    "isClassRef", "isJDKClass"),
-                            entry(Optional.class.getName(), "isOptional",
-                                    "isClassRef", "isJDKClass"),
-                            entry(String.class.getName(), "isString",
-                                    "isClassRef", "isJDKClass"));
+                .ofEntries(
+                    entry(BigDecimal.class.getName(), "isBigDecimal",
+                        "isClassRef", "isJDKClass"),
+                    entry(Boolean.class.getName(), "isBoolean",
+                        "isClassRef", "isJDKClass"),
+                    entry(Byte.class.getName(), "hasIntegerType",
+                        "isByte", "isClassRef", "isJDKClass"),
+                    entry(Character.class.getName(), "isCharacter",
+                        "isClassRef", "isJDKClass"),
+                    entry(Double.class.getName(), "hasFloatType",
+                        "isDouble", "isClassRef", "isJDKClass"),
+                    entry(Float.class.getName(), "hasFloatType",
+                        "isFloat", "isClassRef", "isJDKClass"),
+                    entry(List.class.getName(), "isIterable",
+                        "isClassRef", "isJDKClass"),
+                    entry(Long.class.getName(), "hasIntegerType",
+                        "isLong", "isClassRef", "isJDKClass"),
+                    entry(Short.class.getName(), "hasIntegerType",
+                        "isShort", "isClassRef", "isJDKClass"),
+                    entry(Sample.Characteristics.Enum.class.getName(),
+                        "isEnum", "isClassRef", "isNonJDKClass"),
+                    entry(Integer.class.getName(), "hasIntegerType",
+                        "isInteger", "isClassRef", "isJDKClass"),
+                    entry(Date.class.getName(), "isDate", "isClassRef",
+                        "isJDKClass"),
+                    entry(LocalDateTime.class.getName(), "isDateTime",
+                        "isClassRef", "isJDKClass"),
+                    entry(Map.class.getName(), "isMap", "isClassRef",
+                        "isJDKClass"),
+                    entry(Object.class.getName(), "isNativeObject",
+                        "isClassRef", "isJDKClass"),
+                    entry(Optional.class.getName(), "isOptional",
+                        "isClassRef", "isJDKClass"),
+                    entry(String.class.getName(), "isString",
+                        "isClassRef", "isJDKClass"));
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
                 var complete = ctx.getCompleteReflectionOrigins().entrySet()
-                        .stream().map(entry -> {
-                            var origin = entry.getValue();
-                            var name = origin instanceof AnnotatedParameterizedType
-                                    ? ((Class<?>) ((ParameterizedType) origin
-                                            .getType()).getRawType()).getName()
-                                    : ((Class<?>) origin.getType()).getName();
+                    .stream().map(entry -> {
+                        var origin = entry.getValue();
+                        var name = origin instanceof AnnotatedParameterizedType
+                            ? ((Class<?>) ((ParameterizedType) origin
+                            .getType()).getRawType()).getName()
+                            : ((Class<?>) origin.getType()).getName();
 
-                            return Arguments.of(
-                                    ClassRefSignatureModel.of(origin),
-                                    specializations.get(name),
-                                    ModelKind.REFLECTION_COMPLETE,
-                                    entry.getKey());
-                        });
+                        return Arguments.of(
+                            ClassRefSignatureModel.of(origin),
+                            specializations.get(name),
+                            ModelKind.REFLECTION_COMPLETE,
+                            entry.getKey());
+                    });
                 var bare = ctx.getBareReflectionOrigins().entrySet().stream()
-                        .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
-                                specializations.get(entry.getValue().getName()),
-                                ModelKind.REFLECTION_BARE, entry.getKey()));
+                    .map(entry -> Arguments.of(
+                        ClassRefSignatureModel.of(entry.getValue()),
+                        specializations.get(entry.getValue().getName()),
+                        ModelKind.REFLECTION_BARE, entry.getKey()));
 
                 var source = ctx.getSourceOrigins().entrySet().stream()
-                        .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
-                                specializations.get(entry.getValue()
-                                        .getFullyQualifiedClassName()),
-                                ModelKind.SOURCE, entry.getKey()));
+                    .map(entry -> Arguments.of(
+                        ClassRefSignatureModel.of(entry.getValue()),
+                        specializations.get(entry.getValue()
+                            .getFullyQualifiedClassName()),
+                        ModelKind.SOURCE, entry.getKey()));
 
                 return Streams.combine(complete, bare, source);
             }
@@ -443,26 +442,26 @@ public class ClassRefSignatureModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_GetTypeAnnotation(ClassRefSignatureModel model,
-                ModelKind kind) throws NoSuchFieldException {
+            ModelKind kind) throws NoSuchFieldException {
             switch (kind) {
-            case REFLECTION_COMPLETE:
-            case SOURCE: {
-                var fooAnnotation = AnnotationInfoModel
+                case REFLECTION_COMPLETE:
+                case SOURCE: {
+                    var fooAnnotation = AnnotationInfoModel
                         .of(matches.getAnnotation("fooAnnotation"));
-                var barAnnotation = AnnotationInfoModel
+                    var barAnnotation = AnnotationInfoModel
                         .of(matches.getAnnotation("barAnnotation"));
 
-                assertEquals(List.of(fooAnnotation), model.getAnnotations());
+                    assertEquals(List.of(fooAnnotation), model.getAnnotations());
 
-                assertEquals(List.of(barAnnotation),
+                    assertEquals(List.of(barAnnotation),
                         model.getOwner()
-                                .map(ClassRefSignatureModel::getAnnotations)
-                                .orElseGet(List::of));
-            }
+                            .map(ClassRefSignatureModel::getAnnotations)
+                            .orElseGet(List::of));
+                }
                 break;
-            case REFLECTION_BARE:
-                assertEquals(Optional.empty(), model.getOwner());
-                break;
+                case REFLECTION_BARE:
+                    assertEquals(Optional.empty(), model.getOwner());
+                    break;
             }
         }
     }
@@ -476,7 +475,7 @@ public class ClassRefSignatureModelTests {
         @ParameterizedTest(name = ModelProvider.Specialized.testNamePattern)
         @ArgumentsSource(ModelProvider.Specialized.class)
         public void should_HaveSpecialization(ClassRefSignatureModel model,
-                String[] characteristics, ModelKind kind, String testName) {
+            String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
         }
     }
@@ -490,12 +489,12 @@ public class ClassRefSignatureModelTests {
         Context(ScanResult source, ReflectionData data) {
             this.source = source;
             this.sourceOrigins = getDeclaredFields(data.getTarget(), source)
-                    .collect(Collectors.toMap(FieldInfo::getName,
-                            field -> (ClassRefTypeSignature) field
-                                    .getTypeSignatureOrTypeDescriptor()));
+                .collect(Collectors.toMap(FieldInfo::getName,
+                    field -> (ClassRefTypeSignature) field
+                        .getTypeSignatureOrTypeDescriptor()));
             this.bareReflectionOrigins = data.getBareReflectionOrigins();
             this.completeReflectionOrigins = data
-                    .getCompleteReflectionOrigins();
+                .getCompleteReflectionOrigins();
         }
 
         public Class<?> getBareReflectionOrigin(String name) {
@@ -532,31 +531,31 @@ public class ClassRefSignatureModelTests {
 
         static final class Matches {
             public Annotation getAnnotation(String name)
-                    throws NoSuchFieldException {
+                throws NoSuchFieldException {
                 var annotations = getDeclaredField(Sample.Matches.class, name)
-                        .getAnnotatedType().getAnnotations();
+                    .getAnnotatedType().getAnnotations();
 
                 if (annotations.length > 0) {
                     return annotations[0];
                 }
 
                 throw new NoSuchFieldException(
-                        "No annotated field with name \"" + name + "\" found");
+                    "No annotated field with name \"" + name + "\" found");
             }
 
             public AnnotatedType getTypeArgument(String name)
-                    throws NoSuchFieldException {
+                throws NoSuchFieldException {
                 var owner = getDeclaredField(Sample.Matches.class, name)
-                        .getAnnotatedType();
+                    .getAnnotatedType();
 
                 if (owner instanceof AnnotatedParameterizedType) {
                     return ((AnnotatedParameterizedType) owner)
-                            .getAnnotatedActualTypeArguments()[0];
+                        .getAnnotatedActualTypeArguments()[0];
                 }
 
                 throw new NoSuchFieldException(
-                        "No parametrized field with name \"" + name
-                                + "\" found");
+                    "No parametrized field with name \"" + name
+                        + "\" found");
             }
         }
 
@@ -568,10 +567,10 @@ public class ClassRefSignatureModelTests {
             ReflectionData(Class<?> target) {
                 this.target = target;
                 this.bareReflectionOrigins = getDeclaredFields(target).collect(
-                        Collectors.toMap(Field::getName, Field::getType));
+                    Collectors.toMap(Field::getName, Field::getType));
                 this.completeReflectionOrigins = getDeclaredFields(target)
-                        .collect(Collectors.toMap(Field::getName,
-                                Field::getAnnotatedType));
+                    .collect(Collectors.toMap(Field::getName,
+                        Field::getAnnotatedType));
             }
 
             public Map<String, Class<?>> getBareReflectionOrigins() {
@@ -589,7 +588,7 @@ public class ClassRefSignatureModelTests {
 
         static class Characteristics extends Context {
             private static final ReflectionData data = new ReflectionData(
-                    Sample.Characteristics.class);
+                Sample.Characteristics.class);
 
             Characteristics(ScanResult source) {
                 super(source, data);
@@ -602,7 +601,7 @@ public class ClassRefSignatureModelTests {
 
         static class Default extends Context {
             private static final ReflectionData data = new ReflectionData(
-                    Sample.class);
+                Sample.class);
 
             Default(ScanResult source) {
                 super(source, data);

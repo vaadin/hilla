@@ -1,16 +1,5 @@
 package dev.hilla.parser.models;
 
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
-import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
-import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,6 +15,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ArrayTypeSignature;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,9 +36,16 @@ import dev.hilla.parser.test.helpers.SourceExtension;
 import dev.hilla.parser.test.helpers.SpecializationChecker;
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.ArrayTypeSignature;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ScanResult;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getClassInfo;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
+import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(SourceExtension.class)
 public class ClassInfoModelTests {
@@ -61,89 +60,89 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_CheckAssignability(ClassInfoModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         var assignableReflectionClass = Dependency.SampleChild.class;
         var nonAssignableReflectionClass = Dependency.Sample.StaticInner.class;
 
         var assignableSourceClass = getClassInfo(Dependency.SampleChild.class,
-                ctx.getSource());
+            ctx.getSource());
         var nonAssignableSourceClass = getClassInfo(
-                Dependency.Sample.StaticInner.class, ctx.getSource());
+            Dependency.Sample.StaticInner.class, ctx.getSource());
 
         assertTrue(model.isAssignableFrom(assignableReflectionClass));
         assertTrue(model.isAssignableFrom(assignableSourceClass));
         assertTrue(model.isAssignableFrom(
-                ClassInfoModel.of(assignableReflectionClass)));
+            ClassInfoModel.of(assignableReflectionClass)));
         assertTrue(model
-                .isAssignableFrom(ClassInfoModel.of(assignableSourceClass)));
+            .isAssignableFrom(ClassInfoModel.of(assignableSourceClass)));
 
         assertFalse(model.isAssignableFrom(nonAssignableReflectionClass));
         assertFalse(model.isAssignableFrom(nonAssignableSourceClass));
         assertFalse(model.isAssignableFrom(
-                ClassInfoModel.of(nonAssignableReflectionClass)));
+            ClassInfoModel.of(nonAssignableReflectionClass)));
         assertFalse(model
-                .isAssignableFrom(ClassInfoModel.of(nonAssignableSourceClass)));
+            .isAssignableFrom(ClassInfoModel.of(nonAssignableSourceClass)));
 
         assertTrue(ClassInfoModel.isAssignableFrom(model.getName(),
-                assignableReflectionClass));
+            assignableReflectionClass));
         assertTrue(ClassInfoModel.isAssignableFrom(model.getName(),
-                assignableSourceClass));
+            assignableSourceClass));
         assertTrue(ClassInfoModel.isAssignableFrom(model.getName(),
-                ClassInfoModel.of(assignableReflectionClass)));
+            ClassInfoModel.of(assignableReflectionClass)));
         assertTrue(ClassInfoModel.isAssignableFrom(model.getName(),
-                ClassInfoModel.of(assignableSourceClass)));
+            ClassInfoModel.of(assignableSourceClass)));
 
         assertFalse(ClassInfoModel.isAssignableFrom(model.getName(),
-                nonAssignableReflectionClass));
+            nonAssignableReflectionClass));
         assertFalse(ClassInfoModel.isAssignableFrom(model.getName(),
-                nonAssignableSourceClass));
+            nonAssignableSourceClass));
         assertFalse(ClassInfoModel.isAssignableFrom(model.getName(),
-                ClassInfoModel.of(nonAssignableReflectionClass)));
+            ClassInfoModel.of(nonAssignableReflectionClass)));
         assertFalse(ClassInfoModel.isAssignableFrom(model.getName(),
-                ClassInfoModel.of(nonAssignableSourceClass)));
+            ClassInfoModel.of(nonAssignableSourceClass)));
 
         switch (kind) {
-        case REFLECTION: {
-            var refOrigin = ctx.getReflectionOrigin();
-            assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
+            case REFLECTION: {
+                var refOrigin = ctx.getReflectionOrigin();
+                assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
                     assignableReflectionClass));
-            assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
                     assignableSourceClass));
-            assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
                     ClassInfoModel.of(assignableReflectionClass)));
-            assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(refOrigin,
                     ClassInfoModel.of(assignableSourceClass)));
 
-            assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
                     nonAssignableReflectionClass));
-            assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
                     nonAssignableSourceClass));
-            assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(refOrigin,
                     ClassInfoModel.of(nonAssignableReflectionClass)));
-            ClassInfoModel.isAssignableFrom(refOrigin,
+                ClassInfoModel.isAssignableFrom(refOrigin,
                     ClassInfoModel.of(nonAssignableSourceClass));
-        }
+            }
             break;
-        case SOURCE: {
-            var sourceOrigin = ctx.getSourceOrigin();
-            assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
+            case SOURCE: {
+                var sourceOrigin = ctx.getSourceOrigin();
+                assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     assignableReflectionClass));
-            assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     assignableSourceClass));
-            assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     ClassInfoModel.of(assignableReflectionClass)));
-            assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertTrue(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     ClassInfoModel.of(assignableSourceClass)));
 
-            assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     nonAssignableReflectionClass));
-            assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     nonAssignableSourceClass));
-            assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
+                assertFalse(ClassInfoModel.isAssignableFrom(sourceOrigin,
                     ClassInfoModel.of(nonAssignableReflectionClass)));
-            ClassInfoModel.isAssignableFrom(sourceOrigin,
+                ClassInfoModel.isAssignableFrom(sourceOrigin,
                     ClassInfoModel.of(nonAssignableSourceClass));
-        }
+            }
             break;
         }
     }
@@ -156,9 +155,9 @@ public class ClassInfoModelTests {
         var sourceModel = ClassInfoModel.of(ctx.getSourceOrigin());
 
         var otherReflectionModel = ClassInfoModel
-                .of(Dependency.SampleChild.class);
+            .of(Dependency.SampleChild.class);
         var otherSourceModel = ClassInfoModel.of(ctx.getSource()
-                .getClassInfo(Dependency.SampleChild.class.getName()));
+            .getClassInfo(Dependency.SampleChild.class.getName()));
 
         assertEquals(model, model);
         assertEquals(model, reflectionModel);
@@ -200,9 +199,9 @@ public class ClassInfoModelTests {
         var sameClassName = sameReflectionClass.getName();
         var anotherClassName = anotherReflectionClass.getName();
         var sameSourceClass = getClassInfo(sameReflectionClass,
-                ctx.getSource());
+            ctx.getSource());
         var anotherSourceClass = getClassInfo(anotherReflectionClass,
-                ctx.getSource());
+            ctx.getSource());
 
         assertTrue(model.is(sameClassName));
         assertTrue(model.is(sameReflectionClass));
@@ -221,10 +220,10 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetAllInnerClasses(ClassInfoModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         var expected = ClassMemberUtils
-                .getDeclaredClasses(Dependency.Sample.class)
-                .map(ClassInfoModel::of).collect(Collectors.toSet());
+            .getDeclaredClasses(Dependency.Sample.class)
+            .map(ClassInfoModel::of).collect(Collectors.toSet());
         var actual = new HashSet<>(model.getInnerClasses());
 
         assertEquals(expected, actual);
@@ -235,7 +234,7 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredFields(Dependency.Sample.class)
-                .map(FieldInfoModel::of).collect(Collectors.toList());
+            .map(FieldInfoModel::of).collect(Collectors.toList());
         var actual = model.getFields();
 
         assertEquals(expected, actual);
@@ -245,13 +244,13 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassInheritanceChain(ClassInfoModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         var expected = Stream
-                .<Class<?>> iterate(Dependency.Sample.class,
-                        ((Predicate<Class<?>>) Objects::nonNull)
-                                .and(ClassInfoModel::isNonJDKClass),
-                        Class::getSuperclass)
-                .map(ClassInfoModel::of).collect(Collectors.toList());
+            .<Class<?>>iterate(Dependency.Sample.class,
+                ((Predicate<Class<?>>) Objects::nonNull)
+                    .and(ClassInfoModel::isNonJDKClass),
+                Class::getSuperclass)
+            .map(ClassInfoModel::of).collect(Collectors.toList());
         var actual = model.getInheritanceChain();
 
         assertEquals(expected, actual);
@@ -262,9 +261,9 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassMethods(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredMethods(Dependency.Sample.class)
-                .map(MethodInfoModel::of).collect(Collectors.toSet());
+            .map(MethodInfoModel::of).collect(Collectors.toSet());
         var actual = cleanup(model.getMethods().stream())
-                .collect(Collectors.toSet());
+            .collect(Collectors.toSet());
 
         assertEquals(expected, actual);
     }
@@ -274,11 +273,11 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetInterfaces(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
-                .map(ClassInfoModel::of).map(ClassInfoModel::getName)
-                .collect(Collectors.toList());
+            .map(ClassInfoModel::of).map(ClassInfoModel::getName)
+            .collect(Collectors.toList());
         var actual = model.getInterfacesStream()
-                .map(ClassRefSignatureModel::getName)
-                .collect(Collectors.toList());
+            .map(ClassRefSignatureModel::getName)
+            .collect(Collectors.toList());
 
         assertEquals(expected, actual);
     }
@@ -288,7 +287,7 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetSimpleName(ClassInfoModel model, ModelKind kind) {
         assertEquals(Dependency.Sample.class.getSimpleName(),
-                model.getSimpleName());
+            model.getSimpleName());
     }
 
     @DisplayName("It should get superclass of the class")
@@ -296,8 +295,8 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetSuperclass(ClassInfoModel model, ModelKind kind) {
         assertEquals(Dependency.Sample.class.getSuperclass().getName(),
-                model.getSuperClass().map(ClassRefSignatureModel::getName)
-                        .orElse(null));
+            model.getSuperClass().map(ClassRefSignatureModel::getName)
+                .orElse(null));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -329,16 +328,16 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(ClassInfoModel model,
-            ModelKind kind) {
+        ModelKind kind) {
         switch (kind) {
-        case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
-            assertTrue(model.isReflection());
-            break;
-        case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
-            assertTrue(model.isSource());
-            break;
+            case REFLECTION:
+                assertEquals(ctx.getReflectionOrigin(), model.get());
+                assertTrue(model.isReflection());
+                break;
+            case SOURCE:
+                assertEquals(ctx.getSourceOrigin(), model.get());
+                assertTrue(model.isSource());
+                break;
         }
     }
 
@@ -457,7 +456,7 @@ public class ClassInfoModelTests {
 
         @Annotation
         static class Sample extends Parent
-                implements Interface<ParametrizedDependency> {
+            implements Interface<ParametrizedDependency> {
             public static FieldStaticPublic fieldStaticPublic;
             protected static FieldStaticProtected fieldStaticProtected;
             private static FieldStaticPrivate fieldStaticPrivate;
@@ -555,9 +554,9 @@ public class ClassInfoModelTests {
         @ParameterizedTest(name = ModelProvider.testNamePattern)
         @ArgumentsSource(ModelProvider.class)
         public void should_GetClassAnnotation(ClassInfoModel model,
-                ModelKind kind) {
+            ModelKind kind) {
             assertEquals(List.of(AnnotationInfoModel.of(ctx.getAnnotation())),
-                    model.getAnnotations());
+                model.getAnnotations());
         }
     }
 
@@ -570,7 +569,7 @@ public class ClassInfoModelTests {
         @ParameterizedTest(name = ModelProvider.Characteristics.testNamePattern)
         @ArgumentsSource(ModelProvider.Characteristics.class)
         public void should_DetectCharacteristics(ClassInfoModel model,
-                String[] characteristics, ModelKind kind, String testName) {
+            String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
         }
     }
@@ -584,7 +583,7 @@ public class ClassInfoModelTests {
         @ParameterizedTest(name = ModelProvider.Specialization.testNamePattern)
         @ArgumentsSource(ModelProvider.Specialization.class)
         public void should_DetectClassSpecialization(ClassInfoModel model,
-                String[] specializations, ModelKind kind, String testName) {
+            String[] specializations, ModelKind kind, String testName) {
             checker.apply(model, specializations);
         }
     }
@@ -597,10 +596,10 @@ public class ClassInfoModelTests {
             var ctx = new Context.Default(context);
 
             return Stream.of(
-                    Arguments.of(ClassInfoModel.of(ctx.getReflectionOrigin()),
-                            ModelKind.REFLECTION),
-                    Arguments.of(ClassInfoModel.of(ctx.getSourceOrigin()),
-                            ModelKind.SOURCE));
+                Arguments.of(ClassInfoModel.of(ctx.getReflectionOrigin()),
+                    ModelKind.REFLECTION),
+                Arguments.of(ClassInfoModel.of(ctx.getSourceOrigin()),
+                    ModelKind.SOURCE));
         }
 
         public static final class Specialization implements ArgumentsProvider {
@@ -608,20 +607,20 @@ public class ClassInfoModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context.Specializations(context);
 
                 return Streams.combine(
-                        ctx.getReflectionSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getSimpleName())),
-                        ctx.getSourceSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getSimpleName())));
+                    ctx.getReflectionSpecializations().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            ClassInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.REFLECTION,
+                            entry.getKey().getSimpleName())),
+                    ctx.getSourceSpecializations().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            ClassInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.SOURCE,
+                            entry.getKey().getSimpleName())));
             }
         }
 
@@ -630,44 +629,44 @@ public class ClassInfoModelTests {
 
             @Override
             public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
+                ExtensionContext context) {
                 var ctx = new Context.Characteristics(context);
 
                 return Streams.combine(
-                        ctx.getReflectionCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getSimpleName())),
-                        ctx.getSourceCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getSimpleName())));
+                    ctx.getReflectionCharacteristics().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            ClassInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.REFLECTION,
+                            entry.getKey().getSimpleName())),
+                    ctx.getSourceCharacteristics().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                            ClassInfoModel.of(entry.getKey()),
+                            entry.getValue(), ModelKind.SOURCE,
+                            entry.getKey().getSimpleName())));
             }
 
         }
 
         static final class CharacteristicsChecker
-                extends SpecializationChecker<ClassInfoModel> {
+            extends SpecializationChecker<ClassInfoModel> {
             private static final List<String> allowedMethods = List.of(
-                    "isAbstract", "isAnnotation", "isArrayClass", "isEnum",
-                    "isFinal", "isInterface", "isInterfaceOrAnnotation",
-                    "isNative", "isPrivate", "isProtected", "isPublic",
-                    "isStandardClass", "isStatic", "isSynthetic");
+                "isAbstract", "isAnnotation", "isArrayClass", "isEnum",
+                "isFinal", "isInterface", "isInterfaceOrAnnotation",
+                "isNative", "isPrivate", "isProtected", "isPublic",
+                "isStandardClass", "isStatic", "isSynthetic");
 
             public CharacteristicsChecker() {
                 super(ClassInfoModel.class,
-                        getDeclaredMethods(ClassInfoModel.class),
-                        allowedMethods);
+                    getDeclaredMethods(ClassInfoModel.class),
+                    allowedMethods);
             }
         }
 
         static final class Checker
-                extends SpecializationChecker<SpecializedModel> {
+            extends SpecializationChecker<SpecializedModel> {
             public Checker() {
                 super(SpecializedModel.class,
-                        getDeclaredMethods(SpecializedModel.class));
+                    getDeclaredMethods(SpecializedModel.class));
             }
         }
     }
@@ -689,31 +688,31 @@ public class ClassInfoModelTests {
 
         static class Characteristics extends Context {
             private static final Map<Class<?>, String[]> reflectionCharacteristics = Map
-                    .ofEntries(entry(
-                            ClassInfoModelTests.Characteristics.Abstract.class,
-                            "isAbstract", "isStandardClass", "isStatic"),
-                            entry(ClassInfoModelTests.Characteristics.Annotation.class,
-                                    "isAnnotation", "isAbstract",
-                                    "isInterfaceOrAnnotation", "isStatic"),
-                            entry(Object[].class, "isAbstract", "isArrayClass",
-                                    "isFinal", "isPublic", "isStandardClass"),
-                            entry(ClassInfoModelTests.Characteristics.Enum.class,
-                                    "isEnum", "isFinal", "isStandardClass",
-                                    "isStatic"),
-                            entry(ClassInfoModelTests.Characteristics.Final.class,
-                                    "isFinal", "isStandardClass", "isStatic"),
-                            entry(ClassInfoModelTests.Characteristics.Interface.class,
-                                    "isAbstract", "isInterface",
-                                    "isInterfaceOrAnnotation", "isStatic"),
-                            entry(Byte.class, "isFinal", "isPublic",
-                                    "isStandardClass"),
-                            entry(ClassInfoModelTests.Characteristics.Private.class,
-                                    "isPrivate", "isStandardClass", "isStatic"),
-                            entry(ClassInfoModelTests.Characteristics.Protected.class,
-                                    "isProtected", "isStandardClass",
-                                    "isStatic"),
-                            entry(ClassInfoModelTests.Characteristics.Public.class,
-                                    "isPublic", "isStandardClass", "isStatic"));
+                .ofEntries(entry(
+                        ClassInfoModelTests.Characteristics.Abstract.class,
+                        "isAbstract", "isStandardClass", "isStatic"),
+                    entry(ClassInfoModelTests.Characteristics.Annotation.class,
+                        "isAnnotation", "isAbstract",
+                        "isInterfaceOrAnnotation", "isStatic"),
+                    entry(Object[].class, "isAbstract", "isArrayClass",
+                        "isFinal", "isPublic", "isStandardClass"),
+                    entry(ClassInfoModelTests.Characteristics.Enum.class,
+                        "isEnum", "isFinal", "isStandardClass",
+                        "isStatic"),
+                    entry(ClassInfoModelTests.Characteristics.Final.class,
+                        "isFinal", "isStandardClass", "isStatic"),
+                    entry(ClassInfoModelTests.Characteristics.Interface.class,
+                        "isAbstract", "isInterface",
+                        "isInterfaceOrAnnotation", "isStatic"),
+                    entry(Byte.class, "isFinal", "isPublic",
+                        "isStandardClass"),
+                    entry(ClassInfoModelTests.Characteristics.Private.class,
+                        "isPrivate", "isStandardClass", "isStatic"),
+                    entry(ClassInfoModelTests.Characteristics.Protected.class,
+                        "isProtected", "isStandardClass",
+                        "isStatic"),
+                    entry(ClassInfoModelTests.Characteristics.Public.class,
+                        "isPublic", "isStandardClass", "isStatic"));
             private final Map<ClassInfo, String[]> sourceCharacteristics;
 
             Characteristics(ExtensionContext context) {
@@ -723,8 +722,8 @@ public class ClassInfoModelTests {
             Characteristics(ScanResult source) {
                 super(source);
                 this.sourceCharacteristics = reflectionCharacteristics
-                        .entrySet().stream().collect(Collectors.toMap(
-                                this::transformKey, Map.Entry::getValue));
+                    .entrySet().stream().collect(Collectors.toMap(
+                        this::transformKey, Map.Entry::getValue));
             }
 
             public Map<Class<?>, String[]> getReflectionCharacteristics() {
@@ -737,23 +736,23 @@ public class ClassInfoModelTests {
 
             @Override
             protected ClassInfo transformKey(
-                    Map.Entry<Class<?>, String[]> entry) {
+                Map.Entry<Class<?>, String[]> entry) {
                 if (!entry.getKey().isArray()) {
                     return super.transformKey(entry);
                 }
 
                 return ((ArrayTypeSignature) getSource()
-                        .getClassInfo(Dependency.UnsearchableTypesSample.class
-                                .getName())
-                        .getFieldInfo("array")
-                        .getTypeSignatureOrTypeDescriptor())
-                                .getArrayClassInfo();
+                    .getClassInfo(Dependency.UnsearchableTypesSample.class
+                        .getName())
+                    .getFieldInfo("array")
+                    .getTypeSignatureOrTypeDescriptor())
+                    .getArrayClassInfo();
             }
         }
 
         static class Default extends Context {
             private static final Annotation annotation = Dependency.Sample.class
-                    .getAnnotation(Dependency.Annotation.class);
+                .getAnnotation(Dependency.Annotation.class);
             private static final Class<?> reflectionJDK = List.class;
             private static final Class<?> reflectionOrigin = Dependency.Sample.class;
             private final ClassInfo sourceJDK;
@@ -792,24 +791,24 @@ public class ClassInfoModelTests {
 
         static class Specializations extends Context {
             private static final Map<Class<?>, String[]> reflectionSpecializations = Map
-                    .ofEntries(
-                            entry(BigDecimal.class, "isJDKClass",
-                                    "isBigDecimal"),
-                            entry(Boolean.class, "isJDKClass", "isBoolean"),
-                            entry(Byte.class, "isJDKClass", "isByte",
-                                    "hasIntegerType"),
-                            entry(Character.class, "isJDKClass", "isCharacter"),
-                            entry(Double.class, "isJDKClass", "isDouble",
-                                    "hasFloatType"),
-                            entry(Float.class, "isJDKClass", "isFloat",
-                                    "hasFloatType"),
-                            entry(Integer.class, "isJDKClass", "isInteger",
-                                    "hasIntegerType"),
-                            entry(Long.class, "isJDKClass", "isLong",
-                                    "hasIntegerType"),
-                            entry(Short.class, "isJDKClass", "isShort",
-                                    "hasIntegerType"),
-                            entry(Void.class, "isJDKClass"));
+                .ofEntries(
+                    entry(BigDecimal.class, "isJDKClass",
+                        "isBigDecimal"),
+                    entry(Boolean.class, "isJDKClass", "isBoolean"),
+                    entry(Byte.class, "isJDKClass", "isByte",
+                        "hasIntegerType"),
+                    entry(Character.class, "isJDKClass", "isCharacter"),
+                    entry(Double.class, "isJDKClass", "isDouble",
+                        "hasFloatType"),
+                    entry(Float.class, "isJDKClass", "isFloat",
+                        "hasFloatType"),
+                    entry(Integer.class, "isJDKClass", "isInteger",
+                        "hasIntegerType"),
+                    entry(Long.class, "isJDKClass", "isLong",
+                        "hasIntegerType"),
+                    entry(Short.class, "isJDKClass", "isShort",
+                        "hasIntegerType"),
+                    entry(Void.class, "isJDKClass"));
             private final Map<ClassInfo, String[]> sourceSpecializations;
 
             Specializations(ExtensionContext context) {
@@ -819,8 +818,8 @@ public class ClassInfoModelTests {
             Specializations(ScanResult source) {
                 super(source);
                 this.sourceSpecializations = reflectionSpecializations
-                        .entrySet().stream().collect(Collectors.toMap(
-                                this::transformKey, Map.Entry::getValue));
+                    .entrySet().stream().collect(Collectors.toMap(
+                        this::transformKey, Map.Entry::getValue));
             }
 
             public Map<Class<?>, String[]> getReflectionSpecializations() {
