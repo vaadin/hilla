@@ -152,6 +152,13 @@
                   }
                 ]
               },
+              "enumTypes": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEnumTypes"
+                  }
+                ]
+              },
               "recordTypes": {
                 "allOf": [
                   {
@@ -822,6 +829,15 @@
                 "nullable": true
               }
             }
+          }
+        }
+      },
+      "com.example.application.endpoints.TsFormEndpoint.FormEnumTypes": {
+        "type": "object",
+        "properties": {
+          "enumProperty": {
+            "type": "string",
+            "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
           }
         }
       }
