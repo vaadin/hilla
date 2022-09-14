@@ -138,3 +138,18 @@ const COMPONENTS_SCHEMAS_REF_LENGTH = '#/components/schemas/'.length;
 export function convertReferenceSchemaToPath({ $ref }: ReferenceSchema): string {
   return convertFullyQualifiedNameToRelativePath($ref.substring(COMPONENTS_SCHEMAS_REF_LENGTH));
 }
+
+export function resolveReference(
+  schemas: ReadonlyDeep<OpenAPIV3.ComponentsObject>['schemas'],
+  { $ref }: ReferenceSchema,
+): Schema | undefined {
+  if (schemas) {
+    for (const [name, schema] of Object.entries(schemas)) {
+      if ($ref.includes(name)) {
+        return schema;
+      }
+    }
+  }
+
+  return undefined;
+}
