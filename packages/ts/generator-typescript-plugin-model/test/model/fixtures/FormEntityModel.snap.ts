@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1, StringModel as StringModel_1 } from "@hilla/form";
 import FormAnnotationsModel_1 from "./FormAnnotationsModel";
 import FormArrayTypesModel_1 from "./FormArrayTypesModel";
 import FormDataPrimitivesModel_1 from "./FormDataPrimitivesModel";
@@ -26,6 +26,9 @@ class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityI
     }
     get arrayTypes(): FormArrayTypesModel_1 {
         return this[_getPropertyModel_1]("arrayTypes", FormArrayTypesModel_1, [true]) as FormArrayTypesModel_1;
+    }
+    get enumTypes(): StringModel_1 {
+        return this[_getPropertyModel_1]("enumTypes", StringModel_1, [true]) as StringModel_1;
     }
     get recordTypes(): FormRecordTypesModel_1 {
         return this[_getPropertyModel_1]("recordTypes", FormRecordTypesModel_1, [true]) as FormRecordTypesModel_1;

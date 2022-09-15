@@ -100,7 +100,12 @@ final class SchemaProcessor {
 
     private Schema<?> mapSchema() {
         var _type = (ClassRefSignatureModel) type;
-        var schema = nullify(new MapSchema(), true);
+
+        // For the TS generator, to recognize a schema as a map, it requires
+        // "additionalProperties" to be set. The default "any" option could be
+        // updated later.
+        var schema = nullify(new MapSchema(), true)
+                .additionalProperties(anySchema());
 
         if (type.isNonJDKClass()) {
             schema.addExtension("x-class-name", _type.getName());

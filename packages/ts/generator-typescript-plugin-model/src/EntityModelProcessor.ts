@@ -1,5 +1,4 @@
-import type { ClassElement, Identifier, SourceFile, Statement } from 'typescript';
-import ts, { ClassDeclaration } from 'typescript';
+import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type { ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
@@ -15,52 +14,57 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@hilla/generator-typescript-core/utils.js';
+import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import { dirname } from 'path/posix';
-import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
+import type { ClassElement, Identifier, SourceFile, Statement } from 'typescript';
+import ts, { ClassDeclaration } from 'typescript';
+import {
+  ModelSchemaContext,
+  ModelSchemaExpressionProcessor,
+  ModelSchemaTypeProcessor,
+} from './ModelSchemaProcessor.js';
 
-export class ModelEntityProcessor {
+export type Context = Pick<ModelSchemaContext, 'isReferenceToEnum'> &
+  Readonly<{
+    owner: Plugin;
+  }>;
+
+export class EntityModelProcessor {
   readonly #component: Schema;
-  readonly #owner: Plugin;
   readonly #dependencies: DependencyManager;
-  readonly #entityName: string;
+  readonly #entityId: Identifier;
   readonly #fullyQualifiedName: string;
-  #getPropertyModelSymbol?: Identifier = undefined;
-  readonly #name: string;
+  readonly #getPropertyModelSymbol: Identifier;
+  readonly #id: Identifier;
   readonly #path: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
+  readonly #context: Context;
 
-  public constructor(name: string, component: Schema, owner: Plugin) {
+  public constructor(name: string, component: Schema, context: Context) {
     this.#component = component;
-    this.#owner = owner;
+    this.#context = context;
     this.#fullyQualifiedName = name;
-    this.#entityName = simplifyFullyQualifiedName(name);
-    this.#name = `${this.#entityName}Model`;
-    this.#path = convertFullyQualifiedNameToRelativePath(`${name}Model`);
+
+    const entityName = simplifyFullyQualifiedName(name);
+    const entityPath = convertFullyQualifiedNameToRelativePath(name);
+
+    this.#path = `${entityPath}Model`;
     this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
-  }
 
-  get #id(): Identifier {
-    const id = ts.factory.createIdentifier(this.#name);
+    const { exports, imports, paths } = this.#dependencies;
 
-    this.#dependencies.exports.default.set(id);
+    this.#getPropertyModelSymbol = imports.named.add('@hilla/form', '_getPropertyModel');
+    this.#id = exports.default.set(`${entityName}Model`);
 
-    return id;
+    this.#entityId = imports.default.add(paths.createRelativePath(entityPath), entityName, true);
   }
 
   public process(): SourceFile {
-    this.#owner.logger.debug(`Processing model for entity: ${this.#entityName}`);
+    this.#context.owner.logger.debug(`Processing model for entity: ${this.#entityId.text}`);
 
-    const entity = this.#dependencies.imports.default.add(
-      this.#dependencies.paths.createRelativePath(convertFullyQualifiedNameToRelativePath(this.#fullyQualifiedName)),
-      this.#entityName,
-      true,
-    );
-
-    const declaration = this.#processExtendedModelClass(this.#component, entity);
+    const declaration = this.#processExtendedModelClass(this.#component, this.#entityId);
 
     const { imports, exports } = this.#dependencies;
     const importStatements = imports.toCode();
@@ -72,24 +76,20 @@ export class ModelEntityProcessor {
     );
   }
 
-  #getGetPropertyModelSymbol(): Identifier {
-    this.#getPropertyModelSymbol ||= this.#dependencies.imports.named.add('@hilla/form', '_getPropertyModel');
-    return this.#getPropertyModelSymbol;
-  }
-
   #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
     if (!properties) {
       return [];
     }
 
+    const ctx = {
+      dependencies: this.#dependencies,
+      isReferenceToEnum: this.#context.isReferenceToEnum,
+    };
+
     const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
-      const type = new ModelSchemaTypeProcessor(schema, this.#dependencies).process();
-      const args = new ModelSchemaExpressionProcessor(
-        schema,
-        this.#dependencies,
-        (_) => !requiredSet.has(name),
-      ).process();
+      const type = new ModelSchemaTypeProcessor(schema, ctx).process();
+      const args = new ModelSchemaExpressionProcessor(schema, ctx, (_) => !requiredSet.has(name)).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
@@ -102,7 +102,7 @@ export class ModelEntityProcessor {
             ts.factory.createReturnStatement(
               ts.factory.createAsExpression(
                 ts.factory.createCallExpression(
-                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getGetPropertyModelSymbol()),
+                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getPropertyModelSymbol),
                   undefined,
                   [
                     ts.factory.createStringLiteral(name),
@@ -121,7 +121,7 @@ export class ModelEntityProcessor {
   }
 
   #processExtendedModelClass(schema: Schema, entity: Identifier): Statement | undefined {
-    const { logger } = this.#owner;
+    const { logger } = this.#context.owner;
 
     let entitySchema = schema;
     let parent;
@@ -151,7 +151,7 @@ export class ModelEntityProcessor {
   }
 
   #processModelClass(schema: Schema, entity: Identifier, parent: Identifier): ClassDeclaration | undefined {
-    const { logger } = this.#owner;
+    const { logger } = this.#context.owner;
 
     if (!isObjectSchema(schema)) {
       logger.error(schema, `Component is not an object: ${this.#fullyQualifiedName}`);

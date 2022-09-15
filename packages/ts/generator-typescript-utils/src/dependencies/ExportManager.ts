@@ -116,8 +116,9 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
 export class DefaultExportManager implements CodeConvertable<ExportAssignment | undefined> {
   #id?: Identifier;
 
-  public set(id: Identifier) {
-    this.#id = id;
+  public set(id: Identifier | string): Identifier {
+    this.#id = typeof id === 'string' ? ts.factory.createIdentifier(id) : id;
+    return this.#id;
   }
 
   public toCode(): ExportAssignment | undefined {
