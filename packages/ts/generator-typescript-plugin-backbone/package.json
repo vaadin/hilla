@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-backbone",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A Hilla TypeScript Generator plugin to generate basic code",
   "main": "index.js",
   "type": "module",
@@ -49,18 +49,18 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^1.2.0",
-    "@hilla/generator-typescript-plugin-client": "^1.2.0"
+    "@hilla/generator-typescript-core": "^1.2.1",
+    "@hilla/generator-typescript-plugin-client": "^1.2.1"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^1.2.0",
+    "@hilla/generator-typescript-utils": "^1.2.1",
     "fast-deep-equal": "^3.1.3",
     "openapi-types": "^9.3.0",
     "typescript": "^4.5.2"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^1.2.0",
-    "@hilla/generator-typescript-plugin-client": "^1.2.0",
+    "@hilla/generator-typescript-core": "^1.2.1",
+    "@hilla/generator-typescript-plugin-client": "^1.2.1",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.1",
