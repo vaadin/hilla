@@ -137,13 +137,17 @@ final class SchemaProcessor {
     }
 
     private Schema<?> mapSchema() {
+        var schema = nullify(new MapSchema(), true);
+
         var _type = (ClassRefSignatureModel) type;
         var typeArguments = _type.getTypeArguments();
-        var values = new SchemaProcessor(typeArguments.get(1), info, storage)
-                .process();
 
-        var schema = nullify(new MapSchema(), true)
-                .additionalProperties(values);
+        // For the TS generator, to recognize a schema as a map, it requires
+        // "additionalProperties" to be set
+        schema.additionalProperties(!typeArguments.isEmpty()
+                ? new SchemaProcessor(typeArguments.get(1), info, storage)
+                        .process()
+                : anySchema());
 
         if (type.isNonJDKClass()) {
             schema.addExtension("x-class-name", _type.getName());
@@ -161,8 +165,10 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var typeArguments = _type.getTypeArguments();
 
-        return new SchemaProcessor(typeArguments.get(0), info, storage)
-                .process();
+        return !typeArguments.isEmpty()
+                ? new SchemaProcessor(typeArguments.get(0), info, storage)
+                        .process()
+                : anySchema();
     }
 
     private Schema<?> refSchema() {
@@ -185,8 +191,9 @@ final class SchemaProcessor {
     private Schema<?> typeArgumentSchema() {
         var types = ((TypeArgumentModel) type).getAssociatedTypes();
 
-        return types.isEmpty() ? anySchema()
-                : new SchemaProcessor(types.get(0), info, storage).process();
+        return !types.isEmpty()
+                ? new SchemaProcessor(types.get(0), info, storage).process()
+                : anySchema();
     }
 
     private Schema<?> typeParameterSchema() {
