@@ -32,14 +32,14 @@ public abstract class AbstractPlugin<C extends PluginConfiguration>
                 .getGenericSuperclass()).getActualTypeArguments()[0];
         if (configClass.equals(PluginConfiguration.class)) {
             throw new IllegalArgumentException(String.format(
-                "The '%s' plugin does not expect configuration set",
-                getClass().getName()));
+                    "The '%s' plugin does not expect configuration set",
+                    getClass().getName()));
         }
 
         if (!configClass.isAssignableFrom(configuration.getClass())) {
             throw new IllegalArgumentException(
-                String.format("Requires instance of %s " + ", but got %s",
-                    configClass, configuration.getClass()));
+                    String.format("Requires instance of %s " + ", but got %s",
+                            configClass, configuration.getClass()));
         }
 
         this.configuration = (C) configuration;
