@@ -44,7 +44,7 @@ public final class TransferTypesPlugin
 
     public TransferTypesPlugin() {
         super();
-        setOrder(100);
+        setOrder(300);
     }
 
     @Nonnull
