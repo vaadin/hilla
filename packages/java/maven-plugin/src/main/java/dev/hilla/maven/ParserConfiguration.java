@@ -40,7 +40,6 @@ public final class ParserConfiguration {
     public static class Plugin {
         private PluginConfiguration configuration;
         private String name;
-        private Integer order;
 
         public Plugin() {
         }
@@ -69,10 +68,6 @@ public final class ParserConfiguration {
         @Nonnull
         public String getName() {
             return name;
-        }
-
-        public Integer getOrder() {
-            return order;
         }
 
         @Override
@@ -113,10 +108,10 @@ public final class ParserConfiguration {
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         private static final Set<Plugin> defaults = Set.of(
-                new Plugin(TransferTypesPlugin.class.getName()),
                 new Plugin(BackbonePlugin.class.getName()),
                 new Plugin(NonnullPlugin.class.getName()),
-                new Plugin(ModelPlugin.class.getName()));
+                new Plugin(ModelPlugin.class.getName()),
+                new Plugin(TransferTypesPlugin.class.getName()));
 
         public PluginsProcessor() {
             super(defaults);

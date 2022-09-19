@@ -126,7 +126,7 @@ final class ParserProcessor {
     private void preparePlugins(ParserConfig.Builder builder) {
         var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
-                        plugin.getOrder(), plugin.getConfiguration()))
+                        plugin.getConfiguration()))
                 .collect(Collectors.toList());
 
         builder.plugins(loadedPlugins);

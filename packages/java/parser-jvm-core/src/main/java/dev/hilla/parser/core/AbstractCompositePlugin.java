@@ -1,6 +1,5 @@
 package dev.hilla.parser.core;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -16,7 +15,6 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
 
     protected AbstractCompositePlugin(@Nonnull Plugin... plugins) {
         Stream.of(plugins).map(Objects::requireNonNull)
-                .sorted(Comparator.comparingInt(Plugin::getOrder))
                 .forEachOrdered(this.plugins::add);
         verifyPluginsOrder();
     }
@@ -51,11 +49,18 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     private void verifyPluginsOrder() {
         var previous = new HashSet<Class<? extends Plugin>>();
         for (var plugin : plugins) {
-            for (var requiredPluginCls : plugin.getRequiredPlugins()) {
-                if (!previous.contains(requiredPluginCls)) {
+            for (var runAfterPluginCls : plugin.runAfter()) {
+                if (!previous.contains(runAfterPluginCls)) {
                     throw new PluginException(
                             String.format("Plugin %s must " + "be run after %s",
-                                    plugin.getClass(), requiredPluginCls));
+                                    plugin.getClass(), runAfterPluginCls));
+                }
+            }
+            for (var runBeforePluginCls: plugin.runBefore()) {
+                if (previous.contains(runBeforePluginCls)) {
+                    throw new PluginException(
+                            String.format("Plugin %s must " + "be run before %s",
+                                plugin.getClass(), runBeforePluginCls));
                 }
             }
             previous.add(plugin.getClass());

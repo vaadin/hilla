@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -25,8 +23,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserConfig extends AbstractParserConfig {
-    private final SortedSet<Plugin> plugins = new TreeSet<>(
-            Comparator.comparingInt(Plugin::getOrder));
+    private final List<Plugin> plugins = new LinkedList<>();
     private Set<String> classPathElements;
     private String endpointAnnotationName;
     private OpenAPI openAPI;
@@ -54,7 +51,7 @@ public final class ParserConfig extends AbstractParserConfig {
 
     @Nonnull
     @Override
-    public SortedSet<Plugin> getPlugins() {
+    public List<Plugin> getPlugins() {
         return plugins;
     }
 

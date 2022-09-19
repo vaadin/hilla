@@ -22,11 +22,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
 
-    public ModelPlugin() {
-        super();
-        setOrder(200);
-    }
-
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -90,7 +85,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+    public Collection<Class<? extends Plugin>> runAfter() {
         return List.of(BackbonePlugin.class);
     }
 }

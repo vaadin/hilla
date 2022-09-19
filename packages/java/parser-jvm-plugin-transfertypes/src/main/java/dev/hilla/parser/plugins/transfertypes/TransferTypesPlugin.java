@@ -42,11 +42,6 @@ public final class TransferTypesPlugin
                 EndpointSubscription.class);
     }
 
-    public TransferTypesPlugin() {
-        super();
-        setOrder(300);
-    }
-
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -63,7 +58,7 @@ public final class TransferTypesPlugin
     }
 
     @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+    public Collection<Class<? extends Plugin>> runAfter() {
         return List.of(BackbonePlugin.class);
     }
 

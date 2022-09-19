@@ -27,11 +27,6 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     private Map<String, AnnotationMatcher> annotationsMap = mapByName(
             NonnullPluginConfig.Processor.defaults);
 
-    public NonnullPlugin() {
-        super();
-        setOrder(100);
-    }
-
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -71,7 +66,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+    public Collection<Class<? extends Plugin>> runAfter() {
         return List.of(BackbonePlugin.class);
     }
 

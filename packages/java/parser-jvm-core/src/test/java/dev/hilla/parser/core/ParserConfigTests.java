@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -49,11 +49,11 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsAsCollection() {
-        var plugins = List.of(new FooPlugin(), new BarPlugin());
+        var plugins = List.<Plugin>of(new FooPlugin(), new BarPlugin());
         var actual = defaultBuilder.plugins(plugins).finish();
         var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI,
-                new HashSet<>(plugins));
+                plugins);
 
         assertEquals(expected, actual);
     }
@@ -66,7 +66,7 @@ public class ParserConfigTests {
                 .finish();
         var expected = new TestParserConfig(defaultClassPathElements,
                 defaultEndpointAnnotationName, defaultOpenAPI,
-                Set.of(fooPlugin, barPlugin));
+                List.of(fooPlugin, barPlugin));
 
         assertEquals(expected, actual);
     }
@@ -79,7 +79,7 @@ public class ParserConfigTests {
 
         adjuster.accept(defaultOpenAPI);
         var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+                defaultEndpointAnnotationName, defaultOpenAPI, Collections.emptyList());
 
         assertEquals(expected, actual);
     }
@@ -89,7 +89,7 @@ public class ParserConfigTests {
         var actual = defaultBuilder.classPath(List.of("somepath"), false)
                 .endpointAnnotation("com.example.Endpoint", false).finish();
         var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+                defaultEndpointAnnotationName, defaultOpenAPI, Collections.emptyList());
 
         assertEquals(expected, actual);
     }
@@ -97,7 +97,7 @@ public class ParserConfigTests {
     @Test
     public void should_CreateConfigWithDefaultParameters() {
         var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName, defaultOpenAPI, Set.of());
+                defaultEndpointAnnotationName, defaultOpenAPI, Collections.emptyList());
         var actual = defaultBuilder.finish();
 
         assertEquals(expected, actual);
@@ -148,7 +148,7 @@ public class ParserConfigTests {
 
         var openAPI = type.getMapper().readValue(openAPISource, OpenAPI.class);
         var expected = new TestParserConfig(Set.of(targetDir.toString()),
-                defaultEndpointAnnotationName, openAPI, Set.of());
+                defaultEndpointAnnotationName, openAPI, Collections.emptyList());
 
         assertEquals(expected, actual);
     }
@@ -156,7 +156,6 @@ public class ParserConfigTests {
     private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
         BarPlugin() {
             super();
-            setOrder(1);
         }
 
         @Nonnull
@@ -177,7 +176,6 @@ public class ParserConfigTests {
 
     private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
         FooPlugin() {
-            setOrder(0);
         }
 
         @Nonnull
@@ -220,11 +218,11 @@ public class ParserConfigTests {
         private final Set<String> classPathElements;
         private final String endpointAnnotationName;
         private final OpenAPI openAPI;
-        private final Set<Plugin> plugins;
+        private final List<Plugin> plugins;
 
         public TestParserConfig(Set<String> classPathElements,
                 String endpointAnnotationName, OpenAPI openAPI,
-                Set<Plugin> plugins) {
+                List<Plugin> plugins) {
             this.classPathElements = classPathElements;
             this.endpointAnnotationName = endpointAnnotationName;
             this.openAPI = openAPI;
@@ -251,7 +249,7 @@ public class ParserConfigTests {
 
         @Nonnull
         @Override
-        public Set<Plugin> getPlugins() {
+        public List<Plugin> getPlugins() {
             return plugins;
         }
     }

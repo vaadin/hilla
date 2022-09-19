@@ -1,5 +1,6 @@
 package dev.hilla.parser.core;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public abstract class AbstractParserConfig {
     public abstract OpenAPI getOpenAPI();
 
     @Nonnull
-    public abstract Set<Plugin> getPlugins();
+    public abstract List<Plugin> getPlugins();
 
     @Override
     public int hashCode() {
