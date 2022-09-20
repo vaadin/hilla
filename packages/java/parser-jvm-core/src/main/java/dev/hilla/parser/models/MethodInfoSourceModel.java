@@ -113,7 +113,7 @@ final class MethodInfoSourceModel extends MethodInfoModel
     protected List<MethodParameterInfoModel> prepareParameters() {
         return Arrays.stream(origin.getParameterInfo())
                 .map(MethodParameterInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     @Override

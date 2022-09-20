@@ -59,9 +59,5 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return typeParameter;
     }
 
-    public void setTypeParameter(TypeParameterModel typeParameter) {
-        this.typeParameter = typeParameter;
-    }
-
     protected abstract TypeParameterModel prepareResolved();
 }

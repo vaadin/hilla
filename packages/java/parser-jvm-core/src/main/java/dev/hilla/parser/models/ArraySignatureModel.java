@@ -49,10 +49,6 @@ public abstract class ArraySignatureModel extends AnnotatedAbstractModel
         return nestedType;
     }
 
-    public void setNestedType(SignatureModel nestedType) {
-        this.nestedType = nestedType;
-    }
-
     @Override
     public int hashCode() {
         return 1 + getNestedType().hashCode();

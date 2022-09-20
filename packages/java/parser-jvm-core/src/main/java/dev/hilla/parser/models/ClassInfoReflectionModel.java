@@ -189,7 +189,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return Arrays.stream(origin.getDeclaredFields()).map(FieldInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -208,7 +208,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     protected List<MethodInfoModel> prepareMethods() {
         return Arrays.stream(origin.getDeclaredMethods())
                 .map(MethodInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     @Override

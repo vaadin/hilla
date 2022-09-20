@@ -57,14 +57,6 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
         return value;
     }
 
-    public void setValue(AnnotationParameterEnumValueModel value) {
-        this.value = value;
-    }
-
-    public void setValue(ClassInfoModel value) {
-        this.value = value;
-    }
-
     @Override
     public int hashCode() {
         return getName().hashCode() + 7 * getValue().hashCode();

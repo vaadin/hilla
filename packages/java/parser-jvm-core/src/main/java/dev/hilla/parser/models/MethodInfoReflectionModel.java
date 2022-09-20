@@ -91,7 +91,7 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
     protected List<MethodParameterInfoModel> prepareParameters() {
         return Arrays.stream(get().getParameters())
                 .map(MethodParameterInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     static final class Constructor extends MethodInfoReflectionModel {

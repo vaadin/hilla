@@ -46,10 +46,6 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
         return bounds;
     }
 
-    public void setBounds(List<SignatureModel> bounds) {
-        this.bounds = bounds;
-    }
-
     public Stream<SignatureModel> getBoundsStream() {
         return getBounds().stream();
     }

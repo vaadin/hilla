@@ -84,20 +84,12 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return owner;
     }
 
-    void setOwner(ClassInfoModel owner) {
-        this.owner = owner;
-    }
-
     public List<MethodParameterInfoModel> getParameters() {
         if (parameters == null) {
             parameters = prepareParameters();
         }
 
         return parameters;
-    }
-
-    public void setParameters(Collection<MethodParameterInfoModel> parameters) {
-        this.parameters = new MemberList<>(parameters, this);
     }
 
     public Stream<MethodParameterInfoModel> getParametersStream() {
@@ -112,20 +104,12 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return resultType;
     }
 
-    public void setResultType(SignatureModel resultType) {
-        this.resultType = resultType;
-    }
-
     public List<TypeParameterModel> getTypeParameters() {
         if (typeParameters == null) {
             typeParameters = prepareTypeParameters();
         }
 
         return typeParameters;
-    }
-
-    public void setTypeParameters(List<TypeParameterModel> typeParameters) {
-        this.typeParameters = typeParameters;
     }
 
     @Override

@@ -189,7 +189,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -208,7 +208,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return origin.getDeclaredMethodInfo().stream().map(MethodInfoModel::of)
-                .collect(MemberList.collectWithOwner(this));
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -58,20 +58,12 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         return owner;
     }
 
-    public void setOwner(MethodInfoModel owner) {
-        this.owner = owner;
-    }
-
     public SignatureModel getType() {
         if (type == null) {
             type = prepareType();
         }
 
         return type;
-    }
-
-    public void setType(SignatureModel type) {
-        this.type = type;
     }
 
     @Override

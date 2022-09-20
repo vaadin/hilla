@@ -143,10 +143,6 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return typeArguments;
     }
 
-    public void setTypeArguments(List<TypeArgumentModel> typeArguments) {
-        this.typeArguments = typeArguments;
-    }
-
     public Stream<TypeArgumentModel> getTypeArgumentsStream() {
         return getTypeArguments().stream();
     }
@@ -252,6 +248,7 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return getClassInfo().isString();
     }
 
+    // TODO: remove when the cleaner solution is found
     public void setReference(ClassInfoModel reference) {
         this.reference = reference;
     }

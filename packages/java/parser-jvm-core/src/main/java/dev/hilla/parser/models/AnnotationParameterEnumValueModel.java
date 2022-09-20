@@ -45,10 +45,6 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
         return classInfo;
     }
 
-    public void setClassInfo(ClassInfoModel classInfo) {
-        this.classInfo = classInfo;
-    }
-
     @Override
     public Class<AnnotationParameterEnumValueModel> getCommonModelClass() {
         return AnnotationParameterEnumValueModel.class;
