@@ -61,7 +61,7 @@ function convertNamedAttributes(attributes: AnnotationNamedAttributes): Expressi
   );
 }
 
-const $context = Symbol();
+const $dependencies = Symbol();
 const $processArray = Symbol();
 const $processRecord = Symbol();
 const $processReference = Symbol();
@@ -72,19 +72,15 @@ const $processUnknown = Symbol();
 const $originalSchema = Symbol();
 const $schema = Symbol();
 
-export type ModelSchemaContext = Readonly<{
-  dependencies: DependencyManager;
-}>;
-
 export type OptionalChecker = (schema: Schema) => boolean;
 
 export abstract class ModelSchemaPartProcessor<T> {
-  readonly [$context]: ModelSchemaContext;
+  readonly [$dependencies]: DependencyManager;
   readonly [$originalSchema]: Schema;
   readonly [$schema]: Schema;
 
-  constructor(schema: Schema, context: ModelSchemaContext) {
-    this[$context] = context;
+  constructor(schema: Schema, dependencies: DependencyManager) {
+    this[$dependencies] = dependencies;
     this[$originalSchema] = schema;
     this[$schema] = isComposedSchema(schema) ? decomposeSchema(schema)[0] : schema;
   }
@@ -131,7 +127,7 @@ export abstract class ModelSchemaPartProcessor<T> {
 class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode> {
   protected override [$processArray](schema: ArraySchema): TypeNode {
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [
-      new ModelSchemaInternalTypeProcessor(schema.items, this[$context]).process(),
+      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
     ]);
   }
 
@@ -147,7 +143,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     const valueType =
       typeof props === 'boolean'
         ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-        : new ModelSchemaInternalTypeProcessor(props, this[$context]).process();
+        : new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process();
 
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
@@ -156,7 +152,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
   }
 
   protected override [$processReference](schema: ReferenceSchema): TypeNode {
-    const { paths, imports } = this[$context].dependencies;
+    const { paths, imports } = this[$dependencies];
     const typeName = convertReferenceSchemaToSpecifier(schema);
     const typePath = paths.createRelativePath(convertReferenceSchemaToPath(schema));
     return ts.factory.createTypeReferenceNode(
@@ -175,24 +171,23 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
 
 class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier> {
   override [$processArray](_: ArraySchema): Identifier {
-    return importBuiltInFormModel('ArrayModel', this[$context].dependencies);
+    return importBuiltInFormModel('ArrayModel', this[$dependencies]);
   }
 
   override [$processBoolean](_: BooleanSchema): Identifier {
-    return importBuiltInFormModel('BooleanModel', this[$context].dependencies);
+    return importBuiltInFormModel('BooleanModel', this[$dependencies]);
   }
 
   override [$processNumber](_: NumberSchema | IntegerSchema): Identifier {
-    return importBuiltInFormModel('NumberModel', this[$context].dependencies);
+    return importBuiltInFormModel('NumberModel', this[$dependencies]);
   }
 
   override [$processRecord](_: MapSchema): Identifier {
-    return importBuiltInFormModel('ObjectModel', this[$context].dependencies);
+    return importBuiltInFormModel('ObjectModel', this[$dependencies]);
   }
 
   override [$processReference](schema: ReferenceSchema): Identifier {
-    const { dependencies } = this[$context];
-    const { paths, imports } = dependencies;
+    const { paths, imports } = this[$dependencies];
 
     const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
     const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
@@ -201,26 +196,26 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
   }
 
   override [$processString](_: StringSchema): Identifier {
-    return importBuiltInFormModel('StringModel', this[$context].dependencies);
+    return importBuiltInFormModel('StringModel', this[$dependencies]);
   }
 
   override [$processUnknown](_: Schema): Identifier {
-    return importBuiltInFormModel('ObjectModel', this[$context].dependencies);
+    return importBuiltInFormModel('ObjectModel', this[$dependencies]);
   }
 }
 
 export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeReferenceNode> {
   readonly #id: ModelSchemaIdentifierProcessor;
 
-  constructor(schema: Schema, context: ModelSchemaContext) {
-    super(schema, context);
-    this.#id = new ModelSchemaIdentifierProcessor(schema, context);
+  constructor(schema: Schema, dependencies: DependencyManager) {
+    super(schema, dependencies);
+    this.#id = new ModelSchemaIdentifierProcessor(schema, dependencies);
   }
 
   protected override [$processArray](schema: ArraySchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processArray](schema), [
-      new ModelSchemaInternalTypeProcessor(schema.items, this[$context]).process(),
-      new ModelSchemaTypeProcessor(schema.items, this[$context]).process(),
+      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+      new ModelSchemaTypeProcessor(schema.items, this[$dependencies]).process(),
     ]);
   }
 
@@ -234,7 +229,7 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
   protected override [$processRecord](schema: MapSchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processRecord](schema), [
-      new ModelSchemaInternalTypeProcessor(schema, this[$context]).process(),
+      new ModelSchemaInternalTypeProcessor(schema, this[$dependencies]).process(),
     ]);
   }
 
@@ -254,8 +249,8 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
   readonly #checkOptional: OptionalChecker;
 
-  constructor(schema: Schema, context: ModelSchemaContext, checkOptional: OptionalChecker = isNullableSchema) {
-    super(schema, context);
+  constructor(schema: Schema, dependencies: DependencyManager, checkOptional: OptionalChecker = isNullableSchema) {
+    super(schema, dependencies);
     this.#checkOptional = checkOptional;
   }
 
@@ -277,9 +272,9 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {
     return [
-      new ModelSchemaIdentifierProcessor(schema.items, this[$context]).process(),
+      new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process(),
       ts.factory.createArrayLiteralExpression(
-        new ModelSchemaExpressionProcessor(schema.items, this[$context]).process(),
+        new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
       ),
     ];
   }
@@ -310,7 +305,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
   #getValidator = (annotation: Annotation): Expression =>
     ts.factory.createNewExpression(
-      importBuiltInFormModel(annotation.simpleName, this[$context].dependencies),
+      importBuiltInFormModel(annotation.simpleName, this[$dependencies]),
       undefined,
       annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [],
     );

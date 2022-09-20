@@ -2,11 +2,6 @@ import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { Identifier } from 'typescript';
 
-export type DependencyData = Readonly<{
-  id: Identifier;
-  path: string;
-}>;
-
 export type Context = Readonly<{
   owner: Plugin;
 }>;
