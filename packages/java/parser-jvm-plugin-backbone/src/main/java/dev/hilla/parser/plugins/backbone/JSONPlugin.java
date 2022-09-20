@@ -19,6 +19,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
+
+    public static final String JSON_IGNORE = JsonIgnore.class.getName();
+
+    public static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
+            .getName();
+
     @Override
     @Nonnull
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -35,13 +41,12 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
         var ignoredByAnnotation = cls.getFieldsStream()
                 .filter(f -> f.getAnnotations().stream()
                         .map(AnnotationInfoModel::getName)
-                        .anyMatch(n -> n.equals(JsonIgnore.class.getName())))
+                        .anyMatch(n -> n.equals(JSON_IGNORE)))
                 .map(FieldInfoModel::getName);
 
         // Find the JsonIgnoreProperties and get list of ignored fields
         var ignoredByClassAnnotation = cls.getAnnotations().stream()
-                .filter(a -> a.getName()
-                        .equals(JsonIgnoreProperties.class.getName()))
+                .filter(a -> a.getName().equals(JSON_IGNORE_PROPERTIES))
                 .flatMap(AnnotationInfoModel::getParametersStream)
                 .flatMap(p -> Arrays.stream(((Object[]) p.getValue())))
                 .map(Objects::toString);
