@@ -74,13 +74,13 @@ public final class NodeDependencies {
     }
 
     @Nonnull
-    private NodeDependencies withChildNodes(
+    public NodeDependencies withChildNodes(
             @Nonnull Stream<Node<?, ?>> childNodes) {
         return new NodeDependencies(getNode(), childNodes, getRelatedNodes());
     }
 
     @Nonnull
-    private NodeDependencies withRelatedNodes(
+    public NodeDependencies withRelatedNodes(
             @Nonnull Stream<Node<?, ?>> relatedNodes) {
         return new NodeDependencies(getNode(), getChildNodes(), relatedNodes);
     }

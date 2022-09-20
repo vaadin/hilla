@@ -1,7 +1,12 @@
 package dev.hilla.parser.core;
 
+import dev.hilla.parser.models.AnnotatedModel;
+import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.models.ClassInfoModel;
+
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -97,4 +102,26 @@ public final class NodePath<N extends Node<?, ?>> {
     <N extends Node<?, ?>> NodePath<N> childPath(@Nonnull N node) {
         return new NodePath<>(node, this);
     }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Stream<Node<?, ?>> getParentNodes() {
+        return Stream.iterate((NodePath) this, NodePath::hasParentNodes,
+                NodePath::getParentPath).map(NodePath::getNode);
+    }
+
+    public Stream<AnnotationInfoModel> getAnnotations() {
+        var models = getParentNodes()
+                .filter(node -> node.getSource() instanceof AnnotatedModel)
+                .map(node -> (AnnotatedModel) node.getSource());
+        return models.flatMap(AnnotatedModel::getAnnotationsStream);
+    }
+
+    public Stream<AnnotationInfoModel> getPackageAnnotations() {
+        var classes = getParentNodes()
+                .filter(node -> node.getSource() instanceof ClassInfoModel)
+                .map(node -> (ClassInfoModel) node.getSource());
+        return classes.map(ClassInfoModel::getPackage)
+                .flatMap(AnnotatedModel::getAnnotationsStream);
+    }
+
 }
