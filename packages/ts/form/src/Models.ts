@@ -131,9 +131,9 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 
 declare enum Enum {}
 
-export abstract class EnumModel<M extends typeof Enum>
-  extends AbstractModel<M[keyof M]>
-  implements HasFromString<M[keyof M] | undefined>
+export abstract class EnumModel<E extends typeof Enum>
+  extends AbstractModel<E[keyof E]>
+  implements HasFromString<E[keyof E] | undefined>
 {
   public static override createEmptyValue() {
     if (this === EnumModel) {
@@ -147,10 +147,10 @@ export abstract class EnumModel<M extends typeof Enum>
     return Object.values(enumObject)[0];
   }
 
-  public abstract readonly [_enum]: M;
+  public abstract readonly [_enum]: E;
 
-  public [_fromString](value: string): M[keyof M] | undefined {
-    return value in this[_enum] ? (value as M[keyof M]) : undefined;
+  public [_fromString](value: string): E[keyof E] | undefined {
+    return value in this[_enum] ? (value as E[keyof E]) : undefined;
   }
 }
 
