@@ -34,6 +34,7 @@ import {
   ValidationConstrainedSchema,
 } from './Annotation.js';
 import parseAnnotation from './parseAnnotation.js';
+import { importBuiltInFormModel } from './utils.js';
 
 function convertAttribute(attribute: AnnotationPrimitiveAttribute): Expression {
   switch (typeof attribute) {
@@ -73,15 +74,9 @@ const $schema = Symbol();
 
 export type ModelSchemaContext = Readonly<{
   dependencies: DependencyManager;
-  isReferenceToEnum: (schema: ReferenceSchema) => boolean;
 }>;
 
 export type OptionalChecker = (schema: Schema) => boolean;
-
-function importBuiltInFormModel(specifier: string, { imports, paths }: DependencyManager): Identifier {
-  const modelPath = paths.createBareModulePath('@hilla/form', false);
-  return imports.named.getIdentifier(modelPath, specifier) ?? imports.named.add(modelPath, specifier);
-}
 
 export abstract class ModelSchemaPartProcessor<T> {
   readonly [$context]: ModelSchemaContext;
@@ -196,12 +191,7 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
   }
 
   override [$processReference](schema: ReferenceSchema): Identifier {
-    const { dependencies, isReferenceToEnum } = this[$context];
-
-    if (isReferenceToEnum(schema)) {
-      return importBuiltInFormModel('StringModel', dependencies);
-    }
-
+    const { dependencies } = this[$context];
     const { paths, imports } = dependencies;
 
     const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
