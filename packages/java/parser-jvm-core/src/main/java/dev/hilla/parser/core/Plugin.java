@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import javax.annotation.Nonnull;
 
-public interface Plugin extends Comparable<Plugin> {
+public interface Plugin {
     void enter(NodePath<?> nodePath);
 
     void exit(NodePath<?> nodePath);
@@ -26,21 +26,4 @@ public interface Plugin extends Comparable<Plugin> {
     NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);
 
     void setStorage(SharedStorage storage);
-
-    @Override
-    default int compareTo(Plugin o) {
-        if (runAfter().contains(o.getClass())) {
-            return 1;
-        }
-        if (runBefore().contains(o.getClass())) {
-            return -1;
-        }
-        if (o.runAfter().contains(getClass())) {
-            return -1;
-        }
-        if (o.runBefore().contains(getClass())) {
-            return 1;
-        }
-        return getClass().getName().compareTo(o.getClass().getName());
-    }
 }
