@@ -13,6 +13,7 @@ export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
 export const _binderNode = Symbol('binderNode');
 export const _getPropertyModel = Symbol('getPropertyModel');
+export const _enum = Symbol('enum');
 
 const _properties = Symbol('properties');
 const _optional = Symbol('optional');
@@ -126,6 +127,31 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
   public static override createEmptyValue = String;
 
   public [_fromString] = String;
+}
+
+declare enum Enum {}
+
+export abstract class EnumModel<M extends typeof Enum>
+  extends AbstractModel<M[keyof M]>
+  implements HasFromString<M[keyof M] | undefined>
+{
+  public static override createEmptyValue() {
+    if (this === EnumModel) {
+      throw new Error('Cannot create an instance of an abstract class');
+    }
+
+    // @ts-expect-error: the instantiation of the abstract class is handled above.
+    // Now only the children instantiation could happen.
+    const { [_enum]: enumObject } = new this({ value: undefined }, 'value', false);
+
+    return Object.values(enumObject)[0];
+  }
+
+  public abstract readonly [_enum]: M;
+
+  public [_fromString](value: string): M[keyof M] | undefined {
+    return value in this[_enum] ? (value as M[keyof M]) : undefined;
+  }
 }
 
 export class ObjectModel<T> extends AbstractModel<T> {
