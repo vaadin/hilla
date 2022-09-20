@@ -20,6 +20,7 @@ public class UUIDTest {
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
+                .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
 
