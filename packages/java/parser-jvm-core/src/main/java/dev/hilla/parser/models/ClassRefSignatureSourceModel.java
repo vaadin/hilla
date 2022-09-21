@@ -23,16 +23,6 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         return origin;
     }
 
-    @Override
-    public String getName() {
-        return origin.getBaseClassName();
-    }
-
-    @Override
-    public Optional<ClassRefSignatureModel> getOwner() {
-        return Optional.empty();
-    }
-
     protected List<AnnotationInfo> getOriginAnnotations() {
         return origin.getTypeAnnotationInfo();
     }
@@ -58,6 +48,11 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
     }
 
     @Override
+    protected Optional<ClassRefSignatureModel> prepareOwner() {
+        return Optional.empty();
+    }
+
+    @Override
     protected List<TypeArgumentModel> prepareTypeArguments() {
         return getOriginTypeArguments().stream().map(TypeArgumentModel::of)
                 .collect(Collectors.toList());
@@ -79,25 +74,6 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         Suffixed(ClassRefTypeSignature origin, int currentSuffixIndex) {
             super(origin);
             this.currentSuffixIndex = currentSuffixIndex;
-        }
-
-        @Override
-        public String getName() {
-            var builder = new StringBuilder(origin.getBaseClassName());
-
-            for (var i = 0; i <= currentSuffixIndex; i++) {
-                builder.append('$');
-                builder.append(origin.getSuffixes().get(i));
-            }
-
-            return builder.toString();
-        }
-
-        @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
-            return currentSuffixIndex > 0
-                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
-                    : Optional.of(new SuffixedBase(origin));
         }
 
         @Override
@@ -131,6 +107,13 @@ abstract class ClassRefSignatureSourceModel extends ClassRefSignatureModel
         @Override
         protected List<TypeArgument> getOriginTypeArguments() {
             return origin.getSuffixTypeArguments().get(currentSuffixIndex);
+        }
+
+        @Override
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
+            return currentSuffixIndex > 0
+                    ? Optional.of(new Suffixed(origin, currentSuffixIndex - 1))
+                    : Optional.of(new SuffixedBase(origin));
         }
     }
 

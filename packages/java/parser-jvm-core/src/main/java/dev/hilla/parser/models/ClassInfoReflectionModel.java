@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -194,28 +193,15 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInheritanceChain() {
-        var list = new ArrayList<ClassInfoModel>();
-        var current = origin;
-
-        while (current != null && ClassInfoModel.isNonJDKClass(current)) {
-            list.add(current == origin ? this : ClassInfoModel.of(current));
-            current = current.getSuperclass();
-        }
-
-        return list;
-    }
-
-    @Override
     protected List<ClassInfoModel> prepareInnerClasses() {
         return Arrays.stream(origin.getDeclaredClasses())
                 .map(ClassInfoModel::of).collect(Collectors.toList());
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInterfaces() {
-        return Arrays.stream(origin.getInterfaces()).map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+    protected List<ClassRefSignatureModel> prepareInterfaces() {
+        return Arrays.stream(origin.getInterfaces())
+                .map(ClassRefSignatureModel::of).collect(Collectors.toList());
     }
 
     @Override
@@ -230,11 +216,11 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected ClassInfoModel prepareSuperClass() {
+    protected ClassRefSignatureModel prepareSuperClass() {
         var superClass = origin.getSuperclass();
 
         return superClass != null && ClassInfoModel.isNonJDKClass(superClass)
-                ? ClassInfoModel.of(superClass)
+                ? ClassRefSignatureModel.of(superClass)
                 : null;
     }
 

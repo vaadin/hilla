@@ -5,12 +5,9 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-
-import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.MethodInfo;
 
@@ -19,6 +16,7 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     private ClassInfoModel owner;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
+    private List<TypeParameterModel> typeParameters;
 
     public static MethodInfoModel of(@Nonnull MethodInfo origin) {
         return new MethodInfoSourceModel(Objects.requireNonNull(origin));
@@ -51,7 +49,8 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return getName().equals(other.getName())
                 && getModifiers() == other.getModifiers()
                 && getResultType().equals(other.getResultType())
-                && getClassName().equals(other.getClassName());
+                && getClassName().equals(other.getClassName())
+                && getTypeParameters().equals(other.getTypeParameters());
     }
 
     public boolean equalsIgnoreParameters(Object obj) {
@@ -69,9 +68,8 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     public abstract String getClassName();
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(getResultDependenciesStream(),
-                getParameterDependenciesStream());
+    public Class<MethodInfoModel> getCommonModelClass() {
+        return MethodInfoModel.class;
     }
 
     public abstract int getModifiers();
@@ -83,16 +81,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         }
 
         return owner;
-    }
-
-    public List<ClassInfoModel> getParameterDependencies() {
-        return getParameterDependenciesStream().collect(Collectors.toList());
-    }
-
-    public Stream<ClassInfoModel> getParameterDependenciesStream() {
-        return getParametersStream()
-                .flatMap(MethodParameterInfoModel::getDependenciesStream)
-                .distinct();
     }
 
     public List<MethodParameterInfoModel> getParameters() {
@@ -107,20 +95,20 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return getParameters().stream();
     }
 
-    public List<ClassInfoModel> getResultDependencies() {
-        return getResultDependenciesStream().collect(Collectors.toList());
-    }
-
-    public Stream<ClassInfoModel> getResultDependenciesStream() {
-        return getResultType().getDependenciesStream();
-    }
-
     public SignatureModel getResultType() {
         if (resultType == null) {
             resultType = prepareResultType();
         }
 
         return resultType;
+    }
+
+    public List<TypeParameterModel> getTypeParameters() {
+        if (typeParameters == null) {
+            typeParameters = prepareTypeParameters();
+        }
+
+        return typeParameters;
     }
 
     @Override
@@ -164,4 +152,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     protected abstract List<MethodParameterInfoModel> prepareParameters();
 
     protected abstract SignatureModel prepareResultType();
+
+    protected abstract List<TypeParameterModel> prepareTypeParameters();
 }

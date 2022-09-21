@@ -14,8 +14,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +40,6 @@ import io.github.classgraph.ScanResult;
 public class ArraySignatureModelTests {
     private static final boolean isJDK11 = Runtime.Version
             .parse(System.getProperty("java.version")).feature() <= 11;
-    private static final Logger log = Logger
-            .getLogger(ArraySignatureModelTests.class.getName());
     private Context ctx;
 
     @BeforeEach
@@ -91,17 +87,6 @@ public class ArraySignatureModelTests {
             assertTrue(model.isSource());
             break;
         }
-    }
-
-    @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideDependencies(ArraySignatureModel model,
-            ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Dependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
     }
 
     @DisplayName("It should provide nested type")

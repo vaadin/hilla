@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -40,8 +39,8 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     public abstract String getClassName();
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getType().getDependenciesStream();
+    public Class<FieldInfoModel> getCommonModelClass() {
+        return FieldInfoModel.class;
     }
 
     @Override

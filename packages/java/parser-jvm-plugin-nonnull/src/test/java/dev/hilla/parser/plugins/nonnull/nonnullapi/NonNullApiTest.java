@@ -20,7 +20,7 @@ public class NonNullApiTest {
     public void should_ApplyNonNullApiAnnotation()
             throws IOException, URISyntaxException {
         var plugin = new NonnullPlugin();
-        plugin.setConfig(new NonnullPluginConfig(Set.of(
+        plugin.setConfiguration(new NonnullPluginConfig(Set.of(
                 new AnnotationMatcher(NonNullApi.class.getName(), false, 10),
                 new AnnotationMatcher(NullableField.class.getName(), true, 20),
                 new AnnotationMatcher(NullableMethod.class.getName(), true, 20),

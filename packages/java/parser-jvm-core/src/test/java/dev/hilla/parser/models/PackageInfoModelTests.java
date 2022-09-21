@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,15 +96,6 @@ public class PackageInfoModelTests {
             assertEquals(ctx.getSourceOrigin(), model.get());
             break;
         }
-    }
-
-    @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideNoDependencies(PackageInfoModel model,
-            ModelKind kind) {
-        assertEquals(Set.of(), model.getDependencies());
-        assertEquals(0, model.getDependenciesStream().count());
     }
 
     static class Context {

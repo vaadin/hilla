@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.utils.Streams;
-
 import io.github.classgraph.AnnotationInfo;
 
 public abstract class AnnotationInfoModel implements Model, NamedModel {
@@ -50,12 +48,8 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams.combine(
-                getClassInfo().map(ClassInfoModel::getDependenciesStream)
-                        .orElse(Stream.empty()),
-                getParameters().stream().flatMap(
-                        AnnotationParameterModel::getDependenciesStream));
+    public Class<AnnotationInfoModel> getCommonModelClass() {
+        return AnnotationInfoModel.class;
     }
 
     public Set<AnnotationParameterModel> getParameters() {
@@ -64,6 +58,10 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         }
 
         return parameters;
+    }
+
+    public Stream<AnnotationParameterModel> getParametersStream() {
+        return getParameters().stream();
     }
 
     @Override

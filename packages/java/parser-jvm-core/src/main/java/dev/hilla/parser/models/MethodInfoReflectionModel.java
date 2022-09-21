@@ -126,6 +126,11 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
         protected SignatureModel prepareResultType() {
             return BaseSignatureModel.of(Void.TYPE);
         }
+
+        @Override
+        protected List<TypeParameterModel> prepareTypeParameters() {
+            return List.of();
+        }
     }
 
     static final class Regular extends MethodInfoReflectionModel {
@@ -158,6 +163,12 @@ abstract class MethodInfoReflectionModel extends MethodInfoModel
         @Override
         protected SignatureModel prepareResultType() {
             return SignatureModel.of(origin.getAnnotatedReturnType());
+        }
+
+        @Override
+        protected List<TypeParameterModel> prepareTypeParameters() {
+            return Arrays.stream(origin.getTypeParameters())
+                    .map(TypeParameterModel::of).collect(Collectors.toList());
         }
     }
 }

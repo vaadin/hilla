@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
@@ -196,25 +193,16 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInheritanceChain() {
-        return Streams
-                .combine(Stream.of(this),
-                        origin.getSuperclasses().stream()
-                                .filter(ClassInfoModel::isNonJDKClass)
-                                .map(ClassInfoModel::of))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     protected List<ClassInfoModel> prepareInnerClasses() {
         return origin.getInnerClasses().stream().map(ClassInfoModel::of)
                 .collect(Collectors.toList());
     }
 
     @Override
-    protected List<ClassInfoModel> prepareInterfaces() {
-        return origin.getInterfaces().stream().map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+    protected List<ClassRefSignatureModel> prepareInterfaces() {
+        return origin.getTypeSignatureOrTypeDescriptor()
+                .getSuperinterfaceSignatures().stream()
+                .map(ClassRefSignatureModel::of).collect(Collectors.toList());
     }
 
     @Override
@@ -229,9 +217,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected ClassInfoModel prepareSuperClass() {
-        var superClass = origin.getSuperclass();
-        return superClass != null ? ClassInfoModel.of(superClass) : null;
+    protected ClassRefSignatureModel prepareSuperClass() {
+        var superClass = origin.getTypeSignatureOrTypeDescriptor()
+                .getSuperclassSignature();
+        return superClass != null ? ClassRefSignatureModel.of(superClass)
+                : null;
     }
 
     @Override

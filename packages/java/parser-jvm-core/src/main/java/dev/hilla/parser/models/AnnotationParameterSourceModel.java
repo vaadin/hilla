@@ -27,8 +27,13 @@ final class AnnotationParameterSourceModel extends AnnotationParameterModel
         var _value = origin.getValue();
 
         if (_value instanceof AnnotationClassRef) {
-            return ClassInfoModel
-                    .of(((AnnotationClassRef) _value).getClassInfo());
+            var _ref = (AnnotationClassRef) _value;
+            if (_ref.getClassInfo() == null) {
+                // ClassGraph is missing the class, try loading from reflection
+                return ClassInfoModel.of(_ref.loadClass());
+            } else {
+                return ClassInfoModel.of(_ref.getClassInfo());
+            }
         } else if (_value instanceof AnnotationEnumValue) {
             return AnnotationParameterEnumValueModel
                     .of((AnnotationEnumValue) _value);

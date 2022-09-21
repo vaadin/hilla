@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -122,14 +121,6 @@ public class BaseSignatureModelTests {
             assertTrue(model.isSource());
             break;
         }
-    }
-
-    @DisplayName("It should provide no dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideNoDependencies(BaseSignatureModel model,
-            ModelKind kind, String methodName) {
-        assertEquals(Set.of(), model.getDependencies());
     }
 
     private enum ModelKind {

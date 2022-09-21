@@ -1,79 +1,109 @@
 package dev.hilla.parser.core.dependency;
 
-import java.util.Collection;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.Plugin;
+import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.SharedStorage;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.FieldInfoModel;
-import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
+import dev.hilla.parser.models.NamedModel;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.RootNode;
+import dev.hilla.parser.test.nodes.EndpointNode;
+import dev.hilla.parser.test.nodes.EntityNode;
+import dev.hilla.parser.test.nodes.FieldNode;
+import dev.hilla.parser.test.nodes.MethodNode;
+import dev.hilla.parser.test.nodes.MethodParameterNode;
+import dev.hilla.parser.test.nodes.TypeSignatureNode;
 
-public class DependencyPlugin implements Plugin.Processor {
-    public static final String ENTITY_DEPS_STORAGE_KEY = "DependencyPlugin_EntityDeps";
-    public static final String DEPS_MEMBERS_STORAGE_KEY = "DependencyPlugin_DepsMembers";
-    public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "DependencyPlugin_EndpointsDirectDeps";
-    private int order = 0;
-    private SharedStorage storage;
+final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
+    public static final String ENTITY_DEPS_STORAGE_KEY = "x-dependency-entities";
+    public static final String DEPS_MEMBERS_STORAGE_KEY = "x-dependency-entity-members";
+    public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "x-dependency-endpoints";
 
+    private final List<String> entityDependencies = new ArrayList<>();
+    private final List<String> dependencyMembers = new ArrayList<>();
+    private final List<String> endpointDependencies = new ArrayList<>();
+
+    @Nonnull
     @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    @Override
-    public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-            @Nonnull Collection<ClassInfoModel> entities) {
-        var collector = new DependencyCollector(endpoints, entities);
-
-        storage.getPluginStorage().put(ENTITY_DEPS_STORAGE_KEY,
-                collector.collectEntityDependencyNames());
-
-        storage.getPluginStorage().put(DEPS_MEMBERS_STORAGE_KEY,
-                collector.collectDependencyMemberNames());
-
-        storage.getPluginStorage().put(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
-                collector.collectEndpointDirectDependencyNames());
-    }
-
-    @Override
-    public void setStorage(@Nonnull SharedStorage storage) {
-        this.storage = storage;
-    }
-
-    private static class DependencyCollector {
-        private final Collection<ClassInfoModel> endpoints;
-        private final Collection<ClassInfoModel> entities;
-
-        public DependencyCollector(Collection<ClassInfoModel> endpoints,
-                Collection<ClassInfoModel> entities) {
-            this.endpoints = endpoints;
-            this.entities = entities;
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        var node = nodeDependencies.getNode();
+        if (node instanceof RootNode) {
+            var rootNode = (RootNode) node;
+            return nodeDependencies.appendChildNodes(rootNode.getSource()
+                    .getClassesWithAnnotation(getStorage().getParserConfig()
+                            .getEndpointAnnotationName())
+                    .stream().map(ClassInfoModel::of).map(EndpointNode::of));
+        } else if ((node instanceof EndpointNode)) {
+            var cls = (ClassInfoModel) node.getSource();
+            return nodeDependencies.appendChildNodes(
+                    cls.getMethodsStream().map(MethodNode::of));
+        } else if (node instanceof MethodNode) {
+            var methodNode = (MethodNode) node;
+            var resultTypeNode = TypeSignatureNode
+                    .of(methodNode.getSource().getResultType());
+            return nodeDependencies.prependChildNodes(Stream.of(resultTypeNode))
+                    .appendChildNodes(
+                            methodNode.getSource().getParametersStream()
+                                    .map(param -> MethodParameterNode.of(param,
+                                            Optional.ofNullable(param.getName())
+                                                    .orElse("_unnamed"))));
+        } else if ((node instanceof EntityNode)) {
+            var cls = (ClassInfoModel) node.getSource();
+            return nodeDependencies
+                    .appendChildNodes(cls.getFieldsStream().map(FieldNode::of));
+        } else if (node instanceof FieldNode) {
+            var fieldNode = (FieldNode) node;
+            return nodeDependencies.appendChildNodes(Stream
+                    .of(TypeSignatureNode.of(fieldNode.getSource().getType())));
+        } else if ((node instanceof TypeSignatureNode)
+                && (node.getSource() instanceof ClassRefSignatureModel)
+                && !(((ClassRefSignatureModel) node.getSource())
+                        .isJDKClass())) {
+            var entityCls = ((ClassRefSignatureModel) node.getSource())
+                    .getClassInfo();
+            return nodeDependencies
+                    .appendRelatedNodes(Stream.of(EntityNode.of(entityCls)));
         }
+        return nodeDependencies;
+    }
 
-        public Collection<String> collectEntityDependencyNames() {
-            return entities.stream().map(ClassInfoModel::getName)
-                    .collect(Collectors.toList());
+    @Override
+    public void enter(NodePath<?> nodePath) {
+
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+        if (nodePath.getNode().getSource() instanceof NamedModel
+                && (nodePath.getParentPath().getNode() instanceof EntityNode)) {
+            var model = (NamedModel) nodePath.getNode().getSource();
+            dependencyMembers.add(model.getName());
         }
-
-        public Collection<String> collectDependencyMemberNames() {
-            return entities.stream().flatMap(ClassInfoModel::getFieldsStream)
-                    .map(FieldInfoModel::getName).collect(Collectors.toList());
+        if ((nodePath.getNode() instanceof EntityNode)
+                && (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
+            var model = (ClassInfoModel) nodePath.getNode().getSource();
+            entityDependencies.add(model.getName());
         }
-
-        public Collection<String> collectEndpointDirectDependencyNames() {
-            return endpoints.stream()
-                    .flatMap(ClassInfoModel::getDependenciesStream)
-                    .map(ClassInfoModel::getName).collect(Collectors.toList());
+        if (nodePath.getNode().getSource() instanceof NamedModel && (nodePath
+                .getParentPath().getNode() instanceof EndpointNode)) {
+            var model = (NamedModel) nodePath.getNode().getSource();
+            endpointDependencies.add(model.getName());
+        }
+        if (nodePath.getNode() instanceof RootNode) {
+            var openApi = ((RootNode) nodePath.getNode()).getTarget();
+            openApi.addExtension(ENTITY_DEPS_STORAGE_KEY, entityDependencies);
+            openApi.addExtension(DEPS_MEMBERS_STORAGE_KEY, dependencyMembers);
+            openApi.addExtension(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
+                    endpointDependencies);
         }
     }
 }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +16,6 @@ import javax.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
@@ -134,6 +132,13 @@ public class ParserConfigTests {
                 "[JVM Parser] endpointAnnotationName is not provided.");
     }
 
+    @Test
+    public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
+        assertThrows(IllegalArgumentException.class, () -> new BazPlugin()
+                .setConfiguration(new PluginConfiguration() {
+                }), "Requires instance of " + BazPluginConfig.class.getName());
+    }
+
     private void testOpenAPISourceFile(String fileName,
             ParserConfig.OpenAPIFileType type)
             throws URISyntaxException, IOException {
@@ -148,53 +153,66 @@ public class ParserConfigTests {
         assertEquals(expected, actual);
     }
 
-    private static class BarPlugin implements Plugin.Processor {
-        private int order = 1;
-        private SharedStorage storage;
+    private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
+        BarPlugin() {
+            super();
+            setOrder(1);
+        }
 
+        @Nonnull
         @Override
-        public int getOrder() {
-            return order;
+        public NodeDependencies scan(
+                @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
         }
 
         @Override
-        public void setOrder(int order) {
-            this.order = order;
+        public void enter(NodePath<?> nodePath) {
         }
 
         @Override
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
-        }
-
-        @Override
-        public void setStorage(@Nonnull SharedStorage storage) {
-            this.storage = storage;
+        public void exit(NodePath<?> nodePath) {
         }
     }
 
-    private static class FooPlugin implements Plugin.Processor {
-        private int order = 0;
-        private SharedStorage storage;
+    private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
+        FooPlugin() {
+            setOrder(0);
+        }
 
+        @Nonnull
         @Override
-        public int getOrder() {
-            return order;
+        public NodeDependencies scan(
+                @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
         }
 
         @Override
-        public void setOrder(int order) {
-            this.order = order;
+        public void enter(NodePath<?> nodePath) {
         }
 
         @Override
-        public void process(@Nonnull Collection<ClassInfoModel> endpoints,
-                @Nonnull Collection<ClassInfoModel> entities) {
+        public void exit(NodePath<?> nodePath) {
+        }
+    }
+
+    private static class BazPluginConfig implements PluginConfiguration {
+    }
+
+    private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+                @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
         }
 
         @Override
-        public void setStorage(@Nonnull SharedStorage storage) {
-            this.storage = storage;
+        public void enter(NodePath<?> nodePath) {
+        }
+
+        @Override
+        public void exit(NodePath<?> nodePath) {
         }
     }
 
