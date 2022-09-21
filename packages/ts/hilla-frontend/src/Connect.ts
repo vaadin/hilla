@@ -72,7 +72,7 @@ export class EndpointValidationError extends EndpointError {
 /**
  * An exception that gets thrown for unexpected HTTP response.
  */
-export class EndpointResponseError extends Error {
+export class EndpointResponseError extends EndpointError {
   /**
    * The optional response object, containing the HTTP response error
    */
@@ -83,8 +83,15 @@ export class EndpointResponseError extends Error {
    * @param response the `response` property value
    */
   public constructor(message: string, response: Response) {
-    super(message);
+    super(message, 'EndpointResponseError', response);
     this.response = response;
+  }
+
+  /**
+   * Convenience property to get the HTTP code status directly
+   */
+  public get status(): number {
+    return this.response.status;
   }
 }
 
@@ -142,7 +149,10 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
     } else if (errorText !== null && errorText.length > 0) {
       throw new EndpointResponseError(errorText, response);
     } else {
-      throw new EndpointError(`expected "200 OK" response, but got ${response.status} ${response.statusText}`);
+      throw new EndpointResponseError(
+        `expected "200 OK" response, but got ${response.status} ${response.statusText}`,
+        response,
+      );
     }
   }
 };
