@@ -1,9 +1,11 @@
-/* tslint:disable:max-classes-per-file */
+/* eslint-disable no-use-before-define */
 // API to test
 import {
+  _enum,
   _getPropertyModel,
   ArrayModel,
   BooleanModel,
+  EnumModel,
   ModelConstructor,
   NotBlank,
   NumberModel,
@@ -105,6 +107,7 @@ export interface TestEntity {
   fieldArrayString: string[];
   fieldArrayModel: IdEntity[];
   fieldMatrixNumber: number[][];
+  fieldEnum: RecordStatus;
   fieldAny: any;
 }
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
@@ -146,6 +149,10 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
       ArrayModel,
       [false, NumberModel, [false, new Positive()]],
     ]) as ArrayModel<ReadonlyArray<number>, ArrayModel<number, NumberModel>>;
+  }
+
+  public get fieldEnum() {
+    return this[_getPropertyModel]('fieldEnum', RecordStatusModel, [false]) as RecordStatusModel;
   }
 
   public get fieldAny() {
@@ -198,4 +205,14 @@ export class TestMessageInterpolationModel<
       new Required(),
     ]) as StringModel;
   }
+}
+
+export enum RecordStatus {
+  CREATED = 'CREATED',
+  UPDATED = 'UPDATED',
+  REMOVED = 'REMOVED',
+}
+
+export class RecordStatusModel extends EnumModel<typeof RecordStatus> {
+  public readonly [_enum] = RecordStatus;
 }
