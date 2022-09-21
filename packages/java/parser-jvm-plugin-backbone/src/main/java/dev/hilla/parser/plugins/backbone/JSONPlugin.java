@@ -24,12 +24,12 @@ import java.util.stream.Stream;
 
 public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
 
-    public static final String JSON_IGNORE = JsonIgnore.class.getName();
+    private static final String JSON_IGNORE = JsonIgnore.class.getName();
 
-    public static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
+    private static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
             .getName();
 
-    public static final String JSON_IGNORE_TYPE = JsonIgnoreType.class
+    private static final String JSON_IGNORE_TYPE = JsonIgnoreType.class
             .getName();
 
     @Override
