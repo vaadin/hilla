@@ -1,0 +1,73 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "TransientEndpoint"
+    }
+  ],
+  "paths": {
+    "/TransientEndpoint/getTransientModel": {
+      "post": {
+        "tags": ["TransientEndpoint"],
+        "operationId": "TransientEndpoint_getTransientModel_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.transients.TransientEndpoint$TransientModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.transients.TransientEndpoint$TransientModel": {
+        "type": "object",
+        "properties": {
+          "notTransientField": {
+            "type": "string",
+            "nullable": true
+          },
+          "nonTransientEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.transients.NonTransientEntity"
+              }
+            ]
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.backbone.transients.NonTransientEntity": {
+        "type": "object",
+        "properties": {
+          "entityField": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}
