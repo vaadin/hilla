@@ -95,6 +95,20 @@ export class EndpointResponseError extends EndpointError {
   }
 }
 
+export class UnauthorizedResponseError extends EndpointResponseError {
+  public constructor(message: string, response: Response) {
+    super(message, response);
+    this.type = 'UnauthorizedResponseError';
+  }
+}
+
+export class ForbiddenResponseError extends EndpointResponseError {
+  public constructor(message: string, response: Response) {
+    super(message, response);
+    this.type = 'ForbiddenResponseError';
+  }
+}
+
 /**
  * Represents the connection to and endpoint returning a subscription rather than a value.
  */
@@ -149,10 +163,16 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
     } else if (errorText !== null && errorText.length > 0) {
       throw new EndpointResponseError(errorText, response);
     } else {
-      throw new EndpointResponseError(
-        `expected "200 OK" response, but got ${response.status} ${response.statusText}`,
-        response,
-      );
+      const message = `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
+
+      switch (response.status) {
+        case 401:
+          throw new UnauthorizedResponseError(message, response);
+        case 403:
+          throw new ForbiddenResponseError(message, response);
+        default:
+          throw new EndpointResponseError(message, response);
+      }
     }
   }
 };
