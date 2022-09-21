@@ -1,14 +1,16 @@
-import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type { ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
+/* eslint-disable symbol-description */
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
   isComposedSchema,
   isEmptyObject,
+  isEnumSchema,
   isObjectSchema,
   isReferenceSchema,
   ObjectSchema,
+  ReferenceSchema,
+  Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -18,62 +20,123 @@ import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import { dirname } from 'path/posix';
-import type { ClassElement, Identifier, SourceFile, Statement } from 'typescript';
-import ts, { ClassDeclaration } from 'typescript';
-import {
-  ModelSchemaContext,
-  ModelSchemaExpressionProcessor,
-  ModelSchemaTypeProcessor,
-} from './ModelSchemaProcessor.js';
+import type { ClassDeclaration, ClassElement, Identifier, SourceFile, Statement } from 'typescript';
+import ts from 'typescript';
+import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
+import type { Context } from './utils.js';
+import { importBuiltInFormModel } from './utils.js';
 
-export type Context = Pick<ModelSchemaContext, 'isReferenceToEnum'> &
-  Readonly<{
-    owner: Plugin;
-  }>;
+export type DependencyData = Readonly<{
+  id: Identifier;
+  path: string;
+}>;
 
-export class EntityModelProcessor {
-  readonly #component: Schema;
-  readonly #dependencies: DependencyManager;
-  readonly #entityId: Identifier;
-  readonly #fullyQualifiedName: string;
-  readonly #getPropertyModelSymbol: Identifier;
-  readonly #id: Identifier;
-  readonly #path: string;
+const $dependencies = Symbol();
+const $entity = Symbol();
+const $fullyQualifiedName = Symbol();
+const $model = Symbol();
+const $processDeclaration = Symbol();
+
+export abstract class EntityModelProcessor {
+  public static process(name: string, component: Schema, context: Context): SourceFile {
+    context.owner.logger.debug(`Processing model for entity: ${name}`);
+
+    const schema = isComposedSchema(component) ? decomposeSchema(component)[0] : component;
+
+    return isEnumSchema(schema)
+      ? new EntityEnumModelProcessor(name).process() // eslint-disable-line no-use-before-define
+      : new EntityClassModelProcessor(name, component, context).process(); // eslint-disable-line no-use-before-define
+  }
+
+  protected readonly [$dependencies]: DependencyManager;
+  protected readonly [$entity]: DependencyData;
+  protected readonly [$fullyQualifiedName]: string;
+  protected readonly [$model]: DependencyData;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
-  readonly #context: Context;
 
-  public constructor(name: string, component: Schema, context: Context) {
-    this.#component = component;
-    this.#context = context;
-    this.#fullyQualifiedName = name;
+  protected constructor(name: string, shouldImportEntityAsType: boolean) {
+    this[$fullyQualifiedName] = name;
 
     const entityName = simplifyFullyQualifiedName(name);
     const entityPath = convertFullyQualifiedNameToRelativePath(name);
 
-    this.#path = `${entityPath}Model`;
-    this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
+    const modelName = `${entityName}Model`;
+    const modelPath = `${entityPath}Model`;
+    this[$dependencies] = new DependencyManager(new PathManager({ relativeTo: dirname(modelPath) }));
 
-    const { exports, imports, paths } = this.#dependencies;
+    const { exports, imports, paths } = this[$dependencies];
 
-    this.#getPropertyModelSymbol = imports.named.add('@hilla/form', '_getPropertyModel');
-    this.#id = exports.default.set(`${entityName}Model`);
+    this[$model] = {
+      id: exports.default.set(modelName),
+      path: modelPath,
+    };
 
-    this.#entityId = imports.default.add(paths.createRelativePath(entityPath), entityName, true);
+    this[$entity] = {
+      id: imports.default.add(paths.createRelativePath(entityPath), entityName, shouldImportEntityAsType),
+      path: entityPath,
+    };
   }
 
   public process(): SourceFile {
-    this.#context.owner.logger.debug(`Processing model for entity: ${this.#entityId.text}`);
+    const declaration = this[$processDeclaration]();
 
-    const declaration = this.#processExtendedModelClass(this.#component, this.#entityId);
-
-    const { imports, exports } = this.#dependencies;
+    const { imports, exports } = this[$dependencies];
     const importStatements = imports.toCode();
     const exportStatement = exports.toCode();
 
     return createSourceFile(
       [...importStatements, declaration, ...exportStatement].filter(Boolean) as readonly Statement[],
-      this.#sourcePaths.createRelativePath(this.#path),
+      this.#sourcePaths.createRelativePath(this[$model].path),
     );
+  }
+
+  protected abstract [$processDeclaration](): ClassDeclaration | undefined;
+}
+
+export class EntityClassModelProcessor extends EntityModelProcessor {
+  readonly #component: Schema;
+  readonly #context: Context;
+  readonly #fullyQualifiedName: string;
+  readonly #getPropertyModelSymbol: Identifier;
+
+  public constructor(name: string, component: Schema, context: Context) {
+    super(name, true);
+
+    this.#component = component;
+    this.#context = context;
+    this.#fullyQualifiedName = name;
+
+    this.#getPropertyModelSymbol = this[$dependencies].imports.named.add('@hilla/form', '_getPropertyModel');
+  }
+
+  protected [$processDeclaration](): ClassDeclaration | undefined {
+    const { logger } = this.#context.owner;
+
+    let entitySchema = this.#component;
+    let parent;
+
+    if (isComposedSchema(this.#component)) {
+      const decomposed = decomposeSchema(this.#component);
+
+      if (decomposed.length > 2) {
+        logger.error(this.#component, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
+        return undefined;
+      }
+
+      const [parentSchema, childSchema] = decomposed;
+
+      if (!isReferenceSchema(parentSchema)) {
+        logger.error(parent, 'Only reference schema allowed for parent class');
+        return undefined;
+      }
+
+      entitySchema = childSchema;
+      parent = this.#processParentClass(parentSchema);
+    } else {
+      parent = importBuiltInFormModel('ObjectModel', this[$dependencies]);
+    }
+
+    return this.#processModelClass(entitySchema, this[$entity].id, parent);
   }
 
   #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
@@ -81,15 +144,14 @@ export class EntityModelProcessor {
       return [];
     }
 
-    const ctx = {
-      dependencies: this.#dependencies,
-      isReferenceToEnum: this.#context.isReferenceToEnum,
-    };
-
     const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
-      const type = new ModelSchemaTypeProcessor(schema, ctx).process();
-      const args = new ModelSchemaExpressionProcessor(schema, ctx, (_) => !requiredSet.has(name)).process();
+      const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
+      const args = new ModelSchemaExpressionProcessor(
+        schema,
+        this[$dependencies],
+        (_) => !requiredSet.has(name),
+      ).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
@@ -118,36 +180,6 @@ export class EntityModelProcessor {
         ),
       );
     });
-  }
-
-  #processExtendedModelClass(schema: Schema, entity: Identifier): Statement | undefined {
-    const { logger } = this.#context.owner;
-
-    let entitySchema = schema;
-    let parent;
-
-    if (isComposedSchema(schema)) {
-      const decomposed = decomposeSchema(schema);
-
-      if (decomposed.length > 2) {
-        logger.error(schema, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
-        return undefined;
-      }
-
-      const [parentSchema, childSchema] = decomposed;
-
-      if (!isReferenceSchema(parentSchema)) {
-        logger.error(parent, 'Only reference schema allowed for parent class');
-        return undefined;
-      }
-
-      entitySchema = childSchema;
-      parent = this.#processParentClass(parentSchema);
-    } else {
-      parent = this.#dependencies.imports.named.add('@hilla/form', 'ObjectModel');
-    }
-
-    return this.#processModelClass(entitySchema, entity, parent);
   }
 
   #processModelClass(schema: Schema, entity: Identifier, parent: Identifier): ClassDeclaration | undefined {
@@ -182,7 +214,7 @@ export class EntityModelProcessor {
     return ts.factory.createClassDeclaration(
       undefined,
       undefined,
-      this.#id,
+      this[$model].id,
       [modelTypeParameters],
       [
         ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
@@ -194,7 +226,7 @@ export class EntityModelProcessor {
   }
 
   #processParentClass(schema: ReferenceSchema): Identifier {
-    const { imports, paths } = this.#dependencies;
+    const { imports, paths } = this[$dependencies];
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = convertReferenceSchemaToPath(schema);
@@ -202,5 +234,40 @@ export class EntityModelProcessor {
     const modelSpecifier = `${specifier}Model`;
 
     return imports.default.add(modelPath, modelSpecifier, false);
+  }
+}
+
+export class EntityEnumModelProcessor extends EntityModelProcessor {
+  public constructor(name: string) {
+    super(name, false);
+  }
+
+  protected [$processDeclaration](): ClassDeclaration {
+    const enumModel = importBuiltInFormModel('EnumModel', this[$dependencies]);
+    const enumPropertySymbol = this[$dependencies].imports.named.add('@hilla/form', '_enum');
+
+    return ts.factory.createClassDeclaration(
+      undefined,
+      undefined,
+      this[$model].id,
+      undefined,
+      [
+        ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+          ts.factory.createExpressionWithTypeArguments(enumModel, [
+            ts.factory.createTypeQueryNode(this[$entity].id, undefined),
+          ]),
+        ]),
+      ],
+      [
+        ts.factory.createPropertyDeclaration(
+          undefined,
+          [ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)],
+          ts.factory.createComputedPropertyName(enumPropertySymbol),
+          undefined,
+          undefined,
+          this[$entity].id,
+        ),
+      ],
+    );
   }
 }

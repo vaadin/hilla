@@ -1,10 +1,10 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import { isEnumSchema, resolveReference } from '@hilla/generator-typescript-core/Schema.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
-import { Context, EntityModelProcessor } from './EntityModelProcessor.js';
+import { EntityModelProcessor } from './EntityModelProcessor.js';
+import type { Context } from './utils.js';
 
 export enum ModelPluginSourceType {
   Model = 'model',
@@ -34,17 +34,11 @@ export default class ModelPlugin extends Plugin {
     }
 
     const ctx: Context = {
-      isReferenceToEnum(schema) {
-        const resolved = resolveReference(schemas, schema);
-        return !!resolved && isEnumSchema(resolved);
-      },
       owner: this,
     };
 
     return schemas
-      ? Object.entries(schemas)
-          .filter(([, component]) => !isEnumSchema(component))
-          .map(([name, component]) => new EntityModelProcessor(name, component, ctx).process())
+      ? Object.entries(schemas).map(([name, component]) => EntityModelProcessor.process(name, component, ctx))
       : [];
   }
 }

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Annotation, AnnotationNamedAttributes } from '../../src/Annotation.js';
+import type { Annotation, AnnotationNamedAttributes } from '../../src/Annotation.js';
 import parseAnnotation from '../../src/parseAnnotation.js';
 
 function assertAnnotation(

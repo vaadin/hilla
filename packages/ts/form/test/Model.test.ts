@@ -1,10 +1,12 @@
 import { expect } from '@open-wc/testing';
 // API to test
 import {
+  _enum,
   _fromString,
   _key,
   ArrayModel,
   Binder,
+  EnumModel,
   IsNumber,
   NotBlank,
   NotEmpty,
@@ -14,7 +16,7 @@ import {
   Size,
 } from '../src';
 
-import { IdEntity, IdEntityModel, TestEntity, TestModel } from './TestModels';
+import { IdEntity, IdEntityModel, RecordStatus, RecordStatusModel, TestEntity, TestModel } from './TestModels';
 
 describe('form/Model', () => {
   let binder: Binder<TestEntity, TestModel>;
@@ -335,6 +337,30 @@ describe('form/Model', () => {
         });
       });
       expect(walkedCells).to.equal(4);
+    });
+  });
+
+  describe('enum model', () => {
+    it('should get default enum value', () => {
+      expect(RecordStatusModel.createEmptyValue()).to.equal(RecordStatus.CREATED);
+    });
+
+    it('should get the enum object from the model', () => {
+      expect(binder.model.fieldEnum[_enum]).to.equal(RecordStatus);
+    });
+
+    it('should record and return the value', () => {
+      binder.for(binder.model.fieldEnum).value = RecordStatus.REMOVED;
+      expect(binder.model.fieldEnum.valueOf()).to.equal(RecordStatus.REMOVED);
+    });
+
+    it('should fail if the EnumModel.createEmptyValue() is used', () => {
+      expect(() => EnumModel.createEmptyValue()).to.throw('Cannot create an instance of an abstract class');
+    });
+
+    it('should extract value from string', () => {
+      expect(binder.model.fieldEnum[_fromString]('UPDATED')).to.equal(RecordStatus.UPDATED);
+      expect(binder.model.fieldEnum[_fromString]('unknown')).to.be.undefined;
     });
   });
 });
