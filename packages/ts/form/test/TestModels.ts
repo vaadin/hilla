@@ -1,4 +1,4 @@
-/* tslint:disable:max-classes-per-file */
+/* eslint-disable no-use-before-define */
 // API to test
 import {
   _enum,
