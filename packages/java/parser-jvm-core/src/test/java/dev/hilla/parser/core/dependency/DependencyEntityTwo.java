@@ -11,5 +11,6 @@ public class DependencyEntityTwo {
     }
 
     public static class InnerClass {
+        public String innerClassMember;
     }
 }

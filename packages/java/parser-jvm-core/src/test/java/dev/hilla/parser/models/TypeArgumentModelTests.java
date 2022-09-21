@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -12,7 +13,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -127,21 +127,21 @@ public class TypeArgumentModelTests {
 
     static final class Context
             extends AbstractContext<AnnotatedType, TypeArgument> {
-        private static final Map<String, AnnotatedType> reflectionOrigins = Arrays
-                .stream(Sample.class.getDeclaredFields())
-                .collect(Collectors.toMap(Field::getName,
-                        field -> ((AnnotatedParameterizedType) field
-                                .getAnnotatedType())
-                                        .getAnnotatedActualTypeArguments()[0]));
+        private static final Map<String, AnnotatedType> reflectionOrigins = getDeclaredFields(
+                Sample.class)
+                        .collect(Collectors.toMap(Field::getName,
+                                field -> ((AnnotatedParameterizedType) field
+                                        .getAnnotatedType())
+                                                .getAnnotatedActualTypeArguments()[0]));
 
         Context(ScanResult source) {
-            super(source, reflectionOrigins, source
-                    .getClassInfo(Sample.class.getName()).getDeclaredFieldInfo()
-                    .stream()
-                    .collect(Collectors.toMap(FieldInfo::getName,
-                            field -> ((ClassRefTypeSignature) field
-                                    .getTypeSignatureOrTypeDescriptor())
-                                            .getTypeArguments().get(0))));
+            super(source, reflectionOrigins,
+                    getDeclaredFields(Sample.class, source)
+                            .collect(Collectors.toMap(FieldInfo::getName,
+                                    field -> ((ClassRefTypeSignature) field
+                                            .getTypeSignatureOrTypeDescriptor())
+                                                    .getTypeArguments()
+                                                    .get(0))));
         }
 
         Context(ExtensionContext context) {

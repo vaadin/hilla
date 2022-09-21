@@ -4,19 +4,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-
-import dev.hilla.parser.utils.Streams;
 
 import io.github.classgraph.ClassInfo;
 
@@ -26,13 +23,12 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
             Instant.class, LocalTime.class };
-    private List<ClassInfoModel> chain;
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
-    private List<ClassInfoModel> interfaces;
+    private List<ClassRefSignatureModel> interfaces;
     private List<MethodInfoModel> methods;
     private PackageInfoModel pkg;
-    private Optional<ClassInfoModel> superClass;
+    private Optional<ClassRefSignatureModel> superClass;
     private List<TypeParameterModel> typeParameters;
 
     public static boolean is(Class<?> actor, String target) {
@@ -181,23 +177,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Streams
-                .combine(getFieldDependenciesStream(),
-                        getMethodDependenciesStream(), getInnerClassesStream(),
-                        getSuperClassStream(), getInterfacesStream(),
-                        getInterfaceDependenciesStream(),
-                        getTypeParameterDependenciesStream())
-                .filter(ClassInfoModel::isNonJDKClass).distinct();
-    }
-
-    public Set<ClassInfoModel> getFieldDependencies() {
-        return getFieldDependenciesStream().collect(Collectors.toSet());
-    }
-
-    public Stream<ClassInfoModel> getFieldDependenciesStream() {
-        return getFieldsStream().flatMap(FieldInfoModel::getDependenciesStream)
-                .distinct();
+    public Class<ClassInfoModel> getCommonModelClass() {
+        return ClassInfoModel.class;
     }
 
     public List<FieldInfoModel> getFields() {
@@ -213,8 +194,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     public List<ClassInfoModel> getInheritanceChain() {
-        if (chain == null) {
-            chain = prepareInheritanceChain();
+        var chain = new ArrayList<ClassInfoModel>();
+
+        var current = this;
+
+        while (current != null && isNonJDKClass(current.getName())) {
+            chain.add(current);
+            current = current.getSuperClass()
+                    .map(ClassRefSignatureModel::getClassInfo).orElse(null);
         }
 
         return chain;
@@ -222,15 +209,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public Stream<ClassInfoModel> getInheritanceChainStream() {
         return getInheritanceChain().stream();
-    }
-
-    public Set<ClassInfoModel> getInnerClassDependencies() {
-        return getInnerClassDependenciesStream().collect(Collectors.toSet());
-    }
-
-    public Stream<ClassInfoModel> getInnerClassDependenciesStream() {
-        return getInnerClassesStream()
-                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
     }
 
     public List<ClassInfoModel> getInnerClasses() {
@@ -245,16 +223,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getInnerClasses().stream();
     }
 
-    public Set<ClassInfoModel> getInterfaceDependencies() {
-        return getInterfaceDependenciesStream().collect(Collectors.toSet());
-    }
-
-    public Stream<ClassInfoModel> getInterfaceDependenciesStream() {
-        return getInterfacesStream()
-                .flatMap(ClassInfoModel::getDependenciesStream).distinct();
-    }
-
-    public List<ClassInfoModel> getInterfaces() {
+    public List<ClassRefSignatureModel> getInterfaces() {
         if (interfaces == null) {
             interfaces = prepareInterfaces();
         }
@@ -262,17 +231,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return interfaces;
     }
 
-    public Stream<ClassInfoModel> getInterfacesStream() {
+    public Stream<ClassRefSignatureModel> getInterfacesStream() {
         return getInterfaces().stream();
-    }
-
-    public Set<ClassInfoModel> getMethodDependencies() {
-        return getMethodDependenciesStream().collect(Collectors.toSet());
-    }
-
-    public Stream<ClassInfoModel> getMethodDependenciesStream() {
-        return getMethodsStream()
-                .flatMap(MethodInfoModel::getDependenciesStream).distinct();
     }
 
     public List<MethodInfoModel> getMethods() {
@@ -297,7 +257,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public abstract String getSimpleName();
 
-    public Optional<ClassInfoModel> getSuperClass() {
+    public Optional<ClassRefSignatureModel> getSuperClass() {
         if (superClass == null) {
             superClass = Optional.ofNullable(prepareSuperClass());
         }
@@ -305,17 +265,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return superClass;
     }
 
-    public Stream<ClassInfoModel> getSuperClassStream() {
+    public Stream<ClassRefSignatureModel> getSuperClassStream() {
         return getSuperClass().stream();
-    }
-
-    public Stream<ClassInfoModel> getTypeParameterDependenciesStream() {
-        return getTypeParameterStream()
-                .flatMap(TypeParameterModel::getDependenciesStream).distinct();
-    }
-
-    public Stream<TypeParameterModel> getTypeParameterStream() {
-        return getTypeParameters().stream();
     }
 
     public List<TypeParameterModel> getTypeParameters() {
@@ -324,6 +275,10 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         }
 
         return typeParameters;
+    }
+
+    public Stream<TypeParameterModel> getTypeParametersStream() {
+        return getTypeParameters().stream();
     }
 
     public int hashCode() {
@@ -414,17 +369,15 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     protected abstract List<FieldInfoModel> prepareFields();
 
-    protected abstract List<ClassInfoModel> prepareInheritanceChain();
-
     protected abstract List<ClassInfoModel> prepareInnerClasses();
 
-    protected abstract List<ClassInfoModel> prepareInterfaces();
+    protected abstract List<ClassRefSignatureModel> prepareInterfaces();
 
     protected abstract List<MethodInfoModel> prepareMethods();
 
     protected abstract PackageInfoModel preparePackage();
 
-    protected abstract ClassInfoModel prepareSuperClass();
+    protected abstract ClassRefSignatureModel prepareSuperClass();
 
     protected abstract List<TypeParameterModel> prepareTypeParameters();
 }

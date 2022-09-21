@@ -13,7 +13,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,22 +75,6 @@ public class TypeParameterModelTests {
                     model.getBoundsStream().map(NamedModel.class::cast)
                             .map(NamedModel::getName)
                             .collect(Collectors.toList()));
-            break;
-        }
-    }
-
-    @DisplayName("It should get bounds")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(TypeParameterModel model, ModelKind kind,
-            String name) {
-        switch (name) {
-        case "RegularTypeParameter":
-            assertEquals(Set.of(), model.getDependencies());
-            break;
-        case "BoundedTypeParameter":
-            assertEquals(Set.of(ClassInfoModel.of(Sample.Bound.class)),
-                    model.getDependencies());
             break;
         }
     }

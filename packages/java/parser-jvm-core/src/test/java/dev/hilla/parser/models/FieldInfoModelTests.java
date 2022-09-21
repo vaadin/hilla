@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredFields;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static dev.hilla.parser.test.helpers.SpecializationChecker.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,10 +14,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,16 +49,6 @@ public class FieldInfoModelTests {
     @BeforeEach
     public void setUp(@Source ScanResult source) {
         ctx = new Context.Default(source);
-    }
-
-    @DisplayName("It should provide field dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(FieldInfoModel model, ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
     }
 
     @DisplayName("It should provide field name")
@@ -291,9 +280,10 @@ public class FieldInfoModelTests {
         static final class Default extends AbstractContext<Field, FieldInfo> {
             private static final Annotation annotation;
             private static final String defaultFieldName = "field";
-            private static final Map<String, Field> reflectionOrigins = Arrays
-                    .stream(Sample.class.getDeclaredFields()).collect(Collectors
-                            .toMap(Field::getName, Function.identity()));
+            private static final Map<String, Field> reflectionOrigins = getDeclaredFields(
+                    Sample.class)
+                            .collect(Collectors.toMap(Field::getName,
+                                    Function.identity()));
 
             static {
                 annotation = reflectionOrigins.get(defaultFieldName)
@@ -306,8 +296,7 @@ public class FieldInfoModelTests {
 
             Default(ScanResult source) {
                 super(source, reflectionOrigins,
-                        source.getClassInfo(Sample.class.getName())
-                                .getDeclaredFieldInfo().stream()
+                        getDeclaredFields(Sample.class, source)
                                 .collect(Collectors.toMap(FieldInfo::getName,
                                         Function.identity())));
             }

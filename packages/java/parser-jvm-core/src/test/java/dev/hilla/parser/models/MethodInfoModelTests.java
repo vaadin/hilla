@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,32 +48,21 @@ public class MethodInfoModelTests {
         ctx = new Context.Default(source);
     }
 
-    @DisplayName("It should provide method dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_GetDependencies(MethodInfoModel model, ModelKind kind) {
-        var expected = Set.of(ClassInfoModel.of(Sample.Dependency.class),
-                ClassInfoModel.of(Sample.ParamDependency.class));
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
-    }
-
     @DisplayName("It should have the same hashCode for source and reflection models")
-    @Test
-    public void should_HaveSameHashCodeForSourceAndReflectionModels() {
-        var reflectionModel = MethodInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = MethodInfoModel.of(ctx.getSourceOrigin());
-
+    @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
+    @ArgumentsSource(ModelProvider.Equality.class)
+    public void should_HaveSameHashCodeForSourceAndReflectionModels(
+            MethodInfoModel reflectionModel, MethodInfoModel sourceModel,
+            String name) {
         assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
     }
 
     @DisplayName("It should have source and reflection models equal")
-    @Test
-    public void should_HaveSourceAndReflectionModelsEqual() {
-        var reflectionModel = MethodInfoModel.of(ctx.getReflectionOrigin());
-        var sourceModel = MethodInfoModel.of(ctx.getSourceOrigin());
-
+    @ParameterizedTest(name = ModelProvider.Equality.testNamePattern)
+    @ArgumentsSource(ModelProvider.Equality.class)
+    public void should_HaveSourceAndReflectionModelsEqual(
+            MethodInfoModel reflectionModel, MethodInfoModel sourceModel,
+            String name) {
         assertEquals(reflectionModel, reflectionModel);
         assertEquals(reflectionModel, sourceModel);
 
@@ -89,15 +77,32 @@ public class MethodInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectOrigin(MethodInfoModel model,
-            ModelKind kind) {
+            ModelKind kind, String name) {
         switch (kind) {
         case REFLECTION:
-            assertEquals(ctx.getReflectionOrigin(), model.get());
+            assertEquals(ctx.getReflectionOrigin(name), model.get());
             assertTrue(model.isReflection());
             break;
         case SOURCE:
-            assertEquals(ctx.getSourceOrigin(), model.get());
+            assertEquals(ctx.getSourceOrigin(name), model.get());
             assertTrue(model.isSource());
+            break;
+        }
+    }
+
+    @DisplayName("It should provide correct type parameters")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectTypeParameters(MethodInfoModel model,
+            ModelKind kind, String name) {
+        switch (name) {
+        case Context.Default.basicMethodName:
+            assertEquals(List.of(), model.getTypeParameters());
+            break;
+        case Context.Default.genericMethodName:
+            assertEquals(ctx.getTypeParameterOrigins().stream()
+                    .map(TypeParameterModel::of).collect(Collectors.toList()),
+                    model.getTypeParameters());
             break;
         }
     }
@@ -113,58 +118,6 @@ public class MethodInfoModelTests {
         public void should_DetectCharacteristics(MethodInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
-        }
-    }
-
-    public static class ModelProvider implements ArgumentsProvider {
-        public static final String testNamePattern = "{1}";
-
-        @Override
-        public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new Context.Default(context);
-
-            return Stream.of(
-                    Arguments.of(MethodInfoModel.of(ctx.getReflectionOrigin()),
-                            ModelKind.REFLECTION),
-                    Arguments.of(MethodInfoModel.of(ctx.getSourceOrigin()),
-                            ModelKind.SOURCE));
-        }
-
-        public static class Characteristics implements ArgumentsProvider {
-            public static final String testNamePattern = "{2} [{3}]";
-
-            @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
-                var ctx = new Context.Characteristics(context);
-
-                return Streams.combine(ctx.getReflectionCharacteristics()
-                        .entrySet().stream()
-                        .map(entry -> Arguments.of(
-                                MethodInfoModel.of(entry.getKey()),
-                                entry.getValue(), ModelKind.REFLECTION,
-                                entry.getKey().getName())),
-                        ctx.getSourceCharacteristics().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        MethodInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getName())));
-            }
-
-            public static final class Checker
-                    extends SpecializationChecker<MethodInfoModel> {
-                private static final List<String> allowedMethods = List.of(
-                        "isAbstract", "isBridge", "isConstructor", "isFinal",
-                        "isNative", "isPrivate", "isProtected", "isPublic",
-                        "isStatic", "isStrict", "isSynchronized", "isSynthetic",
-                        "isVarArgs");
-
-                public Checker() {
-                    super(MethodInfoModel.class,
-                            getDeclaredMethods(MethodInfoModel.class),
-                            allowedMethods);
-                }
-            }
         }
     }
 
@@ -229,11 +182,19 @@ public class MethodInfoModelTests {
         }
 
         static final class Default extends AbstractContext<Method, MethodInfo> {
-            private static final String methodName = "method";
-            private static final Map<String, Method> reflectionOrigins = Arrays
-                    .stream(Sample.class.getDeclaredMethods())
-                    .collect(Collectors.toMap(Method::getName,
-                            Function.identity()));
+            public static final String basicMethodName = "method";
+            public static final String genericMethodName = "genericMethod";
+            private static final Map<String, Method> reflectionOrigins = getDeclaredMethods(
+                    Sample.class)
+                            .collect(Collectors.toMap(Method::getName,
+                                    Function.identity()));
+
+            private static final List<TypeVariable<?>> typeParameterOrigins;
+
+            static {
+                typeParameterOrigins = Arrays.asList(reflectionOrigins
+                        .get(genericMethodName).getTypeParameters());
+            }
 
             Default(ExtensionContext context) {
                 this(SourceExtension.getSource(context));
@@ -241,23 +202,95 @@ public class MethodInfoModelTests {
 
             Default(ScanResult source) {
                 super(source, reflectionOrigins,
-                        source.getClassInfo(Sample.class.getName())
-                                .getDeclaredMethodInfo().stream()
+                        getDeclaredMethods(Sample.class, source)
                                 .collect(Collectors.toMap(MethodInfo::getName,
                                         Function.identity())));
             }
 
-            public Method getReflectionOrigin() {
-                return getReflectionOrigin(methodName);
+            public List<TypeVariable<?>> getTypeParameterOrigins() {
+                return typeParameterOrigins;
+            }
+        }
+    }
+
+    static class ModelProvider implements ArgumentsProvider {
+        public static final String testNamePattern = "{1} [{2}]";
+
+        @Override
+        public Stream<Arguments> provideArguments(ExtensionContext context) {
+            var ctx = new Context.Default(context);
+
+            return Streams.combine(
+                    ctx.getReflectionOrigins().entrySet().stream()
+                            .map(entry -> Arguments.of(
+                                    MethodInfoModel.of(entry.getValue()),
+                                    ModelKind.REFLECTION, entry.getKey())),
+                    ctx.getSourceOrigins().entrySet().stream()
+                            .map(entry -> Arguments.of(
+                                    MethodInfoModel.of(entry.getValue()),
+                                    ModelKind.SOURCE, entry.getKey())));
+        }
+
+        static class Characteristics implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            @Override
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Characteristics(context);
+
+                return Streams.combine(ctx.getReflectionCharacteristics()
+                        .entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                MethodInfoModel.of(entry.getKey()),
+                                entry.getValue(), ModelKind.REFLECTION,
+                                entry.getKey().getName())),
+                        ctx.getSourceCharacteristics().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        MethodInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getName())));
             }
 
-            public MethodInfo getSourceOrigin() {
-                return getSourceOrigin(methodName);
+            static final class Checker
+                    extends SpecializationChecker<MethodInfoModel> {
+                private static final List<String> allowedMethods = List.of(
+                        "isAbstract", "isBridge", "isConstructor", "isFinal",
+                        "isNative", "isPrivate", "isProtected", "isPublic",
+                        "isStatic", "isStrict", "isSynchronized", "isSynthetic",
+                        "isVarArgs");
+
+                public Checker() {
+                    super(MethodInfoModel.class,
+                            getDeclaredMethods(MethodInfoModel.class),
+                            allowedMethods);
+                }
+            }
+        }
+
+        static class Equality implements ArgumentsProvider {
+            public static final String testNamePattern = "{1} [{2}]";
+
+            @Override
+            public Stream<Arguments> provideArguments(ExtensionContext context)
+                    throws Exception {
+                var ctx = new Context.Default(context);
+
+                return ctx.getReflectionOrigins().entrySet().stream()
+                        .map(entry -> Arguments.of(
+                                MethodInfoModel.of(entry.getValue()),
+                                MethodInfoModel.of(
+                                        ctx.getSourceOrigin(entry.getKey())),
+                                entry.getKey()));
             }
         }
     }
 
     static class Sample {
+        public <T> T genericMethod(T parameter) {
+            return parameter;
+        }
+
         public Dependency method(String first, ParamDependency second) {
             return null;
         }

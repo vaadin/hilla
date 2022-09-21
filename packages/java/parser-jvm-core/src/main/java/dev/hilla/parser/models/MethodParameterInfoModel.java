@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Parameter;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -44,8 +43,8 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getType().getDependenciesStream();
+    public Class<MethodParameterInfoModel> getCommonModelClass() {
+        return MethodParameterInfoModel.class;
     }
 
     public abstract int getModifiers();

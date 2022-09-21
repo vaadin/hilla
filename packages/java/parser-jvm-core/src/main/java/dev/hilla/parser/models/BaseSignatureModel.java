@@ -38,6 +38,11 @@ public abstract class BaseSignatureModel extends AnnotatedAbstractModel
                 && Objects.equals(getAnnotations(), other.getAnnotations());
     }
 
+    @Override
+    public Class<BaseSignatureModel> getCommonModelClass() {
+        return BaseSignatureModel.class;
+    }
+
     public abstract Class<?> getType();
 
     @Override

@@ -1,34 +1,22 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.SortedSet;
+import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class PluginManager {
+public final class PluginManager
+        extends AbstractCompositePlugin<PluginConfiguration> {
     private static final ClassLoader loader = PluginManager.class
             .getClassLoader();
-    private static final Logger logger = LoggerFactory
-            .getLogger(PluginManager.class);
-    private final ChangeListener<Integer> listener;
-    private final SortedSet<Plugin> plugins;
 
-    PluginManager(ParserConfig config, SharedStorage storage) {
-        plugins = config.getPlugins();
-        listener = new ChangeListener<>(
-                () -> storage.getClassMappers().hashCode());
-
-        for (var plugin : plugins) {
-            plugin.setStorage(storage);
-        }
+    PluginManager(Collection<Plugin> plugins) {
+        super(plugins.toArray(Plugin[]::new));
     }
 
     public static Plugin load(String name, Integer order,
-            PluginConfiguration config) {
+            PluginConfiguration configuration) {
         var cls = processClass(loadClass(name));
         var instance = instantiatePlugin(cls);
-        instance.setConfig(config);
+        instance.setConfiguration(configuration);
 
         if (order != null) {
             instance.setOrder(order);
@@ -59,6 +47,7 @@ public final class PluginManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Class<? extends Plugin> processClass(Class<?> cls) {
         if (Plugin.class.isAssignableFrom(cls)) {
             return (Class<? extends Plugin>) cls;
@@ -67,32 +56,5 @@ public final class PluginManager {
         throw new ParserException(String.format(
                 "Plugin '%s' is not an instance of '%s' interface",
                 cls.getName(), Plugin.class.getName()));
-    }
-
-    public void preprocess() {
-        for (var plugin : plugins) {
-            if (plugin instanceof Plugin.Preprocessor) {
-                logger.debug("Executing preprocessor plugin "
-                        + plugin.getClass().getName());
-
-                ((Plugin.Preprocessor) plugin).preprocess();
-            }
-        }
-    }
-
-    public void process(ScanElementsCollector collector) {
-        listener.onChange(collector::collect);
-
-        for (var plugin : plugins) {
-            if (plugin instanceof Plugin.Processor) {
-                logger.debug("Executing processor plugin "
-                        + plugin.getClass().getName());
-
-                ((Plugin.Processor) plugin).process(collector.getEndpoints(),
-                        collector.getEntities());
-
-                listener.poll();
-            }
-        }
     }
 }

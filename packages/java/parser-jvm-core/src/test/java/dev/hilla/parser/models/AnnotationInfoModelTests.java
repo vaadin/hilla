@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethods;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +11,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -115,17 +115,6 @@ public class AnnotationInfoModelTests {
         }
     }
 
-    @DisplayName("It should provide dependencies")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_ProvideDependencies(AnnotationInfoModel model,
-            ModelKind kind) {
-        assertEquals(
-                Set.of(ClassInfoModel.of(Sample.class),
-                        ClassInfoModel.of(Sample.Enum.class)),
-                model.getDependencies());
-    }
-
     static final class Context {
         private static final String fieldName = "bar";
         private static final Enum<?> reflectionEnumValue;
@@ -134,8 +123,7 @@ public class AnnotationInfoModelTests {
         private static final Map<String, Object> reflectionParameterOrigins;
 
         static {
-            reflectionParameterOrigins = Arrays
-                    .stream(Sample.Foo.class.getDeclaredMethods())
+            reflectionParameterOrigins = getDeclaredMethods(Sample.Foo.class)
                     .collect(Collectors.toMap(Method::getName,
                             Failable.asFunction(method -> method
                                     .invoke(reflectionOrigin))));
@@ -249,15 +237,6 @@ public class AnnotationInfoModelTests {
             assertEquals("VALUE", model.getValueName());
         }
 
-        @DisplayName("It should provide all dependencies")
-        @ParameterizedTest(name = EnumValueProvider.testNamePattern)
-        @ArgumentsSource(EnumValueProvider.class)
-        public void should_GetDependencies(
-                AnnotationParameterEnumValueModel model, ModelKind kind) {
-            assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
-                    model.getDependencies());
-        }
-
         @DisplayName("It should have the same hashCode for source and reflection models")
         @Test
         public void should_HaveSameHashCodeForSourceAndReflectionModels() {
@@ -291,26 +270,6 @@ public class AnnotationInfoModelTests {
     @DisplayName("Annotation parameter")
     @Nested
     public class Parameter {
-        @DisplayName("It should get parameter dependencies")
-        @ParameterizedTest(name = ParameterProvider.testNamePattern)
-        @ArgumentsSource(ParameterProvider.class)
-        public void should_GetDependencies(AnnotationParameterModel model,
-                ModelKind kind, String name) {
-            switch (name) {
-            case "classParameter":
-                assertEquals(Set.of(ClassInfoModel.of(Sample.class)),
-                        model.getDependencies());
-                break;
-            case "enumParameter":
-                assertEquals(Set.of(ClassInfoModel.of(Sample.Enum.class)),
-                        model.getDependencies());
-                break;
-            default:
-                assertEquals(Set.of(), model.getDependencies());
-                break;
-            }
-        }
-
         @DisplayName("It should get name and value correctly")
         @ParameterizedTest(name = ParameterProvider.testNamePattern)
         @ArgumentsSource(ParameterProvider.class)

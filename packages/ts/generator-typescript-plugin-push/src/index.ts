@@ -7,7 +7,10 @@ import PushProcessor from './PushProcessor.js';
 type ExtendedMediaTypeSchema = ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> &
   Readonly<{ 'x-class-name': string }>;
 
-const classesToReplace: readonly string[] = ['reactor.core.publisher.Flux', 'dev.hilla.EndpointSubscription'];
+const classesToReplace: readonly string[] = [
+  'dev.hilla.runtime.transfertypes.Flux',
+  'dev.hilla.runtime.transfertypes.EndpointSubscription',
+];
 
 export default class PushPlugin extends Plugin {
   /**

@@ -50,7 +50,7 @@
                     "type": "string",
                     "nullable": true
                   },
-                  "x-class-name": "reactor.core.publisher.Flux"
+                  "x-class-name": "dev.hilla.runtime.transfertypes.Flux"
                 }
               }
             }
@@ -108,7 +108,7 @@
                     "type": "string",
                     "nullable": true
                   },
-                  "x-class-name": "reactor.core.publisher.Flux"
+                  "x-class-name": "dev.hilla.runtime.transfertypes.Flux"
                 }
               }
             }
@@ -130,7 +130,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "x-class-name": "reactor.core.publisher.Flux"
+                  "x-class-name": "dev.hilla.runtime.transfertypes.Flux"
                 }
               }
             }
@@ -154,7 +154,7 @@
                     "type": "string",
                     "nullable": true
                   },
-                  "x-class-name": "dev.hilla.EndpointSubscription"
+                  "x-class-name": "dev.hilla.runtime.transfertypes.EndpointSubscription"
                 }
               }
             }

@@ -18,12 +18,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -193,59 +191,6 @@ public class ClassInfoModelTests {
         assertTrue(ClassInfoModel.of(sourceNonJDK).isNonJDKClass());
     }
 
-    @DisplayName("It should collect all dependencies from the class")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CollectClassDependencies(ClassInfoModel model,
-            ModelKind kind) {
-        var expected = Stream
-                .of(ctx.getFieldDependencies(), ctx.getMethodDependencies(),
-                        ctx.getParentClass(), ctx.getInterfaces(),
-                        ctx.getInnerClasses(), ctx.getInterfaceDependencies())
-                .flatMap(Collection::stream).map(ClassInfoModel::of)
-                .collect(Collectors.toSet());
-
-        var actual = model.getDependencies();
-
-        assertEquals(expected, actual);
-    }
-
-    @DisplayName("It should collect field dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CollectClassFieldDependencies(ClassInfoModel model,
-            ModelKind kind) {
-        var expected = ctx.getFieldDependencies().stream()
-                .map(ClassInfoModel::of).collect(Collectors.toSet());
-        var actual = model.getFieldDependencies();
-
-        assertEquals(expected, actual);
-    }
-
-    @DisplayName("It should collect method dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CollectClassMethodDependencies(ClassInfoModel model,
-            ModelKind kind) {
-        var expected = ctx.getMethodDependencies().stream()
-                .map(ClassInfoModel::of).collect(Collectors.toSet());
-        var actual = model.getMethodDependencies();
-
-        assertEquals(expected, actual);
-    }
-
-    @DisplayName("It should collect inner class dependencies of the class")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_CollectInnerClassDependencies(ClassInfoModel model,
-            ModelKind kind) {
-        var expected = ctx.getInnerClassesDependencies().stream()
-                .map(ClassInfoModel::of).collect(Collectors.toSet());
-        var actual = model.getInnerClassDependencies();
-
-        assertEquals(expected, actual);
-    }
-
     @DisplayName("It should be able to compare model with classes and other models")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
@@ -329,8 +274,11 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetInterfaces(ClassInfoModel model, ModelKind kind) {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
-                .map(ClassInfoModel::of).collect(Collectors.toList());
-        var actual = model.getInterfaces();
+                .map(ClassInfoModel::of).map(ClassInfoModel::getName)
+                .collect(Collectors.toList());
+        var actual = model.getInterfacesStream()
+                .map(ClassRefSignatureModel::getName)
+                .collect(Collectors.toList());
 
         assertEquals(expected, actual);
     }
@@ -347,8 +295,9 @@ public class ClassInfoModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_GetSuperclass(ClassInfoModel model, ModelKind kind) {
-        assertEquals(Dependency.Sample.class.getSuperclass().getName(), model
-                .getSuperClass().map(ClassInfoModel::getName).orElse(null));
+        assertEquals(Dependency.Sample.class.getSuperclass().getName(),
+                model.getSuperClass().map(ClassRefSignatureModel::getName)
+                        .orElse(null));
     }
 
     @DisplayName("It should have the same hashCode for source and reflection models")
@@ -805,37 +754,6 @@ public class ClassInfoModelTests {
         static class Default extends Context {
             private static final Annotation annotation = Dependency.Sample.class
                     .getAnnotation(Dependency.Annotation.class);
-            private static final Set<Class<?>> fieldDependencies = Set.of(
-                    Dependency.FieldStaticPublic.class,
-                    Dependency.FieldStaticProtected.class,
-                    Dependency.FieldStaticPrivate.class,
-                    Dependency.FieldPublic.class,
-                    Dependency.FieldProtected.class,
-                    Dependency.FieldPrivate.class);
-            private static final Set<Class<?>> innerClasses = Set.of(
-                    Dependency.Sample.DynamicInner.class,
-                    Dependency.Sample.StaticInner.class);
-            private static final Set<Class<?>> innerClassesDependencies = Set
-                    .of(Dependency.Sample.class, Dependency.InnerMethod.class,
-                            Dependency.InnerField.class,
-                            Dependency.InnerParent.class);
-            private static final Set<Class<?>> interfaces = Set
-                    .of(Dependency.Interface.class);
-            private static final Set<Class<?>> interfacesDependencies = Set
-                    .of(Dependency.ParametrizedDependency.class);
-            private static final Set<Class<?>> methodDependencies = Set.of(
-                    Dependency.MethodStaticPublic.class,
-                    Dependency.MethodStaticProtected.class,
-                    Dependency.MethodStaticPrivate.class,
-                    Dependency.MethodPublic.class,
-                    Dependency.MethodProtected.class,
-                    Dependency.MethodPrivate.class);
-            private static final Set<Class<?>> parentClass = Set
-                    .of(Dependency.Parent.class);
-            private static final Set<Class<?>> parentClassDependencies = Set.of(
-                    Dependency.ParentFieldPublic.class,
-                    Dependency.GrandParent.class,
-                    Dependency.GrandParentMethodPrivate.class);
             private static final Class<?> reflectionJDK = List.class;
             private static final Class<?> reflectionOrigin = Dependency.Sample.class;
             private final ClassInfo sourceJDK;
@@ -853,38 +771,6 @@ public class ClassInfoModelTests {
 
             public Annotation getAnnotation() {
                 return annotation;
-            }
-
-            public Set<Class<?>> getFieldDependencies() {
-                return fieldDependencies;
-            }
-
-            public Set<Class<?>> getInnerClasses() {
-                return innerClasses;
-            }
-
-            public Set<Class<?>> getInnerClassesDependencies() {
-                return innerClassesDependencies;
-            }
-
-            public Set<Class<?>> getInterfaceDependencies() {
-                return interfacesDependencies;
-            }
-
-            public Set<Class<?>> getInterfaces() {
-                return interfaces;
-            }
-
-            public Set<Class<?>> getMethodDependencies() {
-                return methodDependencies;
-            }
-
-            public Set<Class<?>> getParentClass() {
-                return parentClass;
-            }
-
-            public Set<Class<?>> getParentClassDependencies() {
-                return parentClassDependencies;
             }
 
             public Class<?> getReflectionJDK() {

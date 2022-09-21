@@ -51,8 +51,8 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return getBoundsStream().flatMap(SignatureModel::getDependenciesStream);
+    public Class<TypeParameterModel> getCommonModelClass() {
+        return TypeParameterModel.class;
     }
 
     @Override

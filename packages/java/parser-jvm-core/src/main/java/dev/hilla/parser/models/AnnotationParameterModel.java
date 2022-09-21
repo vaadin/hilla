@@ -2,7 +2,6 @@ package dev.hilla.parser.models;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -46,17 +45,8 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
     }
 
     @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        var value = getValue();
-
-        if (value instanceof ClassInfoModel) {
-            return Stream.of((ClassInfoModel) value);
-        } else if (value instanceof AnnotationParameterEnumValueModel) {
-            return Stream.of(
-                    ((AnnotationParameterEnumValueModel) value).getClassInfo());
-        }
-
-        return Stream.empty();
+    public Class<AnnotationParameterModel> getCommonModelClass() {
+        return AnnotationParameterModel.class;
     }
 
     public Object getValue() {

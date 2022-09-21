@@ -226,6 +226,11 @@
               {
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
               }
+            ],
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
             ]
           },
           "past": {

@@ -1,8 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
 import io.github.classgraph.PackageInfo;
 
 public abstract class PackageInfoModel extends AnnotatedAbstractModel
@@ -31,13 +28,8 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
     }
 
     @Override
-    public Set<ClassInfoModel> getDependencies() {
-        return Set.of();
-    }
-
-    @Override
-    public Stream<ClassInfoModel> getDependenciesStream() {
-        return Stream.empty();
+    public Class<PackageInfoModel> getCommonModelClass() {
+        return PackageInfoModel.class;
     }
 
     @Override

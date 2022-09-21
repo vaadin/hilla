@@ -25,11 +25,6 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         return origin;
     }
 
-    @Override
-    public String getName() {
-        return getOriginClassInfo().getName();
-    }
-
     protected abstract Class<?> getOriginClassInfo();
 
     @Override
@@ -65,13 +60,12 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
-            return Optional.empty();
-        }
-
-        @Override
         protected Class<?> getOriginClassInfo() {
             return origin;
+        }
+
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
+            return Optional.empty();
         }
     }
 
@@ -98,7 +92,6 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
             extends ClassRefSignatureReflectionModel<T> {
         protected final List<Annotation[]> ownedAnnotations;
         protected final int ownerIndex;
-        private Optional<ClassRefSignatureModel> owner;
 
         Annotated(T origin, List<Annotation[]> ownedAnnotations,
                 int ownerIndex) {
@@ -120,21 +113,13 @@ abstract class ClassRefSignatureReflectionModel<T extends AnnotatedElement>
         }
 
         @Override
-        public Optional<ClassRefSignatureModel> getOwner() {
-            if (owner == null) {
-                owner = prepareOwner();
-            }
-
-            return owner;
-        }
-
-        @Override
         protected List<AnnotationInfoModel> prepareAnnotations() {
             return AnnotatedAbstractModel
                     .processAnnotations(ownedAnnotations.get(ownerIndex));
         }
 
-        private Optional<ClassRefSignatureModel> prepareOwner() {
+        @Override
+        protected Optional<ClassRefSignatureModel> prepareOwner() {
             var owner = origin.getAnnotatedOwnerType();
 
             return owner != null
