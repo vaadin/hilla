@@ -16,17 +16,6 @@
     }
   ],
   "paths": {
-    "/ExposedEndpoint/methodFromEndpoint": {
-      "post": {
-        "tags": ["ExposedEndpoint"],
-        "operationId": "ExposedEndpoint_methodFromEndpoint_POST",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/ExposedEndpoint/methodFromExposedSuperclass": {
       "post": {
         "tags": ["ExposedEndpoint"],
@@ -69,6 +58,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/ExposedEndpoint/methodFromEndpoint": {
+      "post": {
+        "tags": ["ExposedEndpoint"],
+        "operationId": "ExposedEndpoint_methodFromEndpoint_POST",
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }

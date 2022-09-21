@@ -103,21 +103,20 @@ public final class NodePath<N extends Node<?, ?>> {
         return new NodePath<>(node, this);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Stream<Node<?, ?>> getParentNodes() {
-        return Stream.iterate((NodePath) this, NodePath::hasParentNodes,
-                NodePath::getParentPath).map(NodePath::getNode);
+    public Stream<Node<?, ?>> stream() {
+        return Stream.<NodePath<?>> iterate(this, NodePath::hasParentNodes,
+            NodePath::getParentPath).map(NodePath::getNode);
     }
 
     public Stream<AnnotationInfoModel> getAnnotations() {
-        var models = getParentNodes()
+        var models = stream()
                 .filter(node -> node.getSource() instanceof AnnotatedModel)
                 .map(node -> (AnnotatedModel) node.getSource());
         return models.flatMap(AnnotatedModel::getAnnotationsStream);
     }
 
     public Stream<AnnotationInfoModel> getPackageAnnotations() {
-        var classes = getParentNodes()
+        var classes = stream()
                 .filter(node -> node.getSource() instanceof ClassInfoModel)
                 .map(node -> (ClassInfoModel) node.getSource());
         return classes.map(ClassInfoModel::getPackage)

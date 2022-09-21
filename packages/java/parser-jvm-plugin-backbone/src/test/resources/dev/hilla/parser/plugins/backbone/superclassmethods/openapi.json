@@ -1,0 +1,286 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "PersonEndpoint"
+    }
+  ],
+  "paths": {
+    "/PersonEndpoint/delete": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_delete_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["id"],
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PersonEndpoint/get": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_get_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["id"],
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PersonEndpoint/getNonNullablePage": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_getNonNullablePage_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["pageNumber", "pageSize", "parameters"],
+                "type": "object",
+                "properties": {
+                  "pageSize": {
+                    "type": "number"
+                  },
+                  "pageNumber": {
+                    "type": "number"
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "",
+                  "nullable": true,
+                  "items": {
+                    "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PersonEndpoint/getPage": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_getPage_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["pageNumber", "pageSize"],
+                "type": "object",
+                "properties": {
+                  "pageSize": {
+                    "type": "number"
+                  },
+                  "pageNumber": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PersonEndpoint/size": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_size_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "description": ""
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/PersonEndpoint/update": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_update_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["entity"],
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "nullable": true,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint.Person": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
