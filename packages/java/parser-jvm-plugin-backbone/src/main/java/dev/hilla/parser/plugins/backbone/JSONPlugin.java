@@ -63,10 +63,9 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
                 .concat(ignoredByAnnotation, ignoredByClassAnnotation)
                 .collect(Collectors.toSet());
 
-        // Filter out ignored fields and rebuild dependencies stream for the
-        // node
+        // Filter out ignored fields
         return nodeDependencies
-                .withChildNodes(nodeDependencies.getChildNodes().filter(n -> {
+                .processChildNodes(nodeStream -> nodeStream.filter(n -> {
                     if (n instanceof FieldNode) {
                         var fieldNode = (FieldNode) n;
 
