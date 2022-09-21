@@ -357,5 +357,10 @@ describe('form/Model', () => {
     it('should fail if the EnumModel.createEmptyValue() is used', () => {
       expect(() => EnumModel.createEmptyValue()).to.throw('Cannot create an instance of an abstract class');
     });
+
+    it('should extract value from string', () => {
+      expect(binder.model.fieldEnum[_fromString]('UPDATED')).to.equal(RecordStatus.UPDATED);
+      expect(binder.model.fieldEnum[_fromString]('unknown')).to.be.undefined;
+    });
   });
 });
