@@ -14,10 +14,6 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.models.AnnotatedModel;
-import dev.hilla.parser.models.AnnotationInfoModel;
-import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
@@ -47,8 +43,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
         var schema = typeSignatureNode.getTarget();
         var matcher = Stream
-                .concat(getAnnotationsFromPath(nodePath),
-                        getPackageAnnotations(nodePath))
+                .concat(nodePath.getAnnotations(),
+                        nodePath.getPackageAnnotations())
                 .map(annotation -> annotationsMap.get(annotation.getName()))
                 .filter(Objects::nonNull)
                 .max(Comparator.comparingInt(AnnotationMatcher::getScore))
@@ -79,28 +75,5 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             Collection<AnnotationMatcher> annotations) {
         return annotations.stream().collect(Collectors
                 .toMap(AnnotationMatcher::getName, Function.identity()));
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Stream<Node<?, ?>> getParentNodes(NodePath<?> nodePath) {
-        return Stream.iterate((NodePath) nodePath, NodePath::hasParentNodes,
-                NodePath::getParentPath).map(NodePath::getNode);
-    }
-
-    private Stream<AnnotationInfoModel> getAnnotationsFromPath(
-            NodePath<?> nodePath) {
-        var models = getParentNodes(nodePath)
-                .filter(node -> node.getSource() instanceof AnnotatedModel)
-                .map(node -> (AnnotatedModel) node.getSource());
-        return models.flatMap(AnnotatedModel::getAnnotationsStream);
-    }
-
-    private Stream<AnnotationInfoModel> getPackageAnnotations(
-            NodePath<?> nodePath) {
-        var classes = getParentNodes(nodePath)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource());
-        return classes.map(ClassInfoModel::getPackage)
-                .flatMap(AnnotatedModel::getAnnotationsStream);
     }
 }
