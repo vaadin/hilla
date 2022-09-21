@@ -19,5 +19,7 @@ public class JSONAnnotationsEndpoint {
         public String ignoredA;
 
         public String ignoredB;
+
+        public JsonIgnoredType ignoredType;
     }
 }

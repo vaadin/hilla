@@ -2,19 +2,23 @@ package dev.hilla.parser.plugins.backbone;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
+import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
 import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +27,9 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
     public static final String JSON_IGNORE = JsonIgnore.class.getName();
 
     public static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
+            .getName();
+
+    public static final String JSON_IGNORE_TYPE = JsonIgnoreType.class
             .getName();
 
     @Override
@@ -37,11 +44,10 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        // Find fields annotated with JsonIgnore
-        var ignoredByAnnotation = cls.getFieldsStream()
-                .filter(f -> f.getAnnotations().stream()
-                        .map(AnnotationInfoModel::getName)
-                        .anyMatch(n -> n.equals(JSON_IGNORE)))
+        // Find fields annotated with JsonIgnore or whose type is annotated with
+        // JsonIgnoreType
+        var ignoredByAnnotation = cls.getFieldsStream().filter(
+                field -> isFieldIgnored(field) || isFieldTypeIgnored(field))
                 .map(FieldInfoModel::getName);
 
         // Find the JsonIgnoreProperties and get list of ignored fields
@@ -71,6 +77,23 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
 
                     return true;
                 }));
+    }
+
+    private static boolean isFieldIgnored(FieldInfoModel field) {
+        return field.getAnnotations().stream().map(AnnotationInfoModel::getName)
+                .anyMatch(n -> n.equals(JSON_IGNORE));
+    }
+
+    private static boolean isFieldTypeIgnored(FieldInfoModel field) {
+        SignatureModel type = field.getType();
+
+        if (!(type instanceof ClassRefSignatureModel)) {
+            return false;
+        }
+
+        return ((ClassRefSignatureModel) type).getClassInfo().getAnnotations()
+                .stream().map(AnnotationInfoModel::getName)
+                .anyMatch(n -> n.equals(JSON_IGNORE_TYPE));
     }
 
     @Override
