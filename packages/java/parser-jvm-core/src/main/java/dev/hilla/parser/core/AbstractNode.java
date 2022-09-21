@@ -25,7 +25,7 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        AbstractNode<?, ?> node = (AbstractNode<?, ?>) o;
+        var node = (AbstractNode<?, ?>) o;
         return source.equals(node.getSource());
     }
 
