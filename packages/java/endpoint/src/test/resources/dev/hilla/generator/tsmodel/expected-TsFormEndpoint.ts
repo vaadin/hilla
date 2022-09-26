@@ -201,6 +201,6 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   }
 
   get unknownValue(): ObjectModel<unknown> {
-    return this [_getPropertyModel]('unknownValue', ObjectModel, [true]);
+    return this[_getPropertyModel]('unknownValue', ObjectModel, [true]);
   }
 }
