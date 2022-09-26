@@ -21,6 +21,9 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
+    private static final String[] openAPIFileRelativePath = {
+            "generated-resources", "openapi.json" };
+
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
     @Parameter(readonly = true)
@@ -61,7 +64,7 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
         try {
             var logger = getLog();
             var openAPIFile = Paths.get(project.getBuild().getDirectory(),
-                    "openapi.json");
+                    openAPIFileRelativePath);
 
             logger.debug("Saving OpenAPI file to " + openAPIFile);
 
