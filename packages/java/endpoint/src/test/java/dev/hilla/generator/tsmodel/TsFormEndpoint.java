@@ -147,5 +147,6 @@ public class TsFormEndpoint {
         Map<String, List<String>> mapWithList;
         Map<List<String>, Map<String, List<MyEntity>>> complexMap;
         List<List<Map<String, List<String>>>> nestedArrays;
+        Object unknownValue;
     }
 }
