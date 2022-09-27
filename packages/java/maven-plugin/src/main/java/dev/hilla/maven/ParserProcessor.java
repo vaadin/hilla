@@ -18,7 +18,8 @@ import org.apache.maven.project.MavenProject;
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.core.PluginManager;
-import dev.hilla.parser.utils.OpenAPIPrinter;
+
+import io.swagger.v3.oas.models.OpenAPI;
 
 final class ParserProcessor {
     private final Log logger;
@@ -76,27 +77,16 @@ final class ParserProcessor {
         return this;
     }
 
-    public String process() {
+    public OpenAPI process() {
         var builder = new ParserConfig.Builder().classPath(classPath)
                 .endpointAnnotation(endpointAnnotationName);
 
         preparePlugins(builder);
         prepareOpenAPIBase(builder);
 
-        try {
-            logger.debug("Starting JVM Parser");
+        logger.debug("Starting JVM Parser");
 
-            var openAPI = new Parser(builder.finish()).execute();
-            var openAPIJSONString = new OpenAPIPrinter().writeAsString(openAPI);
-
-            logger.debug("OpenAPI (JSON): " + openAPIJSONString);
-
-            return openAPIJSONString;
-        } catch (IOException e) {
-            throw new ParserException(
-                    "Failed processing OpenAPI generated from parsed Java code",
-                    e);
-        }
+        return new Parser(builder.finish()).execute();
     }
 
     private void prepareOpenAPIBase(ParserConfig.Builder builder) {

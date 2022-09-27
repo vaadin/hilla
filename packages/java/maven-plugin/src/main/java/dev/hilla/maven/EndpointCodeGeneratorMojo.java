@@ -1,6 +1,8 @@
 package dev.hilla.maven;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -9,12 +11,19 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import dev.hilla.parser.utils.OpenAPIPrinter;
+
+import io.swagger.v3.oas.models.OpenAPI;
+
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
+    private static final String[] openAPIFileRelativePath = {
+            "generated-resources", "openapi.json" };
+
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
     @Parameter(readonly = true)
@@ -27,15 +36,17 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     @Override
     public void execute() throws EndpointCodeGeneratorMojoException {
         var result = parseJavaCode();
+        saveOpenAPI(result);
         generateTypeScriptCode(result);
     }
 
-    private void generateTypeScriptCode(String openAPI)
+    private void generateTypeScriptCode(OpenAPI openAPI)
             throws EndpointCodeGeneratorMojoException {
         var logger = getLog();
         try {
             var executor = new GeneratorProcessor(project, logger,
-                    runNpmInstall).input(openAPI)
+                    runNpmInstall)
+                            .input(new OpenAPIPrinter().writeAsString(openAPI))
                             .verbose(logger.isDebugEnabled());
 
             generator.getOutputDir().ifPresent(executor::outputDir);
@@ -48,7 +59,28 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
         }
     }
 
-    private String parseJavaCode() throws EndpointCodeGeneratorMojoException {
+    private void saveOpenAPI(OpenAPI openAPI)
+            throws EndpointCodeGeneratorMojoException {
+        try {
+            var logger = getLog();
+            var openAPIFile = Paths.get(project.getBuild().getDirectory(),
+                    openAPIFileRelativePath);
+
+            logger.debug("Saving OpenAPI file to " + openAPIFile);
+
+            Files.createDirectories(openAPIFile.getParent());
+
+            Files.write(openAPIFile, new OpenAPIPrinter().pretty()
+                    .writeAsString(openAPI).getBytes());
+
+            logger.debug("OpenAPI file saved");
+        } catch (IOException e) {
+            throw new EndpointCodeGeneratorMojoException(
+                    "Saving OpenAPI file failed", e);
+        }
+    }
+
+    private OpenAPI parseJavaCode() throws EndpointCodeGeneratorMojoException {
         try {
             var executor = new ParserProcessor(project, getLog());
 
