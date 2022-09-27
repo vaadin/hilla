@@ -85,7 +85,7 @@ jobs:
       - name: Save Workspace
         run: |
           tar cf workspace.tar -C ~/ $( \
-            mvn -q \
+            mvn -q -DskipTests \
               -Dexec.executable='echo' \
               -Dexec.args='${project.groupId}:${project.artifactId}' \
               -Dexec.skip='${maven.deploy.skip}' \
