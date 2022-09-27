@@ -70,10 +70,6 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
 
             Files.createDirectories(openAPIFile.getParent());
 
-            if (!Files.exists(openAPIFile)) {
-                Files.createFile(openAPIFile);
-            }
-
             Files.write(openAPIFile, new OpenAPIPrinter().pretty()
                     .writeAsString(openAPI).getBytes());
 
