@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1 } from "@hilla/form";
 import FormAnnotationsModel_1 from "./FormAnnotationsModel";
 import FormArrayTypesModel_1 from "./FormArrayTypesModel";
 import FormDataPrimitivesModel_1 from "./FormDataPrimitivesModel";
@@ -45,6 +45,9 @@ class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityI
     }
     get nonnullTypes(): FormNonnullTypesModel_1 {
         return this[_getPropertyModel_1]("nonnullTypes", FormNonnullTypesModel_1, [true]) as FormNonnullTypesModel_1;
+    }
+    get unknownModel(): ObjectModel_1<unknown> {
+        return this[_getPropertyModel_1]("unknownModel", ObjectModel_1, [true]) as ObjectModel_1<unknown>;
     }
 }
 export default FormEntityModel;

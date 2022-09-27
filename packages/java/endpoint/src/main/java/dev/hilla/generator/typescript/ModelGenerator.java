@@ -25,11 +25,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.jknack.handlebars.Helper;
-import io.swagger.codegen.v3.CodegenProperty;
 
 import dev.hilla.generator.GeneratorUtils;
 import dev.hilla.generator.MainGenerator;
 import dev.hilla.generator.OpenAPIObjectGenerator;
+
+import io.swagger.codegen.v3.CodegenProperty;
 
 class ModelGenerator {
     private ModelGenerator() {
@@ -49,8 +50,7 @@ class ModelGenerator {
         List<String> annotations = (List) property.getVendorExtensions()
                 .get(OpenAPIObjectGenerator.CONSTRAINT_ANNOTATIONS);
         if (annotations != null) {
-            return annotations.stream()
-                    .map(annotation -> String.format("new " + "%s", annotation))
+            return annotations.stream().map(annotation -> "new " + annotation)
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -131,7 +131,7 @@ class ModelGenerator {
         private String prepareModelName(TypeParser.Node node) {
             if (isArray(node)) {
                 return ARRAY_MODEL_NAME;
-            } else if (isObject(node)) {
+            } else if (isObject(node) || isAny(node)) {
                 return OBJECT_MODEL_NAME;
             } else if (isPrimitive(node)) {
                 return getPrimitiveModelName(node);
@@ -194,9 +194,14 @@ class ModelGenerator {
                 node.setName(getPrimitiveModelName(node));
                 visitedNodes.add(node);
                 return node;
+            } else if (isAny(node) && !visitedNodes.contains(node)) {
+                node.setName(OBJECT_MODEL_NAME);
+                node.addNested(new TypeParser.Node(UNKNOWN));
+                visitedNodes.add(node);
+                return node;
             }
 
-            if (!visitedNodes.contains(node)) {
+            if (!visitedNodes.contains(node) && !isUnknown(node)) {
                 node.setName(getOtherModelName(node));
             }
 
@@ -219,6 +224,8 @@ class ModelGenerator {
                 + MainGenerator.MODEL;
         protected static final String OBJECT_MODEL_NAME = "Object"
                 + MainGenerator.MODEL;
+        protected static final String UNKNOWN = "unknown";
+        private static final String ANY = "any";
         private static final Set<String> PRIMITIVES = Collections
                 .unmodifiableSet(new HashSet<>(
                         Arrays.asList("string", "number", "boolean")));
@@ -246,6 +253,14 @@ class ModelGenerator {
 
         protected boolean isPrimitive(TypeParser.Node node) {
             return PRIMITIVES.contains(node.getName());
+        }
+
+        protected boolean isAny(TypeParser.Node node) {
+            return Objects.equals(node.getName(), ANY);
+        }
+
+        protected boolean isUnknown(TypeParser.Node node) {
+            return Objects.equals(node.getName(), UNKNOWN);
         }
     }
 }
