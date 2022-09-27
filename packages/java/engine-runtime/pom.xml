@@ -6,7 +6,7 @@
   <parent>
     <groupId>dev.hilla</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -15,7 +15,7 @@
   <name>Hilla Engine Runtime</name>
 
   <properties>
-    <flow.version>23.2-SNAPSHOT</flow.version>
+    <flow.version>23.3-SNAPSHOT</flow.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
