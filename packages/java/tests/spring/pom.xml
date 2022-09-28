@@ -52,6 +52,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
       <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme</artifactId>
