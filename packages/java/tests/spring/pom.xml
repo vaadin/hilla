@@ -17,8 +17,8 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <vaadin.version>23.3-SNAPSHOT</vaadin.version>
     <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
+    <vaadin.component.version>23.3-SNAPSHOT</vaadin.component.version>
   </properties>
 
   <dependencyManagement>
@@ -51,6 +51,11 @@
         <version>${spring.boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-lumo-theme</artifactId>
+        <version>${vaadin.component.version}</version>
       </dependency>
 
       <dependency>

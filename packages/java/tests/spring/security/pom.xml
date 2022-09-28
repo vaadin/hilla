@@ -18,18 +18,36 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>${vaadin.version}</version>
+            <artifactId>vaadin-testbench-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-testbench</artifactId>
+            <version>${vaadin.component.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-login-testbench</artifactId>
+            <version>${vaadin.component.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-notification-testbench</artifactId>
+            <version>${vaadin.component.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-text-field-testbench</artifactId>
+            <version>${vaadin.component.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
