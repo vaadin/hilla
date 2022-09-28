@@ -18,7 +18,6 @@
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.javadoc.skip>true</maven.javadoc.skip>
     <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
-    <vaadin.component.version>23.3-SNAPSHOT</vaadin.component.version>
   </properties>
 
   <dependencyManagement>
