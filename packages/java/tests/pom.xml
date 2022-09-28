@@ -88,6 +88,11 @@
       <artifactId>vaadin-combo-box-flow</artifactId>
       <version>${vaadin.component.version}</version>
     </dependency>
+      <dependency>
+          <groupId>com.vaadin</groupId>
+          <artifactId>vaadin-custom-field-flow</artifactId>
+          <version>${vaadin.component.version}</version>
+      </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-date-picker-flow</artifactId>
