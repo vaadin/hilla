@@ -49,6 +49,13 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public abstract int getModifiers();
 
+    /**
+     * Returns a zero-based index of the parameter in the method parameter list.
+     * 
+     * @return the index, from 0 to n-1
+     */
+    public abstract int getIndex();
+
     @Override
     public MethodInfoModel getOwner() {
         if (owner == null) {
