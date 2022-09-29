@@ -45,7 +45,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                     }
                   ]
                 }
@@ -69,7 +69,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                       }
                     ]
                   }
@@ -87,7 +87,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                     }
                   ]
                 }
@@ -178,7 +178,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                       }
                     ]
                   }
@@ -210,10 +210,9 @@
                   "parameters": {
                     "type": "object",
                     "additionalProperties": {
-                      "nullable": true,
                       "anyOf": [
                         {
-                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                         }
                       ]
                     },
@@ -233,10 +232,9 @@
                   "type": "array",
                   "nullable": true,
                   "items": {
-                    "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person"
                       }
                     ]
                   }
@@ -250,7 +248,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person": {
+      "dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint$Person": {
         "type": "object",
         "properties": {
           "name": {

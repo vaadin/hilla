@@ -1,10 +1,12 @@
 package dev.hilla.parser.core;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.NamedModel;
 
 public abstract class AbstractNode<S, T> implements Node<S, T> {
@@ -56,10 +58,9 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
             sourceName = ((ClassInfoModel) source).getSimpleName();
         } else if (source instanceof NamedModel) {
             sourceName = ((NamedModel) source).getName();
-        } else {
-            sourceName = source.getClass().getSimpleName();
         }
-        return String.format("%s(%s)",
-                getClass().getSimpleName().replaceAll("Node$", ""), sourceName);
+
+        return getClass().getSimpleName().replaceAll("Node$", "") + "("
+                + sourceName + ")";
     }
 }

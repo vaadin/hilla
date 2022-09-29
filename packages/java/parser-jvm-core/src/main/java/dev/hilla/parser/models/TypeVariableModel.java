@@ -1,8 +1,10 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
+import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Detainted;
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeVariableSignature;
@@ -19,6 +21,25 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 
+    /**
+     * A factory that creates a synthetic pre-resolved type variable model.
+     *
+     * @param typeParameter
+     *            Origin type parameter.
+     * @param annotations
+     *            List of variable annotations.
+     * @return Type variable model instance
+     * @deprecated To be removed once <a href=
+     *             "https://github.com/classgraph/classgraph/issues/706">{@code
+     * TypeVariable.resolve()} </a> is fixed.
+     */
+    @Deprecated
+    public static TypeVariableModel of(
+            @Nonnull TypeParameterModel typeParameter,
+            @Nonnull List<AnnotationInfoModel> annotations) {
+        return new TypeVariableSyntheticModel(typeParameter, annotations);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -32,8 +53,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         var other = (TypeVariableModel) obj;
 
         return getName().equals(other.getName())
-                && getAnnotations().equals(other.getAnnotations())
-                && resolve().equals(other.resolve());
+                && getAnnotations().equals(other.getAnnotations());
     }
 
     @Override
@@ -43,7 +63,8 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), resolve().hashCode());
+        return Objects.hash(getCommonModelClass().getName(), getName(),
+                getAnnotations());
     }
 
     @Override

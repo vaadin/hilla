@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
@@ -25,15 +26,16 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof EndpointNode ||
-            nodeDependencies.getNode() instanceof EndpointExposedNode) {
-            var endpointCls = (ClassInfoModel) nodeDependencies.getNode()
-                    .getSource();
-            var methods = endpointCls.getMethodsStream()
+        var node = nodeDependencies.getNode();
+        if (node instanceof EndpointNode
+                || node instanceof EndpointExposedNode) {
+            var endpointCls = (ClassInfoModel) node.getSource();
+            var methodNodes = endpointCls.getMethodsStream()
                     .filter(MethodInfoModel::isPublic)
                     .<Node<?, ?>> map(MethodNode::of);
-            return nodeDependencies.appendChildNodes(methods);
+            return nodeDependencies.appendChildNodes(methodNodes);
         }
+
         return nodeDependencies;
     }
 
@@ -74,8 +76,8 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var methodName = methodNode.getSource().getName();
 
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
-        rootNode.getTarget()
-            .path(String.format("/%s/%s", endpointName, methodName),
+        rootNode.getTarget().path(
+                String.format("/%s/%s", endpointName, methodName),
                 methodNode.getTarget());
     }
 
@@ -100,6 +102,7 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private Optional<Node<?, ?>> findClosestEndpoint(NodePath<?> nodePath) {
         return nodePath.getParentPath().stream()
-            .filter(n -> n instanceof EndpointNode).findFirst();
+                .<Node<?, ?>> map(NodePath::getNode)
+                .filter(n -> n instanceof EndpointNode).findFirst();
     }
 }

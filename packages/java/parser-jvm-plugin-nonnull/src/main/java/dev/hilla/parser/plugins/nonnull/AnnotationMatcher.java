@@ -14,6 +14,7 @@ public final class AnnotationMatcher {
      */
     public static final AnnotationMatcher DEFAULT = new AnnotationMatcher();
     private final boolean makesNullable;
+    private final boolean makesNonNull;
     private final String name;
     private final int score;
 
@@ -22,14 +23,16 @@ public final class AnnotationMatcher {
      */
     public AnnotationMatcher() {
         this.name = "(default)";
-        this.makesNullable = true;
+        this.makesNullable = false;
+        this.makesNonNull = false;
         this.score = 0;
     }
 
-    public AnnotationMatcher(@Nonnull String name, boolean makesNullable,
+    public AnnotationMatcher(@Nonnull String name, boolean nullable,
             int score) {
         this.name = Objects.requireNonNull(name);
-        this.makesNullable = makesNullable;
+        this.makesNullable = nullable;
+        this.makesNonNull = !nullable;
         this.score = score;
     }
 
@@ -38,7 +41,7 @@ public final class AnnotationMatcher {
      * false if nullable
      */
     public boolean doesMakeNonNull() {
-        return !makesNullable;
+        return makesNonNull;
     }
 
     /**

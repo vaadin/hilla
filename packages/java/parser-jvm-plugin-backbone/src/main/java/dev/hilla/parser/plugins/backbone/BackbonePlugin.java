@@ -8,7 +8,9 @@ public final class BackbonePlugin
 
     public BackbonePlugin() {
         super(new EndpointPlugin(), new EndpointExposedPlugin(),
-            new MethodPlugin(), new MethodParameterPlugin(), new EntityPlugin(),
-            new FieldPlugin(), new TypeSignaturePlugin(), new JSONPlugin());
+                new MethodPlugin(), new MethodParameterPlugin(),
+                new EntityPlugin(), new FieldPlugin(),
+                new TypeSignaturePlugin(), new JSONPlugin(),
+                new TypeParameterPlugin());
     }
 }

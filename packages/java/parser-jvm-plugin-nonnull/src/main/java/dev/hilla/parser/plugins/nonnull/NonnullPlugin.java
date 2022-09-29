@@ -50,7 +50,12 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 .max(Comparator.comparingInt(AnnotationMatcher::getScore))
                 .orElse(AnnotationMatcher.DEFAULT);
 
-        schema.setNullable(matcher.doesMakeNonNull() ? null : true);
+        if (matcher.doesMakeNonNull()) {
+            schema.setNullable(null);
+        } else if (matcher.doesMakeNullable()) {
+            schema.setNullable(true);
+        }
+        // else (default), preserve original nullable flag in schema
     }
 
     @Override

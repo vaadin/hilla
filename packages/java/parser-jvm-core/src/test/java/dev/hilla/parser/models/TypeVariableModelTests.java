@@ -111,6 +111,15 @@ public class TypeVariableModelTests {
         }
     }
 
+    @DisplayName("It should have different hashCode for different scope")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_HaveDifferentHashCodeForTypeParameters(
+            TypeVariableModel reflectionModel, TypeVariableModel sourceModel,
+            String name) {
+        assertEquals(reflectionModel.hashCode(), sourceModel.hashCode());
+    }
+
     static final class Context extends
             AbstractContext<AnnotatedTypeVariable, TypeVariableSignature> {
         private static final Map<String, TypeVariable<?>> parameters = Arrays
@@ -214,6 +223,26 @@ public class TypeVariableModelTests {
         }
 
         static class Bound {
+        }
+
+        <T> Sample(T t) {
+        }
+
+        <T> Sample(T t1, T t2) {
+        }
+
+        <T> void parameterizedMethodFoo(T t) {
+        }
+
+        <T> void parameterizedMethodBar(T t) {
+        }
+
+        static class ParameterizedClassFoo<T> {
+            private T typeVariableField;
+        }
+
+        static class ParameterizedClassBar<T> {
+            private T typeVariableField;
         }
     }
 }
