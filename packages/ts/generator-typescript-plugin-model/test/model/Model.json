@@ -193,6 +193,10 @@
                     "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormNonnullTypes"
                   }
                 ]
+              },
+              "unknownModel": {
+                "type": "object",
+                "nullable": true
               }
             }
           }
