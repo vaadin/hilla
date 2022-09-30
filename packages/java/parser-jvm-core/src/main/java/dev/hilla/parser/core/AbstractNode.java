@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.NamedModel;
+import dev.hilla.parser.models.SignatureModel;
 
 public abstract class AbstractNode<S, T> implements Node<S, T> {
     private final S source;
@@ -56,6 +57,8 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
         var sourceName = "";
         if (source instanceof ClassInfoModel) {
             sourceName = ((ClassInfoModel) source).getSimpleName();
+        } else if (source instanceof SignatureModel) {
+            sourceName = source.toString();
         } else if (source instanceof NamedModel) {
             sourceName = ((NamedModel) source).getName();
         }

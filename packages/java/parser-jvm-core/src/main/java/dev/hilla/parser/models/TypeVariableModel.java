@@ -80,5 +80,10 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return typeParameter;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
+
     protected abstract TypeParameterModel prepareResolved();
 }
