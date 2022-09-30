@@ -107,20 +107,4 @@ public final class NodePath<N extends Node<?, ?>> {
         return Stream.<NodePath<?>> iterate(this, NodePath::hasParentNodes,
                 NodePath::getParentPath);
     }
-
-    public Stream<AnnotationInfoModel> getAnnotations() {
-        var models = stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof AnnotatedModel)
-                .map(node -> (AnnotatedModel) node.getSource());
-        return models.flatMap(AnnotatedModel::getAnnotationsStream);
-    }
-
-    public Stream<AnnotationInfoModel> getPackageAnnotations() {
-        var classes = stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource());
-        return classes.map(ClassInfoModel::getPackage)
-                .flatMap(AnnotatedModel::getAnnotationsStream);
-    }
-
 }
