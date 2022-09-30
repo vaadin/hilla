@@ -59,22 +59,22 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         // Apply from current node, if source is annotated
         if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
             annotations = Stream.concat(annotations,
-                ((AnnotatedModel) nodePath.getNode()
-                    .getSource()).getAnnotationsStream());
+                    ((AnnotatedModel) nodePath.getNode().getSource())
+                            .getAnnotationsStream());
         }
 
         // When the parent source is annotated, but the parent target is not a
         // schema (consider MethodNode, MethodParameterNode, and FieldNode),
         // apply annotations from parent node to the current node’s target.
         var parentNode = nodePath.getParentPath().getNode();
-        if ((parentNode.getSource() instanceof AnnotatedModel) &&
-            !(parentNode.getTarget() instanceof Schema)) {
+        if ((parentNode.getSource() instanceof AnnotatedModel)
+                && !(parentNode.getTarget() instanceof Schema)) {
             annotations = Stream.concat(annotations,
-                ((AnnotatedModel) parentNode.getSource()).getAnnotationsStream());
+                    ((AnnotatedModel) parentNode.getSource())
+                            .getAnnotationsStream());
         }
 
-        annotations
-                .map(annotation -> annotationsMap.get(annotation.getName()))
+        annotations.map(annotation -> annotationsMap.get(annotation.getName()))
                 .filter(Objects::nonNull)
                 .max(Comparator.comparingInt(AnnotationMatcher::getScore))
                 .map(AnnotationMatcher::doesMakeNullable).ifPresent(
