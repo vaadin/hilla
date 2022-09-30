@@ -24,6 +24,7 @@ import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import io.swagger.v3.oas.models.media.Schema;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     private Map<String, AnnotationMatcher> annotationsMap = mapByName(
@@ -46,14 +47,33 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
+        if (!(nodePath.getNode().getTarget() instanceof Schema)) {
             return;
         }
 
-        var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
-        var schema = typeSignatureNode.getTarget();
-        Stream.concat(typeSignatureNode.getSource().getAnnotationsStream(),
-                getPackageAnnotationsStream(nodePath))
+        var schema = (Schema<?>) nodePath.getNode().getTarget();
+
+        // Apply annotations from package (NonNullApi)
+        var annotations = getPackageAnnotationsStream(nodePath);
+
+        // Apply from current node, if source is annotated
+        if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
+            annotations = Stream.concat(annotations,
+                ((AnnotatedModel) nodePath.getNode()
+                    .getSource()).getAnnotationsStream());
+        }
+
+        // When the parent source is annotated, but the parent target is not a
+        // schema (consider MethodNode, MethodParameterNode, and FieldNode),
+        // apply annotations from parent node to the current node’s target.
+        var parentNode = nodePath.getParentPath().getNode();
+        if ((parentNode.getSource() instanceof AnnotatedModel) &&
+            !(parentNode.getTarget() instanceof Schema)) {
+            annotations = Stream.concat(annotations,
+                ((AnnotatedModel) parentNode.getSource()).getAnnotationsStream());
+        }
+
+        annotations
                 .map(annotation -> annotationsMap.get(annotation.getName()))
                 .filter(Objects::nonNull)
                 .max(Comparator.comparingInt(AnnotationMatcher::getScore))
