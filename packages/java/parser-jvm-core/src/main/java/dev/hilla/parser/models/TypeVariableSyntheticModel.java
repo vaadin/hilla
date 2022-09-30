@@ -12,6 +12,7 @@ import io.github.classgraph.TypeVariableSignature;
  *
  * @deprecated
  */
+@Deprecated
 final class TypeVariableSyntheticModel extends TypeVariableModel {
     private final TypeParameterModel typeParameter;
     private final List<AnnotationInfoModel> annotations;
