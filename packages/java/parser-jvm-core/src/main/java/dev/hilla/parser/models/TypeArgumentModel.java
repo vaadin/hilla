@@ -70,9 +70,8 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getAssociatedTypesStream()
-            .map(Object::toString)
-            .collect(Collectors.joining(" & "));
+        return getAssociatedTypesStream().map(Object::toString)
+                .collect(Collectors.joining(" & "));
     }
 
     protected abstract List<SignatureModel> prepareAssociatedTypes();

@@ -20,7 +20,7 @@ public class GenericsTest {
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointAnnotation(EndpointExposed.class.getName())
-            .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new BackbonePlugin()).finish();
 
         helper.executeParserWithConfig(config);
     }

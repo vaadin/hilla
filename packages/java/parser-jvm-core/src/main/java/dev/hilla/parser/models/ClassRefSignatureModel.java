@@ -257,10 +257,11 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getClassInfo().getSimpleName() +
-            getTypeArgumentsStream().map(Object::toString).collect(
-                () -> new StringJoiner(", ", "<", ">").setEmptyValue(""),
-                StringJoiner::add, StringJoiner::merge);
+        return getClassInfo().getSimpleName()
+                + getTypeArgumentsStream().map(Object::toString).collect(
+                        () -> new StringJoiner(", ", "<", ">")
+                                .setEmptyValue(""),
+                        StringJoiner::add, StringJoiner::merge);
     }
 
     protected abstract List<AnnotationInfoModel> prepareAnnotations();
