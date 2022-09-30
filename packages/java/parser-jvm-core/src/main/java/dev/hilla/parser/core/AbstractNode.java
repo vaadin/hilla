@@ -61,6 +61,8 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
             sourceName = source.toString();
         } else if (source instanceof NamedModel) {
             sourceName = ((NamedModel) source).getName();
+        } else {
+            sourceName = source.getClass().getSimpleName();
         }
 
         return getClass().getSimpleName().replaceAll("Node$", "") + "("
