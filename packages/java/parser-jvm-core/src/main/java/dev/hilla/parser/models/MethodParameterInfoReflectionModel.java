@@ -23,20 +23,6 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
     }
 
     @Override
-    public int getIndex() {
-        var parameters = origin.getDeclaringExecutable().getParameters();
-
-        for (var i = 0; i < parameters.length; i++) {
-            if (parameters[i].equals(origin)) {
-                return i;
-            }
-        }
-
-        throw new IllegalStateException(
-                "The parameter has not been found in the method parameter list");
-    }
-
-    @Override
     public String getName() {
         return origin.getName();
     }
@@ -64,6 +50,20 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
         return processAnnotations(origin.getAnnotations());
+    }
+
+    @Override
+    protected int prepareIndex() {
+        var parameters = origin.getDeclaringExecutable().getParameters();
+
+        for (var i = 0; i < parameters.length; i++) {
+            if (parameters[i].equals(origin)) {
+                return i;
+            }
+        }
+
+        throw new IllegalStateException(
+                "The parameter has not been found in the method parameter list");
     }
 
     @Override
