@@ -27,7 +27,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
      *            Origin type parameter.
      * @param annotations
      *            List of variable annotations.
-     * @return Type variable model instance
+     * @return Type variable model instance.
      * @deprecated To be removed once <a href=
      *             "https://github.com/classgraph/classgraph/issues/706">{@code
      * TypeVariable.resolve()} </a> is fixed.

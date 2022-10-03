@@ -2,9 +2,10 @@ package dev.hilla.parser.models;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * A synthetic pre-resolved TypeVariableModel implementation.
+ * An artificial pre-resolved TypeVariableModel implementation.
  */
 final class TypeVariableArtificialModel extends TypeVariableModel {
     private final TypeParameterModel typeParameter;
@@ -12,8 +13,8 @@ final class TypeVariableArtificialModel extends TypeVariableModel {
 
     TypeVariableArtificialModel(@Nonnull TypeParameterModel typeParameter,
             @Nonnull List<AnnotationInfoModel> annotations) {
-        this.typeParameter = typeParameter;
-        this.annotations = annotations;
+        this.typeParameter = Objects.requireNonNull(typeParameter);
+        this.annotations = Objects.requireNonNull(annotations);
     }
 
     @Override

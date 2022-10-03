@@ -1,6 +1,7 @@
 package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;
@@ -11,6 +12,7 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.ParameterizedModel;
 import dev.hilla.parser.models.SignatureModel;
+import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
@@ -32,26 +34,18 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     @Nonnull
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
-        if (!(node instanceof TypeSignatureNode)) {
+        @Nonnull NodePath<?> parentPath) {
+        if (node instanceof TypeSignatureNode) {
+            return TypeSignatureNode.of(
+                resolveTypeSignature((SignatureModel) node.getSource(),
+                    parentPath));
+        } else if (node instanceof EndpointSignatureNode) {
+            return EndpointSignatureNode.of(
+                resolveTypeSignature((SignatureModel) node.getSource(),
+                    parentPath));
+        } else {
             return node;
         }
-
-        if (node.getSource() instanceof TypeVariableModel) {
-            // Manually pre-resolve type variables to workround the issue
-            // in ClassGraph TypeVariable.resolve().
-            // TODO: remove once
-            // https://github.com/classgraph/classgraph/issues/706 is fixed.
-            var resolvedVariable = resolveTypeVariable(
-                    (TypeVariableModel) node.getSource(), parentPath);
-            return TypeSignatureNode.of(resolvedVariable);
-        } else if (node.getSource() instanceof TypeParameterModel) {
-            var resolvedParameter = resolveTypeParameter(
-                    (TypeParameterModel) node.getSource(), parentPath);
-            return TypeSignatureNode.of(resolvedParameter);
-        }
-
-        return node;
     }
 
     @Nonnull
@@ -60,26 +54,68 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
+    private ClassRefSignatureModel resolveClassRef(
+        ClassRefSignatureModel classRef, NodePath<?> path) {
+        if (classRef.getTypeArguments().isEmpty()) {
+            return classRef;
+        }
+
+        var typeArguments = classRef.getTypeArgumentsStream()
+            .map(typeArgument -> resolveTypeArgument(typeArgument, path))
+            .collect(Collectors.toList());
+        return ClassRefSignatureModel.of(classRef.getClassInfo(), typeArguments,
+            classRef.getAnnotations());
+    }
+
+    private TypeArgumentModel resolveTypeArgument(
+        TypeArgumentModel typeArgument, NodePath<?> path) {
+        if (typeArgument.getAssociatedTypes().isEmpty()) {
+            return typeArgument;
+        }
+
+        var signatures = typeArgument.getAssociatedTypesStream()
+            .map(signature -> resolveTypeSignature(signature, path))
+            .collect(Collectors.toList());
+        return TypeArgumentModel.of(typeArgument.getWildcard(), signatures,
+            typeArgument.getAnnotations());
+    }
+
+    private SignatureModel resolveTypeSignature(SignatureModel signature,
+        NodePath<?> path) {
+        if (signature instanceof ClassRefSignatureModel) {
+            // TODO: remove once
+            // https://github.com/classgraph/classgraph/issues/706 is fixed.
+            return resolveClassRef((ClassRefSignatureModel) signature, path);
+        } else if (signature instanceof TypeVariableModel) {
+            // TODO: remove once
+            // https://github.com/classgraph/classgraph/issues/706 is fixed.
+            return resolveTypeVariable((TypeVariableModel) signature, path);
+        } else if (signature instanceof TypeParameterModel) {
+            return resolveTypeParameter((TypeParameterModel) signature, path);
+        } else {
+            return signature;
+        }
+    }
+
     private TypeVariableModel resolveTypeVariable(
-            TypeVariableModel typeVariable, NodePath<?> path) {
+        TypeVariableModel typeVariable, NodePath<?> path) {
         var node = path.getNode();
-        if (node instanceof MethodParameterNode
-                || node instanceof TypeSignatureNode
-                || node instanceof EndpointSignatureNode) {
+        if (node instanceof MethodParameterNode ||
+            node instanceof TypeSignatureNode ||
+            node instanceof EndpointSignatureNode) {
             return resolveTypeVariable(typeVariable, path.getParentPath());
         }
 
         var parameterStream = Stream.<TypeParameterModel> empty();
         if (node.getSource() instanceof ParameterizedModel) {
-            parameterStream = ((ParameterizedModel) node.getSource())
-                    .getTypeParametersStream();
+            parameterStream = ((ParameterizedModel) node.getSource()).getTypeParametersStream();
         }
 
-        var resolvedTypeVariable = parameterStream
-                .filter(typeParameter -> typeParameter.getName()
-                        .equals(typeVariable.getName()))
-                .findFirst().map(typeParameter -> TypeVariableModel
-                        .of(typeParameter, typeVariable.getAnnotations()));
+        var resolvedTypeVariable = parameterStream.filter(
+            typeParameter -> typeParameter.getName()
+                .equals(typeVariable.getName())).findFirst().map(
+            typeParameter -> TypeVariableModel.of(typeParameter,
+                typeVariable.getAnnotations()));
 
         if (node instanceof MethodNode && resolvedTypeVariable.isEmpty()) {
             // Method has no matching type parameter, so lookup in the class
@@ -90,22 +126,21 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     private SignatureModel resolveTypeParameter(
-            TypeParameterModel typeParameter, NodePath<?> path) {
+        TypeParameterModel typeParameter, NodePath<?> path) {
         var closestEndpointExposedPath = path.stream()
-                .filter(p -> p.getNode() instanceof EndpointExposedNode)
-                .findFirst();
+            .filter(p -> p.getNode() instanceof EndpointExposedNode)
+            .findFirst();
 
         if (closestEndpointExposedPath.isEmpty()) {
             return typeParameter;
         }
 
         var endpointExposedPath = closestEndpointExposedPath.get();
-        var endpointExposedNode = (EndpointExposedNode) endpointExposedPath
-                .getNode();
+        var endpointExposedNode = (EndpointExposedNode) endpointExposedPath.getNode();
         var paramIndex = endpointExposedNode.getSource().getTypeParameters()
-                .indexOf(typeParameter);
-        var classRef = (ClassRefSignatureModel) ((EndpointSignatureNode) endpointExposedPath
-                .getParentPath().getNode()).getSource();
+            .indexOf(typeParameter);
+        var classRef = (ClassRefSignatureModel) ((EndpointSignatureNode) endpointExposedPath.getParentPath()
+            .getNode()).getSource();
         var typeArg = classRef.getTypeArguments().get(paramIndex);
         if (!typeArg.getWildcard().equals(TypeArgument.Wildcard.NONE)) {
             return typeParameter;
@@ -114,14 +149,9 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
         var signature = typeArg.getAssociatedTypes().get(0);
         // Recursively resolve type variables
         if (signature instanceof TypeVariableModel) {
-            // Pre-resolve to workaround TypeVariable.resolve() bug.
-            // TODO: remove call to resolveTypeVariable once
-            // https://github.com/classgraph/classgraph/issues/706 is fixed
-            var typeVar = resolveTypeVariable((TypeVariableModel) signature,
-                    endpointExposedPath.getParentPath());
-            var endpointTypeParameter = typeVar.resolve();
+            var endpointTypeParameter = ((TypeVariableModel) signature).resolve();
             return resolveTypeParameter(endpointTypeParameter,
-                    endpointExposedPath.getParentPath());
+                endpointExposedPath.getParentPath());
         }
 
         return signature;

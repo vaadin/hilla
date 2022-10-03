@@ -29,16 +29,6 @@ final class TypeVariableSourceModel extends TypeVariableModel
 
     @Override
     protected TypeParameterModel prepareResolved() {
-        var typeParameterModel = (TypeParameterModel) null;
-        try {
-            typeParameterModel = TypeParameterModel.of(origin.resolve());
-        } catch (IllegalArgumentException e) {
-            // TODO: remove when
-            // https://github.com/classgraph/classgraph/issues/706 is fixed
-            if (!e.getMessage().equals("Class name is not set")) {
-                throw e;
-            }
-        }
-        return typeParameterModel;
+        return TypeParameterModel.of(origin.resolve());
     }
 }
