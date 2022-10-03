@@ -4,7 +4,6 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Detainted;
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeVariableSignature;
@@ -37,7 +36,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
     public static TypeVariableModel of(
             @Nonnull TypeParameterModel typeParameter,
             @Nonnull List<AnnotationInfoModel> annotations) {
-        return new TypeVariableSyntheticModel(typeParameter, annotations);
+        return new TypeVariableArtificialModel(typeParameter, annotations);
     }
 
     @Override
@@ -64,8 +63,8 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCommonModelClass().getName(), getName(),
-                getAnnotations(), resolve());
+        return getName().hashCode() ^ getAnnotations().hashCode() ^
+            resolve().hashCode();
     }
 
     @Override
