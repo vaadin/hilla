@@ -63,8 +63,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return getName().hashCode() ^ getAnnotations().hashCode() ^
-            resolve().hashCode();
+        return 0x4f76c9f1 ^ getName().hashCode();
     }
 
     @Override
