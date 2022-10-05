@@ -89,6 +89,6 @@ public final class TransferTypesPlugin
 
         var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
         return TypeSignatureNode.of(ClassRefSignatureModel.of(mappedClassInfo,
-            classRef.getTypeArguments(), classRef.getAnnotations()));
+                classRef.getTypeArguments(), classRef.getAnnotations()));
     }
 }

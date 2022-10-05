@@ -27,10 +27,12 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
      * A factory method that creates an artificial type argument from the
      * provided arguments.
      *
-     * @param wildcard Wildcard kind for the type argument.
-     * @param associatedTypes List of types to associate with the type
-     *                        argument.
-     * @param annotations List of type argument annotations.
+     * @param wildcard
+     *            Wildcard kind for the type argument.
+     * @param associatedTypes
+     *            List of types to associate with the type argument.
+     * @param annotations
+     *            List of type argument annotations.
      * @return The type argument.
      * @deprecated To be removed once <a href=
      *             "https://github.com/classgraph/classgraph/issues/706">{@code
@@ -38,10 +40,10 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
      */
     @Deprecated
     public static TypeArgumentModel of(@Nonnull TypeArgument.Wildcard wildcard,
-        @Nonnull List<SignatureModel> associatedTypes,
-        @Nonnull List<AnnotationInfoModel> annotations) {
+            @Nonnull List<SignatureModel> associatedTypes,
+            @Nonnull List<AnnotationInfoModel> annotations) {
         return new TypeArgumentArtificialModel(wildcard, associatedTypes,
-            annotations);
+                annotations);
     }
 
     @Override

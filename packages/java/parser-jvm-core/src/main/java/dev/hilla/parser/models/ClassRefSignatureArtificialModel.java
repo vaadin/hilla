@@ -15,10 +15,9 @@ final class ClassRefSignatureArtificialModel extends ClassRefSignatureModel {
 
     private final List<AnnotationInfoModel> annotations;
 
-    ClassRefSignatureArtificialModel(
-        @Nonnull ClassInfoModel classInfo,
-        @Nonnull List<TypeArgumentModel> typeArguments,
-        @Nonnull List<AnnotationInfoModel> annotations) {
+    ClassRefSignatureArtificialModel(@Nonnull ClassInfoModel classInfo,
+            @Nonnull List<TypeArgumentModel> typeArguments,
+            @Nonnull List<AnnotationInfoModel> annotations) {
         this.classInfo = Objects.requireNonNull(classInfo);
         this.typeArguments = Objects.requireNonNull(typeArguments);
         this.annotations = Objects.requireNonNull(annotations);

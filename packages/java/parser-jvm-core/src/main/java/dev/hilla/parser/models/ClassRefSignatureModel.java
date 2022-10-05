@@ -96,20 +96,23 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
      * A factory method that constructs an artificial class reference signature
      * from the given arguments.
      *
-     * @param classInfo     The referenced class.
-     * @param typeArguments Type arguments to specify in the reference.
-     * @param annotations   Annotations to declare on the reference.
+     * @param classInfo
+     *            The referenced class.
+     * @param typeArguments
+     *            Type arguments to specify in the reference.
+     * @param annotations
+     *            Annotations to declare on the reference.
      * @return A class reference signature.
      * @deprecated To be removed once <a href=
-     * "https://github.com/classgraph/classgraph/issues/706">{@code
+     *             "https://github.com/classgraph/classgraph/issues/706">{@code
      * TypeVariable.resolve()} </a> is fixed.
      */
     @Deprecated
     public static ClassRefSignatureModel of(@Nonnull ClassInfoModel classInfo,
-        @Nonnull List<TypeArgumentModel> typeArguments,
-        @Nonnull List<AnnotationInfoModel> annotations) {
+            @Nonnull List<TypeArgumentModel> typeArguments,
+            @Nonnull List<AnnotationInfoModel> annotations) {
         return new ClassRefSignatureArtificialModel(classInfo, typeArguments,
-            annotations);
+                annotations);
     }
 
     @Override
