@@ -199,4 +199,8 @@ export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEnti
   get nestedArrays(): ArrayModel<ModelValue<ArrayModel<ModelValue<ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>, ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>>, ArrayModel<ModelValue<ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>, ObjectModel<Record<string, ModelValue<ArrayModel<string, StringModel>>>>>> {
     return this[_getPropertyModel]('nestedArrays', ArrayModel, [true, ArrayModel, [true, ObjectModel, [true]]]);
   }
+
+  get unknownValue(): ObjectModel<unknown> {
+    return this[_getPropertyModel]('unknownValue', ObjectModel, [true]);
+  }
 }
