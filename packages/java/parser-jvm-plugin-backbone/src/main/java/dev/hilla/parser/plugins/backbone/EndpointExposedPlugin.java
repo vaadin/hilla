@@ -12,15 +12,10 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
-import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
-import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +26,6 @@ public final class EndpointExposedPlugin
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EndpointExposedNode) {
-            var node = (EndpointExposedNode) nodePath.getNode();
-            var name = node.getSource().getSimpleName();
-            node.setTarget(new Tag().name(name));
-        }
     }
 
     @Override

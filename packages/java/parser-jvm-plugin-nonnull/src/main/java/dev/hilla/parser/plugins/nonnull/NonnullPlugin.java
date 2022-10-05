@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
-import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.NodeDependencies;
@@ -22,7 +21,6 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import io.swagger.v3.oas.models.media.Schema;
 

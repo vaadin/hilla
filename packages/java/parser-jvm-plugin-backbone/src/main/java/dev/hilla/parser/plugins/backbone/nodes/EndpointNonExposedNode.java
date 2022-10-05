@@ -7,14 +7,13 @@ import dev.hilla.parser.models.ClassInfoModel;
 import io.swagger.v3.oas.models.tags.Tag;
 
 public final class EndpointNonExposedNode
-        extends AbstractNode<ClassInfoModel, Tag> {
-    private EndpointNonExposedNode(@Nonnull ClassInfoModel classInfo,
-            @Nonnull Tag schema) {
-        super(classInfo, schema);
+        extends AbstractNode<ClassInfoModel, Void> {
+    private EndpointNonExposedNode(@Nonnull ClassInfoModel classInfo) {
+        super(classInfo, null);
     }
 
     @Nonnull
     public static EndpointNonExposedNode of(@Nonnull ClassInfoModel classInfo) {
-        return new EndpointNonExposedNode(classInfo, new Tag());
+        return new EndpointNonExposedNode(classInfo);
     }
 }

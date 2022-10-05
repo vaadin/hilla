@@ -7,14 +7,13 @@ import dev.hilla.parser.models.SignatureModel;
 import io.swagger.v3.oas.models.PathItem;
 
 public final class EndpointSignatureNode
-        extends AbstractNode<SignatureModel, String> {
-    private EndpointSignatureNode(@Nonnull SignatureModel source,
-            @Nonnull String target) {
-        super(source, target);
+        extends AbstractNode<SignatureModel, Void> {
+    private EndpointSignatureNode(@Nonnull SignatureModel source) {
+        super(source, null);
     }
 
     @Nonnull
     static public EndpointSignatureNode of(@Nonnull SignatureModel source) {
-        return new EndpointSignatureNode(source, "not used");
+        return new EndpointSignatureNode(source);
     }
 }

@@ -15,9 +15,9 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
 
     private T target;
 
-    protected AbstractNode(@Nonnull S value, @Nonnull T schema) {
-        this.source = Objects.requireNonNull(value);
-        this.target = Objects.requireNonNull(schema);
+    protected AbstractNode(@Nonnull S source, T target) {
+        this.source = Objects.requireNonNull(source);
+        this.target = target;
     }
 
     @Override

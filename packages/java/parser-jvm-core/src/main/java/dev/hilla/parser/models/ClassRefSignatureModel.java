@@ -270,11 +270,6 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return getClassInfo().isString();
     }
 
-    // TODO: remove when the cleaner solution is found
-    public void setReference(ClassInfoModel reference) {
-        this.reference = reference;
-    }
-
     @Override
     public String toString() {
         return getClassInfo().getSimpleName()

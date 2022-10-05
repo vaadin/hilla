@@ -1,6 +1,8 @@
 package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -99,16 +101,12 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private TypeVariableModel resolveTypeVariable(
         TypeVariableModel typeVariable, NodePath<?> path) {
-        var node = path.getNode();
-        if (node instanceof MethodParameterNode ||
-            node instanceof TypeSignatureNode ||
-            node instanceof EndpointSignatureNode) {
-            return resolveTypeVariable(typeVariable, path.getParentPath());
-        }
-
         var parameterStream = Stream.<TypeParameterModel> empty();
+        var node = path.getNode();
         if (node.getSource() instanceof ParameterizedModel) {
             parameterStream = ((ParameterizedModel) node.getSource()).getTypeParametersStream();
+        } else if (path.hasParentNodes()) {
+            return resolveTypeVariable(typeVariable, path.getParentPath());
         }
 
         var resolvedTypeVariable = parameterStream.filter(
@@ -127,22 +125,23 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private SignatureModel resolveTypeParameter(
         TypeParameterModel typeParameter, NodePath<?> path) {
-        var closestEndpointExposedPath = path.stream()
-            .filter(p -> p.getNode() instanceof EndpointExposedNode)
+        var closestEndpointSignaturePath =
+            path.stream()
+            .filter(p -> p.getNode() instanceof EndpointSignatureNode)
             .findFirst();
 
-        if (closestEndpointExposedPath.isEmpty()) {
+        if (closestEndpointSignaturePath.isEmpty()) {
             return typeParameter;
         }
 
-        var endpointExposedPath = closestEndpointExposedPath.get();
-        var endpointExposedNode = (EndpointExposedNode) endpointExposedPath.getNode();
-        var paramIndex = endpointExposedNode.getSource().getTypeParameters()
-            .indexOf(typeParameter);
-        var classRef = (ClassRefSignatureModel) ((EndpointSignatureNode) endpointExposedPath.getParentPath()
-            .getNode()).getSource();
+        var endpointSignaturePath = closestEndpointSignaturePath.get();
+        var classRef = (ClassRefSignatureModel) endpointSignaturePath.getNode()
+            .getSource();
+
+        var paramIndex = classRef.getClassInfo().getTypeParameters().indexOf(typeParameter);
         var typeArg = classRef.getTypeArguments().get(paramIndex);
         if (!typeArg.getWildcard().equals(TypeArgument.Wildcard.NONE)) {
+            // TODO: add resolving for wildcard type arguments
             return typeParameter;
         }
 
@@ -150,8 +149,7 @@ public class TypeParameterPlugin extends AbstractPlugin<PluginConfiguration> {
         // Recursively resolve type variables
         if (signature instanceof TypeVariableModel) {
             var endpointTypeParameter = ((TypeVariableModel) signature).resolve();
-            return resolveTypeParameter(endpointTypeParameter,
-                endpointExposedPath.getParentPath());
+            return resolveTypeParameter(endpointTypeParameter, endpointSignaturePath);
         }
 
         return signature;
