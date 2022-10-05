@@ -323,7 +323,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     }
   }
 
-  private *getChildBinderNodes(): Generator<BinderNode<any, AbstractModel<any>>> {
+  private *getChildBinderNodes(): Generator<BinderNode<unknown, AbstractModel<unknown>>> {
     if (this.value === undefined) {
       // Undefined value cannot have child properties and items.
       return;
@@ -338,8 +338,8 @@ export class BinderNode<T, M extends AbstractModel<T>> {
       // from initial `binder.read()` or `binder.clear()` or by using a
       // binder node (e. g., form biding) for a nested field.
       if (this.defaultValue) {
-        for (const key of Object.keys(this.defaultValue)) {
-          const childModel = (this.model as any)[key] as AbstractModel<any>;
+        for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
+          const childModel = getter.call(this.model) as AbstractModel<unknown>;
           if (childModel) {
             yield getBinderNode(childModel);
           }
