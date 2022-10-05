@@ -11,6 +11,6 @@ public final class BackbonePlugin
                 new MethodPlugin(), new MethodParameterPlugin(),
                 new EntityPlugin(), new FieldPlugin(),
                 new TypeSignaturePlugin(), new JSONPlugin(),
-                new TypeParameterPlugin());
+                new FixClassGraphPlugin());
     }
 }
