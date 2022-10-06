@@ -76,8 +76,7 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var methodName = methodNode.getSource().getName();
 
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
-        rootNode.getTarget().path(
-"/" + endpointName + "/" + methodName
+        rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
     }
 
