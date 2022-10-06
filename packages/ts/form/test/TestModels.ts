@@ -216,3 +216,15 @@ export enum RecordStatus {
 export class RecordStatusModel extends EnumModel<typeof RecordStatus> {
   public readonly [_enum] = RecordStatus;
 }
+
+export interface WithPossibleCharList {
+  charList?: string;
+}
+
+export class WithPossibleCharListModel extends ObjectModel<WithPossibleCharList> {
+  public static override createEmptyValue: () => WithPossibleCharList;
+
+  public get charList() {
+    return this[_getPropertyModel]('charList', StringModel, [true]) as StringModel;
+  }
+}

@@ -26,8 +26,12 @@ export function getBinderNode<M extends AbstractModel<any>, T = ModelValue<M>>(m
   return model[_binderNode]!;
 }
 
-interface HasFromString<T> {
+export interface HasFromString<T> {
   [_fromString](value: string): T;
+}
+
+export function hasFromString<T>(model: AbstractModel<T>): model is AbstractModel<T> & HasFromString<T> {
+  return _fromString in model;
 }
 
 export interface HasValue<T> {
@@ -54,6 +58,8 @@ export abstract class AbstractModel<T> {
   public static createEmptyValue(): unknown {
     return undefined;
   }
+
+  public declare readonly ['constructor']: typeof AbstractModel;
 
   public readonly [_parent]: ModelParent<T>;
 
@@ -155,28 +161,35 @@ export abstract class EnumModel<E extends typeof Enum>
 }
 
 export class ObjectModel<T> extends AbstractModel<T> {
-  public static override createEmptyValue() {
-    const modelInstance = new this({ value: undefined }, 'value', false);
-    let obj = {};
-    // Iterate the model class hierarchy up to the ObjectModel, and extract
-    // the property getter names from every prototypes
+  public static *getOwnAndParentGetters<M extends ObjectModel<any>>(
+    model: M,
+  ): Generator<readonly [key: string, getter: () => unknown]> {
     for (
-      let proto = Object.getPrototypeOf(modelInstance);
+      let proto = Object.getPrototypeOf(model);
       proto !== ObjectModel.prototype;
       proto = Object.getPrototypeOf(proto)
     ) {
-      obj = Object.getOwnPropertyNames(proto)
-        .filter((propertyName) => propertyName !== 'constructor')
-        // Initialise the properties in the value object with empty value
-        .reduce((o, propertyName) => {
-          const propertyModel = (modelInstance as any)[propertyName] as AbstractModel<any>;
-          (o as any)[propertyName] = propertyModel[_optional]
-            ? undefined
-            : (propertyModel.constructor as ModelConstructor<any, AbstractModel<any>>).createEmptyValue();
-          return o;
-        }, obj);
+      const descriptors = Object.getOwnPropertyDescriptors(proto);
+      for (const [name, { get }] of Object.entries(descriptors)) {
+        if (get) {
+          yield [name, get];
+        }
+      }
     }
-    return obj;
+  }
+
+  public static override createEmptyValue() {
+    const model = new this({ value: undefined }, 'value', false);
+    const obj: Record<string, unknown> = {};
+
+    // Iterate the model class hierarchy up to the ObjectModel, and extract
+    // the property getter names from every prototypes
+    for (const [key, getter] of this.getOwnAndParentGetters(model)) {
+      const propertyModel = getter.call(model) as AbstractModel<any>;
+      obj[key] = propertyModel[_optional] ? undefined : propertyModel.constructor.createEmptyValue();
+    }
+
+    return obj as unknown;
   }
 
   private [_properties]: { [name in keyof T]?: AbstractModel<T[name]> } = {};
