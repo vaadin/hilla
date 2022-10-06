@@ -66,9 +66,9 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
                 .ifPresent((parameter) -> {
                     if (parameter.getName() == null) {
                         logger.info("Missing endpoint method parameter names"
-                                + "in JVM bytecode, probably because they were not enabled"
-                                + " during compilation. For Java compiler, add the "
-                                + "\"-parameters\" flag to enable those.");
+                                + " in JVM bytecode, probably because they were not enabled"
+                                + " during compilation. For the Java compiler, set the"
+                                + " \"parameters\" flag to true to enable them.");
                     }
                 });
     }

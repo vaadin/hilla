@@ -53,6 +53,20 @@ final class MethodParameterInfoReflectionModel extends MethodParameterInfoModel
     }
 
     @Override
+    protected int prepareIndex() {
+        var parameters = origin.getDeclaringExecutable().getParameters();
+
+        for (var i = 0; i < parameters.length; i++) {
+            if (parameters[i].equals(origin)) {
+                return i;
+            }
+        }
+
+        throw new IllegalStateException(
+                "The parameter has not been found in the method parameter list");
+    }
+
+    @Override
     protected MethodInfoModel prepareOwner() {
         return MethodInfoModel.of(origin.getDeclaringExecutable());
     }

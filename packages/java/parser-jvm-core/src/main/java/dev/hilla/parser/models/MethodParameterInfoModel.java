@@ -11,6 +11,7 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, OwnedModel<MethodInfoModel> {
     private MethodInfoModel owner;
     private SignatureModel type;
+    private Integer index;
 
     public static MethodParameterInfoModel of(
             @Nonnull MethodParameterInfo origin) {
@@ -49,6 +50,19 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public abstract int getModifiers();
 
+    /**
+     * Returns a zero-based index of the parameter in the method parameter list.
+     *
+     * @return the index, from 0 to n-1
+     */
+    public int getIndex() {
+        if (index == null) {
+            index = prepareIndex();
+        }
+
+        return index;
+    }
+
     @Override
     public MethodInfoModel getOwner() {
         if (owner == null) {
@@ -80,6 +94,8 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
     public abstract boolean isMandated();
 
     public abstract boolean isSynthetic();
+
+    protected abstract int prepareIndex();
 
     protected abstract MethodInfoModel prepareOwner();
 

@@ -301,9 +301,7 @@
         <version>3.10.1</version>
         <configuration>
           <encoding>UTF-8</encoding>
-          <compilerArgs>
-            <arg>-parameters</arg>
-          </compilerArgs>
+          <parameters>true</parameters>
         </configuration>
       </plugin>
       <plugin>
