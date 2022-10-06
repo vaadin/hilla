@@ -186,7 +186,7 @@ describe('form/Binder', () => {
       expect(requestUpdateStub).to.be.calledOnce;
     });
 
-    it.only('should update when clearing validation', async () => {
+    it('should update when clearing validation', async () => {
       binder.clear();
       const binderNode = binder.for(binder.model.customer.fullName);
       await binderNode.validate();
