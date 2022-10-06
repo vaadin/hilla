@@ -336,7 +336,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
       // initialised fields. The keys in `defaultValue` are defined for all
       // non-optional fields plus those optional fields whose values were set
       // from initial `binder.read()` or `binder.clear()` or by using a
-      // binder node (e. g., form biding) for a nested field.
+      // binder node (e. g., form binding) for a nested field.
       if (this.defaultValue) {
         for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
           const childModel = getter.call(this.model) as AbstractModel<unknown>;
