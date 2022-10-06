@@ -16,7 +16,15 @@ import {
   Size,
 } from '../src';
 
-import { IdEntity, IdEntityModel, RecordStatus, RecordStatusModel, TestEntity, TestModel } from './TestModels';
+import {
+  IdEntity,
+  IdEntityModel,
+  RecordStatus,
+  RecordStatusModel,
+  WithPossibleCharListModel,
+  TestEntity,
+  TestModel,
+} from './TestModels';
 
 describe('form/Model', () => {
   let binder: Binder<TestEntity, TestModel>;
@@ -361,6 +369,35 @@ describe('form/Model', () => {
     it('should extract value from string', () => {
       expect(binder.model.fieldEnum[_fromString]('UPDATED')).to.equal(RecordStatus.UPDATED);
       expect(binder.model.fieldEnum[_fromString]('unknown')).to.be.undefined;
+    });
+  });
+
+  describe('misc', () => {
+    it('should correctly read for the model with a single optional value', async () => {
+      const withPossibleCharListBinder = new Binder(document.createElement('div'), WithPossibleCharListModel);
+      const charListBinder = withPossibleCharListBinder.for(withPossibleCharListBinder.model.charList);
+
+      charListBinder.addValidator({
+        message: 'error',
+        validate(value: string) {
+          return value.length >= 2 && value.length <= 3;
+        },
+      });
+      withPossibleCharListBinder.read({});
+
+      charListBinder.value = 'a';
+
+      let results = await withPossibleCharListBinder.validate();
+
+      expect(results.length).to.equal(1);
+      expect(results[0].property).to.equal('charList');
+      expect(results[0].message).to.equal('error');
+
+      charListBinder.value = 'aa';
+
+      results = await withPossibleCharListBinder.validate();
+
+      expect(results.length).to.equal(0);
     });
   });
 });
