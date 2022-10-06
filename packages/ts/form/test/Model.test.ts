@@ -24,7 +24,6 @@ import {
   WithPossibleCharListModel,
   TestEntity,
   TestModel,
-  WithPossibleCharList,
 } from './TestModels';
 
 describe('form/Model', () => {
