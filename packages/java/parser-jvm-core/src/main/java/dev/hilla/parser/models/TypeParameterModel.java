@@ -3,6 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -63,6 +64,11 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     @Override
     public boolean isTypeParameter() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
     protected abstract List<SignatureModel> prepareBounds();

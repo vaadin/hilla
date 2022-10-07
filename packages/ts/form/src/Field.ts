@@ -1,6 +1,6 @@
 import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
-import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode } from './Models.js';
+import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
 
 interface FieldBase<T> {
   required: boolean;
@@ -170,6 +170,10 @@ export function getDefaultFieldStrategy<T>(elm: any, model?: AbstractModel<T>): 
   }
 }
 
+function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+  return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
+}
+
 /**
  * Binds a form field component into a model.
  *
@@ -203,13 +207,8 @@ export const field = directive(
 
       const binderNode = getBinderNode(model);
 
-      const convertFieldValue = (fieldValue: any) => {
-        const fromString = (model as any)[_fromString];
-        return typeof fieldValue === 'string' && fromString ? fromString(fieldValue) : fieldValue;
-      };
-
       if (!this.fieldState) {
-        this.fieldState = {
+        const fieldState = {
           name: '',
           value: '',
           required: false,
@@ -220,28 +219,25 @@ export const field = directive(
           strategy: binderNode.binder.getFieldStrategy(element, model),
         };
 
-        const { fieldState } = this;
+        this.fieldState = fieldState;
 
         const updateValueFromElement = () => {
           fieldState.value = fieldState.strategy.value;
-          binderNode.value = convertFieldValue(fieldState.value);
+          binderNode.value = convertFieldValue(model, fieldState.value);
           if (effect !== undefined) {
             effect.call(element, element);
           }
         };
 
-        element.oninput = () => {
-          updateValueFromElement();
-        };
+        element.addEventListener('input', updateValueFromElement);
 
         const changeBlurHandler = () => {
           updateValueFromElement();
           binderNode.visited = true;
         };
-        element.onblur = changeBlurHandler;
-        element.onchange = changeBlurHandler;
 
-        element.checkValidity = () => !fieldState.invalid;
+        element.addEventListener('blur', changeBlurHandler);
+        element.addEventListener('change', changeBlurHandler);
       }
 
       const { fieldState } = this;
@@ -257,7 +253,7 @@ export const field = directive(
       }
 
       const { value } = binderNode;
-      const valueFromField = convertFieldValue(fieldState.value);
+      const valueFromField = convertFieldValue(model, fieldState.value);
       if (value !== valueFromField && !(Number.isNaN(value) && Number.isNaN(valueFromField))) {
         fieldState.value = value;
         fieldState.strategy.value = value;

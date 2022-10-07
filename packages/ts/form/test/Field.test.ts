@@ -3,6 +3,8 @@ import { assert, expect } from '@open-wc/testing';
 import sinon from 'sinon';
 import { LitElement, nothing, render } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
+// TODO: remove when the new version of eslint-config-vaadin is released.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement, query } from 'lit/decorators.js';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test

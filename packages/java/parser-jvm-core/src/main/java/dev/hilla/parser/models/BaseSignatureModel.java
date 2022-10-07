@@ -54,4 +54,9 @@ public abstract class BaseSignatureModel extends AnnotatedAbstractModel
     public boolean isBase() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return getType().toString();
+    }
 }

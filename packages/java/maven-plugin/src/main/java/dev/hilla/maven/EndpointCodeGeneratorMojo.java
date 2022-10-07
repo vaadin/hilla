@@ -87,6 +87,8 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
             parser.getClassPath().ifPresent(executor::classPath);
             parser.getEndpointAnnotation()
                     .ifPresent(executor::endpointAnnotation);
+            parser.getEndpointExposedAnnotation()
+                    .ifPresent(executor::endpointExposedAnnotation);
             parser.getPlugins().ifPresent(executor::plugins);
             parser.getOpenAPIPath().ifPresent(executor::openAPIBase);
 
