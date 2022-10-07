@@ -9,36 +9,15 @@ import javax.annotation.Nonnull;
  * and non-nullable: their name, meaning, and score
  */
 public final class AnnotationMatcher {
-    /**
-     * A default annotation, which corresponds to not having any annotation
-     */
-    public static final AnnotationMatcher DEFAULT = new AnnotationMatcher();
     private final boolean makesNullable;
     private final String name;
     private final int score;
 
-    /**
-     * A default annotation, which corresponds to not having any annotation
-     */
-    public AnnotationMatcher() {
-        this.name = "(default)";
-        this.makesNullable = true;
-        this.score = 0;
-    }
-
-    public AnnotationMatcher(@Nonnull String name, boolean makesNullable,
+    public AnnotationMatcher(@Nonnull String name, boolean nullable,
             int score) {
         this.name = Objects.requireNonNull(name);
-        this.makesNullable = makesNullable;
+        this.makesNullable = nullable;
         this.score = score;
-    }
-
-    /**
-     * Returns true if the annotation makes a member/signature non-nullable,
-     * false if nullable
-     */
-    public boolean doesMakeNonNull() {
-        return !makesNullable;
     }
 
     /**

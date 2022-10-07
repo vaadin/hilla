@@ -99,29 +99,12 @@ public final class NodePath<N extends Node<?, ?>> {
         return String.join("", list);
     }
 
-    <N extends Node<?, ?>> NodePath<N> childPath(@Nonnull N node) {
+    <N extends Node<?, ?>> NodePath<N> withChildNode(@Nonnull N node) {
         return new NodePath<>(node, this);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Stream<Node<?, ?>> getParentNodes() {
-        return Stream.iterate((NodePath) this, NodePath::hasParentNodes,
-                NodePath::getParentPath).map(NodePath::getNode);
+    public Stream<NodePath<?>> stream() {
+        return Stream.<NodePath<?>> iterate(this, NodePath::hasParentNodes,
+                NodePath::getParentPath);
     }
-
-    public Stream<AnnotationInfoModel> getAnnotations() {
-        var models = getParentNodes()
-                .filter(node -> node.getSource() instanceof AnnotatedModel)
-                .map(node -> (AnnotatedModel) node.getSource());
-        return models.flatMap(AnnotatedModel::getAnnotationsStream);
-    }
-
-    public Stream<AnnotationInfoModel> getPackageAnnotations() {
-        var classes = getParentNodes()
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource());
-        return classes.map(ClassInfoModel::getPackage)
-                .flatMap(AnnotatedModel::getAnnotationsStream);
-    }
-
 }

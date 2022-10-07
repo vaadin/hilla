@@ -6,6 +6,7 @@ import java.util.Collections;
 import javax.annotation.Nonnull;
 
 public interface Plugin {
+
     void enter(NodePath<?> nodePath);
 
     void exit(NodePath<?> nodePath);
@@ -20,6 +21,12 @@ public interface Plugin {
 
     default Collection<Class<? extends Plugin>> getRequiredPlugins() {
         return Collections.emptyList();
+    }
+
+    @Nonnull
+    default Node<?, ?> resolve(@Nonnull Node<?, ?> node,
+            @Nonnull NodePath<?> parentPath) {
+        return node;
     }
 
     @Nonnull

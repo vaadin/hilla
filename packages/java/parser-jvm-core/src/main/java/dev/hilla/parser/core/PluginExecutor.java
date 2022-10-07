@@ -82,12 +82,15 @@ public final class PluginExecutor {
             PluginExecutor.this.enqueueExitFirst(getPath());
 
             var reverseChildList = new LinkedList<NodePath<?>>();
-            scanResult.getChildNodes().stream().map(getPath()::childPath)
+            scanResult.getChildNodes().stream()
+                    .map(node -> plugin.resolve(node, getPath()))
+                    .map(getPath()::withChildNode)
                     .forEachOrdered(reverseChildList::addFirst);
             reverseChildList.forEach(PluginExecutor.this::enqueueEnterFirst);
 
             scanResult.getRelatedNodes().stream()
-                    .map(getPath().getRootPath()::childPath)
+                    .map(node -> plugin.resolve(node, getPath().getRootPath()))
+                    .map(getPath().getRootPath()::withChildNode)
                     .forEachOrdered(PluginExecutor.this::enqueueEnterLast);
         }
     }

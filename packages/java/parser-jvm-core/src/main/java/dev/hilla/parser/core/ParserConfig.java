@@ -29,6 +29,7 @@ public final class ParserConfig extends AbstractParserConfig {
             Comparator.comparingInt(Plugin::getOrder));
     private Set<String> classPathElements;
     private String endpointAnnotationName;
+    private String endpointExposedAnnotationName;
     private OpenAPI openAPI;
 
     private ParserConfig() {
@@ -44,6 +45,12 @@ public final class ParserConfig extends AbstractParserConfig {
     @Override
     public String getEndpointAnnotationName() {
         return endpointAnnotationName;
+    }
+
+    @Nonnull
+    @Override
+    public String getEndpointExposedAnnotationName() {
+        return endpointExposedAnnotationName;
     }
 
     @Nonnull
@@ -145,6 +152,26 @@ public final class ParserConfig extends AbstractParserConfig {
         public Builder endpointAnnotation(
                 @Nonnull String annotationQualifiedName) {
             return endpointAnnotation(annotationQualifiedName, true);
+        }
+
+        @Nonnull
+        public Builder endpointExposedAnnotation(
+                @Nonnull String annotationFullyQualifiedName,
+                boolean override) {
+            Objects.requireNonNull(annotationFullyQualifiedName);
+
+            actions.add(config -> {
+                if (override || config.endpointExposedAnnotationName == null) {
+                    config.endpointExposedAnnotationName = annotationFullyQualifiedName;
+                }
+            });
+            return this;
+        }
+
+        @Nonnull
+        public Builder endpointExposedAnnotation(
+                @Nonnull String annotationQualifiedName) {
+            return endpointExposedAnnotation(annotationQualifiedName, true);
         }
 
         public ParserConfig finish() {
