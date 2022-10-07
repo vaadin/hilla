@@ -10,6 +10,8 @@ import {
   EndpointResponseError,
   EndpointValidationError,
   FluxConnection,
+  ForbiddenResponseError,
+  UnauthorizedResponseError,
 } from '../src/index.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import { deleteCookie, setCookie } from '../src/CookieUtils.js';
@@ -390,6 +392,40 @@ describe('ConnectClient', () => {
       expect(thrownError).to.be.instanceOf(EndpointResponseError);
       expect(thrownError).to.have.property('message').that.is.string(body);
       expect(thrownError).to.have.deep.property('response', errorResponse);
+    });
+
+    it('should reject with unauthorized error', async () => {
+      const errorResponse = new Response(null, {
+        status: 401,
+        statusText: 'Unauthorized',
+      });
+      fetchMock.post(`${base}/connect/FooEndpoint/vaadinUnauthResponse`, errorResponse);
+
+      let thrownError;
+      try {
+        await client.call('FooEndpoint', 'vaadinUnauthResponse');
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).to.be.instanceOf(UnauthorizedResponseError);
+      expect(thrownError).to.have.deep.property('status', errorResponse.status);
+    });
+
+    it('should reject with forbidden error', async () => {
+      const errorResponse = new Response(null, {
+        status: 403,
+        statusText: 'Forbidden',
+      });
+      fetchMock.post(`${base}/connect/FooEndpoint/vaadinForbiddenResponse`, errorResponse);
+
+      let thrownError;
+      try {
+        await client.call('FooEndpoint', 'vaadinForbiddenResponse');
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).to.be.instanceOf(ForbiddenResponseError);
+      expect(thrownError).to.have.deep.property('status', errorResponse.status);
     });
 
     it('should reject with extra validation parameters in the exception if response body has the data', async () => {
