@@ -23,6 +23,9 @@ public abstract class AbstractParserConfig {
                 && Objects.equals(getEndpointAnnotationName(),
                         ((AbstractParserConfig) another)
                                 .getEndpointAnnotationName())
+                && Objects.equals(getEndpointExposedAnnotationName(),
+                        ((AbstractParserConfig) another)
+                                .getEndpointExposedAnnotationName())
                 && Objects.equals(getOpenAPI(),
                         ((AbstractParserConfig) another).getOpenAPI())
                 && Objects.equals(getPlugins(),
@@ -36,6 +39,9 @@ public abstract class AbstractParserConfig {
     public abstract String getEndpointAnnotationName();
 
     @Nonnull
+    public abstract String getEndpointExposedAnnotationName();
+
+    @Nonnull
     public abstract OpenAPI getOpenAPI();
 
     @Nonnull
@@ -44,6 +50,6 @@ public abstract class AbstractParserConfig {
     @Override
     public int hashCode() {
         return Objects.hash(getClassPathElements(), getEndpointAnnotationName(),
-                getOpenAPI(), getPlugins());
+                getEndpointExposedAnnotationName(), getOpenAPI(), getPlugins());
     }
 }

@@ -2,10 +2,14 @@ package dev.hilla.parser.plugins.backbone;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.core.NodeDependencies;
@@ -22,44 +26,58 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof EndpointNode) {
-            var endpointCls = (ClassInfoModel) nodeDependencies.getNode()
-                    .getSource();
-            var methods = endpointCls.getMethodsStream()
+        var node = nodeDependencies.getNode();
+        if (node instanceof EndpointNode
+                || node instanceof EndpointExposedNode) {
+            var endpointCls = (ClassInfoModel) node.getSource();
+            var methodNodes = endpointCls.getMethodsStream()
                     .filter(MethodInfoModel::isPublic)
                     .<Node<?, ?>> map(MethodNode::of);
-            return nodeDependencies.appendChildNodes(methods);
+            return nodeDependencies.appendChildNodes(methodNodes);
         }
+
         return nodeDependencies;
     }
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
-        var parentNode = nodePath.getParentPath().getNode();
-        if (node instanceof MethodNode && parentNode instanceof EndpointNode) {
-            var methodNode = (MethodNode) node;
-            var endpointNode = (EndpointNode) parentNode;
-            methodNode.getTarget()
-                    .post(createOperation(endpointNode, methodNode));
+        if (!(nodePath.getNode() instanceof MethodNode)) {
+            return;
         }
+
+        var methodNode = (MethodNode) nodePath.getNode();
+
+        var endpointParent = findClosestEndpoint(nodePath);
+        if (endpointParent.isEmpty()) {
+            return;
+        }
+
+        var endpointNode = (EndpointNode) endpointParent.get();
+
+        methodNode.getTarget().post(createOperation(endpointNode, methodNode));
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        var node = nodePath.getNode();
-        var parentNode = nodePath.getParentPath().getNode();
-        var grandParentNode = nodePath.getParentPath().getParentPath()
-                .getNode();
-        if (node instanceof MethodNode && parentNode instanceof EndpointNode
-                && grandParentNode instanceof RootNode) {
-            var endpointName = ((EndpointNode) parentNode).getTarget()
-                    .getName();
-            var methodName = ((MethodNode) node).getSource().getName();
-            ((RootNode) grandParentNode).getTarget().path(
-                    String.format("/%s/%s", endpointName, methodName),
-                    ((MethodNode) node).getTarget());
+        if (!(nodePath.getNode() instanceof MethodNode)) {
+            return;
         }
+
+        var methodNode = (MethodNode) nodePath.getNode();
+
+        var endpointParent = findClosestEndpoint(nodePath);
+        if (endpointParent.isEmpty()) {
+            return;
+        }
+
+        var endpointNode = (EndpointNode) endpointParent.get();
+
+        var endpointName = endpointNode.getTarget().getName();
+        var methodName = methodNode.getSource().getName();
+
+        var rootNode = (RootNode) nodePath.getRootPath().getNode();
+        rootNode.getTarget().path("/" + endpointName + "/" + methodName,
+                methodNode.getTarget());
     }
 
     private Operation createOperation(EndpointNode endpointNode,
@@ -79,5 +97,11 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     private ApiResponses createResponses() {
         var response = new ApiResponse().description("");
         return new ApiResponses().addApiResponse("200", response);
+    }
+
+    private Optional<Node<?, ?>> findClosestEndpoint(NodePath<?> nodePath) {
+        return nodePath.getParentPath().stream()
+                .<Node<?, ?>> map(NodePath::getNode)
+                .filter(n -> n instanceof EndpointNode).findFirst();
     }
 }

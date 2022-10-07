@@ -11,8 +11,8 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodInfo;
 
-public abstract class MethodInfoModel extends AnnotatedAbstractModel
-        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
+        Model, NamedModel, OwnedModel<ClassInfoModel>, ParameterizedModel {
     private ClassInfoModel owner;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
@@ -103,6 +103,7 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         return resultType;
     }
 
+    @Override
     public List<TypeParameterModel> getTypeParameters() {
         if (typeParameters == null) {
             typeParameters = prepareTypeParameters();
