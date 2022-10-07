@@ -27,6 +27,7 @@ final class ParserProcessor {
     private final MavenProject project;
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
+    private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private String openAPIPath;
 
     public ParserProcessor(MavenProject project, Log logger) {
@@ -62,6 +63,13 @@ final class ParserProcessor {
             @Nonnull String endpointAnnotationName) {
         this.endpointAnnotationName = Objects
                 .requireNonNull(endpointAnnotationName);
+        return this;
+    }
+
+    public ParserProcessor endpointExposedAnnotation(
+            @Nonnull String endpointExposedAnnotationName) {
+        this.endpointExposedAnnotationName = Objects
+                .requireNonNull(endpointExposedAnnotationName);
         return this;
     }
 

@@ -27,6 +27,7 @@ public class ExtendedTest {
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
+                .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new BackbonePlugin()).addPlugin(plugin).finish();
 
         helper.executeParserWithConfig(config);
