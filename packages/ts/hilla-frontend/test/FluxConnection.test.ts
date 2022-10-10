@@ -1,6 +1,7 @@
 import { expect } from '@open-wc/testing';
+import { atmosphere } from 'a-atmosphere-javascript';
 import type { ReactiveController } from 'lit';
-import { FluxConnection } from '../src/FluxConnection';
+import { FluxConnection, State } from '../src/FluxConnection';
 import type {
   AbstractMessage,
   ClientCompleteMessage,
@@ -27,15 +28,15 @@ describe('FluxConnection', () => {
   beforeEach(() => {
     (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
     fluxConnection = new FluxConnection();
-
     const socket = () => (fluxConnection as any).socket;
+    (atmosphere as any).reset();
     fluxConnectionHelper = {
       socket,
       handleMessage(msg) {
-        (fluxConnection as any).handleMessage(msg);
+        socket().fakeEvent('onMessage', { responseBody: JSON.stringify(msg) });
       },
       sentMessage(i) {
-        return socket().sentMessages[i];
+        return JSON.parse(socket().sentMessages[i]);
       },
       nrSentMessages() {
         return socket().sentMessages.length;
@@ -279,48 +280,40 @@ describe('FluxConnection', () => {
     fakeElement.disconnectedCallback();
     expectNoDataRetained(fluxConnection);
   });
-  it('dispatches an active event on socket.io connect', () => {
-    const socket = fluxConnectionHelper.socket();
-    socket.connected = false;
+  it('dispatches an active event on Atmosphere connect', () => {
+    fluxConnection.state = State.INACTIVE;
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
       if (e.detail.active) {
         events += 1;
       }
     });
-    socket.connected = true;
-    socket.emit('connect');
+    fluxConnectionHelper.socket().fakeEvent('onOpen');
     expect(events).to.equal(1);
   });
-  it('dispatches an active event on socket.io reconnect', () => {
-    const socket = fluxConnectionHelper.socket();
-    socket.connected = false;
+  it('dispatches an active event on Atmosphere reconnect', () => {
+    fluxConnection.state = State.INACTIVE;
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
       if (e.detail.active) {
         events += 1;
       }
     });
-    socket.connected = true;
-    socket.emit('connect');
-    socket.connected = false;
-    socket.emit('disconnect');
-    socket.connected = true;
-    socket.emit('connect');
+    fluxConnectionHelper.socket().fakeEvent('onOpen');
+    fluxConnectionHelper.socket().fakeEvent('onClose');
+    fluxConnectionHelper.socket().fakeEvent('onReopen');
     expect(events).to.equal(2);
   });
-  it('dispatches an inactive event on socket.io disconnect', () => {
-    const socket = fluxConnectionHelper.socket();
+  it('dispatches an inactive event on Atmosphere disconnect', () => {
+    fluxConnection.state = State.INACTIVE;
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
       if (!e.detail.active) {
         events += 1;
       }
     });
-    socket.connected = true;
-    socket.emit('connect');
-    socket.connected = false;
-    socket.emit('disconnect');
+    fluxConnectionHelper.socket().fakeEvent('onOpen');
+    fluxConnectionHelper.socket().fakeEvent('onClose');
     expect(events).to.equal(1);
   });
 });

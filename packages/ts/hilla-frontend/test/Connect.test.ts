@@ -2,6 +2,7 @@
 /* tslint:disable: no-unused-expression */
 import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
+import { atmosphere } from 'a-atmosphere-javascript';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
 import {
@@ -602,6 +603,7 @@ describe('ConnectClient', () => {
     beforeEach(() => {
       (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
       client = new ConnectClient();
+      (atmosphere as any).reset();
     });
 
     it('should create a fluxConnection', async () => {

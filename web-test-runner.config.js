@@ -39,7 +39,7 @@ export default {
       inject: {
         importMap: {
           imports: {
-            'socket.io-client': '/mocks/socket.io-client.ts',
+            'a-atmosphere-javascript': '/mocks/atmosphere.ts',
           },
         },
       },
