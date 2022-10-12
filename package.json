@@ -28,6 +28,7 @@
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^23.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@web/dev-server-esbuild": "^0.2.14",
     "@web/dev-server-import-maps": "^0.0.6",

@@ -4,6 +4,11 @@ import { readdir } from 'fs/promises';
 import { URL } from 'url';
 import { importMapsPlugin } from '@web/dev-server-import-maps';
 import { puppeteerLauncher } from '@web/test-runner-puppeteer';
+import { fromRollup } from '@web/dev-server-rollup';
+import rollupCommonjs from '@rollup/plugin-commonjs';
+import {fromRollupWithFix, fixExportNamedExports} from './wdsCommonjsFixes.js';
+
+const commonjs = fromRollupWithFix(rollupCommonjs);
 
 // One of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -44,6 +49,8 @@ export default {
         },
       },
     }),
+    commonjs(),
+    fixExportNamedExports(),
   ],
   browsers: [
     puppeteerLauncher({
