@@ -41,18 +41,20 @@ public class PushConfigurer {
                 new AtmosphereServlet(), "/HILLA/push");
 
         // Override the global mapping set by Flow
-        registration.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH, "/HILLA/push");
+        registration.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH,
+                "/HILLA/push");
         registration.setLoadOnStartup(0);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
     }
 
-    private static class EmbeddedAtmosphereInitializer extends ContainerInitializer
-            implements ServletContextInitializer {
+    private static class EmbeddedAtmosphereInitializer
+            extends ContainerInitializer implements ServletContextInitializer {
 
         @Override
-        public void onStartup(ServletContext servletContext) throws ServletException {
-            onStartup(Collections.<Class<?>>emptySet(), servletContext);
+        public void onStartup(ServletContext servletContext)
+                throws ServletException {
+            onStartup(Collections.<Class<?>> emptySet(), servletContext);
         }
 
     }

@@ -41,8 +41,7 @@ import dev.hilla.push.messages.toclient.AbstractClientMessage;
  */
 @AtmosphereHandlerService(path = "/HILLA/push", broadcaster = SimpleBroadcaster.class, interceptors = {
         AtmosphereResourceLifecycleInterceptor.class,
-        TrackMessageSizeInterceptor.class,
-        SuspendTrackerInterceptor.class })
+        TrackMessageSizeInterceptor.class, SuspendTrackerInterceptor.class })
 @Singleton
 public class PushEndpoint extends AtmosphereHandlerAdapter {
 
@@ -79,22 +78,25 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
     }
 
     private void onMessageRequest(AtmosphereResource resource) {
-        // This is copied from BroadcastOnPostAtmosphereInterceptor but does not use the
-        // broadcaster as the message should only go to this one channel and not all
+        // This is copied from BroadcastOnPostAtmosphereInterceptor but does not
+        // use the
+        // broadcaster as the message should only go to this one channel and not
+        // all
         // push channels
         AtmosphereRequest request = resource.getRequest();
         try {
             Object o = IOUtils.readEntirely(resource);
             if (IOUtils.isBodyEmpty(o)) {
-                getLogger().warn("Received an empty body for push message {}", request);
+                getLogger().warn("Received an empty body for push message {}",
+                        request);
                 return;
             }
 
             String message = o == null ? null : o.toString();
             if (message != null) {
                 Principal p = request.getUserPrincipal();
-                SecurityContextHolder
-                        .setContext(new SecurityContextImpl((Authentication) p));
+                SecurityContextHolder.setContext(
+                        new SecurityContextImpl((Authentication) p));
                 try {
                     onMessage(resource, message);
                 } finally {
@@ -121,26 +123,26 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
      * Called when the client sends a message through the push channel.
      *
      * @param event
-     *                          the Atmosphere resource that received the message
-     * @param messageFromClient the received message
+     *            the Atmosphere resource that received the message
+     * @param messageFromClient
+     *            the received message
      */
-    private void onMessage(AtmosphereResource resource, String messageFromClient) {
+    private void onMessage(AtmosphereResource resource,
+            String messageFromClient) {
         try {
-            AbstractServerMessage message = objectMapper.readValue(
-                    messageFromClient, AbstractServerMessage.class);
+            AbstractServerMessage message = objectMapper
+                    .readValue(messageFromClient, AbstractServerMessage.class);
             if (getLogger().isDebugEnabled()) {
-                getLogger()
-                        .debug("Received push message from the client: "
-                                + message);
+                getLogger().debug(
+                        "Received push message from the client: " + message);
             }
             Consumer<AbstractClientMessage> sender = msg -> {
                 try {
                     if (getLogger().isDebugEnabled()) {
-                        getLogger().debug("Sending push message to the client: "
-                                + msg);
+                        getLogger().debug(
+                                "Sending push message to the client: " + msg);
                     }
-                    resource.write(
-                            objectMapper.writeValueAsString(msg));
+                    resource.write(objectMapper.writeValueAsString(msg));
                 } catch (JsonProcessingException
                         | IllegalArgumentException e1) {
                     getLogger().warn(
@@ -148,11 +150,9 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
                 }
             };
 
-            pushMessageHandler.handleMessage(resource.uuid(), message,
-                    sender);
+            pushMessageHandler.handleMessage(resource.uuid(), message, sender);
         } catch (JsonProcessingException e) {
-            getLogger().warn(
-                    "Unexpected problem when receiving push message",
+            getLogger().warn("Unexpected problem when receiving push message",
                     e);
         }
 
@@ -163,14 +163,15 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
      * connection).
      *
      * @param resource
-     *                 the resource which was connected
+     *            the resource which was connected
      */
     private void onConnect(AtmosphereResource resource) {
         pushMessageHandler.handleBrowserConnect(resource.uuid());
         resource.addEventListener(new DisconnectListener(this));
     }
 
-    private static class DisconnectListener extends AtmosphereResourceEventListenerAdapter {
+    private static class DisconnectListener
+            extends AtmosphereResourceEventListenerAdapter {
 
         private PushEndpoint pushEndpoint;
 
@@ -194,15 +195,15 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
     /**
      * Called when the push channel is disconnected.
      * 
-     * @param event the Atmosphere event
+     * @param event
+     *            the Atmosphere event
      */
     private void onDisconnect(AtmosphereResourceEvent event) {
         pushMessageHandler.handleBrowserDisconnect(event.getResource().uuid());
     }
 
     private void onThrowable(AtmosphereResourceEvent event) {
-        getLogger().error("Exception in push connection",
-                event.throwable());
+        getLogger().error("Exception in push connection", event.throwable());
         onDisconnect(event);
     }
 

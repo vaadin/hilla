@@ -128,9 +128,11 @@ public class PushMessageHandler {
         }
 
         if (fluxSubscriptionInfos.get(connectionId).containsKey(fluxId)) {
-            String msg = "A subscription for flux id " + fluxId + " already exists";
+            String msg = "A subscription for flux id " + fluxId
+                    + " already exists";
             getLogger().error(msg);
-            // This should not send a response with the flux id back as it will then abort the real flux id
+            // This should not send a response with the flux id back as it will
+            // then abort the real flux id
             return;
         }
 
