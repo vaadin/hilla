@@ -9,13 +9,14 @@ import javax.servlet.ServletContext;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
 import org.atmosphere.config.service.AtmosphereHandlerService;
 import org.atmosphere.config.service.Singleton;
+import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListenerAdapter;
 import org.atmosphere.handler.AtmosphereHandlerAdapter;
 import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
-import org.atmosphere.interceptor.BroadcastOnPostAtmosphereInterceptor;
 import org.atmosphere.interceptor.SuspendTrackerInterceptor;
+import org.atmosphere.util.IOUtils;
 import org.atmosphere.util.SimpleBroadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,6 @@ import dev.hilla.push.messages.toclient.AbstractClientMessage;
 @AtmosphereHandlerService(path = "/HILLA/push", broadcaster = SimpleBroadcaster.class, interceptors = {
         AtmosphereResourceLifecycleInterceptor.class,
         TrackMessageSizeInterceptor.class,
-        BroadcastOnPostAtmosphereInterceptor.class,
         SuspendTrackerInterceptor.class })
 @Singleton
 public class PushEndpoint extends AtmosphereHandlerAdapter {
@@ -69,10 +69,40 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
         if (objectMapper == null) {
             autowire(resource.getAtmosphereConfig().getServletContext());
         }
-        if (resource.getRequest().getMethod().equalsIgnoreCase("GET")) {
+        String method = resource.getRequest().getMethod();
+        if (method.equalsIgnoreCase("GET")) {
             onConnect(resource);
+        } else if (method.equalsIgnoreCase("POST")) {
+            onMessageRequest(resource);
         }
         super.onRequest(resource);
+    }
+
+    private void onMessageRequest(AtmosphereResource resource) {
+        AtmosphereRequest request = resource.getRequest();
+        try {
+            Object o = IOUtils.readEntirely(resource);
+            if (IOUtils.isBodyEmpty(o)) {
+                getLogger().warn("Received an empty body for push message {}", request);
+                return;
+            }
+
+            String message = o == null ? null : o.toString();
+            if (message != null) {
+                Principal p = request.getUserPrincipal();
+                SecurityContextHolder
+                        .setContext(new SecurityContextImpl((Authentication) p));
+                try {
+                    onMessage(resource, message);
+                } finally {
+                    SecurityContextHolder.clearContext();
+                }
+            }
+        } catch (IOException e) {
+            getLogger().warn("Unable to read push message {}", request, e);
+            return;
+        }
+
     }
 
     @Override
@@ -81,21 +111,6 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
         super.onStateChange(event);
         if (event.isCancelled() || event.isResumedOnTimeout()) {
             onDisconnect(event);
-        } else if (event.isSuspended()) {
-            String message = event.getMessage() == null ? null : event.getMessage().toString();
-            if (message != null) {
-                Principal p = event.getResource().getRequest().getUserPrincipal();
-                SecurityContextHolder
-                        .setContext(new SecurityContextImpl((Authentication) p));
-                try {
-                    onMessage(event, message);
-                } finally {
-                    SecurityContextHolder.clearContext();
-                }
-
-            } else {
-                getLogger().error("Received null message in push channel");
-            }
         }
     }
 
@@ -103,10 +118,10 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
      * Called when the client sends a message through the push channel.
      *
      * @param event
-     *                          the Atmosphere event
+     *                          the Atmosphere resource that received the message
      * @param messageFromClient the received message
      */
-    private void onMessage(AtmosphereResourceEvent event, String messageFromClient) {
+    private void onMessage(AtmosphereResource resource, String messageFromClient) {
         try {
             AbstractServerMessage message = objectMapper.readValue(
                     messageFromClient, AbstractServerMessage.class);
@@ -121,7 +136,7 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
                         getLogger().debug("Sending push message to the client: "
                                 + msg);
                     }
-                    event.getResource().write(
+                    resource.write(
                             objectMapper.writeValueAsString(msg));
                 } catch (JsonProcessingException
                         | IllegalArgumentException e1) {
@@ -130,7 +145,7 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
                 }
             };
 
-            pushMessageHandler.handleMessage(event.getResource().uuid(), message,
+            pushMessageHandler.handleMessage(resource.uuid(), message,
                     sender);
         } catch (JsonProcessingException e) {
             getLogger().warn(
