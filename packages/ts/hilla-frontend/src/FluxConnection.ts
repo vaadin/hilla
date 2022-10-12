@@ -52,21 +52,21 @@ export class FluxConnection extends EventTarget {
       onMessage: (response: any) => {
         this.handleMessage(JSON.parse(response.responseBody));
       },
-      onopen: (response: any) => {
+      onopen: (_response: any) => {
         if (this.state === State.INACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.sendPendingMessages();
         }
       },
-      onreopen: (response: any) => {
+      onreopen: (_response: any) => {
         if (this.state === State.INACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.sendPendingMessages();
         }
       },
-      onclose: (response: any) => {
+      onclose: (_response: any) => {
         // https://socket.io/docs/v4/client-api/#event-disconnect
         if (this.state === State.ACTIVE) {
           this.state = State.INACTIVE;
@@ -74,7 +74,8 @@ export class FluxConnection extends EventTarget {
         }
       },
       onError: (response: any) => {
-        console.error(response);
+        // eslint-disable-next-line no-console
+        console.error('error in push communication', response);
       },
     };
     this.socket = atmosphere.subscribe!({
