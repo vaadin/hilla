@@ -79,6 +79,9 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
     }
 
     private void onMessageRequest(AtmosphereResource resource) {
+        // This is copied from BroadcastOnPostAtmosphereInterceptor but does not use the
+        // broadcaster as the message should only go to this one channel and not all
+        // push channels
         AtmosphereRequest request = resource.getRequest();
         try {
             Object o = IOUtils.readEntirely(resource);
