@@ -1,6 +1,6 @@
 package dev.hilla;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;

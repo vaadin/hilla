@@ -16,7 +16,7 @@
 
 package dev.hilla.auth;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
