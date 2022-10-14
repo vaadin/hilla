@@ -34,7 +34,7 @@
       <artifactId>spring-data-commons</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
+      <groupId>jakarta.validation</groupId>
       <artifactId>validation-api</artifactId>
     </dependency>
   </dependencies>

@@ -6,8 +6,8 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 
 public class Elements {
 

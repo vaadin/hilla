@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
-    private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "javax.validation.constraints";
+    private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
     public ModelPlugin() {
         super();
