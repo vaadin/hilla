@@ -1,7 +1,12 @@
 import { expect } from '@open-wc/testing';
 import type { ReactiveController } from 'lit';
 import { FluxConnection } from '../src/FluxConnection';
-import type { ClientCompleteMessage, ClientErrorMessage, ClientUpdateMessage } from '../src/FluxMessages';
+import type {
+  AbstractMessage,
+  ClientCompleteMessage,
+  ClientErrorMessage,
+  ClientUpdateMessage,
+} from '../src/FluxMessages';
 
 function expectNoDataRetained(fluxConnectionAny: any) {
   expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
@@ -12,12 +17,30 @@ function expectNoDataRetained(fluxConnectionAny: any) {
 
 describe('FluxConnection', () => {
   let fluxConnection: FluxConnection;
-  let fluxConnectionAny: any;
+  let fluxConnectionHelper: {
+    nrSentMessages(): number;
+    sentMessage(i: number): AbstractMessage;
+    handleMessage(msg: AbstractMessage): unknown;
+    socket: () => any;
+  };
 
   beforeEach(() => {
     (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
     fluxConnection = new FluxConnection();
-    fluxConnectionAny = fluxConnection;
+
+    const socket = () => (fluxConnection as any).socket;
+    fluxConnectionHelper = {
+      socket,
+      handleMessage(msg) {
+        (fluxConnection as any).handleMessage(msg);
+      },
+      sentMessage(i) {
+        return socket().sentMessages[i];
+      },
+      nrSentMessages() {
+        return socket().sentMessages.length;
+      },
+    };
   });
 
   it('should be exported', () => {
@@ -35,19 +58,19 @@ describe('FluxConnection', () => {
 
   it('should establish a websocket connection when using an endpoint', () => {
     fluxConnection.subscribe('MyEndpoint', 'myMethod');
-    expect(fluxConnectionAny.socket).not.to.equal(undefined);
+    expect(fluxConnectionHelper.socket()).not.to.equal(undefined);
   });
 
   it('should reuse the websocket connection for all endpoints', () => {
     fluxConnection.subscribe('MyEndpoint', 'myMethod');
-    const { socket } = fluxConnectionAny;
+    const socket = fluxConnectionHelper.socket();
     fluxConnection.subscribe('OtherEndpoint', 'otherMethod');
-    expect(fluxConnectionAny.socket).to.equal(socket);
+    expect(fluxConnectionHelper.socket()).to.equal(socket);
   });
 
   it('should send a subscribe server message when subscribing', () => {
     fluxConnection.subscribe('MyEndpoint', 'myMethod');
-    expect(fluxConnectionAny.socket.sentMessages[0]).to.eql({
+    expect(fluxConnectionHelper.sentMessage(0)).to.eql({
       '@type': 'subscribe',
       id: '0',
       endpointName: 'MyEndpoint',
@@ -71,7 +94,7 @@ describe('FluxConnection', () => {
       receivedValues.push(value);
     });
     const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
-    fluxConnectionAny.handleMessage(msg);
+    fluxConnectionHelper.handleMessage(msg);
     expect(receivedValues.length).to.equal(1);
     expect(receivedValues[0]).to.eql({ foo: 'bar' });
   });
@@ -82,7 +105,7 @@ describe('FluxConnection', () => {
       completeCalled += 1;
     });
     const msg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
-    fluxConnectionAny.handleMessage(msg);
+    fluxConnectionHelper.handleMessage(msg);
     expect(completeCalled).to.eq(1);
   });
   it('should call onError when receiving a server message', () => {
@@ -92,7 +115,7 @@ describe('FluxConnection', () => {
       errorCalled += 1;
     });
     const msg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'it failed' };
-    fluxConnectionAny.handleMessage(msg);
+    fluxConnectionHelper.handleMessage(msg);
     expect(errorCalled).to.eq(1);
   });
   it('should not deliver messages after completing', () => {
@@ -103,9 +126,9 @@ describe('FluxConnection', () => {
     });
     const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
     const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
-    fluxConnectionAny.handleMessage(completeMsg);
+    fluxConnectionHelper.handleMessage(completeMsg);
     try {
-      fluxConnectionAny.handleMessage(msg);
+      fluxConnectionHelper.handleMessage(msg);
       expect.fail('Should not fail silently');
     } catch (e) {
       // No need to handle the error
@@ -118,8 +141,8 @@ describe('FluxConnection', () => {
       // No need to handle the value
     });
     sub.cancel();
-    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
-    expect(fluxConnectionAny.socket.sentMessages[1]).to.eql({
+    expect(fluxConnectionHelper.nrSentMessages()).to.equal(2);
+    expect(fluxConnectionHelper.sentMessage(1)).to.eql({
       '@type': 'unsubscribe',
       id: '0',
     });
@@ -132,13 +155,13 @@ describe('FluxConnection', () => {
     });
     sub.cancel();
     const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
-    fluxConnectionAny.handleMessage(msg);
+    fluxConnectionHelper.handleMessage(msg);
     expect(onNextCalled).to.equal(0);
   });
   it('should throw an error for messages to unknown subscriptions', () => {
     const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
     try {
-      fluxConnectionAny.handleMessage(msg);
+      fluxConnectionHelper.handleMessage(msg);
       expect.fail('Should have thrown an error');
     } catch (e) {
       // No need to handle the error
@@ -147,7 +170,7 @@ describe('FluxConnection', () => {
   it('should throw an error for flux errors without onError', () => {
     const msg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
     try {
-      fluxConnectionAny.handleMessage(msg);
+      fluxConnectionHelper.handleMessage(msg);
       expect.fail('Should have thrown an error');
     } catch (e) {
       // No need to handle the error
@@ -156,7 +179,7 @@ describe('FluxConnection', () => {
   it('should throw an error for unknown messages', () => {
     const msg: any = { '@type': 'unknown', id: '0' };
     try {
-      fluxConnectionAny.handleMessage(msg);
+      fluxConnectionHelper.handleMessage(msg);
       expect.fail('Should have thrown an error');
     } catch (e) {
       // No need to handle the error
@@ -175,9 +198,9 @@ describe('FluxConnection', () => {
     });
 
     const completeMsg: ClientCompleteMessage = { '@type': 'complete', id: '0' };
-    fluxConnectionAny.handleMessage(completeMsg);
+    fluxConnectionHelper.handleMessage(completeMsg);
 
-    expectNoDataRetained(fluxConnectionAny);
+    expectNoDataRetained(fluxConnection);
   });
   it('clean internal data on error', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -192,9 +215,9 @@ describe('FluxConnection', () => {
     });
 
     const completeMsg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'foo' };
-    fluxConnectionAny.handleMessage(completeMsg);
+    fluxConnectionHelper.handleMessage(completeMsg);
 
-    expectNoDataRetained(fluxConnectionAny);
+    expectNoDataRetained(fluxConnection);
   });
   it('clean internal data on cancel', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -209,7 +232,7 @@ describe('FluxConnection', () => {
     });
     sub.cancel();
 
-    expectNoDataRetained(fluxConnectionAny);
+    expectNoDataRetained(fluxConnection);
   });
   it('should ignore a second cancel call', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -222,12 +245,12 @@ describe('FluxConnection', () => {
     sub.onNext((_value) => {
       // Just need a callback
     });
-    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(1);
+    expect(fluxConnectionHelper.nrSentMessages()).to.equal(1);
 
     sub.cancel();
-    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
+    expect(fluxConnectionHelper.nrSentMessages()).to.equal(2);
     sub.cancel();
-    expect(fluxConnectionAny.socket.sentMessages.length).to.equal(2);
+    expect(fluxConnectionHelper.nrSentMessages()).to.equal(2);
   });
   it('calls cancel when context is deactivated', () => {
     const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
@@ -254,10 +277,10 @@ describe('FluxConnection', () => {
     const fakeElement: any = new FakeElement();
     sub.context(fakeElement);
     fakeElement.disconnectedCallback();
-    expectNoDataRetained(fluxConnectionAny);
+    expectNoDataRetained(fluxConnection);
   });
   it('dispatches an active event on socket.io connect', () => {
-    const { socket } = fluxConnectionAny;
+    const socket = fluxConnectionHelper.socket();
     socket.connected = false;
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
@@ -270,7 +293,7 @@ describe('FluxConnection', () => {
     expect(events).to.equal(1);
   });
   it('dispatches an active event on socket.io reconnect', () => {
-    const { socket } = fluxConnectionAny;
+    const socket = fluxConnectionHelper.socket();
     socket.connected = false;
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
@@ -287,7 +310,7 @@ describe('FluxConnection', () => {
     expect(events).to.equal(2);
   });
   it('dispatches an inactive event on socket.io disconnect', () => {
-    const { socket } = fluxConnectionAny;
+    const socket = fluxConnectionHelper.socket();
     let events = 0;
     fluxConnection.addEventListener('state-changed', (e) => {
       if (!e.detail.active) {
