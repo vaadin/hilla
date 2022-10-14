@@ -3,7 +3,7 @@ package dev.hilla.parser.models;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationParameterValue;
 

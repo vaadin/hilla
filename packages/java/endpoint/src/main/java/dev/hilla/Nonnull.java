@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * Since Typescript Generator works with any annotation with case-insensitive
  * `nonnull` name, this annotation exists only for convenience because the
- * traditional `javax.annotation.Nonnull` annotation is not applicable to type
+ * traditional `jakarta.annotation.Nonnull` annotation is not applicable to type
  * parameters.
  */
 @Documented

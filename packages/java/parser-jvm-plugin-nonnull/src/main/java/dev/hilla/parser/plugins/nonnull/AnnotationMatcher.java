@@ -2,7 +2,7 @@ package dev.hilla.parser.plugins.nonnull;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Describes annotations that make class members and their signatures nullable
@@ -42,7 +42,7 @@ public final class AnnotationMatcher {
     }
 
     /**
-     * Returns the annotation name (e.g. javax.annotation.Nonnull)
+     * Returns the annotation name (e.g. jakarta.annotation.Nonnull)
      */
     public String getName() {
         return name;

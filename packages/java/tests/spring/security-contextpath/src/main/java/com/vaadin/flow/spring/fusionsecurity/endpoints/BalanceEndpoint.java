@@ -1,6 +1,6 @@
 package com.vaadin.flow.spring.fusionsecurity.endpoints;
 
-import javax.annotation.security.PermitAll;
+import jakarta.annotation.security.PermitAll;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;

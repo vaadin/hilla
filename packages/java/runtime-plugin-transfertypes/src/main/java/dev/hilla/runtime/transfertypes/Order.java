@@ -1,6 +1,6 @@
 package dev.hilla.runtime.transfertypes;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.data.domain.Sort.Direction;
