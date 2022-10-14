@@ -5,24 +5,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.hibernate.annotations.Type;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
 @Entity
 public class UserInfo {
 
     @Id
     @GeneratedValue
-    @Type(type = "uuid-char")
     @JsonIgnore
-    private UUID id;
+    private int id;
 
     private String username;
     @JsonIgnore
@@ -46,7 +43,7 @@ public class UserInfo {
         Collections.addAll(this.roles, roles);
     }
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
