@@ -29,7 +29,7 @@ public class SocketIoWebsocketConfigurer implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(engineIoHandler, "/HILLA/push")
+        registry.addHandler(engineIoHandler, "/HILLA/push/", "/HILLA/push")
                 .addInterceptors(engineIoHandler);
     }
 
