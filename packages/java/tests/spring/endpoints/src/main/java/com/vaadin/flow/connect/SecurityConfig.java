@@ -29,7 +29,8 @@ public class SecurityConfig extends VaadinWebSecurity {
         manager.createUser(new User("user", "{noop}user",
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))));
         manager.createUser(new User("admin", "{noop}admin",
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"))));
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
+                        new SimpleGrantedAuthority("ROLE_USER"))));
         return manager;
     }
 }
