@@ -1,5 +1,8 @@
 package dev.hilla.parser.core;
 
+import dev.hilla.parser.models.ClassInfoModel;
+import dev.hilla.parser.models.MethodInfoModel;
+import dev.hilla.parser.models.NamedModel;
 import io.github.classgraph.ClassInfo;
 
 final class ParserUtils {

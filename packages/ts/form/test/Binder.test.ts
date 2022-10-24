@@ -2,6 +2,8 @@
 
 import { assert, expect } from '@open-wc/testing';
 import { LitElement } from 'lit';
+// TODO: remove when the new version of eslint-config-vaadin is released.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 // API to test

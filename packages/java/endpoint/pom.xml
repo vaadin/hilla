@@ -96,15 +96,9 @@
             <artifactId>reactor-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.socket</groupId>
-            <artifactId>socket.io-server</artifactId>
-            <version>4.0.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.json</groupId>
-                    <artifactId>json</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.vaadin.external.atmosphere</groupId>
+            <artifactId>atmosphere-runtime</artifactId>
+            <version>2.7.3.slf4jvaadin4</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.external.google</groupId>

@@ -24,7 +24,7 @@ final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
 
     @Override
     public String getName() {
-        return origin.getName();
+        return origin.getName() == null ? "arg" + getIndex() : origin.getName();
     }
 
     @Override
@@ -50,6 +50,20 @@ final class MethodParameterInfoSourceModel extends MethodParameterInfoModel
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
         return processAnnotations(origin.getAnnotationInfo());
+    }
+
+    @Override
+    protected int prepareIndex() {
+        var parameters = origin.getMethodInfo().getParameterInfo();
+
+        for (var i = 0; i < parameters.length; i++) {
+            if (parameters[i].equals(origin)) {
+                return i;
+            }
+        }
+
+        throw new IllegalStateException(
+                "The parameter has not been found in the method parameter list");
     }
 
     @Override

@@ -1,6 +1,5 @@
-import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import type { ReactiveElement } from 'lit';
-import { io, Socket } from 'socket.io-client';
+import { atmosphere } from 'a-atmosphere-javascript';
 import type { Subscription } from './Connect';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
 import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
@@ -32,8 +31,9 @@ export class FluxConnection extends EventTarget {
   private onCompleteCallbacks = new Map<string, () => void>();
   private onErrorCallbacks = new Map<string, () => void>();
 
-  private socket!: Socket<DefaultEventsMap, DefaultEventsMap>;
+  private socket: any;
   public state: State = State.INACTIVE;
+  private pendingMessages: ServerMessage[] = [];
 
   constructor() {
     super();
@@ -48,27 +48,48 @@ export class FluxConnection extends EventTarget {
 
   private connectWebsocket() {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
-    this.socket = io('/hilla', { path: '/HILLA/push', extraHeaders });
-    this.socket.on('message', (message) => {
-      this.handleMessage(JSON.parse(message));
-    });
-    this.socket.on('disconnect', () => {
-      // https://socket.io/docs/v4/client-api/#event-disconnect
-      if (this.state === State.ACTIVE) {
-        this.state = State.INACTIVE;
-        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-      }
-    });
-    this.socket.on('connect_error', () => {
-      // https://socket.io/docs/v4/client-api/#event-connect_error
-    });
-
-    this.socket.on('connect', () => {
-      // https://socket.io/docs/v4/client-api/#event-connect
-      if (this.state === State.INACTIVE) {
-        this.state = State.ACTIVE;
-        this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-      }
+    const callback = {
+      onMessage: (response: any) => {
+        this.handleMessage(JSON.parse(response.responseBody));
+      },
+      onOpen: (_response: any) => {
+        if (this.state === State.INACTIVE) {
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.sendPendingMessages();
+        }
+      },
+      onReopen: (_response: any) => {
+        if (this.state === State.INACTIVE) {
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.sendPendingMessages();
+        }
+      },
+      onClose: (_response: any) => {
+        // https://socket.io/docs/v4/client-api/#event-disconnect
+        if (this.state === State.ACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+        }
+      },
+      onError: (response: any) => {
+        // eslint-disable-next-line no-console
+        console.error('error in push communication', response);
+      },
+    };
+    this.socket = atmosphere.subscribe!({
+      url: '/HILLA/push',
+      transport: 'websocket',
+      fallbackTransport: 'long-polling',
+      contentType: 'application/json; charset=UTF-8',
+      reconnectInterval: 5000,
+      timeout: -1,
+      maxReconnectOnClose: 10000000,
+      trackMessageLength: true,
+      enableProtocol: true,
+      headers: extraHeaders,
+      ...callback,
     });
   }
 
@@ -109,8 +130,16 @@ export class FluxConnection extends EventTarget {
     this.endpointInfos.delete(id);
   }
 
+  private sendPendingMessages() {
+    this.pendingMessages.forEach((msg) => this.send(msg));
+    this.pendingMessages = [];
+  }
   private send(message: ServerMessage) {
-    this.socket.send(message);
+    if (this.state === State.INACTIVE) {
+      this.pendingMessages.push(message);
+    } else {
+      this.socket.push(JSON.stringify(message));
+    }
   }
 
   /**

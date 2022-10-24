@@ -29,12 +29,12 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        var node = nodeDependencies.getNode();
-        if (!(node.getSource() instanceof ClassRefSignatureModel)) {
+        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
+        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
             return nodeDependencies;
         }
 
-        var ref = (ClassRefSignatureModel) node.getSource();
+        var ref = (ClassRefSignatureModel) signatureNode.getSource();
         if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
             return nodeDependencies;
         }
