@@ -1,15 +1,20 @@
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
+import com.vaadin.flow.spring.security.VaadinWebSecurity;
 
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
+public class SecurityConfig extends VaadinWebSecurity {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -18,13 +23,14 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
         setLoginView(http, "/login");
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-            throws Exception {
-        // Configure users and roles in memory
-        auth.inMemoryAuthentication().withUser("user").password("{noop}user")
-                .roles("USER").and().withUser("admin").password("{noop}admin")
-                .roles("ADMIN", "USER");
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(new User("user", "{noop}user",
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        manager.createUser(new User("admin", "{noop}admin",
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
+                        new SimpleGrantedAuthority("ROLE_USER"))));
+        return manager;
     }
-
 }
