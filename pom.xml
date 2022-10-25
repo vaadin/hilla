@@ -68,6 +68,7 @@
     <testbench.version>8.0.0</testbench.version>
     <jakarta.validation.version>3.0.1</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
+    <jakarta.activation.api.version>2.1.0</jakarta.activation.api.version>
     <hibernate.validator.version>7.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
   </properties>
