@@ -119,6 +119,10 @@
       <id>spring milestones</id>
       <url>https://repo.spring.io/milestone</url>
     </repository>
+    <repository>
+      <id>apache snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots</url>
+  </repository>
   </repositories>
 
   <pluginRepositories>
