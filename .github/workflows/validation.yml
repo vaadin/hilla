@@ -202,6 +202,10 @@ jobs:
         package: ${{ fromJSON(needs.init.outputs.packages-it) }}
         java-version:
             - 17
+        include:
+          - package: spring/endpoints-latest-java
+            java-version: 17
+            hilla-engine: false
 
     steps:
       - name: Checkout Project Code
