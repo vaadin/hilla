@@ -50,7 +50,8 @@ public class SecurityConfig extends VaadinWebSecurity {
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
         http.authorizeRequests().requestMatchers("/public/**").permitAll();
-        http.authorizeRequests().requestMatchers(applyUrlMapping("/")).permitAll();
+        http.authorizeRequests().requestMatchers(applyUrlMapping("/"))
+                .permitAll();
         http.authorizeRequests().requestMatchers(applyUrlMapping("/form"))
                 .permitAll();
         // Admin only access
