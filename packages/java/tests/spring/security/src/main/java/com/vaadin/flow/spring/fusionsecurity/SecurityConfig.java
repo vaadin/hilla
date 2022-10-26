@@ -49,12 +49,12 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
-        http.authorizeRequests().antMatchers("/public/**").permitAll();
-        http.authorizeRequests().antMatchers(applyUrlMapping("/")).permitAll();
-        http.authorizeRequests().antMatchers(applyUrlMapping("/form"))
+        http.authorizeRequests().requestMatchers("/public/**").permitAll();
+        http.authorizeRequests().requestMatchers(applyUrlMapping("/")).permitAll();
+        http.authorizeRequests().requestMatchers(applyUrlMapping("/form"))
                 .permitAll();
         // Admin only access
-        http.authorizeRequests().antMatchers("/admin-only/**")
+        http.authorizeRequests().requestMatchers("/admin-only/**")
                 .hasAnyRole(ROLE_ADMIN);
 
         super.configure(http);
