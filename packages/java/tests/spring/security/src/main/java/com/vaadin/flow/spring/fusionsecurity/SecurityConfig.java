@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
@@ -49,13 +50,13 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
-        http.authorizeRequests().requestMatchers("/public/**").permitAll();
-        http.authorizeRequests().requestMatchers(applyUrlMapping("/"))
+        http.authorizeRequests().requestMatchers(new AntPathRequestMatcher("/public/**")).permitAll();
+        http.authorizeRequests().requestMatchers(new AntPathRequestMatcher(applyUrlMapping("/")))
                 .permitAll();
-        http.authorizeRequests().requestMatchers(applyUrlMapping("/form"))
+        http.authorizeRequests().requestMatchers(new AntPathRequestMatcher(applyUrlMapping("/form")))
                 .permitAll();
         // Admin only access
-        http.authorizeRequests().requestMatchers("/admin-only/**")
+        http.authorizeRequests().requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
                 .hasAnyRole(ROLE_ADMIN);
 
         super.configure(http);
