@@ -15,8 +15,6 @@ public class SecurityConfig {
 
     @Bean(name = "MySecurityFilterChainBean")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // Access to static resources, bypassing Spring security.
-        http.authorizeHttpRequests().requestMatchers("/VAADIN/**").permitAll();
         // Use default spring login form
         http.formLogin();
         // Vaadin already handles csrf.
