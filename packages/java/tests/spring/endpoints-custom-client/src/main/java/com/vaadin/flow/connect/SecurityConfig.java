@@ -1,28 +1,28 @@
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends VaadinWebSecurity {
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean(name = "MySecurityFilterChainBean")
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Access to static resources, bypassing Spring security.
         http.authorizeRequests().requestMatchers("/VAADIN/**").permitAll();
-        super.configure(http);
         // Use default spring login form
         http.formLogin();
         // Vaadin already handles csrf.
         http.csrf().disable();
+        return http.build();
     }
 
     @Bean
