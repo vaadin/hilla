@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -17,7 +16,7 @@ public class SecurityConfig {
     @Bean(name = "MySecurityFilterChainBean")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Access to static resources, bypassing Spring security.
-        http.authorizeRequests().requestMatchers("/VAADIN/**").permitAll();
+        http.authorizeHttpRequests().requestMatchers("/VAADIN/**").permitAll();
         // Use default spring login form
         http.formLogin();
         // Vaadin already handles csrf.
