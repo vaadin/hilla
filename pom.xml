@@ -69,7 +69,7 @@
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
-    <hibernate.validator.version>7.0.2.Final</hibernate.validator.version>
+    <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
   </properties>
 
