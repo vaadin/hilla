@@ -36,7 +36,7 @@ public class SecurityConfig extends VaadinWebSecurity {
         UserDetails admin = User
                 .withUsername("admin")
                 .password("{noop}admin")
-                .roles("ADMIN")
+                .roles("ADMIN", "USER")
                 .build();
         return new InMemoryUserDetailsManager(user, admin);
     }
