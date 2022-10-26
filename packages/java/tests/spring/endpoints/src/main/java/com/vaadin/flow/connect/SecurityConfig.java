@@ -19,7 +19,7 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
-        http.csrf().ignoringAntMatchers("/login", "/HILLA/push");
+        http.csrf().ignoringRequestMatchers("/login", "/HILLA/push");
         setLoginView(http, "/login");
     }
 

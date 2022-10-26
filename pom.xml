@@ -61,12 +61,12 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.3</slf4j.version>
-    <spring.version>6.0.0-M6</spring.version>
-    <spring.boot.version>3.0.0-M5</spring.boot.version>
+    <spring.version>6.0.0-RC2</spring.version>
+    <spring.boot.version>3.0.0-RC1</spring.boot.version>
     <spring.data.version>2.7.3</spring.data.version>
-    <spring.security.version>6.0.0-M7</spring.security.version>
+    <spring.security.version>6.0.0-RC1</spring.security.version>
     <testbench.version>9.0.0.alpha1</testbench.version>
-    <jakarta.validation.version>3.0.1</jakarta.validation.version>
+    <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
     <hibernate.validator.version>7.0.2.Final</hibernate.validator.version>
