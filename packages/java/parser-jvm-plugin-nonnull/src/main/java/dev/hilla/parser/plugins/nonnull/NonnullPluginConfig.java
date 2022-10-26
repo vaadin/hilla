@@ -50,7 +50,7 @@ public class NonnullPluginConfig
                 // Nullable-like annotations get a higher score. This should
                 // only matter when they are used in conjunction with
                 // package-level annotations
-                new AnnotationMatcher("javax.annotation.Nullable", true, 20),
+                new AnnotationMatcher("jakarta.annotation.Nullable", true, 20),
                 new AnnotationMatcher("org.jetbrains.annotations.Nullable",
                         true, 20),
                 new AnnotationMatcher("androidx.annotation.Nullable", true, 20),
@@ -58,7 +58,7 @@ public class NonnullPluginConfig
                         true, 20),
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
-                new AnnotationMatcher("javax.annotation.Nonnull", false, 30),
+                new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
                 new AnnotationMatcher("org.jetbrains.annotations.NotNull",
                         false, 30),
                 new AnnotationMatcher("lombok.NonNull", false, 30),

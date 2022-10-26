@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

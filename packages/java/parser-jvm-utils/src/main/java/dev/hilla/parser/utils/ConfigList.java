@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *   <annotations>
  *       <disableAllDefaults>false</disableAllDefaults>
  *       <disable>
- *           <annotation>javax.annotations.Nonnull</annotation>
+ *           <annotation>jakarta.annotations.Nonnull</annotation>
  *       </disable>
  *       <use>
  *           <annotation>io.github.my.annotations.Nonnull</annotation>

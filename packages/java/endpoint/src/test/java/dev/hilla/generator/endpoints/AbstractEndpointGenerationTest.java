@@ -16,7 +16,7 @@
 
 package dev.hilla.generator.endpoints;
 
-import javax.annotation.security.DenyAll;
+import jakarta.annotation.security.DenyAll;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

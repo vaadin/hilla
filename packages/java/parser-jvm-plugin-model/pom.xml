@@ -56,5 +56,10 @@
       <artifactId>parser-jvm-plugin-backbone</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

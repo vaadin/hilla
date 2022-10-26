@@ -1,27 +1,23 @@
 package com.vaadin.flow.spring.fusionsecurity.data;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Account {
     @Id
     @GeneratedValue
-    @Type(type = "uuid-char")
-    private UUID id;
+    private int id;
 
     @ManyToOne
     private UserInfo owner;
     private BigDecimal balance;
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 

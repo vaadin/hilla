@@ -47,7 +47,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.scm.id>github</project.scm.id>
     <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.149</classgraph.version>
@@ -59,15 +59,18 @@
     <jackson.databind.version>2.13.2.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>23.3-SNAPSHOT</flow.version>
+    <flow.version>24.0-SNAPSHOT</flow.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <spring.version>5.3.23</spring.version>
-    <spring.boot.version>2.7.4</spring.boot.version>
+    <spring.version>6.0.0-M6</spring.version>
+    <spring.boot.version>3.0.0-M5</spring.boot.version>
     <spring.data.version>2.7.3</spring.data.version>
-    <spring.security.version>5.7.3</spring.security.version>
+    <spring.security.version>6.0.0-M7</spring.security.version>
     <testbench.version>8.0.0</testbench.version>
-    <javax.validation.version>2.0.1.Final</javax.validation.version>
-    <hibernate.validator.version>6.2.3.Final</hibernate.validator.version>
+    <jakarta.validation.version>3.0.1</jakarta.validation.version>
+    <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
+    <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
+    <hibernate.validator.version>7.0.2.Final</hibernate.validator.version>
+    <jaxb.version>4.0.1</jaxb.version>
   </properties>
 
   <organization>
@@ -113,6 +116,14 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>spring milestones</id>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
+    <repository>
+      <id>apache snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots</url>
+  </repository>
   </repositories>
 
   <pluginRepositories>
@@ -131,6 +142,10 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring milestones</id>
+      <url>https://repo.spring.io/milestone</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -179,9 +194,9 @@
         <version>${spring.data.version}</version>
       </dependency>
       <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${javax.validation.version}</version>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta.validation.version}</version>
       </dependency>
       <dependency>
         <groupId>one.util</groupId>
@@ -194,9 +209,9 @@
         <version>3.12.0</version>
       </dependency>
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>5.0.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>

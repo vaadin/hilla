@@ -2,7 +2,7 @@ package dev.hilla.maven;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public final class ParserClassPathConfiguration {
     private final String delimiter = ";";

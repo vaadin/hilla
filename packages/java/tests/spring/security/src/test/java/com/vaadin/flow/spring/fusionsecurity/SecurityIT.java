@@ -41,8 +41,9 @@ public class SecurityIT extends ChromeBrowserTest {
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
             return msg.contains(
-                    "/admin-only/secret.txt - Failed to load resource: the "
-                            + "server responded with a status of 403")
+                    "/admin-only/secret.txt - Failed to load resource: the server responded with a status of 403")
+                    || msg.contains(
+                            "/admin-only/secret.txt?continue - Failed to load resource: the server responded with a status of 403")
                     || msg.contains("/connect/") && msg.contains("Failed to "
                             + "load resource: the server responded with "
                             + "a status of 401")
@@ -320,13 +321,26 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertPathShown(String path) {
-        waitUntil(driver -> driver.getCurrentUrl()
-                .equals(getRootURL() + getUrlMappingBasePath() + "/" + path));
+        assertPathShown(path, true);
+    }
+
+    private void assertPathShown(String path, boolean includeUrlMapping) {
+        waitUntil(driver -> {
+            String url = driver.getCurrentUrl();
+            String expected = getRootURL();
+            if (includeUrlMapping) {
+                expected += getUrlMappingBasePath();
+            }
+            expected += "/" + path;
+
+            return url.equals(expected) || url.equals(expected + "?continue");
+        });
     }
 
     protected void assertResourceShown(String path) {
-        waitUntil(driver -> driver.getCurrentUrl()
-                .equals(getRootURL() + "/" + path));
+        // Resources are always context path relative and not Vaadin servlet
+        // path relative
+        assertPathShown(path, false);
     }
 
     protected void loginUser() {

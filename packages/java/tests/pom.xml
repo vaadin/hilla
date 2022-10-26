@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <jetty.version>9.4.37.v20210219</jetty.version>
+    <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
     <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
@@ -42,8 +42,8 @@
   <dependencies>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>

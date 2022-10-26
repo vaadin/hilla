@@ -15,7 +15,7 @@
   <name>Hilla Engine Runtime</name>
 
   <properties>
-    <flow.version>23.3-SNAPSHOT</flow.version>
+    <flow.version>24.0-SNAPSHOT</flow.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 

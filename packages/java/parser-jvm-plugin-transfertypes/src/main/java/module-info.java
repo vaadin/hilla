@@ -5,6 +5,7 @@ module dev.hilla.parser.plugins.transfertypes {
     requires dev.hilla.parser.utils;
     requires dev.hilla.runtime.transfertypes;
     requires jsr305;
+    requires jakarta.annotation;
     requires io.swagger.v3.oas.models;
     requires io.github.classgraph;
 
