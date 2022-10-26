@@ -56,7 +56,7 @@
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
     <jackson.version>2.13.4</jackson.version>
-    <jackson.databind.version>2.13.2.2</jackson.databind.version>
+    <jackson.databind.version>2.13.4.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.0-SNAPSHOT</flow.version>
