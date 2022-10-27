@@ -55,21 +55,21 @@
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
-    <jackson.version>2.13.4</jackson.version>
-    <jackson.databind.version>2.13.2.2</jackson.databind.version>
+    <jackson.version>2.14.0-rc2</jackson.version>
+    <jackson.databind.version>2.14.0-rc2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.3</slf4j.version>
-    <spring.version>6.0.0-M6</spring.version>
-    <spring.boot.version>3.0.0-M5</spring.boot.version>
+    <spring.version>6.0.0-RC2</spring.version>
+    <spring.boot.version>3.0.0-RC1</spring.boot.version>
     <spring.data.version>2.7.3</spring.data.version>
-    <spring.security.version>6.0.0-M7</spring.security.version>
+    <spring.security.version>6.0.0-RC1</spring.security.version>
     <testbench.version>9.0.0.alpha1</testbench.version>
-    <jakarta.validation.version>3.0.1</jakarta.validation.version>
+    <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
-    <hibernate.validator.version>7.0.2.Final</hibernate.validator.version>
+    <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
   </properties>
 

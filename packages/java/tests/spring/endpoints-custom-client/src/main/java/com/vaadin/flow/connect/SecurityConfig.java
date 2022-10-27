@@ -1,36 +1,34 @@
 package com.vaadin.flow.connect;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean(name = "MySecurityFilterChainBean")
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Use default spring login form
         http.formLogin();
         // Vaadin already handles csrf.
         http.csrf().disable();
+        return http.build();
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        // Access to static resources, bypassing Spring security.
-        web.ignoring().antMatchers("/VAADIN/**");
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-            throws Exception {
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService() {
         // Configure users and roles in memory
-        auth.inMemoryAuthentication().withUser("user").password("{noop}user")
-                .roles("USER").and().withUser("admin").password("{noop}admin")
-                .roles("ADMIN", "USER");
+        UserDetails user = User.withUsername("user").password("{noop}user")
+                .roles("USER").build();
+        UserDetails admin = User.withUsername("admin").password("{noop}admin")
+                .roles("ADMIN", "USER").build();
+        return new InMemoryUserDetailsManager(user, admin);
     }
 }
