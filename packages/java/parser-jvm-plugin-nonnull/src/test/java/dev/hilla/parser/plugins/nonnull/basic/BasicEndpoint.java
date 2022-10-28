@@ -11,14 +11,14 @@ public class BasicEndpoint {
         return map;
     }
 
-    @jakarta.annotation.Nonnull
+    @javax.annotation.Nonnull
     public List<@Nonnull String> mixedAnnotations(@Nonnull String parameter) {
         return List.of(parameter);
     }
 
-    @jakarta.annotation.Nonnull
+    @javax.annotation.Nonnull
     public String nonTypeAnnotation(
-            @jakarta.annotation.Nonnull String nonTypeParameter) {
+            @javax.annotation.Nonnull String nonTypeParameter) {
         return nonTypeParameter;
     }
 
@@ -37,10 +37,10 @@ public class BasicEndpoint {
     }
 
     public static class ExtendedNonNullableModel extends NonNullableModel {
-        @jakarta.annotation.Nonnull
+        @javax.annotation.Nonnull
         public List<@Nonnull String> mixedAnnotations;
 
-        @jakarta.annotation.Nonnull
+        @javax.annotation.Nonnull
         private String nonTypeAnnotation;
     }
 

@@ -1,6 +1,6 @@
 package dev.hilla.parser.core.dependency;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 public class DependencyEntityThree {
     private String foo3 = "foo3";

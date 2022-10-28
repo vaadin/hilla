@@ -1,6 +1,6 @@
 package dev.hilla.parser.test.nodes;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.FieldInfoModel;

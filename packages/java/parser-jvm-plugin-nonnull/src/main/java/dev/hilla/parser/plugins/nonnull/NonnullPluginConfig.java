@@ -59,6 +59,7 @@ public class NonnullPluginConfig
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
                 new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
+                new AnnotationMatcher("javax.annotation.Nonnull", false, 30),
                 new AnnotationMatcher("org.jetbrains.annotations.NotNull",
                         false, 30),
                 new AnnotationMatcher("lombok.NonNull", false, 30),

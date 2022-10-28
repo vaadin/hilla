@@ -67,7 +67,7 @@
     <spring.security.version>6.0.0-RC1</spring.security.version>
     <testbench.version>9.0.0.alpha1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
-    <jakarta.annotation.api.version>2.1.0</jakarta.annotation.api.version>
+    <jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
     <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>

@@ -10,7 +10,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import reactor.core.publisher.Flux;

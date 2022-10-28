@@ -2,7 +2,7 @@ package dev.hilla.parser.models;
 
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationEnumValue;
 

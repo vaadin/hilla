@@ -15,7 +15,16 @@
  */
 package dev.hilla.generator.tsmodel;
 
-import jakarta.annotation.Nonnull;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import dev.hilla.Endpoint;
+import dev.hilla.Nonnull;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
@@ -36,15 +45,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import dev.hilla.Endpoint;
 
 @Endpoint
 public class TsFormEndpoint {

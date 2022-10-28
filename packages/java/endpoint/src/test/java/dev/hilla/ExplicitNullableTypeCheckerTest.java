@@ -16,8 +16,10 @@
 
 package dev.hilla;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,15 +31,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.hilla.generator.tsmodel.TsFormEndpoint.Id;
+import javax.annotation.Nonnull;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.lang.Nullable;
 
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import dev.hilla.generator.tsmodel.TsFormEndpoint.Id;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
