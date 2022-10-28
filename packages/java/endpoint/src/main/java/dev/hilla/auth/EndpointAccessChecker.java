@@ -20,10 +20,10 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.function.Function;
 
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;

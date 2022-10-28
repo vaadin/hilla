@@ -1,6 +1,6 @@
 package dev.hilla.runtime.transfertypes;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * A DTO for {@link org.springframework.data.domain.Pageable}.

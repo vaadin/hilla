@@ -16,8 +16,8 @@
 
 package dev.hilla;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

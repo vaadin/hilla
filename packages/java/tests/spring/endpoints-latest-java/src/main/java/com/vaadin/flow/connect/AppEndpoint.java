@@ -1,6 +1,6 @@
 package com.vaadin.flow.connect;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 

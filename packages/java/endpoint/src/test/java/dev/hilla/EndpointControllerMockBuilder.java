@@ -2,7 +2,7 @@ package dev.hilla;
 
 import static org.mockito.Mockito.mock;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.auth.CsrfChecker;

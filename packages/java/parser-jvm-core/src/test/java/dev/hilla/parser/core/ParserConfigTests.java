@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

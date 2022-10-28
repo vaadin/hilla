@@ -2,7 +2,7 @@ package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 
 import java.math.BigDecimal;
 
-import javax.annotation.security.PermitAll;
+import jakarta.annotation.security.PermitAll;
 
 import dev.hilla.Endpoint;
 import com.vaadin.flow.spring.fusionsecurity.service.BankService;

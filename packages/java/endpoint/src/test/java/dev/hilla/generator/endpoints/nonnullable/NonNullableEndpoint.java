@@ -15,7 +15,7 @@
  */
 package dev.hilla.generator.endpoints.nonnullable;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

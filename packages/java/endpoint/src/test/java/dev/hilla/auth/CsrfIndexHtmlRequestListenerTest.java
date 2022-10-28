@@ -16,7 +16,7 @@
 
 package dev.hilla.auth;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.jsoup.nodes.Document;
 import org.junit.Assert;

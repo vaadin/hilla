@@ -1,7 +1,7 @@
 package dev.hilla.auth;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 

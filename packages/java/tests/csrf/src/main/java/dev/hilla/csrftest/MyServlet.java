@@ -1,6 +1,6 @@
 package dev.hilla.csrftest;
 
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 
 import com.vaadin.flow.server.VaadinServlet;
 

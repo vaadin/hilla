@@ -18,7 +18,7 @@ package dev.hilla;
 
 import java.lang.reflect.Method;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.atmosphere.client.TrackMessageSizeInterceptor;
 import org.atmosphere.config.service.AtmosphereHandlerService;
