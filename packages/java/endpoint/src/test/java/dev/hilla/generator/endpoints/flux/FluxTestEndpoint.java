@@ -16,7 +16,7 @@
 package dev.hilla.generator.endpoints.flux;
 
 import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
+import dev.hilla.shared.Nonnull;
 import reactor.core.publisher.Flux;
 
 /**

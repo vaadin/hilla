@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -55,7 +55,7 @@ final class GeneratorProcessor {
     }
 
     public GeneratorProcessor plugins(
-            @Nonnull GeneratorConfiguration.PluginList plugins) {
+            GeneratorConfiguration.@Nonnull PluginList plugins) {
         var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
 
         if (!plugins.isDisableAllDefaults()) {

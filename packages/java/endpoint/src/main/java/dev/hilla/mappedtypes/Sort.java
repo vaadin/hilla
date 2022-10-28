@@ -18,7 +18,7 @@ package dev.hilla.mappedtypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.hilla.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 /**
  * A DTO for {@link org.springframework.data.domain.Sort}.

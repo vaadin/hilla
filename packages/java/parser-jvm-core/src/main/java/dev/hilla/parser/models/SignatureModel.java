@@ -8,7 +8,7 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.TypeVariable;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;

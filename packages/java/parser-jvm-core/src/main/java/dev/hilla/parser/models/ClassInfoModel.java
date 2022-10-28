@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 

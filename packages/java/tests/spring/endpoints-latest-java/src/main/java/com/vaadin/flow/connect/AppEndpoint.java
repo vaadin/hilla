@@ -5,7 +5,7 @@ import jakarta.annotation.Nullable;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 /**
  * Simple Vaadin Connect Service definition.

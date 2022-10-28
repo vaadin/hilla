@@ -17,7 +17,7 @@ package dev.hilla.mappedtypes;
 
 import jakarta.validation.constraints.NotBlank;
 
-import dev.hilla.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;

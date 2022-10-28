@@ -65,7 +65,7 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("androidx.annotation.NonNull", false, 30),
                 new AnnotationMatcher("org.eclipse.jdt.annotation.NonNull",
                         false, 30),
-                new AnnotationMatcher("dev.hilla.Nonnull", false, 30));
+                new AnnotationMatcher("dev.hilla.shared.Nonnull", false, 30));
 
         public Processor(NonnullPluginConfig config) {
             super(config, defaults);

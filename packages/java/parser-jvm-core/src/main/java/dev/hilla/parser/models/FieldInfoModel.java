@@ -3,7 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import io.github.classgraph.FieldInfo;
 

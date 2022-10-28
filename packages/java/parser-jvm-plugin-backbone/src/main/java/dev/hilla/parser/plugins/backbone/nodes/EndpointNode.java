@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.backbone.nodes;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.ClassInfoModel;

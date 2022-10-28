@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeSignature;
@@ -39,7 +39,7 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
      * TypeVariable.resolve()} </a> is fixed.
      */
     @Deprecated
-    public static TypeArgumentModel of(@Nonnull TypeArgument.Wildcard wildcard,
+    public static TypeArgumentModel of(TypeArgument.@Nonnull Wildcard wildcard,
             @Nonnull List<SignatureModel> associatedTypes,
             @Nonnull List<AnnotationInfoModel> annotations) {
         return new TypeArgumentArtificialModel(wildcard, associatedTypes,

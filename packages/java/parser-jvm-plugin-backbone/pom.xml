@@ -27,6 +27,11 @@
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
+      <artifactId>shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
       <artifactId>parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
     </dependency>

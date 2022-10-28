@@ -24,6 +24,11 @@
       <artifactId>jsr305</artifactId>
     </dependency>
     <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
     </dependency>

@@ -3,6 +3,7 @@ module dev.hilla.parser.plugins.model {
     requires dev.hilla.parser.core;
     requires dev.hilla.parser.plugins.backbone;
     requires dev.hilla.parser.utils;
+    requires dev.hilla.shared;
     requires jakarta.annotation;
     requires jsr305;
     requires io.github.classgraph;

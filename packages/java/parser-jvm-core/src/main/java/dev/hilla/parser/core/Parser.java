@@ -2,7 +2,7 @@ package dev.hilla.parser.core;
 
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

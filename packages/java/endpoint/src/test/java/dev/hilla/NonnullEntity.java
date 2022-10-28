@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import dev.hilla.shared.Nonnull;
+
 public class NonnullEntity {
     @Nonnull
     private final List<@Nonnull String> nonNullableField = new ArrayList<>();

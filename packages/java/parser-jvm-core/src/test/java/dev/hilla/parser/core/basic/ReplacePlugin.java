@@ -1,6 +1,6 @@
 package dev.hilla.parser.core.basic;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 import java.util.stream.Stream;
 
 import dev.hilla.parser.core.AbstractPlugin;

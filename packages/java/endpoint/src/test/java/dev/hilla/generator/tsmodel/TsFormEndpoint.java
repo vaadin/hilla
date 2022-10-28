@@ -15,7 +15,7 @@
  */
 package dev.hilla.generator.tsmodel;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;

@@ -2,6 +2,7 @@ module dev.hilla.parser.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires dev.hilla.parser.utils;
+    requires dev.hilla.shared;
     requires io.github.classgraph;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;

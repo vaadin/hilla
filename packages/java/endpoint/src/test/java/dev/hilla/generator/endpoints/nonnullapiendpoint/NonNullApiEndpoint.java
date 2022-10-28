@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.Nullable;
+import dev.hilla.shared.Nullable;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 

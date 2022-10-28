@@ -1,6 +1,6 @@
 package dev.hilla.parser.models;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ final class TypeArgumentArtificialModel extends TypeArgumentModel {
 
     private final List<AnnotationInfoModel> annotations;
 
-    TypeArgumentArtificialModel(@Nonnull TypeArgument.Wildcard wildcard,
+    TypeArgumentArtificialModel(TypeArgument.@Nonnull Wildcard wildcard,
             @Nonnull List<SignatureModel> associatedTypes,
             @Nonnull List<AnnotationInfoModel> annotations) {
         this.wildcard = Objects.requireNonNull(wildcard);

@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.logging.Log;
@@ -79,7 +79,7 @@ final class ParserProcessor {
     }
 
     public ParserProcessor plugins(
-            @Nonnull ParserConfiguration.Plugins plugins) {
+            ParserConfiguration.@Nonnull Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
 
         return this;

@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.backbone;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import java.util.Optional;
 

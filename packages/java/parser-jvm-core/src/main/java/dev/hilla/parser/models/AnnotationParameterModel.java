@@ -3,7 +3,7 @@ package dev.hilla.parser.models;
 import java.util.Map;
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 import io.github.classgraph.AnnotationParameterValue;
 
@@ -17,7 +17,7 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
     }
 
     public static <T> AnnotationParameterModel of(
-            @Nonnull Map.Entry<String, T> origin) {
+            Map.@Nonnull Entry<String, T> origin) {
         return new AnnotationParameterReflectionModel<>(
                 Objects.requireNonNull(origin));
     }

@@ -15,7 +15,7 @@
  */
 package dev.hilla.generator.endpoints.nonnullable;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +54,9 @@ public class NonNullableEndpoint {
         return Collections.emptyMap();
     }
 
-    @dev.hilla.Nonnull
-    public Map<String, @dev.hilla.Nonnull VaadinNonNullableModel> echoVaadinNonNullableMap(
-            @dev.hilla.Nonnull List<@dev.hilla.Nonnull String> nonNullableParameter) {
+    @dev.hilla.shared.Nonnull
+    public Map<String, @dev.hilla.shared.Nonnull VaadinNonNullableModel> echoVaadinNonNullableMap(
+            @dev.hilla.shared.Nonnull List<@dev.hilla.shared.Nonnull String> nonNullableParameter) {
         return Collections.emptyMap();
     }
 
@@ -72,8 +72,8 @@ public class NonNullableEndpoint {
         return "";
     }
 
-    @dev.hilla.Nonnull
-    public Page<@dev.hilla.Nonnull String> returnNonnullMappedType() {
+    @dev.hilla.shared.Nonnull
+    public Page<@dev.hilla.shared.Nonnull String> returnNonnullMappedType() {
         return Mockito.mock(Page.class);
     }
 
@@ -90,12 +90,12 @@ public class NonNullableEndpoint {
     }
 
     public static class VaadinNonNullableModel {
-        @dev.hilla.Nonnull
+        @dev.hilla.shared.Nonnull
         String foo;
-        @dev.hilla.Nonnull
-        List<@dev.hilla.Nonnull Integer> nonNullableList;
-        @dev.hilla.Nonnull
-        Map<String, @dev.hilla.Nonnull String> nonNullableMap;
+        @dev.hilla.shared.Nonnull
+        List<@dev.hilla.shared.Nonnull Integer> nonNullableList;
+        @dev.hilla.shared.Nonnull
+        Map<String, @dev.hilla.shared.Nonnull String> nonNullableMap;
     }
 
     public static class ReturnType {

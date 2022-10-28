@@ -16,8 +16,6 @@
 
 package dev.hilla;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import dev.hilla.shared.Nonnull;
+import dev.hilla.shared.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.hilla.generator.tsmodel.TsFormEndpoint.Id;

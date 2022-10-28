@@ -10,6 +10,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import dev.hilla.shared.Nonnull;
+
 import static org.junit.Assert.assertTrue;
 
 public class NonnullReflectionTest {

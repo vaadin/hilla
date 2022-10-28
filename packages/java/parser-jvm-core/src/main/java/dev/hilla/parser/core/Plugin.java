@@ -3,7 +3,7 @@ package dev.hilla.parser.core;
 import java.util.Collection;
 import java.util.Collections;
 
-import jakarta.annotation.Nonnull;
+import dev.hilla.shared.Nonnull;
 
 public interface Plugin {
 
