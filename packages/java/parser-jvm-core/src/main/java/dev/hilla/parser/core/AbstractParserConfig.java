@@ -3,7 +3,7 @@ package dev.hilla.parser.core;
 import java.util.Objects;
 import java.util.Set;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import io.swagger.v3.oas.models.OpenAPI;
 

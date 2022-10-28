@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 

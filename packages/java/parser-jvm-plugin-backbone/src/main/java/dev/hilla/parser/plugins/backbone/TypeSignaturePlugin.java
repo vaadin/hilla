@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;

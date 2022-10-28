@@ -3,7 +3,7 @@ package dev.hilla.runtime.transfertypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 /**
  * A DTO for {@link org.springframework.data.domain.Sort}.

@@ -15,16 +15,17 @@
  */
 package dev.hilla.generator.endpoints.nonnullable;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import dev.hilla.Endpoint;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
+
+import dev.hilla.Endpoint;
+import dev.hilla.Nonnull;
 
 @Endpoint
 public class NonNullableEndpoint {

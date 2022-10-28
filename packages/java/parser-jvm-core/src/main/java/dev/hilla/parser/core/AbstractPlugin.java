@@ -3,7 +3,7 @@ package dev.hilla.parser.core;
 import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 public abstract class AbstractPlugin<C extends PluginConfiguration>
         implements Plugin {

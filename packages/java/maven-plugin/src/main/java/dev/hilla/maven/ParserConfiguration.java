@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;

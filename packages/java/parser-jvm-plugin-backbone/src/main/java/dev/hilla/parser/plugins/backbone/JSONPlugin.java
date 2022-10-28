@@ -15,7 +15,7 @@ import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
 import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;

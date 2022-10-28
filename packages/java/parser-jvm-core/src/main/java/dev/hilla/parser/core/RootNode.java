@@ -1,6 +1,6 @@
 package dev.hilla.parser.core;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.ScanResult;
 import io.swagger.v3.oas.models.OpenAPI;

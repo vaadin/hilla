@@ -3,7 +3,7 @@ package dev.hilla.parser.core;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
