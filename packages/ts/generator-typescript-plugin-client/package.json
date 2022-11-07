@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-client",
-  "version": "2.0.0-alpha2",
+  "version": "1.1.14",
   "description": "A Hilla TypeScript Generator plugin to generate default client implementation",
   "main": "index.js",
   "type": "module",
@@ -49,14 +49,14 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^2.0.0-alpha2"
+    "@hilla/generator-typescript-core": "^1.1.14"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.0.0-alpha2",
+    "@hilla/generator-typescript-utils": "^1.1.14",
     "typescript": "^4.5.2"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^2.0.0-alpha2",
+    "@hilla/generator-typescript-core": "^1.1.14",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.1",
