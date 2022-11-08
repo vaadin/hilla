@@ -34,16 +34,16 @@
     "@web/test-runner-chrome": "^0.10.2",
     "@web/test-runner-puppeteer": "^0.10.5",
     "concurrently": "^6.2.1",
-    "esbuild": "^0.13.12",
+    "esbuild": "^0.15.10",
     "eslint": "^7.32.0",
     "eslint-config-vaadin": "^0.4.0",
     "eslint-plugin-chai-friendly": "^0.7.2",
     "lerna": "^4.0.0",
-    "lint-staged": "^11.1.2",
-    "meow": "^10.1.1",
+    "lint-staged": "^13.0.3",
+    "meow": "^10.1.5",
     "micromatch": "^4.0.4",
-    "prettier": "^2.3.2",
+    "prettier": "^2.7.1",
     "simple-git-hooks": "^2.6.1",
-    "typescript": "^4.5.2"
+    "typescript": "^4.8.4"
   }
 }
