@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.models.TypeVariableModel;
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class TypeSignatureNode

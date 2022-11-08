@@ -34,6 +34,16 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
 
     @Override
     @Nonnull
+    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
+            @Nonnull NodePath<?> parentPath) {
+        for (var plugin : plugins) {
+            node = plugin.resolve(node, parentPath);
+        }
+        return node;
+    }
+
+    @Override
+    @Nonnull
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         for (var plugin : plugins) {
             nodeDependencies = plugin.scan(nodeDependencies);

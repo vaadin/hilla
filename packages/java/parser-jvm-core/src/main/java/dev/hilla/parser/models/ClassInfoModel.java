@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.ClassInfo;
 
 public abstract class ClassInfoModel extends AnnotatedAbstractModel
-        implements Model, NamedModel, SpecializedModel {
+        implements Model, NamedModel, SpecializedModel, ParameterizedModel {
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
@@ -269,16 +269,13 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return getSuperClass().stream();
     }
 
+    @Override
     public List<TypeParameterModel> getTypeParameters() {
         if (typeParameters == null) {
             typeParameters = prepareTypeParameters();
         }
 
         return typeParameters;
-    }
-
-    public Stream<TypeParameterModel> getTypeParametersStream() {
-        return getTypeParameters().stream();
     }
 
     public int hashCode() {

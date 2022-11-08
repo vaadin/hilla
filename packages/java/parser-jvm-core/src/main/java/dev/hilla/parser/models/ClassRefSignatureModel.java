@@ -6,6 +6,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -88,6 +90,29 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     public static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
         return ClassRefSignatureReflectionModel.Annotated
                 .of(Objects.requireNonNull(origin));
+    }
+
+    /**
+     * A factory method that constructs an artificial class reference signature
+     * from the given arguments.
+     *
+     * @param classInfo
+     *            The referenced class.
+     * @param typeArguments
+     *            Type arguments to specify in the reference.
+     * @param annotations
+     *            Annotations to declare on the reference.
+     * @return A class reference signature.
+     * @deprecated To be removed once <a href=
+     *             "https://github.com/classgraph/classgraph/issues/706">{@code
+     * TypeVariable.resolve()} </a> is fixed.
+     */
+    @Deprecated
+    public static ClassRefSignatureModel of(@Nonnull ClassInfoModel classInfo,
+            @Nonnull List<TypeArgumentModel> typeArguments,
+            @Nonnull List<AnnotationInfoModel> annotations) {
+        return new ClassRefSignatureArtificialModel(classInfo, typeArguments,
+                annotations);
     }
 
     @Override
@@ -248,9 +273,13 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return getClassInfo().isString();
     }
 
-    // TODO: remove when the cleaner solution is found
-    public void setReference(ClassInfoModel reference) {
-        this.reference = reference;
+    @Override
+    public String toString() {
+        return getClassInfo().getSimpleName()
+                + getTypeArgumentsStream().map(Object::toString).collect(
+                        () -> new StringJoiner(", ", "<", ">")
+                                .setEmptyValue(""),
+                        StringJoiner::add, StringJoiner::merge);
     }
 
     protected abstract List<AnnotationInfoModel> prepareAnnotations();

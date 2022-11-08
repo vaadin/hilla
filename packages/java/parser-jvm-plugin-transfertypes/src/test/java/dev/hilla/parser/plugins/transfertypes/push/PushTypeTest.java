@@ -25,6 +25,7 @@ public class PushTypeTest {
         var config = new ParserConfig.Builder()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
+                .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new TransferTypesPlugin())
                 .addPlugin(new BackbonePlugin()).finish();
 

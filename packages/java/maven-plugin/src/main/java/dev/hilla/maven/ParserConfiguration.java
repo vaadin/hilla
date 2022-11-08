@@ -18,6 +18,7 @@ import dev.hilla.parser.utils.ConfigList;
 public final class ParserConfiguration {
     private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
+    private String endpointExposedAnnotation;
     private String openAPIPath;
     private Plugins plugins;
 
@@ -27,6 +28,10 @@ public final class ParserConfiguration {
 
     public Optional<String> getEndpointAnnotation() {
         return Optional.ofNullable(endpointAnnotation);
+    }
+
+    public Optional<String> getEndpointExposedAnnotation() {
+        return Optional.ofNullable(endpointExposedAnnotation);
     }
 
     public Optional<String> getOpenAPIPath() {

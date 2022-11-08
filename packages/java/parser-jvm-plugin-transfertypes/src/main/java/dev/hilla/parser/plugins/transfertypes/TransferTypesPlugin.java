@@ -87,9 +87,8 @@ public final class TransferTypesPlugin
             return node;
         }
 
-        var mapped = ClassInfoModel.of(classMap.get(className));
-        // TODO: replace the setter call with something cleaner
-        classRef.setReference(mapped);
-        return node;
+        var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
+        return TypeSignatureNode.of(ClassRefSignatureModel.of(mappedClassInfo,
+                classRef.getTypeArguments(), classRef.getAnnotations()));
     }
 }
