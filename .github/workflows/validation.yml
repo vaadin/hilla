@@ -48,20 +48,20 @@ jobs:
       - name: List Java Unit
         id: packages-java
         run: |
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+          echo "packages=$(node -e "console.log(JSON.stringify(
             require('fs').readdirSync('packages/java')
               .filter(name => name !== 'tests')
-          ))")"
+          ))")" >> $GITHUB_OUTPUT
       - name: List TypeScript Unit
         id: packages-ts
         run: >-
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+          echo "packages=$(node -e "console.log(JSON.stringify(
             require('fs').readdirSync('packages/ts')
-          ))")"
+          ))")" >> $GITHUB_OUTPUT
       - name: List IT
         id: packages-it
         run: >-
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
+          echo "packages=$(node -e "console.log(JSON.stringify(
             [
               require('fs').readdirSync('packages/java/tests/')
                 .filter(name => name !== 'spring'),
@@ -71,7 +71,7 @@ jobs:
               .filter(path =>
                 require('fs').lstatSync('packages/java/tests/' + path).isDirectory()
               )
-          ))")"
+          ))")" >> $GITHUB_OUTPUT
       - name: Setup
         uses: ./.github/actions/setup
       - name: Validate Java Format
@@ -136,7 +136,7 @@ jobs:
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         if: ${{ env.COVFILES != '' }}
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -179,7 +179,7 @@ jobs:
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
