@@ -18,9 +18,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -28,8 +27,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>${vaadin.version}</version>
+            <artifactId>vaadin-testbench-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
