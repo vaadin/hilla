@@ -2,7 +2,7 @@ package dev.hilla.parser.plugins.model;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public final class ValidationConstraint {
     private final Map<String, Object> attributes;

@@ -3,7 +3,7 @@ package com.vaadin.flow.connect;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import dev.hilla.Endpoint;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 
 /**

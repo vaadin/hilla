@@ -10,7 +10,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;

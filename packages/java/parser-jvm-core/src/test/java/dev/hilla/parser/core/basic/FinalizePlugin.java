@@ -1,6 +1,6 @@
 package dev.hilla.parser.core.basic;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -4,7 +4,7 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import io.github.classgraph.TypeVariableSignature;
 

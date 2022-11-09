@@ -2,7 +2,7 @@ package com.vaadin.flow.connect;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

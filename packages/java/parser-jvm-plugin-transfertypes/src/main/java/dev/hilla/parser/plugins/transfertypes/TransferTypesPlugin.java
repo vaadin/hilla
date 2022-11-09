@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Plugin;
