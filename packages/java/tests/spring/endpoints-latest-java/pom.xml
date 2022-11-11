@@ -24,7 +24,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring</artifactId>
             <exclusions>
-                <!-- There are no vaadin components in the test UIs -->
                 <exclusion>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-core</artifactId>
