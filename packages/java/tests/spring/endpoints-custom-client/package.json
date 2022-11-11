@@ -14,10 +14,9 @@
     "@hilla/generator-typescript-utils": "../../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.17",
-    "@vaadin/flow-frontend": "./target/flow-frontend",
     "@vaadin/router": "1.7.4",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.3.0"
+    "lit": "2.4.1"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "3.1.0",
@@ -26,6 +25,7 @@
     "glob": "7.2.3",
     "mkdirp": "1.0.4",
     "rollup-plugin-brotli": "3.1.0",
+    "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "4.7.4",
     "vite": "v3.1.0",
@@ -36,21 +36,21 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "1.3.0-alpha1",
-      "@hilla/frontend": "1.3.0-alpha1",
-      "@hilla/generator-typescript-cli": "1.3.0-alpha1",
-      "@hilla/generator-typescript-core": "1.3.0-alpha1",
-      "@hilla/generator-typescript-plugin-backbone": "1.3.0-alpha1",
-      "@hilla/generator-typescript-plugin-barrel": "1.3.0-alpha1",
-      "@hilla/generator-typescript-plugin-client": "1.3.0-alpha1",
-      "@hilla/generator-typescript-plugin-model": "1.3.0-alpha1",
-      "@hilla/generator-typescript-plugin-push": "1.3.0-alpha1",
-      "@hilla/generator-typescript-utils": "1.3.0-alpha1",
+      "@hilla/form": "2.0.0-alpha2",
+      "@hilla/frontend": "2.0.0-alpha2",
+      "@hilla/generator-typescript-cli": "2.0.0-alpha2",
+      "@hilla/generator-typescript-core": "2.0.0-alpha2",
+      "@hilla/generator-typescript-plugin-backbone": "2.0.0-alpha2",
+      "@hilla/generator-typescript-plugin-barrel": "2.0.0-alpha2",
+      "@hilla/generator-typescript-plugin-client": "2.0.0-alpha2",
+      "@hilla/generator-typescript-plugin-model": "2.0.0-alpha2",
+      "@hilla/generator-typescript-plugin-push": "2.0.0-alpha2",
+      "@hilla/generator-typescript-utils": "2.0.0-alpha2",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.17",
       "@vaadin/router": "1.7.4",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.3.0"
+      "lit": "2.4.1"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "3.1.0",
@@ -59,6 +59,7 @@
       "glob": "7.2.3",
       "mkdirp": "1.0.4",
       "rollup-plugin-brotli": "3.1.0",
+      "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "4.7.4",
       "vite": "v3.1.0",
@@ -67,7 +68,7 @@
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0"
     },
-    "hash": "013b2835d01ec7a260c38c86e34b945b09fa6d873546035afe7f53c7ebeb545a"
+    "hash": "b768f26f805e4384f20abebd92b452aa8f1160abd9490cf3423a781ac526a052"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
