@@ -61,15 +61,15 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.3</slf4j.version>
-    <spring.version>6.0.0-RC2</spring.version>
-    <spring.boot.version>3.0.0-RC1</spring.boot.version>
-    <spring.data.version>2.7.3</spring.data.version>
-    <spring.security.version>6.0.0-RC1</spring.security.version>
+    <spring.version>6.0.0-RC4</spring.version>
+    <spring.boot.version>3.0.0-RC2</spring.boot.version>
+    <spring.data.commons.version>3.0.0-RC2</spring.data.commons.version>
+    <spring.security.version>6.0.0-RC2</spring.security.version>
     <testbench.version>9.0.0.alpha1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
-    <jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
+    <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version>
-    <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
+    <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
   </properties>
 
@@ -191,7 +191,7 @@
       <dependency>
         <groupId>org.springframework.data</groupId>
         <artifactId>spring-data-commons</artifactId>
-        <version>${spring.data.version}</version>
+        <version>${spring.data.commons.version}</version>
       </dependency>
       <dependency>
         <groupId>jakarta.validation</groupId>
@@ -211,13 +211,13 @@
       <dependency>
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
-        <version>5.0.0</version>
+        <version>6.0.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>io.projectreactor</groupId>
         <artifactId>reactor-bom</artifactId>
-        <version>2020.0.18</version>
+        <version>2022.0.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -252,7 +252,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.12.10</version>
+        <version>1.12.18</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
