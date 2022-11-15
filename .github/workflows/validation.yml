@@ -27,15 +27,8 @@ jobs:
       packages-it: ${{ steps.packages-it.outputs.packages }}
 
     steps:
-      - uses: ZheSun88/check-user-permission@triggering-actor
-        id: check
-        with:
-          require: 'write'
       - name: Check Secrets
         run: |
-          [ "${{ steps.check.outputs.require-result }}" != "true" ] \
-            && echo "::error::!! NO USER PERMISSIONS FOR RUNNING VALIDATION: Check if the PR is from an external contributor !!" \
-            && exit 1 || exit 0
           TB_LICENSE="${{secrets.TB_LICENSE}}"
           [ -z "$TB_LICENSE" ] \
             && echo "::error::!! ERROR NO TB_LICENSE: Check that this repo has a valid TB_LICENSE secret !!" \
