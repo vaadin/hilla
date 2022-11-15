@@ -39,7 +39,7 @@ final class SchemaProcessor {
             result = stringSchema();
         } else if (type.isBoolean()) {
             result = booleanSchema();
-        } else if (type.hasIntegerType()) {
+        } else if (type.hasIntegerType() || type.isBigInteger()) {
             result = integerSchema();
         } else if (type.hasFloatType() || type.isBigDecimal()) {
             result = numberSchema();
@@ -83,8 +83,8 @@ final class SchemaProcessor {
     }
 
     private Schema<?> integerSchema() {
-        return nullify(new IntegerSchema(), !type.isPrimitive())
-                .format(type.isLong() ? "int64" : "int32");
+        return nullify(new IntegerSchema(), !type.isPrimitive()).format(
+                type.isLong() || type.isBigInteger() ? "int64" : "int32");
     }
 
     private Schema<?> iterableSchema() {

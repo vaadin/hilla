@@ -184,6 +184,11 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
     }
 
     @Override
+    public boolean isBigInteger() {
+        return getClassInfo().isBigInteger();
+    }
+
+    @Override
     public boolean isBoolean() {
         return getClassInfo().isBoolean();
     }
