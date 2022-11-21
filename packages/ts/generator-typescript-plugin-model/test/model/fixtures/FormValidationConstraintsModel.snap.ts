@@ -2,7 +2,7 @@ import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, A
 import FormEntityModel_1 from "./FormEntityModel";
 import type FormValidationConstraints_1 from "./FormValidationConstraints";
 class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
-    static createEmptyValue: () => FormValidationConstraints_1;
+    declare static createEmptyValue: () => FormValidationConstraints_1;
     get list(): ArrayModel_1<string, StringModel_1> {
         return this[_getPropertyModel_1]("list", ArrayModel_1, [true, StringModel_1, [true], new NotEmpty_1()]) as ArrayModel_1<string, StringModel_1>;
     }
