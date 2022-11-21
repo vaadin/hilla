@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * This script is used for cherry-pick commits for hilla repo.
- * To run this script:  
+ * To run this script:
  * 1.collect committed-PRs marked with target/<branch-name>  labels
  * 2.cherry-pick the commit to the target branchs
  * 3.label the original commit PR with cherry-picked-<branch-name>
@@ -43,11 +43,11 @@ async function getAllCommits(){
         'Content-Type': 'application/json',
       }
     };
-    
+
     res = await axios.get(url, options);
     data = res.data;
     data = data.filter(da => da.labels.length > 0 && da.merged_at !== null);
-    
+
     if (data.length === 0) {
       console.log("No commits needs to be picked.");
       process.exit(0);
@@ -69,7 +69,7 @@ async function getCommit(commitURL){
         'Content-Type': 'application/json',
       }
     };
-    
+
     res = await axios.get(commitURL, options);
     data = res.data;
 
@@ -114,19 +114,19 @@ async function filterCommits(commits){
 async function cherryPickCommits(){
   for(let i=arrPR.length-1; i>=0; i--){
     let branchName = `cherry-pick-${arrPR[i]}-to-${arrBranch[i]}-${Date.now()}`;
-    
-    await exec('git checkout master');
+
+    await exec('git checkout main');
     await exec('git pull');
     await exec(`git checkout ${arrBranch[i]}`);
     await exec(`git reset --hard origin/${arrBranch[i]}`);
-    
+
     try{
       await exec(`git checkout -b ${branchName}`);
     } catch (err) {
       console.error(`Cannot Create Branch, error : ${err}`);
       process.exit(1);
     }
-    
+
     try{
       let {stdout, stderr} = await exec(`git cherry-pick ${arrSHA[i]}`);
     } catch (err) {
@@ -134,14 +134,14 @@ async function cherryPickCommits(){
       await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
       await postComment(arrURL[i], arrUser[i], arrMergedBy[i], arrBranch[i], err);
       await exec(`git cherry-pick --abort`);
-      await exec(`git checkout master`);
+      await exec(`git checkout main`);
       await exec(`git branch -D ${branchName}`);
       continue;
     }
     await exec(`git push origin HEAD:${branchName}`);
-    
+
     await createPR(arrTitle[i], branchName, arrBranch[i]);
-    await exec(`git checkout master`);
+    await exec(`git checkout main`);
     await exec(`git branch -D ${branchName}`);
     await labelCommit(arrURL[i], `cherry-picked-${arrBranch[i]}`);
   }
@@ -155,7 +155,7 @@ async function labelCommit(url, label){
       'Authorization': `token ${token}`,
     }
   };
-  
+
   await axios.post(issueURL, {"labels":[label]}, options);
 }
 
@@ -174,7 +174,7 @@ async function postComment(url, userName, mergedBy, branch, message){
 
 async function createPR(title, head, base){
   const payload = {title, head, base};
-  
+
   return new Promise(resolve => {
     const content = JSON.stringify({ title, head, base }, null, 1)
     const req = https.request({
