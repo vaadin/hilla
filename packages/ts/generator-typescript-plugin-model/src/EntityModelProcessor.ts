@@ -126,7 +126,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       const [parentSchema, childSchema] = decomposed;
 
       if (!isReferenceSchema(parentSchema)) {
-        logger.error(parent, 'Only reference schema allowed for parent class');
+        logger.error(parentSchema, 'Only reference schema allowed for parent class');
         return undefined;
       }
 
@@ -204,7 +204,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
 
     const emptyValueElement = ts.factory.createPropertyDeclaration(
       undefined,
-      [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
+      [ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword), ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
       'createEmptyValue',
       undefined,
       ts.factory.createFunctionTypeNode(undefined, [], ts.factory.createTypeReferenceNode(entity)),
