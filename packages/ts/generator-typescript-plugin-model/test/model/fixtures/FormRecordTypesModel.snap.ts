@@ -3,7 +3,7 @@ import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
 import type FormOptionalTypes_1 from "./FormOptionalTypes";
 import type FormRecordTypes_1 from "./FormRecordTypes";
 class FormRecordTypesModel<T extends FormRecordTypes_1 = FormRecordTypes_1> extends ObjectModel_1<T> {
-    static createEmptyValue: () => FormRecordTypes_1;
+    declare static createEmptyValue: () => FormRecordTypes_1;
     get stringMap(): ObjectModel_1<Record<string, string>> {
         return this[_getPropertyModel_1]("stringMap", ObjectModel_1, [true]) as ObjectModel_1<Record<string, string>>;
     }

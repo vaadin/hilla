@@ -1,7 +1,7 @@
 import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
 import type FormNonnullTypes_1 from "./FormNonnullTypes";
 class FormNonnullTypesModel<T extends FormNonnullTypes_1 = FormNonnullTypes_1> extends ObjectModel_1<T> {
-    static createEmptyValue: () => FormNonnullTypes_1;
+    declare static createEmptyValue: () => FormNonnullTypes_1;
     get nonNullableString(): StringModel_1 {
         return this[_getPropertyModel_1]("nonNullableString", StringModel_1, [false]) as StringModel_1;
     }
