@@ -21,7 +21,7 @@ export interface IdEntity {
   idString: string;
 }
 export class IdEntityModel<T extends IdEntity = IdEntity> extends ObjectModel<T> {
-  public static override createEmptyValue: () => IdEntity;
+  public declare static createEmptyValue: () => IdEntity;
 
   public get idString(): StringModel {
     return this[_getPropertyModel]('idString', StringModel, [false]);
@@ -34,7 +34,7 @@ export interface Product extends IdEntity {
   isInStock: boolean;
 }
 export class ProductModel<T extends Product = Product> extends IdEntityModel<T> {
-  public static override createEmptyValue: () => Product;
+  public declare static createEmptyValue: () => Product;
 
   public get description() {
     return this[_getPropertyModel]('description', StringModel, [false, new Required()]);
@@ -54,7 +54,7 @@ export interface Customer extends IdEntity {
   nickName: string;
 }
 export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<T> {
-  public static override createEmptyValue: () => Customer;
+  public declare static createEmptyValue: () => Customer;
 
   public get fullName() {
     return this[_getPropertyModel]('fullName', StringModel, [
@@ -76,7 +76,7 @@ export interface Order extends IdEntity {
   products: ReadonlyArray<Product>;
 }
 export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
-  public static override createEmptyValue: () => Order;
+  public declare static createEmptyValue: () => Order;
 
   public get customer(): CustomerModel {
     return this[_getPropertyModel]('customer', CustomerModel, [false, new Required()]);
@@ -111,7 +111,7 @@ export interface TestEntity {
   fieldAny: any;
 }
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
-  public static override createEmptyValue: () => TestEntity;
+  public declare static createEmptyValue: () => TestEntity;
 
   public get fieldString() {
     return this[_getPropertyModel]('fieldString', StringModel, [false]) as StringModel;
@@ -166,7 +166,7 @@ export interface Employee extends IdEntity {
   colleagues?: Employee[];
 }
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
-  public static override createEmptyValue: () => Employee;
+  public declare static createEmptyValue: () => Employee;
 
   public get fullName() {
     return this[_getPropertyModel]('fullName', StringModel, [false]) as StringModel;
@@ -188,7 +188,7 @@ export interface TestMessageInterpolationEntity {
 export class TestMessageInterpolationModel<
   T extends TestMessageInterpolationEntity = TestMessageInterpolationEntity,
 > extends ObjectModel<T> {
-  public static override createEmptyValue: () => TestMessageInterpolationEntity;
+  public declare static createEmptyValue: () => TestMessageInterpolationEntity;
 
   public get stringMinSize() {
     return this[_getPropertyModel]('stringMinSize', StringModel, [
@@ -222,7 +222,7 @@ export interface WithPossibleCharList {
 }
 
 export class WithPossibleCharListModel extends ObjectModel<WithPossibleCharList> {
-  public static override createEmptyValue: () => WithPossibleCharList;
+  public declare static createEmptyValue: () => WithPossibleCharList;
 
   public get charList() {
     return this[_getPropertyModel]('charList', StringModel, [true]) as StringModel;
