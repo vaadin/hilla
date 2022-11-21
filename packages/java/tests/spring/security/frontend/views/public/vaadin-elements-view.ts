@@ -14,7 +14,6 @@ import '@vaadin/select';
 import '@vaadin/list-box';
 import '@vaadin/item';
 import '@vaadin/radio-group';
-import '@vaadin/radio-group/vaadin-radio-group';
 import '@vaadin/text-field';
 import '@vaadin/integer-field';
 import '@vaadin/number-field';
@@ -55,14 +54,17 @@ export class VaadinElementsView extends View {
         >Load Data From Endpoint</vaadin-button
       >
       <vaadin-form-layout @click="${() => this.notification.close()}">
-        <vaadin-checkbox ...="${field(this.binder.model.checkbox)}">checkbox</vaadin-checkbox>
-        <vaadin-radio-button ...="${field(this.binder.model.radioButton)}">radio-button</vaadin-radio-button>
+        <vaadin-checkbox ...="${field(this.binder.model.checkbox)}" label="checkbox"></vaadin-checkbox>
+        <vaadin-radio-button ...="${field(this.binder.model.radioButton)}" label="radio-button"></vaadin-radio-button>
         <vaadin-radio-group ...="${field(this.binder.model.radioButtonGroup)}" label="radio-group" invalid>
           ${until(
             this.options.then(
               (opts) =>
                 opts &&
-                repeat(opts, (item, _i) => html` <vaadin-radio-button value="${item}">${item}</vaadin-radio-button> `),
+                repeat(
+                  opts,
+                  (item, _i) => html` <vaadin-radio-button value="${item}" label="${item}"></vaadin-radio-button> `,
+                ),
             ),
           )}
         </vaadin-radio-group>
