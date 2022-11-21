@@ -6,7 +6,7 @@ import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
 import FormEntityHierarchyModel_1 from "./FormEntityHierarchyModel";
 import FormEntityModel_1 from "./FormEntityModel";
 class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends ObjectModel_1<T> {
-    static createEmptyValue: () => FormArrayTypes_1;
+    declare static createEmptyValue: () => FormArrayTypes_1;
     get stringList(): ArrayModel_1<string, StringModel_1> {
         return this[_getPropertyModel_1]("stringList", ArrayModel_1, [true, StringModel_1, [true]]) as ArrayModel_1<string, StringModel_1>;
     }
