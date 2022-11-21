@@ -2,7 +2,7 @@ import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, O
 import FormEntityModel_1 from "./FormEntityModel";
 import type FormOptionalTypes_1 from "./FormOptionalTypes";
 class FormOptionalTypesModel<T extends FormOptionalTypes_1 = FormOptionalTypes_1> extends ObjectModel_1<T> {
-    static createEmptyValue: () => FormOptionalTypes_1;
+    declare static createEmptyValue: () => FormOptionalTypes_1;
     get optionalString(): StringModel_1 {
         return this[_getPropertyModel_1]("optionalString", StringModel_1, [true]) as StringModel_1;
     }
