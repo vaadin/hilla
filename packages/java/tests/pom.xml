@@ -16,7 +16,7 @@
 
   <properties>
     <jetty.version>9.4.37.v20210219</jetty.version>
-    <vaadin.component.version>23.3-SNAPSHOT</vaadin.component.version>
+    <vaadin.component.version>23.3.0.alpha3</vaadin.component.version>
     <jetty.scantrigger></jetty.scantrigger>
 
     <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
