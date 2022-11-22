@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,11 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     public boolean isBigDecimal() {
         return ClassInfoModel.isAssignableFrom(BigDecimal.class, origin);
+    }
+
+    @Override
+    public boolean isBigInteger() {
+        return ClassInfoModel.isAssignableFrom(BigInteger.class, origin);
     }
 
     @Override
