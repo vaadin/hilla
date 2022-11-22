@@ -15,6 +15,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -259,6 +260,8 @@ public class BaseSignatureModelTests {
                     .ofEntries(
                             entry(BigDecimal.class, "isBase", "isJDKClass",
                                     "isBigDecimal"),
+                            entry(BigInteger.class, "isBase", "isJDKClass",
+                                    "isBigInteger"),
                             entry(Boolean.TYPE, "isBase", "isJDKClass",
                                     "isBoolean", "isPrimitive"),
                             entry(Byte.TYPE, "isBase", "isJDKClass", "isByte",
