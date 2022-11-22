@@ -87,7 +87,8 @@ final class ParserProcessor {
 
     public OpenAPI process() {
         var builder = new ParserConfig.Builder().classPath(classPath)
-                .endpointAnnotation(endpointAnnotationName);
+                .endpointAnnotation(endpointAnnotationName)
+                .endpointExposedAnnotation(endpointExposedAnnotationName);
 
         preparePlugins(builder);
         prepareOpenAPIBase(builder);
