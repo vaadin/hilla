@@ -59,6 +59,26 @@
         }
       }
     },
+    "/SimpleTypeEndpoint/getBigInteger": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getBigInteger_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/SimpleTypeEndpoint/getBoolean": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],

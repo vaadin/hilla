@@ -1,6 +1,7 @@
 package dev.hilla.parser.plugins.backbone.simpletype;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Endpoint
 public class SimpleTypeEndpoint {
@@ -10,6 +11,10 @@ public class SimpleTypeEndpoint {
 
     public BigDecimal getBigDecimal() {
         return BigDecimal.valueOf(0);
+    }
+
+    public BigInteger getBigInteger() {
+        return BigInteger.valueOf(0);
     }
 
     public boolean getBoolean() {

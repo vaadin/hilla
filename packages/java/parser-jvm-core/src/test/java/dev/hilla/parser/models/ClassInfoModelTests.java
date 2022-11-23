@@ -17,6 +17,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -795,6 +796,8 @@ public class ClassInfoModelTests {
                     .ofEntries(
                             entry(BigDecimal.class, "isJDKClass",
                                     "isBigDecimal"),
+                            entry(BigInteger.class, "isJDKClass",
+                                    "isBigInteger"),
                             entry(Boolean.class, "isJDKClass", "isBoolean"),
                             entry(Byte.class, "isJDKClass", "isByte",
                                     "hasIntegerType"),
