@@ -21,6 +21,10 @@ public interface SpecializedModel {
         return false;
     }
 
+    default boolean isBigInteger() {
+        return false;
+    }
+
     default boolean isBoolean() {
         return false;
     }
