@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
@@ -10,9 +10,9 @@
   <packaging>pom</packaging>
 
   <parent>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-parent</artifactId>
-      <version>2.1.0</version>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-parent</artifactId>
+    <version>2.1.0</version>
   </parent>
 
   <modules>
@@ -55,16 +55,16 @@
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
-    <jackson.version>2.14.0-rc2</jackson.version>
-    <jackson.databind.version>2.14.0-rc2</jackson.databind.version>
+    <jackson.version>2.14.1</jackson.version>
+    <jackson.databind.version>2.14.1</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.0-SNAPSHOT</flow.version>
-    <slf4j.version>2.0.3</slf4j.version>
-    <spring.version>6.0.0-RC4</spring.version>
-    <spring.boot.version>3.0.0-RC2</spring.boot.version>
-    <spring.data.commons.version>3.0.0-RC2</spring.data.commons.version>
-    <spring.security.version>6.0.0-RC2</spring.security.version>
+    <slf4j.version>2.0.4</slf4j.version>
+    <spring.version>6.0.2</spring.version>
+    <spring.boot.version>3.0.0</spring.boot.version>
+    <spring.data.commons.version>3.0.0</spring.data.commons.version>
+    <spring.security.version>6.0.0</spring.security.version>
     <testbench.version>9.0.0.alpha1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
@@ -116,14 +116,6 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
-    <repository>
-      <id>spring milestones</id>
-      <url>https://repo.spring.io/milestone</url>
-    </repository>
-    <repository>
-      <id>apache snapshots</id>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
-  </repository>
   </repositories>
 
   <pluginRepositories>
@@ -142,10 +134,6 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring milestones</id>
-      <url>https://repo.spring.io/milestone</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -348,36 +336,36 @@
       </plugin>
 
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>3.2.1</version>
-          <executions>
-              <execution>
-                  <id>attach-sources</id>
-                  <phase>package</phase>
-                  <goals>
-                      <goal>jar-no-fork</goal>
-                  </goals>
-              </execution>
-          </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.3.2</version>
-          <executions>
-              <execution>
-                  <id>attach-javadocs</id>
-                  <phase>package</phase>
-                  <goals>
-                      <goal>jar</goal>
-                  </goals>
-              </execution>
-          </executions>
-          <configuration>
-              <quiet>true</quiet>
-          </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.3.2</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <quiet>true</quiet>
+        </configuration>
       </plugin>
     </plugins>
   </build>
