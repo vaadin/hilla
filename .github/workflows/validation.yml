@@ -181,14 +181,17 @@ jobs:
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
       - name: Verify
         run: |
-          mvn -B -am -ntp -fae \
-            -Dfailsafe.forkCount=4 \
-            -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-            -Dfailsafe.rerunFailingTestsCount=2 \
-            -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
-            -Dmaven.wagon.http.retryHandler.count=3 \
-            -Dvaadin.hillaEngine=${{ matrix.hillaEngine }} \
-            verify
+          (
+            cd packages/java/tests && \
+            mvn -B -am -ntp -fae \
+              -Dfailsafe.forkCount=4 \
+              -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
+              -Dfailsafe.rerunFailingTestsCount=2 \
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+              -Dmaven.wagon.http.retryHandler.count=3 \
+              -Dvaadin.hillaEngine=${{ matrix.hillaEngine }} \
+              verify
+          )
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:
