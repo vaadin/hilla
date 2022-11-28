@@ -14,7 +14,6 @@ on:
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
-  workflow_dispatch:
 
 jobs:
   init:
