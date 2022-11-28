@@ -157,8 +157,6 @@ jobs:
       fail-fast: false
       matrix:
         hillaEngine: [false, true]
-        include:
-            hilla-engine: false
 
     steps:
       - name: Checkout Project Code
