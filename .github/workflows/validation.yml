@@ -21,11 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    outputs:
-      packages-java: ${{ steps.packages-java.outputs.packages }}
-      packages-ts: ${{ steps.packages-ts.outputs.packages }}
-      packages-it: ${{ steps.packages-it.outputs.packages }}
-
     steps:
       - name: Check Secrets
         run: |
@@ -38,33 +33,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - name: List Java Unit
-        id: packages-java
-        run: |
-          echo "packages=$(node -e "console.log(JSON.stringify(
-            require('fs').readdirSync('packages/java')
-              .filter(name => name !== 'tests')
-          ))")" >> $GITHUB_OUTPUT
-      - name: List TypeScript Unit
-        id: packages-ts
-        run: >-
-          echo "packages=$(node -e "console.log(JSON.stringify(
-            require('fs').readdirSync('packages/ts')
-          ))")" >> $GITHUB_OUTPUT
-      - name: List IT
-        id: packages-it
-        run: >-
-          echo "packages=$(node -e "console.log(JSON.stringify(
-            [
-              require('fs').readdirSync('packages/java/tests/')
-                .filter(name => name !== 'spring'),
-              require('fs').readdirSync('packages/java/tests/spring/')
-                .map(name => 'spring/' + name)
-            ].flat()
-              .filter(path =>
-                require('fs').lstatSync('packages/java/tests/' + path).isDirectory()
-              )
-          ))")" >> $GITHUB_OUTPUT
       - name: Setup
         uses: ./.github/actions/setup
       - name: Validate Java Format
@@ -102,8 +70,6 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.init.outputs.packages-java) }}
 
     steps:
       - name: Checkout Project Code
@@ -122,7 +88,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
-        run: (cd packages/java/${{ matrix.package }} && mvn -B -am -P\!it-modules verify)
+        run: mvn -B -am -P\!it-modules verify
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
@@ -144,8 +110,6 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.init.outputs.packages-ts) }}
 
     steps:
       - name: Checkout Project Code
@@ -164,7 +128,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
-        run: (cd packages/ts/${{ matrix.package }} && npm run test:coverage)
+        run: npm run test:coverage
         env:
           CI: true
       - name: Collect Coverage
@@ -192,13 +156,6 @@ jobs:
       fail-fast: false
       matrix:
         hillaEngine: [false, true]
-        package: ${{ fromJSON(needs.init.outputs.packages-it) }}
-        java-version:
-            - 17
-        include:
-          - package: spring/endpoints-latest-java
-            java-version: 17
-            hilla-engine: false
 
     steps:
       - name: Checkout Project Code
@@ -208,8 +165,6 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          java-version: ${{ matrix.java-version }}
       - uses: actions/download-artifact@v3
         with:
           name: saved-workspace
@@ -226,7 +181,7 @@ jobs:
       - name: Verify
         run: |
           (
-            cd packages/java/tests/${{ matrix.package }} && \
+            cd packages/java/tests && \
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
