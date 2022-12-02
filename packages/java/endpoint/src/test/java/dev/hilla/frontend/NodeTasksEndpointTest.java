@@ -9,18 +9,20 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.vaadin.flow.di.Lookup;
-import dev.hilla.Endpoint;
-import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
-import com.vaadin.flow.server.frontend.NodeTasks.Builder;
-import com.vaadin.flow.server.frontend.scanner.ClassFinder;
-import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
+import com.vaadin.flow.server.frontend.NodeTasks;
+import com.vaadin.flow.server.frontend.Options;
+import com.vaadin.flow.server.frontend.scanner.ClassFinder;
+import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
+
+import dev.hilla.Endpoint;
 
 public class NodeTasksEndpointTest {
 
@@ -32,7 +34,7 @@ public class NodeTasksEndpointTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
     String userDir;
     File dir;
-    Builder builder;
+    Options options;
 
     @Before
     public void setup() {
@@ -52,7 +54,7 @@ public class NodeTasksEndpointTest {
         Mockito.doReturn(new DefaultClassFinder(
                 Collections.singleton(ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
-        builder = new Builder(mockLookup, dir, TARGET)
+        options = new Options(mockLookup, dir).withBuildDirectory(TARGET)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
                 .withEndpointSourceFolder(src)
@@ -63,7 +65,7 @@ public class NodeTasksEndpointTest {
 
     @Test
     public void should_GenerateEndpointFiles() throws Exception {
-        builder.build().execute();
+        new NodeTasks(options).execute();
 
         Arrays.asList(
                 // enableClientSide
