@@ -18,4 +18,4 @@ insert_final_newline = false
 trim_trailing_whitespace = false
 
 [{pom.xml, pom-*.xml}]
-indent_size = 4
+indent_size = 2

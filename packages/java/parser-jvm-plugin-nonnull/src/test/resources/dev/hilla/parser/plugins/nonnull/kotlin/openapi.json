@@ -1,0 +1,1147 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "NonNullEndpoint"
+    },
+    {
+      "name": "NullableEndpoint"
+    }
+  ],
+  "paths": {
+    "/NonNullEndpoint/getString": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getString_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveString": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveString_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getLong": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getLong_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveLong": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveLong_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getBigDecimal": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getBigDecimal_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveBigDecimal": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveBigDecimal_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getStringList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getStringList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveStringList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveStringList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getBigDecimalList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getBigDecimalList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveBigDecimalList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveBigDecimalList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "double",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getNonnullLongList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getNonnullLongList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveNonnullLongList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveNonnullLongList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getNonnullStringList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getNonnullStringList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveNonnullStringList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveNonnullStringList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getNonnullBigDecimalList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getNonnullBigDecimalList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveNonnullBigDecimalList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveNonnullBigDecimalList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "double"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getLongList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getLongList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveLongList": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveLongList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "format": "int64",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getStringMap": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getStringMap_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveStringMap": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveStringMap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/getComplexType": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_getComplexType_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullEndpoint/saveComplexType": {
+      "post": {
+        "tags": ["NonNullEndpoint"],
+        "operationId": "NonNullEndpoint_saveComplexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getString": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getString_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveString": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveString_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getLong": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getLong_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveLong": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveLong_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getBigDecimal": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getBigDecimal_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number",
+                  "format": "double",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveBigDecimal": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveBigDecimal_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getStringList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getStringList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveStringList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveStringList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getBigDecimalList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getBigDecimalList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveBigDecimalList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveBigDecimalList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "number",
+                      "format": "double",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getNonnullLongList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getNonnullLongList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveNonnullLongList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveNonnullLongList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getNonnullStringList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getNonnullStringList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveNonnullStringList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveNonnullStringList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getNonnullBigDecimalList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getNonnullBigDecimalList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "number",
+                    "format": "double"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveNonnullBigDecimalList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveNonnullBigDecimalList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "number",
+                      "format": "double"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getLongList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getLongList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveLongList": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveLongList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer",
+                      "format": "int64",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getStringMap": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getStringMap_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveStringMap": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveStringMap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/getComplexType": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_getComplexType_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NullableEndpoint/saveComplexType": {
+      "post": {
+        "tags": ["NullableEndpoint"],
+        "operationId": "NullableEndpoint_saveComplexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg0": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}
