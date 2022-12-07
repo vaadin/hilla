@@ -27,31 +27,31 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
  * generator tasks.
  */
 public class EndpointGeneratorTaskFactoryImpl
-    implements EndpointGeneratorTaskFactory {
+        implements EndpointGeneratorTaskFactory {
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
         Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
-            "Vaadin OpenAPI file should not be null.");
+                "Vaadin OpenAPI file should not be null.");
         Objects.requireNonNull(options.getFrontendGeneratedFolder(),
-            "Vaadin output folder should not be null.");
+                "Vaadin output folder should not be null.");
         return new TaskGenerateEndpointImpl(options.getApplicationProperties(),
-            options.getEndpointGeneratedOpenAPIFile(),
-            options.getFrontendGeneratedFolder(),
-            options.getFrontendDirectory());
+                options.getEndpointGeneratedOpenAPIFile(),
+                options.getFrontendGeneratedFolder(),
+                options.getFrontendDirectory());
     }
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
         Objects.requireNonNull(options.getEndpointSourceFolder(),
-            "Source paths should not be null.");
+                "Source paths should not be null.");
         Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
-            "OpenAPI output file should not be null.");
+                "OpenAPI output file should not be null.");
         Objects.requireNonNull(options.getClassFinder().getClassLoader(),
-            "ClassLoader should not be null.");
+                "ClassLoader should not be null.");
         return new TaskGenerateOpenAPIImpl(options.getApplicationProperties(),
-            options.getEndpointSourceFolder(),
-            options.getClassFinder().getClassLoader(),
-            options.getEndpointGeneratedOpenAPIFile());
+                options.getEndpointSourceFolder(),
+                options.getClassFinder().getClassLoader(),
+                options.getEndpointGeneratedOpenAPIFile());
     }
 }
