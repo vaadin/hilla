@@ -15,10 +15,10 @@
  */
 package dev.hilla.frontend;
 
-import java.io.File;
 import java.util.Objects;
 
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
+import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
@@ -30,27 +30,28 @@ public class EndpointGeneratorTaskFactoryImpl
         implements EndpointGeneratorTaskFactory {
 
     @Override
-    public TaskGenerateEndpoint createTaskGenerateEndpoint(
-            File applicationProperties, File openApi, File outputFolder,
-            File frontendDirectory) {
-        Objects.requireNonNull(openApi,
+    public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
+        Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
                 "Vaadin OpenAPI file should not be null.");
-        Objects.requireNonNull(outputFolder,
+        Objects.requireNonNull(options.getFrontendGeneratedFolder(),
                 "Vaadin output folder should not be null.");
-        return new TaskGenerateEndpointImpl(applicationProperties, openApi,
-                outputFolder, frontendDirectory);
+        return new TaskGenerateEndpointImpl(options.getApplicationProperties(),
+                options.getEndpointGeneratedOpenAPIFile(),
+                options.getFrontendGeneratedFolder(),
+                options.getFrontendDirectory());
     }
 
     @Override
-    public TaskGenerateOpenAPI createTaskGenerateOpenAPI(File properties,
-            File javaSourceFolder, ClassLoader classLoader, File output) {
-        Objects.requireNonNull(javaSourceFolder,
+    public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
+        Objects.requireNonNull(options.getEndpointSourceFolder(),
                 "Source paths should not be null.");
-        Objects.requireNonNull(output,
+        Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
                 "OpenAPI output file should not be null.");
-        Objects.requireNonNull(classLoader, "ClassLoader should not be null.");
-        return new TaskGenerateOpenAPIImpl(properties, javaSourceFolder,
-                classLoader, output);
+        Objects.requireNonNull(options.getClassFinder().getClassLoader(),
+                "ClassLoader should not be null.");
+        return new TaskGenerateOpenAPIImpl(options.getApplicationProperties(),
+                options.getEndpointSourceFolder(),
+                options.getClassFinder().getClassLoader(),
+                options.getEndpointGeneratedOpenAPIFile());
     }
-
 }
