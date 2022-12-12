@@ -22,12 +22,21 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Check Secrets
+      - uses: actions-cool/check-user-permission@main
+        id: checkUser
+        with:
+          username: ${{github.triggering_actor}}
+          require: 'write'
+      - name: Fail on external workflow triggering
+        if: ${{ steps.checkUser.outputs.require-result != 'true' }}
         run: |
-          TB_LICENSE="${{secrets.TB_LICENSE}}"
-          [ -z "$TB_LICENSE" ] \
-            && echo "::error::!! ERROR NO TB_LICENSE: Check that this repo has a valid TB_LICENSE secret !!" \
-            && exit 1 || exit 0
+          echo "🚫 **${{ github.actor }}** is an external contributor, a **${{github.repository}}** team member has to review this changes and re-run this build" \
+            | tee -a $GITHUB_STEP_SUMMARY && exit 1
+      - name: Check secrets
+        run: |
+          [ -z "${{secrets.TB_LICENSE}}" ] \
+            && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
+            | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
