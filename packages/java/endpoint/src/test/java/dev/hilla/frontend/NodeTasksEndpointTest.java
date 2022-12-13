@@ -54,7 +54,7 @@ public class NodeTasksEndpointTest {
         Mockito.doReturn(new DefaultClassFinder(
                 Collections.singleton(ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
-        options = new Options(mockLookup, dir).withBuildDirectory(TARGET)
+        options = new Options(mockLookup, dir, TARGET)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
                 .withEndpointSourceFolder(src)
