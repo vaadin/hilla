@@ -8,14 +8,14 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 
-@NpmPackage(value = "@hilla/generator-typescript-core", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-utils", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-cli", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.0.0-alpha5")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-alpha5")
+@NpmPackage(value = "@hilla/generator-typescript-core", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-utils", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-cli", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.0.0-alpha6")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-alpha6")
 public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     static final boolean IS_WINDOWS;
     static final String MAVEN_COMMAND;

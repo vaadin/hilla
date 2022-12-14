@@ -9,5 +9,5 @@ $wnd.Vaadin = $wnd.Vaadin || {};
 $wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/form',
-  version: /* updated-by-script */ '2.0.0-alpha5',
+  version: /* updated-by-script */ '2.0.0-alpha6',
 });
