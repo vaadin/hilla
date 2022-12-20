@@ -60,7 +60,7 @@ final class TypeArgumentSourceModel extends TypeArgumentModel
         }
         var strings = List.of(origin.toString().split(" "));
         strings = strings.subList(0, strings.indexOf("?"));
-        return AnnotationInfoArtificialModel
+        return AnnotationInfoModel
                 .parseStringsStream(strings.stream());
     }
 }
