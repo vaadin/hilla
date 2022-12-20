@@ -54,7 +54,6 @@ public class TypeArgumentModelTests {
     @DisplayName("It should get annotations")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    @Disabled("ClassGraph bug: you cannot extract annotations for a wildcard")
     public void should_GetAnnotations(TypeArgumentModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),

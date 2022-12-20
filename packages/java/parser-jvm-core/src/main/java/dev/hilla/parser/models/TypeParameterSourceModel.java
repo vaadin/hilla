@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ final class TypeParameterSourceModel extends TypeParameterModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return List.of();
+        return getParameterAnnotationsStream().collect(Collectors.toList());
     }
 
     @Override
@@ -39,5 +40,14 @@ final class TypeParameterSourceModel extends TypeParameterModel
                         origin.getInterfaceBounds().stream())
                 .filter(Objects::nonNull).map(SignatureModel::of).distinct()
                 .collect(Collectors.toList());
+    }
+
+    private Stream<AnnotationInfoModel> getParameterAnnotationsStream() {
+        // FIXME: workaround for
+        // https://github.com/classgraph/classgraph/issues/741,
+        // remove when the issue is fixed.
+        var strings = List.of(origin.toString().split(" "));
+        strings = strings.subList(0, strings.indexOf(getName()));
+        return AnnotationInfoModel.parseStringsStream(strings.stream());
     }
 }

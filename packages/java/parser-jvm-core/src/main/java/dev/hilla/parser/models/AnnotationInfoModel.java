@@ -72,4 +72,16 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     protected abstract Optional<ClassInfoModel> prepareClassInfo();
 
     protected abstract Set<AnnotationParameterModel> prepareParameters();
+
+    // FIXME: workaround for
+    // https://github.com/classgraph/classgraph/issues/741,
+    // remove when the issue is fixed.
+    static Stream<AnnotationInfoModel> parseStringsStream(
+            Stream<String> strings) {
+        return strings.filter(s -> s.startsWith("@"))
+                // NOTE: annotation arguments are not supported
+                .filter(s -> !s.contains("("))
+                .map(s -> new AnnotationInfoArtificialModel(s.substring(1),
+                        Set.of()));
+    }
 }

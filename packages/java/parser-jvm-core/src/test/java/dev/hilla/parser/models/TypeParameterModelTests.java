@@ -50,7 +50,6 @@ public class TypeParameterModelTests {
     @DisplayName("It should get annotations")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    @Disabled("Bug in ClassGraph: collected annotations are inaccessible")
     public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
