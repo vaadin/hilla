@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -103,9 +102,7 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
      * @param annotations
      *            Annotations to declare on the reference.
      * @return A class reference signature.
-     * @deprecated To be removed once <a href=
-     *             "https://github.com/classgraph/classgraph/issues/706">{@code
-     * TypeVariable.resolve()} </a> is fixed.
+     * @deprecated
      */
     @Deprecated
     public static ClassRefSignatureModel of(@Nonnull ClassInfoModel classInfo,
