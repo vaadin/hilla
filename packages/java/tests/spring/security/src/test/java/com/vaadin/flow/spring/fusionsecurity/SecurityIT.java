@@ -40,10 +40,14 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
-            return msg.contains(
-                    "/admin-only/secret.txt - Failed to load resource: the server responded with a status of 403")
+            return msg
+                    .contains("/admin-only/secret.nocache.txt - Failed to load "
+                            + "resource: the "
+                            + "server responded with a status of 403")
                     || msg.contains(
-                            "/admin-only/secret.txt?continue - Failed to load resource: the server responded with a status of 403")
+                            "/admin-only/secret.nocache.txt?continue - Failed"
+                                    + " to "
+                                    + "load resource: the server responded with a status of 403")
                     || msg.contains("/connect/") && msg.contains("Failed to "
                             + "load resource: the server responded with "
                             + "a status of 401")
@@ -178,7 +182,7 @@ public class SecurityIT extends ChromeBrowserTest {
     @Test
     public void redirect_to_resource_after_login() {
         String contents = "Secret document for admin";
-        String path = "admin-only/secret.txt";
+        String path = "admin-only/secret.nocache.txt";
         openResource(path);
         loginAdmin();
         assertResourceShown(path);
@@ -198,7 +202,7 @@ public class SecurityIT extends ChromeBrowserTest {
     @Test
     public void access_restricted_to_logged_in_users() {
         String contents = "Secret document for all logged in users";
-        String path = "all-logged-in/secret.txt";
+        String path = "all-logged-in/secret.nocache.txt";
 
         openResource(path);
         assertLoginViewShown();
@@ -218,7 +222,7 @@ public class SecurityIT extends ChromeBrowserTest {
     @Test
     public void access_restricted_to_admin() {
         String contents = "Secret document for admin";
-        String path = "admin-only/secret.txt";
+        String path = "admin-only/secret.nocache.txt";
         openResource(path);
         assertLoginViewShown();
         loginUser();
@@ -250,13 +254,13 @@ public class SecurityIT extends ChromeBrowserTest {
 
     @Test
     public void public_app_resources_available_for_all() {
-        openResource("public/public.txt");
+        openResource("public/public.nocache.txt");
         String shouldBeTextFile = getDriver().getPageSource();
         Assert.assertTrue(
                 shouldBeTextFile.contains("Public document for all users"));
         open("login");
         loginUser();
-        openResource("public/public.txt");
+        openResource("public/public.nocache.txt");
         shouldBeTextFile = getDriver().getPageSource();
         Assert.assertTrue(
                 shouldBeTextFile.contains("Public document for all users"));
