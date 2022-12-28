@@ -50,7 +50,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.149</classgraph.version>
+    <classgraph.version>4.8.153</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
@@ -261,7 +261,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
+        <version>0.8.8</version>
         <executions>
           <execution>
             <goals>

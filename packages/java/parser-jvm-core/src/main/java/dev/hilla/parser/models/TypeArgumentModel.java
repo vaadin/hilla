@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeArgument;
-import io.github.classgraph.TypeSignature;
 
 public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         implements SignatureModel {
@@ -21,29 +20,6 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
 
     public static TypeArgumentModel of(@Nonnull AnnotatedType origin) {
         return new TypeArgumentReflectionModel(Objects.requireNonNull(origin));
-    }
-
-    /**
-     * A factory method that creates an artificial type argument from the
-     * provided arguments.
-     *
-     * @param wildcard
-     *            Wildcard kind for the type argument.
-     * @param associatedTypes
-     *            List of types to associate with the type argument.
-     * @param annotations
-     *            List of type argument annotations.
-     * @return The type argument.
-     * @deprecated To be removed once <a href=
-     *             "https://github.com/classgraph/classgraph/issues/706">{@code
-     * TypeVariable.resolve()} </a> is fixed.
-     */
-    @Deprecated
-    public static TypeArgumentModel of(@Nonnull TypeArgument.Wildcard wildcard,
-            @Nonnull List<SignatureModel> associatedTypes,
-            @Nonnull List<AnnotationInfoModel> annotations) {
-        return new TypeArgumentArtificialModel(wildcard, associatedTypes,
-                annotations);
     }
 
     @Override
