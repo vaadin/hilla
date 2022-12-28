@@ -1,6 +1,10 @@
-package dev.hilla.maven;
+package dev.hilla.maven.runner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -12,10 +16,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-
-final class GeneratorProcessor {
+public final class GeneratorProcessor {
     private static final List<GeneratorConfiguration.Plugin> DEFAULT_PLUGINS = Arrays
             .asList(new GeneratorConfiguration.Plugin(
                     "@hilla/generator-typescript-plugin-client"),
@@ -28,19 +29,17 @@ final class GeneratorProcessor {
                     new GeneratorConfiguration.Plugin(
                             "@hilla/generator-typescript-plugin-push"));
 
-    private final Log logger;
-    private final MavenProject project;
+    private final Path baseDir;
+    private static final Logger logger = LoggerFactory
+            .getLogger(GeneratorProcessor.class);
     private final boolean runNpmInstall;
     private String input;
     private String outputDir = "frontend/generated";
     private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
             DEFAULT_PLUGINS);
-    private boolean verbose = false;
 
-    public GeneratorProcessor(MavenProject project, Log logger,
-            boolean runNpmInstall) {
-        this.logger = logger;
-        this.project = project;
+    public GeneratorProcessor(Path baseDir, boolean runNpmInstall) {
+        this.baseDir = baseDir;
         this.runNpmInstall = runNpmInstall;
     }
 
@@ -72,7 +71,7 @@ final class GeneratorProcessor {
     }
 
     public void process() throws IOException, InterruptedException {
-        var runner = new GeneratorShellRunner(project.getBasedir(), logger);
+        var runner = new GeneratorShellRunner(baseDir.toFile());
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
@@ -84,15 +83,10 @@ final class GeneratorProcessor {
         runner.run(input);
     }
 
-    public GeneratorProcessor verbose(boolean verbose) {
-        this.verbose = verbose;
-        return this;
-    }
-
     private void prepareOutputDir(GeneratorShellRunner runner) {
         var outputDirPath = Paths.get(outputDir);
         var result = outputDirPath.isAbsolute() ? outputDirPath
-                : project.getBasedir().toPath().resolve(outputDir);
+                : baseDir.resolve(outputDir);
         runner.add("-o", result.toString());
     }
 
@@ -102,7 +96,7 @@ final class GeneratorProcessor {
     }
 
     private void prepareVerbose(GeneratorShellRunner runner) {
-        if (verbose) {
+        if (logger.isDebugEnabled()) {
             runner.add("-v");
         }
     }

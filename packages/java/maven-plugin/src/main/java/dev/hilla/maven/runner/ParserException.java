@@ -1,4 +1,4 @@
-package dev.hilla.maven;
+package dev.hilla.maven.runner;
 
 public final class ParserException extends RuntimeException {
     ParserException(String message) {

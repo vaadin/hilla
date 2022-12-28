@@ -1,16 +1,35 @@
 package dev.hilla.internal;
 
-import com.vaadin.flow.server.ExecutionFailedException;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import com.vaadin.flow.server.ExecutionFailedException;
 
 class TaskGenerateHillaImplTest {
+    private static final File DIR = new File(
+            System.getProperty("user.dir", "."));
+
+    @Test
+    void shouldThrowExeptionIfNotConfigured() {
+        var gen = new TaskGenerateHillaImpl();
+        var e = assertThrowsExactly(ExecutionFailedException.class,
+                () -> gen.execute());
+        assertEquals("Project directory not set", e.getMessage());
+    }
+
     @Test
     void executeShouldBeAbleToListFilesInProjectDir() {
         var gen = new TaskGenerateHillaImpl() {
@@ -21,6 +40,7 @@ class TaskGenerateHillaImplTest {
         };
 
         try {
+            gen.configure(DIR, null);
             gen.execute();
         } catch (ExecutionFailedException e) {
             fail("Shouldn't have thrown an exception", e);
@@ -48,6 +68,7 @@ class TaskGenerateHillaImplTest {
         };
 
         try {
+            gen.configure(DIR, null);
             gen.execute();
             fail("Should have thrown exception");
         } catch (ExecutionFailedException e) {
@@ -69,9 +90,9 @@ class TaskGenerateHillaImplTest {
         try {
             gen.runCodeGeneration(List.of("unknownEvilCommmand"));
             fail("Should throw exception for a shell command that doesn't exist");
-        } catch (ExecutionFailedException ex) {
-            assertNotNull(ex.getCause());
-            assertFalse(ex.getMessage().contains("exit"));
+        } catch (ExecutionFailedException e) {
+            assertNotNull(e.getCause());
+            assertFalse(e.getMessage().contains("exit"));
         }
     }
 
@@ -83,9 +104,9 @@ class TaskGenerateHillaImplTest {
             gen.runCodeGeneration(List.of(TaskGenerateHillaImpl.MAVEN_COMMAND,
                     "thisOptionDoesNotExist"));
             fail("Should throw exception for a shell command that exits with error code");
-        } catch (ExecutionFailedException ex) {
-            assertNull(ex.getCause());
-            assertTrue(ex.getMessage().contains("exit"));
+        } catch (ExecutionFailedException e) {
+            assertNull(e.getCause());
+            assertTrue(e.getMessage().contains("exit"));
         }
     }
 
@@ -99,7 +120,7 @@ class TaskGenerateHillaImplTest {
             var gen = new TaskGenerateHillaImpl();
             gen.configure(tmpDir.toFile(), null);
             var command = gen.prepareCommand();
-            assertEquals(2, command.size());
+            assertFalse(command.isEmpty());
             assertEquals(TaskGenerateHillaImpl.MAVEN_COMMAND, command.get(0));
         } finally {
             if (tmpDir != null) {
@@ -122,8 +143,8 @@ class TaskGenerateHillaImplTest {
             try {
                 gen.prepareCommand();
                 fail("Should throw exception");
-            } catch (UnsupportedOperationException ex) {
-                assertTrue(ex.getMessage().contains("Gradle"));
+            } catch (UnsupportedOperationException e) {
+                assertTrue(e.getMessage().contains("Gradle"));
             }
 
             final var dummy = "dummy";
@@ -160,8 +181,8 @@ class TaskGenerateHillaImplTest {
             try {
                 gen.prepareCommand();
                 fail("Should throw exception");
-            } catch (IllegalStateException ex) {
-                assertTrue(ex.getMessage().contains("Failed"));
+            } catch (IllegalStateException e) {
+                assertTrue(e.getMessage().contains("Failed"));
             }
         } finally {
             if (tmpDir != null) {

@@ -1,8 +1,8 @@
-package dev.hilla.maven;
+package dev.hilla.maven.runner;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -11,37 +11,27 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.core.PluginManager;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-final class ParserProcessor {
-    private final Log logger;
+public final class ParserProcessor {
+    private final Path baseDir;
+    private static final Logger logger = LoggerFactory
+            .getLogger(ParserProcessor.class);
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
-    private final MavenProject project;
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private String openAPIPath;
 
-    public ParserProcessor(MavenProject project, Log logger) {
-        this.project = project;
-        this.logger = logger;
-
-        try {
-            classPath = Stream
-                    .of(project.getCompileClasspathElements(),
-                            project.getRuntimeClasspathElements())
-                    .flatMap(Collection::stream).collect(Collectors.toSet());
-        } catch (DependencyResolutionRequiredException e) {
-            throw new ParserException("Failed collecting Maven class path", e);
-        }
+    public ParserProcessor(Path baseDir, Set<String> classPath) {
+        this.baseDir = baseDir;
+        this.classPath = classPath;
     }
 
     public ParserProcessor classPath(
@@ -104,8 +94,7 @@ final class ParserProcessor {
         }
 
         try {
-            var path = Paths.get(project.getBasedir().getAbsolutePath(),
-                    openAPIPath);
+            var path = baseDir.resolve(openAPIPath);
             var fileName = path.getFileName().toString();
 
             if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")

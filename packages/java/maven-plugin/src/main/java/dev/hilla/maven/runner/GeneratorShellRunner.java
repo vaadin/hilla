@@ -1,6 +1,7 @@
-package dev.hilla.maven;
+package dev.hilla.maven.runner;
 
-import org.apache.maven.plugin.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +22,14 @@ final class GeneratorShellRunner {
     }
 
     private final List<String> arguments = new ArrayList<>();
-    private final Log logger;
 
-    public GeneratorShellRunner(File baseDir, Log logger) {
-        this.logger = logger;
+    private static final Logger logger = LoggerFactory
+            .getLogger(GeneratorShellRunner.class);
+
+    private final File workingDirectory;
+
+    public GeneratorShellRunner(File workingDirectory) {
+        this.workingDirectory = workingDirectory;
 
         if (IS_WINDOWS) {
             arguments.add("cmd.exe");
@@ -40,10 +45,13 @@ final class GeneratorShellRunner {
 
     public void run(String input) throws InterruptedException, IOException {
         Objects.requireNonNull(input);
-        logger.debug(String.format("Executing command: %s",
-                String.join(" ", arguments)));
 
-        var builder = new ProcessBuilder().command(arguments)
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing command: {}", String.join(" ", arguments));
+        }
+
+        var builder = new ProcessBuilder().directory(workingDirectory)
+                .command(arguments)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT);
 
@@ -56,8 +64,8 @@ final class GeneratorShellRunner {
         var exitCode = process.waitFor();
 
         if (exitCode == 0) {
-            logger.info("The Generator process finished with the exit code "
-                    + exitCode);
+            logger.info("The Generator process finished with the exit code {}",
+                    exitCode);
         } else {
             throw new GeneratorException(
                     "Generator execution failed with exit code " + exitCode);
@@ -65,8 +73,8 @@ final class GeneratorShellRunner {
     }
 
     public void runNpmInstall() throws InterruptedException, IOException {
-        var builder = new ProcessBuilder().command(List.of("npm", "install"))
-                .inheritIO();
+        var builder = new ProcessBuilder().directory(workingDirectory)
+                .command(List.of("npm", "install")).inheritIO();
 
         var process = builder.start();
 
