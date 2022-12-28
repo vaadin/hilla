@@ -72,4 +72,9 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     protected abstract Optional<ClassInfoModel> prepareClassInfo();
 
     protected abstract Set<AnnotationParameterModel> prepareParameters();
+
+    static Stream<AnnotationInfoModel> parseString(String string,
+            String stopMarker) {
+        return Stream.empty();
+    }
 }
