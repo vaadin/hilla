@@ -21,11 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    outputs:
-      packages-java: ${{ steps.packages-java.outputs.packages }}
-      packages-ts: ${{ steps.packages-ts.outputs.packages }}
-      packages-it: ${{ steps.packages-it.outputs.packages }}
-
     steps:
       - name: Check Secrets
         run: |
@@ -38,33 +33,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - name: List Java Unit
-        id: packages-java
-        run: |
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
-            require('fs').readdirSync('packages/java')
-              .filter(name => name !== 'tests')
-          ))")"
-      - name: List TypeScript Unit
-        id: packages-ts
-        run: >-
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
-            require('fs').readdirSync('packages/ts')
-          ))")"
-      - name: List IT
-        id: packages-it
-        run: >-
-          echo "::set-output name=packages::$(node -e "console.log(JSON.stringify(
-            [
-              require('fs').readdirSync('packages/java/tests/')
-                .filter(name => name !== 'spring'),
-              require('fs').readdirSync('packages/java/tests/spring/')
-                .map(name => 'spring/' + name)
-            ].flat()
-              .filter(path =>
-                require('fs').lstatSync('packages/java/tests/' + path).isDirectory()
-              )
-          ))")"
       - name: Setup
         uses: ./.github/actions/setup
       - name: Validate Java Format
@@ -102,8 +70,6 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.init.outputs.packages-java) }}
 
     steps:
       - name: Checkout Project Code
@@ -122,14 +88,14 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
-        run: (cd packages/java/${{ matrix.package }} && mvn -B -am -P\!it-modules verify)
+        run: mvn -B -am -P\!it-modules verify
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         if: ${{ env.COVFILES != '' }}
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -144,8 +110,6 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.init.outputs.packages-ts) }}
 
     steps:
       - name: Checkout Project Code
@@ -164,7 +128,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
-        run: (cd packages/ts/${{ matrix.package }} && npm run test:coverage)
+        run: npm run test:coverage
         env:
           CI: true
       - name: Collect Coverage
@@ -172,7 +136,7 @@ jobs:
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -192,14 +156,12 @@ jobs:
       fail-fast: false
       matrix:
         hillaEngine: [false, true]
-        package: ${{ fromJSON(needs.init.outputs.packages-it) }}
+        package:
+          - tests
         java-version:
-            - 11
-        exclude:
-          - package: spring/endpoints-latest-java
-            java-version: 11
+          - 11
         include:
-          - package: spring/endpoints-latest-java
+          - package: tests/spring/endpoints-latest-java
             java-version: 17
             hilla-engine: false
 
@@ -229,7 +191,7 @@ jobs:
       - name: Verify
         run: |
           (
-            cd packages/java/tests/${{ matrix.package }} && \
+            cd packages/java/${{ matrix.package }} && \
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
