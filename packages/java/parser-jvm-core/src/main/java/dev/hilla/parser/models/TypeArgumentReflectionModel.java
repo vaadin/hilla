@@ -52,11 +52,7 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        // TODO: This is a temporary limitation of ClassGraph; when it is fixed,
-        // the condition should be removed.
-        return getWildcard() == TypeArgument.Wildcard.NONE
-                ? processAnnotations(origin.getAnnotations())
-                : List.of();
+        return processAnnotations(origin.getAnnotations());
     }
 
     @Override
