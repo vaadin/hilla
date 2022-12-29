@@ -20,25 +20,6 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 
-    /**
-     * A factory that creates a synthetic pre-resolved type variable model.
-     *
-     * @param typeParameter
-     *            Origin type parameter.
-     * @param annotations
-     *            List of variable annotations.
-     * @return Type variable model instance.
-     * @deprecated To be removed once <a href=
-     *             "https://github.com/classgraph/classgraph/issues/706">{@code
-     * TypeVariable.resolve()} </a> is fixed.
-     */
-    @Deprecated
-    public static TypeVariableModel of(
-            @Nonnull TypeParameterModel typeParameter,
-            @Nonnull List<AnnotationInfoModel> annotations) {
-        return new TypeVariableArtificialModel(typeParameter, annotations);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -25,9 +25,8 @@ final class TypeParameterReflectionModel extends TypeParameterModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        // TODO: Temporary limitation because ClassGraph doesn't provide stored
-        // annotations for TypeParameter.
-        return List.of();
+        return Arrays.stream(origin.getAnnotations())
+                .map(AnnotationInfoModel::of).collect(Collectors.toList());
     }
 
     @Override
