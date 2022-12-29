@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.hilla.maven.runner.GeneratorConfiguration;
+import dev.hilla.maven.runner.GeneratorUnavailableException;
 import dev.hilla.maven.runner.ParserConfiguration;
 import dev.hilla.maven.runner.PluginConfiguration;
 import dev.hilla.maven.runner.PluginException;
 import dev.hilla.maven.runner.PluginRunner;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -27,16 +29,24 @@ import org.apache.maven.project.MavenProject;
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
+
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
+
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
-    @Parameter(property = "hilla.runNpmInstall", defaultValue = "true")
-    private boolean runNpmInstall;
+
     @Parameter(defaultValue = "${project.build.directory}", readonly = true)
     private File buildDirectory;
+
+    // If set to false, the plugin will not fail if the generator is not
+    // available. This allows to run this goal just to save the configuration,
+    // without having to run 'npm install' to avoid an error
+    @Parameter(property = "hilla.failOnMissingGenerator", defaultValue = "true")
+    private boolean failOnMissingGenerator;
 
     @Override
     public void execute() throws EndpointCodeGeneratorMojoException {
@@ -55,7 +65,6 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
         conf.setBaseDir(project.getBasedir().toPath());
         conf.setGenerator(generator);
         conf.setParser(parser);
-        conf.setRunNpmInstall(runNpmInstall);
         var buildDir = project.getBuild().getDirectory();
         conf.setBuildDir(buildDir);
 
@@ -73,6 +82,13 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
             new PluginRunner(conf).execute();
         } catch (PluginException e) {
             throw new EndpointCodeGeneratorMojoException("Execution failed", e);
+        } catch (GeneratorUnavailableException e) {
+            if (failOnMissingGenerator) {
+                throw new EndpointCodeGeneratorMojoException("Execution failed",
+                        e);
+            } else {
+                getLog().warn(e.getMessage());
+            }
         }
     }
 }

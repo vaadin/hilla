@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import dev.hilla.maven.runner.GeneratorUnavailableException;
 import dev.hilla.maven.runner.PluginConfiguration;
 import dev.hilla.maven.runner.PluginException;
 import dev.hilla.maven.runner.PluginRunner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,20 +55,18 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
                 throw new ExecutionFailedException("Project directory not set");
             }
 
-            PluginConfiguration config;
+            PluginConfiguration config = null;
 
             if (buildDirectoryName != null) {
+                var buildDir = new File(projectDirectory, buildDirectoryName);
+
                 try {
-                    config = PluginConfiguration.load(
-                            new File(projectDirectory, buildDirectoryName));
+                    config = PluginConfiguration.load(buildDir);
                 } catch (IOException e) {
-                    logger.info(
+                    logger.warn(
                             "Hilla Maven Plugin configuration found, but not read correctly",
                             e);
-                    config = null;
                 }
-            } else {
-                config = null;
             }
 
             if (config == null) {
@@ -79,7 +79,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
                         "Hilla Maven Plugin configuration found: run generator directly");
                 new PluginRunner(config).execute();
             }
-        } catch (PluginException e) {
+        } catch (PluginException | GeneratorUnavailableException e) {
             throw new ExecutionFailedException(e);
         }
     }
@@ -126,10 +126,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     }
 
     List<String> prepareMavenCommand() {
-        // By default the Maven plugin runs `npm install` which is not needed
-        // here as this task is invoked after the one that runs it
-        return List.of(MAVEN_COMMAND, "hilla:generate",
-                "-Dhilla.runNpmInstall=false");
+        return List.of(MAVEN_COMMAND, "hilla:generate");
     }
 
     List<String> prepareGradleCommand() {

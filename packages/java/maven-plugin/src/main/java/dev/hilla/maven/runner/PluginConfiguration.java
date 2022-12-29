@@ -20,17 +20,20 @@ public class PluginConfiguration {
     private Set<String> classPath;
     private GeneratorConfiguration generator;
     private ParserConfiguration parser;
-    private boolean runNpmInstall;
     private String buildDir;
 
     public static PluginConfiguration load(File targetDir) throws IOException {
-        File file = new File(targetDir, RESOURCE_NAME);
+        File configFile = new File(targetDir, RESOURCE_NAME);
 
-        if (!file.exists()) {
+        if (!configFile.isFile()) {
             return null;
         }
 
-        return MAPPER.readValue(file, PluginConfiguration.class);
+        // The Maven configuration can change, so it is preferable to get a new
+        // one each time the project is run
+        configFile.deleteOnExit();
+
+        return MAPPER.readValue(configFile, PluginConfiguration.class);
     }
 
     public void store(File targetDir) throws IOException {
@@ -67,14 +70,6 @@ public class PluginConfiguration {
 
     public void setParser(ParserConfiguration parser) {
         this.parser = parser;
-    }
-
-    public boolean isRunNpmInstall() {
-        return runNpmInstall;
-    }
-
-    public void setRunNpmInstall(boolean runNpmInstall) {
-        this.runNpmInstall = runNpmInstall;
     }
 
     public String getBuildDir() {

@@ -21,16 +21,18 @@ public class PluginRunner {
         this.conf = conf;
     }
 
-    public void execute() throws PluginException {
+    public void execute()
+            throws PluginException, GeneratorUnavailableException {
         var result = parseJavaCode();
         var openAPI = saveOpenAPI(result);
         generateTypeScriptCode(openAPI);
     }
 
-    private void generateTypeScriptCode(String openAPI) throws PluginException {
+    private void generateTypeScriptCode(String openAPI)
+            throws PluginException, GeneratorUnavailableException {
         try {
-            var executor = new GeneratorProcessor(conf.getBaseDir(),
-                    conf.isRunNpmInstall()).input(openAPI);
+            var executor = new GeneratorProcessor(conf.getBaseDir())
+                    .input(openAPI);
 
             var generator = conf.getGenerator();
             generator.getOutputDir().ifPresent(executor::outputDir);

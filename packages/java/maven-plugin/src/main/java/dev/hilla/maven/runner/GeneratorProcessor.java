@@ -32,15 +32,13 @@ public final class GeneratorProcessor {
     private final Path baseDir;
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
-    private final boolean runNpmInstall;
     private String input;
     private String outputDir = "frontend/generated";
     private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
             DEFAULT_PLUGINS);
 
-    public GeneratorProcessor(Path baseDir, boolean runNpmInstall) {
+    public GeneratorProcessor(Path baseDir) {
         this.baseDir = baseDir;
-        this.runNpmInstall = runNpmInstall;
     }
 
     public GeneratorProcessor input(@Nonnull String input) {
@@ -70,16 +68,12 @@ public final class GeneratorProcessor {
         return this;
     }
 
-    public void process() throws IOException, InterruptedException {
+    public void process() throws IOException, InterruptedException,
+            GeneratorUnavailableException {
         var runner = new GeneratorShellRunner(baseDir.toFile());
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
-
-        if (runNpmInstall) {
-            runner.runNpmInstall();
-        }
-
         runner.run(input);
     }
 
