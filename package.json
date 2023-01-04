@@ -29,6 +29,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.4",
+    "@types/sinon": "^10.0.13",
     "@web/dev-server-esbuild": "^0.2.14",
     "@web/dev-server-import-maps": "^0.0.6",
     "@web/test-runner-chrome": "^0.10.2",
@@ -44,6 +45,7 @@
     "micromatch": "^4.0.4",
     "prettier": "^2.7.1",
     "simple-git-hooks": "^2.6.1",
-    "typescript": "^4.8.4"
+    "sinon": "^15.0.1",
+    "typescript": "^4.9.4"
   }
 }

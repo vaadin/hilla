@@ -205,9 +205,7 @@ public class AnnotationInfoModelTests {
 
             Enum enumParameter();
 
-            int intParameter()
-
-            default 10;
+            int intParameter() default 10;
 
             String stringParameter() default "bar1";
         }
