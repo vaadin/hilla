@@ -25,7 +25,8 @@ public final class MethodParameterPlugin
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof MethodNode methodNode) {
+        if (nodeDependencies.getNode() instanceof MethodNode) {
+            var methodNode = (MethodNode) nodeDependencies.getNode();
             return nodeDependencies
                     .appendChildNodes(getParametersStream(methodNode));
         }

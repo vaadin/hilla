@@ -24,9 +24,10 @@ public final class Parser {
     public OpenAPI execute() {
         logger.debug("Executing JVM Parser");
 
-        try (var scanResult = new ClassGraph()
+        try (var scanResult = new ClassGraph().enableAnnotationInfo()
                 .overrideClasspath(config.getClassPathElements()).scan()) {
-            var rootNode = new RootNode(new ProjectScanResult(scanResult), storage.getOpenAPI());
+            var rootNode = new RootNode(new ProjectScanResult(scanResult),
+                    storage.getOpenAPI());
             var pluginManager = new PluginManager(
                     storage.getParserConfig().getPlugins());
             pluginManager.setStorage(storage);

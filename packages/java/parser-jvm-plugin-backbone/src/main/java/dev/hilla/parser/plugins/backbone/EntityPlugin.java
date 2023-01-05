@@ -25,14 +25,16 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode signatureNode)) {
+        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
             return nodeDependencies;
         }
 
-        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel ref)) {
+        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
+        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
             return nodeDependencies;
         }
 
+        var ref = (ClassRefSignatureModel) signatureNode.getSource();
         if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
             return nodeDependencies;
         }
@@ -43,7 +45,8 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode entityNode) {
+        if (nodePath.getNode() instanceof EntityNode) {
+            var entityNode = (EntityNode) nodePath.getNode();
             var cls = entityNode.getSource();
             entityNode.setTarget(
                     cls.isEnum() ? enumSchema(cls) : new ObjectSchema());
