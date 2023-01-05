@@ -36,8 +36,7 @@ public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof FieldNode) {
-            var fieldNode = (FieldNode) nodePath.getNode();
+        if (nodePath.getNode() instanceof FieldNode fieldNode) {
             fieldNode.setTarget(fieldNode.getSource().getName());
         }
     }

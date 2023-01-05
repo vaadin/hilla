@@ -25,8 +25,7 @@ public final class MethodParameterPlugin
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof MethodNode) {
-            var methodNode = (MethodNode) nodeDependencies.getNode();
+        if (nodeDependencies.getNode() instanceof MethodNode methodNode) {
             return nodeDependencies
                     .appendChildNodes(getParametersStream(methodNode));
         }
@@ -60,7 +59,7 @@ public final class MethodParameterPlugin
                     .orElse(String.format("_param_%d", i));
             parameterNodes.add(i, MethodParameterNode.of(parameter, name));
         }
-        return parameterNodes.stream().sequential();
+        return parameterNodes.stream();
     }
 
     private RequestBody createRequestBody() {

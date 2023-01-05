@@ -36,8 +36,7 @@ public final class TypeSignaturePlugin
         extends AbstractPlugin<PluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof TypeSignatureNode) {
-            var typeSignatureNode = (TypeSignatureNode) nodePath.getNode();
+        if (nodePath.getNode() instanceof TypeSignatureNode typeSignatureNode) {
             typeSignatureNode.setTarget(
                     new SchemaProcessor(typeSignatureNode.getSource())
                             .process());
@@ -46,11 +45,10 @@ public final class TypeSignaturePlugin
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
+        if (!(nodePath.getNode() instanceof TypeSignatureNode node)) {
             return;
         }
 
-        var node = (TypeSignatureNode) nodePath.getNode();
         var schema = node.getTarget();
         var parentNode = nodePath.getParentPath().getNode();
         var grandParentNode = nodePath.getParentPath().getParentPath()

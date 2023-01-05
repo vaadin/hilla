@@ -41,11 +41,9 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof MethodNode)) {
+        if (!(nodePath.getNode() instanceof MethodNode methodNode)) {
             return;
         }
-
-        var methodNode = (MethodNode) nodePath.getNode();
 
         var endpointParent = findClosestEndpoint(nodePath);
         if (endpointParent.isEmpty()) {
@@ -59,11 +57,9 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof MethodNode)) {
+        if (!(nodePath.getNode() instanceof MethodNode methodNode)) {
             return;
         }
-
-        var methodNode = (MethodNode) nodePath.getNode();
 
         var endpointParent = findClosestEndpoint(nodePath);
         if (endpointParent.isEmpty()) {
