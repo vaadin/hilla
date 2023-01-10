@@ -1,8 +1,17 @@
 package dev.hilla.parser.plugins.backbone;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
@@ -16,21 +25,37 @@ import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
 import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
 
-import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String JSON_IGNORE = JsonIgnore.class.getName();
     private static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
             .getName();
     private static final String JSON_IGNORE_TYPE = JsonIgnoreType.class
             .getName();
+
+    private static boolean isFieldIgnored(FieldInfoModel field) {
+        return field.getAnnotations().stream().map(AnnotationInfoModel::getName)
+                .anyMatch(n -> n.equals(JSON_IGNORE));
+    }
+
+    private static boolean isFieldTypeIgnored(FieldInfoModel field) {
+        SignatureModel type = field.getType();
+
+        if (!(type instanceof ClassRefSignatureModel)) {
+            return false;
+        }
+
+        return ((ClassRefSignatureModel) type).getClassInfo().getAnnotations()
+                .stream().map(AnnotationInfoModel::getName)
+                .anyMatch(n -> n.equals(JSON_IGNORE_TYPE));
+    }
+
+    @Override
+    public void enter(NodePath<?> nodePath) {
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+    }
 
     @Override
     @Nonnull
@@ -77,30 +102,5 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
 
                     return true;
                 }));
-    }
-
-    private static boolean isFieldIgnored(FieldInfoModel field) {
-        return field.getAnnotations().stream().map(AnnotationInfoModel::getName)
-                .anyMatch(n -> n.equals(JSON_IGNORE));
-    }
-
-    private static boolean isFieldTypeIgnored(FieldInfoModel field) {
-        SignatureModel type = field.getType();
-
-        if (!(type instanceof ClassRefSignatureModel)) {
-            return false;
-        }
-
-        return ((ClassRefSignatureModel) type).getClassInfo().getAnnotations()
-                .stream().map(AnnotationInfoModel::getName)
-                .anyMatch(n -> n.equals(JSON_IGNORE_TYPE));
-    }
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
     }
 }

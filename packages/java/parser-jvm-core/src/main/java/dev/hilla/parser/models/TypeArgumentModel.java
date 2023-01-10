@@ -78,9 +78,6 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
     protected abstract List<SignatureModel> prepareAssociatedTypes();
 
     public enum Wildcard {
-        NONE,
-        ANY,
-        EXTENDS,
-        SUPER;
+        NONE, ANY, EXTENDS, SUPER;
     }
 }

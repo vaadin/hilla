@@ -226,6 +226,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
                 .anyMatch(cls -> predicate.test(cls, actor));
     }
 
+    public final Optional<ClassRefSignatureModel> getSuperClass() {
+        if (superClass == null) {
+            superClass = Optional.ofNullable(prepareSuperClass());
+        }
+
+        return superClass;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -321,14 +329,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     public abstract String getSimpleName();
-
-    public final Optional<ClassRefSignatureModel> getSuperClass() {
-        if (superClass == null) {
-            superClass = Optional.ofNullable(prepareSuperClass());
-        }
-
-        return superClass;
-    }
 
     public Stream<ClassRefSignatureModel> getSuperClassStream() {
         return getSuperClass().stream();

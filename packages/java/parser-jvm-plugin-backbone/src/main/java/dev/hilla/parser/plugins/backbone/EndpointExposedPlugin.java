@@ -49,6 +49,54 @@ public final class EndpointExposedPlugin
                 (TypeParameterModel) signature, parentPath));
     }
 
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        var node = nodeDependencies.getNode();
+
+        if (node instanceof EndpointNode || node instanceof EndpointExposedNode
+                || node instanceof EndpointNonExposedNode) {
+            // Attach type signature nodes for hierarchy parent superclass and
+            // implemented interfaces, if any
+            var cls = (ClassInfoModel) node.getSource();
+            return nodeDependencies
+                    .appendChildNodes(scanEndpointClassSignature(cls));
+        }
+
+        if (node instanceof EndpointSignatureNode) {
+            // Attach the referenced class from the endpoint hierarchy type
+            // signature
+            var classRef = ((ClassRefSignatureModel) node.getSource());
+            var classInfo = classRef.getClassInfo();
+            return nodeDependencies.appendChildNodes(
+                    Stream.of(createEndpointHierarchyClassNode(classInfo)));
+        }
+
+        return nodeDependencies;
+    }
+
+    /**
+     * Creates a node that wraps the given endpoint hierarchy class as a source.
+     * If the class is annotated with the configured {@code @EndpointExposed}
+     * annotation, uses {@code EndpointExposedNode}, otherwise uses
+     * {@code EndpointNonExposedNode}.
+     *
+     * @param classInfo
+     *            The class from the endpoint hierarchy.
+     * @return The node for the class.
+     */
+    private Node<?, ?> createEndpointHierarchyClassNode(
+            ClassInfoModel classInfo) {
+        var endpointExposedAnnotationName = getStorage().getParserConfig()
+                .getEndpointExposedAnnotationName();
+        var exposed = classInfo.getAnnotationsStream()
+                .map(AnnotationInfoModel::getName)
+                .anyMatch(endpointExposedAnnotationName::equals);
+        var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
+                : EndpointNonExposedNode.of(classInfo);
+        return classInfoNode;
+    }
+
     /**
      * Replaces generic type parameters used in {@code @EndpointExposed} with
      * their arguments defined in type signatures of endpoint class hierarchy
@@ -91,32 +139,6 @@ public final class EndpointExposedPlugin
         return signature;
     }
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        var node = nodeDependencies.getNode();
-
-        if (node instanceof EndpointNode || node instanceof EndpointExposedNode
-                || node instanceof EndpointNonExposedNode) {
-            // Attach type signature nodes for hierarchy parent superclass and
-            // implemented interfaces, if any
-            var cls = (ClassInfoModel) node.getSource();
-            return nodeDependencies
-                    .appendChildNodes(scanEndpointClassSignature(cls));
-        }
-
-        if (node instanceof EndpointSignatureNode) {
-            // Attach the referenced class from the endpoint hierarchy type
-            // signature
-            var classRef = ((ClassRefSignatureModel) node.getSource());
-            var classInfo = classRef.getClassInfo();
-            return nodeDependencies.appendChildNodes(
-                    Stream.of(createEndpointHierarchyClassNode(classInfo)));
-        }
-
-        return nodeDependencies;
-    }
-
     /**
      * Creates and returns nodes for the type signatures of the superclass and
      * implemented interfaces of the endpoint or endpoint hierarchy ancestor
@@ -137,27 +159,5 @@ public final class EndpointExposedPlugin
                 .concat(endpointClass.getSuperClass().stream(),
                         endpointClass.getInterfacesStream())
                 .map(EndpointSignatureNode::of);
-    }
-
-    /**
-     * Creates a node that wraps the given endpoint hierarchy class as a source.
-     * If the class is annotated with the configured {@code @EndpointExposed}
-     * annotation, uses {@code EndpointExposedNode}, otherwise uses
-     * {@code EndpointNonExposedNode}.
-     *
-     * @param classInfo
-     *            The class from the endpoint hierarchy.
-     * @return The node for the class.
-     */
-    private Node<?, ?> createEndpointHierarchyClassNode(
-            ClassInfoModel classInfo) {
-        var endpointExposedAnnotationName = getStorage().getParserConfig()
-                .getEndpointExposedAnnotationName();
-        var exposed = classInfo.getAnnotationsStream()
-                .map(AnnotationInfoModel::getName)
-                .anyMatch(endpointExposedAnnotationName::equals);
-        var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
-                : EndpointNonExposedNode.of(classInfo);
-        return classInfoNode;
     }
 }

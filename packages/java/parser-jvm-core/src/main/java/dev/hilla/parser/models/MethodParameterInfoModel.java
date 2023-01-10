@@ -9,9 +9,9 @@ import io.github.classgraph.MethodParameterInfo;
 
 public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, OwnedModel<MethodInfoModel> {
+    private Integer index;
     private MethodInfoModel owner;
     private SignatureModel type;
-    private Integer index;
 
     @Deprecated
     public static MethodParameterInfoModel of(
@@ -49,8 +49,6 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         return MethodParameterInfoModel.class;
     }
 
-    public abstract int getModifiers();
-
     /**
      * Returns a zero-based index of the parameter in the method parameter list.
      *
@@ -63,6 +61,8 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
         return index;
     }
+
+    public abstract int getModifiers();
 
     @Override
     public MethodInfoModel getOwner() {

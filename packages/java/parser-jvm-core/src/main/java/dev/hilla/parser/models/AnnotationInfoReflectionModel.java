@@ -41,8 +41,8 @@ final class AnnotationInfoReflectionModel extends AnnotationInfoModel
                     // could simply invoke the method to get a value.
                     try {
                         var value = method.invoke(origin);
-                        var isDefault = Objects.deepEquals(method.getDefaultValue(),
-                                value);
+                        var isDefault = Objects
+                                .deepEquals(method.getDefaultValue(), value);
                         return AnnotationParameterModel.of(method.getName(),
                                 value, isDefault);
                     } catch (InvocationTargetException

@@ -1,7 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.Map;
-
 final class AnnotationParameterReflectionModel<T>
         extends AnnotationParameterModel implements ReflectionModel {
     private final ReflectionOrigin<T> origin;

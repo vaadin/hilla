@@ -23,27 +23,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
-            return nodeDependencies;
-        }
-
-        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
-        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
-            return nodeDependencies;
-        }
-
-        var ref = (ClassRefSignatureModel) signatureNode.getSource();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
-            return nodeDependencies;
-        }
-
-        return nodeDependencies.appendRelatedNodes(
-                Stream.of(EntityNode.of(ref.getClassInfo())));
-    }
-
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EntityNode) {
@@ -65,6 +44,27 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
 
             attachSchemaWithNameToOpenApi(schema, cls.getName(), openApi);
         }
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
+            return nodeDependencies;
+        }
+
+        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
+        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
+            return nodeDependencies;
+        }
+
+        var ref = (ClassRefSignatureModel) signatureNode.getSource();
+        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+            return nodeDependencies;
+        }
+
+        return nodeDependencies.appendRelatedNodes(
+                Stream.of(EntityNode.of(ref.getClassInfo())));
     }
 
     private void attachSchemaWithNameToOpenApi(Schema<?> schema, String name,
