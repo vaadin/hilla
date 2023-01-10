@@ -23,22 +23,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     public static final String MEDIA_TYPE = "application/json";
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        var node = nodeDependencies.getNode();
-        if (node instanceof EndpointNode
-                || node instanceof EndpointExposedNode) {
-            var endpointCls = (ClassInfoModel) node.getSource();
-            var methodNodes = endpointCls.getMethodsStream()
-                    .filter(MethodInfoModel::isPublic)
-                    .<Node<?, ?>> map(MethodNode::of);
-            return nodeDependencies.appendChildNodes(methodNodes);
-        }
-
-        return nodeDependencies;
-    }
-
     @Override
     public void enter(NodePath<?> nodePath) {
         if (!(nodePath.getNode() instanceof MethodNode)) {
@@ -78,6 +62,22 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
         rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        var node = nodeDependencies.getNode();
+        if (node instanceof EndpointNode
+                || node instanceof EndpointExposedNode) {
+            var endpointCls = (ClassInfoModel) node.getSource();
+            var methodNodes = endpointCls.getMethodsStream()
+                    .filter(MethodInfoModel::isPublic)
+                    .<Node<?, ?>> map(MethodNode::of);
+            return nodeDependencies.appendChildNodes(methodNodes);
+        }
+
+        return nodeDependencies;
     }
 
     private Operation createOperation(EndpointNode endpointNode,

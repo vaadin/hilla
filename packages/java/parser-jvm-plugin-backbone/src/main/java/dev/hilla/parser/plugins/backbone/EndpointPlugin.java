@@ -23,22 +23,18 @@ import io.swagger.v3.oas.models.tags.Tag;
 public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof RootNode) {
-            var rootNode = (RootNode) nodeDependencies.getNode();
-            var endpointAnnotationName = getStorage().getParserConfig()
-                    .getEndpointAnnotationName();
-            var endpoints = rootNode.getSource()
-                    .getClassesWithAnnotation(endpointAnnotationName).stream()
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
-            checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
-            return nodeDependencies.appendChildNodes(
-                    endpoints.stream().filter(ClassInfoModel::isNonJDKClass)
-                            .map(EndpointNode::of));
-        }
-        return nodeDependencies;
+    private static void checkIfJavaCompilerParametersFlagIsEnabled(
+            Collection<ClassInfoModel> endpoints) {
+        endpoints.stream().flatMap(ClassInfoModel::getMethodsStream)
+                .flatMap(MethodInfoModel::getParametersStream).findFirst()
+                .ifPresent((parameter) -> {
+                    if (parameter.getName() == null) {
+                        logger.info("Missing endpoint method parameter names"
+                                + " in JVM bytecode, probably because they were not enabled"
+                                + " during compilation. For the Java compiler, set the"
+                                + " \"parameters\" flag to true to enable them.");
+                    }
+                });
     }
 
     @Override
@@ -60,17 +56,21 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    private static void checkIfJavaCompilerParametersFlagIsEnabled(
-            Collection<ClassInfoModel> endpoints) {
-        endpoints.stream().flatMap(ClassInfoModel::getMethodsStream)
-                .flatMap(MethodInfoModel::getParametersStream).findFirst()
-                .ifPresent((parameter) -> {
-                    if (parameter.getName() == null) {
-                        logger.info("Missing endpoint method parameter names"
-                                + " in JVM bytecode, probably because they were not enabled"
-                                + " during compilation. For the Java compiler, set the"
-                                + " \"parameters\" flag to true to enable them.");
-                    }
-                });
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        if (nodeDependencies.getNode() instanceof RootNode) {
+            var rootNode = (RootNode) nodeDependencies.getNode();
+            var endpointAnnotationName = getStorage().getParserConfig()
+                    .getEndpointAnnotationName();
+            var endpoints = rootNode.getSource()
+                    .getClassesWithAnnotation(endpointAnnotationName).stream()
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
+            checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
+            return nodeDependencies.appendChildNodes(
+                    endpoints.stream().filter(ClassInfoModel::isNonJDKClass)
+                            .map(EndpointNode::of));
+        }
+        return nodeDependencies;
     }
 }

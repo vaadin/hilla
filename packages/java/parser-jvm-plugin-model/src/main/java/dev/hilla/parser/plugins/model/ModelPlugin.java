@@ -29,33 +29,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         setOrder(200);
     }
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return nodeDependencies;
-    }
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
-            return;
-        }
-
-        var signatureNode = (TypeSignatureNode) nodePath.getNode();
-        var signature = (SignatureModel) signatureNode.getSource();
-        if (signature.isTypeArgument() || signature.isTypeParameter()) {
-            return;
-        }
-
-        var schema = signatureNode.getTarget();
-        addConstraintsToSchema(signature, schema);
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-
-    }
-
     private static ValidationConstraint convertAnnotation(
             AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
@@ -80,6 +53,38 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
                 .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
     }
 
+    @Override
+    public void enter(NodePath<?> nodePath) {
+        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
+            return;
+        }
+
+        var signatureNode = (TypeSignatureNode) nodePath.getNode();
+        var signature = (SignatureModel) signatureNode.getSource();
+        if (signature.isTypeArgument() || signature.isTypeParameter()) {
+            return;
+        }
+
+        var schema = signatureNode.getTarget();
+        addConstraintsToSchema(signature, schema);
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+
+    }
+
+    @Override
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
+    }
+
     private void addConstraintsToSchema(SignatureModel signature,
             Schema<?> schema) {
         var constraints = signature.getAnnotationsStream()
@@ -90,10 +95,5 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         if (!constraints.isEmpty()) {
             schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
         }
-    }
-
-    @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
-        return List.of(BackbonePlugin.class);
     }
 }
