@@ -8,12 +8,10 @@ import java.util.stream.Stream;
 
 import dev.hilla.parser.utils.Streams;
 
-import io.github.classgraph.TypeArgument;
-
 final class TypeArgumentReflectionModel extends TypeArgumentModel
         implements ReflectionSignatureModel {
     private final AnnotatedType origin;
-    private TypeArgument.Wildcard wildcard;
+    private Wildcard wildcard;
 
     TypeArgumentReflectionModel(AnnotatedType origin) {
         this.origin = origin;
@@ -29,21 +27,21 @@ final class TypeArgumentReflectionModel extends TypeArgumentModel
     }
 
     @Override
-    public TypeArgument.Wildcard getWildcard() {
+    public Wildcard getWildcard() {
         if (wildcard == null) {
             if (origin instanceof AnnotatedWildcardType) {
                 var specific = (AnnotatedWildcardType) origin;
 
                 if (specific.getAnnotatedLowerBounds().length > 0) {
-                    wildcard = TypeArgument.Wildcard.SUPER;
+                    wildcard = Wildcard.SUPER;
                 } else if (!specific.getAnnotatedUpperBounds()[0].getType()
                         .equals(Object.class)) {
-                    wildcard = TypeArgument.Wildcard.EXTENDS;
+                    wildcard = Wildcard.EXTENDS;
                 } else {
-                    wildcard = TypeArgument.Wildcard.ANY;
+                    wildcard = Wildcard.ANY;
                 }
             } else {
-                wildcard = TypeArgument.Wildcard.NONE;
+                wildcard = Wildcard.NONE;
             }
         }
 

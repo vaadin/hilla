@@ -1,20 +1,21 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;

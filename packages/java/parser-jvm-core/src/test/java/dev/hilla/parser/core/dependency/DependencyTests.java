@@ -61,7 +61,7 @@ public class DependencyTests {
 
     @Test
     public void should_ResolveDependencyMembersCorrectly() {
-        var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
+        var expected = List.of("bar", "dependencyEntityThree", "foo", "foo2",
                 "foo3");
 
         var actual = openApi.getExtensions()

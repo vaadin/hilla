@@ -13,6 +13,7 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
     private SignatureModel type;
     private Integer index;
 
+    @Deprecated
     public static MethodParameterInfoModel of(
             @Nonnull MethodParameterInfo origin) {
         return new MethodParameterInfoSourceModel(

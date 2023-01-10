@@ -236,7 +236,8 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredFields(Dependency.Sample.class)
-                .map(FieldInfoModel::of).collect(Collectors.toList());
+                .map(FieldInfoModel::of).sorted(FieldInfoModel.FIELD_ORDER)
+                .collect(Collectors.toList());
         var actual = model.getFields();
 
         assertEquals(expected, actual);
@@ -748,7 +749,7 @@ public class ClassInfoModelTests {
                                 .getName())
                         .getFieldInfo("array")
                         .getTypeSignatureOrTypeDescriptor())
-                                .getArrayClassInfo();
+                        .getArrayClassInfo();
             }
         }
 

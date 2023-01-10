@@ -67,16 +67,17 @@ public class TypeArgumentModelTests {
             ModelKind kind, String name) {
         switch (name) {
         case "anyTypeArgument":
-            assertEquals(TypeArgument.Wildcard.ANY, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.ANY, model.getWildcard());
             break;
         case "extendsTypeArgument":
-            assertEquals(TypeArgument.Wildcard.EXTENDS, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.EXTENDS,
+                    model.getWildcard());
             break;
         case "regularTypeArgument":
-            assertEquals(TypeArgument.Wildcard.NONE, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.NONE, model.getWildcard());
             break;
         case "superTypeArgument":
-            assertEquals(TypeArgument.Wildcard.SUPER, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.SUPER, model.getWildcard());
             break;
         }
     }
@@ -127,10 +128,10 @@ public class TypeArgumentModelTests {
             extends AbstractContext<AnnotatedType, TypeArgument> {
         private static final Map<String, AnnotatedType> reflectionOrigins = getDeclaredFields(
                 Sample.class)
-                        .collect(Collectors.toMap(Field::getName,
-                                field -> ((AnnotatedParameterizedType) field
-                                        .getAnnotatedType())
-                                                .getAnnotatedActualTypeArguments()[0]));
+                .collect(Collectors.toMap(Field::getName,
+                        field -> ((AnnotatedParameterizedType) field
+                                .getAnnotatedType())
+                                .getAnnotatedActualTypeArguments()[0]));
 
         Context(ScanResult source) {
             super(source, reflectionOrigins,
@@ -138,8 +139,7 @@ public class TypeArgumentModelTests {
                             .collect(Collectors.toMap(FieldInfo::getName,
                                     field -> ((ClassRefTypeSignature) field
                                             .getTypeSignatureOrTypeDescriptor())
-                                                    .getTypeArguments()
-                                                    .get(0))));
+                                            .getTypeArguments().get(0))));
         }
 
         Context(ExtensionContext context) {

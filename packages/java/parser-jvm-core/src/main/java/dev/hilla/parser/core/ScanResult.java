@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ScanResult;
 
-public class ProjectScanResult {
-    private final ScanResult result;
+public class ScanResult {
+    private final io.github.classgraph.ScanResult result;
 
-    public ProjectScanResult(ScanResult result) {
+    public ScanResult(io.github.classgraph.ScanResult result) {
         this.result = result;
+    }
+
+    public io.github.classgraph.ScanResult get() {
+        return result;
     }
 
     public List<? extends Class<?>> getClassesWithAnnotation(

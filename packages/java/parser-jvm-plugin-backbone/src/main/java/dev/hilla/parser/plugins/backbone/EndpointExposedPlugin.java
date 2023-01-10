@@ -1,18 +1,19 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
+import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
@@ -20,15 +21,9 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
-import io.github.classgraph.TypeArgument;
-import io.swagger.v3.oas.models.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class EndpointExposedPlugin
         extends AbstractPlugin<PluginConfiguration> {
-    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
-
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -79,7 +74,7 @@ public final class EndpointExposedPlugin
         var paramIndex = classRef.getClassInfo().getTypeParameters()
                 .indexOf(typeParameter);
         var typeArg = classRef.getTypeArguments().get(paramIndex);
-        if (!typeArg.getWildcard().equals(TypeArgument.Wildcard.NONE)) {
+        if (!typeArg.getWildcard().equals(TypeArgumentModel.Wildcard.NONE)) {
             // TODO: add resolving for wildcard type arguments
             return typeParameter;
         }

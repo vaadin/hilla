@@ -8,6 +8,7 @@ import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.models.AnnotationParameterModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
@@ -17,18 +18,17 @@ import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
-
     private static final String JSON_IGNORE = JsonIgnore.class.getName();
-
     private static final String JSON_IGNORE_PROPERTIES = JsonIgnoreProperties.class
             .getName();
-
     private static final String JSON_IGNORE_TYPE = JsonIgnoreType.class
             .getName();
 
@@ -54,6 +54,7 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
         var ignoredByClassAnnotation = cls.getAnnotations().stream()
                 .filter(a -> a.getName().equals(JSON_IGNORE_PROPERTIES))
                 .flatMap(AnnotationInfoModel::getParametersStream)
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
                 .flatMap(p -> Arrays.stream(((Object[]) p.getValue())))
                 .map(Objects::toString);
 

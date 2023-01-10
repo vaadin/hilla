@@ -1,21 +1,23 @@
 package dev.hilla.parser.plugins.model;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
@@ -59,6 +61,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         var simpleName = extractSimpleName(annotation.getName());
 
         var attributes = annotation.getParametersStream()
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
                 .collect(Collectors.toMap(AnnotationParameterModel::getName,
                         AnnotationParameterModel::getValue));
 

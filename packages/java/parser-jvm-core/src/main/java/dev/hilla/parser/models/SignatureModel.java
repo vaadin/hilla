@@ -20,6 +20,7 @@ import io.github.classgraph.TypeVariableSignature;
 
 public interface SignatureModel
         extends Model, SpecializedModel, AnnotatedModel {
+    @Deprecated
     static SignatureModel of(@Nonnull HierarchicalTypeSignature signature) {
         if (signature instanceof BaseTypeSignature) {
             return BaseSignatureModel.of((BaseTypeSignature) signature);
