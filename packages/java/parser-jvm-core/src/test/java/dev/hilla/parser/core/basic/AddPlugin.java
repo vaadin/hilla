@@ -1,22 +1,31 @@
 package dev.hilla.parser.core.basic;
 
-import javax.annotation.Nonnull;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.test.nodes.EndpointNode;
 import dev.hilla.parser.test.nodes.EntityNode;
 import dev.hilla.parser.test.nodes.FieldNode;
 import dev.hilla.parser.test.nodes.MethodNode;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
 
 final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
+    @Override
+    public void enter(NodePath<?> nodePath) {
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+    }
+
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -57,14 +66,6 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
         } else {
             return nodeDependencies;
         }
-    }
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
     }
 
     static class Sample {

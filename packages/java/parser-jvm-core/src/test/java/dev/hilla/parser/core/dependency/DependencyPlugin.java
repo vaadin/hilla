@@ -8,14 +8,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.core.SharedStorage;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.NamedModel;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.test.nodes.EndpointNode;
 import dev.hilla.parser.test.nodes.EntityNode;
 import dev.hilla.parser.test.nodes.FieldNode;
@@ -24,13 +23,43 @@ import dev.hilla.parser.test.nodes.MethodParameterNode;
 import dev.hilla.parser.test.nodes.TypeSignatureNode;
 
 final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
-    public static final String ENTITY_DEPS_STORAGE_KEY = "x-dependency-entities";
     public static final String DEPS_MEMBERS_STORAGE_KEY = "x-dependency-entity-members";
     public static final String ENDPOINTS_DIRECT_DEPS_STORAGE_KEY = "x-dependency-endpoints";
-
-    private final List<String> entityDependencies = new ArrayList<>();
+    public static final String ENTITY_DEPS_STORAGE_KEY = "x-dependency-entities";
     private final List<String> dependencyMembers = new ArrayList<>();
     private final List<String> endpointDependencies = new ArrayList<>();
+    private final List<String> entityDependencies = new ArrayList<>();
+
+    @Override
+    public void enter(NodePath<?> nodePath) {
+
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+        if (nodePath.getNode().getSource() instanceof NamedModel
+                && (nodePath.getParentPath().getNode() instanceof EntityNode)) {
+            var model = (NamedModel) nodePath.getNode().getSource();
+            dependencyMembers.add(model.getName());
+        }
+        if ((nodePath.getNode() instanceof EntityNode)
+                && (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
+            var model = (ClassInfoModel) nodePath.getNode().getSource();
+            entityDependencies.add(model.getName());
+        }
+        if (nodePath.getNode().getSource() instanceof NamedModel && (nodePath
+                .getParentPath().getNode() instanceof EndpointNode)) {
+            var model = (NamedModel) nodePath.getNode().getSource();
+            endpointDependencies.add(model.getName());
+        }
+        if (nodePath.getNode() instanceof RootNode) {
+            var openApi = ((RootNode) nodePath.getNode()).getTarget();
+            openApi.addExtension(ENTITY_DEPS_STORAGE_KEY, entityDependencies);
+            openApi.addExtension(DEPS_MEMBERS_STORAGE_KEY, dependencyMembers);
+            openApi.addExtension(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
+                    endpointDependencies);
+        }
+    }
 
     @Nonnull
     @Override
@@ -74,36 +103,5 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
                     .appendRelatedNodes(Stream.of(EntityNode.of(entityCls)));
         }
         return nodeDependencies;
-    }
-
-    @Override
-    public void enter(NodePath<?> nodePath) {
-
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode().getSource() instanceof NamedModel
-                && (nodePath.getParentPath().getNode() instanceof EntityNode)) {
-            var model = (NamedModel) nodePath.getNode().getSource();
-            dependencyMembers.add(model.getName());
-        }
-        if ((nodePath.getNode() instanceof EntityNode)
-                && (nodePath.getNode().getSource() instanceof ClassInfoModel)) {
-            var model = (ClassInfoModel) nodePath.getNode().getSource();
-            entityDependencies.add(model.getName());
-        }
-        if (nodePath.getNode().getSource() instanceof NamedModel && (nodePath
-                .getParentPath().getNode() instanceof EndpointNode)) {
-            var model = (NamedModel) nodePath.getNode().getSource();
-            endpointDependencies.add(model.getName());
-        }
-        if (nodePath.getNode() instanceof RootNode) {
-            var openApi = ((RootNode) nodePath.getNode()).getTarget();
-            openApi.addExtension(ENTITY_DEPS_STORAGE_KEY, entityDependencies);
-            openApi.addExtension(DEPS_MEMBERS_STORAGE_KEY, dependencyMembers);
-            openApi.addExtension(ENDPOINTS_DIRECT_DEPS_STORAGE_KEY,
-                    endpointDependencies);
-        }
     }
 }
