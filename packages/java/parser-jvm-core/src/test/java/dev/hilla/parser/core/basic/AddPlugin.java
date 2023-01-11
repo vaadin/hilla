@@ -50,8 +50,8 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
                     .appendChildNodes(Stream.concat(
                             ((EndpointNode) node).getSource().getFieldsStream()
                                     .map(FieldNode::of),
-                            cleanup(((EndpointNode) node).getSource().getMethodsStream())
-                                    .map(MethodNode::of)))
+                            cleanup(((EndpointNode) node).getSource()
+                                    .getMethodsStream()).map(MethodNode::of)))
                     .appendRelatedNodes(Stream.of(
                             EntityNode.of(ClassInfoModel.of(Sample.class))));
         }
