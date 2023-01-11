@@ -1,5 +1,7 @@
 package dev.hilla.parser.core.dependency;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +76,7 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return nodeDependencies.appendChildNodes(
-                    cls.getMethodsStream().map(MethodNode::of));
+                    cleanup(cls.getMethodsStream()).map(MethodNode::of));
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
             var resultTypeNode = TypeSignatureNode

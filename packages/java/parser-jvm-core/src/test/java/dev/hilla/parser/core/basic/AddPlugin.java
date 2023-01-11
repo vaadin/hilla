@@ -1,5 +1,8 @@
 package dev.hilla.parser.core.basic;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,25 +50,23 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
                     .appendChildNodes(Stream.concat(
                             ((EndpointNode) node).getSource().getFieldsStream()
                                     .map(FieldNode::of),
-                            ((EndpointNode) node).getSource().getMethodsStream()
+                            cleanup(((EndpointNode) node).getSource().getMethodsStream())
                                     .map(MethodNode::of)))
                     .appendRelatedNodes(Stream.of(
                             EntityNode.of(ClassInfoModel.of(Sample.class))));
-        } else if (node instanceof EntityNode && ((EntityNode) node).getSource()
-                .getName().equals(Sample.class.getName())) {
-            try {
-                return nodeDependencies
-                        .appendChildNodes(Stream
-                                .of(Sample.class.getDeclaredMethod("methodFoo"),
-                                        Sample.class
-                                                .getDeclaredMethod("methodBar"))
-                                .map(MethodInfoModel::of).map(MethodNode::of));
-            } catch (NoSuchMethodException e) {
-                return nodeDependencies;
-            }
-        } else {
-            return nodeDependencies;
         }
+
+        if (node instanceof EntityNode && ((EntityNode) node).getSource()
+                .getName().equals(Sample.class.getName())) {
+            return nodeDependencies
+                    .appendChildNodes(Stream
+                            .of(getDeclaredMethod(Sample.class, "methodFoo"),
+                                    getDeclaredMethod(Sample.class,
+                                            "methodBar"))
+                            .map(MethodInfoModel::of).map(MethodNode::of));
+        }
+
+        return nodeDependencies;
     }
 
     static class Sample {
