@@ -38,8 +38,6 @@ import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ArraySignatureModelTests {
-    private static final boolean isJDK11 = Runtime.Version
-            .parse(System.getProperty("java.version")).feature() <= 11;
     private Context ctx;
 
     @BeforeEach
@@ -117,8 +115,8 @@ public class ArraySignatureModelTests {
         private static final String fieldName = "foo";
         private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType())
-                .getAnnotatedGenericComponentType()
-                .getAnnotation(Sample.Bar.class);
+                        .getAnnotatedGenericComponentType()
+                        .getAnnotation(Sample.Bar.class);
         private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;

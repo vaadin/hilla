@@ -128,10 +128,10 @@ public class TypeArgumentModelTests {
             extends AbstractContext<AnnotatedType, TypeArgument> {
         private static final Map<String, AnnotatedType> reflectionOrigins = getDeclaredFields(
                 Sample.class)
-                .collect(Collectors.toMap(Field::getName,
-                        field -> ((AnnotatedParameterizedType) field
-                                .getAnnotatedType())
-                                .getAnnotatedActualTypeArguments()[0]));
+                        .collect(Collectors.toMap(Field::getName,
+                                field -> ((AnnotatedParameterizedType) field
+                                        .getAnnotatedType())
+                                                .getAnnotatedActualTypeArguments()[0]));
 
         Context(ScanResult source) {
             super(source, reflectionOrigins,
@@ -139,7 +139,8 @@ public class TypeArgumentModelTests {
                             .collect(Collectors.toMap(FieldInfo::getName,
                                     field -> ((ClassRefTypeSignature) field
                                             .getTypeSignatureOrTypeDescriptor())
-                                            .getTypeArguments().get(0))));
+                                                    .getTypeArguments()
+                                                    .get(0))));
         }
 
         Context(ExtensionContext context) {
