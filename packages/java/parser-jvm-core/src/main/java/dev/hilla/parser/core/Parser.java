@@ -25,6 +25,7 @@ public final class Parser {
         logger.debug("Executing JVM Parser");
 
         try (var scanResult = new ClassGraph().enableAnnotationInfo()
+                .ignoreClassVisibility()
                 .overrideClasspath(config.getClassPathElements()).scan()) {
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
