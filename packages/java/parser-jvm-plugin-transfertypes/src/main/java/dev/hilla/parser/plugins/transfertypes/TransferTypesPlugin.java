@@ -10,16 +10,16 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.core.Node;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.runtime.transfertypes.EndpointSubscription;
 import dev.hilla.runtime.transfertypes.Flux;
 import dev.hilla.runtime.transfertypes.Order;
@@ -47,13 +47,6 @@ public final class TransferTypesPlugin
         setOrder(300);
     }
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return nodeDependencies.processChildNodes(this::processNodes)
-                .processRelatedNodes(this::processNodes);
-    }
-
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -67,8 +60,11 @@ public final class TransferTypesPlugin
         return List.of(BackbonePlugin.class);
     }
 
-    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
-        return nodes.map(this::mapClassRefNodes);
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies.processChildNodes(this::processNodes)
+                .processRelatedNodes(this::processNodes);
     }
 
     private Node<?, ?> mapClassRefNodes(Node<?, ?> node) {
@@ -90,5 +86,9 @@ public final class TransferTypesPlugin
         var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
         return TypeSignatureNode.of(ClassRefSignatureModel.of(mappedClassInfo,
                 classRef.getTypeArguments(), classRef.getAnnotations()));
+    }
+
+    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
+        return nodes.map(this::mapClassRefNodes);
     }
 }

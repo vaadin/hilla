@@ -1,18 +1,19 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
-
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
-import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
-import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -21,17 +22,6 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 
 public final class MethodParameterPlugin
         extends AbstractPlugin<PluginConfiguration> {
-
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (nodeDependencies.getNode() instanceof MethodNode) {
-            var methodNode = (MethodNode) nodeDependencies.getNode();
-            return nodeDependencies
-                    .appendChildNodes(getParametersStream(methodNode));
-        }
-        return nodeDependencies;
-    }
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -50,6 +40,23 @@ public final class MethodParameterPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        if (nodeDependencies.getNode() instanceof MethodNode) {
+            var methodNode = (MethodNode) nodeDependencies.getNode();
+            return nodeDependencies
+                    .appendChildNodes(getParametersStream(methodNode));
+        }
+        return nodeDependencies;
+    }
+
+    private RequestBody createRequestBody() {
+        var requestMap = new ObjectSchema();
+        return new RequestBody().content(new Content().addMediaType(
+                MethodPlugin.MEDIA_TYPE, new MediaType().schema(requestMap)));
+    }
+
     private Stream<Node<?, ?>> getParametersStream(MethodNode methodNode) {
         var parameters = new ArrayList<>(
                 methodNode.getSource().getParameters());
@@ -60,13 +67,7 @@ public final class MethodParameterPlugin
                     .orElse(String.format("_param_%d", i));
             parameterNodes.add(i, MethodParameterNode.of(parameter, name));
         }
-        return parameterNodes.stream().sequential();
-    }
-
-    private RequestBody createRequestBody() {
-        var requestMap = new ObjectSchema();
-        return new RequestBody().content(new Content().addMediaType(
-                MethodPlugin.MEDIA_TYPE, new MediaType().schema(requestMap)));
+        return parameterNodes.stream();
     }
 
 }

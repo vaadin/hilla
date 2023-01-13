@@ -201,10 +201,10 @@
         }
       }
     },
-    "/BasicEndpoint/typeWithTypeArgument": {
+    "/BasicEndpoint/typeArgumentWildcard": {
       "post": {
         "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_typeWithTypeArgument_POST",
+        "operationId": "BasicEndpoint_typeArgumentWildcard_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -215,11 +215,7 @@
                     "type": "array",
                     "nullable": true,
                     "items": {
-                      "anyOf": [
-                        {
-                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
-                        }
-                      ]
+                      "type": "string"
                     }
                   }
                 }
@@ -236,11 +232,7 @@
                   "type": "array",
                   "nullable": true,
                   "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
-                      }
-                    ]
+                    "type": "string"
                   }
                 }
               }
@@ -289,10 +281,10 @@
         }
       }
     },
-    "/BasicEndpoint/typeArgumentWildcard": {
+    "/BasicEndpoint/typeWithTypeArgument": {
       "post": {
         "tags": ["BasicEndpoint"],
-        "operationId": "BasicEndpoint_typeArgumentWildcard_POST",
+        "operationId": "BasicEndpoint_typeWithTypeArgument_POST",
         "requestBody": {
           "content": {
             "application/json": {
@@ -303,7 +295,11 @@
                     "type": "array",
                     "nullable": true,
                     "items": {
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                        }
+                      ]
                     }
                   }
                 }
@@ -320,7 +316,11 @@
                   "type": "array",
                   "nullable": true,
                   "items": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel"
+                      }
+                    ]
                   }
                 }
               }
@@ -356,12 +356,6 @@
       "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",
         "properties": {
-          "publicField": {
-            "type": "string"
-          },
-          "protectedField": {
-            "type": "string"
-          },
           "complexTypeField": {
             "type": "object",
             "additionalProperties": {
@@ -378,6 +372,12 @@
           "nullableField": {
             "type": "string",
             "nullable": true
+          },
+          "protectedField": {
+            "type": "string"
+          },
+          "publicField": {
+            "type": "string"
           },
           "typeWithTypeArgument": {
             "type": "array",

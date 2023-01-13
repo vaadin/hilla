@@ -1,9 +1,5 @@
 package dev.hilla.parser.core;
 
-import dev.hilla.parser.models.AnnotatedModel;
-import dev.hilla.parser.models.AnnotationInfoModel;
-import dev.hilla.parser.models.ClassInfoModel;
-
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -86,6 +82,11 @@ public final class NodePath<N extends Node<?, ?>> {
         return hash;
     }
 
+    public Stream<NodePath<?>> stream() {
+        return Stream.<NodePath<?>> iterate(this, NodePath::hasParentNodes,
+                NodePath::getParentPath);
+    }
+
     @Override
     public String toString() {
         var list = new LinkedList<String>();
@@ -101,10 +102,5 @@ public final class NodePath<N extends Node<?, ?>> {
 
     <N extends Node<?, ?>> NodePath<N> withChildNode(@Nonnull N node) {
         return new NodePath<>(node, this);
-    }
-
-    public Stream<NodePath<?>> stream() {
-        return Stream.<NodePath<?>> iterate(this, NodePath::hasParentNodes,
-                NodePath::getParentPath);
     }
 }

@@ -11,6 +11,7 @@ public abstract class ArraySignatureModel extends AnnotatedAbstractModel
         implements SignatureModel {
     private SignatureModel nestedType;
 
+    @Deprecated
     public static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin) {
         return new ArraySignatureSourceModel(Objects.requireNonNull(origin));
     }

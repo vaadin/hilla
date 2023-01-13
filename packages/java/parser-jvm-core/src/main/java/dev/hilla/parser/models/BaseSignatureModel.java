@@ -9,6 +9,7 @@ import io.github.classgraph.BaseTypeSignature;
 
 public abstract class BaseSignatureModel extends AnnotatedAbstractModel
         implements SignatureModel {
+    @Deprecated
     public static BaseSignatureModel of(@Nonnull BaseTypeSignature origin) {
         return new BaseSignatureSourceModel(Objects.requireNonNull(origin));
     }

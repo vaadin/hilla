@@ -20,8 +20,17 @@ final class TypeArgumentSourceModel extends TypeArgumentModel
     }
 
     @Override
-    public TypeArgument.Wildcard getWildcard() {
-        return origin.getWildcard();
+    public Wildcard getWildcard() {
+        switch (origin.getWildcard()) {
+        case EXTENDS:
+            return Wildcard.EXTENDS;
+        case ANY:
+            return Wildcard.ANY;
+        case SUPER:
+            return Wildcard.SUPER;
+        default:
+            return Wildcard.NONE;
+        }
     }
 
     @Override

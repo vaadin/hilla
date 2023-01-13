@@ -64,11 +64,12 @@ public class AnnotationInfoModelTests {
     public void should_GetParameters(AnnotationInfoModel model,
             ModelKind kind) {
         var expected = Set.of(
-                AnnotationParameterModel.of("stringParameter", "foo1"),
-                AnnotationParameterModel.of("intParameter", 10),
-                AnnotationParameterModel.of("classParameter", Sample.class),
-                AnnotationParameterModel.of("enumParameter",
-                        Sample.Enum.VALUE));
+                AnnotationParameterModel.of("stringParameter", "foo1", false),
+                AnnotationParameterModel.of("intParameter", 10, false),
+                AnnotationParameterModel.of("classParameter", Sample.class,
+                        false),
+                AnnotationParameterModel.of("enumParameter", Sample.Enum.VALUE,
+                        false));
         var actual = model.getParameters();
         assertEquals(expected, actual);
     }
@@ -120,15 +121,18 @@ public class AnnotationInfoModelTests {
         private static final Enum<?> reflectionEnumValue;
         private static final Sample.Foo reflectionOrigin = getDeclaredField(
                 Sample.class, fieldName).getAnnotation(Sample.Foo.class);
-        private static final Map<String, Object> reflectionParameterOrigins;
+        private static final Map<String, AnnotationParameterModel.ReflectionOrigin<?>> reflectionParameterOrigins;
 
         static {
             reflectionParameterOrigins = getDeclaredMethods(Sample.Foo.class)
                     .collect(Collectors.toMap(Method::getName,
-                            Failable.asFunction(method -> method
-                                    .invoke(reflectionOrigin))));
+                            Failable.asFunction(
+                                    method -> new AnnotationParameterModel.ReflectionOrigin<>(
+                                            method.getName(),
+                                            method.invoke(reflectionOrigin),
+                                            method.isDefault()))));
             reflectionEnumValue = (Enum<?>) reflectionParameterOrigins
-                    .get("enumParameter");
+                    .get("enumParameter").getValue();
         }
 
         private final AnnotationEnumValue sourceEnumValue;
@@ -157,7 +161,7 @@ public class AnnotationInfoModelTests {
             return reflectionOrigin;
         }
 
-        public Map<String, Object> getReflectionParameterOrigins() {
+        public Map<String, AnnotationParameterModel.ReflectionOrigin<?>> getReflectionParameterOrigins() {
             return reflectionParameterOrigins;
         }
 
@@ -205,9 +209,7 @@ public class AnnotationInfoModelTests {
 
             Enum enumParameter();
 
-            int intParameter()
-
-            default 10;
+            int intParameter() default 10;
 
             String stringParameter() default "bar1";
         }
@@ -276,7 +278,8 @@ public class AnnotationInfoModelTests {
         public void should_GetNameAndValue(AnnotationParameterModel model,
                 ModelKind kind, String name) {
             assertEquals(name, model.getName());
-            assertEquals(process(ctx.getReflectionParameterOrigins().get(name)),
+            assertEquals(process(
+                    ctx.getReflectionParameterOrigins().get(name).getValue()),
                     model.getValue());
         }
 
@@ -351,12 +354,12 @@ public class AnnotationInfoModelTests {
             var reflectionOrigins = ctx.getReflectionParameterOrigins();
             var sourceOrigins = ctx.getSourceParameterOrigins();
 
-            return reflectionOrigins.entrySet().stream()
-                    .map(entry -> Arguments.of(
-                            AnnotationParameterModel.of(entry),
+            return reflectionOrigins.values().stream()
+                    .map(origin -> Arguments.of(
+                            AnnotationParameterModel.of(origin),
                             AnnotationParameterModel
-                                    .of(sourceOrigins.get(entry.getKey())),
-                            entry.getKey()));
+                                    .of(sourceOrigins.get(origin.getName())),
+                            origin.getName()));
         }
     }
 
@@ -368,10 +371,10 @@ public class AnnotationInfoModelTests {
             var ctx = new Context(context);
 
             return Streams.combine(
-                    ctx.getReflectionParameterOrigins().entrySet().stream()
-                            .map(entry -> Arguments.of(
-                                    AnnotationParameterModel.of(entry),
-                                    ModelKind.REFLECTION, entry.getKey())),
+                    ctx.getReflectionParameterOrigins().values().stream()
+                            .map(origin -> Arguments.of(
+                                    AnnotationParameterModel.of(origin),
+                                    ModelKind.REFLECTION, origin.getName())),
                     ctx.getSourceParameterOrigins().entrySet().stream()
                             .map(entry -> Arguments.of(
                                     AnnotationParameterModel

@@ -24,7 +24,7 @@ describe('FormPlugin', () => {
       const files = await generator.process(input);
       expect(files.length).to.equal(modelNames.length);
 
-      const filesByName = files.reduce<Record<string, typeof files[0]>>((r, file) => {
+      const filesByName = files.reduce<Record<string, (typeof files)[0]>>((r, file) => {
         r[file.name] = file;
         return r;
       }, {});
