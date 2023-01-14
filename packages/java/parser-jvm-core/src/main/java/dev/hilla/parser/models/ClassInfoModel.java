@@ -34,6 +34,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassRefSignatureModel> interfaces;
     private List<MethodInfoModel> methods;
     private PackageInfoModel pkg;
+    private List<PropertyInfoModel> properties;
     private Optional<ClassRefSignatureModel> superClass;
     private List<TypeParameterModel> typeParameters;
 
@@ -328,6 +329,14 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return pkg;
     }
 
+    public List<PropertyInfoModel> getProperties() {
+        if (properties == null) {
+            properties = prepareProperties();
+        }
+
+        return properties;
+    }
+
     public abstract String getSimpleName();
 
     public Stream<ClassRefSignatureModel> getSuperClassStream() {
@@ -452,6 +461,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     protected abstract List<MethodInfoModel> prepareMethods();
 
     protected abstract PackageInfoModel preparePackage();
+
+    protected abstract List<PropertyInfoModel> prepareProperties();
 
     protected abstract ClassRefSignatureModel prepareSuperClass();
 

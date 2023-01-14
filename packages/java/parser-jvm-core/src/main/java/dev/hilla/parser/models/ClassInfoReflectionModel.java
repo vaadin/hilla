@@ -9,12 +9,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 final class ClassInfoReflectionModel extends ClassInfoModel
         implements ReflectionModel {
+    private final BeanDescription description;
     private final Class<?> origin;
 
     ClassInfoReflectionModel(Class<?> origin) {
         this.origin = origin;
+
+        var mapper = new ObjectMapper();
+        this.description = mapper.getSerializationConfig()
+                .introspect(mapper.constructType(origin));
     }
 
     @Override
@@ -222,6 +230,13 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected PackageInfoModel preparePackage() {
         return PackageInfoModel.of(origin.getPackage());
+    }
+
+    @Override
+    protected List<PropertyInfoModel> prepareProperties() {
+        return description.findProperties().stream()
+                .map(property -> PropertyInfoModel.of(property, this))
+                .collect(Collectors.toList());
     }
 
     @Override
