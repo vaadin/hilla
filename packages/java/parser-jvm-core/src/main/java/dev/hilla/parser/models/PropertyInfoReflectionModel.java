@@ -35,4 +35,12 @@ final class PropertyInfoReflectionModel extends PropertyInfoModel {
     protected String prepareName() {
         return origin.getName();
     }
+
+    @Override
+    protected SignatureModel prepareType() {
+        var getter = origin.getGetter();
+        return SignatureModel.of(getter == null
+                ? origin.getField().getAnnotated().getAnnotatedType()
+                : origin.getGetter().getAnnotated().getAnnotatedReturnType());
+    }
 }

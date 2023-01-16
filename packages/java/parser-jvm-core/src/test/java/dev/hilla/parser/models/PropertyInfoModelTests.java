@@ -4,6 +4,7 @@ import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,27 +33,42 @@ public class PropertyInfoModelTests {
     @DisplayName("It should provide correct properties")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    public void should_ExtractPublicPropertiesCorrectly(PropertyInfoModel model,
+    public void should_ExtractPropertiesCorrectly(PropertyInfoModel model,
             PropertyInfo info) {
         assertEquals(info.renamedName(), model.getName());
         assertEquals(ClassInfoModel.of(Sample.class), model.getOwner());
         assertEquals(
                 FieldInfoModel.of(getDeclaredField(Sample.class, info.name())),
                 model.getField());
-        assertEquals(
-                info.isPrivate()
-                        ? Optional.of(MethodInfoModel
-                                .of(getDeclaredMethod(Sample.class,
-                                        "get" + Character.toUpperCase(
-                                                info.name().charAt(0))
-                                                + info.name().substring(1))))
-                        : Optional.empty(),
-                model.getGetter());
+        assertEquals(info.hasGetter()
+                ? Optional.of(MethodInfoModel
+                        .of(getDeclaredMethod(Sample.class, info.getterName())))
+                : Optional.empty(), model.getGetter());
     }
 
-    record PropertyInfo(String name, boolean isPrivate, boolean isRenamed) {
+    @DisplayName("It should provide correct properties")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvideCorrectTypes(PropertyInfoModel model,
+            PropertyInfo info) {
+        var signature = info.hasGetter()
+                ? SignatureModel
+                        .of(getDeclaredMethod(Sample.class, info.getterName())
+                                .getAnnotatedReturnType())
+                : SignatureModel.of(getDeclaredField(Sample.class, info.name())
+                        .getAnnotatedType());
+
+        assertEquals(signature, model.getType());
+    }
+
+    record PropertyInfo(String name, boolean hasGetter, boolean isRenamed) {
         String renamedName() {
             return isRenamed ? name + '0' : name;
+        }
+
+        String getterName() {
+            return "get" + Character.toUpperCase(name.charAt(0))
+                    + name.substring(1);
         }
     }
 
@@ -76,8 +92,8 @@ public class PropertyInfoModelTests {
 
     static class ModelProvider implements ArgumentsProvider {
         public static final String testNamePattern = "{1}";
-        private static final Pattern publicPattern = Pattern.compile("public",
-                Pattern.CASE_INSENSITIVE);
+        private static final Pattern noGetterPattern = Pattern
+                .compile("public|NoGetter", Pattern.CASE_INSENSITIVE);
         private static final Pattern renamedPattern = Pattern.compile("renamed",
                 Pattern.CASE_INSENSITIVE);
 
@@ -90,7 +106,7 @@ public class PropertyInfoModelTests {
                             PropertyInfoModel.of(entry.getValue(),
                                     ClassInfoModel.of(Sample.class)),
                             new PropertyInfo(entry.getKey(),
-                                    !publicPattern.matcher(entry.getKey())
+                                    !noGetterPattern.matcher(entry.getKey())
                                             .find(),
                                     renamedPattern.matcher(entry.getKey())
                                             .find())));
@@ -99,26 +115,27 @@ public class PropertyInfoModelTests {
 
     static class Sample {
         @JsonIgnore
-        public final String ignoredPublicProperty = "ignoredPublic";
-        public final String publicProperty = "public";
+        public Short ignoredPublicProperty;
+        public List<Integer> publicProperty;
         @JsonProperty("renamedPublicProperty0")
-        public final String renamedPublicProperty = "renamedPublic";
-        private final String ignoredPrivateProperty = "ignoredPrivate";
-        private final String privateProperty = "private";
-        private final String renamedPrivateProperty = "renamedPrivate";
+        public Float renamedPublicProperty;
+        private Byte ignoredPrivateProperty;
+        private Map<String, Long> privateProperty;
+        private Double renamedPrivateProperty;
+        private String privatePropertyNoGetter;
 
         @JsonIgnore
-        public String getIgnoredPrivateProperty() {
+        public Byte getIgnoredPrivateProperty() {
             return ignoredPrivateProperty;
         }
 
-        public String getPrivateProperty() {
+        public Map<String, Long> getPrivateProperty() {
             return privateProperty;
         }
 
         @JsonProperty("renamedPrivateProperty0")
-        public String getRenamedPrivateProperty() {
-            return renamedPrivateProperty;
+        public List<Double> getRenamedPrivateProperty() {
+            return List.of(renamedPrivateProperty);
         }
     }
 }

@@ -16,6 +16,7 @@ public abstract class PropertyInfoModel extends AnnotatedAbstractModel
     private FieldInfoModel field;
     private Optional<MethodInfoModel> getter;
     private String name;
+    private SignatureModel type;
 
     protected PropertyInfoModel(ClassInfoModel owner) {
         this.owner = owner;
@@ -77,6 +78,14 @@ public abstract class PropertyInfoModel extends AnnotatedAbstractModel
         return owner;
     }
 
+    public SignatureModel getType() {
+        if (type == null) {
+            type = prepareType();
+        }
+
+        return type;
+    }
+
     @Override
     public int hashCode() {
         return (getName().hashCode() + getOwner().hashCode()) ^ 0x73448be4;
@@ -96,4 +105,6 @@ public abstract class PropertyInfoModel extends AnnotatedAbstractModel
     protected abstract Optional<MethodInfoModel> prepareGetter();
 
     protected abstract String prepareName();
+
+    protected abstract SignatureModel prepareType();
 }

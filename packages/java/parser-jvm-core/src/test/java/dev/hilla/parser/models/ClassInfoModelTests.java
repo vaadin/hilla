@@ -519,10 +519,12 @@ public class ClassInfoModelTests {
         @JsonIgnore
         public String ignorePublicProp;
         public String publicProp;
+        public transient String publicTransientProp;
         @JsonProperty("renamedPublicProp0")
         public String renamedPublicProp;
         private String ignorePrivateProp;
         private String privateProp;
+        private transient String privateTransientProp;
         private String renamedPrivateProp;
 
         @JsonIgnore
@@ -612,6 +614,8 @@ public class ClassInfoModelTests {
     public class AsModelWithJacksonProperties {
         private static final Pattern ignorePattern = Pattern.compile("ignored",
                 Pattern.CASE_INSENSITIVE);
+        private static final Pattern transientPattern = Pattern
+                .compile("transient", Pattern.CASE_INSENSITIVE);
         private List<String> propertyNames;
 
         @BeforeEach
@@ -645,6 +649,10 @@ public class ClassInfoModelTests {
         public void should_ProvideCorrectJacksonProperties() {
             assertEquals(Optional.empty(), propertyNames.stream()
                     .filter(p -> ignorePattern.matcher(p).find()).findFirst());
+            assertEquals(Optional.empty(),
+                    propertyNames.stream()
+                            .filter(p -> transientPattern.matcher(p).find())
+                            .findFirst());
         }
     }
 
