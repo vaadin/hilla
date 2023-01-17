@@ -23,7 +23,7 @@ import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
+import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
 public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String JSON_IGNORE = JsonIgnore.class.getName();
@@ -92,8 +92,8 @@ public class JSONPlugin extends AbstractPlugin<PluginConfiguration> {
         // Filter out ignored fields
         return nodeDependencies
                 .processChildNodes(nodeStream -> nodeStream.filter(n -> {
-                    if (n instanceof FieldNode) {
-                        var fieldNode = (FieldNode) n;
+                    if (n instanceof PropertyNode) {
+                        var fieldNode = (PropertyNode) n;
 
                         if (ignored.contains(fieldNode.getSource().getName())) {
                             return false;

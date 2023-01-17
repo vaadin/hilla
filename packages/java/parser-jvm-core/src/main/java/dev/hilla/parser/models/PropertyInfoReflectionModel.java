@@ -19,16 +19,26 @@ final class PropertyInfoReflectionModel extends PropertyInfoModel {
     }
 
     @Override
+    public boolean hasGetter() {
+        return origin.hasGetter();
+    }
+
+    @Override
+    public boolean isTransient() {
+        return !origin.hasGetter() && origin.getField().isTransient();
+    }
+
+    @Override
     protected FieldInfoModel prepareField() {
         return FieldInfoModel.of(origin.getField().getAnnotated());
     }
 
     @Override
     protected Optional<MethodInfoModel> prepareGetter() {
-        var getter = origin.getGetter();
-        return getter == null ? Optional.empty()
-                : Optional.of(
-                        MethodInfoModel.of(origin.getGetter().getAnnotated()));
+        return origin.hasGetter()
+                ? Optional.of(
+                        MethodInfoModel.of(origin.getGetter().getAnnotated()))
+                : Optional.empty();
     }
 
     @Override
@@ -38,9 +48,8 @@ final class PropertyInfoReflectionModel extends PropertyInfoModel {
 
     @Override
     protected SignatureModel prepareType() {
-        var getter = origin.getGetter();
-        return SignatureModel.of(getter == null
-                ? origin.getField().getAnnotated().getAnnotatedType()
-                : origin.getGetter().getAnnotated().getAnnotatedReturnType());
+        return SignatureModel.of(origin.hasGetter()
+                ? origin.getGetter().getAnnotated().getAnnotatedReturnType()
+                : origin.getField().getAnnotated().getAnnotatedType());
     }
 }

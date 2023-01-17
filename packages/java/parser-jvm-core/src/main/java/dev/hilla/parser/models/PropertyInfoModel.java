@@ -86,10 +86,14 @@ public abstract class PropertyInfoModel extends AnnotatedAbstractModel
         return type;
     }
 
+    public abstract boolean hasGetter();
+
     @Override
     public int hashCode() {
         return (getName().hashCode() + getOwner().hashCode()) ^ 0x73448be4;
     }
+
+    public abstract boolean isTransient();
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {

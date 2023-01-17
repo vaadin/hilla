@@ -63,7 +63,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         }
 
         // When the parent source is annotated, but the parent target is not a
-        // schema (consider MethodNode, MethodParameterNode, and FieldNode),
+        // schema (consider MethodNode, MethodParameterNode, and PropertyNode),
         // apply annotations from parent node to the current node’s target.
         var parentNode = nodePath.getParentPath().getNode();
         if ((parentNode.getSource() instanceof AnnotatedModel)

@@ -19,9 +19,9 @@ import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -66,9 +66,9 @@ public final class TypeSignaturePlugin
                 && schema instanceof ComposedSchema) {
             attachSchemaToEntitySubclass((ComposedSchema) schema,
                     (EntityNode) parentNode);
-        } else if (parentNode instanceof FieldNode
+        } else if (parentNode instanceof PropertyNode
                 && grandParentNode instanceof EntityNode) {
-            attachSchemaToFieldOfEntity(schema, (FieldNode) parentNode,
+            attachSchemaToPropertyOfEntity(schema, (PropertyNode) parentNode,
                     (EntityNode) grandParentNode);
         } else if (parentNode instanceof TypeSignatureNode) {
             attachSchemaToNestingParentSignature(schema,
@@ -87,8 +87,8 @@ public final class TypeSignaturePlugin
                     nodeDependencies);
         } else if (node instanceof EntityNode) {
             return scanEntity((EntityNode) node, nodeDependencies);
-        } else if (node instanceof FieldNode) {
-            return scanField((FieldNode) node, nodeDependencies);
+        } else if (node instanceof PropertyNode) {
+            return scanProperty((PropertyNode) node, nodeDependencies);
         } else if (node instanceof TypeSignatureNode) {
             return scanTypeSignature((TypeSignatureNode) node,
                     nodeDependencies);
@@ -103,12 +103,6 @@ public final class TypeSignaturePlugin
         schema.addAnyOfItem(subclassSchema);
         schema.setNullable(null);
         entityNode.setTarget(schema);
-    }
-
-    private void attachSchemaToFieldOfEntity(Schema<?> schema,
-            FieldNode fieldNode, EntityNode entityNode) {
-        var fieldName = fieldNode.getTarget();
-        entityNode.getTarget().addProperties(fieldName, schema);
     }
 
     private void attachSchemaToMethod(Schema<?> schema, MethodNode methodNode) {
@@ -139,6 +133,12 @@ public final class TypeSignaturePlugin
         requestMap.addProperties(methodParameterNode.getTarget(), schema);
     }
 
+    private void attachSchemaToPropertyOfEntity(Schema<?> schema,
+            PropertyNode propertyNode, EntityNode entityNode) {
+        var propertyName = propertyNode.getTarget();
+        entityNode.getTarget().addProperties(propertyName, schema);
+    }
+
     private NodeDependencies scanEntity(EntityNode node,
             NodeDependencies nodeDependencies) {
         var cls = node.getSource();
@@ -149,12 +149,6 @@ public final class TypeSignaturePlugin
         }
 
         return nodeDependencies;
-    }
-
-    private NodeDependencies scanField(FieldNode fieldNode,
-            NodeDependencies nodeDependencies) {
-        return nodeDependencies.appendChildNodes(Stream
-                .of(TypeSignatureNode.of(fieldNode.getSource().getType())));
     }
 
     private NodeDependencies scanMethodNode(MethodNode methodNode,
@@ -181,6 +175,12 @@ public final class TypeSignaturePlugin
         var nestedTypeNodes = Stream.of(nestedSignatureModels)
                 .<Node<?, ?>> map(TypeSignatureNode::of);
         return nodeDependencies.appendChildNodes(nestedTypeNodes);
+    }
+
+    private NodeDependencies scanProperty(PropertyNode propertyNode,
+            NodeDependencies nodeDependencies) {
+        return nodeDependencies.appendChildNodes(Stream
+                .of(TypeSignatureNode.of(propertyNode.getSource().getType())));
     }
 
     private NodeDependencies scanTypeSignature(TypeSignatureNode node,

@@ -10,16 +10,16 @@ import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
-import dev.hilla.parser.models.FieldInfoModel;
+import dev.hilla.parser.models.PropertyInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.plugins.backbone.nodes.FieldNode;
+import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
-public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof FieldNode) {
-            var fieldNode = (FieldNode) nodePath.getNode();
-            fieldNode.setTarget(fieldNode.getSource().getName());
+        if (nodePath.getNode() instanceof PropertyNode) {
+            var propertyNode = (PropertyNode) nodePath.getNode();
+            propertyNode.setTarget(propertyNode.getSource().getName());
         }
     }
 
@@ -39,10 +39,10 @@ public final class FieldPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        var fields = cls.getFieldsStream()
-                .filter(Predicate.not(FieldInfoModel::isTransient))
-                .<Node<?, ?>> map(FieldNode::of);
+        var properties = cls.getProperties().stream()
+                .filter(Predicate.not(PropertyInfoModel::isTransient))
+                .<Node<?, ?>> map(PropertyNode::of);
 
-        return nodeDependencies.appendChildNodes(fields);
+        return nodeDependencies.appendChildNodes(properties);
     }
 }
