@@ -23,9 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,9 +37,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import dev.hilla.parser.test.helpers.ClassMemberUtils;
 import dev.hilla.parser.test.helpers.ModelKind;
@@ -515,33 +510,6 @@ public class ClassInfoModelTests {
         }
     }
 
-    static final class Properties {
-        @JsonIgnore
-        public String ignorePublicProp;
-        public String publicProp;
-        public transient String publicTransientProp;
-        @JsonProperty("renamedPublicProp0")
-        public String renamedPublicProp;
-        private String ignorePrivateProp;
-        private String privateProp;
-        private transient String privateTransientProp;
-        private String renamedPrivateProp;
-
-        @JsonIgnore
-        public String getIgnorePrivateProp() {
-            return ignorePrivateProp;
-        }
-
-        public String getPrivateProp() {
-            return privateProp;
-        }
-
-        @JsonProperty("renamedPrivateProp0")
-        public String getRenamedPrivateProp() {
-            return renamedPublicProp;
-        }
-    }
-
     static final class Specialization {
         private static class Sample {
             public Boolean getBoolean() {
@@ -606,53 +574,6 @@ public class ClassInfoModelTests {
         public void should_DetectCharacteristics(ClassInfoModel model,
                 String[] characteristics, ModelKind kind, String testName) {
             checker.apply(model, characteristics);
-        }
-    }
-
-    @Nested
-    @DisplayName("As a model with Jackson properties")
-    public class AsModelWithJacksonProperties {
-        private static final Pattern ignorePattern = Pattern.compile("ignored",
-                Pattern.CASE_INSENSITIVE);
-        private static final Pattern transientPattern = Pattern
-                .compile("transient", Pattern.CASE_INSENSITIVE);
-        private List<String> propertyNames;
-
-        @BeforeEach
-        public void setUp() {
-            propertyNames = ClassInfoModel.of(Properties.class).getProperties()
-                    .stream().map(PropertyInfoModel::getName).toList();
-        }
-
-        @DisplayName("It should contain default properties")
-        @Test
-        public void should_ContainDefaultProperties() {
-            assertTrue(propertyNames.contains("publicProp"));
-            assertTrue(propertyNames.contains("privateProp"));
-        }
-
-        @DisplayName("It should contain nothing except for default and renamed properties")
-        @Test
-        public void should_ContainNothingExceptDefaultAndRenamed() {
-            assertEquals(4, propertyNames.size());
-        }
-
-        @DisplayName("It should contain renamed properties")
-        @Test
-        public void should_ContainRenamedProperties() {
-            assertTrue(propertyNames.contains("renamedPublicProp0"));
-            assertTrue(propertyNames.contains("renamedPrivateProp0"));
-        }
-
-        @DisplayName("It should not contain ignored properties")
-        @Test
-        public void should_ProvideCorrectJacksonProperties() {
-            assertEquals(Optional.empty(), propertyNames.stream()
-                    .filter(p -> ignorePattern.matcher(p).find()).findFirst());
-            assertEquals(Optional.empty(),
-                    propertyNames.stream()
-                            .filter(p -> transientPattern.matcher(p).find())
-                            .findFirst());
         }
     }
 

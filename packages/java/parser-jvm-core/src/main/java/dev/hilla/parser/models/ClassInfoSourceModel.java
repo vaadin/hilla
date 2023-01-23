@@ -225,11 +225,6 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected List<PropertyInfoModel> prepareProperties() {
-        return List.of();
-    }
-
-    @Override
     protected ClassRefSignatureModel prepareSuperClass() {
         var superClass = origin.getTypeSignatureOrTypeDescriptor()
                 .getSuperclassSignature();

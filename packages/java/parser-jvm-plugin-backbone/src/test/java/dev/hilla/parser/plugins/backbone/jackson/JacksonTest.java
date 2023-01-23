@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.json;
+package dev.hilla.parser.plugins.backbone.jackson;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,7 +10,7 @@ import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
-public class JSONAnnotationsTest {
+public class JacksonTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test

@@ -9,28 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-
 final class ClassInfoReflectionModel extends ClassInfoModel
         implements ReflectionModel {
-    private final BeanDescription description;
     private final Class<?> origin;
 
     ClassInfoReflectionModel(Class<?> origin) {
         this.origin = origin;
-        var mapper = new ObjectMapper().setVisibility(PropertyAccessor.ALL,
-                JsonAutoDetect.Visibility.ANY);
-        var config = mapper.getSerializationConfig();
-        config = config.with(
-                new IgnoreInheritedPropertiesIntrospector(origin, config));
-        this.description = config.introspect(mapper.constructType(origin));
     }
 
     @Override
@@ -241,13 +225,6 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected List<PropertyInfoModel> prepareProperties() {
-        return description.findProperties().stream()
-                .map(property -> PropertyInfoModel.of(property, this))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     protected ClassRefSignatureModel prepareSuperClass() {
         var superClass = origin.getAnnotatedSuperclass();
 
@@ -260,40 +237,5 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     protected List<TypeParameterModel> prepareTypeParameters() {
         return Arrays.stream(origin.getTypeParameters())
                 .map(TypeParameterModel::of).collect(Collectors.toList());
-    }
-
-    private static final class IgnoreInheritedPropertiesIntrospector
-            extends JacksonAnnotationIntrospector {
-        private final SerializationConfig config;
-        private final AnnotatedClass klass;
-
-        IgnoreInheritedPropertiesIntrospector(Class<?> origin,
-                SerializationConfig config) {
-            this.config = config;
-            var desc = config.introspectClassAnnotations(origin);
-            this.klass = desc.getClassInfo();
-        }
-
-        @Override
-        public boolean hasIgnoreMarker(AnnotatedMember member) {
-            return isInheritedMember(member) || hasIgnoredType(member)
-                    || isIgnoredAtClassLevel(member)
-                    || super.hasIgnoreMarker(member);
-        }
-
-        private boolean hasIgnoredType(AnnotatedMember member) {
-            return isIgnorableType(
-                    config.introspectClassAnnotations(member.getType())
-                            .getClassInfo()) == Boolean.TRUE;
-        }
-
-        private boolean isIgnoredAtClassLevel(AnnotatedMember member) {
-            return findPropertyIgnoralByName(config, klass)
-                    .findIgnoredForSerialization().contains(member.getName());
-        }
-
-        private boolean isInheritedMember(AnnotatedMember member) {
-            return member.getDeclaringClass() != klass.getAnnotated();
-        }
     }
 }

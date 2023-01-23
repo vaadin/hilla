@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.json;
+package dev.hilla.parser.plugins.backbone.jackson;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
