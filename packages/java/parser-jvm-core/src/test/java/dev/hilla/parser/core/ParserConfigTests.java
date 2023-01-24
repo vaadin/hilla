@@ -169,13 +169,6 @@ public class ParserConfigTests {
             setOrder(1);
         }
 
-        @Nonnull
-        @Override
-        public NodeDependencies scan(
-                @Nonnull NodeDependencies nodeDependencies) {
-            return nodeDependencies;
-        }
-
         @Override
         public void enter(NodePath<?> nodePath) {
         }
@@ -183,6 +176,33 @@ public class ParserConfigTests {
         @Override
         public void exit(NodePath<?> nodePath) {
         }
+
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+                @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
+        }
+    }
+
+    private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
+        @Override
+        public void enter(NodePath<?> nodePath) {
+        }
+
+        @Override
+        public void exit(NodePath<?> nodePath) {
+        }
+
+        @Nonnull
+        @Override
+        public NodeDependencies scan(
+                @Nonnull NodeDependencies nodeDependencies) {
+            return nodeDependencies;
+        }
+    }
+
+    private static class BazPluginConfig implements PluginConfiguration {
     }
 
     private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
@@ -190,13 +210,6 @@ public class ParserConfigTests {
             setOrder(0);
         }
 
-        @Nonnull
-        @Override
-        public NodeDependencies scan(
-                @Nonnull NodeDependencies nodeDependencies) {
-            return nodeDependencies;
-        }
-
         @Override
         public void enter(NodePath<?> nodePath) {
         }
@@ -204,25 +217,12 @@ public class ParserConfigTests {
         @Override
         public void exit(NodePath<?> nodePath) {
         }
-    }
 
-    private static class BazPluginConfig implements PluginConfiguration {
-    }
-
-    private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
         @Nonnull
         @Override
         public NodeDependencies scan(
                 @Nonnull NodeDependencies nodeDependencies) {
             return nodeDependencies;
-        }
-
-        @Override
-        public void enter(NodePath<?> nodePath) {
-        }
-
-        @Override
-        public void exit(NodePath<?> nodePath) {
         }
     }
 

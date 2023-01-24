@@ -1,43 +1,27 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
-
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.Node;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
+
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
 public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
     public static final String MEDIA_TYPE = "application/json";
-
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        var node = nodeDependencies.getNode();
-        if (node instanceof EndpointNode
-                || node instanceof EndpointExposedNode) {
-            var endpointCls = (ClassInfoModel) node.getSource();
-            var methodNodes = endpointCls.getMethodsStream()
-                    .filter(MethodInfoModel::isPublic)
-                    .<Node<?, ?>> map(MethodNode::of);
-            return nodeDependencies.appendChildNodes(methodNodes);
-        }
-
-        return nodeDependencies;
-    }
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -78,6 +62,22 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
         rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        var node = nodeDependencies.getNode();
+        if (node instanceof EndpointNode
+                || node instanceof EndpointExposedNode) {
+            var endpointCls = (ClassInfoModel) node.getSource();
+            var methodNodes = endpointCls.getMethodsStream()
+                    .filter(MethodInfoModel::isPublic)
+                    .<Node<?, ?>> map(MethodNode::of);
+            return nodeDependencies.appendChildNodes(methodNodes);
+        }
+
+        return nodeDependencies;
     }
 
     private Operation createOperation(EndpointNode endpointNode,

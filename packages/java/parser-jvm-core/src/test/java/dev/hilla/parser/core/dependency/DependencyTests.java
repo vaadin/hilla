@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +12,14 @@ import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
 
+import io.swagger.v3.oas.models.OpenAPI;
+
 public class DependencyTests {
     private static final List<String> classPath;
     private static final ResourceLoader resourceLoader = new ResourceLoader(
             DependencyTests.class);
-    private static Parser parser;
     private static OpenAPI openApi;
+    private static Parser parser;
 
     static {
         try {
@@ -37,16 +38,6 @@ public class DependencyTests {
     }
 
     @Test
-    public void should_ResolveDependenciesCorrectly_When_ResolvingMethods() {
-        var expected = List.of("getEntityOne", "getEntityTwo");
-
-        var actual = openApi.getExtensions()
-                .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void should_ResolveDependenciesCorrectly_When_ResolvingEntities() {
         var expected = List.of(
                 "dev.hilla.parser.core.dependency.DependencyEntityOne",
@@ -60,8 +51,18 @@ public class DependencyTests {
     }
 
     @Test
+    public void should_ResolveDependenciesCorrectly_When_ResolvingMethods() {
+        var expected = List.of("getEntityOne", "getEntityTwo");
+
+        var actual = openApi.getExtensions()
+                .get(DependencyPlugin.ENDPOINTS_DIRECT_DEPS_STORAGE_KEY);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void should_ResolveDependencyMembersCorrectly() {
-        var expected = List.of("foo", "bar", "dependencyEntityThree", "foo2",
+        var expected = List.of("bar", "dependencyEntityThree", "foo", "foo2",
                 "foo3");
 
         var actual = openApi.getExtensions()

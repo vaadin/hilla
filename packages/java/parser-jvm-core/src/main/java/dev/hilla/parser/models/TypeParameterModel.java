@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -14,6 +13,7 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {
     private List<SignatureModel> bounds;
 
+    @Deprecated
     public static TypeParameterModel of(@Nonnull TypeParameter origin) {
         return new TypeParameterSourceModel(Objects.requireNonNull(origin));
     }

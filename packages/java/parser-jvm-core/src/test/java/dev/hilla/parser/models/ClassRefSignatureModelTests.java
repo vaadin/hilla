@@ -414,21 +414,20 @@ public class ClassRefSignatureModelTests {
                                             .getType()).getRawType()).getName()
                                     : ((Class<?>) origin.getType()).getName();
 
-                            return Arguments.of(
-                                    ClassRefSignatureModel.of(origin),
+                            return Arguments.of(SignatureModel.of(origin),
                                     specializations.get(name),
                                     ModelKind.REFLECTION_COMPLETE,
                                     entry.getKey());
                         });
                 var bare = ctx.getBareReflectionOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
+                                SignatureModel.of(entry.getValue()),
                                 specializations.get(entry.getValue().getName()),
                                 ModelKind.REFLECTION_BARE, entry.getKey()));
 
                 var source = ctx.getSourceOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
+                                SignatureModel.of(entry.getValue()),
                                 specializations.get(entry.getValue()
                                         .getFullyQualifiedClassName()),
                                 ModelKind.SOURCE, entry.getKey()));

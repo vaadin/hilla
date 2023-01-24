@@ -38,8 +38,6 @@ import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ArraySignatureModelTests {
-    private static final boolean isJDK11 = Runtime.Version
-            .parse(System.getProperty("java.version")).feature() <= 11;
     private Context ctx;
 
     @BeforeEach

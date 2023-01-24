@@ -11,15 +11,11 @@ public class JSONAnnotationsEndpoint {
 
     @JsonIgnoreProperties({ "ignoredA", "ignoredB" })
     private static class AnnotatedEntity {
-        public String normal;
-
         @JsonIgnore
         public String ignored;
-
         public String ignoredA;
-
         public String ignoredB;
-
         public JsonIgnoredType ignoredType;
+        public String normal;
     }
 }

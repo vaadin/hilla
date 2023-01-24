@@ -16,6 +16,25 @@
     }
   ],
   "paths": {
+    "/BareTypeEndpoint/getBareList": {
+      "post": {
+        "tags": ["BareTypeEndpoint"],
+        "operationId": "BareTypeEndpoint_getBareList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/BareTypeEndpoint/getBareMap": {
       "post": {
         "tags": ["BareTypeEndpoint"],
@@ -30,25 +49,6 @@
                   "additionalProperties": {
                     "type": "object"
                   },
-                  "nullable": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/BareTypeEndpoint/getBareList": {
-      "post": {
-        "tags": ["BareTypeEndpoint"],
-        "operationId": "BareTypeEndpoint_getBareList_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
                   "nullable": true
                 }
               }

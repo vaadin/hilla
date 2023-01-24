@@ -1,23 +1,26 @@
 package dev.hilla.parser.models;
 
-import java.util.Map;
-
 final class AnnotationParameterReflectionModel<T>
         extends AnnotationParameterModel implements ReflectionModel {
-    private final Map.Entry<String, T> origin;
+    private final ReflectionOrigin<T> origin;
 
-    AnnotationParameterReflectionModel(Map.Entry<String, T> origin) {
+    AnnotationParameterReflectionModel(ReflectionOrigin<T> origin) {
         this.origin = origin;
     }
 
     @Override
-    public Map.Entry<String, T> get() {
+    public ReflectionOrigin<T> get() {
         return origin;
     }
 
     @Override
     public String getName() {
-        return origin.getKey();
+        return origin.getName();
+    }
+
+    @Override
+    public boolean isDefault() {
+        return origin.isDefault();
     }
 
     @Override

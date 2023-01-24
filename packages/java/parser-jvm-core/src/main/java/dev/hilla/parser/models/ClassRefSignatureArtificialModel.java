@@ -1,19 +1,18 @@
 package dev.hilla.parser.models;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 /**
  * An artificial ClassRefSignatureModel implementation.
  */
 final class ClassRefSignatureArtificialModel extends ClassRefSignatureModel {
-    private final ClassInfoModel classInfo;
-
-    private final List<TypeArgumentModel> typeArguments;
-
     private final List<AnnotationInfoModel> annotations;
+    private final ClassInfoModel classInfo;
+    private final List<TypeArgumentModel> typeArguments;
 
     ClassRefSignatureArtificialModel(@Nonnull ClassInfoModel classInfo,
             @Nonnull List<TypeArgumentModel> typeArguments,
@@ -21,6 +20,11 @@ final class ClassRefSignatureArtificialModel extends ClassRefSignatureModel {
         this.classInfo = Objects.requireNonNull(classInfo);
         this.typeArguments = Objects.requireNonNull(typeArguments);
         this.annotations = Objects.requireNonNull(annotations);
+    }
+
+    @Override
+    public Object get() {
+        return null;
     }
 
     @Override
@@ -41,10 +45,5 @@ final class ClassRefSignatureArtificialModel extends ClassRefSignatureModel {
     @Override
     protected List<TypeArgumentModel> prepareTypeArguments() {
         return typeArguments;
-    }
-
-    @Override
-    public Object get() {
-        return null;
     }
 }

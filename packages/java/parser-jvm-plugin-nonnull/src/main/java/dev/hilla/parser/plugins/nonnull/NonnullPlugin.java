@@ -13,15 +13,16 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import dev.hilla.parser.core.AbstractPlugin;
-import dev.hilla.parser.core.Plugin;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
+import dev.hilla.parser.core.Plugin;
+import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
@@ -33,10 +34,10 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         setOrder(100);
     }
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return nodeDependencies;
+    static private Map<String, AnnotationMatcher> mapByName(
+            Collection<AnnotationMatcher> annotations) {
+        return annotations.stream().collect(Collectors
+                .toMap(AnnotationMatcher::getName, Function.identity()));
     }
 
     @Override
@@ -80,16 +81,22 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     @Override
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
+    }
+
+    @Override
     public void setConfiguration(@Nonnull PluginConfiguration configuration) {
         super.setConfiguration(configuration);
         this.annotationsMap = mapByName(
                 new NonnullPluginConfig.Processor(getConfiguration())
                         .process());
-    }
-
-    @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
-        return List.of(BackbonePlugin.class);
     }
 
     private Optional<PackageInfoModel> findClosestPackage(
@@ -104,11 +111,5 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             NodePath<?> nodePath) {
         return findClosestPackage(nodePath).stream()
                 .flatMap(PackageInfoModel::getAnnotationsStream);
-    }
-
-    static private Map<String, AnnotationMatcher> mapByName(
-            Collection<AnnotationMatcher> annotations) {
-        return annotations.stream().collect(Collectors
-                .toMap(AnnotationMatcher::getName, Function.identity()));
     }
 }

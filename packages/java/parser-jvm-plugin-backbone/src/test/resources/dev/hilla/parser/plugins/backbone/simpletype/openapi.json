@@ -16,6 +16,17 @@
     }
   ],
   "paths": {
+    "/SimpleTypeEndpoint/doSomething": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_doSomething_POST",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/SimpleTypeEndpoint/getArray": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
@@ -402,17 +413,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/doSomething": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_doSomething_POST",
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }

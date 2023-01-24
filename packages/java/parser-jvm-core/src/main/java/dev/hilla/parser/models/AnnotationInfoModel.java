@@ -14,6 +14,7 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Optional<ClassInfoModel> classInfo;
     private Set<AnnotationParameterModel> parameters;
 
+    @Deprecated
     public static AnnotationInfoModel of(@Nonnull AnnotationInfo origin) {
         return new AnnotationInfoSourceModel(Objects.requireNonNull(origin));
     }
@@ -72,9 +73,4 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     protected abstract Optional<ClassInfoModel> prepareClassInfo();
 
     protected abstract Set<AnnotationParameterModel> prepareParameters();
-
-    static Stream<AnnotationInfoModel> parseString(String string,
-            String stopMarker) {
-        return Stream.empty();
-    }
 }
