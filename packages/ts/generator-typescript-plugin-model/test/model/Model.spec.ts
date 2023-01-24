@@ -22,7 +22,7 @@ describe('FormPlugin', () => {
       });
       const input = await readFile(new URL('./Model.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
-      // expect(files.length).to.equal(modelNames.length);
+      expect(files.length, 'number of generated files').to.equal(modelNames.length);
 
       const filesByName = files.reduce<Record<string, (typeof files)[0]>>((r, file) => {
         r[file.name] = file;
