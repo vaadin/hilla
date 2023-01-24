@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vaadin.component.version>24.0-SNAPSHOT</vaadin.component.version>
+    <vaadin.component.version>24.0.0.alpha4</vaadin.component.version>
     <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
@@ -51,11 +51,13 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-testbench-core</artifactId>
       <version>${testbench.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-test-util</artifactId>
       <version>${flow.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
@@ -66,92 +68,6 @@
       <groupId>dev.hilla</groupId>
       <artifactId>engine-runtime</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-app-layout-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-avatar-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-checkbox-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-combo-box-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-      <dependency>
-          <groupId>com.vaadin</groupId>
-          <artifactId>vaadin-custom-field-flow</artifactId>
-          <version>${vaadin.component.version}</version>
-      </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-date-picker-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-date-time-picker-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-form-layout-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-list-box-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-login-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-notification-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-radio-button-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-rich-text-editor-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-select-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-tabs-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-text-field-flow</artifactId>
-      <version>${vaadin.component.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-time-picker-flow</artifactId>
-      <version>${vaadin.component.version}</version>
     </dependency>
 
     <dependency>

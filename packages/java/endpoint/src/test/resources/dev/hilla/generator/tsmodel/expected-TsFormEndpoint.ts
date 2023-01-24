@@ -14,7 +14,7 @@ import {Email,Null,NotNull,NotEmpty,NotBlank,AssertTrue,AssertFalse,Negative,Neg
  * @see {@link file:///.../endpoint/src/test/java/dev/hilla/generator/tsmodel/TsFormEndpoint.java}
  */
 export default class MyEntityModel<T extends MyEntity = MyEntity> extends MyEntityIdModel<T> {
-  static createEmptyValue: () => MyEntity;
+  declare static createEmptyValue: () => MyEntity;
 
   get myId(): NumberModel {
     return this[_getPropertyModel]('myId', NumberModel, [true]);

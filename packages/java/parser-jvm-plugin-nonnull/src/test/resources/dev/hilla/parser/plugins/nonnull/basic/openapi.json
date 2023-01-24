@@ -201,6 +201,86 @@
         }
       }
     },
+    "/BasicEndpoint/typeArgumentWildcard": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_typeArgumentWildcard_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BasicEndpoint/typeParameter": {
+      "post": {
+        "tags": ["BasicEndpoint"],
+        "operationId": "BasicEndpoint_typeParameter_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/BasicEndpoint/typeWithTypeArgument": {
       "post": {
         "tags": ["BasicEndpoint"],
@@ -276,12 +356,6 @@
       "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",
         "properties": {
-          "publicField": {
-            "type": "string"
-          },
-          "protectedField": {
-            "type": "string"
-          },
           "complexTypeField": {
             "type": "object",
             "additionalProperties": {
@@ -298,6 +372,12 @@
           "nullableField": {
             "type": "string",
             "nullable": true
+          },
+          "protectedField": {
+            "type": "string"
+          },
+          "publicField": {
+            "type": "string"
           },
           "typeWithTypeArgument": {
             "type": "array",

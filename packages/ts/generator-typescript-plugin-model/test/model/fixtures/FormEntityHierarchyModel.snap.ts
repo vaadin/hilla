@@ -2,7 +2,7 @@ import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1,
 import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
 import FormEntityIdModel_1 from "./FormEntityIdModel";
 class FormEntityHierarchyModel<T extends FormEntityHierarchy_1 = FormEntityHierarchy_1> extends FormEntityIdModel_1<T> {
-    static createEmptyValue: () => FormEntityHierarchy_1;
+    declare static createEmptyValue: () => FormEntityHierarchy_1;
     get lorem(): StringModel_1 {
         return this[_getPropertyModel_1]("lorem", StringModel_1, [true]) as StringModel_1;
     }

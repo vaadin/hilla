@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +49,11 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     public boolean isBigDecimal() {
         return ClassInfoModel.isAssignableFrom(BigDecimal.class, origin);
+    }
+
+    @Override
+    public boolean isBigInteger() {
+        return ClassInfoModel.isAssignableFrom(BigInteger.class, origin);
     }
 
     @Override
@@ -189,13 +195,14 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
+                .sorted(FieldInfoModel.FIELD_ORDER)
                 .collect(Collectors.toList());
     }
 
     @Override
     protected List<ClassInfoModel> prepareInnerClasses() {
         return origin.getInnerClasses().stream().map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+                .sorted(CLASS_ORDER).collect(Collectors.toList());
     }
 
     @Override
@@ -208,6 +215,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return origin.getDeclaredMethodInfo().stream().map(MethodInfoModel::of)
+                .sorted(MethodInfoModel.METHOD_ORDER)
                 .collect(Collectors.toList());
     }
 

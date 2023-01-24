@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,11 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     public boolean isBigDecimal() {
         return ClassInfoModel.isAssignableFrom(BigDecimal.class, origin);
+    }
+
+    @Override
+    public boolean isBigInteger() {
+        return ClassInfoModel.isAssignableFrom(BigInteger.class, origin);
     }
 
     @Override
@@ -189,25 +195,28 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return Arrays.stream(origin.getDeclaredFields()).map(FieldInfoModel::of)
+                .sorted(FieldInfoModel.FIELD_ORDER)
                 .collect(Collectors.toList());
     }
 
     @Override
     protected List<ClassInfoModel> prepareInnerClasses() {
         return Arrays.stream(origin.getDeclaredClasses())
-                .map(ClassInfoModel::of).collect(Collectors.toList());
+                .map(ClassInfoModel::of).sorted(CLASS_ORDER)
+                .collect(Collectors.toList());
     }
 
     @Override
     protected List<ClassRefSignatureModel> prepareInterfaces() {
-        return Arrays.stream(origin.getInterfaces())
+        return Arrays.stream(origin.getAnnotatedInterfaces())
                 .map(ClassRefSignatureModel::of).collect(Collectors.toList());
     }
 
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return Arrays.stream(origin.getDeclaredMethods())
-                .map(MethodInfoModel::of).collect(Collectors.toList());
+                .map(MethodInfoModel::of).sorted(MethodInfoModel.METHOD_ORDER)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -217,7 +226,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
 
     @Override
     protected ClassRefSignatureModel prepareSuperClass() {
-        var superClass = origin.getSuperclass();
+        var superClass = origin.getAnnotatedSuperclass();
 
         return superClass != null && ClassInfoModel.isNonJDKClass(superClass)
                 ? ClassRefSignatureModel.of(superClass)

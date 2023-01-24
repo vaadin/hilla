@@ -19,6 +19,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -365,6 +366,8 @@ public class ClassRefSignatureModelTests {
                     .ofEntries(
                             entry(BigDecimal.class.getName(), "isBigDecimal",
                                     "isClassRef", "isJDKClass"),
+                            entry(BigInteger.class.getName(), "isBigInteger",
+                                    "isClassRef", "isJDKClass"),
                             entry(Boolean.class.getName(), "isBoolean",
                                     "isClassRef", "isJDKClass"),
                             entry(Byte.class.getName(), "hasIntegerType",
@@ -411,21 +414,20 @@ public class ClassRefSignatureModelTests {
                                             .getType()).getRawType()).getName()
                                     : ((Class<?>) origin.getType()).getName();
 
-                            return Arguments.of(
-                                    ClassRefSignatureModel.of(origin),
+                            return Arguments.of(SignatureModel.of(origin),
                                     specializations.get(name),
                                     ModelKind.REFLECTION_COMPLETE,
                                     entry.getKey());
                         });
                 var bare = ctx.getBareReflectionOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
+                                SignatureModel.of(entry.getValue()),
                                 specializations.get(entry.getValue().getName()),
                                 ModelKind.REFLECTION_BARE, entry.getKey()));
 
                 var source = ctx.getSourceOrigins().entrySet().stream()
                         .map(entry -> Arguments.of(
-                                ClassRefSignatureModel.of(entry.getValue()),
+                                SignatureModel.of(entry.getValue()),
                                 specializations.get(entry.getValue()
                                         .getFullyQualifiedClassName()),
                                 ModelKind.SOURCE, entry.getKey()));

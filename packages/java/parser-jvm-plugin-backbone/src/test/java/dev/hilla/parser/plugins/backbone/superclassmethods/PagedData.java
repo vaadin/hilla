@@ -22,16 +22,16 @@ import java.util.Map;
 
 @EndpointExposed
 public interface PagedData<T> {
-    default int size() {
-        return 0;
+    default List<@Nonnull T> getNonNullablePage(int pageSize, int pageNumber,
+            Map<String, @Nonnull T> parameters) {
+        return Collections.emptyList();
     }
 
     default List<T> getPage(int pageSize, int pageNumber) {
         return Collections.emptyList();
     }
 
-    default List<@Nonnull T> getNonNullablePage(int pageSize, int pageNumber,
-            Map<String, @Nonnull T> parameters) {
-        return Collections.emptyList();
+    default int size() {
+        return 0;
     }
 }

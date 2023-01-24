@@ -12,7 +12,7 @@ import FormRecordTypesModel_1 from "./FormRecordTypesModel";
 import FormTemporalTypesModel_1 from "./FormTemporalTypesModel";
 import FormValidationConstraintsModel_1 from "./FormValidationConstraintsModel";
 class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityIdModel_1<T> {
-    static createEmptyValue: () => FormEntity_1;
+    declare static createEmptyValue: () => FormEntity_1;
     get myId(): NumberModel_1 {
         return this[_getPropertyModel_1]("myId", NumberModel_1, [true]) as NumberModel_1;
     }

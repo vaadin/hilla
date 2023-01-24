@@ -1,19 +1,30 @@
 package dev.hilla.parser.core.basic;
 
-import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.Node;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.test.nodes.EndpointNode;
 import dev.hilla.parser.test.nodes.FieldNode;
 import dev.hilla.parser.test.nodes.MethodNode;
-import dev.hilla.parser.core.Node;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
 
 final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
+    @Override
+    public void enter(NodePath<?> nodePath) {
+
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+
+    }
+
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
@@ -26,23 +37,6 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    @Override
-    public void enter(NodePath<?> nodePath) {
-
-    }
-
-    @Override
-    public void exit(NodePath<?> nodePath) {
-
-    }
-
-    @Nonnull
-    private Stream<Node<?, ?>> removeBarMethod(
-            @Nonnull Stream<Node<?, ?>> nodes) {
-        return nodes.filter(node -> !((node instanceof MethodNode)
-                && ((MethodNode) node).getSource().getName().equals("bar")));
-    }
-
     @Nonnull
     private Stream<Node<?, ?>> getReplacementFields() {
         try {
@@ -53,6 +47,13 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
         } catch (NoSuchFieldException e) {
             return Stream.empty();
         }
+    }
+
+    @Nonnull
+    private Stream<Node<?, ?>> removeBarMethod(
+            @Nonnull Stream<Node<?, ?>> nodes) {
+        return nodes.filter(node -> !((node instanceof MethodNode)
+                && ((MethodNode) node).getSource().getName().equals("bar")));
     }
 
     static class Sample {

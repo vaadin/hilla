@@ -14,6 +14,7 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Optional<ClassInfoModel> classInfo;
     private Set<AnnotationParameterModel> parameters;
 
+    @Deprecated
     public static AnnotationInfoModel of(@Nonnull AnnotationInfo origin) {
         return new AnnotationInfoSourceModel(Objects.requireNonNull(origin));
     }

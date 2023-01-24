@@ -1,20 +1,21 @@
 package dev.hilla.parser.plugins.backbone;
 
-import javax.annotation.Nonnull;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -22,27 +23,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
 public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
-            return nodeDependencies;
-        }
-
-        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
-        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
-            return nodeDependencies;
-        }
-
-        var ref = (ClassRefSignatureModel) signatureNode.getSource();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
-            return nodeDependencies;
-        }
-
-        return nodeDependencies.appendRelatedNodes(
-                Stream.of(EntityNode.of(ref.getClassInfo())));
-    }
-
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EntityNode) {
@@ -64,6 +44,27 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
 
             attachSchemaWithNameToOpenApi(schema, cls.getName(), openApi);
         }
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
+            return nodeDependencies;
+        }
+
+        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
+        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
+            return nodeDependencies;
+        }
+
+        var ref = (ClassRefSignatureModel) signatureNode.getSource();
+        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+            return nodeDependencies;
+        }
+
+        return nodeDependencies.appendRelatedNodes(
+                Stream.of(EntityNode.of(ref.getClassInfo())));
     }
 
     private void attachSchemaWithNameToOpenApi(Schema<?> schema, String name,

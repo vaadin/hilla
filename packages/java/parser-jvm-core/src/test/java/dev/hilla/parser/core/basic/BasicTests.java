@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
@@ -14,10 +13,6 @@ import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
 
 public class BasicTests {
-    private final List<String> classPath;
-    private final ResourceLoader resourceLoader = new ResourceLoader(
-            getClass());
-
     private static final List<String> STEPS = new LinkedList<>();
 
     static {
@@ -43,12 +38,30 @@ public class BasicTests {
         STEPS.add("<- Root(ScanResult)");
     }
 
+    private final List<String> classPath;
+    private final ResourceLoader resourceLoader = new ResourceLoader(
+            getClass());
+
     {
         try {
             classPath = List.of(resourceLoader.findTargetDirPath().toString());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void should_TraverseInConsistentOrder() {
+        var config = new ParserConfig.Builder().classPath(classPath)
+                .endpointAnnotation(Endpoint.class.getName())
+                .addPlugin(new BasicPlugin()).finish();
+
+        var parser = new Parser(config);
+
+        var openApi = parser.execute();
+
+        assertEquals(String.join("\n", STEPS),
+                openApi.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 
     @Test
@@ -66,19 +79,5 @@ public class BasicTests {
                         "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
                         "MethodInfoModel methodBar")),
                 openApi.getExtensions().get(BasicPlugin.STORAGE_KEY));
-    }
-
-    @Test
-    public void should_TraverseInConsistentOrder() {
-        var config = new ParserConfig.Builder().classPath(classPath)
-                .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BasicPlugin()).finish();
-
-        var parser = new Parser(config);
-
-        var openApi = parser.execute();
-
-        assertEquals(String.join("\n", STEPS),
-                openApi.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 }

@@ -6,11 +6,11 @@ import java.util.Optional;
 
 @Endpoint
 public class BareTypeEndpoint {
-    public Map getBareMap() {
+    public List getBareList() {
         return null;
     }
 
-    public List getBareList() {
+    public Map getBareMap() {
         return null;
     }
 

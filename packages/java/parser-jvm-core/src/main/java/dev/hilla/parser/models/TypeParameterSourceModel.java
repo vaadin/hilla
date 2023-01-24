@@ -1,9 +1,10 @@
 package dev.hilla.parser.models;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.utils.Streams;
 
@@ -29,15 +30,30 @@ final class TypeParameterSourceModel extends TypeParameterModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return List.of();
+        var annotations = origin.getTypeAnnotationInfo();
+        return annotations == null ? List.of()
+                : annotations.stream().map(AnnotationInfoModel::of)
+                        .collect(Collectors.toList());
     }
 
     @Override
     protected List<SignatureModel> prepareBounds() {
         return Streams
-                .combine(Stream.of(origin.getClassBound()),
-                        origin.getInterfaceBounds().stream())
-                .filter(Objects::nonNull).map(SignatureModel::of).distinct()
-                .collect(Collectors.toList());
+                .combine(Stream.of(getClassBoundSignature()),
+                        origin.getInterfaceBounds().stream()
+                                .map(SignatureModel::of))
+                .distinct().collect(Collectors.toList());
+    }
+
+    @Nonnull
+    private SignatureModel getClassBoundSignature() {
+        // FIXME: param class bound is sometimes null and sometimes Object.
+        // Possibly a bug in ClassGraph. Use Object to align with reflection.
+        var classBound = origin.getClassBound();
+        if (classBound == null) {
+            return ClassRefSignatureModel.of(Object.class);
+        }
+
+        return SignatureModel.of(classBound);
     }
 }

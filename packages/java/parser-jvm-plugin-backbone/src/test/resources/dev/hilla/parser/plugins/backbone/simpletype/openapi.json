@@ -16,6 +16,17 @@
     }
   ],
   "paths": {
+    "/SimpleTypeEndpoint/doSomething": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_doSomething_POST",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/SimpleTypeEndpoint/getArray": {
       "post": {
         "tags": ["SimpleTypeEndpoint"],
@@ -51,6 +62,26 @@
                 "schema": {
                   "type": "number",
                   "format": "double",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleTypeEndpoint/getBigInteger": {
+      "post": {
+        "tags": ["SimpleTypeEndpoint"],
+        "operationId": "SimpleTypeEndpoint_getBigInteger_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
                   "nullable": true
                 }
               }
@@ -382,17 +413,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/SimpleTypeEndpoint/doSomething": {
-      "post": {
-        "tags": ["SimpleTypeEndpoint"],
-        "operationId": "SimpleTypeEndpoint_doSomething_POST",
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }

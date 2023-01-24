@@ -166,7 +166,7 @@
     "schemas": {
       "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity": {
         "type": "string",
-        "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
+        "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "MANY_MANY_WORDS", "_HELLO"]
       }
     }
   }

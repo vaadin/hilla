@@ -17,6 +17,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -235,7 +236,8 @@ public class ClassInfoModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_GetClassFields(ClassInfoModel model, ModelKind kind) {
         var expected = getDeclaredFields(Dependency.Sample.class)
-                .map(FieldInfoModel::of).collect(Collectors.toList());
+                .map(FieldInfoModel::of).sorted(FieldInfoModel.FIELD_ORDER)
+                .collect(Collectors.toList());
         var actual = model.getFields();
 
         assertEquals(expected, actual);
@@ -795,6 +797,8 @@ public class ClassInfoModelTests {
                     .ofEntries(
                             entry(BigDecimal.class, "isJDKClass",
                                     "isBigDecimal"),
+                            entry(BigInteger.class, "isJDKClass",
+                                    "isBigInteger"),
                             entry(Boolean.class, "isJDKClass", "isBoolean"),
                             entry(Byte.class, "isJDKClass", "isByte",
                                     "hasIntegerType"),
