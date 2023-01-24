@@ -3,6 +3,7 @@ package dev.hilla.parser.models;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -13,11 +14,14 @@ import io.github.classgraph.MethodInfo;
 
 public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
         Model, NamedModel, OwnedModel<ClassInfoModel>, ParameterizedModel {
+    static final Comparator<MethodInfoModel> METHOD_ORDER = Comparator
+            .comparing(MethodInfoModel::getName);
     private ClassInfoModel owner;
     private List<MethodParameterInfoModel> parameters;
     private SignatureModel resultType;
     private List<TypeParameterModel> typeParameters;
 
+    @Deprecated
     public static MethodInfoModel of(@Nonnull MethodInfo origin) {
         return new MethodInfoSourceModel(Objects.requireNonNull(origin));
     }

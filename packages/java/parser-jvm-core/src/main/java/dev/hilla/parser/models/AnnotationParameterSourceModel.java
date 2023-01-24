@@ -23,6 +23,11 @@ final class AnnotationParameterSourceModel extends AnnotationParameterModel
     }
 
     @Override
+    public boolean isDefault() {
+        return false;
+    }
+
+    @Override
     protected Object prepareValue() {
         var _value = origin.getValue();
 

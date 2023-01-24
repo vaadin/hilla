@@ -5,6 +5,10 @@ import java.math.BigInteger;
 
 @Endpoint
 public class SimpleTypeEndpoint {
+    public void doSomething() {
+        // no-op
+    }
+
     public int[] getArray() {
         return new int[] { 1, 2, 3 };
     }
@@ -83,9 +87,5 @@ public class SimpleTypeEndpoint {
 
     public String getString() {
         return "test";
-    }
-
-    public void doSomething() {
-        // no-op
     };
 }

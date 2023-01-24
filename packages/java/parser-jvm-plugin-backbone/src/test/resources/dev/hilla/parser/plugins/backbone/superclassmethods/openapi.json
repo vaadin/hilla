@@ -55,6 +55,33 @@
         }
       }
     },
+    "/PersonEndpoint/delete": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_delete_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/PersonEndpoint/update": {
       "post": {
         "tags": ["PersonEndpoint"],
@@ -90,98 +117,6 @@
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
                     }
                   ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/PersonEndpoint/delete": {
-      "post": {
-        "tags": ["PersonEndpoint"],
-        "operationId": "PersonEndpoint_delete_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "integer",
-                    "format": "int32",
-                    "nullable": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/PersonEndpoint/size": {
-      "post": {
-        "tags": ["PersonEndpoint"],
-        "operationId": "PersonEndpoint_size_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/PersonEndpoint/getPage": {
-      "post": {
-        "tags": ["PersonEndpoint"],
-        "operationId": "PersonEndpoint_getPage_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "pageSize": {
-                    "type": "integer",
-                    "format": "int32"
-                  },
-                  "pageNumber": {
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "nullable": true,
-                  "items": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
-                      }
-                    ]
-                  }
                 }
               }
             }
@@ -240,6 +175,71 @@
                       }
                     ]
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonEndpoint/getPage": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_getPage_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pageSize": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "pageNumber": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.superclassmethods.PersonEndpoint$Person"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonEndpoint/size": {
+      "post": {
+        "tags": ["PersonEndpoint"],
+        "operationId": "PersonEndpoint_size_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
                 }
               }
             }

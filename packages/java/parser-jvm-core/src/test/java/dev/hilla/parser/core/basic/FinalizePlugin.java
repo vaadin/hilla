@@ -1,27 +1,22 @@
 package dev.hilla.parser.core.basic;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
+import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.NamedModel;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.RootNode;
 
 final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
     private final List<String> footsteps = new ArrayList<>();
     private final List<String> members = new ArrayList<>();
-
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return nodeDependencies;
-    }
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -48,5 +43,11 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
             openApi.addExtension(BasicPlugin.FOOTSTEPS_STORAGE_KEY,
                     String.join("\n", footsteps));
         }
+    }
+
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
     }
 }

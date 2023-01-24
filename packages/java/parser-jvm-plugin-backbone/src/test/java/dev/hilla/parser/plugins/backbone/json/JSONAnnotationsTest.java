@@ -1,13 +1,14 @@
 package dev.hilla.parser.plugins.backbone.json;
 
-import dev.hilla.parser.core.ParserConfig;
-import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
 public class JSONAnnotationsTest {
     private final TestHelper helper = new TestHelper(getClass());

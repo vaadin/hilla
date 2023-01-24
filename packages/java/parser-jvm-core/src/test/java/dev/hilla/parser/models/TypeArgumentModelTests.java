@@ -67,16 +67,17 @@ public class TypeArgumentModelTests {
             ModelKind kind, String name) {
         switch (name) {
         case "anyTypeArgument":
-            assertEquals(TypeArgument.Wildcard.ANY, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.ANY, model.getWildcard());
             break;
         case "extendsTypeArgument":
-            assertEquals(TypeArgument.Wildcard.EXTENDS, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.EXTENDS,
+                    model.getWildcard());
             break;
         case "regularTypeArgument":
-            assertEquals(TypeArgument.Wildcard.NONE, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.NONE, model.getWildcard());
             break;
         case "superTypeArgument":
-            assertEquals(TypeArgument.Wildcard.SUPER, model.getWildcard());
+            assertEquals(TypeArgumentModel.Wildcard.SUPER, model.getWildcard());
             break;
         }
     }

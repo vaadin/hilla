@@ -9,6 +9,7 @@ import io.github.classgraph.AnnotationEnumValue;
 public abstract class AnnotationParameterEnumValueModel implements Model {
     private ClassInfoModel classInfo;
 
+    @Deprecated
     public static AnnotationParameterEnumValueModel of(
             @Nonnull AnnotationEnumValue origin) {
         return new AnnotationParameterEnumValueSourceModel(

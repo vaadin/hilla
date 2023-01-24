@@ -1,21 +1,23 @@
 package dev.hilla.parser.plugins.model;
 
-import javax.annotation.Nonnull;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import dev.hilla.parser.core.AbstractPlugin;
+import dev.hilla.parser.core.NodeDependencies;
+import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
 import dev.hilla.parser.models.SignatureModel;
-import dev.hilla.parser.core.NodeDependencies;
-import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
@@ -27,10 +29,28 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         setOrder(200);
     }
 
-    @Nonnull
-    @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        return nodeDependencies;
+    private static ValidationConstraint convertAnnotation(
+            AnnotationInfoModel annotation) {
+        var simpleName = extractSimpleName(annotation.getName());
+
+        var attributes = annotation.getParametersStream()
+                .filter(Predicate.not(AnnotationParameterModel::isDefault))
+                .collect(Collectors.toMap(AnnotationParameterModel::getName,
+                        AnnotationParameterModel::getValue));
+
+        return new ValidationConstraint(simpleName,
+                !attributes.isEmpty() ? attributes : null);
+    }
+
+    private static String extractSimpleName(String fullyQualifiedName) {
+        return fullyQualifiedName
+                .substring(fullyQualifiedName.lastIndexOf(".") + 1);
+    }
+
+    private static boolean isValidationConstraintAnnotation(
+            AnnotationInfoModel annotation) {
+        return annotation.getName()
+                .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
     }
 
     @Override
@@ -54,27 +74,15 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     }
 
-    private static ValidationConstraint convertAnnotation(
-            AnnotationInfoModel annotation) {
-        var simpleName = extractSimpleName(annotation.getName());
-
-        var attributes = annotation.getParametersStream()
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        AnnotationParameterModel::getValue));
-
-        return new ValidationConstraint(simpleName,
-                !attributes.isEmpty() ? attributes : null);
+    @Override
+    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
+        return List.of(BackbonePlugin.class);
     }
 
-    private static String extractSimpleName(String fullyQualifiedName) {
-        return fullyQualifiedName
-                .substring(fullyQualifiedName.lastIndexOf(".") + 1);
-    }
-
-    private static boolean isValidationConstraintAnnotation(
-            AnnotationInfoModel annotation) {
-        return annotation.getName()
-                .startsWith(VALIDATION_CONSTRAINTS_PACKAGE_NAME);
+    @Nonnull
+    @Override
+    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
     }
 
     private void addConstraintsToSchema(SignatureModel signature,
@@ -87,10 +95,5 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         if (!constraints.isEmpty()) {
             schema.addExtension(VALIDATION_CONSTRAINTS_KEY, constraints);
         }
-    }
-
-    @Override
-    public Collection<Class<? extends Plugin>> getRequiredPlugins() {
-        return List.of(BackbonePlugin.class);
     }
 }

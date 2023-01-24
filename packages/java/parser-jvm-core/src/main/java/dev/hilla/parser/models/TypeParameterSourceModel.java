@@ -1,9 +1,10 @@
 package dev.hilla.parser.models;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import dev.hilla.parser.utils.Streams;
 

@@ -31,8 +31,8 @@ public class BasicEndpoint {
         return str;
     }
 
-    public List<@Nonnull NonNullableModel> typeWithTypeArgument(
-            List<@Nonnull NonNullableModel> list) {
+    public List<@Nonnull ? extends String> typeArgumentWildcard(
+            List<@Nonnull ? extends String> list) {
         return list;
     }
 
@@ -40,8 +40,8 @@ public class BasicEndpoint {
         return list;
     }
 
-    public List<@Nonnull ? extends String> typeArgumentWildcard(
-            List<@Nonnull ? extends String> list) {
+    public List<@Nonnull NonNullableModel> typeWithTypeArgument(
+            List<@Nonnull NonNullableModel> list) {
         return list;
     }
 

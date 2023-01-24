@@ -353,16 +353,14 @@ public class RequestUtilTest {
 
     private void addRoute(SpringServlet servlet,
             Class<? extends Component> view) {
-
         Optional<Route> route = AnnotationReader.getAnnotationFor(view,
                 Route.class);
-
         if (!route.isPresent()) {
             throw new IllegalArgumentException(
                     "Unable find a @Route annotation");
         }
 
-        String path = RouteUtil.getRoutePath(view, route.get());
+        String path = route.get().value();
         RouteRegistry routeRegistry = servlet.getService().getRouter()
                 .getRegistry();
         RouteTarget publicRouteTarget = Mockito.mock(RouteTarget.class);

@@ -16,6 +16,32 @@
     }
   ],
   "paths": {
+    "/ExtendedEndpoint/getNonnullListOfNullableElements": {
+      "post": {
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_getNonnullListOfNullableElements_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint$Entity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ExtendedEndpoint/superComplexType": {
       "post": {
         "tags": ["ExtendedEndpoint"],
@@ -72,32 +98,6 @@
                       }
                     },
                     "nullable": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ExtendedEndpoint/getNonnullListOfNullableElements": {
-      "post": {
-        "tags": ["ExtendedEndpoint"],
-        "operationId": "ExtendedEndpoint_getNonnullListOfNullableElements_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint$Entity"
-                      }
-                    ]
                   }
                 }
               }
