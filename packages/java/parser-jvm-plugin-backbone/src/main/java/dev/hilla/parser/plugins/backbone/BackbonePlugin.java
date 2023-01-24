@@ -7,7 +7,6 @@ import dev.hilla.parser.core.PluginConfiguration;
 
 public final class BackbonePlugin
         extends AbstractCompositePlugin<PluginConfiguration> {
-
     public BackbonePlugin() {
         super(new EndpointPlugin(), new EndpointExposedPlugin(),
                 new MethodPlugin(), new MethodParameterPlugin(),

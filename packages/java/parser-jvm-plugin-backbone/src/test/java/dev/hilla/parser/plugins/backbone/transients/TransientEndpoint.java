@@ -7,9 +7,9 @@ public class TransientEndpoint {
     }
 
     public static class TransientModel {
-        private NonTransientEntity nonTransientEntity;
-        private String notTransientField;
-        private transient TransientEntity transientEntity;
-        private transient String transientField;
+        public NonTransientEntity nonTransientEntity;
+        public String notTransientField;
+        public transient TransientEntity transientEntity;
+        public transient String transientField;
     }
 }
