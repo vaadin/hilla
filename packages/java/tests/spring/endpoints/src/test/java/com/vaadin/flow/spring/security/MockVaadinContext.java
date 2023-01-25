@@ -1,6 +1,5 @@
 package com.vaadin.flow.spring.security;
 
-import jakarta.servlet.ServletContext;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockServletContext;
 
@@ -8,6 +7,8 @@ import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RoutePathProvider;
 import com.vaadin.flow.server.VaadinServletContext;
+
+import jakarta.servlet.ServletContext;
 
 public class MockVaadinContext extends VaadinServletContext {
 
@@ -26,13 +27,13 @@ public class MockVaadinContext extends VaadinServletContext {
     }
 
     public MockVaadinContext(ServletContext context,
-        RoutePathProvider provider) {
+            RoutePathProvider provider) {
         super(context);
 
         Mockito.when(lookup.lookup(RoutePathProvider.class)).thenReturn(null);
 
         Mockito.when(lookup.lookup(RoutePathProvider.class))
-            .thenReturn(provider);
+                .thenReturn(provider);
 
         setAttribute(lookup);
     }
