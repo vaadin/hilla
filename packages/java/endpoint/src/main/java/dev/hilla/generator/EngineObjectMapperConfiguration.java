@@ -18,7 +18,7 @@ import dev.hilla.EndpointController;
 @ConditionalOnFeatureFlag(EngineObjectMapperConfiguration.HILLA_ENGINE_FEATURE_FLAG)
 public class EngineObjectMapperConfiguration {
     private static final Logger logger = LoggerFactory
-        .getLogger(EngineObjectMapperConfiguration.class);
+            .getLogger(EngineObjectMapperConfiguration.class);
     static final String HILLA_ENGINE_FEATURE_FLAG = "hillaEngine";
 
     @Bean
