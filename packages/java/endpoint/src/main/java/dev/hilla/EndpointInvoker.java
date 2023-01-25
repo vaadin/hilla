@@ -107,7 +107,6 @@ public class EndpointInvoker {
                 : createVaadinConnectObjectMapper(applicationContext);
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
-
     }
 
     private static Logger getLogger() {
@@ -177,6 +176,9 @@ public class EndpointInvoker {
                     JsonAutoDetect.Visibility.ANY);
         }
         objectMapper.registerModule(new ByteArrayModule());
+
+        getLogger().debug("Using default Hilla ObjectMapper");
+
         return objectMapper;
     }
 
