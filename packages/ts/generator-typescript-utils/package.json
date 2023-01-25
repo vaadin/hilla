@@ -33,6 +33,9 @@
     "./testing/snapshotMatcher.js": {
       "default": "./testing/snapshotMatcher.js"
     },
+    "./ast.js": {
+      "default": "./ast.js"
+    },
     "./createFullyUniqueIdentifier.js": {
       "default": "./createFullyUniqueIdentifier.js"
     },
