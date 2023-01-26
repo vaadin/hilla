@@ -22,44 +22,15 @@ import {
   StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
-import type { Expression, Identifier, TypeNode, TypeReferenceNode } from 'typescript';
-import ts from 'typescript';
+import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
 import {
   AnnotatedSchema,
-  Annotation,
-  AnnotationNamedAttributes,
-  AnnotationPrimitiveAttribute,
+  AnnotationParser,
   isAnnotatedSchema,
   isValidationConstrainedSchema,
   ValidationConstrainedSchema,
-} from './Annotation.js';
-import parseAnnotation from './parseAnnotation.js';
+} from './annotation.js';
 import { importBuiltInFormModel } from './utils.js';
-
-function convertAttribute(attribute: AnnotationPrimitiveAttribute): Expression {
-  switch (typeof attribute) {
-    case 'boolean':
-      return attribute ? ts.factory.createTrue() : ts.factory.createFalse();
-    case 'number':
-      return ts.factory.createNumericLiteral(attribute);
-    case 'string':
-      return ts.factory.createStringLiteral(attribute);
-    default:
-      return ts.factory.createOmittedExpression();
-  }
-}
-
-function convertNamedAttributes(attributes: AnnotationNamedAttributes): Expression {
-  const attributeEntries = Object.entries(attributes);
-  if (attributeEntries.length === 1 && attributeEntries[0][0] === 'value') {
-    return convertAttribute(attributeEntries[0][1]);
-  }
-
-  return ts.factory.createObjectLiteralExpression(
-    attributeEntries.map(([key, value]) => ts.factory.createPropertyAssignment(key, convertAttribute(value))),
-    false,
-  );
-}
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -75,9 +46,9 @@ const $schema = Symbol();
 export type OptionalChecker = (schema: Schema) => boolean;
 
 export abstract class ModelSchemaPartProcessor<T> {
-  readonly [$dependencies]: DependencyManager;
-  readonly [$originalSchema]: Schema;
-  readonly [$schema]: Schema;
+  protected readonly [$dependencies]: DependencyManager;
+  protected readonly [$originalSchema]: Schema;
+  protected readonly [$schema]: Schema;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     this[$dependencies] = dependencies;
@@ -250,10 +221,13 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
   readonly #checkOptional: OptionalChecker;
+  readonly #parse: typeof AnnotationParser.prototype.parse;
 
   constructor(schema: Schema, dependencies: DependencyManager, checkOptional: OptionalChecker = isNullableSchema) {
     super(schema, dependencies);
     this.#checkOptional = checkOptional;
+    const parser = new AnnotationParser((name) => importBuiltInFormModel(name, dependencies));
+    this.#parse = parser.parse.bind(parser);
   }
 
   public override process(): readonly ts.Expression[] {
@@ -305,18 +279,11 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return [];
   }
 
-  #getValidator = (annotation: Annotation): Expression =>
-    ts.factory.createNewExpression(
-      importBuiltInFormModel(annotation.simpleName, this[$dependencies]),
-      undefined,
-      annotation.attributes !== undefined ? [convertNamedAttributes(annotation.attributes)] : [],
-    );
-
   #getValidatorsFromAnnotations(schema: AnnotatedSchema): readonly Expression[] {
-    return schema['x-annotations'].map(parseAnnotation).map(this.#getValidator);
+    return schema['x-annotations'].map(this.#parse);
   }
 
   #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
-    return schema['x-validation-constraints'].map(this.#getValidator);
+    return schema['x-validation-constraints'].map(this.#parse);
   }
 }

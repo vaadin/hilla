@@ -1,9 +1,20 @@
 package com.vaadin.flow.spring.security;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.internal.AnnotationReader;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.Router;
+import com.vaadin.flow.router.internal.NavigationRouteTarget;
+import com.vaadin.flow.router.internal.RouteTarget;
+import com.vaadin.flow.router.internal.RouteUtil;
+import com.vaadin.flow.server.HandlerHelper.RequestType;
+import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.flow.spring.*;
+import dev.hilla.EndpointControllerConfiguration;
+import dev.hilla.EndpointProperties;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,30 +29,10 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.internal.AnnotationReader;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.Router;
-import com.vaadin.flow.router.internal.NavigationRouteTarget;
-import com.vaadin.flow.router.internal.RouteTarget;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.HandlerHelper.RequestType;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.shared.ApplicationConstants;
-import com.vaadin.flow.spring.SpringBootAutoConfiguration;
-import com.vaadin.flow.spring.SpringSecurityAutoConfiguration;
-import com.vaadin.flow.spring.SpringServlet;
-import com.vaadin.flow.spring.SpringVaadinServletService;
-import com.vaadin.flow.spring.VaadinConfigurationProperties;
-
-import dev.hilla.EndpointControllerConfiguration;
-import dev.hilla.EndpointProperties;
-
 import jakarta.annotation.security.RolesAllowed;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EndpointProperties.class })
@@ -349,7 +340,6 @@ public class RequestUtilTest {
         SpringServlet servlet = Mockito.mock(SpringServlet.class);
         SpringVaadinServletService service = Mockito
                 .mock(SpringVaadinServletService.class);
-        VaadinServletContext context = new MockVaadinContext();
         Router router = Mockito.mock(Router.class);
         RouteRegistry routeRegistry = Mockito.mock(RouteRegistry.class);
 
@@ -358,23 +348,19 @@ public class RequestUtilTest {
         Mockito.when(servlet.getService()).thenReturn(service);
         Mockito.when(service.getRouter()).thenReturn(router);
         Mockito.when(router.getRegistry()).thenReturn(routeRegistry);
-        Mockito.when(service.getContext()).thenReturn(context);
         return servlet;
     }
 
     private void addRoute(SpringServlet servlet,
             Class<? extends Component> view) {
-
         Optional<Route> route = AnnotationReader.getAnnotationFor(view,
                 Route.class);
-
         if (!route.isPresent()) {
             throw new IllegalArgumentException(
                     "Unable find a @Route annotation");
         }
 
-        String path = RouteUtil.getRoutePath(servlet.getService().getContext(),
-                view);
+        String path = route.get().value();
         RouteRegistry routeRegistry = servlet.getService().getRouter()
                 .getRegistry();
         RouteTarget publicRouteTarget = Mockito.mock(RouteTarget.class);
