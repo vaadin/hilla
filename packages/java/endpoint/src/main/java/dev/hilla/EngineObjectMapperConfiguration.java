@@ -1,4 +1,4 @@
-package dev.hilla.generator;
+package dev.hilla;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import dev.hilla.ByteArrayModule;
-import dev.hilla.ConditionalOnFeatureFlag;
-import dev.hilla.EndpointController;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 @Configuration
 @ConditionalOnFeatureFlag(EngineObjectMapperConfiguration.HILLA_ENGINE_FEATURE_FLAG)
@@ -30,6 +29,8 @@ public class EngineObjectMapperConfiguration {
 
         logger.debug("Using Hilla Multi-Module Engine ObjectMapper");
 
-        return new ObjectMapper();
+        return new ObjectMapper().registerModule(new ParameterNamesModule())
+                .registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
     }
 }
