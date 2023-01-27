@@ -10,17 +10,30 @@ import jakarta.validation.constraints.NotEmpty;
 
 public class Elements {
 
+    private final Boolean checkbox = true;
     private final List<String> checkboxGroup = List.of("item-1");
+    private final String comboBox = "item-1";
+    private final String customField = "foo";
     private final LocalDate datePicker = LocalDate.now().plusDays(1);
     private final LocalDateTime dateTimePicker = LocalDateTime.now().plusDays(1)
             .plusHours(1);
+    private final Integer integerField = 12;
+    private final Integer listBox = 1;
+    private final Double numberField = 12.33d;
+    private final String passwordField = "bar";
+    private final Boolean radioButton = false;
+    private final String radioButtonGroup = "item-2";
+    private final String richText = "[{\"insert\":\"HTML Ipsum Presents\"},{\"attributes\":{\"header\":3},\"insert\":\"\\n\"},{\"attributes\":{\"bold\":true},\"insert\":\"Pellentesque habitant morbi tristique\"},{\"insert\":\" senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae. \"}]";
+    private final String select = "item-1";
+    private final String textArea = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    private final String textField = "foo";
+    private final LocalTime timePicker = LocalTime.now().plusMinutes(30);
     @Email
     @NotEmpty
     private String emailField;
-    private final LocalTime timePicker = LocalTime.now().plusMinutes(30);
 
     public Boolean getCheckbox() {
-        return true;
+        return checkbox;
     }
 
     public List<String> getCheckboxGroup() {
@@ -28,11 +41,11 @@ public class Elements {
     }
 
     public String getComboBox() {
-        return "item-1";
+        return comboBox;
     }
 
     public String getCustomField() {
-        return "foo";
+        return customField;
     }
 
     public LocalDate getDatePicker() {
@@ -48,43 +61,43 @@ public class Elements {
     }
 
     public Integer getIntegerField() {
-        return 12;
+        return integerField;
     }
 
     public Integer getListBox() {
-        return 1;
+        return listBox;
     }
 
     public Double getNumberField() {
-        return 12.33d;
+        return numberField;
     }
 
     public String getPasswordField() {
-        return "bar";
+        return passwordField;
     }
 
     public Boolean getRadioButton() {
-        return false;
+        return radioButton;
     }
 
     public String getRadioButtonGroup() {
-        return "item-2";
+        return radioButtonGroup;
     }
 
     public String getRichText() {
-        return "[{\"insert\":\"HTML Ipsum Presents\"},{\"attributes\":{\"header\":3},\"insert\":\"\\n\"},{\"attributes\":{\"bold\":true},\"insert\":\"Pellentesque habitant morbi tristique\"},{\"insert\":\" senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae. \"}]";
+        return richText;
     }
 
     public String getSelect() {
-        return "item-1";
+        return select;
     }
 
     public String getTextArea() {
-        return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+        return textArea;
     }
 
     public String getTextField() {
-        return "foo";
+        return textField;
     }
 
     public LocalTime getTimePicker() {
