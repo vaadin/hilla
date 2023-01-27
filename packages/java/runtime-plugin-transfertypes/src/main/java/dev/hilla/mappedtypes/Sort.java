@@ -18,10 +18,10 @@ package dev.hilla.mappedtypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.hilla.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
- * A DTO for {@link org.springframework.data.domain.Sort}.
+ * A DTO for {@code org.springframework.data.domain.Sort}.
  */
 public class Sort {
     @Nonnull

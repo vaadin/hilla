@@ -15,10 +15,10 @@
  */
 package dev.hilla.mappedtypes;
 
-import dev.hilla.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
- * A DTO for {@link org.springframework.data.domain.Pageable}.
+ * A DTO for {@code org.springframework.data.domain.Pageable}.
  */
 public class Pageable {
     private int pageNumber;

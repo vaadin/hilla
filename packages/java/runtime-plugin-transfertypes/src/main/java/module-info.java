@@ -5,4 +5,5 @@ module dev.hilla.runtime.transfertypes {
     requires jakarta.annotation;
 
     exports dev.hilla.runtime.transfertypes;
+    exports dev.hilla.mappedtypes;
 }
