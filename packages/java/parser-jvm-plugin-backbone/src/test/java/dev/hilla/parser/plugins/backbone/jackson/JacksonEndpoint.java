@@ -29,7 +29,7 @@ public class JacksonEndpoint {
         private IgnoredType privatePropWithJsonIgnoreType;
         private transient String privateTransientProp;
         private transient String privateTransientPropWithGetter;
-        private String propertyWithoutGetter;
+        private String propertyFieldOnly;
         private String renamedPrivateProp;
 
         public String getPrivateProp() {
@@ -49,6 +49,13 @@ public class JacksonEndpoint {
             return privateTransientPropWithGetter;
         }
 
+        public String getPropertyGetterOnly() {
+            return "test";
+        }
+
+        public void setPropertyGetterOnly(String value) {
+        }
+
         public String getPropertyWithDifferentField() {
             return fieldNotExposedAsProperty;
         }
@@ -57,16 +64,12 @@ public class JacksonEndpoint {
             fieldNotExposedAsProperty = value;
         }
 
-        public String getPropertyWithoutField() {
-            return "test";
-        }
-
-        public void setPropertyWithoutField(String value) {
-        }
-
         @JsonProperty("renamedPrivateProp0")
         public String getRenamedPrivateProp() {
             return renamedPublicProp;
+        }
+
+        public void setPropertySetterOnly(String value) {
         }
 
         @JsonIgnoreType

@@ -58,11 +58,15 @@
                 "type": "string",
                 "nullable": true
               },
-              "propertyWithDifferentField": {
+              "propertyGetterOnly": {
                 "type": "string",
                 "nullable": true
               },
-              "propertyWithoutField": {
+              "propertySetterOnly": {
+                "type": "string",
+                "nullable": true
+              },
+              "propertyWithDifferentField": {
                 "type": "string",
                 "nullable": true
               },
