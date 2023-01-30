@@ -152,6 +152,11 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isVarArgs();
 
+    @Override
+    public String toString() {
+        return "MethodInfoModel[" + get() + "]";
+    }
+
     protected abstract ClassInfoModel prepareOwner();
 
     protected abstract List<MethodParameterInfoModel> prepareParameters();

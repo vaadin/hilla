@@ -62,7 +62,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getName();
+        return "TypeVariableModel[" + get() + "]";
     }
 
     protected abstract TypeParameterModel prepareResolved();

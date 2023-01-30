@@ -85,6 +85,11 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isTransient();
 
+    @Override
+    public String toString() {
+        return "FieldInfoModel[" + get() + "]";
+    }
+
     protected abstract ClassInfoModel prepareOwner();
 
     protected abstract SignatureModel prepareType();
