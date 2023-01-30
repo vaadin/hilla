@@ -23,13 +23,12 @@ public class EngineObjectMapperConfiguration {
     @Bean
     @Qualifier(EndpointController.VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER)
     public ObjectMapper createObjectMapper(ApplicationContext context) {
-        var builder = context.getBean(Jackson2ObjectMapperBuilder.class);
-        var objectMapper = builder.createXmlMapper(false).build();
-        objectMapper.registerModule(new ByteArrayModule());
-
         logger.debug("Using Hilla Multi-Module Engine ObjectMapper");
 
-        return new ObjectMapper().registerModule(new ParameterNamesModule())
+        return context.getBean(Jackson2ObjectMapperBuilder.class)
+                .createXmlMapper(false).build()
+                .registerModule(new ByteArrayModule())
+                .registerModule(new ParameterNamesModule())
                 .registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule());
     }
