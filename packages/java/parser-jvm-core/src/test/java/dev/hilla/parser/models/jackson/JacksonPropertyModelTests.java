@@ -1,12 +1,14 @@
 package dev.hilla.parser.models.jackson;
 
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getAnyDeclaredMethod;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredField;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.toGetterName;
+import static dev.hilla.parser.test.helpers.ClassMemberUtils.toSetterName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,18 +26,25 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedField;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
-import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
-import dev.hilla.parser.models.SignatureModel;
 
 public class JacksonPropertyModelTests {
-    Context ctx;
+    private static final Map<String, String> stringifiedProps = Map.ofEntries(
+            Map.entry("privatePropertyWithAccessors", "java.lang.Byte"),
+            Map.entry("privateProperty",
+                    "java.util.Map<java.lang.String, java.lang.Long>"),
+            Map.entry("renamedPublicProperty", "java.lang.Float"),
+            Map.entry("renamedPrivateProperty", "java.lang.Double"),
+            Map.entry("propertyWithoutAccessor", "java.lang.Short"),
+            Map.entry("publicProperty", "java.util.List<java.lang.Integer>"),
+            Map.entry("propertyGetterOnly", "java.lang.Boolean[]"),
+            Map.entry("propertySetterOnly", "java.lang.Short"));
+
+    private Context ctx;
 
     @BeforeEach
     public void setUp() {
@@ -47,7 +56,8 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
             String name) {
-        assertEquals(ctx.getType(name), model.getType());
+        assertEquals(stringifiedProps.get(name),
+                model.getPrimaryType().get().toString());
     }
 
     @DisplayName("It should pass equality check")
@@ -55,10 +65,9 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_PassEqualityCheck(JacksonPropertyModel model,
             String name) {
-        var expected = JacksonPropertyModel.of(ctx.getReflectionOrigin(name));
-
         assertEquals(model, model);
-        assertEquals(expected, model);
+        assertEquals(JacksonPropertyModel.of(ctx.getReflectionOrigin(name)),
+                model);
         assertNotEquals(model, new Object());
     }
 
@@ -84,7 +93,11 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideCorrectPropertyInfo(JacksonPropertyModel model,
             String name) {
-        assertEquals(ctx.getNameAfterRenaming(name), model.getName());
+        var n = switch (name) {
+        case "renamedPublicProperty", "renamedPrivateProperty" -> name + "0";
+        default -> name;
+        };
+        assertEquals(n, model.getName());
         assertEquals(ClassInfoModel.of(Sample.class), model.getOwner());
     }
 
@@ -93,7 +106,23 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvidePropertyAnnotations(JacksonPropertyModel model,
             String name) {
-        assertEquals(ctx.getAnnotations(name), model.getAnnotations());
+        var expected = switch (name) {
+        case "renamedPublicProperty" -> Map.ofEntries(
+                Map.entry("com.fasterxml.jackson.annotation.JsonProperty",
+                        "renamedPublicProperty0"));
+        case "renamedPrivateProperty" -> Map.ofEntries(
+                Map.entry("com.fasterxml.jackson.annotation.JsonProperty",
+                        "renamedPrivateProperty0"));
+        default -> Map.ofEntries();
+        };
+
+        assertEquals(expected,
+                model.getAnnotations().stream().collect(Collectors.toMap(
+                        a -> ((Class<?>) a.getClassInfo().get().get())
+                                .getName(),
+                        a -> a.getParameters().stream()
+                                .filter(p -> "value".equals(p.getName()))
+                                .findFirst().get().getValue())));
     }
 
     @DisplayName("It should provide property field (if there is one)")
@@ -101,8 +130,18 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvidePropertyField(JacksonPropertyModel model,
             String name) {
-        assertEquals(ctx.getField(name).isPresent(), model.hasField());
-        assertEquals(ctx.getField(name), model.getField());
+        record Expected(boolean hasField, Optional<FieldInfoModel> field) {
+        }
+
+        var expected = switch (name) {
+        case "propertyGetterOnly", "propertySetterOnly" -> new Expected(false,
+                Optional.empty());
+        default -> new Expected(true, Optional
+                .of(FieldInfoModel.of(getDeclaredField(Sample.class, name))));
+        };
+
+        assertEquals(expected.hasField(), model.hasField());
+        assertEquals(expected.field(), model.getField());
     }
 
     @DisplayName("It should provide property getter (if there is one)")
@@ -110,8 +149,37 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvidePropertyGetter(JacksonPropertyModel model,
             String name) {
-        assertEquals(ctx.getGetter(name).isPresent(), model.hasGetter());
-        assertEquals(ctx.getGetter(name), model.getGetter());
+        record Expected(boolean hasGetter, Optional<MethodInfoModel> getter) {
+        }
+
+        var expected = switch (name) {
+        case "publicProperty", "renamedPublicProperty", "propertySetterOnly" -> new Expected(
+                false, Optional.empty());
+        default -> new Expected(true, Optional.of(MethodInfoModel
+                .of(getDeclaredMethod(Sample.class, toGetterName(name)))));
+        };
+
+        assertEquals(expected.hasGetter(), model.hasGetter());
+        assertEquals(expected.getter(), model.getGetter());
+    }
+
+    @DisplayName("It should provide property setter (if there is one)")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_ProvidePropertySetter(JacksonPropertyModel model,
+            String name) {
+        record Expected(boolean hasSetter, Optional<MethodInfoModel> setter) {
+        }
+
+        var expected = switch (name) {
+        case "privatePropertyWithAccessors", "propertySetterOnly" -> new Expected(
+                true, getAnyDeclaredMethod(Sample.class, toSetterName(name))
+                        .map(MethodInfoModel::of));
+        default -> new Expected(false, Optional.empty());
+        };
+
+        assertEquals(expected.hasSetter(), model.hasSetter());
+        assertEquals(expected.setter(), model.getSetter());
     }
 
     @DisplayName("It should provide the same hash code for same properties")
@@ -119,9 +187,8 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_ProvideSameHashCodeForSameProperties(
             JacksonPropertyModel model, String name) {
-        var expected = JacksonPropertyModel.of(ctx.getReflectionOrigin(name));
-
-        assertEquals(expected.hashCode(), model.hashCode());
+        assertEquals(JacksonPropertyModel.of(ctx.getReflectionOrigin(name))
+                .hashCode(), model.hashCode());
     }
 
     static class Context {
@@ -137,43 +204,12 @@ public class JacksonPropertyModelTests {
                             Function.identity()));
         }
 
-        public List<AnnotationInfoModel> getAnnotations(String name) {
-            return Arrays
-                    .stream(reflectionOrigins.get(name).getAccessor()
-                            .getAnnotated().getAnnotations())
-                    .map(AnnotationInfoModel::of).toList();
-        }
-
-        public Optional<FieldInfoModel> getField(String name) {
-            return Optional.ofNullable(reflectionOrigins.get(name).getField())
-                    .map(AnnotatedField::getAnnotated).map(FieldInfoModel::of);
-        }
-
-        public Optional<MethodInfoModel> getGetter(String name) {
-            return Optional.ofNullable(reflectionOrigins.get(name).getGetter())
-                    .map(AnnotatedMethod::getAnnotated)
-                    .map(MethodInfoModel::of);
-        }
-
-        public String getNameAfterRenaming(String name) {
-            return reflectionOrigins.get(name).getName();
-        }
-
         public BeanPropertyDefinition getReflectionOrigin(String name) {
             return reflectionOrigins.get(name);
         }
 
         public Map<String, BeanPropertyDefinition> getReflectionOrigins() {
             return reflectionOrigins;
-        }
-
-        public SignatureModel getType(String name) {
-            var accessor = reflectionOrigins.get(name).getAccessor()
-                    .getAnnotated();
-
-            return SignatureModel.of(accessor instanceof Method
-                    ? ((Method) accessor).getAnnotatedReturnType()
-                    : ((Field) accessor).getAnnotatedType());
         }
     }
 
@@ -196,19 +232,32 @@ public class JacksonPropertyModelTests {
         @JsonProperty("renamedPublicProperty0")
         public Float renamedPublicProperty;
         private Map<String, Long> privateProperty;
+        private Byte privatePropertyWithAccessors;
         private Double renamedPrivateProperty;
 
         public Map<String, Long> getPrivateProperty() {
             return privateProperty;
         }
 
-        public Boolean[] getPropertyWithoutField() {
+        public Byte getPrivatePropertyWithAccessors() {
+            return privatePropertyWithAccessors;
+        }
+
+        public void setPrivatePropertyWithAccessors(
+                Byte privatePropertyWithAccessors) {
+            this.privatePropertyWithAccessors = privatePropertyWithAccessors;
+        }
+
+        public Boolean[] getPropertyGetterOnly() {
             return new Boolean[] {};
         }
 
         @JsonProperty("renamedPrivateProperty0")
         public List<Double> getRenamedPrivateProperty() {
             return List.of(renamedPrivateProperty);
+        }
+
+        public void setPropertySetterOnly(Short s) {
         }
     }
 }
