@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.IgnorePropertiesUtil;
 
 import dev.hilla.parser.core.AbstractPlugin;
@@ -26,8 +25,8 @@ import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import jakarta.annotation.Nonnull;
 
 public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
-    private static final Comparator<BeanPropertyDefinition> sorter = Comparator
-            .comparing(BeanPropertyDefinition::getName);
+    private static final Comparator<JacksonPropertyModel> sorter = Comparator
+            .comparing(JacksonPropertyModel::getName);
     private final SerializationConfig config;
 
     public PropertyPlugin(@Nonnull ObjectMapper mapper) {
@@ -77,7 +76,7 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
                 .introspect(config.constructType((Class<?>) cls));
 
         var processor = new PropertyProcessor(description);
-        return processor.stream().sorted(sorter).map(JacksonPropertyModel::of);
+        return processor.stream().sorted(sorter);
     }
 
     /**
@@ -91,8 +90,9 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
             this.description = description;
         }
 
-        public Stream<BeanPropertyDefinition> stream() {
-            var properties = description.findProperties().stream();
+        public Stream<JacksonPropertyModel> stream() {
+            var properties = description.findProperties().stream()
+                    .map(JacksonPropertyModel::of);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
 
@@ -108,8 +108,8 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L652">BeanSerializerFactory#filterBeanProperties</a>
          */
-        private Stream<BeanPropertyDefinition> filterIgnoredProperties(
-                Stream<BeanPropertyDefinition> properties) {
+        private Stream<JacksonPropertyModel> filterIgnoredProperties(
+                Stream<JacksonPropertyModel> properties) {
             var ignored = findIgnored();
             var included = findIncluded();
 
@@ -125,19 +125,13 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L759">BeanSerializerFactory#removeIgnorableTypes</a>
          */
-        private Stream<BeanPropertyDefinition> filterPropertiesWithIgnoredTypes(
-                Stream<BeanPropertyDefinition> properties) {
+        private Stream<JacksonPropertyModel> filterPropertiesWithIgnoredTypes(
+                Stream<JacksonPropertyModel> properties) {
             var ignores = new HashMap<Class<?>, Boolean>();
             var introspector = config.getAnnotationIntrospector();
 
             return properties.filter(property -> {
-                var accessor = property.getAccessor();
-
-                if (accessor == null) {
-                    return false;
-                }
-
-                var type = property.getRawPrimaryType();
+                var type = property.get().getRawPrimaryType();
                 var result = ignores.get(type);
 
                 if (result == null) {
@@ -163,19 +157,18 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
          * @see <a href=
          *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L696">BeanSerializerFactory#removeSetterlessGetters</a>
          */
-        private Stream<BeanPropertyDefinition> filterSetterlessGetters(
-                Stream<BeanPropertyDefinition> properties) {
+        private Stream<JacksonPropertyModel> filterSetterlessGetters(
+                Stream<JacksonPropertyModel> properties) {
             // one caveat: only remove implicit properties;
             // explicitly annotated ones should remain
             return properties.filter(property -> property.couldDeserialize()
                     || property.isExplicitlyIncluded());
         }
 
-        private Stream<BeanPropertyDefinition> filterSuperClassProperties(
-                Stream<BeanPropertyDefinition> properties) {
-            return properties.filter(
-                    property -> Objects.equals(description.getBeanClass(),
-                            property.getAccessor().getDeclaringClass()));
+        private Stream<JacksonPropertyModel> filterSuperClassProperties(
+                Stream<JacksonPropertyModel> properties) {
+            return properties.filter(property -> property.getOwner()
+                    .is(description.getBeanClass()));
         }
 
         private Set<String> findIgnored() {

@@ -179,8 +179,8 @@ public final class TypeSignaturePlugin
 
     private NodeDependencies scanProperty(PropertyNode propertyNode,
             NodeDependencies nodeDependencies) {
-        return nodeDependencies.appendChildNodes(Stream
-                .of(TypeSignatureNode.of(propertyNode.getSource().getType())));
+        return nodeDependencies.appendChildNodes(Stream.of(TypeSignatureNode
+                .of(propertyNode.getSource().getPrimaryType())));
     }
 
     private NodeDependencies scanTypeSignature(TypeSignatureNode node,
