@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.FieldInfo;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
-        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+        implements ClassMemberModel {
     static final Comparator<FieldInfoModel> FIELD_ORDER = Comparator
             .comparing(FieldInfoModel::getName);
     private ClassInfoModel owner;
