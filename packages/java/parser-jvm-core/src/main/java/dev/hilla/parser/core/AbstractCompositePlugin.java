@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
 import dev.hilla.parser.utils.PluginException;
+
+import jakarta.annotation.Nonnull;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
         extends AbstractPlugin<C> {

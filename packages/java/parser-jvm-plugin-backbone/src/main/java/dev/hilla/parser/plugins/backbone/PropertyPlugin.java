@@ -50,7 +50,8 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
             return nodeDependencies;
         }
 
-        var model = (ClassInfoModel) nodeDependencies.getNode().getSource();
+        var node = nodeDependencies.getNode();
+        var model = (ClassInfoModel) node.getSource();
         if (model.isEnum()) {
             return nodeDependencies;
         }
