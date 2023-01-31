@@ -45,10 +45,6 @@
       "dev.hilla.parser.plugins.backbone.transients.TransientEndpoint$TransientModel": {
         "type": "object",
         "properties": {
-          "notTransientField": {
-            "type": "string",
-            "nullable": true
-          },
           "nonTransientEntity": {
             "nullable": true,
             "anyOf": [
@@ -56,6 +52,10 @@
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.transients.NonTransientEntity"
               }
             ]
+          },
+          "notTransientField": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

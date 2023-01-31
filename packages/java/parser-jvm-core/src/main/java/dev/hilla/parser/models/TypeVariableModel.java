@@ -1,7 +1,6 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.AnnotatedTypeVariable;
-import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -12,6 +11,7 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {
     private TypeParameterModel typeParameter;
 
+    @Deprecated
     public static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
         return new TypeVariableSourceModel(Objects.requireNonNull(origin));
     }

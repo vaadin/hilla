@@ -14,6 +14,7 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         implements SignatureModel {
     private List<SignatureModel> associatedTypes;
 
+    @Deprecated
     public static TypeArgumentModel of(@Nonnull TypeArgument origin) {
         return new TypeArgumentSourceModel(Objects.requireNonNull(origin));
     }
@@ -56,7 +57,7 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         return TypeArgumentModel.class;
     }
 
-    public abstract TypeArgument.Wildcard getWildcard();
+    public abstract Wildcard getWildcard();
 
     @Override
     public int hashCode() {
@@ -75,4 +76,8 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
     }
 
     protected abstract List<SignatureModel> prepareAssociatedTypes();
+
+    public enum Wildcard {
+        NONE, ANY, EXTENDS, SUPER;
+    }
 }

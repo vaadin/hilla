@@ -1,6 +1,7 @@
 package dev.hilla.parser.models;
 
 import java.lang.reflect.Field;
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -9,9 +10,12 @@ import io.github.classgraph.FieldInfo;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+    static final Comparator<FieldInfoModel> FIELD_ORDER = Comparator
+            .comparing(FieldInfoModel::getName);
     private ClassInfoModel owner;
     private SignatureModel type;
 
+    @Deprecated
     public static FieldInfoModel of(@Nonnull FieldInfo origin) {
         return new FieldInfoSourceModel(Objects.requireNonNull(origin));
     }

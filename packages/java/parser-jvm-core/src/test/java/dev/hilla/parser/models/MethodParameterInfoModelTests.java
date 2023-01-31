@@ -81,6 +81,13 @@ public class MethodParameterInfoModelTests {
         assertNotEquals(reflectionModel, new Object());
     }
 
+    @DisplayName("It should index parameters correctly")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_IndexParameters(MethodParameterInfoModel model) {
+        assertEquals(1, model.getIndex());
+    }
+
     @DisplayName("It should provide correct origin")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
@@ -98,13 +105,6 @@ public class MethodParameterInfoModelTests {
             assertTrue(model.isSource());
             break;
         }
-    }
-
-    @DisplayName("It should index parameters correctly")
-    @ParameterizedTest(name = ModelProvider.testNamePattern)
-    @ArgumentsSource(ModelProvider.class)
-    public void should_IndexParameters(MethodParameterInfoModel model) {
-        assertEquals(1, model.getIndex());
     }
 
     static final class ModelProvider implements ArgumentsProvider {

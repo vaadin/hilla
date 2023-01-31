@@ -195,13 +195,14 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
+                .sorted(FieldInfoModel.FIELD_ORDER)
                 .collect(Collectors.toList());
     }
 
     @Override
     protected List<ClassInfoModel> prepareInnerClasses() {
         return origin.getInnerClasses().stream().map(ClassInfoModel::of)
-                .collect(Collectors.toList());
+                .sorted(CLASS_ORDER).collect(Collectors.toList());
     }
 
     @Override
@@ -214,6 +215,7 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return origin.getDeclaredMethodInfo().stream().map(MethodInfoModel::of)
+                .sorted(MethodInfoModel.METHOD_ORDER)
                 .collect(Collectors.toList());
     }
 

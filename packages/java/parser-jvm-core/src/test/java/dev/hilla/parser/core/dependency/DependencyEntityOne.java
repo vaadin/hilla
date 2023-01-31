@@ -10,15 +10,15 @@ public class DependencyEntityOne {
         return new DependencyEntityTwo();
     }
 
+    public DependencyEntityThree getDependencyEntityThree() {
+        return dependencyEntityThree;
+    }
+
     public String getFoo() {
         return foo;
     }
 
     public void setBar(int value) {
         bar = value;
-    }
-
-    public DependencyEntityThree getDependencyEntityThree() {
-        return dependencyEntityThree;
     }
 }

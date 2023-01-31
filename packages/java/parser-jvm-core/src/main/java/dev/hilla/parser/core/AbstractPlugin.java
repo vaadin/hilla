@@ -1,9 +1,6 @@
 package dev.hilla.parser.core;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
 
 public abstract class AbstractPlugin<C extends PluginConfiguration>
         implements Plugin {
