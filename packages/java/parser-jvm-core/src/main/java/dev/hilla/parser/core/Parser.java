@@ -86,6 +86,20 @@ public final class Parser {
     }
 
     /**
+     * Allows to change the class loader that the parser uses for reflection.
+     *
+     * @param classLoader
+     *           a class loader instance.
+     *
+     * @return this (for method chaining).
+     */
+    @Nonnull
+    public Parser classLoader(@Nonnull ClassLoader classLoader) {
+        config.classLoader = classLoader;
+        return this;
+    }
+
+    /**
      * Specifies the classpath where the parser will scan for endpoints.
      * Specifying the classpath is required.
      *
@@ -257,7 +271,9 @@ public final class Parser {
 
         try (var scanResult = new ClassGraph().enableAnnotationInfo()
                 .ignoreClassVisibility()
-                .overrideClasspath(config.getClassPathElements()).scan()) {
+                .overrideClasspath(config.getClassPathElements())
+                .overrideClassLoaders(config.getClassLoader())
+                .scan()) {
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
             var pluginManager = new PluginManager(
@@ -357,9 +373,20 @@ public final class Parser {
         private String endpointAnnotationName;
         private String endpointExposedAnnotationName;
         private OpenAPI openAPI;
+        private ClassLoader classLoader;
 
         private Config(OpenAPI openAPI) {
             this.openAPI = openAPI;
+        }
+
+        /**
+         * Gets the class loader for reflection in the parser.
+         *
+         * @return the class loader
+         */
+        @Nonnull
+        public ClassLoader getClassLoader() {
+            return classLoader;
         }
 
         /**
@@ -392,6 +419,7 @@ public final class Parser {
             return endpointExposedAnnotationName;
         }
 
+
         /**
          * Gets the OpenAPI object.
          *
@@ -414,5 +442,6 @@ public final class Parser {
         public SortedSet<Plugin> getPlugins() {
             return plugins;
         }
+
     }
 }

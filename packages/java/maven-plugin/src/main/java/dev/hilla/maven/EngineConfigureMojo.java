@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.maven.runner.GeneratorConfiguration;
-import dev.hilla.maven.runner.GeneratorUnavailableException;
-import dev.hilla.maven.runner.ParserConfiguration;
-import dev.hilla.maven.runner.PluginConfiguration;
-import dev.hilla.maven.runner.PluginException;
-import dev.hilla.maven.runner.PluginRunner;
-
+import dev.hilla.internal.EngineConfiguration;
+import dev.hilla.internal.GeneratorConfiguration;
+import dev.hilla.internal.ParserConfiguration;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -24,11 +21,16 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
- * TypeScript code from it.
+ * Maven Plugin for Hilla. Emits Hilla engine configuration file in the build
+ * directory.
+ *
+ * The configuration gathered from the Maven plugin is saved in a file,
+ * so that further runs of the parser / generator can skip running a separate
+ * Maven process to get this configuration again.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public final class EndpointCodeGeneratorMojo extends AbstractMojo {
+@Mojo(name = "configure", defaultPhase = LifecyclePhase.GENERATE_RESOURCES,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+public final class EngineConfigureMojo extends AbstractMojo {
 
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
@@ -49,16 +51,17 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
     private boolean failOnMissingGenerator;
 
     @Override
-    public void execute() throws EndpointCodeGeneratorMojoException {
-        PluginConfiguration conf = new PluginConfiguration();
+    public void execute() throws EngineConfigureMojoException {
+        EngineConfiguration conf = new EngineConfiguration();
 
         try {
             conf.setClassPath(Stream
                     .of(project.getCompileClasspathElements(),
                             project.getRuntimeClasspathElements())
-                    .flatMap(Collection::stream).collect(Collectors.toSet()));
+                .flatMap(Collection::stream).collect(Collectors.toCollection(
+                    LinkedHashSet::new)));
         } catch (DependencyResolutionRequiredException e) {
-            throw new EndpointCodeGeneratorMojoException("Configuration failed",
+            throw new EngineConfigureMojoException("Configuration failed",
                     e);
         }
 
@@ -75,20 +78,7 @@ public final class EndpointCodeGeneratorMojo extends AbstractMojo {
             Files.createDirectories(Paths.get(buildDir));
             conf.store(buildDirectory);
         } catch (IOException e) {
-            getLog().warn("Maven configuration has not been saved to file", e);
-        }
-
-        try {
-            new PluginRunner(conf).execute();
-        } catch (PluginException e) {
-            throw new EndpointCodeGeneratorMojoException("Execution failed", e);
-        } catch (GeneratorUnavailableException e) {
-            if (failOnMissingGenerator) {
-                throw new EndpointCodeGeneratorMojoException("Execution failed",
-                        e);
-            } else {
-                getLog().warn(e.getMessage());
-            }
+            throw new EngineConfigureMojoException("Maven configuration has not been saved to file", e);
         }
     }
 }

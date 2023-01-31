@@ -1,16 +1,11 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public final class GeneratorConfiguration {
-    private String outputDir;
     private PluginList plugins;
-
-    public Optional<String> getOutputDir() {
-        return Optional.ofNullable(outputDir);
-    }
 
     public Optional<PluginList> getPlugins() {
         return Optional.ofNullable(plugins);

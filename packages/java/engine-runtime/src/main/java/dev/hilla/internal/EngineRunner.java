@@ -1,4 +1,4 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import dev.hilla.parser.utils.OpenAPIPrinter;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -9,42 +9,41 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class PluginRunner {
+public class EngineRunner {
     private static final Logger logger = LoggerFactory
-            .getLogger(PluginRunner.class);
+            .getLogger(EngineRunner.class);
     private static final String[] openAPIFileRelativePath = {
             "generated-resources", "openapi.json" };
 
-    private final PluginConfiguration conf;
+    private final EngineConfiguration conf;
 
-    public PluginRunner(PluginConfiguration conf) {
+    public EngineRunner(EngineConfiguration conf) {
         this.conf = conf;
     }
 
     public void execute()
-            throws PluginException, GeneratorUnavailableException {
+            throws EngineException, GeneratorUnavailableException {
         var result = parseJavaCode();
         var openAPI = saveOpenAPI(result);
         generateTypeScriptCode(openAPI);
     }
 
     private void generateTypeScriptCode(String openAPI)
-            throws PluginException, GeneratorUnavailableException {
+            throws EngineException, GeneratorUnavailableException {
         try {
             var executor = new GeneratorProcessor(conf.getBaseDir())
                     .input(openAPI);
 
             var generator = conf.getGenerator();
-            generator.getOutputDir().ifPresent(executor::outputDir);
             generator.getPlugins().ifPresent(executor::plugins);
 
             executor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
-            throw new PluginException("TS code generation failed", e);
+            throw new EngineException("TS code generation failed", e);
         }
     }
 
-    private String saveOpenAPI(OpenAPI openAPI) throws PluginException {
+    private String saveOpenAPI(OpenAPI openAPI) throws EngineException {
         try {
             var openAPIFile = Paths.get(conf.getBuildDir(),
                     openAPIFileRelativePath);
@@ -60,27 +59,27 @@ public class PluginRunner {
 
             return openAPIString;
         } catch (IOException e) {
-            throw new PluginException("Saving OpenAPI file failed", e);
+            throw new EngineException("Saving OpenAPI file failed", e);
         }
     }
 
-    private OpenAPI parseJavaCode() throws PluginException {
+    private OpenAPI parseJavaCode() throws EngineException {
         try {
-            var executor = new ParserProcessor(conf.getBaseDir(),
+            var processor = new ParserProcessor(conf.getBaseDir(),
                     conf.getClassPath());
             var parser = conf.getParser();
 
-            parser.getClassPath().ifPresent(executor::classPath);
+            parser.getClassPath().ifPresent(processor::classPath);
             parser.getEndpointAnnotation()
-                    .ifPresent(executor::endpointAnnotation);
+                    .ifPresent(processor::endpointAnnotation);
             parser.getEndpointExposedAnnotation()
-                    .ifPresent(executor::endpointExposedAnnotation);
-            parser.getPlugins().ifPresent(executor::plugins);
-            parser.getOpenAPIPath().ifPresent(executor::openAPIBase);
+                    .ifPresent(processor::endpointExposedAnnotation);
+            parser.getPlugins().ifPresent(processor::plugins);
+            parser.getOpenAPIPath().ifPresent(processor::openAPIBase);
 
-            return executor.process();
+            return processor.process();
         } catch (ParserException e) {
-            throw new PluginException("Java code parsing failed", e);
+            throw new EngineException("Java code parsing failed", e);
         }
     }
 }

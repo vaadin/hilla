@@ -41,12 +41,13 @@ public class ParserConfigTests {
         defaultClassPathElements = Set.of(targetDir.toString());
         defaultEndpointExposedAnnotationName = "dev.hilla.EndpointExposed";
         defaultOpenAPI = new OpenAPI()
-                .info(new Info().title("Vaadin Application").version("1.0.0"))
+                .info(new Info().title("Hilla Application").version("1.0.0"))
                 .servers(List
                         .of(new Server().url("http://localhost:8080/connect")
-                                .description("Vaadin Backend")))
+                                .description("Hilla Backend")))
                 .paths(new Paths());
-        parser = new Parser().classPath(defaultClassPathElements)
+        parser = new Parser().classLoader(ClassLoader.getSystemClassLoader())
+                .classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName)
                 .endpointExposedAnnotation(
                         defaultEndpointExposedAnnotationName);

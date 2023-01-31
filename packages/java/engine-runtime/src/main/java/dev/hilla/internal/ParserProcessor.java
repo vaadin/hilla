@@ -1,4 +1,4 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +29,7 @@ public final class ParserProcessor {
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private String openAPIPath;
+    private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     public ParserProcessor(Path baseDir, Set<String> classPath) {
         this.baseDir = baseDir;
@@ -64,8 +65,13 @@ public final class ParserProcessor {
         return this;
     }
 
-    public ParserProcessor openAPIBase(@Nonnull String openAPIPath) {
-        this.openAPIPath = Objects.requireNonNull(openAPIPath);
+    public ParserProcessor openAPIBase(@Nonnull String openAPIBase) {
+        this.openAPIPath = openAPIBase;
+        return this;
+    }
+
+    public ParserProcessor classLoader(@Nonnull ClassLoader classLoader) {
+        this.classLoader = classLoader;
         return this;
     }
 
@@ -77,7 +83,8 @@ public final class ParserProcessor {
     }
 
     public OpenAPI process() {
-        var parser = new Parser().classPath(classPath)
+        var parser = new Parser().classLoader(classLoader)
+                .classPath(classPath)
                 .endpointAnnotation(endpointAnnotationName)
                 .endpointExposedAnnotation(endpointExposedAnnotationName);
 

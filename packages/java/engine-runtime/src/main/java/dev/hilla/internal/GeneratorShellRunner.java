@@ -1,4 +1,4 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +22,7 @@ final class GeneratorShellRunner {
         IS_WINDOWS = osName.contains("windows");
         TSGEN = IS_WINDOWS ? "tsgen.cmd" : "tsgen";
     }
+    private File baseDir;
 
     private final List<String> arguments = new ArrayList<>();
 

@@ -1,11 +1,11 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,12 +33,13 @@ public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
     private String input;
-    private String outputDir = "frontend/generated";
+    private File outputDir;
     private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
             DEFAULT_PLUGINS);
 
     public GeneratorProcessor(Path baseDir) {
         this.baseDir = baseDir;
+        this.outputDir = new File(baseDir.toFile(), "frontend/generated");
     }
 
     public GeneratorProcessor input(@Nonnull String input) {
@@ -46,7 +47,7 @@ public final class GeneratorProcessor {
         return this;
     }
 
-    public GeneratorProcessor outputDir(@Nonnull String outputDir) {
+    public GeneratorProcessor outputDir(@Nonnull File outputDir) {
         this.outputDir = Objects.requireNonNull(outputDir);
         return this;
     }
@@ -78,9 +79,9 @@ public final class GeneratorProcessor {
     }
 
     private void prepareOutputDir(GeneratorShellRunner runner) {
-        var outputDirPath = Paths.get(outputDir);
+        var outputDirPath = outputDir.toPath();
         var result = outputDirPath.isAbsolute() ? outputDirPath
-                : baseDir.resolve(outputDir);
+                : baseDir.resolve(outputDirPath);
         runner.add("-o", result.toString());
     }
 

@@ -5,11 +5,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import dev.hilla.maven.runner.GeneratorUnavailableException;
-import dev.hilla.maven.runner.PluginConfiguration;
-import dev.hilla.maven.runner.PluginException;
-import dev.hilla.maven.runner.PluginRunner;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +12,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateHilla;
 
+/**
+ * @deprecated to be removed
+ */
 @NpmPackage(value = "@hilla/generator-typescript-core", version = "2.0.0-beta1")
 @NpmPackage(value = "@hilla/generator-typescript-utils", version = "2.0.0-beta1")
 @NpmPackage(value = "@hilla/generator-typescript-cli", version = "2.0.0-beta1")
@@ -55,13 +53,13 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
                 throw new ExecutionFailedException("Project directory not set");
             }
 
-            PluginConfiguration config = null;
+            EngineConfiguration config = null;
 
             if (buildDirectoryName != null) {
                 var buildDir = new File(projectDirectory, buildDirectoryName);
 
                 try {
-                    config = PluginConfiguration.load(buildDir);
+                    config = EngineConfiguration.load(buildDir);
                 } catch (IOException e) {
                     logger.warn(
                             "Hilla Maven Plugin configuration found, but not read correctly",
@@ -77,9 +75,9 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
             } else {
                 logger.info(
                         "Hilla Maven Plugin configuration found: run generator directly");
-                new PluginRunner(config).execute();
+                new EngineRunner(config).execute();
             }
-        } catch (PluginException | GeneratorUnavailableException e) {
+        } catch (EngineException | GeneratorUnavailableException e) {
             throw new ExecutionFailedException(e);
         }
     }
@@ -102,7 +100,7 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         }
     }
 
-    boolean isMavenProject(Path path) {
+    private boolean isMavenProject(Path path) {
         return path.resolve("pom.xml").toFile().exists();
     }
 

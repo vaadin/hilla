@@ -1,11 +1,11 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 public final class ParserException extends RuntimeException {
     ParserException(String message) {
         super(message);
     }
 
-    ParserException(String message, Throwable cause) {
+    public ParserException(String message, Throwable cause) {
         super(message, cause);
     }
 

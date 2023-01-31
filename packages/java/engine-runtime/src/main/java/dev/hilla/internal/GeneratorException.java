@@ -1,4 +1,4 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 public final class GeneratorException extends RuntimeException {
     GeneratorException(String message) {

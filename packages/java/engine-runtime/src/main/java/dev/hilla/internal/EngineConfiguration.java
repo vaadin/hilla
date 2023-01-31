@@ -1,15 +1,15 @@
-package dev.hilla.maven.runner;
+package dev.hilla.internal;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class PluginConfiguration {
+public class EngineConfiguration {
     public static final String RESOURCE_NAME = "hilla-engine-configuration.json";
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
@@ -17,12 +17,12 @@ public class PluginConfiguration {
                     JsonAutoDetect.Visibility.ANY);
 
     private Path baseDir;
-    private Set<String> classPath;
+    private LinkedHashSet<String> classPath;
     private GeneratorConfiguration generator;
     private ParserConfiguration parser;
     private String buildDir;
 
-    public static PluginConfiguration load(File targetDir) throws IOException {
+    public static EngineConfiguration load(File targetDir) throws IOException {
         File configFile = new File(targetDir, RESOURCE_NAME);
 
         if (!configFile.isFile()) {
@@ -33,7 +33,7 @@ public class PluginConfiguration {
         // one each time the project is run
         configFile.deleteOnExit();
 
-        return MAPPER.readValue(configFile, PluginConfiguration.class);
+        return MAPPER.readValue(configFile, EngineConfiguration.class);
     }
 
     public void store(File targetDir) throws IOException {
@@ -48,11 +48,11 @@ public class PluginConfiguration {
         this.baseDir = baseDir;
     }
 
-    public Set<String> getClassPath() {
+    public LinkedHashSet<String> getClassPath() {
         return classPath;
     }
 
-    public void setClassPath(Set<String> classPath) {
+    public void setClassPath(LinkedHashSet<String> classPath) {
         this.classPath = classPath;
     }
 

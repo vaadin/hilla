@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package dev.hilla.frontend;
+package dev.hilla.internal;
 
 import java.util.Objects;
 
@@ -31,27 +31,17 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
-                "Vaadin OpenAPI file should not be null.");
-        Objects.requireNonNull(options.getFrontendGeneratedFolder(),
-                "Vaadin output folder should not be null.");
         return new TaskGenerateEndpointImpl(options.getApplicationProperties(),
-                options.getEndpointGeneratedOpenAPIFile(),
-                options.getFrontendGeneratedFolder(),
-                options.getFrontendDirectory());
+            options.getNpmFolder(), options.getBuildDirectoryName(),
+            options.getEndpointGeneratedOpenAPIFile(),
+            options.getFrontendGeneratedFolder());
     }
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
-        Objects.requireNonNull(options.getEndpointSourceFolder(),
-                "Source paths should not be null.");
-        Objects.requireNonNull(options.getEndpointGeneratedOpenAPIFile(),
-                "OpenAPI output file should not be null.");
-        Objects.requireNonNull(options.getClassFinder().getClassLoader(),
-                "ClassLoader should not be null.");
         return new TaskGenerateOpenAPIImpl(options.getApplicationProperties(),
-                options.getEndpointSourceFolder(),
-                options.getClassFinder().getClassLoader(),
-                options.getEndpointGeneratedOpenAPIFile());
+            options.getNpmFolder(), options.getBuildDirectoryName(),
+            options.getClassFinder().getClassLoader(),
+            options.getEndpointGeneratedOpenAPIFile());
     }
 }

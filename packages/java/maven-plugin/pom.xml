@@ -78,11 +78,16 @@
       <artifactId>parser-jvm-plugin-model</artifactId>
       <version>${project.version}</version>
     </dependency>
-      <dependency>
-          <groupId>dev.hilla</groupId>
-          <artifactId>parser-jvm-plugin-transfertypes</artifactId>
-          <version>${project.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>parser-jvm-plugin-transfertypes</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>engine-runtime</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
