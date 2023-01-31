@@ -20,7 +20,6 @@ import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.Model;
 import dev.hilla.parser.models.NamedModel;
 import dev.hilla.parser.models.OwnedModel;
-import dev.hilla.parser.models.SignatureModel;
 
 import jakarta.annotation.Nonnull;
 
@@ -29,8 +28,9 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
     private final BeanPropertyDefinition origin;
     private Optional<FieldInfoModel> field;
     private Optional<MethodInfoModel> getter;
+    private ClassInfoModel owner;
     private Optional<MethodInfoModel> setter;
-    private SignatureModel type;
+    private JacksonPropertyTypeModel type;
 
     private JacksonPropertyModel(BeanPropertyDefinition origin) {
         this.origin = origin;
@@ -38,7 +38,7 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
 
     public static JacksonPropertyModel of(
             @Nonnull BeanPropertyDefinition origin) {
-        return new JacksonPropertyModel(origin);
+        return new JacksonPropertyModel(Objects.requireNonNull(origin));
     }
 
     public boolean couldDeserialize() {
@@ -58,7 +58,9 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
         var other = (JacksonPropertyModel) obj;
 
         return origin.getName().equals(other.origin.getName())
-                && getOwner().equals(other.getOwner());
+                && getField().equals(other.getField())
+                && getGetter().equals(other.getGetter())
+                && getSetter().equals(other.getSetter());
     }
 
     @Override
@@ -104,10 +106,10 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
     }
 
     public Optional<? extends ClassMemberModel> getMutator() {
-        if (origin.hasField()) {
-            return getField();
-        } else if (origin.hasSetter()) {
+        if (origin.hasSetter()) {
             return getSetter();
+        } else if (origin.hasField()) {
+            return getField();
         }
 
         return Optional.empty();
@@ -120,28 +122,26 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
 
     @Override
     public ClassInfoModel getOwner() {
-        return getPrimaryMember().getOwner();
+        if (owner == null) {
+            owner = getPrimaryMember().getOwner();
+        }
+
+        return owner;
     }
 
     public ClassMemberModel getPrimaryMember() {
-        if (origin.hasField()) {
-            return getField().get();
-        } else if (origin.hasGetter()) {
+        if (origin.hasGetter()) {
             return getGetter().get();
+        } else if (origin.hasSetter()) {
+            return getSetter().get();
         }
 
-        return getSetter().get();
+        return getField().get();
     }
 
-    public SignatureModel getPrimaryType() {
+    public JacksonPropertyTypeModel getPrimaryType() {
         if (type == null) {
-            if (origin.hasField()) {
-                return getField().get().getType();
-            } else if (origin.hasGetter()) {
-                return getGetter().get().getResultType();
-            }
-
-            return getSetter().get().getParameters().get(0).getType();
+            type = JacksonPropertyTypeModel.of(origin);
         }
 
         return type;
@@ -172,8 +172,8 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return (origin.getName().hashCode() + getOwner().hashCode())
-                ^ 0x73448be4;
+        return (origin.getName().hashCode() + getField().hashCode()
+                + getGetter().hashCode() + getSetter().hashCode()) ^ 0x73448be4;
     }
 
     public boolean isExplicitlyIncluded() {

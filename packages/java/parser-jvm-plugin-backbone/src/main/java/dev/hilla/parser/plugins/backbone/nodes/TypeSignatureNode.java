@@ -1,15 +1,14 @@
 package dev.hilla.parser.plugins.backbone.nodes;
 
-import javax.annotation.Nonnull;
-
 import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.models.SignatureModel;
+
 import io.swagger.v3.oas.models.media.Schema;
+import jakarta.annotation.Nonnull;
 
 public final class TypeSignatureNode
         extends AbstractNode<SignatureModel, Schema<?>> {
-    private TypeSignatureNode(@Nonnull SignatureModel source,
-            @Nonnull Schema<?> target) {
+    private TypeSignatureNode(SignatureModel source, Schema<?> target) {
         super(source, target);
     }
 

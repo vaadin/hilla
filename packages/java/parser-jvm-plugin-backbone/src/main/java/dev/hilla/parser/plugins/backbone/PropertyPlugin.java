@@ -52,7 +52,8 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        var model = (ClassInfoModel) nodeDependencies.getNode().getSource();
+        var node = nodeDependencies.getNode();
+        var model = (ClassInfoModel) node.getSource();
         if (model.isEnum()) {
             return nodeDependencies;
         }
@@ -155,7 +156,7 @@ public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
 
         /**
          * @see <a href=
-         *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L696">BeanSerializerFactory#removeSetterlessGetters</a>
+         *      "https://github.com/FasterXML/jackson-databind/blob/2.15/src/main/java/com/fasterxml/jackson/databind/ser/BeanSerializerFactory.java#L802">BeanSerializerFactory#removeSetterlessGetters</a>
          */
         private Stream<JacksonPropertyModel> filterSetterlessGetters(
                 Stream<JacksonPropertyModel> properties) {
