@@ -20,7 +20,7 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 
 import io.swagger.v3.oas.models.tags.Tag;
 
-public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EndpointPlugin extends AbstractPlugin<BackbonePluginConfig> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(

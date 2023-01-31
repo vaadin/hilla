@@ -33,7 +33,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class TypeSignaturePlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfig> {
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypeSignatureNode) {

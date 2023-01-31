@@ -18,11 +18,6 @@ package dev.hilla;
 
 import java.lang.reflect.Method;
 
-import jakarta.servlet.ServletContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,8 +29,13 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
 
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
+import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
+
+import jakarta.servlet.ServletContext;
 
 /**
  * A configuration class for customizing the {@link EndpointController} class.
@@ -53,6 +53,119 @@ public class EndpointControllerConfiguration {
     public EndpointControllerConfiguration(
             EndpointProperties endpointProperties) {
         this.endpointProperties = endpointProperties;
+    }
+
+    /**
+     * Registers a default {@link AccessAnnotationChecker} bean instance.
+     *
+     * @return the default bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AccessAnnotationChecker accessAnnotationChecker() {
+        return new AccessAnnotationChecker();
+    }
+
+    /**
+     * Registers a default {@link EndpointAccessChecker} bean instance.
+     *
+     * @param accessAnnotationChecker
+     *            the access controlks checker to use
+     * @return the default Vaadin endpoint access checker bean
+     */
+    @Bean
+    public EndpointAccessChecker accessChecker(
+            AccessAnnotationChecker accessAnnotationChecker) {
+        return new EndpointAccessChecker(accessAnnotationChecker);
+    }
+
+    /**
+     * Registers a default {@link CsrfChecker} bean instance.
+     *
+     * @param servletContext
+     *            the servlet context
+     *
+     * @return the default bean
+     */
+    @Bean
+    public CsrfChecker csrfChecker(ServletContext servletContext) {
+        return new CsrfChecker(servletContext);
+    }
+
+    /**
+     * Registers the endpoint invoker.
+     *
+     * @param applicationContext
+     *            Spring context to extract beans annotated with
+     *            {@link Endpoint} from
+     * @param endpointMapperFactory
+     *            optional bean to override the default
+     *            {@link JacksonObjectMapperFactory} that is used for
+     *            serializing and deserializing request and response bodies Use
+     *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
+     *            qualifier to override the mapper.
+     * @param explicitNullableTypeChecker
+     *            the method parameter and return value type checker to verify
+     *            that null values are explicit
+     * @param servletContext
+     *            the servlet context
+     * @param endpointRegistry
+     *            the registry used to store endpoint information
+     *
+     * @return the endpoint invoker
+     */
+    @Bean
+    public EndpointInvoker endpointInvoker(
+            ApplicationContext applicationContext,
+            @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
+            ExplicitNullableTypeChecker explicitNullableTypeChecker,
+            ServletContext servletContext, EndpointRegistry endpointRegistry) {
+        return new EndpointInvoker(applicationContext, endpointMapperFactory,
+                explicitNullableTypeChecker, servletContext, endpointRegistry);
+    }
+
+    /**
+     * Registers an endpoint name checker responsible for validating the
+     * endpoint names.
+     *
+     * @return the endpoint name checker
+     */
+    @Bean
+    public EndpointNameChecker endpointNameChecker() {
+        return new EndpointNameChecker();
+    }
+
+    /**
+     * Registers the endpoint registry.
+     *
+     * @param endpointNameChecker
+     *            the name checker to use
+     * @return the endpoint registry
+     */
+    @Bean
+    public EndpointRegistry endpointRegistry(
+            EndpointNameChecker endpointNameChecker) {
+        return new EndpointRegistry(endpointNameChecker);
+    }
+
+    /**
+     * Registers endpoint utility methods.
+     *
+     * @return the endpoint util class
+     */
+    @Bean
+    public EndpointUtil endpointUtil() {
+        return new EndpointUtil();
+    }
+
+    /**
+     * Registers a {@link ExplicitNullableTypeChecker} bean instance.
+     *
+     * @return the explicit nullable type checker
+     */
+    @Bean
+    public ExplicitNullableTypeChecker typeChecker() {
+        return new ExplicitNullableTypeChecker();
     }
 
     /**
@@ -123,118 +236,5 @@ public class EndpointControllerConfiguration {
             prefixMappingBuilder.options(options);
         }
         return prefixMappingBuilder.build().combine(mapping);
-    }
-
-    /**
-     * Registers an endpoint name checker responsible for validating the
-     * endpoint names.
-     *
-     * @return the endpoint name checker
-     */
-    @Bean
-    public EndpointNameChecker endpointNameChecker() {
-        return new EndpointNameChecker();
-    }
-
-    /**
-     * Registers a default {@link EndpointAccessChecker} bean instance.
-     *
-     * @param accessAnnotationChecker
-     *            the access controlks checker to use
-     * @return the default Vaadin endpoint access checker bean
-     */
-    @Bean
-    public EndpointAccessChecker accessChecker(
-            AccessAnnotationChecker accessAnnotationChecker) {
-        return new EndpointAccessChecker(accessAnnotationChecker);
-    }
-
-    /**
-     * Registers a default {@link AccessAnnotationChecker} bean instance.
-     *
-     * @return the default bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public AccessAnnotationChecker accessAnnotationChecker() {
-        return new AccessAnnotationChecker();
-    }
-
-    /**
-     * Registers a default {@link CsrfChecker} bean instance.
-     *
-     * @param servletContext
-     *            the servlet context
-     *
-     * @return the default bean
-     */
-    @Bean
-    public CsrfChecker csrfChecker(ServletContext servletContext) {
-        return new CsrfChecker(servletContext);
-    }
-
-    /**
-     * Registers a {@link ExplicitNullableTypeChecker} bean instance.
-     *
-     * @return the explicit nullable type checker
-     */
-    @Bean
-    public ExplicitNullableTypeChecker typeChecker() {
-        return new ExplicitNullableTypeChecker();
-    }
-
-    /**
-     * Registers endpoint utility methods.
-     *
-     * @return the endpoint util class
-     */
-    @Bean
-    public EndpointUtil endpointUtil() {
-        return new EndpointUtil();
-    }
-
-    /**
-     * Registers the endpoint registry.
-     *
-     * @param endpointNameChecker
-     *            the name checker to use
-     * @return the endpoint registry
-     */
-    @Bean
-    public EndpointRegistry endpointRegistry(
-            EndpointNameChecker endpointNameChecker) {
-        return new EndpointRegistry(endpointNameChecker);
-    }
-
-    /**
-     * Registers the endpoint invoker.
-     *
-     * @param applicationContext
-     *            Spring context to extract beans annotated with
-     *            {@link Endpoint} from
-     * @param vaadinEndpointMapper
-     *            optional bean to override the default {@link ObjectMapper}
-     *            that is used for serializing and deserializing request and
-     *            response bodies Use
-     *            {@link EndpointController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
-     *            qualifier to override the mapper.
-     * @param explicitNullableTypeChecker
-     *            the method parameter and return value type checker to verify
-     *            that null values are explicit
-     * @param servletContext
-     *            the servlet context
-     * @param endpointRegistry
-     *            the registry used to store endpoint information
-     *
-     * @return the endpoint invoker
-     */
-    @Bean
-    public EndpointInvoker endpointInvoker(
-            ApplicationContext applicationContext,
-            @Autowired(required = false) @Qualifier(EndpointController.VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER) ObjectMapper vaadinEndpointMapper,
-            ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry) {
-        return new EndpointInvoker(applicationContext, vaadinEndpointMapper,
-                explicitNullableTypeChecker, servletContext, endpointRegistry);
     }
 }

@@ -23,7 +23,7 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfig> {
     @Override
     public void enter(NodePath<?> nodePath) {
     }

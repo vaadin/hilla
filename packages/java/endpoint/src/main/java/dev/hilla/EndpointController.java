@@ -28,7 +28,6 @@ import com.vaadin.flow.server.VaadinServletService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -73,13 +72,13 @@ public class EndpointController {
     /**
      * A qualifier to override the request and response default json mapper.
      */
-    public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
+    public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
     EndpointRegistry endpointRegistry;
 
-    private CsrfChecker csrfChecker;
+    private final CsrfChecker csrfChecker;
 
-    private EndpointInvoker endpointInvoker;
+    private final EndpointInvoker endpointInvoker;
 
     /**
      * A constructor used to initialize the controller.
@@ -167,7 +166,7 @@ public class EndpointController {
                         "Failed to serialize endpoint '%s' method '%s' response. "
                                 + "Double check method's return type or specify a custom mapper bean with qualifier '%s'",
                         endpointName, methodName,
-                        EndpointController.VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER);
+                        EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER);
                 getLogger().error(errorMessage, e);
                 throw new EndpointInternalException(errorMessage);
             }

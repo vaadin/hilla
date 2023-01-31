@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
-public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class MethodPlugin extends AbstractPlugin<BackbonePluginConfig> {
     public static final String MEDIA_TYPE = "application/json";
 
     @Override

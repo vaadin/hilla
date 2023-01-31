@@ -52,6 +52,13 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
+    public void setConfiguration(PluginConfiguration configuration) {
+        super.setConfiguration(configuration);
+        plugins.iterator().forEachRemaining(
+                plugin -> plugin.setConfiguration(configuration));
+    }
+
+    @Override
     public void setStorage(SharedStorage storage) {
         super.setStorage(storage);
         plugins.iterator()
