@@ -38,7 +38,8 @@ public class JacksonPropertyModelTests {
             Map.entry("privateProperty",
                     "java.util.Map<java.lang.String, java.lang.Long>"),
             Map.entry("renamedPublicProperty", "java.lang.Float"),
-            Map.entry("renamedPrivateProperty", "java.lang.Double"),
+            Map.entry("renamedPrivateProperty",
+                    "java.util.List<java.lang.Double>"),
             Map.entry("propertyWithoutAccessor", "java.lang.Short"),
             Map.entry("publicProperty", "java.util.List<java.lang.Integer>"),
             Map.entry("propertyGetterOnly", "java.lang.Boolean[]"),
@@ -57,7 +58,7 @@ public class JacksonPropertyModelTests {
     public void should_HaveCorrectType(JacksonPropertyModel model,
             String name) {
         assertEquals(stringifiedProps.get(name),
-                model.getPrimaryType().get().toString());
+                model.getType().getPrimary().get().toString());
     }
 
     @DisplayName("It should pass equality check")
