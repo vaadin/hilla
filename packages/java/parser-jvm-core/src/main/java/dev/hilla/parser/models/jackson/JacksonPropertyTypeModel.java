@@ -17,7 +17,8 @@ import dev.hilla.parser.models.SignatureModel;
 import jakarta.annotation.Nonnull;
 
 public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
-        implements Model {
+        implements
+        JacksonModel<SignatureModel, SignatureModel, SignatureModel> {
     private final BeanPropertyDefinition origin;
     private Optional<SignatureModel> fieldType;
     private Optional<SignatureModel> getterType;
@@ -45,9 +46,9 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
         var other = (JacksonPropertyTypeModel) obj;
 
         return origin.getName().equals(other.origin.getName())
-                && getFieldType().equals(other.getFieldType())
-                && getGetterType().equals(other.getGetterType())
-                && getSetterType().equals(other.getSetterType());
+                && getField().equals(other.getField())
+                && getGetter().equals(other.getGetter())
+                && getSetter().equals(other.getSetter());
     }
 
     @Override
@@ -60,7 +61,7 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
         return JacksonPropertyTypeModel.class;
     }
 
-    public Optional<SignatureModel> getFieldType() {
+    public Optional<SignatureModel> getField() {
         if (fieldType == null) {
             fieldType = origin.hasField()
                     ? Optional.of(SignatureModel.of(origin.getField()
@@ -71,7 +72,7 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
         return fieldType;
     }
 
-    public Optional<SignatureModel> getGetterType() {
+    public Optional<SignatureModel> getGetter() {
         if (getterType == null) {
             getterType = origin.hasGetter()
                     ? Optional.of(SignatureModel.of(origin.getGetter()
@@ -82,21 +83,21 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
         return getterType;
     }
 
-    public SignatureModel getPrimaryType() {
+    public SignatureModel getPrimary() {
         Optional<SignatureModel> type;
 
         if (origin.hasGetter()) {
-            type = getGetterType();
+            type = getGetter();
         } else if (origin.hasSetter()) {
-            type = getSetterType();
+            type = getSetter();
         } else {
-            type = getFieldType();
+            type = getField();
         }
 
         return type.get();
     }
 
-    public Optional<SignatureModel> getSetterType() {
+    public Optional<SignatureModel> getSetter() {
         if (setterType == null) {
             setterType = origin.hasSetter() ? Optional.of(SignatureModel
                     .of(origin.getSetter().getAnnotated().getParameters()[0]
@@ -121,9 +122,8 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
 
     @Override
     public int hashCode() {
-        return (origin.getName().hashCode() + getFieldType().hashCode()
-                + getGetterType().hashCode() + getSetterType().hashCode())
-                ^ 0x10e6f7b;
+        return (origin.getName().hashCode() + getField().hashCode()
+                + getGetter().hashCode() + getSetter().hashCode()) ^ 0x10e6f7b;
     }
 
     @Override
@@ -133,7 +133,7 @@ public final class JacksonPropertyTypeModel extends AnnotatedAbstractModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
-        return Stream.of(getFieldType(), getGetterType(), getSetterType())
+        return Stream.of(getField(), getGetter(), getSetter())
                 .filter(Optional::isPresent).map(Optional::get)
                 .flatMap(AnnotatedModel::getAnnotationsStream)
                 .collect(Collectors.toList());

@@ -24,7 +24,9 @@ import dev.hilla.parser.models.OwnedModel;
 import jakarta.annotation.Nonnull;
 
 public final class JacksonPropertyModel extends AnnotatedAbstractModel
-        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+        implements
+        JacksonModel<FieldInfoModel, MethodInfoModel, MethodInfoModel>,
+        NamedModel, OwnedModel<ClassInfoModel> {
     private final BeanPropertyDefinition origin;
     private Optional<FieldInfoModel> field;
     private Optional<MethodInfoModel> getter;
@@ -139,14 +141,6 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
         return getField().get();
     }
 
-    public JacksonPropertyTypeModel getPrimaryType() {
-        if (type == null) {
-            type = JacksonPropertyTypeModel.of(origin);
-        }
-
-        return type;
-    }
-
     public Optional<MethodInfoModel> getSetter() {
         if (setter == null) {
             setter = origin.hasSetter()
@@ -156,6 +150,14 @@ public final class JacksonPropertyModel extends AnnotatedAbstractModel
         }
 
         return setter;
+    }
+
+    public JacksonPropertyTypeModel getType() {
+        if (type == null) {
+            type = JacksonPropertyTypeModel.of(origin);
+        }
+
+        return type;
     }
 
     public boolean hasField() {
