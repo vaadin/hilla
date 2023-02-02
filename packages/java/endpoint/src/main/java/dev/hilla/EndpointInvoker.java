@@ -96,20 +96,16 @@ public class EndpointInvoker {
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
-        this.endpointMapper = buildEndpointMapper(applicationContext,
-                endpointMapperFactory);
+        this.endpointMapper = endpointMapperFactory != null
+                ? endpointMapperFactory.build()
+                : createDefaultEndpointMapper(applicationContext);
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
     }
 
-    private static ObjectMapper buildEndpointMapper(
-            ApplicationContext applicationContext,
-            JacksonObjectMapperFactory endpointMapperFactory) {
-        if (endpointMapperFactory == null) {
-            endpointMapperFactory = new JacksonObjectMapperFactory.Json();
-        }
-
-        var endpointMapper = endpointMapperFactory.build();
+    private static ObjectMapper createDefaultEndpointMapper(
+            ApplicationContext applicationContext) {
+        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
         applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
                 .configure(endpointMapper);
 
