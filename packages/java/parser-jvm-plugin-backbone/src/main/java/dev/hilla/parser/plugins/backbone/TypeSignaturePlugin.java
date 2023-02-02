@@ -23,7 +23,6 @@ import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
-import dev.hilla.parser.plugins.backbone.nodes.PropertyTypeNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -68,12 +67,10 @@ public final class TypeSignaturePlugin
                 && schema instanceof ComposedSchema) {
             attachSchemaToEntitySubclass((ComposedSchema) schema,
                     (EntityNode) parentNode);
-        } else if (parentNode instanceof PropertyTypeNode
-                && grandParentNode instanceof PropertyNode) {
-            attachSchemaToPropertyOfEntity(schema,
-                    (PropertyNode) grandParentNode,
-                    (EntityNode) nodePath.getParentPath().getParentPath()
-                            .getParentPath().getNode());
+        } else if (parentNode instanceof PropertyNode
+                && grandParentNode instanceof EntityNode) {
+            attachSchemaToPropertyOfEntity(schema, (PropertyNode) parentNode,
+                    (EntityNode) grandParentNode);
         } else if (parentNode instanceof TypeSignatureNode) {
             attachSchemaToNestingParentSignature(schema,
                     (TypeSignatureNode) parentNode);
@@ -96,8 +93,6 @@ public final class TypeSignaturePlugin
         } else if (node instanceof TypeSignatureNode) {
             return scanTypeSignature((TypeSignatureNode) node,
                     nodeDependencies);
-        } else if (node instanceof PropertyTypeNode) {
-            return scanPropertyType((PropertyTypeNode) node, nodeDependencies);
         }
 
         return nodeDependencies;
@@ -177,14 +172,8 @@ public final class TypeSignaturePlugin
 
     private NodeDependencies scanProperty(PropertyNode propertyNode,
             NodeDependencies nodeDependencies) {
-        return nodeDependencies.appendChildNodes(Stream
-                .of(PropertyTypeNode.of(propertyNode.getSource().getType())));
-    }
-
-    private NodeDependencies scanPropertyType(PropertyTypeNode node,
-            NodeDependencies nodeDependencies) {
-        return nodeDependencies.appendChildNodes(
-                Stream.of(TypeSignatureNode.of(node.getSource().getPrimary())));
+        return nodeDependencies.appendChildNodes(Stream.of(TypeSignatureNode
+                .of(propertyNode.getSource().getType().getPrimary())));
     }
 
     private NodeDependencies scanTypeSignature(TypeSignatureNode node,

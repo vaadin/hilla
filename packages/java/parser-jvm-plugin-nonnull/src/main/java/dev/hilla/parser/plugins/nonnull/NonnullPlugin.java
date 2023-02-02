@@ -21,11 +21,11 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
+import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
-import dev.hilla.parser.plugins.backbone.nodes.PropertyTypeNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 import io.swagger.v3.oas.models.media.Schema;
@@ -125,23 +125,18 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         var parent = nodePath.getParentPath().getNode();
 
         if (current instanceof TypeSignatureNode) {
-            if (parent instanceof MethodNode
-                    || parent instanceof MethodParameterNode
-                    || parent instanceof PropertyTypeNode) {
+            if (parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
-                        ((AnnotatedModel) parent.getSource())
+                        ((JacksonPropertyModel) parent.getSource()).getType()
                                 .getAnnotationsStream());
             }
 
-            if (parent instanceof PropertyTypeNode) {
-                var grandParent = nodePath.getParentPath().getParentPath()
-                        .getNode();
-
-                if (grandParent instanceof PropertyNode) {
-                    annotations = Stream.concat(annotations,
-                            ((AnnotatedModel) grandParent.getSource())
-                                    .getAnnotationsStream());
-                }
+            if (parent instanceof MethodNode
+                    || parent instanceof MethodParameterNode
+                    || parent instanceof PropertyNode) {
+                annotations = Stream.concat(annotations,
+                        ((AnnotatedModel) parent.getSource())
+                                .getAnnotationsStream());
             }
         }
 
