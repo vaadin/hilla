@@ -813,46 +813,6 @@ public class EndpointControllerTest {
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
                 .getBean(Jackson2ObjectMapperBuilder.class);
-        verify(contextMock, times(1)).getBean(JacksonProperties.class);
-        verify(mockOwnObjectMapper, times(1)).setVisibility(
-                PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-    }
-
-    @Test
-    public void should_NotOverrideVisibility_When_JacksonPropertiesProvideVisibility() {
-        ApplicationContext contextMock = mock(ApplicationContext.class);
-        ObjectMapper mockDefaultObjectMapper = mock(ObjectMapper.class);
-        ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
-        JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
-        when(contextMock.getBean(ObjectMapper.class))
-                .thenReturn(mockDefaultObjectMapper);
-        when(contextMock.getBean(JacksonProperties.class))
-                .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
-        when(mockJacksonProperties.getVisibility())
-                .thenReturn(Collections.singletonMap(PropertyAccessor.ALL,
-                        JsonAutoDetect.Visibility.PUBLIC_ONLY));
-        EndpointRegistry registry = new EndpointRegistry(
-                mock(EndpointNameChecker.class));
-        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class),
-                mock(ServletContext.class), registry);
-        new EndpointController(contextMock, registry, invoker, null);
-
-        verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
-        verify(mockDefaultObjectMapper, never()).setVisibility(
-                PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        verify(mockOwnObjectMapper, never()).setVisibility(PropertyAccessor.ALL,
-                JsonAutoDetect.Visibility.ANY);
-        verify(contextMock, times(1)).getBean(JacksonProperties.class);
     }
 
     @Test
