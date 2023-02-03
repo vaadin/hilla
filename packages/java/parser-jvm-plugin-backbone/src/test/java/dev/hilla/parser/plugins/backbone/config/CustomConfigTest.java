@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.plugins.backbone.BackbonePluginConfig;
+import dev.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
 public class CustomConfigTest {
@@ -17,7 +17,7 @@ public class CustomConfigTest {
     @Test
     public void should_CorrectlyHandleComplexTypes()
             throws IOException, URISyntaxException {
-        var pluginConfig = new BackbonePluginConfig();
+        var pluginConfig = new BackbonePluginConfiguration();
         pluginConfig
                 .setObjectMapperFactoryClassName(CustomFactory.class.getName());
 

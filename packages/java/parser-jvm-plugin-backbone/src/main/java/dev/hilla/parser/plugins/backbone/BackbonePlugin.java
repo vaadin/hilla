@@ -6,10 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 import dev.hilla.parser.core.AbstractCompositePlugin;
-import dev.hilla.parser.core.PluginConfiguration;
 
 public final class BackbonePlugin
-        extends AbstractCompositePlugin<PluginConfiguration> {
+        extends AbstractCompositePlugin<BackbonePluginConfiguration> {
     public BackbonePlugin() {
         super(new EndpointPlugin(), new EndpointExposedPlugin(),
                 new MethodPlugin(), new MethodParameterPlugin(),
