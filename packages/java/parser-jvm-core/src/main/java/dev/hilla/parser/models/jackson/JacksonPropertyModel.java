@@ -114,8 +114,8 @@ public final class JacksonPropertyModel
                         getGetter().map(AnnotatedModel::getAnnotations),
                         getSetter().map(
                                 m -> m.getParameters().get(0).getAnnotations()))
-                .filter(Optional::isPresent).map(Optional::get)
-                .flatMap(Collection::stream).collect(Collectors.toList());
+                .flatMap(Optional::stream).flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override

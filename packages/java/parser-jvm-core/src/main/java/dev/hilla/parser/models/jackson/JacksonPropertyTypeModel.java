@@ -79,7 +79,7 @@ public final class JacksonPropertyTypeModel
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
         return Stream.of(getField(), getGetter(), getSetter())
-                .filter(Optional::isPresent).map(Optional::get)
+                .flatMap(Optional::stream)
                 .flatMap(AnnotatedModel::getAnnotationsStream)
                 .collect(Collectors.toList());
     }
