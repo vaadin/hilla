@@ -16,7 +16,11 @@
 
 package dev.hilla.generator.endpoints;
 
-import jakarta.annotation.security.DenyAll;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -51,14 +55,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.NullHandling;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+
 import dev.hilla.Endpoint;
 import dev.hilla.EndpointExposed;
 import dev.hilla.ExplicitNullableTypeChecker;
 import dev.hilla.auth.EndpointAccessChecker;
 import dev.hilla.endpointransfermapper.EndpointTransferMapper;
 import dev.hilla.generator.OpenAPIObjectGenerator;
+import dev.hilla.generator.endpoints.complexhierarchymodel.GrandParentModel;
+import dev.hilla.generator.endpoints.complexhierarchymodel.Model;
+import dev.hilla.generator.endpoints.complexhierarchymodel.ParentModel;
 import dev.hilla.mappedtypes.Pageable;
+import dev.hilla.utils.TestUtils;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -79,23 +96,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import jakarta.annotation.security.DenyAll;
 import reactor.core.publisher.Flux;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.NullHandling;
-
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import dev.hilla.generator.endpoints.complexhierarchymodel.GrandParentModel;
-import dev.hilla.generator.endpoints.complexhierarchymodel.Model;
-import dev.hilla.generator.endpoints.complexhierarchymodel.ParentModel;
-import dev.hilla.utils.TestUtils;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractEndpointGenerationTest
         extends AbstractEndpointGeneratorBaseTest {
@@ -632,8 +634,7 @@ public abstract class AbstractEndpointGenerationTest
             declaringClass = declaringClass.getDeclaringClass();
         }
         String expectedEndingJavaFilePath = StringUtils.replaceChars(
-                declaringClass.getCanonicalName(), '.', '/')
-                + ".java";
+                declaringClass.getCanonicalName(), '.', '/') + ".java";
         String wrongPathMessage = String.format(
                 "The generated model class '%s' refers to Java path '%s'. The path should end with '%s'",
                 expectedClass, actualJavaFileReference,

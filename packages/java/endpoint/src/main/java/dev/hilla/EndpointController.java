@@ -15,17 +15,6 @@
  */
 package dev.hilla;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -38,6 +27,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletService;
+
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
@@ -45,6 +44,8 @@ import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
 import dev.hilla.exception.EndpointException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
