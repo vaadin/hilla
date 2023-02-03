@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
@@ -34,7 +33,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public final class TypeSignaturePlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypeSignatureNode) {
