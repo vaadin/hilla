@@ -21,6 +21,7 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
+import dev.hilla.parser.models.SpecializedModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -50,33 +51,43 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         }
 
         var schema = (Schema<?>) nodePath.getNode().getTarget();
+        var nodeSource = nodePath.getNode().getSource();
 
-        // Apply annotations from package (NonNullApi)
-        var annotations = getPackageAnnotationsStream(nodePath);
+        if ((nodeSource instanceof SpecializedModel)
+                && ((SpecializedModel) nodeSource).isOptional()) {
+            // Optional is always nullable, regardless of annotations
+            schema.setNullable(true);
+        } else {
+            // Apply annotations from package (NonNullApi)
+            var annotations = getPackageAnnotationsStream(nodePath);
 
-        // Apply from current node, if source is annotated
-        if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) nodePath.getNode().getSource())
-                            .getAnnotationsStream());
+            // Apply from current node, if source is annotated
+            if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
+                annotations = Stream.concat(annotations,
+                        ((AnnotatedModel) nodePath.getNode().getSource())
+                                .getAnnotationsStream());
+            }
+
+            // When the parent source is annotated, but the parent target is not
+            // a
+            // schema (consider MethodNode, MethodParameterNode, and FieldNode),
+            // apply annotations from parent node to the current node’s target.
+            var parentNode = nodePath.getParentPath().getNode();
+            if ((parentNode.getSource() instanceof AnnotatedModel)
+                    && !(parentNode.getTarget() instanceof Schema)) {
+                annotations = Stream.concat(annotations,
+                        ((AnnotatedModel) parentNode.getSource())
+                                .getAnnotationsStream());
+            }
+
+            annotations
+                    .map(annotation -> annotationsMap.get(annotation.getName()))
+                    .filter(Objects::nonNull)
+                    .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                    .map(AnnotationMatcher::doesMakeNullable)
+                    .ifPresent(nullable -> schema
+                            .setNullable(nullable ? true : null));
         }
-
-        // When the parent source is annotated, but the parent target is not a
-        // schema (consider MethodNode, MethodParameterNode, and FieldNode),
-        // apply annotations from parent node to the current node’s target.
-        var parentNode = nodePath.getParentPath().getNode();
-        if ((parentNode.getSource() instanceof AnnotatedModel)
-                && !(parentNode.getTarget() instanceof Schema)) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) parentNode.getSource())
-                            .getAnnotationsStream());
-        }
-
-        annotations.map(annotation -> annotationsMap.get(annotation.getName()))
-                .filter(Objects::nonNull)
-                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
-                .map(AnnotationMatcher::doesMakeNullable).ifPresent(
-                        nullable -> schema.setNullable(nullable ? true : null));
     }
 
     @Override
