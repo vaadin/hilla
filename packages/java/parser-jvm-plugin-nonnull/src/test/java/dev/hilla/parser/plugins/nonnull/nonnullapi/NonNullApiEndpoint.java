@@ -1,6 +1,7 @@
 package dev.hilla.parser.plugins.nonnull.nonnullapi;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Endpoint
@@ -35,5 +36,9 @@ public class NonNullApiEndpoint {
         public String nullableField;
         @NullableSignature
         public String nullableSignatureField;
+    }
+
+    public Optional<String> optionalMethod(Optional<String> opt) {
+        return opt;
     }
 }
