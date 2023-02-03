@@ -443,6 +443,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isSynthetic();
 
+    @Override
+    public String toString() {
+        return "ClassInfoModel[" + get() + "]";
+    }
+
     protected abstract List<FieldInfoModel> prepareFields();
 
     protected abstract List<ClassInfoModel> prepareInnerClasses();

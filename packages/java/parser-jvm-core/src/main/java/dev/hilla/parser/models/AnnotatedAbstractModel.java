@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationInfo;
 
-abstract class AnnotatedAbstractModel implements AnnotatedModel {
+public abstract class AnnotatedAbstractModel implements AnnotatedModel {
     private List<AnnotationInfoModel> annotations;
 
     protected static List<AnnotationInfoModel> processAnnotations(

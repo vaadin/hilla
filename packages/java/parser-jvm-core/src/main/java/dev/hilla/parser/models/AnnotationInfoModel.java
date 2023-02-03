@@ -70,6 +70,11 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         return getName().hashCode() + 11 * getParameters().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "AnnotationInfoModel[" + get() + "]";
+    }
+
     protected abstract Optional<ClassInfoModel> prepareClassInfo();
 
     protected abstract Set<AnnotationParameterModel> prepareParameters();

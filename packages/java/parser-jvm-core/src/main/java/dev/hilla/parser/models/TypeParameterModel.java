@@ -68,7 +68,7 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getName();
+        return "TypeParameterModel[" + get() + "]";
     }
 
     protected abstract List<SignatureModel> prepareBounds();

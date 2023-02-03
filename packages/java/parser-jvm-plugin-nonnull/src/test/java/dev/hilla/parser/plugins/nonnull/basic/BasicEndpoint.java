@@ -50,21 +50,17 @@ public class BasicEndpoint {
         public List<@Nonnull String> mixedAnnotations;
 
         @javax.annotation.Nonnull
-        private String nonTypeAnnotation;
+        public String nonTypeAnnotation;
     }
 
     public static class NonNullableModel {
         @Nonnull
+        public Map<String, @Nonnull List<@Nonnull NonNullableModel>> complexTypeField;
+        public String nullableField;
+        @Nonnull
+        public String protectedField;
+        @Nonnull
         public String publicField;
-
-        @Nonnull
-        protected String protectedField;
-
-        @Nonnull
-        private Map<String, @Nonnull List<@Nonnull NonNullableModel>> complexTypeField;
-
-        private String nullableField;
-
-        private List<@Nonnull String> typeWithTypeArgument;
+        public List<@Nonnull String> typeWithTypeArgument;
     }
 }

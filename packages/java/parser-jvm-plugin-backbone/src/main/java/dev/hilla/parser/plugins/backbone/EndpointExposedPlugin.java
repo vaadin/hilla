@@ -16,6 +16,7 @@ import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
+import dev.hilla.parser.models.jackson.JacksonPropertyTypeModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
@@ -36,7 +37,8 @@ public final class EndpointExposedPlugin
     @Override
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
             @Nonnull NodePath<?> parentPath) {
-        if (!(node instanceof TypeSignatureNode)) {
+        if (!(node instanceof TypeSignatureNode)
+                || node.getSource() instanceof JacksonPropertyTypeModel) {
             return node;
         }
 

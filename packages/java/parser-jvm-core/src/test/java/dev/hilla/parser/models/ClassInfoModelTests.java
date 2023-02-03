@@ -605,28 +605,6 @@ public class ClassInfoModelTests {
                             ModelKind.SOURCE));
         }
 
-        public static final class Specialization implements ArgumentsProvider {
-            public static final String testNamePattern = "{2} [{3}]";
-
-            @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
-                var ctx = new Context.Specializations(context);
-
-                return Streams.combine(
-                        ctx.getReflectionSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getSimpleName())),
-                        ctx.getSourceSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getSimpleName())));
-            }
-        }
-
         static final class Characteristics implements ArgumentsProvider {
             public static final String testNamePattern = "{2} [{3}]";
 
@@ -670,6 +648,28 @@ public class ClassInfoModelTests {
             public Checker() {
                 super(SpecializedModel.class,
                         getDeclaredMethods(SpecializedModel.class));
+            }
+        }
+
+        static final class Specialization implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            @Override
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Specializations(context);
+
+                return Streams.combine(
+                        ctx.getReflectionSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.REFLECTION,
+                                        entry.getKey().getSimpleName())),
+                        ctx.getSourceSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getSimpleName())));
             }
         }
     }

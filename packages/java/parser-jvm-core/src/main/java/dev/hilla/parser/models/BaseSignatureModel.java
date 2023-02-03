@@ -58,6 +58,6 @@ public abstract class BaseSignatureModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getType().toString();
+        return "BaseSignatureModel[" + get() + "]";
     }
 }

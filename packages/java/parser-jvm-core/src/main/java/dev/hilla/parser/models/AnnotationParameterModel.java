@@ -64,6 +64,11 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
 
     public abstract boolean isDefault();
 
+    @Override
+    public String toString() {
+        return "AnnotationParameterModel[" + get() + "]";
+    }
+
     protected abstract Object prepareValue();
 
     public static final class ReflectionOrigin<T> {
@@ -77,6 +82,22 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
             this.isDefault = isDefault;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (!(obj instanceof ReflectionOrigin)) {
+                return false;
+            }
+
+            var other = (ReflectionOrigin<?>) obj;
+
+            return name.equals(other.name) && value.equals(other.value)
+                    && isDefault == other.isDefault;
+        }
+
         public String getName() {
             return name;
         }
@@ -85,8 +106,20 @@ public abstract class AnnotationParameterModel implements Model, NamedModel {
             return value;
         }
 
+        @Override
+        public int hashCode() {
+            return (name.hashCode() + value.hashCode()
+                    + Boolean.hashCode(isDefault)) ^ 0x10e6f7b;
+        }
+
         public boolean isDefault() {
             return isDefault;
+        }
+
+        @Override
+        public String toString() {
+            return "ReflectionOrigin[name=" + name + ",value=" + value
+                    + ",isDefault=" + isDefault + "]";
         }
     }
 }

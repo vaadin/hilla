@@ -8,6 +8,9 @@ module dev.hilla.parser.plugins.backbone {
     requires transitive dev.hilla.parser.core;
     requires jakarta.annotation;
     requires org.slf4j;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires com.fasterxml.jackson.datatype.jdk8;
+    requires com.fasterxml.jackson.module.paramnames;
 
     exports dev.hilla.parser.plugins.backbone;
     exports dev.hilla.parser.plugins.backbone.nodes;

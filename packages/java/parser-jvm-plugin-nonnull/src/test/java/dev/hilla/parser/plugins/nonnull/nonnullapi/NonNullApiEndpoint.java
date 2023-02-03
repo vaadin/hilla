@@ -30,10 +30,10 @@ public class NonNullApiEndpoint {
     }
 
     static class Dependency {
-        String defaultField;
+        public String defaultField;
         @NullableField
-        String nullableField;
+        public String nullableField;
         @NullableSignature
-        String nullableSignatureField;
+        public String nullableSignatureField;
     }
 }

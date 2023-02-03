@@ -5,9 +5,9 @@ import java.util.ArrayList;
 @Endpoint
 public class ShadowedNameEndpoint {
     /**
-     * Get a list of user name.
+     * Get a list of usernames.
      *
-     * @return list of user name
+     * @return list of usernames
      */
     public java.util.Collection<String> getJavaCollection() {
         return new ArrayList<>();

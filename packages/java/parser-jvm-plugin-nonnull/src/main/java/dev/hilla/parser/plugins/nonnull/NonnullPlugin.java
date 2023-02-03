@@ -21,7 +21,12 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
+import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -62,16 +67,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                             .getAnnotationsStream());
         }
 
-        // When the parent source is annotated, but the parent target is not a
-        // schema (consider MethodNode, MethodParameterNode, and FieldNode),
-        // apply annotations from parent node to the current node’s target.
-        var parentNode = nodePath.getParentPath().getNode();
-        if ((parentNode.getSource() instanceof AnnotatedModel)
-                && !(parentNode.getTarget() instanceof Schema)) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) parentNode.getSource())
-                            .getAnnotationsStream());
-        }
+        annotations = considerAscendantAnnotations(annotations, nodePath);
 
         annotations.map(annotation -> annotationsMap.get(annotation.getName()))
                 .filter(Objects::nonNull)
@@ -111,5 +107,39 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             NodePath<?> nodePath) {
         return findClosestPackage(nodePath).stream()
                 .flatMap(PackageInfoModel::getAnnotationsStream);
+    }
+
+    /**
+     * Adds ascendant annotations for check in case the type is annotated on
+     * method/parameter/property level.
+     *
+     * @param annotations
+     *            initial type annotations
+     * @param nodePath
+     *            the node path
+     * @return stream of all annotations to check
+     */
+    private Stream<AnnotationInfoModel> considerAscendantAnnotations(
+            Stream<AnnotationInfoModel> annotations, NodePath<?> nodePath) {
+        var current = nodePath.getNode();
+        var parent = nodePath.getParentPath().getNode();
+
+        if (current instanceof TypeSignatureNode) {
+            if (parent instanceof PropertyNode) {
+                annotations = Stream.concat(annotations,
+                        ((JacksonPropertyModel) parent.getSource()).getType()
+                                .getAnnotationsStream());
+            }
+
+            if (parent instanceof MethodNode
+                    || parent instanceof MethodParameterNode
+                    || parent instanceof PropertyNode) {
+                annotations = Stream.concat(annotations,
+                        ((AnnotatedModel) parent.getSource())
+                                .getAnnotationsStream());
+            }
+        }
+
+        return annotations;
     }
 }

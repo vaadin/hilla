@@ -18,4 +18,8 @@ package dev.hilla.parser.plugins.backbone.complexhierarchy.models;
 
 public class ComplexHierarchyGrandParentModel {
     private int build;
+
+    public int getBuild() {
+        return build;
+    }
 }

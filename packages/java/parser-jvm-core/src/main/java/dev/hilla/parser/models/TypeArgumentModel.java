@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -71,8 +70,7 @@ public abstract class TypeArgumentModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getAssociatedTypesStream().map(Object::toString)
-                .collect(Collectors.joining(" & "));
+        return "TypeArgumentModel[" + get() + "]";
     }
 
     protected abstract List<SignatureModel> prepareAssociatedTypes();

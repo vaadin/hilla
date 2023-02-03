@@ -19,7 +19,11 @@ public class ExtendedEndpoint extends BasicEndpoint {
     }
 
     public static class Entity {
-        @Nonnull
         private List<String> nonnullListOfNullableStrings;
+
+        @Nonnull
+        public List<String> getNonnullListOfNullableStrings() {
+            return nonnullListOfNullableStrings;
+        }
     }
 }

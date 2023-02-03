@@ -17,20 +17,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.servlet.ServletContext;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.server.VaadinServletContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
@@ -40,6 +26,16 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.googlecode.gentyref.GenericTypeReflector;
+
+import com.vaadin.flow.server.VaadinServletContext;
 
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -51,6 +47,11 @@ import dev.hilla.endpointransfermapper.EndpointTransferMapper;
 import dev.hilla.exception.EndpointException;
 import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.exception.EndpointValidationException.ValidationErrorData;
+
+import jakarta.servlet.ServletContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 
 /**
  * Handles invocation of endpoint methods after checking the user has proper
@@ -107,7 +108,6 @@ public class EndpointInvoker {
                 : createVaadinConnectObjectMapper(applicationContext);
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
-
     }
 
     private static Logger getLogger() {
@@ -177,6 +177,9 @@ public class EndpointInvoker {
                     JsonAutoDetect.Visibility.ANY);
         }
         objectMapper.registerModule(new ByteArrayModule());
+
+        getLogger().debug("Using default Hilla ObjectMapper");
+
         return objectMapper;
     }
 

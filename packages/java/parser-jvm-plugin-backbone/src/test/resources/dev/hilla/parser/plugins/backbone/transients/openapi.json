@@ -65,6 +65,10 @@
           "entityField": {
             "type": "string",
             "nullable": true
+          },
+          "transientWithGetter": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
