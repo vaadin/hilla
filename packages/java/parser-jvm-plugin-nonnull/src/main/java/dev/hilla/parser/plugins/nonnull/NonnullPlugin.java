@@ -53,8 +53,13 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     @Override
     public void exit(NodePath<?> nodePath) {
         var node = nodePath.getNode();
-        if (node.getTarget()instanceof Schema schema) {
-            if (((SpecializedModel) node.getSource()).isOptional()) {
+
+        if (node.getTarget() instanceof Schema) {
+            var schema = (Schema<?>) node.getTarget();
+            var nodeSource = node.getSource();
+
+            if ((nodeSource instanceof SpecializedModel)
+                    && ((SpecializedModel) nodeSource).isOptional()) {
                 // Optional is always nullable, regardless of annotations
                 schema.setNullable(true);
             } else {
@@ -62,9 +67,10 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 var annotations = getPackageAnnotationsStream(nodePath);
 
                 // Apply from current node, if source is annotated
-                if (node.getSource()instanceof AnnotatedModel annotatedSource) {
+                if (nodeSource instanceof AnnotatedModel) {
                     annotations = Stream.concat(annotations,
-                            annotatedSource.getAnnotationsStream());
+                            ((AnnotatedModel) nodeSource)
+                                    .getAnnotationsStream());
                 }
 
                 annotations = considerAscendantAnnotations(annotations,
