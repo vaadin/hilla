@@ -15,20 +15,8 @@
  */
 package dev.hilla;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -39,6 +27,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletService;
+
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
@@ -46,6 +44,8 @@ import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
 import dev.hilla.exception.EndpointException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -73,13 +73,13 @@ public class EndpointController {
     /**
      * A qualifier to override the request and response default json mapper.
      */
-    public static final String VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER = "vaadinEndpointMapper";
+    public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
     EndpointRegistry endpointRegistry;
 
-    private CsrfChecker csrfChecker;
+    private final CsrfChecker csrfChecker;
 
-    private EndpointInvoker endpointInvoker;
+    private final EndpointInvoker endpointInvoker;
 
     /**
      * A constructor used to initialize the controller.
@@ -167,7 +167,7 @@ public class EndpointController {
                         "Failed to serialize endpoint '%s' method '%s' response. "
                                 + "Double check method's return type or specify a custom mapper bean with qualifier '%s'",
                         endpointName, methodName,
-                        EndpointController.VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER);
+                        EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER);
                 getLogger().error(errorMessage, e);
                 throw new EndpointInternalException(errorMessage);
             }

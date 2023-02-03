@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "CustomConfigEndpoint"
+    }
+  ],
+  "paths": {
+    "/CustomConfigEndpoint/get": {
+      "post": {
+        "tags": ["CustomConfigEndpoint"],
+        "operationId": "CustomConfigEndpoint_get_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity": {
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "foo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

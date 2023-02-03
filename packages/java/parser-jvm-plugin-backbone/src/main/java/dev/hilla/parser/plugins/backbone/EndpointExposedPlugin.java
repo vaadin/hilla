@@ -8,7 +8,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
@@ -24,7 +23,7 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
     }

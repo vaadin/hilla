@@ -10,7 +10,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 
@@ -21,7 +20,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 
 public final class MethodParameterPlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {

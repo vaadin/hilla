@@ -16,7 +16,12 @@
 
 package dev.hilla.rest;
 
-import jakarta.servlet.ServletContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,16 +39,12 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import dev.hilla.EndpointController;
-import dev.hilla.EndpointControllerMockBuilder;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import dev.hilla.EndpointController;
+import dev.hilla.EndpointControllerMockBuilder;
+
+import jakarta.servlet.ServletContext;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -86,12 +87,10 @@ public class EndpointWithRestControllerTest {
 
     @Test
     // https://github.com/vaadin/flow/issues/8034
-    public void should_BeAbleToSerializePrivateFieldsOfABean_when_CallingFromConnectEndPoint() {
+    public void should_FollowJacksonPropertiesApproach_when_CallingFromHillaEndpoint() {
         try {
             String result = callEndpointMethod("getBeanWithPrivateFields");
-            assertEquals(
-                    "{\"codeNumber\":\"007\",\"name\":\"Bond\",\"firstName\":\"James\"}",
-                    result);
+            assertEquals("{\"name\":\"Bond\"}", result);
         } catch (Exception e) {
             fail("failed to serialize a bean with private fields");
         }
@@ -117,7 +116,7 @@ public class EndpointWithRestControllerTest {
     public void should_RepsectJacksonAnnotation_when_serializeBean()
             throws Exception {
         String result = callEndpointMethod("getBeanWithJacksonAnnotation");
-        assertEquals("{\"name\":null,\"rating\":2,\"bookId\":null}", result);
+        assertEquals("{\"rating\":2,\"bookId\":null,\"name\":null}", result);
     }
 
     @Test

@@ -258,6 +258,11 @@
             <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>parser-jvm-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
