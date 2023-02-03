@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -93,10 +92,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
         }
 
         return parameters;
-    }
-
-    public Stream<MethodParameterInfoModel> getParametersStream() {
-        return getParameters().stream();
     }
 
     public SignatureModel getResultType() {

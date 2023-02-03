@@ -3,6 +3,7 @@ package dev.hilla.parser.core.basic;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.cleanup;
 import static dev.hilla.parser.test.helpers.ClassMemberUtils.getDeclaredMethod;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,15 +44,16 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies
                     .appendChildNodes(endpoints.stream().map(EndpointNode::of))
                     .appendRelatedNodes(endpoints.stream()
-                            .flatMap(ClassInfoModel::getInnerClassesStream)
-                            .map(EntityNode::of));
+                            .map(ClassInfoModel::getInnerClasses)
+                            .flatMap(Collection::stream).map(EntityNode::of));
         } else if (node instanceof EndpointNode) {
             return nodeDependencies
                     .appendChildNodes(Stream.concat(
-                            ((EndpointNode) node).getSource().getFieldsStream()
-                                    .map(FieldNode::of),
+                            ((EndpointNode) node).getSource().getFields()
+                                    .stream().map(FieldNode::of),
                             cleanup(((EndpointNode) node).getSource()
-                                    .getMethodsStream()).map(MethodNode::of)))
+                                    .getMethods().stream())
+                                            .map(MethodNode::of)))
                     .appendRelatedNodes(Stream.of(
                             EntityNode.of(ClassInfoModel.of(Sample.class))));
         }

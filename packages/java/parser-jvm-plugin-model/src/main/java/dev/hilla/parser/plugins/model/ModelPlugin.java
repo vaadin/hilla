@@ -33,7 +33,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             AnnotationInfoModel annotation) {
         var simpleName = extractSimpleName(annotation.getName());
 
-        var attributes = annotation.getParametersStream()
+        var attributes = annotation.getParameters().stream()
                 .filter(Predicate.not(AnnotationParameterModel::isDefault))
                 .collect(Collectors.toMap(AnnotationParameterModel::getName,
                         AnnotationParameterModel::getValue));
@@ -87,7 +87,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private void addConstraintsToSchema(SignatureModel signature,
             Schema<?> schema) {
-        var constraints = signature.getAnnotationsStream()
+        var constraints = signature.getAnnotations().stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .map(ModelPlugin::convertAnnotation)
                 .collect(Collectors.toList());

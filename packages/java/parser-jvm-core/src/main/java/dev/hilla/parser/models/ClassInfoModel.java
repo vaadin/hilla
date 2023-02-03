@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -262,10 +261,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return fields;
     }
 
-    public Stream<FieldInfoModel> getFieldsStream() {
-        return getFields().stream();
-    }
-
     public List<ClassInfoModel> getInheritanceChain() {
         var chain = new ArrayList<ClassInfoModel>();
 
@@ -280,20 +275,12 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return chain;
     }
 
-    public Stream<ClassInfoModel> getInheritanceChainStream() {
-        return getInheritanceChain().stream();
-    }
-
     public List<ClassInfoModel> getInnerClasses() {
         if (innerClasses == null) {
             innerClasses = prepareInnerClasses();
         }
 
         return innerClasses;
-    }
-
-    public Stream<ClassInfoModel> getInnerClassesStream() {
-        return getInnerClasses().stream();
     }
 
     public List<ClassRefSignatureModel> getInterfaces() {
@@ -304,20 +291,12 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return interfaces;
     }
 
-    public Stream<ClassRefSignatureModel> getInterfacesStream() {
-        return getInterfaces().stream();
-    }
-
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
             methods = prepareMethods();
         }
 
         return methods;
-    }
-
-    public Stream<MethodInfoModel> getMethodsStream() {
-        return getMethods().stream();
     }
 
     public PackageInfoModel getPackage() {
@@ -329,10 +308,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     public abstract String getSimpleName();
-
-    public Stream<ClassRefSignatureModel> getSuperClassStream() {
-        return getSuperClass().stream();
-    }
 
     @Override
     public List<TypeParameterModel> getTypeParameters() {

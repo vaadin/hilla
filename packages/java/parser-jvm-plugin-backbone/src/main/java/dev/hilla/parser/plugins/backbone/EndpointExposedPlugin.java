@@ -91,7 +91,7 @@ public final class EndpointExposedPlugin
             ClassInfoModel classInfo) {
         var endpointExposedAnnotationName = getStorage().getParserConfig()
                 .getEndpointExposedAnnotationName();
-        var exposed = classInfo.getAnnotationsStream()
+        var exposed = classInfo.getAnnotations().stream()
                 .map(AnnotationInfoModel::getName)
                 .anyMatch(endpointExposedAnnotationName::equals);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
@@ -159,7 +159,7 @@ public final class EndpointExposedPlugin
             ClassInfoModel endpointClass) {
         return Stream
                 .concat(endpointClass.getSuperClass().stream(),
-                        endpointClass.getInterfacesStream())
+                        endpointClass.getInterfaces().stream())
                 .map(EndpointSignatureNode::of);
     }
 }

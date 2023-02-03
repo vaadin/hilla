@@ -64,7 +64,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
             annotations = Stream.concat(annotations,
                     ((AnnotatedModel) nodePath.getNode().getSource())
-                            .getAnnotationsStream());
+                            .getAnnotations().stream());
         }
 
         annotations = considerAscendantAnnotations(annotations, nodePath);
@@ -95,20 +95,6 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .process());
     }
 
-    private Optional<PackageInfoModel> findClosestPackage(
-            NodePath<?> nodePath) {
-        return nodePath.stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
-                .map(ClassInfoModel::getPackage);
-    }
-
-    private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
-            NodePath<?> nodePath) {
-        return findClosestPackage(nodePath).stream()
-                .flatMap(PackageInfoModel::getAnnotationsStream);
-    }
-
     /**
      * Adds ascendant annotations for check in case the type is annotated on
      * method/parameter/property level.
@@ -128,18 +114,33 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             if (parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
                         ((JacksonPropertyModel) parent.getSource()).getType()
-                                .getAnnotationsStream());
+                                .getAnnotations().stream());
             }
 
             if (parent instanceof MethodNode
                     || parent instanceof MethodParameterNode
                     || parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
-                        ((AnnotatedModel) parent.getSource())
-                                .getAnnotationsStream());
+                        ((AnnotatedModel) parent.getSource()).getAnnotations()
+                                .stream());
             }
         }
 
         return annotations;
+    }
+
+    private Optional<PackageInfoModel> findClosestPackage(
+            NodePath<?> nodePath) {
+        return nodePath.stream().map(NodePath::getNode)
+                .filter(node -> node.getSource() instanceof ClassInfoModel)
+                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
+                .map(ClassInfoModel::getPackage);
+    }
+
+    private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
+            NodePath<?> nodePath) {
+        return findClosestPackage(nodePath).stream()
+                .map(PackageInfoModel::getAnnotations)
+                .flatMap(Collection::stream);
     }
 }
