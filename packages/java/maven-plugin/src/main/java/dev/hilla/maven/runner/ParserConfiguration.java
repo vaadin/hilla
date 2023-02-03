@@ -1,4 +1,4 @@
-package dev.hilla.maven;
+package dev.hilla.maven.runner;
 
 import java.util.Collection;
 import java.util.HashSet;

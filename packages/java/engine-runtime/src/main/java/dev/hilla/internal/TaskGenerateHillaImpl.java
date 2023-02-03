@@ -1,8 +1,17 @@
 package dev.hilla.internal;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+
+import dev.hilla.maven.runner.GeneratorUnavailableException;
+import dev.hilla.maven.runner.PluginConfiguration;
+import dev.hilla.maven.runner.PluginException;
+import dev.hilla.maven.runner.PluginRunner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -26,17 +35,53 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
         MAVEN_COMMAND = IS_WINDOWS ? "mvn.cmd" : "mvn";
     }
 
+    private static final Logger logger = LoggerFactory
+            .getLogger(TaskGenerateHillaImpl.class);
+
     private File projectDirectory;
+    private String buildDirectoryName;
 
     @Override
     public void configure(File projectDirectory, String buildDirectoryName) {
         this.projectDirectory = projectDirectory;
+        this.buildDirectoryName = buildDirectoryName;
     }
 
     @Override
     public void execute() throws ExecutionFailedException {
-        var command = prepareCommand();
-        runCodeGeneration(command);
+        try {
+            // the configure method should be called before execute
+            if (projectDirectory == null) {
+                throw new ExecutionFailedException("Project directory not set");
+            }
+
+            PluginConfiguration config = null;
+
+            if (buildDirectoryName != null) {
+                var buildDir = new File(projectDirectory, buildDirectoryName);
+
+                try {
+                    config = PluginConfiguration.load(buildDir);
+                } catch (IOException e) {
+                    logger.warn(
+                            "Hilla Maven Plugin configuration found, but not read correctly",
+                            e);
+                }
+            }
+
+            if (config == null) {
+                logger.info(
+                        "Hilla Maven Plugin configuration not found: run generator using Maven");
+                var command = prepareCommand();
+                runCodeGeneration(command);
+            } else {
+                logger.info(
+                        "Hilla Maven Plugin configuration found: run generator directly");
+                new PluginRunner(config).execute();
+            }
+        } catch (PluginException | GeneratorUnavailableException e) {
+            throw new ExecutionFailedException(e);
+        }
     }
 
     void runCodeGeneration(List<String> command)
@@ -87,5 +132,4 @@ public class TaskGenerateHillaImpl implements TaskGenerateHilla {
     List<String> prepareGradleCommand() {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
-
 }

@@ -1,9 +1,21 @@
 package dev.hilla.maven;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import dev.hilla.maven.runner.GeneratorConfiguration;
+import dev.hilla.maven.runner.GeneratorUnavailableException;
+import dev.hilla.maven.runner.ParserConfiguration;
+import dev.hilla.maven.runner.PluginConfiguration;
+import dev.hilla.maven.runner.PluginException;
+import dev.hilla.maven.runner.PluginRunner;
+
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -11,91 +23,72 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import dev.hilla.parser.utils.OpenAPIPrinter;
-
-import io.swagger.v3.oas.models.OpenAPI;
-
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EndpointCodeGeneratorMojo extends AbstractMojo {
-    private static final String[] openAPIFileRelativePath = {
-            "generated-resources", "openapi.json" };
 
     @Parameter(readonly = true)
     private final GeneratorConfiguration generator = new GeneratorConfiguration();
+
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
-    @Parameter(defaultValue = "false")
-    private boolean runNpmInstall;
+
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true)
+    private File buildDirectory;
+
+    // If set to false, the plugin will not fail if the generator is not
+    // available. This allows to run this goal just to save the configuration,
+    // without having to run 'npm install' to avoid an error
+    @Parameter(property = "hilla.failOnMissingGenerator", defaultValue = "true")
+    private boolean failOnMissingGenerator;
 
     @Override
     public void execute() throws EndpointCodeGeneratorMojoException {
-        var result = parseJavaCode();
-        saveOpenAPI(result);
-        generateTypeScriptCode(result);
-    }
+        PluginConfiguration conf = new PluginConfiguration();
 
-    private void generateTypeScriptCode(OpenAPI openAPI)
-            throws EndpointCodeGeneratorMojoException {
-        var logger = getLog();
         try {
-            var executor = new GeneratorProcessor(project, logger,
-                    runNpmInstall)
-                            .input(new OpenAPIPrinter().writeAsString(openAPI))
-                            .verbose(logger.isDebugEnabled());
-
-            generator.getOutputDir().ifPresent(executor::outputDir);
-            generator.getPlugins().ifPresent(executor::plugins);
-
-            executor.process();
-        } catch (IOException | InterruptedException | GeneratorException e) {
-            throw new EndpointCodeGeneratorMojoException(
-                    "TS code generation failed", e);
+            conf.setClassPath(Stream
+                    .of(project.getCompileClasspathElements(),
+                            project.getRuntimeClasspathElements())
+                    .flatMap(Collection::stream).collect(Collectors.toSet()));
+        } catch (DependencyResolutionRequiredException e) {
+            throw new EndpointCodeGeneratorMojoException("Configuration failed",
+                    e);
         }
-    }
 
-    private void saveOpenAPI(OpenAPI openAPI)
-            throws EndpointCodeGeneratorMojoException {
+        conf.setBaseDir(project.getBasedir().toPath());
+        conf.setGenerator(generator);
+        conf.setParser(parser);
+        var buildDir = project.getBuild().getDirectory();
+        conf.setBuildDir(buildDir);
+
+        // The configuration gathered from the Maven plugin is saved in a file
+        // so that further runs can skip running a separate Maven project just
+        // to get this configuration again
         try {
-            var logger = getLog();
-            var openAPIFile = Paths.get(project.getBuild().getDirectory(),
-                    openAPIFileRelativePath);
-
-            logger.debug("Saving OpenAPI file to " + openAPIFile);
-
-            Files.createDirectories(openAPIFile.getParent());
-
-            Files.write(openAPIFile, new OpenAPIPrinter().pretty()
-                    .writeAsString(openAPI).getBytes());
-
-            logger.debug("OpenAPI file saved");
+            Files.createDirectories(Paths.get(buildDir));
+            conf.store(buildDirectory);
         } catch (IOException e) {
-            throw new EndpointCodeGeneratorMojoException(
-                    "Saving OpenAPI file failed", e);
+            getLog().warn("Maven configuration has not been saved to file", e);
         }
-    }
 
-    private OpenAPI parseJavaCode() throws EndpointCodeGeneratorMojoException {
         try {
-            var executor = new ParserProcessor(project, getLog());
-
-            parser.getClassPath().ifPresent(executor::classPath);
-            parser.getEndpointAnnotation()
-                    .ifPresent(executor::endpointAnnotation);
-            parser.getEndpointExposedAnnotation()
-                    .ifPresent(executor::endpointExposedAnnotation);
-            parser.getPlugins().ifPresent(executor::plugins);
-            parser.getOpenAPIPath().ifPresent(executor::openAPIBase);
-
-            return executor.process();
-        } catch (ParserException e) {
-            throw new EndpointCodeGeneratorMojoException(
-                    "Java code parsing failed", e);
+            new PluginRunner(conf).execute();
+        } catch (PluginException e) {
+            throw new EndpointCodeGeneratorMojoException("Execution failed", e);
+        } catch (GeneratorUnavailableException e) {
+            if (failOnMissingGenerator) {
+                throw new EndpointCodeGeneratorMojoException("Execution failed",
+                        e);
+            } else {
+                getLog().warn(e.getMessage());
+            }
         }
     }
 }

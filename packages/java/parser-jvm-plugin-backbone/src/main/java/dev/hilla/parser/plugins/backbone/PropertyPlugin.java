@@ -1,6 +1,5 @@
 package dev.hilla.parser.plugins.backbone;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
@@ -9,6 +8,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.util.IgnorePropertiesUtil;
 
@@ -17,7 +17,6 @@ import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.PluginConfiguration;
-import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
@@ -25,11 +24,14 @@ import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
 import jakarta.annotation.Nonnull;
 
-public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
+public final class PropertyPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final Comparator<JacksonPropertyModel> sorter = Comparator
             .comparing(JacksonPropertyModel::getName);
-    private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
-            .build().getSerializationConfig();
+    private final SerializationConfig config;
+
+    public PropertyPlugin(@Nonnull ObjectMapper mapper) {
+        this.config = Objects.requireNonNull(mapper).getSerializationConfig();
+    }
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -62,17 +64,6 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
         return nodeDependencies.appendChildNodes(properties);
     }
 
-    @Override
-    public void setConfiguration(PluginConfiguration configuration) {
-        super.setConfiguration(configuration);
-
-        var factory = loadJacksonObjectMapperFactory();
-
-        if (factory != null) {
-            this.serializationConfig = factory.build().getSerializationConfig();
-        }
-    }
-
     private Stream<JacksonPropertyModel> collectProperties(
             @Nonnull ClassInfoModel model) {
         var cls = Objects.requireNonNull(model).get();
@@ -82,44 +73,11 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
                     "Jackson: Only reflection models are supported");
         }
 
-        var description = serializationConfig
-                .introspect(serializationConfig.constructType((Class<?>) cls));
+        var description = config
+                .introspect(config.constructType((Class<?>) cls));
 
         var processor = new PropertyProcessor(description);
         return processor.stream().sorted(sorter);
-    }
-
-    private JacksonObjectMapperFactory loadJacksonObjectMapperFactory() {
-        var config = getConfiguration();
-
-        if (config != null
-                && config.getObjectMapperFactoryClassName() != null) {
-            Class<?> cls;
-
-            try {
-                cls = Class.forName(config.getObjectMapperFactoryClassName());
-            } catch (ClassNotFoundException e) {
-                throw new BackbonePluginException(
-                        "ObjectMapper factory class is not found", e);
-            }
-
-            if (!JacksonObjectMapperFactory.class.isAssignableFrom(cls)) {
-                throw new BackbonePluginException(String.format(
-                        "Class %s does not implement JacksonObjectMapperFactory interface",
-                        cls.getName()));
-            }
-
-            try {
-                return (JacksonObjectMapperFactory) cls.getDeclaredConstructor()
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException
-                    | InvocationTargetException | NoSuchMethodException e) {
-                throw new BackbonePluginException(
-                        "Cannot instantiate ObjectMapper factory", e);
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -140,8 +98,7 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
             properties = filterPropertiesWithIgnoredTypes(properties);
 
             // Remove ones without matching mutator (if it is configured).
-            if (serializationConfig
-                    .isEnabled(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS)) {
+            if (config.isEnabled(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS)) {
                 properties = filterSetterlessGetters(properties);
             }
 
@@ -172,19 +129,17 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
         private Stream<JacksonPropertyModel> filterPropertiesWithIgnoredTypes(
                 Stream<JacksonPropertyModel> properties) {
             var ignores = new HashMap<Class<?>, Boolean>();
-            var introspector = serializationConfig.getAnnotationIntrospector();
+            var introspector = config.getAnnotationIntrospector();
 
             return properties.filter(property -> {
                 var type = property.get().getRawPrimaryType();
                 var result = ignores.get(type);
 
                 if (result == null) {
-                    result = serializationConfig.getConfigOverride(type)
-                            .getIsIgnoredType();
+                    result = config.getConfigOverride(type).getIsIgnoredType();
 
                     if (result == null) {
-                        var classInfo = serializationConfig
-                                .introspectClassAnnotations(type)
+                        var classInfo = config.introspectClassAnnotations(type)
                                 .getClassInfo();
                         result = introspector.isIgnorableType(classInfo);
 
@@ -218,14 +173,14 @@ public final class PropertyPlugin extends AbstractPlugin<BackbonePluginConfig> {
         }
 
         private Set<String> findIgnored() {
-            var ignored = serializationConfig.getDefaultPropertyIgnorals(
+            var ignored = config.getDefaultPropertyIgnorals(
                     description.getBeanClass(), description.getClassInfo());
             return ignored == null ? null
                     : ignored.findIgnoredForSerialization();
         }
 
         private Set<String> findIncluded() {
-            var included = serializationConfig.getDefaultPropertyInclusions(
+            var included = config.getDefaultPropertyInclusions(
                     description.getBeanClass(), description.getClassInfo());
             return included == null ? null : included.getIncluded();
         }
