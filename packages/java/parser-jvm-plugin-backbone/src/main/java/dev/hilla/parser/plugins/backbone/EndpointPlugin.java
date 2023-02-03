@@ -12,7 +12,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
@@ -20,7 +19,8 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 
 import io.swagger.v3.oas.models.tags.Tag;
 
-public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EndpointPlugin
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(

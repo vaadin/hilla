@@ -1,13 +1,20 @@
 package dev.hilla;
 
-import jakarta.annotation.security.DenyAll;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -18,17 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.hilla.auth.CsrfChecker;
-import dev.hilla.auth.EndpointAccessChecker;
-import dev.hilla.exception.EndpointException;
-import dev.hilla.exception.EndpointValidationException;
-import dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -45,6 +41,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
@@ -53,23 +54,24 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.shared.ApplicationConstants;
+
+import dev.hilla.auth.CsrfChecker;
+import dev.hilla.auth.EndpointAccessChecker;
+import dev.hilla.exception.EndpointException;
+import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.generator.endpoints.iterableendpoint.IterableEndpoint;
+import dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint;
+import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
 import dev.hilla.testendpoint.BridgeMethodTestEndpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public class EndpointControllerTest {
     private static final TestClass TEST_ENDPOINT = new TestClass();
@@ -220,7 +222,8 @@ public class EndpointControllerTest {
         exception.expectMessage(expectedCheckerMessage);
 
         createVaadinController(endpointWithIllegalName,
-                mock(ObjectMapper.class), null, nameChecker, null, null);
+                mock(JacksonObjectMapperFactory.class), null, nameChecker, null,
+                null);
     }
 
     @Test
@@ -263,10 +266,10 @@ public class EndpointControllerTest {
                 ExplicitNullableTypeChecker.class);
 
         ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT,
-                new ObjectMapper(), restrictingCheckerMock, nameCheckerMock,
-                explicitNullableTypeCheckerMock, null).serveEndpoint(
-                        TEST_ENDPOINT_NAME, TEST_METHOD.getName(), null,
-                        requestMock);
+                new JacksonObjectMapperFactory.Json(), restrictingCheckerMock,
+                nameCheckerMock, explicitNullableTypeCheckerMock, null)
+                        .serveEndpoint(TEST_ENDPOINT_NAME,
+                                TEST_METHOD.getName(), null, requestMock);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         String responseBody = response.getBody();
@@ -808,46 +811,6 @@ public class EndpointControllerTest {
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
                 .getBean(Jackson2ObjectMapperBuilder.class);
-        verify(contextMock, times(1)).getBean(JacksonProperties.class);
-        verify(mockOwnObjectMapper, times(1)).setVisibility(
-                PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-    }
-
-    @Test
-    public void should_NotOverrideVisibility_When_JacksonPropertiesProvideVisibility() {
-        ApplicationContext contextMock = mock(ApplicationContext.class);
-        ObjectMapper mockDefaultObjectMapper = mock(ObjectMapper.class);
-        ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
-        JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
-        when(contextMock.getBean(ObjectMapper.class))
-                .thenReturn(mockDefaultObjectMapper);
-        when(contextMock.getBean(JacksonProperties.class))
-                .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
-        when(mockJacksonProperties.getVisibility())
-                .thenReturn(Collections.singletonMap(PropertyAccessor.ALL,
-                        JsonAutoDetect.Visibility.PUBLIC_ONLY));
-        EndpointRegistry registry = new EndpointRegistry(
-                mock(EndpointNameChecker.class));
-        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class),
-                mock(ServletContext.class), registry);
-        new EndpointController(contextMock, registry, invoker, null);
-
-        verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
-        verify(mockDefaultObjectMapper, never()).setVisibility(
-                PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        verify(mockOwnObjectMapper, never()).setVisibility(PropertyAccessor.ALL,
-                JsonAutoDetect.Visibility.ANY);
-        verify(contextMock, times(1)).getBean(JacksonProperties.class);
     }
 
     @Test
@@ -1206,8 +1169,8 @@ public class EndpointControllerTest {
     }
 
     private <T> EndpointController createVaadinController(T endpoint,
-            ObjectMapper vaadinEndpointMapper) {
-        return createVaadinController(endpoint, vaadinEndpointMapper, null,
+            JacksonObjectMapperFactory endpointMapperFactory) {
+        return createVaadinController(endpoint, endpointMapperFactory, null,
                 null, null, null);
     }
 
@@ -1218,7 +1181,7 @@ public class EndpointControllerTest {
     }
 
     private <T> EndpointController createVaadinController(T endpoint,
-            ObjectMapper vaadinEndpointMapper,
+            JacksonObjectMapperFactory endpointMapperFactory,
             EndpointAccessChecker accessChecker,
             EndpointNameChecker endpointNameChecker,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
@@ -1228,8 +1191,8 @@ public class EndpointControllerTest {
         Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
                 .thenReturn(lookup);
 
-        if (vaadinEndpointMapper == null) {
-            vaadinEndpointMapper = new ObjectMapper();
+        if (endpointMapperFactory == null) {
+            endpointMapperFactory = new JacksonObjectMapperFactory.Json();
         }
 
         if (accessChecker == null) {
@@ -1260,7 +1223,7 @@ public class EndpointControllerTest {
 
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(mockApplicationContext,
-                        vaadinEndpointMapper, explicitNullableTypeChecker,
+                        endpointMapperFactory, explicitNullableTypeChecker,
                         mock(ServletContext.class), registry));
 
         Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
@@ -1280,10 +1243,10 @@ public class EndpointControllerTest {
     private EndpointController createVaadinControllerWithApplicationContext(
             ApplicationContext applicationContext) {
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
-        EndpointController fusionController = controllerMockBuilder
-                .withObjectMapper(new ObjectMapper())
+        EndpointController hillaController = controllerMockBuilder
+                .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
                 .withApplicationContext(applicationContext).build();
-        return fusionController;
+        return hillaController;
     }
 
     private Method createEndpointMethodMockThatThrows(Object argument,

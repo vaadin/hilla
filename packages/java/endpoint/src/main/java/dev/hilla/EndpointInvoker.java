@@ -19,16 +19,12 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.NonNullApi;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +43,7 @@ import dev.hilla.endpointransfermapper.EndpointTransferMapper;
 import dev.hilla.exception.EndpointException;
 import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.exception.EndpointValidationException.ValidationErrorData;
+import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
@@ -62,20 +59,16 @@ import jakarta.validation.Validator;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@Component
 public class EndpointInvoker {
 
-    private final ObjectMapper vaadinEndpointMapper;
+    private static final EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
+    private final ApplicationContext applicationContext;
+    private final ObjectMapper endpointMapper;
+    private final EndpointRegistry endpointRegistry;
+    private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
+    private final ServletContext servletContext;
     private final Validator validator = Validation
             .buildDefaultValidatorFactory().getValidator();
-    private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
-    private final ApplicationContext applicationContext;
-
-    EndpointRegistry endpointRegistry;
-
-    private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
-
-    private ServletContext servletContext;
 
     /**
      * Creates an instance of this bean.
@@ -83,11 +76,11 @@ public class EndpointInvoker {
      * @param applicationContext
      *            Spring context to extract beans annotated with
      *            {@link Endpoint} from
-     * @param vaadinEndpointMapper
-     *            optional bean to override the default {@link ObjectMapper}
-     *            that is used for serializing and deserializing request and
-     *            response bodies Use
-     *            {@link EndpointController#VAADIN_ENDPOINT_MAPPER_BEAN_QUALIFIER}
+     * @param endpointMapperFactory
+     *            optional factory bean to override the default
+     *            {@link JacksonObjectMapperFactory} that is used for
+     *            serializing and deserializing request and response bodies Use
+     *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
      * @param explicitNullableTypeChecker
      *            the method parameter and return value type checker to verify
@@ -98,20 +91,47 @@ public class EndpointInvoker {
      *            the registry used to store endpoint information
      */
     public EndpointInvoker(ApplicationContext applicationContext,
-            ObjectMapper vaadinEndpointMapper,
+            JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
-        this.vaadinEndpointMapper = vaadinEndpointMapper != null
-                ? vaadinEndpointMapper
-                : createVaadinConnectObjectMapper(applicationContext);
+        this.endpointMapper = endpointMapperFactory != null
+                ? endpointMapperFactory.build()
+                : createDefaultEndpointMapper(applicationContext);
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
     }
 
+    private static ObjectMapper createDefaultEndpointMapper(
+            ApplicationContext applicationContext) {
+        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
+        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
+                .configure(endpointMapper);
+
+        return endpointMapper;
+    }
+
     private static Logger getLogger() {
         return LoggerFactory.getLogger(EndpointInvoker.class);
+    }
+
+    /**
+     * Gets the return type of the given method.
+     *
+     * @param endpointName
+     *            the name of the endpoint
+     * @param methodName
+     *            the name of the method
+     */
+    public Class<?> getReturnType(String endpointName, String methodName) {
+        Method method = getMethod(endpointName, methodName);
+        if (method == null) {
+            getLogger().debug("Method '{}' not found in endpoint '{}'",
+                    methodName, endpointName);
+            return null;
+        }
+        return method.getReturnType();
     }
 
     /**
@@ -165,22 +185,182 @@ public class EndpointInvoker {
 
     }
 
-    private ObjectMapper createVaadinConnectObjectMapper(
-            ApplicationContext context) {
-        Jackson2ObjectMapperBuilder builder = context
-                .getBean(Jackson2ObjectMapperBuilder.class);
-        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
-        JacksonProperties jacksonProperties = context
-                .getBean(JacksonProperties.class);
-        if (jacksonProperties.getVisibility().isEmpty()) {
-            objectMapper.setVisibility(PropertyAccessor.ALL,
-                    JsonAutoDetect.Visibility.ANY);
+    String createResponseErrorObject(String errorMessage) {
+        ObjectNode objectNode = endpointMapper.createObjectNode();
+        objectNode.put(EndpointException.ERROR_MESSAGE_FIELD, errorMessage);
+        return objectNode.toString();
+    }
+
+    String createResponseErrorObject(Map<String, Object> serializationData)
+            throws JsonProcessingException {
+        return endpointMapper.writeValueAsString(serializationData);
+    }
+
+    EndpointAccessChecker getAccessChecker() {
+        VaadinServletContext vaadinServletContext = new VaadinServletContext(
+                servletContext);
+        VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext
+                .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
+                    EndpointAccessChecker accessChecker = applicationContext
+                            .getBean(EndpointAccessChecker.class);
+                    return new VaadinConnectAccessCheckerWrapper(accessChecker);
+                });
+        return wrapper.accessChecker;
+    }
+
+    String writeValueAsString(Object returnValue)
+            throws JsonProcessingException {
+        return endpointMapper.writeValueAsString(returnValue);
+    }
+
+    private List<ValidationErrorData> createBeanValidationErrors(
+            Collection<ConstraintViolation<Object>> beanConstraintViolations) {
+        return beanConstraintViolations.stream().map(
+                constraintViolation -> new ValidationErrorData(String.format(
+                        "Object of type '%s' has invalid property '%s' with value '%s', validation error: '%s'",
+                        constraintViolation.getRootBeanClass(),
+                        constraintViolation.getPropertyPath().toString(),
+                        constraintViolation.getInvalidValue(),
+                        constraintViolation.getMessage()),
+                        constraintViolation.getPropertyPath().toString()))
+                .collect(Collectors.toList());
+    }
+
+    private List<ValidationErrorData> createMethodValidationErrors(
+            Collection<ConstraintViolation<Object>> methodConstraintViolations) {
+        return methodConstraintViolations.stream().map(constraintViolation -> {
+            String parameterPath = constraintViolation.getPropertyPath()
+                    .toString();
+            return new ValidationErrorData(String.format(
+                    "Method '%s' of the object '%s' received invalid parameter '%s' with value '%s', validation error: '%s'",
+                    parameterPath.split("\\.")[0],
+                    constraintViolation.getRootBeanClass(), parameterPath,
+                    constraintViolation.getInvalidValue(),
+                    constraintViolation.getMessage()), parameterPath);
+        }).collect(Collectors.toList());
+    }
+
+    private EndpointValidationException getInvalidEndpointParametersException(
+            String methodName, String endpointName,
+            Map<String, String> deserializationErrors,
+            Set<ConstraintViolation<Object>> constraintViolations) {
+        List<ValidationErrorData> validationErrorData = new ArrayList<>(
+                deserializationErrors.size() + constraintViolations.size());
+
+        for (Map.Entry<String, String> deserializationError : deserializationErrors
+                .entrySet()) {
+            String message = String.format(
+                    "Unable to deserialize an endpoint method parameter into type '%s'",
+                    deserializationError.getValue());
+            validationErrorData.add(new ValidationErrorData(message,
+                    deserializationError.getKey()));
         }
-        objectMapper.registerModule(new ByteArrayModule());
 
-        getLogger().debug("Using default Hilla ObjectMapper");
+        validationErrorData
+                .addAll(createBeanValidationErrors(constraintViolations));
 
-        return objectMapper;
+        String message = String.format(
+                "Validation error in endpoint '%s' method '%s'", endpointName,
+                methodName);
+        return new EndpointValidationException(message, validationErrorData);
+    }
+
+    private Type[] getJavaParameters(Method methodToInvoke, Type classType) {
+        return Stream.of(GenericTypeReflector
+                .getExactParameterTypes(methodToInvoke, classType))
+                .toArray(Type[]::new);
+    }
+
+    private Method getMethod(String endpointName, String methodName) {
+        VaadinEndpointData endpointData = endpointRegistry.get(endpointName);
+        if (endpointData == null) {
+            getLogger().debug("Endpoint '{}' not found", endpointName);
+            return null;
+        }
+        return endpointData.getMethod(methodName).orElse(null);
+    }
+
+    private Map<String, JsonNode> getRequestParameters(ObjectNode body) {
+        Map<String, JsonNode> parametersData = new LinkedHashMap<>();
+        if (body != null) {
+            body.fields().forEachRemaining(entry -> parametersData
+                    .put(entry.getKey(), entry.getValue()));
+        }
+        return parametersData;
+    }
+
+    private Class<?> getTransferType(Type type) {
+        if (!(type instanceof Class)) {
+            return null;
+        }
+
+        return endpointTransferMapper.getTransferType((Class) type);
+    }
+
+    private Object[] getVaadinEndpointParameters(
+            Map<String, JsonNode> requestParameters, Type[] javaParameters,
+            String methodName, String endpointName) {
+        Object[] endpointParameters = new Object[javaParameters.length];
+        String[] parameterNames = new String[requestParameters.size()];
+        requestParameters.keySet().toArray(parameterNames);
+        Map<String, String> errorParams = new HashMap<>();
+        Set<ConstraintViolation<Object>> constraintViolations = new LinkedHashSet<>();
+
+        for (int i = 0; i < javaParameters.length; i++) {
+            Type parameterType = javaParameters[i];
+            Type incomingType = parameterType;
+            try {
+                Class<?> mappedType = getTransferType(parameterType);
+                if (mappedType != null) {
+                    incomingType = mappedType;
+                }
+                Object parameter = endpointMapper
+                        .readerFor(endpointMapper.getTypeFactory()
+                                .constructType(incomingType))
+                        .readValue(requestParameters.get(parameterNames[i]));
+                if (mappedType != null) {
+                    parameter = endpointTransferMapper.toEndpointType(parameter,
+                            (Class) parameterType);
+                }
+                endpointParameters[i] = parameter;
+
+                if (parameter != null) {
+                    constraintViolations.addAll(validator.validate(parameter));
+                }
+            } catch (IOException e) {
+                String typeName = parameterType.getTypeName();
+                getLogger().error(
+                        "Unable to deserialize an endpoint '{}' method '{}' "
+                                + "parameter '{}' with type '{}'",
+                        endpointName, methodName, parameterNames[i], typeName,
+                        e);
+                errorParams.put(parameterNames[i], typeName);
+            }
+        }
+
+        if (errorParams.isEmpty() && constraintViolations.isEmpty()) {
+            return endpointParameters;
+        }
+        throw getInvalidEndpointParametersException(methodName, endpointName,
+                errorParams, constraintViolations);
+    }
+
+    private ResponseEntity<String> handleMethodExecutionError(
+            String endpointName, String methodName, InvocationTargetException e)
+            throws EndpointInternalException {
+        if (EndpointException.class.isAssignableFrom(e.getCause().getClass())) {
+            EndpointException endpointException = ((EndpointException) e
+                    .getCause());
+            getLogger().debug("Endpoint '{}' method '{}' aborted the execution",
+                    endpointName, methodName, endpointException);
+            throw endpointException;
+        } else {
+            String errorMessage = String.format(
+                    "Endpoint '%s' method '%s' execution failure", endpointName,
+                    methodName);
+            getLogger().error(errorMessage, e);
+            throw new EndpointInternalException(errorMessage);
+        }
     }
 
     private Object invokeVaadinEndpointMethod(String endpointName,
@@ -282,166 +462,9 @@ public class EndpointInvoker {
                         .equals(NonNullApi.class.getSimpleName()));
     }
 
-    private Type[] getJavaParameters(Method methodToInvoke, Type classType) {
-        return Stream.of(GenericTypeReflector
-                .getExactParameterTypes(methodToInvoke, classType))
-                .toArray(Type[]::new);
-    }
-
-    private ResponseEntity<String> handleMethodExecutionError(
-            String endpointName, String methodName, InvocationTargetException e)
-            throws EndpointInternalException {
-        if (EndpointException.class.isAssignableFrom(e.getCause().getClass())) {
-            EndpointException endpointException = ((EndpointException) e
-                    .getCause());
-            getLogger().debug("Endpoint '{}' method '{}' aborted the execution",
-                    endpointName, methodName, endpointException);
-            throw endpointException;
-        } else {
-            String errorMessage = String.format(
-                    "Endpoint '%s' method '%s' execution failure", endpointName,
-                    methodName);
-            getLogger().error(errorMessage, e);
-            throw new EndpointInternalException(errorMessage);
-        }
-    }
-
-    String createResponseErrorObject(String errorMessage) {
-        ObjectNode objectNode = vaadinEndpointMapper.createObjectNode();
-        objectNode.put(EndpointException.ERROR_MESSAGE_FIELD, errorMessage);
-        return objectNode.toString();
-    }
-
-    String createResponseErrorObject(Map<String, Object> serializationData)
-            throws JsonProcessingException {
-        return vaadinEndpointMapper.writeValueAsString(serializationData);
-    }
-
-    String writeValueAsString(Object returnValue)
-            throws JsonProcessingException {
-        return vaadinEndpointMapper.writeValueAsString(returnValue);
-    }
-
     private String listMethodParameterTypes(Type[] javaParameters) {
         return Stream.of(javaParameters).map(Type::getTypeName)
                 .collect(Collectors.joining(", "));
-    }
-
-    private Object[] getVaadinEndpointParameters(
-            Map<String, JsonNode> requestParameters, Type[] javaParameters,
-            String methodName, String endpointName) {
-        Object[] endpointParameters = new Object[javaParameters.length];
-        String[] parameterNames = new String[requestParameters.size()];
-        requestParameters.keySet().toArray(parameterNames);
-        Map<String, String> errorParams = new HashMap<>();
-        Set<ConstraintViolation<Object>> constraintViolations = new LinkedHashSet<>();
-
-        for (int i = 0; i < javaParameters.length; i++) {
-            Type parameterType = javaParameters[i];
-            Type incomingType = parameterType;
-            try {
-                Class<?> mappedType = getTransferType(parameterType);
-                if (mappedType != null) {
-                    incomingType = mappedType;
-                }
-                Object parameter = vaadinEndpointMapper
-                        .readerFor(vaadinEndpointMapper.getTypeFactory()
-                                .constructType(incomingType))
-                        .readValue(requestParameters.get(parameterNames[i]));
-                if (mappedType != null) {
-                    parameter = endpointTransferMapper.toEndpointType(parameter,
-                            (Class) parameterType);
-                }
-                endpointParameters[i] = parameter;
-
-                if (parameter != null) {
-                    constraintViolations.addAll(validator.validate(parameter));
-                }
-            } catch (IOException e) {
-                String typeName = parameterType.getTypeName();
-                getLogger().error(
-                        "Unable to deserialize an endpoint '{}' method '{}' "
-                                + "parameter '{}' with type '{}'",
-                        endpointName, methodName, parameterNames[i], typeName,
-                        e);
-                errorParams.put(parameterNames[i], typeName);
-            }
-        }
-
-        if (errorParams.isEmpty() && constraintViolations.isEmpty()) {
-            return endpointParameters;
-        }
-        throw getInvalidEndpointParametersException(methodName, endpointName,
-                errorParams, constraintViolations);
-    }
-
-    private Class<?> getTransferType(Type type) {
-        if (!(type instanceof Class)) {
-            return null;
-        }
-
-        return endpointTransferMapper.getTransferType((Class) type);
-    }
-
-    private EndpointValidationException getInvalidEndpointParametersException(
-            String methodName, String endpointName,
-            Map<String, String> deserializationErrors,
-            Set<ConstraintViolation<Object>> constraintViolations) {
-        List<ValidationErrorData> validationErrorData = new ArrayList<>(
-                deserializationErrors.size() + constraintViolations.size());
-
-        for (Map.Entry<String, String> deserializationError : deserializationErrors
-                .entrySet()) {
-            String message = String.format(
-                    "Unable to deserialize an endpoint method parameter into type '%s'",
-                    deserializationError.getValue());
-            validationErrorData.add(new ValidationErrorData(message,
-                    deserializationError.getKey()));
-        }
-
-        validationErrorData
-                .addAll(createBeanValidationErrors(constraintViolations));
-
-        String message = String.format(
-                "Validation error in endpoint '%s' method '%s'", endpointName,
-                methodName);
-        return new EndpointValidationException(message, validationErrorData);
-    }
-
-    private List<ValidationErrorData> createBeanValidationErrors(
-            Collection<ConstraintViolation<Object>> beanConstraintViolations) {
-        return beanConstraintViolations.stream().map(
-                constraintViolation -> new ValidationErrorData(String.format(
-                        "Object of type '%s' has invalid property '%s' with value '%s', validation error: '%s'",
-                        constraintViolation.getRootBeanClass(),
-                        constraintViolation.getPropertyPath().toString(),
-                        constraintViolation.getInvalidValue(),
-                        constraintViolation.getMessage()),
-                        constraintViolation.getPropertyPath().toString()))
-                .collect(Collectors.toList());
-    }
-
-    private List<ValidationErrorData> createMethodValidationErrors(
-            Collection<ConstraintViolation<Object>> methodConstraintViolations) {
-        return methodConstraintViolations.stream().map(constraintViolation -> {
-            String parameterPath = constraintViolation.getPropertyPath()
-                    .toString();
-            return new ValidationErrorData(String.format(
-                    "Method '%s' of the object '%s' received invalid parameter '%s' with value '%s', validation error: '%s'",
-                    parameterPath.split("\\.")[0],
-                    constraintViolation.getRootBeanClass(), parameterPath,
-                    constraintViolation.getInvalidValue(),
-                    constraintViolation.getMessage()), parameterPath);
-        }).collect(Collectors.toList());
-    }
-
-    private Map<String, JsonNode> getRequestParameters(ObjectNode body) {
-        Map<String, JsonNode> parametersData = new LinkedHashMap<>();
-        if (body != null) {
-            body.fields().forEachRemaining(entry -> parametersData
-                    .put(entry.getKey(), entry.getValue()));
-        }
-        return parametersData;
     }
 
     private static class VaadinConnectAccessCheckerWrapper {
@@ -451,45 +474,6 @@ public class EndpointInvoker {
                 EndpointAccessChecker checker) {
             accessChecker = checker;
         }
-    }
-
-    EndpointAccessChecker getAccessChecker() {
-        VaadinServletContext vaadinServletContext = new VaadinServletContext(
-                servletContext);
-        VaadinConnectAccessCheckerWrapper wrapper = vaadinServletContext
-                .getAttribute(VaadinConnectAccessCheckerWrapper.class, () -> {
-                    EndpointAccessChecker accessChecker = applicationContext
-                            .getBean(EndpointAccessChecker.class);
-                    return new VaadinConnectAccessCheckerWrapper(accessChecker);
-                });
-        return wrapper.accessChecker;
-    }
-
-    private Method getMethod(String endpointName, String methodName) {
-        VaadinEndpointData endpointData = endpointRegistry.get(endpointName);
-        if (endpointData == null) {
-            getLogger().debug("Endpoint '{}' not found", endpointName);
-            return null;
-        }
-        return endpointData.getMethod(methodName).orElse(null);
-    }
-
-    /**
-     * Gets the return type of the given method.
-     *
-     * @param endpointName
-     *            the name of the endpoint
-     * @param methodName
-     *            the name of the method
-     */
-    public Class<?> getReturnType(String endpointName, String methodName) {
-        Method method = getMethod(endpointName, methodName);
-        if (method == null) {
-            getLogger().debug("Method '{}' not found in endpoint '{}'",
-                    methodName, endpointName);
-            return null;
-        }
-        return method.getReturnType();
     }
 
 }

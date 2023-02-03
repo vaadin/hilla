@@ -21,6 +21,7 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
+import dev.hilla.parser.models.SpecializedModel;
 import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
@@ -51,29 +52,41 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (!(nodePath.getNode().getTarget() instanceof Schema)) {
-            return;
+        var node = nodePath.getNode();
+
+        if (node.getTarget() instanceof Schema) {
+            var schema = (Schema<?>) node.getTarget();
+            var nodeSource = node.getSource();
+
+            if ((nodeSource instanceof SpecializedModel)
+                    && ((SpecializedModel) nodeSource).isOptional()) {
+                // Optional is always nullable, regardless of annotations
+                schema.setNullable(true);
+            } else {
+                // Apply annotations from package (NonNullApi)
+                var annotations = getPackageAnnotationsStream(nodePath);
+
+                // Apply from current node, if source is annotated
+                if (nodeSource instanceof AnnotatedModel) {
+                    annotations = Stream.concat(annotations,
+                            ((AnnotatedModel) nodeSource).getAnnotations()
+                                    .stream());
+                }
+
+                annotations = considerAscendantAnnotations(annotations,
+                        nodePath);
+
+                annotations
+                        .map(annotation -> annotationsMap
+                                .get(annotation.getName()))
+                        .filter(Objects::nonNull)
+                        .max(Comparator
+                                .comparingInt(AnnotationMatcher::getScore))
+                        .map(AnnotationMatcher::doesMakeNullable)
+                        .ifPresent(nullable -> schema
+                                .setNullable(nullable ? true : null));
+            }
         }
-
-        var schema = (Schema<?>) nodePath.getNode().getTarget();
-
-        // Apply annotations from package (NonNullApi)
-        var annotations = getPackageAnnotationsStream(nodePath);
-
-        // Apply from current node, if source is annotated
-        if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) nodePath.getNode().getSource())
-                            .getAnnotations().stream());
-        }
-
-        annotations = considerAscendantAnnotations(annotations, nodePath);
-
-        annotations.map(annotation -> annotationsMap.get(annotation.getName()))
-                .filter(Objects::nonNull)
-                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
-                .map(AnnotationMatcher::doesMakeNullable).ifPresent(
-                        nullable -> schema.setNullable(nullable ? true : null));
     }
 
     @Override
@@ -93,6 +106,21 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         this.annotationsMap = mapByName(
                 new NonnullPluginConfig.Processor(getConfiguration())
                         .process());
+    }
+
+    private Optional<PackageInfoModel> findClosestPackage(
+            NodePath<?> nodePath) {
+        return nodePath.stream().map(NodePath::getNode)
+                .filter(node -> node.getSource() instanceof ClassInfoModel)
+                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
+                .map(ClassInfoModel::getPackage);
+    }
+
+    private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
+            NodePath<?> nodePath) {
+        return findClosestPackage(nodePath).stream()
+                .map(PackageInfoModel::getAnnotations)
+                .flatMap(Collection::stream);
     }
 
     /**
@@ -127,20 +155,5 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         }
 
         return annotations;
-    }
-
-    private Optional<PackageInfoModel> findClosestPackage(
-            NodePath<?> nodePath) {
-        return nodePath.stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
-                .map(ClassInfoModel::getPackage);
-    }
-
-    private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
-            NodePath<?> nodePath) {
-        return findClosestPackage(nodePath).stream()
-                .map(PackageInfoModel::getAnnotations)
-                .flatMap(Collection::stream);
     }
 }
