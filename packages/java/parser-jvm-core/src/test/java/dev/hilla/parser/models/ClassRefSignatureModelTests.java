@@ -165,8 +165,7 @@ public class ClassRefSignatureModelTests {
                 .of(ctx.getCompleteReflectionOrigin(ModelProvider.fieldName));
         var expected = List.of(TypeArgumentModel
                 .of(matches.getTypeArgument("intTypeArgument")));
-        var actual = model.getTypeArgumentsStream()
-                .collect(Collectors.toList());
+        var actual = model.getTypeArguments();
 
         assertEquals(expected, actual);
     }

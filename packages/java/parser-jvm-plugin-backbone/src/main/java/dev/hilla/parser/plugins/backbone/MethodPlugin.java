@@ -71,7 +71,7 @@ public final class MethodPlugin
         if (node instanceof EndpointNode
                 || node instanceof EndpointExposedNode) {
             var endpointCls = (ClassInfoModel) node.getSource();
-            var methodNodes = endpointCls.getMethodsStream()
+            var methodNodes = endpointCls.getMethods().stream()
                     .filter(MethodInfoModel::isPublic)
                     .<Node<?, ?>> map(MethodNode::of);
             return nodeDependencies.appendChildNodes(methodNodes);

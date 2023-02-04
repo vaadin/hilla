@@ -56,7 +56,8 @@ public class TypeArgumentModelTests {
     public void should_GetAnnotations(TypeArgumentModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
-                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                model.getAnnotations().stream()
+                        .map(AnnotationInfoModel::getName)
                         .collect(Collectors.toList()));
     }
 
