@@ -1,0 +1,15 @@
+{
+  "baseDir": "",
+  "classPath": [],
+  "generator": {
+    "plugins": null
+  },
+  "parser": {
+    "classPath": null,
+    "endpointAnnotation": null,
+    "endpointExposedAnnotation": null,
+    "openAPIPath": null,
+    "plugins": null
+  },
+  "buildDir": ""
+}

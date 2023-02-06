@@ -42,6 +42,26 @@ public final class ParserConfiguration {
         return Optional.ofNullable(plugins);
     }
 
+    public void setClassPath(ParserClassPathConfiguration classPath) {
+        this.classPath = classPath;
+    }
+
+    public void setEndpointAnnotation(String endpointAnnotation) {
+        this.endpointAnnotation = endpointAnnotation;
+    }
+
+    public void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
+        this.endpointExposedAnnotation = endpointExposedAnnotation;
+    }
+
+    public void setOpenAPIPath(String openAPIPath) {
+        this.openAPIPath = openAPIPath;
+    }
+
+    public void setPlugins(Plugins plugins) {
+        this.plugins = plugins;
+    }
+
     public static class Plugin {
         private PluginConfiguration configuration;
         private String name;

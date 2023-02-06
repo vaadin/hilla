@@ -72,7 +72,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
             processor.input(readOpenApi()).process();
         } catch (IOException | InterruptedException | GeneratorUnavailableException e) {
             throw new ExecutionFailedException(
-                "Failed to TypeScript generator", e);
+                "Failed to run TypeScript endpoint generator", e);
         }
     }
 }
