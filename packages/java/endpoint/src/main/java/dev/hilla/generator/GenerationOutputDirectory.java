@@ -84,7 +84,8 @@ class GenerationOutputDirectory {
                 FrontendUtils.WEB_COMPONENT_BOOTSTRAP_FILE_NAME,
                 FrontendUtils.VITE_DEVMODE_TS, FrontendUtils.INDEX_TS,
                 FrontendUtils.INDEX_JS, FrontendUtils.THEME_IMPORTS_NAME,
-                FrontendUtils.THEME_IMPORTS_D_TS_NAME);
+                FrontendUtils.THEME_IMPORTS_D_TS_NAME,
+                FrontendUtils.FEATURE_FLAGS_FILE_NAME);
         private final Logger logger;
         private Set<File> generatedFiles;
 

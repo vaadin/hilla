@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
 import dev.hilla.parser.utils.PluginException;
+
+import jakarta.annotation.Nonnull;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
         extends AbstractPlugin<C> {
@@ -49,6 +49,13 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
             nodeDependencies = plugin.scan(nodeDependencies);
         }
         return nodeDependencies;
+    }
+
+    @Override
+    public void setConfiguration(PluginConfiguration configuration) {
+        super.setConfiguration(configuration);
+        plugins.iterator().forEachRemaining(
+                plugin -> plugin.setConfiguration(configuration));
     }
 
     @Override

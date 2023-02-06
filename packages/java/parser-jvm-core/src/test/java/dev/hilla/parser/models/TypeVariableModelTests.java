@@ -56,7 +56,8 @@ public class TypeVariableModelTests {
     public void should_GetAnnotations(TypeVariableModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
-                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                model.getAnnotations().stream()
+                        .map(AnnotationInfoModel::getName)
                         .collect(Collectors.toList()));
     }
 

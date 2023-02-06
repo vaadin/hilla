@@ -60,5 +60,10 @@ public abstract class ArraySignatureModel extends AnnotatedAbstractModel
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "ArraySignatureModel[" + get() + "]";
+    }
+
     protected abstract SignatureModel prepareNestedType();
 }

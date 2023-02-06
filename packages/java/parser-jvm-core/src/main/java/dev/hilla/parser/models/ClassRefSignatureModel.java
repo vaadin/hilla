@@ -6,8 +6,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -172,10 +170,6 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         return typeArguments;
     }
 
-    public Stream<TypeArgumentModel> getTypeArgumentsStream() {
-        return getTypeArguments().stream();
-    }
-
     @Override
     public int hashCode() {
         return getName().hashCode() + 7 * getTypeArguments().hashCode()
@@ -284,11 +278,7 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getClassInfo().getSimpleName()
-                + getTypeArgumentsStream().map(Object::toString).collect(
-                        () -> new StringJoiner(", ", "<", ">")
-                                .setEmptyValue(""),
-                        StringJoiner::add, StringJoiner::merge);
+        return "ClassRefSignatureModel[" + get() + "]";
     }
 
     protected abstract List<AnnotationInfoModel> prepareAnnotations();

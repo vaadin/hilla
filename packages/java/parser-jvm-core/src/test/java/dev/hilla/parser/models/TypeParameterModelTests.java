@@ -52,7 +52,8 @@ public class TypeParameterModelTests {
     public void should_GetAnnotations(TypeParameterModel model, ModelKind kind,
             String name) {
         assertEquals(List.of(Sample.Foo.class.getName()),
-                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                model.getAnnotations().stream()
+                        .map(AnnotationInfoModel::getName)
                         .collect(Collectors.toList()));
     }
 
@@ -64,13 +65,13 @@ public class TypeParameterModelTests {
         switch (name) {
         case "RegularTypeParameter":
             assertEquals(List.of(Object.class.getName()),
-                    model.getBoundsStream().map(NamedModel.class::cast)
+                    model.getBounds().stream().map(NamedModel.class::cast)
                             .map(NamedModel::getName)
                             .collect(Collectors.toList()));
             break;
         case "BoundedTypeParameter":
             assertEquals(List.of(Sample.Bound.class.getName()),
-                    model.getBoundsStream().map(NamedModel.class::cast)
+                    model.getBounds().stream().map(NamedModel.class::cast)
                             .map(NamedModel::getName)
                             .collect(Collectors.toList()));
             break;

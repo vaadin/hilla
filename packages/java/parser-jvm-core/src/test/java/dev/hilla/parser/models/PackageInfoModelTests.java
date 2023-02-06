@@ -42,7 +42,8 @@ public class PackageInfoModelTests {
     public void should_ContainAnnotation(PackageInfoModel model,
             ModelKind kind) {
         assertEquals(List.of(Foo.class.getName()),
-                model.getAnnotationsStream().map(AnnotationInfoModel::getName)
+                model.getAnnotations().stream()
+                        .map(AnnotationInfoModel::getName)
                         .collect(Collectors.toList()));
     }
 
@@ -53,7 +54,7 @@ public class PackageInfoModelTests {
     public void should_GetAnnotationsWithClassInfo(PackageInfoModel model,
             ModelKind kind) {
         assertEquals(List.of(ClassInfoModel.of(Foo.class)),
-                model.getAnnotationsStream()
+                model.getAnnotations().stream()
                         .map(AnnotationInfoModel::getClassInfo)
                         .collect(Collectors.toList()));
     }

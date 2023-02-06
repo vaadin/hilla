@@ -19,4 +19,8 @@ package dev.hilla.parser.plugins.backbone.complexhierarchy.models;
 public class ComplexHierarchyParentModel
         extends ComplexHierarchyGrandParentModel {
     private String id;
+
+    public String getId() {
+        return id;
+    }
 }

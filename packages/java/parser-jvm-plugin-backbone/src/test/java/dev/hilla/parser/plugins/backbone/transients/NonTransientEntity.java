@@ -2,7 +2,7 @@ package dev.hilla.parser.plugins.backbone.transients;
 
 public class NonTransientEntity {
     private String entityField;
-    private transient String transientEntityField;
+    private transient String transientWithGetter;
 
     public String getEntityField() {
         return entityField;
@@ -12,11 +12,11 @@ public class NonTransientEntity {
         this.entityField = entityField;
     }
 
-    public String getTransientEntityField() {
-        return transientEntityField;
+    public String getTransientWithGetter() {
+        return transientWithGetter;
     }
 
-    public void setTransientEntityField(String transientEntityField) {
-        this.transientEntityField = transientEntityField;
+    public void setTransientWithGetter(String transientWithGetter) {
+        this.transientWithGetter = transientWithGetter;
     }
 }

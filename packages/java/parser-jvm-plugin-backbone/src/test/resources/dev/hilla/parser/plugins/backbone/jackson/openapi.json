@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Vaadin Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Vaadin Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "JacksonEndpoint"
+    }
+  ],
+  "paths": {
+    "/JacksonEndpoint/getSample": {
+      "post": {
+        "tags": ["JacksonEndpoint"],
+        "operationId": "JacksonEndpoint_getSample_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint$Sample"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint$Sample": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint$SampleParent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "privateProp": {
+                "type": "string",
+                "nullable": true
+              },
+              "privateTransientPropWithGetter": {
+                "type": "string",
+                "nullable": true
+              },
+              "propertyGetterOnly": {
+                "type": "string",
+                "nullable": true
+              },
+              "propertySetterOnly": {
+                "type": "string",
+                "nullable": true
+              },
+              "propertyWithDifferentField": {
+                "type": "string",
+                "nullable": true
+              },
+              "publicProp": {
+                "type": "string",
+                "nullable": true
+              },
+              "renamedPrivateProp0": {
+                "type": "string",
+                "nullable": true
+              },
+              "renamedPublicProp0": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint$SampleParent": {
+        "type": "object",
+        "properties": {
+          "privateParentProperty": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicParentProperty": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

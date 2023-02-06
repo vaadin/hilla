@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import io.github.classgraph.FieldInfo;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
-        implements Model, NamedModel, OwnedModel<ClassInfoModel> {
+        implements ClassMemberModel {
     static final Comparator<FieldInfoModel> FIELD_ORDER = Comparator
             .comparing(FieldInfoModel::getName);
     private ClassInfoModel owner;
@@ -84,6 +84,11 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     public abstract boolean isSynthetic();
 
     public abstract boolean isTransient();
+
+    @Override
+    public String toString() {
+        return "FieldInfoModel[" + get() + "]";
+    }
 
     protected abstract ClassInfoModel prepareOwner();
 

@@ -12,14 +12,14 @@
   ],
   "tags": [
     {
-      "name": "JSONAnnotationsEndpoint"
+      "name": "CustomConfigEndpoint"
     }
   ],
   "paths": {
-    "/JSONAnnotationsEndpoint/getEntity": {
+    "/CustomConfigEndpoint/get": {
       "post": {
-        "tags": ["JSONAnnotationsEndpoint"],
-        "operationId": "JSONAnnotationsEndpoint_getEntity_POST",
+        "tags": ["CustomConfigEndpoint"],
+        "operationId": "CustomConfigEndpoint_get_POST",
         "responses": {
           "200": {
             "description": "",
@@ -29,7 +29,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.json.JSONAnnotationsEndpoint$AnnotatedEntity"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity"
                     }
                   ]
                 }
@@ -42,10 +42,14 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.json.JSONAnnotationsEndpoint$AnnotatedEntity": {
+      "dev.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity": {
         "type": "object",
         "properties": {
-          "normal": {
+          "bar": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "foo": {
             "type": "string",
             "nullable": true
           }

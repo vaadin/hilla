@@ -1,4 +1,4 @@
-package dev.hilla.parser.plugins.backbone.json;
+package dev.hilla.parser.plugins.backbone.config;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -8,18 +8,26 @@ import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
-public class JSONAnnotationsTest {
+public class CustomConfigTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyIgnoreFieldsBasedOnJSONAnnotations()
+    public void should_CorrectlyHandleComplexTypes()
             throws IOException, URISyntaxException {
+        var pluginConfig = new BackbonePluginConfiguration();
+        pluginConfig
+                .setObjectMapperFactoryClassName(CustomFactory.class.getName());
+
+        var backbonePlugin = new BackbonePlugin();
+        backbonePlugin.setConfiguration(pluginConfig);
+
         var config = new ParserConfig.Builder()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(backbonePlugin).finish();
 
         helper.executeParserWithConfig(config);
     }

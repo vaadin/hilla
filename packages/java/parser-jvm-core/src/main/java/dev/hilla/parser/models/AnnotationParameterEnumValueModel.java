@@ -58,5 +58,10 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
         return getClassInfo().hashCode() + 13 * getValueName().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "AnnotationParameterEnumValueModel[" + get() + "]";
+    }
+
     protected abstract ClassInfoModel prepareClassInfo();
 }

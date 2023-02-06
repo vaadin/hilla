@@ -8,7 +8,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
@@ -16,6 +15,7 @@ import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
 import dev.hilla.parser.models.TypeVariableModel;
+import dev.hilla.parser.models.jackson.JacksonPropertyTypeModel;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
@@ -23,7 +23,7 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
-        extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -36,7 +36,8 @@ public final class EndpointExposedPlugin
     @Override
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
             @Nonnull NodePath<?> parentPath) {
-        if (!(node instanceof TypeSignatureNode)) {
+        if (!(node instanceof TypeSignatureNode)
+                || node.getSource() instanceof JacksonPropertyTypeModel) {
             return node;
         }
 
@@ -89,7 +90,7 @@ public final class EndpointExposedPlugin
             ClassInfoModel classInfo) {
         var endpointExposedAnnotationName = getStorage().getParserConfig()
                 .getEndpointExposedAnnotationName();
-        var exposed = classInfo.getAnnotationsStream()
+        var exposed = classInfo.getAnnotations().stream()
                 .map(AnnotationInfoModel::getName)
                 .anyMatch(endpointExposedAnnotationName::equals);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
@@ -157,7 +158,7 @@ public final class EndpointExposedPlugin
             ClassInfoModel endpointClass) {
         return Stream
                 .concat(endpointClass.getSuperClass().stream(),
-                        endpointClass.getInterfacesStream())
+                        endpointClass.getInterfaces().stream())
                 .map(EndpointSignatureNode::of);
     }
 }

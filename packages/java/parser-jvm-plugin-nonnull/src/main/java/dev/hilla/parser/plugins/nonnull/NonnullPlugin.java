@@ -21,7 +21,13 @@ import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
+import dev.hilla.parser.models.SpecializedModel;
+import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -46,38 +52,41 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (!(nodePath.getNode().getTarget() instanceof Schema)) {
-            return;
+        var node = nodePath.getNode();
+
+        if (node.getTarget() instanceof Schema) {
+            var schema = (Schema<?>) node.getTarget();
+            var nodeSource = node.getSource();
+
+            if ((nodeSource instanceof SpecializedModel)
+                    && ((SpecializedModel) nodeSource).isOptional()) {
+                // Optional is always nullable, regardless of annotations
+                schema.setNullable(true);
+            } else {
+                // Apply annotations from package (NonNullApi)
+                var annotations = getPackageAnnotationsStream(nodePath);
+
+                // Apply from current node, if source is annotated
+                if (nodeSource instanceof AnnotatedModel) {
+                    annotations = Stream.concat(annotations,
+                            ((AnnotatedModel) nodeSource).getAnnotations()
+                                    .stream());
+                }
+
+                annotations = considerAscendantAnnotations(annotations,
+                        nodePath);
+
+                annotations
+                        .map(annotation -> annotationsMap
+                                .get(annotation.getName()))
+                        .filter(Objects::nonNull)
+                        .max(Comparator
+                                .comparingInt(AnnotationMatcher::getScore))
+                        .map(AnnotationMatcher::doesMakeNullable)
+                        .ifPresent(nullable -> schema
+                                .setNullable(nullable ? true : null));
+            }
         }
-
-        var schema = (Schema<?>) nodePath.getNode().getTarget();
-
-        // Apply annotations from package (NonNullApi)
-        var annotations = getPackageAnnotationsStream(nodePath);
-
-        // Apply from current node, if source is annotated
-        if (nodePath.getNode().getSource() instanceof AnnotatedModel) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) nodePath.getNode().getSource())
-                            .getAnnotationsStream());
-        }
-
-        // When the parent source is annotated, but the parent target is not a
-        // schema (consider MethodNode, MethodParameterNode, and FieldNode),
-        // apply annotations from parent node to the current node’s target.
-        var parentNode = nodePath.getParentPath().getNode();
-        if ((parentNode.getSource() instanceof AnnotatedModel)
-                && !(parentNode.getTarget() instanceof Schema)) {
-            annotations = Stream.concat(annotations,
-                    ((AnnotatedModel) parentNode.getSource())
-                            .getAnnotationsStream());
-        }
-
-        annotations.map(annotation -> annotationsMap.get(annotation.getName()))
-                .filter(Objects::nonNull)
-                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
-                .map(AnnotationMatcher::doesMakeNullable).ifPresent(
-                        nullable -> schema.setNullable(nullable ? true : null));
     }
 
     @Override
@@ -110,6 +119,41 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
         return findClosestPackage(nodePath).stream()
-                .flatMap(PackageInfoModel::getAnnotationsStream);
+                .map(PackageInfoModel::getAnnotations)
+                .flatMap(Collection::stream);
+    }
+
+    /**
+     * Adds ascendant annotations for check in case the type is annotated on
+     * method/parameter/property level.
+     *
+     * @param annotations
+     *            initial type annotations
+     * @param nodePath
+     *            the node path
+     * @return stream of all annotations to check
+     */
+    private Stream<AnnotationInfoModel> considerAscendantAnnotations(
+            Stream<AnnotationInfoModel> annotations, NodePath<?> nodePath) {
+        var current = nodePath.getNode();
+        var parent = nodePath.getParentPath().getNode();
+
+        if (current instanceof TypeSignatureNode) {
+            if (parent instanceof PropertyNode) {
+                annotations = Stream.concat(annotations,
+                        ((JacksonPropertyModel) parent.getSource()).getType()
+                                .getAnnotations().stream());
+            }
+
+            if (parent instanceof MethodNode
+                    || parent instanceof MethodParameterNode
+                    || parent instanceof PropertyNode) {
+                annotations = Stream.concat(annotations,
+                        ((AnnotatedModel) parent.getSource()).getAnnotations()
+                                .stream());
+            }
+        }
+
+        return annotations;
     }
 }
