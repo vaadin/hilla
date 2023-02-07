@@ -1,6 +1,8 @@
 package dev.hilla.internal;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -28,6 +30,7 @@ public final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
+    private String endpointPrefix;
     private String openAPIPath;
     private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
@@ -65,6 +68,11 @@ public final class ParserProcessor {
         return this;
     }
 
+    ParserProcessor endpointPrefix(@Nonnull String endpointPrefix) {
+        this.endpointPrefix = Objects.requireNonNull(endpointPrefix);
+        return this;
+    }
+
     public ParserProcessor openAPIBase(@Nonnull String openAPIBase) {
         this.openAPIPath = openAPIBase;
         return this;
@@ -83,17 +91,31 @@ public final class ParserProcessor {
     }
 
     public OpenAPI process() {
-        var parser = new Parser().classLoader(classLoader)
-                .classPath(classPath)
+        var parser = new Parser().classLoader(classLoader).classPath(classPath)
                 .endpointAnnotation(endpointAnnotationName)
                 .endpointExposedAnnotation(endpointExposedAnnotationName);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
 
+        if (endpointPrefix != null) {
+            parser.adjustOpenAPI(this::applyEndpointPrefix);
+        }
+
         logger.debug("Starting JVM Parser");
 
         return parser.execute();
+    }
+
+    private void applyEndpointPrefix(OpenAPI openAPI) {
+        try {
+            var originalUrl = new URL(openAPI.getServers().get(0).getUrl());
+            openAPI.getServers().get(0).setUrl(
+                new URL(originalUrl.getProtocol(), originalUrl.getHost(),
+                    originalUrl.getPort(), endpointPrefix).toString());
+        } catch (MalformedURLException e) {
+            logger.error("Failed to apply endpoint prefix", e);
+        }
     }
 
     private void prepareOpenAPIBase(Parser parser) {

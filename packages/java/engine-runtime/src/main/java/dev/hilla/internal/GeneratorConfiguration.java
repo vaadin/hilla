@@ -11,7 +11,7 @@ public final class GeneratorConfiguration {
         return Optional.ofNullable(plugins);
     }
 
-    public void setPlugins(PluginList plugins) {
+    void setPlugins(PluginList plugins) {
         this.plugins = plugins;
     }
 

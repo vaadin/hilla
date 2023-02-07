@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 import dev.hilla.parser.utils.OpenAPIPrinter;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -72,6 +73,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                 .ifPresent(processor::endpointAnnotation);
             parserConfiguration.getEndpointExposedAnnotation()
                 .ifPresent(processor::endpointExposedAnnotation);
+            // Use endpoint prefix from application.properties
+            readEndpointPrefixProperty().ifPresent(processor::endpointPrefix);
             parserConfiguration.getPlugins().ifPresent(processor::plugins);
 
             var openAPI = processor.process();
@@ -80,6 +83,16 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             throw new ExecutionFailedException(
                 "Java code parsing failed", e);
         }
+    }
+
+    /**
+     * Reads the endpoint prefix value from the application.properties file.
+     *
+     * @return
+     */
+    private Optional<String> readEndpointPrefixProperty() {
+        return Optional.ofNullable(
+            readApplicationProperties().getProperty("vaadin.endpoint.prefix"));
     }
 
     private void writeOpenAPI(OpenAPI openAPI) throws ExecutionFailedException {

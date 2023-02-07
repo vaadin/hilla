@@ -113,7 +113,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
         Info info = generatedOpenAPI.getInfo();
         assertThat(generatedOpenAPI.getServers().get(0).getUrl(),
-            endsWith("/api/connect"));
+            endsWith("/api"));
     }
 
     @Test
