@@ -2,7 +2,7 @@
  * This class is used for OpenApi generator test
  *
  * This module is generated from ReservedWordMethodEndpoint.java
- * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
+ * All changes to this file are overridden. Consider editing the corresponding Java file if necessary.
  * @module ReservedWordMethodEndpoint
  */
 
