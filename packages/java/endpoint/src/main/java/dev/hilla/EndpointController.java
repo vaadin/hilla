@@ -65,8 +65,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
-@NpmPackage(value = "@hilla/frontend", version = "2.0.0-alpha10")
-@NpmPackage(value = "@hilla/form", version = "2.0.0-alpha10")
+@NpmPackage(value = "@hilla/frontend", version = "2.0.0-beta1")
+@NpmPackage(value = "@hilla/form", version = "2.0.0-beta1")
 public class EndpointController {
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
