@@ -3,7 +3,7 @@ import Discriminator from './Discriminator';
 import XML from './XML';
 /**
 * This module is generated from io.swagger.v3.oas.models.media.Schema.
-* All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
+* All changes to this file are overridden. Consider editing the corresponding Java file if necessary.
 */
 export default interface Schema {
   _default?: any;
