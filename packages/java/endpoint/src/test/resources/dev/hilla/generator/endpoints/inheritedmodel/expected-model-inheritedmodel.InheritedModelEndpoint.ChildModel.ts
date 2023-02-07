@@ -4,7 +4,7 @@ import ArraySchema from '../../../../../../io/swagger/v3/oas/models/media/ArrayS
 
 /**
  * This module is generated from dev.hilla.generator.endpoints.inheritedmodel.InheritedModelEndpoint.ChildModel.
- * All changes to this file are overridden. Please consider to make changes in the corresponding Java file if necessary.
+ * All changes to this file are overridden. Consider editing the corresponding Java file if necessary.
  */
 export default interface ChildModel extends ParentModel {
   name?: string;
