@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
-import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
@@ -20,14 +20,14 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new BackbonePlugin()).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 
     @Test
@@ -35,13 +35,13 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new BackbonePlugin()).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 }

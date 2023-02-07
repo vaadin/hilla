@@ -3,9 +3,9 @@ package dev.hilla.parser.core;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class SharedStorage {
-    private final ParserConfig parserConfig;
+    private final Parser.Config parserConfig;
 
-    SharedStorage(ParserConfig parserConfig) {
+    SharedStorage(Parser.Config parserConfig) {
         this.parserConfig = parserConfig;
     }
 
@@ -13,7 +13,7 @@ public final class SharedStorage {
         return parserConfig.getOpenAPI();
     }
 
-    public ParserConfig getParserConfig() {
+    public Parser.Config getParserConfig() {
         return parserConfig;
     }
 }

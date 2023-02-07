@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
@@ -24,11 +24,11 @@ public class CustomConfigTest {
         var backbonePlugin = new BackbonePlugin();
         backbonePlugin.setConfiguration(pluginConfig);
 
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(backbonePlugin).finish();
+                .addPlugin(backbonePlugin).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 }

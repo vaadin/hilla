@@ -8,9 +8,8 @@ import java.nio.file.Path;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
+
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -28,16 +27,12 @@ public final class TestHelper {
         }
     }
 
-    public void executeParserWithConfig(ParserConfig config)
+    public void executeParserWithConfig(OpenAPI openAPI)
             throws IOException, URISyntaxException {
-        var parser = new Parser(config);
-        parser.execute();
-
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
                 OpenAPI.class);
-        var actual = parser.getStorage().getOpenAPI();
 
-        assertEquals(expected, actual);
+        assertEquals(expected, openAPI);
     }
 
     public Path getTargetDir() {

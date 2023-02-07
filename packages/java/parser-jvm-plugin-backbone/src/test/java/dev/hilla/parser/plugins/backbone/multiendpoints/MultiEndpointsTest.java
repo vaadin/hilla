@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 
@@ -16,11 +16,11 @@ public class MultiEndpointsTest {
     @Test
     public void should_UseAppropriateSchema_When_SimpleTypesAreUsed()
             throws IOException, URISyntaxException {
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new BackbonePlugin()).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 }

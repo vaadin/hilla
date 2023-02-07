@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.testutils.ResourceLoader;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
@@ -25,18 +26,19 @@ import io.swagger.v3.oas.models.servers.Server;
 public class ParserConfigTests {
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
-    private ParserConfig.Builder defaultBuilder;
     private Set<String> defaultClassPathElements;
     private String defaultEndpointAnnotationName;
     private String defaultEndpointExposedAnnotationName;
     private OpenAPI defaultOpenAPI;
+    private Parser parser;
     private Path targetDir;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
+        defaultEndpointAnnotationName = "dev.hilla.Endpoint";
+
         targetDir = resourceLoader.findTargetDirPath();
         defaultClassPathElements = Set.of(targetDir.toString());
-        defaultEndpointAnnotationName = "dev.hilla.Endpoint";
         defaultEndpointExposedAnnotationName = "dev.hilla.EndpointExposed";
         defaultOpenAPI = new OpenAPI()
                 .info(new Info().title("Vaadin Application").version("1.0.0"))
@@ -44,8 +46,7 @@ public class ParserConfigTests {
                         .of(new Server().url("http://localhost:8080/connect")
                                 .description("Vaadin Backend")))
                 .paths(new Paths());
-        defaultBuilder = new ParserConfig.Builder()
-                .classPath(defaultClassPathElements)
+        parser = new Parser().classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName)
                 .endpointExposedAnnotation(
                         defaultEndpointExposedAnnotationName);
@@ -53,120 +54,117 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsAsCollection() {
-        var plugins = List.of(new FooPlugin(), new BarPlugin());
-        var actual = defaultBuilder.plugins(plugins).finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, defaultOpenAPI,
-                new HashSet<>(plugins));
+        var foo = new FooPlugin(1);
+        var bar = new BarPlugin(0);
+        var baz = new BazPlugin(-5);
 
-        assertEquals(expected, actual);
+        var config = parser.plugins(List.of(foo, bar, baz)).getConfig();
+
+        assertEquals(List.of(baz, bar, foo),
+                new ArrayList<>(config.getPlugins()));
+    }
+
+    @Test
+    public void should_AllowAddingPluginsAsVararg() {
+        var foo = new FooPlugin(1);
+        var bar = new BarPlugin(0);
+        var baz = new BazPlugin(-5);
+
+        var config = parser.plugins(foo, bar, baz).getConfig();
+
+        assertEquals(List.of(baz, bar, foo),
+                new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAddingPluginsOneByOne() {
-        var fooPlugin = new FooPlugin();
-        var barPlugin = new BarPlugin();
-        var actual = defaultBuilder.addPlugin(fooPlugin).addPlugin(barPlugin)
-                .finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, defaultOpenAPI,
-                Set.of(fooPlugin, barPlugin));
+        var foo = new FooPlugin(1);
+        var bar = new BarPlugin(0);
+        var baz = new BazPlugin(-1);
 
-        assertEquals(expected, actual);
+        var config = parser.addPlugin(foo).addPlugin(bar).addPlugin(baz)
+                .getConfig();
+
+        assertEquals(List.of(baz, bar, foo),
+                new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAdjustingOpenAPI() {
         Consumer<OpenAPI> adjuster = openAPI -> openAPI.getInfo()
                 .setTitle("My Application");
-        var actual = defaultBuilder.adjustOpenAPI(adjuster).finish();
-
+        var config = parser.adjustOpenAPI(adjuster).getConfig();
         adjuster.accept(defaultOpenAPI);
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, defaultOpenAPI, Set.of());
 
-        assertEquals(expected, actual);
+        assertEquals(defaultOpenAPI, config.getOpenAPI());
     }
 
     @Test
     public void should_AllowPreservingAlreadySetProperties() {
-        var actual = defaultBuilder.classPath(List.of("somepath"), false)
-                .endpointAnnotation("com.example.Endpoint", false).finish();
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, defaultOpenAPI, Set.of());
+        var config = parser.classPath(List.of("somepath"), false)
+                .endpointAnnotation("com.example.Endpoint", false).getConfig();
 
-        assertEquals(expected, actual);
+        assertEquals(defaultClassPathElements, config.getClassPathElements());
     }
 
     @Test
     public void should_CreateConfigWithDefaultParameters() {
-        var expected = new TestParserConfig(defaultClassPathElements,
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, defaultOpenAPI, Set.of());
-        var actual = defaultBuilder.finish();
+        var config = parser.getConfig();
 
-        assertEquals(expected, actual);
+        assertEquals(defaultClassPathElements, config.getClassPathElements());
+        assertEquals(defaultEndpointAnnotationName,
+                config.getEndpointAnnotationName());
+        assertEquals(defaultEndpointExposedAnnotationName,
+                config.getEndpointExposedAnnotationName());
+        assertEquals(defaultOpenAPI, config.getOpenAPI());
+        assertEquals(List.of(), new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_ParseJSONOpenAPISource()
             throws URISyntaxException, IOException {
-        testOpenAPISourceFile("openapi-base.json",
-                ParserConfig.OpenAPIFileType.JSON);
+        testOpenAPISourceFile("openapi-base.json", OpenAPIFileType.JSON);
     }
 
     @Test
     public void should_ParseYAMLOpenAPISource()
             throws URISyntaxException, IOException {
-        testOpenAPISourceFile("openapi-base.yml",
-                ParserConfig.OpenAPIFileType.YAML);
+        testOpenAPISourceFile("openapi-base.yml", OpenAPIFileType.YAML);
     }
 
     @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
-        assertThrows(NullPointerException.class,
-                () -> new ParserConfig.Builder().finish(),
+        assertThrows(NullPointerException.class, () -> new Parser().execute(),
                 "[JVM Parser] classPath is not provided.");
     }
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
         assertThrows(NullPointerException.class,
-                () -> new ParserConfig.Builder()
-                        .classPath(defaultClassPathElements).finish(),
+                () -> new Parser().classPath(defaultClassPathElements)
+                        .execute(),
                 "[JVM Parser] endpointAnnotationName is not provided.");
     }
 
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
-        assertThrows(IllegalArgumentException.class, () -> new BazPlugin()
+        assertThrows(IllegalArgumentException.class, () -> new BazPlugin(0)
                 .setConfiguration(new PluginConfiguration() {
                 }), "Requires instance of " + BazPluginConfig.class.getName());
     }
 
-    private void testOpenAPISourceFile(String fileName,
-            ParserConfig.OpenAPIFileType type)
+    private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
             throws URISyntaxException, IOException {
         var openAPISource = resourceLoader.readToString(fileName);
+        var config = parser.openAPISource(openAPISource, type).getConfig();
+        var expected = type.getMapper().readValue(openAPISource, OpenAPI.class);
 
-        var actual = defaultBuilder.openAPISource(openAPISource, type).finish();
-
-        var openAPI = type.getMapper().readValue(openAPISource, OpenAPI.class);
-        var expected = new TestParserConfig(Set.of(targetDir.toString()),
-                defaultEndpointAnnotationName,
-                defaultEndpointExposedAnnotationName, openAPI, Set.of());
-
-        assertEquals(expected, actual);
+        assertEquals(expected, config.getOpenAPI());
     }
 
     private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
-        BarPlugin() {
-            super();
-            setOrder(1);
+        BarPlugin(int order) {
+            setOrder(order);
         }
 
         @Override
@@ -186,6 +184,10 @@ public class ParserConfigTests {
     }
 
     private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
+        BazPlugin(int order) {
+            setOrder(order);
+        }
+
         @Override
         public void enter(NodePath<?> nodePath) {
         }
@@ -206,8 +208,8 @@ public class ParserConfigTests {
     }
 
     private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
-        FooPlugin() {
-            setOrder(0);
+        FooPlugin(int order) {
+            setOrder(order);
         }
 
         @Override
@@ -223,55 +225,6 @@ public class ParserConfigTests {
         public NodeDependencies scan(
                 @Nonnull NodeDependencies nodeDependencies) {
             return nodeDependencies;
-        }
-    }
-
-    private static class TestParserConfig extends AbstractParserConfig {
-        private final Set<String> classPathElements;
-        private final String endpointAnnotationName;
-        private final String endpointExposedAnnotationName;
-        private final OpenAPI openAPI;
-        private final Set<Plugin> plugins;
-
-        public TestParserConfig(Set<String> classPathElements,
-                String endpointAnnotationName,
-                String endpointExposedAnnotationName, OpenAPI openAPI,
-                Set<Plugin> plugins) {
-            this.classPathElements = classPathElements;
-            this.endpointAnnotationName = endpointAnnotationName;
-            this.endpointExposedAnnotationName = endpointExposedAnnotationName;
-            this.openAPI = openAPI;
-            this.plugins = plugins;
-        }
-
-        @Nonnull
-        @Override
-        public Set<String> getClassPathElements() {
-            return classPathElements;
-        }
-
-        @Nonnull
-        @Override
-        public String getEndpointAnnotationName() {
-            return endpointAnnotationName;
-        }
-
-        @Nonnull
-        @Override
-        public String getEndpointExposedAnnotationName() {
-            return endpointExposedAnnotationName;
-        }
-
-        @Nonnull
-        @Override
-        public OpenAPI getOpenAPI() {
-            return openAPI;
-        }
-
-        @Nonnull
-        @Override
-        public Set<Plugin> getPlugins() {
-            return plugins;
         }
     }
 }
