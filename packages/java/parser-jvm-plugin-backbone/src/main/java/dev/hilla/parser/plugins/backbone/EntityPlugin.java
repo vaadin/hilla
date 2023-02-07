@@ -82,8 +82,9 @@ public final class EntityPlugin
     private Schema<?> enumSchema(ClassInfoModel entity) {
         var schema = new StringSchema();
 
-        schema.setEnum(entity.getFieldsStream().filter(FieldInfoModel::isPublic)
-                .map(FieldInfoModel::getName).collect(Collectors.toList()));
+        schema.setEnum(entity.getFields().stream()
+                .filter(FieldInfoModel::isPublic).map(FieldInfoModel::getName)
+                .collect(Collectors.toList()));
 
         return schema;
     }

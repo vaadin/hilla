@@ -69,8 +69,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 // Apply from current node, if source is annotated
                 if (nodeSource instanceof AnnotatedModel) {
                     annotations = Stream.concat(annotations,
-                            ((AnnotatedModel) nodeSource)
-                                    .getAnnotationsStream());
+                            ((AnnotatedModel) nodeSource).getAnnotations()
+                                    .stream());
                 }
 
                 annotations = considerAscendantAnnotations(annotations,
@@ -119,7 +119,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
         return findClosestPackage(nodePath).stream()
-                .flatMap(PackageInfoModel::getAnnotationsStream);
+                .map(PackageInfoModel::getAnnotations)
+                .flatMap(Collection::stream);
     }
 
     /**
@@ -141,15 +142,15 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             if (parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
                         ((JacksonPropertyModel) parent.getSource()).getType()
-                                .getAnnotationsStream());
+                                .getAnnotations().stream());
             }
 
             if (parent instanceof MethodNode
                     || parent instanceof MethodParameterNode
                     || parent instanceof PropertyNode) {
                 annotations = Stream.concat(annotations,
-                        ((AnnotatedModel) parent.getSource())
-                                .getAnnotationsStream());
+                        ((AnnotatedModel) parent.getSource()).getAnnotations()
+                                .stream());
             }
         }
 

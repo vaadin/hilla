@@ -1,5 +1,6 @@
 package dev.hilla.parser.models;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,10 +36,16 @@ final class TypeArgumentSourceModel extends TypeArgumentModel
 
     @Override
     protected List<AnnotationInfoModel> prepareAnnotations() {
+        var annotations = origin.getTypeAnnotationInfo();
+
         return Stream.concat(
                 getAssociatedTypes().stream()
-                        .flatMap(SignatureModel::getAnnotationsStream),
-                getDirectAnnotationsStream()).collect(Collectors.toList());
+                        .map(SignatureModel::getAnnotations)
+                        .flatMap(Collection::stream),
+                annotations != null
+                        ? annotations.stream().map(AnnotationInfoModel::of)
+                        : Stream.empty())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -47,11 +54,5 @@ final class TypeArgumentSourceModel extends TypeArgumentModel
 
         return signature == null ? List.of()
                 : List.of(SignatureModel.of(signature));
-    }
-
-    private Stream<AnnotationInfoModel> getDirectAnnotationsStream() {
-        var annotations = origin.getTypeAnnotationInfo();
-        return annotations == null ? Stream.empty()
-                : annotations.stream().map(AnnotationInfoModel::of);
     }
 }

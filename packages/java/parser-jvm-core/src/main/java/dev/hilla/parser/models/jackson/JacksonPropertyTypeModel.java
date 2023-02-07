@@ -1,5 +1,6 @@
 package dev.hilla.parser.models.jackson;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,6 +49,18 @@ public final class JacksonPropertyTypeModel
     }
 
     @Override
+    public String toString() {
+        return "JacksonPropertyTypeModel[" + origin + "]";
+    }
+
+    @Override
+    protected List<AnnotationInfoModel> prepareAnnotations() {
+        return Stream.of(getField(), getGetter(), getSetter())
+                .flatMap(Optional::stream).map(AnnotatedModel::getAnnotations)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    @Override
     protected SignatureModel prepareField() {
         return origin.hasField()
                 ? SignatureModel
@@ -69,18 +82,5 @@ public final class JacksonPropertyTypeModel
                 .of(origin.getSetter().getAnnotated().getParameters()[0]
                         .getAnnotatedType())
                 : null;
-    }
-
-    @Override
-    public String toString() {
-        return "JacksonPropertyTypeModel[" + origin + "]";
-    }
-
-    @Override
-    protected List<AnnotationInfoModel> prepareAnnotations() {
-        return Stream.of(getField(), getGetter(), getSetter())
-                .flatMap(Optional::stream)
-                .flatMap(AnnotatedModel::getAnnotationsStream)
-                .collect(Collectors.toList());
     }
 }

@@ -278,7 +278,7 @@ public class ClassInfoModelTests {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
                 .map(ClassInfoModel::of).map(ClassInfoModel::getName)
                 .collect(Collectors.toList());
-        var actual = model.getInterfacesStream()
+        var actual = model.getInterfaces().stream()
                 .map(ClassRefSignatureModel::getName)
                 .collect(Collectors.toList());
 

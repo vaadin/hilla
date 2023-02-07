@@ -6,7 +6,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -169,10 +168,6 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         }
 
         return typeArguments;
-    }
-
-    public Stream<TypeArgumentModel> getTypeArgumentsStream() {
-        return getTypeArguments().stream();
     }
 
     @Override

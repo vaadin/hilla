@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -59,10 +58,6 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         }
 
         return parameters;
-    }
-
-    public Stream<AnnotationParameterModel> getParametersStream() {
-        return getParameters().stream();
     }
 
     @Override
