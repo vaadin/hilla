@@ -26,30 +26,31 @@ public class NodeTasksEndpointTest extends TaskTest {
     public static class ConnectEndpointsForTesting {
     }
 
-
     @BeforeEach
     public void setUp() throws IOException {
-        File src = Files.createDirectories(
-            getTemporaryDirectory().resolve("src")).toFile();
+        File src = Files
+                .createDirectories(getTemporaryDirectory().resolve("src"))
+                .toFile();
         File json = getTemporaryDirectory().toAbsolutePath()
-            .resolve("api-file.json").toFile();
+                .resolve("api-file.json").toFile();
 
         Lookup mockLookup = Mockito.mock(Lookup.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
-            .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
+                .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
         Mockito.doReturn(new DefaultClassFinder(
                 Collections.singleton(ConnectEndpointsForTesting.class)))
-            .when(mockLookup).lookup(ClassFinder.class);
+                .when(mockLookup).lookup(ClassFinder.class);
 
-        options = new Options(mockLookup,
-            getTemporaryDirectory().toFile()).withBuildDirectory(
-                getBuildDirectory()).enablePackagesUpdate(false)
-            .enableImportsUpdate(false).withEmbeddableWebComponents(false)
-            .withEndpointSourceFolder(src)
-            .withEndpointGeneratedOpenAPIFile(json).withFrontendGeneratedFolder(
-                getTemporaryDirectory().resolve("api").toFile())
-            .withJarFrontendResourcesFolder(
-                getTemporaryDirectory().resolve("jar-resources").toFile());
+        options = new Options(mockLookup, getTemporaryDirectory().toFile())
+                .withBuildDirectory(getBuildDirectory())
+                .enablePackagesUpdate(false).enableImportsUpdate(false)
+                .withEmbeddableWebComponents(false)
+                .withEndpointSourceFolder(src)
+                .withEndpointGeneratedOpenAPIFile(json)
+                .withFrontendGeneratedFolder(
+                        getTemporaryDirectory().resolve("api").toFile())
+                .withJarFrontendResourcesFolder(getTemporaryDirectory()
+                        .resolve("jar-resources").toFile());
     }
 
     @Test
@@ -57,16 +58,17 @@ public class NodeTasksEndpointTest extends TaskTest {
         new NodeTasks(options).execute();
 
         Arrays.asList(
-            // enableClientSide
-            "frontend/index.html", "frontend/generated/index.ts",
-            // withConnectJavaSourceFolder and
-            // withConnectGeneratedOpenApiJson
-            "api-file.json",
-            // withConnectClientTsApiFolder
-            "api/connect-client.default.ts", "api/MyEndpoint.ts").forEach(
-            name -> assertTrue(
-                new File(getTemporaryDirectory().toFile(), name).exists(),
-                name + " not created."));
+                // enableClientSide
+                "frontend/index.html", "frontend/generated/index.ts",
+                // withConnectJavaSourceFolder and
+                // withConnectGeneratedOpenApiJson
+                "api-file.json",
+                // withConnectClientTsApiFolder
+                "api/connect-client.default.ts", "api/MyEndpoint.ts")
+                .forEach(name -> assertTrue(
+                        new File(getTemporaryDirectory().toFile(), name)
+                                .exists(),
+                        name + " not created."));
     }
 
 }

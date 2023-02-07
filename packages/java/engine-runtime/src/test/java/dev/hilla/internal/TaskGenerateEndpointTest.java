@@ -25,27 +25,28 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        outputDirectory = Files.createDirectory(
-            getTemporaryDirectory().resolve("output"));
-        openApiJson = new File(
-            getClass().getResource("openapi/esmodule-generator-TwoEndpointsThreeMethods.json").getPath());
+        outputDirectory = Files
+                .createDirectory(getTemporaryDirectory().resolve("output"));
+        openApiJson = new File(getClass().getResource(
+                "openapi/esmodule-generator-TwoEndpointsThreeMethods.json")
+                .getPath());
     }
 
     @Test
     public void should_generate_Two_TypeScriptFiles() throws Exception {
         File ts1 = outputDirectory.resolve("FooBarEndpoint.ts").toFile();
-        File ts2 = outputDirectory.resolve( "FooFooEndpoint.ts").toFile();
-        File client = outputDirectory.resolve( "connect-client.default.ts").toFile();
+        File ts2 = outputDirectory.resolve("FooFooEndpoint.ts").toFile();
+        File client = outputDirectory.resolve("connect-client.default.ts")
+                .toFile();
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
         assertFalse(client.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            openApiJson, outputDirectory.toFile());
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                openApiJson, outputDirectory.toFile());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -53,8 +54,10 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertTrue(client.exists());
 
         String output = FileUtils.readFileToString(client, "UTF-8");
-        assertThat(output, containsString("import { ConnectClient as ConnectClient_1 } from \"@hilla/frontend\";"));
-        assertThat(output, containsString("const client_1 = new ConnectClient_1({ prefix: \"connect\" });"));
+        assertThat(output, containsString(
+                "import { ConnectClient as ConnectClient_1 } from \"@hilla/frontend\";"));
+        assertThat(output, containsString(
+                "const client_1 = new ConnectClient_1({ prefix: \"connect\" });"));
         assertThat(output, containsString("export default client_1;"));
     }
 
@@ -62,10 +65,13 @@ public class TaskGenerateEndpointTest extends TaskTest {
     public void should_use_custom_endpoint_name_when_connect_client_exists()
             throws Exception {
         File ts1 = outputDirectory.resolve("FooBarEndpoint.ts").toFile();
-        File ts2 = outputDirectory.resolve( "FooFooEndpoint.ts").toFile();
-        File client = outputDirectory.resolve( "connect-client.default.ts").toFile();
-        File customConnectClient = Files.createFile(
-            getTemporaryDirectory().resolve("connect-client.ts")).toFile();
+        File ts2 = outputDirectory.resolve("FooFooEndpoint.ts").toFile();
+        File client = outputDirectory.resolve("connect-client.default.ts")
+                .toFile();
+        File customConnectClient = Files
+                .createFile(
+                        getTemporaryDirectory().resolve("connect-client.ts"))
+                .toFile();
 
         assertFalse(ts1.exists());
         assertFalse(ts2.exists());
@@ -73,10 +79,9 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertTrue(customConnectClient.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            openApiJson, outputDirectory.toFile());
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                openApiJson, outputDirectory.toFile());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -85,7 +90,9 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         String outputEndpoinTs1 = FileUtils.readFileToString(ts1, "UTF-8");
         String outputEndpoinTs2 = FileUtils.readFileToString(ts2, "UTF-8");
-        assertThat(outputEndpoinTs1, containsString("import client_1 from \"../connect-client\";"));
-        assertThat(outputEndpoinTs2, containsString("import client_1 from \"../connect-client\";"));
+        assertThat(outputEndpoinTs1,
+                containsString("import client_1 from \"../connect-client\";"));
+        assertThat(outputEndpoinTs2,
+                containsString("import client_1 from \"../connect-client\";"));
     }
 }

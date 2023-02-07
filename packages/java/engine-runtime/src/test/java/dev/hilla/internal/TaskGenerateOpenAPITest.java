@@ -47,47 +47,36 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
     @BeforeEach
     public void setUp() {
-        generatedOpenAPI = getTemporaryDirectory().resolve(
-            "generated-openapi.json").toFile();
+        generatedOpenAPI = getTemporaryDirectory()
+                .resolve("generated-openapi.json").toFile();
     }
 
     @Test
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            this.getClass().getClassLoader(), generatedOpenAPI);
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                this.getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
         Info info = generatedOpenAPI.getInfo();
-        assertEquals(
-            "Hilla Application",
-            info.getTitle(),
-            "Generated OpenAPI should have default application title");
+        assertEquals("Hilla Application", info.getTitle(),
+                "Generated OpenAPI should have default application title");
 
-        assertEquals(
-            "1.0.0",
-            info.getVersion(),
-            "Generated OpenAPI should have default application API version"
-        );
+        assertEquals("1.0.0", info.getVersion(),
+                "Generated OpenAPI should have default application API version");
 
         List<Server> servers = generatedOpenAPI.getServers();
-        assertEquals( 1,
-            servers.size(),
-            "Generated OpenAPI should a default server");
-        assertEquals(
-            "http://localhost:8080/connect",
-            servers.get(0).getUrl(),
-            "Generated OpenAPI should have default url server");
+        assertEquals(1, servers.size(),
+                "Generated OpenAPI should a default server");
+        assertEquals("http://localhost:8080/connect", servers.get(0).getUrl(),
+                "Generated OpenAPI should have default url server");
 
-        assertEquals(
-            "Hilla Backend",
-            servers.get(0).getDescription(),
-            "Generated OpenAPI should have default server description");
+        assertEquals("Hilla Backend", servers.get(0).getDescription(),
+                "Generated OpenAPI should have default server description");
     }
 
     @Test
@@ -96,62 +85,67 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
         String applicationPrefix = "/api";
         StringBuilder applicationPropertiesBuilder = new StringBuilder();
-        applicationPropertiesBuilder
-                .append("vaadin.endpoint.prefix").append("=")
-                .append(applicationPrefix).append("\n");
+        applicationPropertiesBuilder.append("vaadin.endpoint.prefix")
+                .append("=").append(applicationPrefix).append("\n");
         Files.writeString(getApplicationPropertiesFile(),
-            applicationPropertiesBuilder.toString(), StandardCharsets.UTF_8);
+                applicationPropertiesBuilder.toString(),
+                StandardCharsets.UTF_8);
 
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            this.getClass().getClassLoader(), generatedOpenAPI);
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                this.getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
         Info info = generatedOpenAPI.getInfo();
         assertThat(generatedOpenAPI.getServers().get(0).getUrl(),
-            endsWith("/api"));
+                endsWith("/api"));
     }
 
     @Test
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            this.getClass().getClassLoader(), generatedOpenAPI);
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                this.getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
 
-        assertThat(generatedOpenAPI.getPaths(), hasKey("/CustomEndpointName/bar"));
-        assertThat(generatedOpenAPI.getPaths(), not(hasKey("/CustomEndpoint/bar")));
-        assertThat(generatedOpenAPI.getPaths(), hasKey("/CustomEndpointName/foo"));
-        assertThat(generatedOpenAPI.getPaths(), not(hasKey("/CustomEndpoint/foo")));
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/CustomEndpointName/bar"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/CustomEndpoint/bar")));
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/CustomEndpointName/foo"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/CustomEndpoint/foo")));
     }
 
     @Test
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-            getApplicationPropertiesFile().toFile(),
-            getTemporaryDirectory().toFile(),
-            getBuildDirectory(),
-            this.getClass().getClassLoader(), generatedOpenAPI);
+                getApplicationPropertiesFile().toFile(),
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                this.getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
         OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
 
-        assertThat(generatedOpenAPI.getPaths(), hasKey("/WithoutValueEqual/bar"));
-        assertThat(generatedOpenAPI.getPaths(), not(hasKey("/EndpointNoValue/bar")));
-        assertThat(generatedOpenAPI.getPaths(), hasKey("/WithoutValueEqual/foo"));
-        assertThat(generatedOpenAPI.getPaths(), not(hasKey("/EndpointNoValue/foo")));
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/WithoutValueEqual/bar"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/EndpointNoValue/bar")));
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/WithoutValueEqual/foo"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/EndpointNoValue/foo")));
     }
 
     private OpenAPI getGeneratedOpenAPI() {

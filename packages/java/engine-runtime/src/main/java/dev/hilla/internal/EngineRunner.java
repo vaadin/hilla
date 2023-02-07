@@ -71,9 +71,9 @@ public class EngineRunner {
 
             parser.getClassPath().ifPresent(processor::classPath);
             parser.getEndpointAnnotation()
-                .ifPresent(processor::endpointAnnotation);
+                    .ifPresent(processor::endpointAnnotation);
             parser.getEndpointExposedAnnotation()
-                .ifPresent(processor::endpointExposedAnnotation);
+                    .ifPresent(processor::endpointExposedAnnotation);
             parser.getPlugins().ifPresent(processor::plugins);
             parser.getOpenAPIPath().ifPresent(processor::openAPIBase);
 

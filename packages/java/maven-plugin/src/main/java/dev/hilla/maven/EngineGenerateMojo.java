@@ -51,7 +51,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
         try {
             conf = EngineConfiguration.load(buildDirectory);
         } catch (IOException e) {
-            throw new EngineGenerateMojoException("Loading saved configuration failed", e);
+            throw new EngineGenerateMojoException(
+                    "Loading saved configuration failed", e);
         }
 
         try {
@@ -60,8 +61,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
             throw new EngineGenerateMojoException("Execution failed", e);
         } catch (GeneratorUnavailableException e) {
             if (failOnMissingGenerator) {
-                throw new EngineGenerateMojoException("Execution failed",
-                        e);
+                throw new EngineGenerateMojoException("Execution failed", e);
             } else {
                 getLog().warn(e.getMessage());
             }

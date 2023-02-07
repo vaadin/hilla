@@ -27,7 +27,7 @@ public class TaskTest {
 
     @BeforeEach
     public void setUpTaskApplication() throws IOException, URISyntaxException,
-        FrontendUtils.CommandExecutionException, InterruptedException {
+            FrontendUtils.CommandExecutionException, InterruptedException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         userDir = temporaryDirectory.toAbsolutePath().toString();
@@ -37,13 +37,12 @@ public class TaskTest {
 
         Files.createFile(getApplicationPropertiesFile());
 
-        var buildDir =
-            getTemporaryDirectory().resolve(getBuildDirectory());
+        var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
 
-        var classPath = new LinkedHashSet(List.of(
-            Path.of(getClass().getClassLoader().getResource("").toURI())
-                .toString()));
+        var classPath = new LinkedHashSet(List
+                .of(Path.of(getClass().getClassLoader().getResource("").toURI())
+                        .toString()));
         // create hilla-engine-configuration.json
         var config = new EngineConfiguration();
         config.setBaseDir(temporaryDirectory);
@@ -51,28 +50,28 @@ public class TaskTest {
         config.setClassPath(classPath);
         var parserConfig = new ParserConfiguration();
         parserConfig.setEndpointAnnotation(Endpoint.class.getName());
-        parserConfig.setEndpointExposedAnnotation(EndpointExposed.class.getName());
+        parserConfig
+                .setEndpointExposedAnnotation(EndpointExposed.class.getName());
         config.setParser(parserConfig);
         config.setGenerator(new GeneratorConfiguration());
         config.store(buildDir.toFile());
 
-        var nodeModulesDirectory = getTemporaryDirectory().resolve(
-            "node_modules");
-        var packagesDirectory =
-            Path.of(getClass().getClassLoader().getResource("").toURI())
-            .getParent() // target
-            .getParent() // engine-runtime
-            .getParent() // java
-            .getParent() // packages
-            .resolve("ts");
-        var generatorPackages = Files.list(packagesDirectory)
-            .filter(dirName -> dirName.getFileName().toString().startsWith("generator-"))
-            .map(Path::toString)
-            .toList();
+        var nodeModulesDirectory = getTemporaryDirectory()
+                .resolve("node_modules");
+        var packagesDirectory = Path
+                .of(getClass().getClassLoader().getResource("").toURI())
+                .getParent() // target
+                .getParent() // engine-runtime
+                .getParent() // java
+                .getParent() // packages
+                .resolve("ts");
+        var generatorPackages = Files
+                .list(packagesDirectory).filter(dirName -> dirName.getFileName()
+                        .toString().startsWith("generator-"))
+                .map(Path::toString).toList();
 
-        var command = new ArrayList<>(
-            List.of("npm", "--no-update-notifier", "--no-audit", "install",
-                "--no-save"));
+        var command = new ArrayList<>(List.of("npm", "--no-update-notifier",
+                "--no-audit", "install", "--no-save"));
         command.addAll(generatorPackages);
         var processBuilder = FrontendUtils.createProcessBuilder(command);
         processBuilder.directory(temporaryDirectory.toFile());

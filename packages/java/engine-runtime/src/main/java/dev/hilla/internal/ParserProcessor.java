@@ -110,9 +110,10 @@ public final class ParserProcessor {
     private void applyEndpointPrefix(OpenAPI openAPI) {
         try {
             var originalUrl = new URL(openAPI.getServers().get(0).getUrl());
-            openAPI.getServers().get(0).setUrl(
-                new URL(originalUrl.getProtocol(), originalUrl.getHost(),
-                    originalUrl.getPort(), endpointPrefix).toString());
+            openAPI.getServers().get(0)
+                    .setUrl(new URL(originalUrl.getProtocol(),
+                            originalUrl.getHost(), originalUrl.getPort(),
+                            endpointPrefix).toString());
         } catch (MalformedURLException e) {
             logger.error("Failed to apply endpoint prefix", e);
         }

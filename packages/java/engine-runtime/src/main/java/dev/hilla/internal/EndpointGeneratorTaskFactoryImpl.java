@@ -32,16 +32,16 @@ public class EndpointGeneratorTaskFactoryImpl
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
         return new TaskGenerateEndpointImpl(options.getApplicationProperties(),
-            options.getNpmFolder(), options.getBuildDirectoryName(),
-            options.getEndpointGeneratedOpenAPIFile(),
-            options.getFrontendGeneratedFolder());
+                options.getNpmFolder(), options.getBuildDirectoryName(),
+                options.getEndpointGeneratedOpenAPIFile(),
+                options.getFrontendGeneratedFolder());
     }
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
         return new TaskGenerateOpenAPIImpl(options.getApplicationProperties(),
-            options.getNpmFolder(), options.getBuildDirectoryName(),
-            options.getClassFinder().getClassLoader(),
-            options.getEndpointGeneratedOpenAPIFile());
+                options.getNpmFolder(), options.getBuildDirectoryName(),
+                options.getClassFinder().getClassLoader(),
+                options.getEndpointGeneratedOpenAPIFile());
     }
 }

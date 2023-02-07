@@ -44,15 +44,12 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @param output
      *            the output path of the generated json file.
      */
-    TaskGenerateOpenAPIImpl(File properties,
-        File projectDirectory,
-        String buildDirectoryName,
-        @Nonnull ClassLoader classLoader,
-        @Nonnull File output
-        ) {
+    TaskGenerateOpenAPIImpl(File properties, File projectDirectory,
+            String buildDirectoryName, @Nonnull ClassLoader classLoader,
+            @Nonnull File output) {
         super(properties, projectDirectory, buildDirectoryName);
         Objects.requireNonNull(output,
-            "OpenAPI output file should not be null");
+                "OpenAPI output file should not be null");
         this.output = output;
         Objects.requireNonNull(classLoader, "ClassLoader should not be null");
         this.classLoader = classLoader;
@@ -63,16 +60,16 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         try {
             var engineConfiguration = getEngineConfiguration();
             var processor = new ParserProcessor(
-                engineConfiguration.getBaseDir(),
-                engineConfiguration.getClassPath())
-                .classLoader(classLoader);
+                    engineConfiguration.getBaseDir(),
+                    engineConfiguration.getClassPath())
+                            .classLoader(classLoader);
 
             var parserConfiguration = engineConfiguration.getParser();
             parserConfiguration.getClassPath().ifPresent(processor::classPath);
             parserConfiguration.getEndpointAnnotation()
-                .ifPresent(processor::endpointAnnotation);
+                    .ifPresent(processor::endpointAnnotation);
             parserConfiguration.getEndpointExposedAnnotation()
-                .ifPresent(processor::endpointExposedAnnotation);
+                    .ifPresent(processor::endpointExposedAnnotation);
             // Use endpoint prefix from application.properties
             readEndpointPrefixProperty().ifPresent(processor::endpointPrefix);
             parserConfiguration.getPlugins().ifPresent(processor::plugins);
@@ -80,8 +77,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var openAPI = processor.process();
             writeOpenAPI(openAPI);
         } catch (ParserException e) {
-            throw new ExecutionFailedException(
-                "Java code parsing failed", e);
+            throw new ExecutionFailedException("Java code parsing failed", e);
         }
     }
 
@@ -91,8 +87,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @return
      */
     private Optional<String> readEndpointPrefixProperty() {
-        return Optional.ofNullable(
-            readApplicationProperties().getProperty("vaadin.endpoint.prefix"));
+        return Optional.ofNullable(readApplicationProperties()
+                .getProperty("vaadin.endpoint.prefix"));
     }
 
     private void writeOpenAPI(OpenAPI openAPI) throws ExecutionFailedException {
@@ -101,10 +97,10 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             Files.createDirectories(openAPIFile.getParent());
 
             Files.write(openAPIFile, new OpenAPIPrinter().pretty()
-                .writeAsString(openAPI).getBytes());
+                    .writeAsString(openAPI).getBytes());
         } catch (IOException e) {
             throw new ExecutionFailedException(
-                "Failed to write OpenAPI spec file", e);
+                    "Failed to write OpenAPI spec file", e);
         }
     }
 }

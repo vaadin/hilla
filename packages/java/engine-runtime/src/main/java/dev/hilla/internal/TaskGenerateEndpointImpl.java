@@ -36,20 +36,17 @@ import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.0.0-beta1")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-beta1")
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
-    implements TaskGenerateEndpoint {
+        implements TaskGenerateEndpoint {
     private final File outputDirectory;
     private final File openAPI;
 
-    TaskGenerateEndpointImpl(File applicationProperties,
-        File projectDirectory,
-        String buildDirectoryName,
-        File openAPI, File outputDirectory) {
+    TaskGenerateEndpointImpl(File applicationProperties, File projectDirectory,
+            String buildDirectoryName, File openAPI, File outputDirectory) {
 
         super(applicationProperties, projectDirectory, buildDirectoryName);
-        Objects.requireNonNull(openAPI,
-            "OpenAPI file cannot be null");
+        Objects.requireNonNull(openAPI, "OpenAPI file cannot be null");
         Objects.requireNonNull(outputDirectory,
-            "Output directory cannot be null");
+                "Output directory cannot be null");
         this.openAPI = openAPI;
         this.outputDirectory = outputDirectory;
     }
@@ -58,7 +55,8 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         try {
             return Files.readString(openAPI.toPath());
         } catch (IOException e) {
-            throw new ExecutionFailedException("Failed to read OpenAPI spec file " + openAPI.getPath(), e);
+            throw new ExecutionFailedException(
+                    "Failed to read OpenAPI spec file " + openAPI.getPath(), e);
         }
     }
 
@@ -66,13 +64,16 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         try {
             var engineConfiguration = getEngineConfiguration();
-            var processor = new GeneratorProcessor(engineConfiguration.getBaseDir())
-                .outputDir(outputDirectory);
-            getEngineConfiguration().getGenerator().getPlugins().ifPresent(processor::plugins);
+            var processor = new GeneratorProcessor(
+                    engineConfiguration.getBaseDir())
+                            .outputDir(outputDirectory);
+            getEngineConfiguration().getGenerator().getPlugins()
+                    .ifPresent(processor::plugins);
             processor.input(readOpenApi()).process();
-        } catch (IOException | InterruptedException | GeneratorUnavailableException e) {
+        } catch (IOException | InterruptedException
+                | GeneratorUnavailableException e) {
             throw new ExecutionFailedException(
-                "Failed to run TypeScript endpoint generator", e);
+                    "Failed to run TypeScript endpoint generator", e);
         }
     }
 }

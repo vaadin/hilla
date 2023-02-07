@@ -79,19 +79,20 @@ public final class EndpointPlugin
 
     private String getEndpointName(ClassInfoModel endpointCls) {
         var endpointAnnotationName = getStorage().getParserConfig()
-            .getEndpointAnnotationName();
-        var endpointAnnotation = endpointCls.getAnnotations().stream().filter(
-                annotation -> annotation.getName().equals(endpointAnnotationName))
-            .findFirst();
-        return endpointAnnotation
-            .flatMap(this::getEndpointAnnotationValue)
-            .filter(name -> !name.isEmpty())
-            .orElseGet(endpointCls::getSimpleName);
+                .getEndpointAnnotationName();
+        var endpointAnnotation = endpointCls.getAnnotations().stream()
+                .filter(annotation -> annotation.getName()
+                        .equals(endpointAnnotationName))
+                .findFirst();
+        return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
+                .filter(name -> !name.isEmpty())
+                .orElseGet(endpointCls::getSimpleName);
     }
 
-    private Optional<String> getEndpointAnnotationValue(AnnotationInfoModel endpointAnnotation) {
+    private Optional<String> getEndpointAnnotationValue(
+            AnnotationInfoModel endpointAnnotation) {
         return endpointAnnotation.getParameters().stream()
-            .filter(param -> param.getName().equals("value"))
-            .findFirst().map(param -> (String) param.getValue());
+                .filter(param -> param.getName().equals("value")).findFirst()
+                .map(param -> (String) param.getValue());
     }
 }

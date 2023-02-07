@@ -51,12 +51,12 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     AbstractTaskEndpointGenerator(File applicationProperties,
-        File projectDirectory, String buildDirectoryName) {
+            File projectDirectory, String buildDirectoryName) {
         this.applicationProperties = applicationProperties;
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
-            "Project directory cannot be null");
+                "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
-            "Build directory name cannot be null");
+                "Build directory name cannot be null");
     }
 
     protected Properties readApplicationProperties() {
@@ -64,16 +64,17 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
         if (applicationProperties != null && applicationProperties.exists()) {
             try (BufferedReader bufferedReader = Files.newBufferedReader(
-                applicationProperties.toPath(), StandardCharsets.UTF_8)) {
+                    applicationProperties.toPath(), StandardCharsets.UTF_8)) {
                 config.load(bufferedReader);
             } catch (IOException e) {
                 log().info(String.format(
-                    "Can't read the application" + ".properties file from %s",
-                    applicationProperties.toString()), e);
+                        "Can't read the application"
+                                + ".properties file from %s",
+                        applicationProperties.toString()), e);
             }
         } else {
             log().debug(
-                "Found no application properties, using default values.");
+                    "Found no application properties, using default values.");
         }
         return config;
     }
@@ -87,7 +88,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     }
 
     protected EngineConfiguration getEngineConfiguration()
-        throws ExecutionFailedException {
+            throws ExecutionFailedException {
         if (engineConfiguration == null) {
             prepareEngineConfiguration();
         }
@@ -100,7 +101,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     }
 
     protected void prepareEngineConfiguration()
-        throws ExecutionFailedException {
+            throws ExecutionFailedException {
         EngineConfiguration config = null;
 
         var buildDir = new File(projectDirectory, buildDirectoryName);
@@ -108,12 +109,13 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             config = EngineConfiguration.load(buildDir);
         } catch (IOException e) {
             logger.warn(
-                "Hilla engine configuration found, but not read correctly", e);
+                    "Hilla engine configuration found, but not read correctly",
+                    e);
         }
 
         if (config == null) {
             logger.info(
-                "Hilla engine configuration not found: configure using build system plugin");
+                    "Hilla engine configuration not found: configure using build system plugin");
             var command = prepareCommand();
             runConfigure(command);
         }
@@ -122,7 +124,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             config = EngineConfiguration.load(buildDir);
         } catch (IOException e) {
             throw new ExecutionFailedException(
-                "Failed to read Hilla engine configuration", e);
+                    "Failed to read Hilla engine configuration", e);
         }
 
         this.engineConfiguration = config;
@@ -145,10 +147,10 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                 return prepareGradleCommand();
             }
         }
-        throw new IllegalStateException(String.format(
-            "Failed to determine project directory for dev mode. " +
-                "Directory '%s' does not look like a Maven or " +
-                "Gradle project.", projectDirectory));
+        throw new IllegalStateException(String
+                .format("Failed to determine project directory for dev mode. "
+                        + "Directory '%s' does not look like a Maven or "
+                        + "Gradle project.", projectDirectory));
     }
 
     private List<String> prepareMavenCommand() {
@@ -162,17 +164,17 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     void runConfigure(List<String> command) throws ExecutionFailedException {
         var exitCode = 0;
         try {
-            ProcessBuilder builder = new ProcessBuilder(command).directory(
-                projectDirectory).inheritIO();
+            ProcessBuilder builder = new ProcessBuilder(command)
+                    .directory(projectDirectory).inheritIO();
             exitCode = builder.start().waitFor();
         } catch (Exception e) {
             throw new ExecutionFailedException(
-                "Emitting Hilla engine configuration failed", e);
+                    "Emitting Hilla engine configuration failed", e);
         }
         if (exitCode != 0) {
             throw new ExecutionFailedException(
-                "Emitting Hilla engine configuration failed with exit code" +
-                    exitCode);
+                    "Emitting Hilla engine configuration failed with exit code"
+                            + exitCode);
         }
     }
 }

@@ -272,8 +272,7 @@ public final class Parser {
         try (var scanResult = new ClassGraph().enableAnnotationInfo()
                 .ignoreClassVisibility()
                 .overrideClasspath(config.getClassPathElements())
-                .overrideClassLoaders(config.getClassLoader())
-                .scan()) {
+                .overrideClassLoaders(config.getClassLoader()).scan()) {
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
             var pluginManager = new PluginManager(

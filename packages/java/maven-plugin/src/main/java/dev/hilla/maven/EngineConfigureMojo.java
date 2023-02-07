@@ -24,12 +24,11 @@ import org.apache.maven.project.MavenProject;
  * Maven Plugin for Hilla. Emits Hilla engine configuration file in the build
  * directory.
  *
- * The configuration gathered from the Maven plugin is saved in a file,
- * so that further runs of the parser / generator can skip running a separate
- * Maven process to get this configuration again.
+ * The configuration gathered from the Maven plugin is saved in a file, so that
+ * further runs of the parser / generator can skip running a separate Maven
+ * process to get this configuration again.
  */
-@Mojo(name = "configure", defaultPhase = LifecyclePhase.GENERATE_RESOURCES,
-    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Mojo(name = "configure", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EngineConfigureMojo extends AbstractMojo {
 
     @Parameter(readonly = true)
@@ -58,11 +57,10 @@ public final class EngineConfigureMojo extends AbstractMojo {
             conf.setClassPath(Stream
                     .of(project.getCompileClasspathElements(),
                             project.getRuntimeClasspathElements())
-                .flatMap(Collection::stream).collect(Collectors.toCollection(
-                    LinkedHashSet::new)));
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
         } catch (DependencyResolutionRequiredException e) {
-            throw new EngineConfigureMojoException("Configuration failed",
-                    e);
+            throw new EngineConfigureMojoException("Configuration failed", e);
         }
 
         conf.setBaseDir(project.getBasedir().toPath());
@@ -78,7 +76,8 @@ public final class EngineConfigureMojo extends AbstractMojo {
             Files.createDirectories(Paths.get(buildDir));
             conf.store(buildDirectory);
         } catch (IOException e) {
-            throw new EngineConfigureMojoException("Maven configuration has not been saved to file", e);
+            throw new EngineConfigureMojoException(
+                    "Maven configuration has not been saved to file", e);
         }
     }
 }
