@@ -25,18 +25,17 @@ import dev.hilla.EndpointInvoker;
 public class PushConfigurer {
 
     @Bean
-    public PushMessageHandler pushMessageHandler(
-            EndpointInvoker endpointInvoker) {
+    PushMessageHandler pushMessageHandler(EndpointInvoker endpointInvoker) {
         return new PushMessageHandler(endpointInvoker);
     }
 
     @Bean
-    public EmbeddedAtmosphereInitializer atmosphereInitializer() {
+    EmbeddedAtmosphereInitializer atmosphereInitializer() {
         return new EmbeddedAtmosphereInitializer();
     }
 
     @Bean
-    public ServletRegistrationBean<AtmosphereServlet> atmosphereServlet() {
+    ServletRegistrationBean<AtmosphereServlet> atmosphereServlet() {
         ServletRegistrationBean<AtmosphereServlet> registration = new ServletRegistrationBean<>(
                 new AtmosphereServlet(), "/HILLA/push");
 
