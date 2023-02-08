@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -19,7 +18,6 @@ public class DependencyTests {
     private static final ResourceLoader resourceLoader = new ResourceLoader(
             DependencyTests.class);
     private static OpenAPI openApi;
-    private static Parser parser;
 
     static {
         try {
@@ -31,10 +29,9 @@ public class DependencyTests {
 
     @BeforeAll
     public static void setUp() {
-        parser = new Parser(new ParserConfig.Builder().classPath(classPath)
+        openApi = new Parser().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new DependencyPlugin()).finish());
-        openApi = parser.execute();
+                .addPlugin(new DependencyPlugin()).execute();
     }
 
     @Test

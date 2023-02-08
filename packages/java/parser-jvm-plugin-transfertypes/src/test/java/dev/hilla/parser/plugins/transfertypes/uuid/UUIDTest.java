@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
@@ -17,13 +17,13 @@ public class UUIDTest {
     @Test
     public void should_ReplaceUUIDClassWithString()
             throws IOException, URISyntaxException {
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).finish();
+                .addPlugin(new BackbonePlugin()).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import dev.hilla.parser.core.ParserConfig;
+import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import dev.hilla.parser.plugins.nonnull.NonnullPlugin;
@@ -24,12 +24,12 @@ public class BasicTest {
                 .of(new AnnotationMatcher(Nonnull.class.getName(), false, 0)),
                 null));
 
-        var config = new ParserConfig.Builder()
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).addPlugin(plugin).finish();
+                .addPlugin(new BackbonePlugin()).addPlugin(plugin).execute();
 
-        helper.executeParserWithConfig(config);
+        helper.executeParserWithConfig(openAPI);
     }
 }

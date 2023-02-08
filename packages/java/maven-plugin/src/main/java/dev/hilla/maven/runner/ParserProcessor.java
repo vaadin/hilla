@@ -11,18 +11,19 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.ParserConfig;
-import dev.hilla.parser.core.PluginManager;
-
-import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.hilla.parser.core.OpenAPIFileType;
+import dev.hilla.parser.core.Parser;
+import dev.hilla.parser.core.PluginManager;
+
+import io.swagger.v3.oas.models.OpenAPI;
+
 public final class ParserProcessor {
-    private final Path baseDir;
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
+    private final Path baseDir;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
@@ -76,19 +77,19 @@ public final class ParserProcessor {
     }
 
     public OpenAPI process() {
-        var builder = new ParserConfig.Builder().classPath(classPath)
+        var parser = new Parser().classPath(classPath)
                 .endpointAnnotation(endpointAnnotationName)
                 .endpointExposedAnnotation(endpointExposedAnnotationName);
 
-        preparePlugins(builder);
-        prepareOpenAPIBase(builder);
+        preparePlugins(parser);
+        prepareOpenAPIBase(parser);
 
         logger.debug("Starting JVM Parser");
 
-        return new Parser(builder.finish()).execute();
+        return parser.execute();
     }
 
-    private void prepareOpenAPIBase(ParserConfig.Builder builder) {
+    private void prepareOpenAPIBase(Parser parser) {
         if (openAPIPath == null) {
             return;
         }
@@ -102,21 +103,20 @@ public final class ParserProcessor {
                 throw new IOException("No OpenAPI base file found");
             }
 
-            builder.openAPISource(Files.readString(path),
-                    fileName.endsWith("json")
-                            ? ParserConfig.OpenAPIFileType.JSON
-                            : ParserConfig.OpenAPIFileType.YAML);
+            parser.openAPISource(Files.readString(path),
+                    fileName.endsWith("json") ? OpenAPIFileType.JSON
+                            : OpenAPIFileType.YAML);
         } catch (IOException e) {
             throw new ParserException("Failed loading OpenAPI spec file", e);
         }
     }
 
-    private void preparePlugins(ParserConfig.Builder builder) {
+    private void preparePlugins(Parser parser) {
         var loadedPlugins = pluginsProcessor.process().stream()
                 .map((plugin) -> PluginManager.load(plugin.getName(),
                         plugin.getOrder(), plugin.getConfiguration()))
                 .collect(Collectors.toList());
 
-        builder.plugins(loadedPlugins);
+        parser.plugins(loadedPlugins);
     }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.ParserConfig;
 import dev.hilla.parser.testutils.ResourceLoader;
 
 public class BasicTests {
@@ -52,32 +51,24 @@ public class BasicTests {
 
     @Test
     public void should_TraverseInConsistentOrder() {
-        var config = new ParserConfig.Builder().classPath(classPath)
+        var openAPI = new Parser().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BasicPlugin()).finish();
-
-        var parser = new Parser(config);
-
-        var openApi = parser.execute();
+                .addPlugin(new BasicPlugin()).execute();
 
         assertEquals(String.join("\n", STEPS),
-                openApi.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
+                openAPI.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
     }
 
     @Test
     public void should_UpdateNodesAndCollectNames() {
-        var config = new ParserConfig.Builder().classPath(classPath)
+        var openAPI = new Parser().classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BasicPlugin()).finish();
-
-        var parser = new Parser(config);
-
-        var openApi = parser.execute();
+                .addPlugin(new BasicPlugin()).execute();
 
         assertEquals(String.join(", ",
                 List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",
                         "FieldInfoModel fieldBar", "MethodInfoModel methodFoo",
                         "MethodInfoModel methodBar")),
-                openApi.getExtensions().get(BasicPlugin.STORAGE_KEY));
+                openAPI.getExtensions().get(BasicPlugin.STORAGE_KEY));
     }
 }
