@@ -153,11 +153,11 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                         + "Gradle project.", projectDirectory));
     }
 
-    private List<String> prepareMavenCommand() {
+    List<String> prepareMavenCommand() {
         return List.of(MAVEN_COMMAND, "-q", "hilla:configure");
     }
 
-    private List<String> prepareGradleCommand() {
+    List<String> prepareGradleCommand() {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
 
