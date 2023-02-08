@@ -62,7 +62,7 @@ public class EndpointControllerConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AccessAnnotationChecker accessAnnotationChecker() {
+    AccessAnnotationChecker accessAnnotationChecker() {
         return new AccessAnnotationChecker();
     }
 
@@ -74,7 +74,7 @@ public class EndpointControllerConfiguration {
      * @return the default Vaadin endpoint access checker bean
      */
     @Bean
-    public EndpointAccessChecker accessChecker(
+    EndpointAccessChecker accessChecker(
             AccessAnnotationChecker accessAnnotationChecker) {
         return new EndpointAccessChecker(accessAnnotationChecker);
     }
@@ -88,7 +88,7 @@ public class EndpointControllerConfiguration {
      * @return the default bean
      */
     @Bean
-    public CsrfChecker csrfChecker(ServletContext servletContext) {
+    CsrfChecker csrfChecker(ServletContext servletContext) {
         return new CsrfChecker(servletContext);
     }
 
@@ -115,8 +115,7 @@ public class EndpointControllerConfiguration {
      * @return the endpoint invoker
      */
     @Bean
-    public EndpointInvoker endpointInvoker(
-            ApplicationContext applicationContext,
+    EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
@@ -131,7 +130,7 @@ public class EndpointControllerConfiguration {
      * @return the endpoint name checker
      */
     @Bean
-    public EndpointNameChecker endpointNameChecker() {
+    EndpointNameChecker endpointNameChecker() {
         return new EndpointNameChecker();
     }
 
@@ -143,8 +142,7 @@ public class EndpointControllerConfiguration {
      * @return the endpoint registry
      */
     @Bean
-    public EndpointRegistry endpointRegistry(
-            EndpointNameChecker endpointNameChecker) {
+    EndpointRegistry endpointRegistry(EndpointNameChecker endpointNameChecker) {
         return new EndpointRegistry(endpointNameChecker);
     }
 
@@ -154,7 +152,7 @@ public class EndpointControllerConfiguration {
      * @return the endpoint util class
      */
     @Bean
-    public EndpointUtil endpointUtil() {
+    EndpointUtil endpointUtil() {
         return new EndpointUtil();
     }
 
@@ -164,7 +162,7 @@ public class EndpointControllerConfiguration {
      * @return the explicit nullable type checker
      */
     @Bean
-    public ExplicitNullableTypeChecker typeChecker() {
+    ExplicitNullableTypeChecker typeChecker() {
         return new ExplicitNullableTypeChecker();
     }
 
@@ -176,7 +174,7 @@ public class EndpointControllerConfiguration {
      * @return updated configuration for {@link EndpointController}
      */
     @Bean
-    public WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
+    WebMvcRegistrations webMvcRegistrationsHandlerMapping() {
         return new WebMvcRegistrations() {
 
             @Override
