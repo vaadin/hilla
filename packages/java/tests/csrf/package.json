@@ -10,7 +10,7 @@
     "@hilla/generator-typescript-plugin-barrel": "../../../ts/generator-typescript-plugin-barrel",
     "@hilla/generator-typescript-plugin-client": "../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "../../../ts/generator-typescript-plugin-model",
-    "@hilla/generator-typescript-plugin-push": "../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-push": "../../../ts/generator-typescript-plugin-push",
     "@hilla/generator-typescript-utils": "../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.17",
