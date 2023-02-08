@@ -89,7 +89,7 @@ public final class Parser {
      * Allows to change the class loader that the parser uses for reflection.
      *
      * @param classLoader
-     *           a class loader instance.
+     *            a class loader instance.
      *
      * @return this (for method chaining).
      */
@@ -417,7 +417,6 @@ public final class Parser {
         public String getEndpointExposedAnnotationName() {
             return endpointExposedAnnotationName;
         }
-
 
         /**
          * Gets the OpenAPI object.
