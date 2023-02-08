@@ -37,8 +37,7 @@ public class PushConfigurer {
     }
 
     @Bean
-    public PushMessageHandler pushMessageHandler(
-            EndpointInvoker endpointInvoker) {
+    PushMessageHandler pushMessageHandler(EndpointInvoker endpointInvoker) {
         return new PushMessageHandler(endpointInvoker);
     }
 
