@@ -48,8 +48,8 @@ public class PushConfigurer {
         return registration;
     }
 
-    private static class EmbeddedAtmosphereInitializer
-            extends ContainerInitializer implements ServletContextInitializer {
+    static class EmbeddedAtmosphereInitializer extends ContainerInitializer
+            implements ServletContextInitializer {
 
         @Override
         public void onStartup(ServletContext servletContext)
