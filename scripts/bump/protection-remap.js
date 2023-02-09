@@ -19,6 +19,7 @@ const {
 const remapped = {
   required_status_checks: required_status_checks
     ? {
+        enforcement_level: 'everyone',
         strict: required_status_checks.strict,
         contexts: required_status_checks.contexts,
       }
