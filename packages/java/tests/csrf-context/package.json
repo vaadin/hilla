@@ -10,13 +10,13 @@
     "@hilla/generator-typescript-plugin-barrel": "../../../ts/generator-typescript-plugin-barrel",
     "@hilla/generator-typescript-plugin-client": "../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "../../../ts/generator-typescript-plugin-model",
-    "@hilla/generator-typescript-plugin-push": "../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-push": "../../../ts/generator-typescript-plugin-push",
     "@hilla/generator-typescript-utils": "../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.17",
     "@vaadin/router": "1.7.4",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.4.1"
+    "lit": "2.6.1"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "3.1.0",
@@ -28,29 +28,29 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "4.9.3",
-    "vite": "v3.2.4",
-    "vite-plugin-checker": "0.4.9",
-    "workbox-build": "6.5.0",
-    "workbox-core": "6.5.0",
-    "workbox-precaching": "6.5.0"
+    "vite": "3.2.5",
+    "vite-plugin-checker": "0.5.4",
+    "workbox-build": "6.5.4",
+    "workbox-core": "6.5.4",
+    "workbox-precaching": "6.5.4"
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "1.3.0-alpha3",
-      "@hilla/frontend": "1.3.0-alpha3",
-      "@hilla/generator-typescript-cli": "1.3.0-alpha3",
-      "@hilla/generator-typescript-core": "1.3.0-alpha3",
-      "@hilla/generator-typescript-plugin-backbone": "1.3.0-alpha3",
-      "@hilla/generator-typescript-plugin-barrel": "1.3.0-alpha3",
-      "@hilla/generator-typescript-plugin-client": "1.3.0-alpha3",
-      "@hilla/generator-typescript-plugin-model": "1.3.0-alpha3",
-      "@hilla/generator-typescript-plugin-push": "1.3.0-alpha3",
-      "@hilla/generator-typescript-utils": "1.3.0-alpha3",
+      "@hilla/form": "1.3.5",
+      "@hilla/frontend": "1.3.5",
+      "@hilla/generator-typescript-cli": "1.3.5",
+      "@hilla/generator-typescript-core": "1.3.5",
+      "@hilla/generator-typescript-plugin-backbone": "1.3.5",
+      "@hilla/generator-typescript-plugin-barrel": "1.3.5",
+      "@hilla/generator-typescript-plugin-client": "1.3.5",
+      "@hilla/generator-typescript-plugin-model": "1.3.5",
+      "@hilla/generator-typescript-plugin-push": "1.3.5",
+      "@hilla/generator-typescript-utils": "1.3.5",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.17",
       "@vaadin/router": "1.7.4",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.4.1"
+      "lit": "2.6.1"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "3.1.0",
@@ -62,13 +62,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "4.9.3",
-      "vite": "v3.2.4",
-      "vite-plugin-checker": "0.4.9",
-      "workbox-build": "6.5.0",
-      "workbox-core": "6.5.0",
-      "workbox-precaching": "6.5.0"
+      "vite": "3.2.5",
+      "vite-plugin-checker": "0.5.4",
+      "workbox-build": "6.5.4",
+      "workbox-core": "6.5.4",
+      "workbox-precaching": "6.5.4"
     },
-    "hash": "435288b450da5b23401a8af3d3d412f42cbbab8e8e3b1c6091f25c686483c268"
+    "hash": "14f172d354526efa5adf615a7e51eb8abc78f7febbabee2176016b89420fda5b"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
