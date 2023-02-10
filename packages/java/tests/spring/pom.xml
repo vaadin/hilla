@@ -78,6 +78,8 @@
       <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- TB uses selenium version 4.5.3, but Spring Boot is using 4.1.4. 
+         This version pin should be removed after it has been added to Testbench 8.2 -->
     <dependency>
         <groupId>org.seleniumhq.selenium</groupId>
         <artifactId>selenium-chromium-driver</artifactId>
