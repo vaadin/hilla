@@ -1,1 +1,2 @@
 org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor=dev.hilla.EndpointInitializationAotProcessor
+org.springframework.aot.hint.RuntimeHintsRegistrar=dev.hilla.springnative.HillaHintsRegistrar

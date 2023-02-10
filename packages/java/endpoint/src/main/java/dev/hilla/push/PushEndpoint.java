@@ -4,28 +4,18 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.function.Consumer;
 
-import jakarta.servlet.ServletContext;
-
-import org.atmosphere.client.TrackMessageSizeInterceptor;
-import org.atmosphere.config.service.AtmosphereHandlerService;
-import org.atmosphere.config.service.Singleton;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListenerAdapter;
 import org.atmosphere.handler.AtmosphereHandlerAdapter;
-import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
-import org.atmosphere.interceptor.SuspendTrackerInterceptor;
 import org.atmosphere.util.IOUtils;
-import org.atmosphere.util.SimpleBroadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,14 +25,7 @@ import dev.hilla.push.messages.toclient.AbstractClientMessage;
 
 /**
  * Sets up and configures the push channel.
- * <p>
- * This class is initialized by Atmosphere and not Spring, so autowiring is
- * handled manually when the first request comes in.
  */
-@AtmosphereHandlerService(path = "/HILLA/push", broadcaster = SimpleBroadcaster.class, interceptors = {
-        AtmosphereResourceLifecycleInterceptor.class,
-        TrackMessageSizeInterceptor.class, SuspendTrackerInterceptor.class })
-@Singleton
 public class PushEndpoint extends AtmosphereHandlerAdapter {
 
     @Autowired
@@ -50,24 +33,8 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
     @Autowired
     private PushMessageHandler pushMessageHandler;
 
-    public PushEndpoint() {
-        /*
-         * Atmosphere requires there to be a no-arg constructor unless a custom
-         * AtmosphereObjectFactory is used
-         */
-    }
-
-    private void autowire(ServletContext servletContext) {
-        WebApplicationContext ac = WebApplicationContextUtils
-                .getWebApplicationContext(servletContext);
-        ac.getAutowireCapableBeanFactory().autowireBean(this);
-    }
-
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
-        if (objectMapper == null) {
-            autowire(resource.getAtmosphereConfig().getServletContext());
-        }
         String method = resource.getRequest().getMethod();
         if (method.equalsIgnoreCase("GET")) {
             onConnect(resource);
@@ -79,10 +46,9 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
 
     private void onMessageRequest(AtmosphereResource resource) {
         // This is copied from BroadcastOnPostAtmosphereInterceptor but does not
-        // use the
-        // broadcaster as the message should only go to this one channel and not
-        // all
-        // push channels
+        // use the broadcaster as the message should only go to this one channel
+        // and not
+        // all push channels
         AtmosphereRequest request = resource.getRequest();
         try {
             Object o = IOUtils.readEntirely(resource);
