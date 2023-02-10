@@ -30,7 +30,7 @@ public final class ParserClassPathConfiguration {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ParserClassPathConfiguration that = (ParserClassPathConfiguration) o;
+        var that = (ParserClassPathConfiguration) o;
         return override == that.override
                 && Objects.equals(delimiter, that.delimiter)
                 && Objects.equals(value, that.value);
