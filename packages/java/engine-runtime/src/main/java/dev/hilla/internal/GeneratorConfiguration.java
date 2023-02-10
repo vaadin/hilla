@@ -5,13 +5,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class GeneratorConfiguration {
-    private PluginList plugins;
+    private Plugins plugins;
 
-    public Optional<PluginList> getPlugins() {
+    public Optional<Plugins> getPlugins() {
         return Optional.ofNullable(plugins);
     }
 
-    void setPlugins(PluginList plugins) {
+    void setPlugins(Plugins plugins) {
         this.plugins = plugins;
     }
 
@@ -45,7 +45,7 @@ public final class GeneratorConfiguration {
         }
     }
 
-    public static class PluginList {
+    public static class Plugins {
         private final List<Plugin> disable = List.of();
         private final boolean disableAllDefaults = false;
         private final List<Plugin> use = List.of();

@@ -53,7 +53,7 @@ public final class GeneratorProcessor {
     }
 
     public GeneratorProcessor plugins(
-            @Nonnull GeneratorConfiguration.PluginList plugins) {
+            @Nonnull GeneratorConfiguration.Plugins plugins) {
         var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
 
         if (!plugins.isDisableAllDefaults()) {
