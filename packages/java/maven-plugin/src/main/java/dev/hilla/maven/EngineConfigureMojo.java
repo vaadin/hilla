@@ -51,30 +51,29 @@ public final class EngineConfigureMojo extends AbstractMojo {
 
     @Override
     public void execute() throws EngineConfigureMojoException {
-        EngineConfiguration conf = new EngineConfiguration();
-
         try {
+            EngineConfiguration conf = new EngineConfiguration();
             conf.setClassPath(Stream
                     .of(project.getCompileClasspathElements(),
                             project.getRuntimeClasspathElements())
                     .flatMap(Collection::stream)
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
-        } catch (DependencyResolutionRequiredException e) {
-            throw new EngineConfigureMojoException("Configuration failed", e);
-        }
 
-        conf.setBaseDir(project.getBasedir().toPath());
-        conf.setGenerator(generator);
-        conf.setParser(parser);
-        var buildDir = project.getBuild().getDirectory();
-        conf.setBuildDir(buildDir);
+            conf.setBaseDir(project.getBasedir().toPath());
+            conf.setGenerator(generator);
+            conf.setParser(parser);
+            var buildDir = project.getBuild().getDirectory();
+            conf.setBuildDir(buildDir);
 
-        // The configuration gathered from the Maven plugin is saved in a file
-        // so that further runs can skip running a separate Maven project just
-        // to get this configuration again
-        try {
+            // The configuration gathered from the Maven plugin is saved in a
+            // file
+            // so that further runs can skip running a separate Maven project
+            // just
+            // to get this configuration again
             Files.createDirectories(Paths.get(buildDir));
             conf.store(buildDirectory);
+        } catch (DependencyResolutionRequiredException e) {
+            throw new EngineConfigureMojoException("Configuration failed", e);
         } catch (IOException e) {
             throw new EngineConfigureMojoException(
                     "Maven configuration has not been saved to file", e);

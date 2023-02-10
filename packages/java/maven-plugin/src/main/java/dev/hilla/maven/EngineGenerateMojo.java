@@ -47,16 +47,12 @@ public final class EngineGenerateMojo extends AbstractMojo {
 
     @Override
     public void execute() throws EngineGenerateMojoException {
-        EngineConfiguration conf;
         try {
-            conf = EngineConfiguration.load(buildDirectory);
+            var conf = EngineConfiguration.load(buildDirectory);
+            new EngineRunner(conf).execute();
         } catch (IOException e) {
             throw new EngineGenerateMojoException(
                     "Loading saved configuration failed", e);
-        }
-
-        try {
-            new EngineRunner(conf).execute();
         } catch (EngineException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         } catch (GeneratorUnavailableException e) {
