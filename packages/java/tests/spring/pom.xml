@@ -80,7 +80,8 @@
     </dependency>
     <dependency>
         <groupId>org.seleniumhq.selenium</groupId>
-        <artifactId>selenium-chrome-driver</artifactId>
+        <artifactId>selenium-chromium-driver</artifactId>
+        <version>4.5.3</version>
         <scope>test</scope>
     </dependency>
 
