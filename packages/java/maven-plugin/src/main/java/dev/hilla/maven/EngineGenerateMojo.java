@@ -2,7 +2,10 @@ package dev.hilla.maven;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Objects;
 
 import dev.hilla.internal.EngineConfiguration;
 import dev.hilla.internal.EngineException;
@@ -48,8 +51,15 @@ public final class EngineGenerateMojo extends AbstractMojo {
     @Override
     public void execute() throws EngineGenerateMojoException {
         try {
-            var conf = EngineConfiguration.load(buildDirectory);
-            new EngineRunner(conf).execute();
+            var conf = Objects.requireNonNull(
+                EngineConfiguration.load(buildDirectory));
+            var classPath = conf.getClassPath();
+            var urls = new ArrayList<URL>(classPath.size());
+            for (var classPathItem : classPath) {
+                urls.add(new File(classPathItem).toURI().toURL());
+            }
+            var classLoader = new URLClassLoader(urls.toArray(URL[]::new));
+            new EngineRunner(conf, classLoader).execute();
         } catch (IOException e) {
             throw new EngineGenerateMojoException(
                     "Loading saved configuration failed", e);
