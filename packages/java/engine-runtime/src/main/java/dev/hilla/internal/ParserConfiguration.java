@@ -50,7 +50,7 @@ public final class ParserConfiguration {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ParserConfiguration that = (ParserConfiguration) o;
+        var that = (ParserConfiguration) o;
         return Objects.equals(classPath, that.classPath)
                 && Objects.equals(endpointAnnotation, that.endpointAnnotation)
                 && Objects.equals(endpointExposedAnnotation,
