@@ -48,11 +48,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             String buildDirectoryName, @Nonnull ClassLoader classLoader,
             @Nonnull File output) {
         super(properties, projectDirectory, buildDirectoryName);
-        Objects.requireNonNull(output,
-                "OpenAPI output file should not be null");
-        this.output = output;
-        Objects.requireNonNull(classLoader, "ClassLoader should not be null");
-        this.classLoader = classLoader;
+        this.output = Objects.requireNonNull(output, "OpenAPI output file should not be null");
+        this.classLoader = Objects.requireNonNull(classLoader, "ClassLoader should not be null");
     }
 
     @Override
