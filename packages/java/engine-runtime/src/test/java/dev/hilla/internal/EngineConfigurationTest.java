@@ -71,7 +71,7 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void should_store() throws IOException {
+    public void should_SerializeToJsonFile() throws IOException {
         engineConfiguration.store(temporaryDirectory.toFile());
 
         var storedConfig = (ObjectNode) objectMapper.readTree(configFile);
@@ -88,7 +88,7 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void should_load() throws IOException, URISyntaxException {
+    public void should_DeserializeFromJsonFile() throws IOException, URISyntaxException {
         Files.copy(Path.of(TEST_CONFIG.toURI()), configFile.toPath());
 
         var loadedConfig = EngineConfiguration
