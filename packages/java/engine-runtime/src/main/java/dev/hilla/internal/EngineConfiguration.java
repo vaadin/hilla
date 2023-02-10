@@ -90,11 +90,11 @@ public class EngineConfiguration {
             return false;
         }
         EngineConfiguration that = (EngineConfiguration) o;
-        return Objects.equals(baseDir, that.baseDir) &&
-            Objects.equals(classPath, that.classPath) &&
-            Objects.equals(generator, that.generator) &&
-            Objects.equals(parser, that.parser) &&
-            Objects.equals(buildDir, that.buildDir);
+        return Objects.equals(baseDir, that.baseDir)
+                && Objects.equals(classPath, that.classPath)
+                && Objects.equals(generator, that.generator)
+                && Objects.equals(parser, that.parser)
+                && Objects.equals(buildDir, that.buildDir);
     }
 
     @Override

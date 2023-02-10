@@ -31,29 +31,30 @@ public class EngineConfigurationTest {
     private EngineConfiguration engineConfiguration = new EngineConfiguration();
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private static final URL TEST_CONFIG = EngineConfigurationTest.class.getResource(
-        "hilla-engine-configuration.json");
+    private static final URL TEST_CONFIG = EngineConfigurationTest.class
+            .getResource("hilla-engine-configuration.json");
 
     @BeforeEach
     public void setUp() throws IOException {
-        this.temporaryDirectory = Files.createTempDirectory(
-            getClass().getName());
-        this.configFile = this.temporaryDirectory.resolve(
-            EngineConfiguration.RESOURCE_NAME).toFile();
+        this.temporaryDirectory = Files
+                .createTempDirectory(getClass().getName());
+        this.configFile = this.temporaryDirectory
+                .resolve(EngineConfiguration.RESOURCE_NAME).toFile();
 
         this.engineConfiguration.setBaseDir(Path.of("base"));
         this.engineConfiguration.setBuildDir("build");
         this.engineConfiguration.setClassPath(
-            new LinkedHashSet<>(List.of("build/classes", "dependency")));
+                new LinkedHashSet<>(List.of("build/classes", "dependency")));
         var parserConfiguration = new ParserConfiguration();
         parserConfiguration.setEndpointAnnotation("dev.hilla.test.Endpoint");
-        parserConfiguration.setEndpointExposedAnnotation(
-            "dev.hilla.test.EndpointExposed");
+        parserConfiguration
+                .setEndpointExposedAnnotation("dev.hilla.test.EndpointExposed");
         parserConfiguration.setClassPath(new ParserClassPathConfiguration());
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(
-            List.of(new ParserConfiguration.Plugin("parser-jvm-plugin-use")),
-            List.of(
-                new ParserConfiguration.Plugin("parser-jvm-plugin-disable"))));
+                List.of(new ParserConfiguration.Plugin(
+                        "parser-jvm-plugin-use")),
+                List.of(new ParserConfiguration.Plugin(
+                        "parser-jvm-plugin-disable"))));
         parserConfiguration.setOpenAPIPath("test-openapi.json");
         this.engineConfiguration.setParser(parserConfiguration);
 
@@ -73,26 +74,25 @@ public class EngineConfigurationTest {
     public void should_store() throws IOException {
         engineConfiguration.store(temporaryDirectory.toFile());
 
-
         var storedConfig = (ObjectNode) objectMapper.readTree(configFile);
         // baseDir gets stored as absolute URI, relativize for comparison
-        var storedBaseDir = Path.of(
-            URI.create(storedConfig.get("baseDir").asText()));
+        var storedBaseDir = Path
+                .of(URI.create(storedConfig.get("baseDir").asText()));
         var relativeBaseDir = Path.of(".").toAbsolutePath()
-            .relativize(storedBaseDir);
+                .relativize(storedBaseDir);
         storedConfig.set("baseDir", new TextNode(relativeBaseDir.toString()));
         var expectedConfig = objectMapper.readTree(TEST_CONFIG);
 
         assertEquals(expectedConfig.toPrettyString(),
-            storedConfig.toPrettyString());
+                storedConfig.toPrettyString());
     }
 
     @Test
     public void should_load() throws IOException, URISyntaxException {
         Files.copy(Path.of(TEST_CONFIG.toURI()), configFile.toPath());
 
-        var loadedConfig = EngineConfiguration.load(
-            temporaryDirectory.toFile());
+        var loadedConfig = EngineConfiguration
+                .load(temporaryDirectory.toFile());
 
         assertNotNull(loadedConfig);
         assertEquals(engineConfiguration, loadedConfig);

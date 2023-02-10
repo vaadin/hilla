@@ -66,12 +66,15 @@ public final class GeneratorConfiguration {
         private final List<Plugin> disable = List.of();
         private final boolean disableAllDefaults = false;
         private final List<Plugin> use = List.of();
+
         public List<Plugin> getDisable() {
             return disable;
         }
+
         public List<Plugin> getUse() {
             return use;
         }
+
         public boolean isDisableAllDefaults() {
             return disableAllDefaults;
         }
@@ -85,9 +88,9 @@ public final class GeneratorConfiguration {
                 return false;
             }
             Plugins plugins = (Plugins) o;
-            return disableAllDefaults == plugins.disableAllDefaults &&
-                Objects.equals(disable, plugins.disable) &&
-                Objects.equals(use, plugins.use);
+            return disableAllDefaults == plugins.disableAllDefaults
+                    && Objects.equals(disable, plugins.disable)
+                    && Objects.equals(use, plugins.use);
         }
 
         @Override
