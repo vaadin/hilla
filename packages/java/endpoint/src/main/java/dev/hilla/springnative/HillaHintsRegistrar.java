@@ -61,8 +61,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     StandardCharsets.UTF_8);
             List<Class<?>> types = parseOpenApi(openApiAsText);
             for (Class<?> type : types) {
-                hints.reflection().registerType(type,
-                        MemberCategory.values());
+                hints.reflection().registerType(type, MemberCategory.values());
             }
         } catch (IOException e) {
             logger.error("Error while scanning and registering endpoint types",
@@ -73,11 +72,14 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     /**
      * Parses the given open api and finds the used custom types.
      * 
-     * @param openApiAsText the open api JSON as text
+     * @param openApiAsText
+     *            the open api JSON as text
      * @return a list of custom types used
-     * @throws IOException if parsing fails
+     * @throws IOException
+     *             if parsing fails
      */
-    public static List<Class<?>> parseOpenApi(String openApiAsText) throws IOException {
+    public static List<Class<?>> parseOpenApi(String openApiAsText)
+            throws IOException {
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
         ObjectNode schemas = (ObjectNode) openApi.get("components")
                 .get("schemas");
@@ -86,11 +88,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             try {
                 types.add(Class.forName(type));
             } catch (ClassNotFoundException e) {
-                // The type in openapi.json is currently the canonical name so if it is an inner
+                // The type in openapi.json is currently the canonical name so
+                // if it is an inner
                 // class it should use $ instead of .
                 int lastDot = type.lastIndexOf('.');
                 if (lastDot >= 0) {
-                    String modifiedName = type.substring(0, lastDot) + "$" + type.substring(lastDot + 1);
+                    String modifiedName = type.substring(0, lastDot) + "$"
+                            + type.substring(lastDot + 1);
                     try {
                         types.add(Class.forName(modifiedName));
                     } catch (ClassNotFoundException ee) {

@@ -43,11 +43,14 @@ public class ModelEndpointTest extends AbstractEndpointGenerationTest {
     }
 
     @Test
-    public void should_registerCustomTypes_When_CompilingForNative() throws Exception {
+    public void should_registerCustomTypes_When_CompilingForNative()
+            throws Exception {
         generateOpenApi(null);
-        List<Class<?>> types = HillaHintsRegistrar
-                .parseOpenApi(IOUtils.toString(openApiJsonOutput.toUri(), StandardCharsets.UTF_8));
-        Assert.assertEquals(Set.of(ModelFromDifferentPackage.class,
-                ModelEndpoint.Account.class, ModelEndpoint.Group.class), new HashSet<>(types));
+        List<Class<?>> types = HillaHintsRegistrar.parseOpenApi(IOUtils
+                .toString(openApiJsonOutput.toUri(), StandardCharsets.UTF_8));
+        Assert.assertEquals(
+                Set.of(ModelFromDifferentPackage.class,
+                        ModelEndpoint.Account.class, ModelEndpoint.Group.class),
+                new HashSet<>(types));
     }
 }
