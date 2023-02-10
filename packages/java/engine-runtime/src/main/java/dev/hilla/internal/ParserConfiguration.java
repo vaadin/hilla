@@ -42,6 +42,29 @@ public final class ParserConfiguration {
         return Optional.ofNullable(plugins);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParserConfiguration that = (ParserConfiguration) o;
+        return Objects.equals(classPath, that.classPath) &&
+            Objects.equals(endpointAnnotation, that.endpointAnnotation) &&
+            Objects.equals(endpointExposedAnnotation,
+                that.endpointExposedAnnotation) &&
+            Objects.equals(openAPIPath, that.openAPIPath) &&
+            Objects.equals(plugins, that.plugins);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(classPath, endpointAnnotation,
+            endpointExposedAnnotation, openAPIPath, plugins);
+    }
+
     void setClassPath(ParserClassPathConfiguration classPath) {
         this.classPath = classPath;
     }
@@ -115,7 +138,7 @@ public final class ParserConfiguration {
         }
 
         public Plugins(@Nonnull Collection<Plugin> use,
-                @Nonnull Collection<Plugin> disable) {
+            @Nonnull Collection<Plugin> disable) {
             this.disable.addAll(disable);
             this.use.addAll(use);
         }
@@ -134,14 +157,33 @@ public final class ParserConfiguration {
         public boolean shouldAllDefaultsBeDisabled() {
             return disableAllDefaults;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Plugins plugins = (Plugins) o;
+            return disableAllDefaults == plugins.disableAllDefaults &&
+                Objects.equals(disable, plugins.disable) &&
+                Objects.equals(use, plugins.use);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(disable, disableAllDefaults, use);
+        }
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         private static final Set<Plugin> defaults = Set.of(
-                new Plugin(TransferTypesPlugin.class.getName()),
-                new Plugin(BackbonePlugin.class.getName()),
-                new Plugin(NonnullPlugin.class.getName()),
-                new Plugin(ModelPlugin.class.getName()));
+            new Plugin(TransferTypesPlugin.class.getName()),
+            new Plugin(BackbonePlugin.class.getName()),
+            new Plugin(NonnullPlugin.class.getName()),
+            new Plugin(ModelPlugin.class.getName()));
 
         public PluginsProcessor() {
             super(defaults);

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -78,5 +79,26 @@ public class EngineConfiguration {
 
     public void setBuildDir(String buildDir) {
         this.buildDir = buildDir;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        EngineConfiguration that = (EngineConfiguration) o;
+        return Objects.equals(baseDir, that.baseDir) &&
+            Objects.equals(classPath, that.classPath) &&
+            Objects.equals(generator, that.generator) &&
+            Objects.equals(parser, that.parser) &&
+            Objects.equals(buildDir, that.buildDir);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(baseDir, classPath, generator, parser, buildDir);
     }
 }
