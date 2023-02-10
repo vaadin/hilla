@@ -166,7 +166,7 @@ public final class ParserConfiguration {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            Plugins plugins = (Plugins) o;
+            var plugins = (Plugins) o;
             return disableAllDefaults == plugins.disableAllDefaults
                     && Objects.equals(disable, plugins.disable)
                     && Objects.equals(use, plugins.use);
