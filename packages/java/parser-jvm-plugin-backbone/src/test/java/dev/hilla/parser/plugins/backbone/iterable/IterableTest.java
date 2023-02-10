@@ -17,6 +17,7 @@ public class IterableTest {
     public void should_GenerateStringType_When_ReferringToEnumTypes()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
+                .classLoader(ClassLoader.getSystemClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BackbonePlugin()).execute();

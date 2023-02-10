@@ -25,6 +25,7 @@ public class SuperClassMethodsTest {
                 null));
 
         var openAPI = new Parser()
+                .classLoader(ClassLoader.getSystemClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

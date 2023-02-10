@@ -17,6 +17,7 @@ public class BareTypeTest {
     public void should_CorrectlyResolveBareTypes()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
+                .classLoader(ClassLoader.getSystemClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BackbonePlugin()).execute();

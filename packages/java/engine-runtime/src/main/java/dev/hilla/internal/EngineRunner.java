@@ -16,9 +16,11 @@ public class EngineRunner {
             "generated-resources", "openapi.json" };
 
     private final EngineConfiguration conf;
+    private final ClassLoader classLoader;
 
-    public EngineRunner(EngineConfiguration conf) {
+    public EngineRunner(EngineConfiguration conf, ClassLoader classLoader) {
         this.conf = conf;
+        this.classLoader = classLoader;
     }
 
     public void execute()
