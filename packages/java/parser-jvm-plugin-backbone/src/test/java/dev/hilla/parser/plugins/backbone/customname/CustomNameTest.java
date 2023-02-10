@@ -13,7 +13,7 @@ public class CustomNameTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_UseAppropriateSchema_When_SimpleTypesAreUsed()
+    public void should_UseCustomEndpointNames_WhenGivenInAnnotation()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
