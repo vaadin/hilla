@@ -35,8 +35,6 @@ public class TaskTest {
         System.clearProperty(PARAM_FRONTEND_DIR);
         System.clearProperty(PARAM_GENERATED_DIR);
 
-        Files.createFile(getApplicationPropertiesFile());
-
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
 
@@ -94,9 +92,5 @@ public class TaskTest {
 
     protected String getBuildDirectory() {
         return "build";
-    }
-
-    protected Path getApplicationPropertiesFile() {
-        return temporaryDirectory.resolve("application.properties");
     }
 }

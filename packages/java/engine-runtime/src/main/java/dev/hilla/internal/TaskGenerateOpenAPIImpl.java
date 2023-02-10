@@ -44,10 +44,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @param output
      *            the output path of the generated json file.
      */
-    TaskGenerateOpenAPIImpl(File properties, File projectDirectory,
-            String buildDirectoryName, @Nonnull ClassLoader classLoader,
-            @Nonnull File output) {
-        super(properties, projectDirectory, buildDirectoryName);
+    TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
+        @Nonnull ClassLoader classLoader, @Nonnull File output) {
+        super(projectDirectory, buildDirectoryName);
         this.output = Objects.requireNonNull(output, "OpenAPI output file should not be null");
         this.classLoader = Objects.requireNonNull(classLoader, "ClassLoader should not be null");
     }
@@ -67,8 +66,6 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                     .ifPresent(processor::endpointAnnotation);
             parserConfiguration.getEndpointExposedAnnotation()
                     .ifPresent(processor::endpointExposedAnnotation);
-            // Use endpoint prefix from application.properties
-            readEndpointPrefixProperty().ifPresent(processor::endpointPrefix);
             parserConfiguration.getPlugins().ifPresent(processor::plugins);
 
             var openAPI = processor.process();
@@ -76,16 +73,6 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         } catch (ParserException e) {
             throw new ExecutionFailedException("Java code parsing failed", e);
         }
-    }
-
-    /**
-     * Reads the endpoint prefix value from the application.properties file.
-     *
-     * @return
-     */
-    private Optional<String> readEndpointPrefixProperty() {
-        return Optional.ofNullable(readApplicationProperties()
-                .getProperty("vaadin.endpoint.prefix"));
     }
 
     private void writeOpenAPI(OpenAPI openAPI) throws ExecutionFailedException {

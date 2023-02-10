@@ -30,7 +30,6 @@ public final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
-    private String endpointPrefix;
     private String openAPIPath;
     private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
@@ -68,11 +67,6 @@ public final class ParserProcessor {
         return this;
     }
 
-    ParserProcessor endpointPrefix(@Nonnull String endpointPrefix) {
-        this.endpointPrefix = Objects.requireNonNull(endpointPrefix);
-        return this;
-    }
-
     public ParserProcessor openAPIBase(@Nonnull String openAPIBase) {
         this.openAPIPath = openAPIBase;
         return this;
@@ -98,25 +92,9 @@ public final class ParserProcessor {
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
 
-        if (endpointPrefix != null) {
-            parser.adjustOpenAPI(this::applyEndpointPrefix);
-        }
-
         logger.debug("Starting JVM Parser");
 
         return parser.execute();
-    }
-
-    private void applyEndpointPrefix(OpenAPI openAPI) {
-        try {
-            var originalUrl = new URL(openAPI.getServers().get(0).getUrl());
-            openAPI.getServers().get(0)
-                    .setUrl(new URL(originalUrl.getProtocol(),
-                            originalUrl.getHost(), originalUrl.getPort(),
-                            endpointPrefix).toString());
-        } catch (MalformedURLException e) {
-            logger.error("Failed to apply endpoint prefix", e);
-        }
     }
 
     private void prepareOpenAPIBase(Parser parser) {

@@ -55,7 +55,6 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getApplicationPropertiesFile().toFile(),
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 this.getClass().getClassLoader(), generatedOpenAPI);
 
@@ -80,35 +79,9 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     }
 
     @Test
-    public void should_UseGivenProperties_when_applicationPropertiesDefinesThem()
-            throws Exception {
-
-        String applicationPrefix = "/api";
-        StringBuilder applicationPropertiesBuilder = new StringBuilder();
-        applicationPropertiesBuilder.append("vaadin.endpoint.prefix")
-                .append("=").append(applicationPrefix).append("\n");
-        Files.writeString(getApplicationPropertiesFile(),
-                applicationPropertiesBuilder.toString(),
-                StandardCharsets.UTF_8);
-
-        taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getApplicationPropertiesFile().toFile(),
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                this.getClass().getClassLoader(), generatedOpenAPI);
-
-        taskGenerateOpenApi.execute();
-
-        OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
-        Info info = generatedOpenAPI.getInfo();
-        assertThat(generatedOpenAPI.getServers().get(0).getUrl(),
-                endsWith("/api"));
-    }
-
-    @Test
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getApplicationPropertiesFile().toFile(),
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 this.getClass().getClassLoader(), generatedOpenAPI);
 
@@ -130,7 +103,6 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getApplicationPropertiesFile().toFile(),
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 this.getClass().getClassLoader(), generatedOpenAPI);
 

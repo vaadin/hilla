@@ -44,7 +44,6 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertFalse(client.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getApplicationPropertiesFile().toFile(),
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 openApiJson, outputDirectory.toFile());
         taskGenerateEndpoint.execute();
@@ -79,7 +78,6 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertTrue(customConnectClient.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getApplicationPropertiesFile().toFile(),
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 openApiJson, outputDirectory.toFile());
         taskGenerateEndpoint.execute();

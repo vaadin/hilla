@@ -35,7 +35,6 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
-    private final File applicationProperties;
     private final File projectDirectory;
     private final String buildDirectoryName;
     private EngineConfiguration engineConfiguration;
@@ -50,33 +49,11 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    AbstractTaskEndpointGenerator(File applicationProperties,
-            File projectDirectory, String buildDirectoryName) {
-        this.applicationProperties = applicationProperties;
+    AbstractTaskEndpointGenerator(File projectDirectory, String buildDirectoryName) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
                 "Build directory name cannot be null");
-    }
-
-    protected Properties readApplicationProperties() {
-        Properties config = new Properties();
-
-        if (applicationProperties != null && applicationProperties.exists()) {
-            try (BufferedReader bufferedReader = Files.newBufferedReader(
-                    applicationProperties.toPath(), StandardCharsets.UTF_8)) {
-                config.load(bufferedReader);
-            } catch (IOException e) {
-                log().info(String.format(
-                        "Can't read the application"
-                                + ".properties file from %s",
-                        applicationProperties.toString()), e);
-            }
-        } else {
-            log().debug(
-                    "Found no application properties, using default values.");
-        }
-        return config;
     }
 
     protected File getProjectDirectory() {

@@ -40,10 +40,10 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     private final File outputDirectory;
     private final File openAPI;
 
-    TaskGenerateEndpointImpl(File applicationProperties, File projectDirectory,
-            String buildDirectoryName, File openAPI, File outputDirectory) {
+    TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
+        File openAPI, File outputDirectory) {
 
-        super(applicationProperties, projectDirectory, buildDirectoryName);
+        super(projectDirectory, buildDirectoryName);
         this.openAPI = Objects.requireNonNull(openAPI, "OpenAPI file cannot be null");
         this.outputDirectory = Objects.requireNonNull(outputDirectory,
                 "Output directory cannot be null");
