@@ -1,5 +1,7 @@
 package dev.hilla.parser.core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -134,24 +136,45 @@ public class ParserConfigTests {
     }
 
     @Test
+    public void should_ThrowError_When_ClassLoaderIsNotSet() {
+        var e = assertThrows(NullPointerException.class,
+            () -> new Parser()
+                .classPath(defaultClassPathElements)
+                .endpointAnnotation(defaultEndpointAnnotationName)
+                .execute()
+        );
+        assertEquals("[JVM Parser] classLoader is not provided.",
+            e.getMessage());
+    }
+
+    @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
-        assertThrows(NullPointerException.class, () -> new Parser().execute(),
-                "[JVM Parser] classPath is not provided.");
+        var e = assertThrows(NullPointerException.class, () -> new Parser()
+                .classLoader(ClassLoader.getSystemClassLoader())
+                .endpointAnnotation(defaultEndpointAnnotationName)
+                .execute());
+        assertEquals ("[JVM Parser] classPath is not provided.", e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
-        assertThrows(NullPointerException.class,
-                () -> new Parser().classPath(defaultClassPathElements)
-                        .execute(),
-                "[JVM Parser] endpointAnnotationName is not provided.");
+        var e = assertThrows(NullPointerException.class,
+                () -> new Parser()
+                    .classLoader(ClassLoader.getSystemClassLoader())
+                    .classPath(defaultClassPathElements)
+                        .execute());
+        assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
+            e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
-        assertThrows(IllegalArgumentException.class, () -> new BazPlugin(0)
+        var e = assertThrows(IllegalArgumentException.class,
+            () -> new BazPlugin(0)
                 .setConfiguration(new PluginConfiguration() {
-                }), "Requires instance of " + BazPluginConfig.class.getName());
+                }));
+        assertThat(e.getMessage(), startsWith(
+            "Requires instance of class " + BazPluginConfig.class.getName()));
     }
 
     private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
