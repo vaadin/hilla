@@ -49,7 +49,8 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    AbstractTaskEndpointGenerator(File projectDirectory, String buildDirectoryName) {
+    AbstractTaskEndpointGenerator(File projectDirectory,
+            String buildDirectoryName) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,

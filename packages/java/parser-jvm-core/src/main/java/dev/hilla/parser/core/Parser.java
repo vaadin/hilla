@@ -261,7 +261,7 @@ public final class Parser {
     @Nonnull
     public OpenAPI execute() {
         Objects.requireNonNull(config.classLoader,
-            "[JVM Parser] classLoader is not provided.");
+                "[JVM Parser] classLoader is not provided.");
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
         Objects.requireNonNull(config.endpointAnnotationName,

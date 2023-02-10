@@ -138,43 +138,39 @@ public class ParserConfigTests {
     @Test
     public void should_ThrowError_When_ClassLoaderIsNotSet() {
         var e = assertThrows(NullPointerException.class,
-            () -> new Parser()
-                .classPath(defaultClassPathElements)
-                .endpointAnnotation(defaultEndpointAnnotationName)
-                .execute()
-        );
+                () -> new Parser().classPath(defaultClassPathElements)
+                        .endpointAnnotation(defaultEndpointAnnotationName)
+                        .execute());
         assertEquals("[JVM Parser] classLoader is not provided.",
-            e.getMessage());
+                e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
         var e = assertThrows(NullPointerException.class, () -> new Parser()
                 .classLoader(ClassLoader.getSystemClassLoader())
-                .endpointAnnotation(defaultEndpointAnnotationName)
-                .execute());
-        assertEquals ("[JVM Parser] classPath is not provided.", e.getMessage());
+                .endpointAnnotation(defaultEndpointAnnotationName).execute());
+        assertEquals("[JVM Parser] classPath is not provided.", e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser()
-                    .classLoader(ClassLoader.getSystemClassLoader())
-                    .classPath(defaultClassPathElements)
-                        .execute());
+                        .classLoader(ClassLoader.getSystemClassLoader())
+                        .classPath(defaultClassPathElements).execute());
         assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
-            e.getMessage());
+                e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
         var e = assertThrows(IllegalArgumentException.class,
-            () -> new BazPlugin(0)
-                .setConfiguration(new PluginConfiguration() {
-                }));
-        assertThat(e.getMessage(), startsWith(
-            "Requires instance of class " + BazPluginConfig.class.getName()));
+                () -> new BazPlugin(0)
+                        .setConfiguration(new PluginConfiguration() {
+                        }));
+        assertThat(e.getMessage(), startsWith("Requires instance of class "
+                + BazPluginConfig.class.getName()));
     }
 
     private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
