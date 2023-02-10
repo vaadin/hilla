@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -60,17 +59,47 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
         try {
             String openApiAsText = FileUtils.readFileToString(openApiFile,
                     StandardCharsets.UTF_8);
-            JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
-            ObjectNode schemas = (ObjectNode) openApi.get("components")
-                    .get("schemas");
-            schemas.fieldNames().forEachRemaining(type -> {
-                hints.reflection().registerType(TypeReference.of(type),
+            List<Class<?>> types = parseOpenApi(openApiAsText);
+            for (Class<?> type : types) {
+                hints.reflection().registerType(type,
                         MemberCategory.values());
-            });
+            }
         } catch (IOException e) {
             logger.error("Error while scanning and registering endpoint types",
                     e);
         }
+    }
+
+    /**
+     * Parses the given open api and finds the used custom types.
+     * 
+     * @param openApiAsText the open api JSON as text
+     * @return a list of custom types used
+     * @throws IOException if parsing fails
+     */
+    public static List<Class<?>> parseOpenApi(String openApiAsText) throws IOException {
+        JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
+        ObjectNode schemas = (ObjectNode) openApi.get("components")
+                .get("schemas");
+        List<Class<?>> types = new ArrayList<>();
+        schemas.fieldNames().forEachRemaining(type -> {
+            try {
+                types.add(Class.forName(type));
+            } catch (ClassNotFoundException e) {
+                // The type in openapi.json is currently the canonical name so if it is an inner
+                // class it should use $ instead of .
+                int lastDot = type.lastIndexOf('.');
+                if (lastDot >= 0) {
+                    String modifiedName = type.substring(0, lastDot) + "$" + type.substring(lastDot + 1);
+                    try {
+                        types.add(Class.forName(modifiedName));
+                    } catch (ClassNotFoundException ee) {
+                    }
+                }
+            }
+        });
+        return types;
+
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
