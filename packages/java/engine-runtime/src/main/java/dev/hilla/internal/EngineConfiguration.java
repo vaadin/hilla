@@ -89,7 +89,7 @@ public class EngineConfiguration {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        EngineConfiguration that = (EngineConfiguration) o;
+        var that = (EngineConfiguration) o;
         return Objects.equals(baseDir, that.baseDir)
                 && Objects.equals(classPath, that.classPath)
                 && Objects.equals(generator, that.generator)
