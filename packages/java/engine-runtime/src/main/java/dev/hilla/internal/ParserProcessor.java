@@ -31,7 +31,7 @@ public final class ParserProcessor {
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private String openAPIPath;
-    private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    private ClassLoader classLoader = getClass().getClassLoader();
 
     public ParserProcessor(Path baseDir, Set<String> classPath) {
         this.baseDir = baseDir;
