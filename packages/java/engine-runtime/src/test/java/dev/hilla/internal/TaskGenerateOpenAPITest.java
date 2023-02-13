@@ -56,7 +56,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                this.getClass().getClassLoader(), generatedOpenAPI);
+                getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
@@ -83,7 +83,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                this.getClass().getClassLoader(), generatedOpenAPI);
+                getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 
@@ -104,7 +104,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                this.getClass().getClassLoader(), generatedOpenAPI);
+                getClass().getClassLoader(), generatedOpenAPI);
 
         taskGenerateOpenApi.execute();
 

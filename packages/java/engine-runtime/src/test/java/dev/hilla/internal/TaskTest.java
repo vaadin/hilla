@@ -23,14 +23,12 @@ import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 public class TaskTest {
     private Path temporaryDirectory;
 
-    private String userDir;
-
     @BeforeEach
     public void setUpTaskApplication() throws IOException, URISyntaxException,
             FrontendUtils.CommandExecutionException, InterruptedException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
-        userDir = temporaryDirectory.toAbsolutePath().toString();
+        var userDir = temporaryDirectory.toAbsolutePath().toString();
         System.setProperty("user.dir", userDir);
         System.clearProperty(PARAM_FRONTEND_DIR);
         System.clearProperty(PARAM_GENERATED_DIR);
