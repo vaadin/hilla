@@ -19,7 +19,7 @@ public final class GeneratorConfiguration {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GeneratorConfiguration that = (GeneratorConfiguration) o;
+        var that = (GeneratorConfiguration) o;
         return Objects.equals(plugins, that.plugins);
     }
 
