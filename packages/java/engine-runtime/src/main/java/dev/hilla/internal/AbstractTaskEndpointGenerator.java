@@ -74,8 +74,6 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         return engineConfiguration;
     }
 
-    private static final logger = LoggerFactory.getLogger(AbstractTaskEndpointGenerator.class);
-
     protected void prepareEngineConfiguration()
             throws ExecutionFailedException {
         EngineConfiguration config = null;
