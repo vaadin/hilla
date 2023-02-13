@@ -17,7 +17,7 @@ public class GenericsTest {
     public void should_ParseGenericTypes()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

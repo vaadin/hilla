@@ -23,7 +23,7 @@ public class PushTypeTest {
                 EndpointSubscription.class);
 
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

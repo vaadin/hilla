@@ -30,7 +30,7 @@ public class DependencyTests {
     @BeforeAll
     public static void setUp() {
         openApi = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(DependencyTests.class.getClassLoader())
                 .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new DependencyPlugin()).execute();

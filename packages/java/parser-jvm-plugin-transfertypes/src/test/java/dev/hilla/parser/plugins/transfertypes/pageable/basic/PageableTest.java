@@ -21,7 +21,7 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
@@ -37,7 +37,7 @@ public class PageableTest {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

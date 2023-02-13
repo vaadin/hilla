@@ -17,7 +17,7 @@ public class ShadowedNameTest {
     public void should_DistinguishBetweenUserAndBuiltinTypes_When_TheyHaveSameName()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BackbonePlugin()).execute();

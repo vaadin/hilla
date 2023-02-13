@@ -17,7 +17,7 @@ public class ComplexHierarchyTest {
     public void should_GenerateParentModel_When_UsingChildModel()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

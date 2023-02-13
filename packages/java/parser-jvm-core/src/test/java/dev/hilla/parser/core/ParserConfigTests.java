@@ -48,7 +48,7 @@ public class ParserConfigTests {
                         .of(new Server().url("http://localhost:8080/connect")
                                 .description("Hilla Backend")))
                 .paths(new Paths());
-        parser = new Parser().classLoader(ClassLoader.getSystemClassLoader())
+        parser = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName)
                 .endpointExposedAnnotation(
@@ -148,7 +148,7 @@ public class ParserConfigTests {
     @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
         var e = assertThrows(NullPointerException.class, () -> new Parser()
-                .classLoader(ClassLoader.getSystemClassLoader())
+                .classLoader(getClass().getClassLoader())
                 .endpointAnnotation(defaultEndpointAnnotationName).execute());
         assertEquals("[JVM Parser] classPath is not provided.", e.getMessage());
     }
@@ -157,7 +157,7 @@ public class ParserConfigTests {
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser()
-                        .classLoader(ClassLoader.getSystemClassLoader())
+                        .classLoader(getClass().getClassLoader())
                         .classPath(defaultClassPathElements).execute());
         assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
                 e.getMessage());
