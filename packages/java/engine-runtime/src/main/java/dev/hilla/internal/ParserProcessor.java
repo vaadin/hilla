@@ -27,14 +27,16 @@ public final class ParserProcessor {
             .getLogger(ParserProcessor.class);
     private final Path baseDir;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
+    private final ClassLoader classLoader;
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private String openAPIPath;
-    private ClassLoader classLoader = getClass().getClassLoader();
 
-    public ParserProcessor(Path baseDir, Set<String> classPath) {
+    public ParserProcessor(Path baseDir, ClassLoader classLoader,
+        Set<String> classPath) {
         this.baseDir = baseDir;
+        this.classLoader = classLoader;
         this.classPath = classPath;
     }
 
@@ -69,11 +71,6 @@ public final class ParserProcessor {
 
     public ParserProcessor openAPIBase(@Nonnull String openAPIBase) {
         this.openAPIPath = openAPIBase;
-        return this;
-    }
-
-    public ParserProcessor classLoader(@Nonnull ClassLoader classLoader) {
-        this.classLoader = classLoader;
         return this;
     }
 

@@ -65,8 +65,8 @@ public class EngineRunner {
 
     private OpenAPI parseJavaCode() throws EngineException {
         try {
-            var processor = new ParserProcessor(conf.getBaseDir(),
-                    conf.getClassPath());
+            var processor = new ParserProcessor(conf.getBaseDir(), classLoader,
+                conf.getClassPath());
             var parser = conf.getParser();
 
             parser.getClassPath().ifPresent(processor::classPath);
