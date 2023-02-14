@@ -9,9 +9,9 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dev.hilla.internal.EngineConfiguration;
-import dev.hilla.internal.GeneratorConfiguration;
-import dev.hilla.internal.ParserConfiguration;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorConfiguration;
+import dev.hilla.engine.ParserConfiguration;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;

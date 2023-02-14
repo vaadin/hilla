@@ -8,10 +8,13 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import dev.hilla.engine.EngineConfiguration;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to
@@ -19,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public class AbstractMojoTest {
     private Path temporaryDirectory;
+    private Path buildDirectory;
+    private EngineConfiguration engineConfiguration;
 
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
 
@@ -27,6 +32,21 @@ public class AbstractMojoTest {
         testCase.setUp();
 
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
+        buildDirectory = temporaryDirectory.resolve("build");
+        Files.createDirectories(buildDirectory);
+
+        // Load reference EngineConfiguration
+        Files.copy(Path.of(Objects.requireNonNull(
+                getClass().getResource(EngineConfiguration.RESOURCE_NAME)).toURI()),
+            getBuildDirectory().resolve(EngineConfiguration.RESOURCE_NAME));
+
+        engineConfiguration = EngineConfiguration.load(getBuildDirectory().toFile());
+        assertNotNull(engineConfiguration,
+            "expected reference " + "EngineConfiguration to load from json");
+        engineConfiguration.setBaseDir(getTemporaryDirectory());
+
+        // Delete reference json file from temporary directory
+        Files.delete(getBuildDirectory().resolve(EngineConfiguration.RESOURCE_NAME));
     }
 
     @AfterEach
@@ -41,19 +61,32 @@ public class AbstractMojoTest {
         }
     }
 
-    public Mojo lookupMojo(String name, File pom) throws Exception {
+    protected Mojo lookupMojo(String name, File pom) throws Exception {
         return testCase.lookupMojo(name, pom);
     }
 
-    public File getTestConfigurartion() throws URISyntaxException {
+    protected File getTestConfigurartion() throws URISyntaxException {
         return new File(
             Objects.requireNonNull(
                     getClass().getResource(getClass().getSimpleName() + ".xml"))
                 .toURI());
     }
 
+    protected void setVariableValueToObject(Object object, String variable,
+        Object value) throws IllegalAccessException {
+        testCase.setVariableValueToObject(object, variable, value);
+    }
+
     protected Path getTemporaryDirectory() {
         return temporaryDirectory;
+    }
+
+    protected Path getBuildDirectory() {
+        return buildDirectory;
+    }
+
+    protected EngineConfiguration getEngineConfiguration() {
+        return engineConfiguration;
     }
 
     public static class DelegateMojoTestCase extends AbstractMojoTestCase {
@@ -68,6 +101,12 @@ public class AbstractMojoTest {
         @Override
         protected Mojo lookupMojo(String goal, File pom) throws Exception {
             return super.lookupMojo(goal, pom);
+        }
+
+        @Override
+        protected void setVariableValueToObject(Object object, String variable,
+            Object value) throws IllegalAccessException {
+            super.setVariableValueToObject(object, variable, value);
         }
     }
 }

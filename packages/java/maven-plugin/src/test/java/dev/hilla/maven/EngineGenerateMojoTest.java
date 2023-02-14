@@ -22,23 +22,11 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EngineGenerateMojoTest extends AbstractMojoTest {
 
     @Test
     public void should_RunParserAndGenerator() throws Exception {
-        var buildDir = getTemporaryDirectory().resolve("build");
-        Files.createDirectories(buildDir);
-
-        Files.copy(Path.of(Objects.requireNonNull(
-                getClass().getResource(EngineConfiguration.RESOURCE_NAME)).toURI()),
-            buildDir.resolve(EngineConfiguration.RESOURCE_NAME));
-
-        var engineConfiguration = EngineConfiguration.load(buildDir.toFile());
-        assertNotNull(engineConfiguration, "expected EngineConfiguration to load correctly");
-        engineConfiguration.setBaseDir(getTemporaryDirectory());
-
         var mojoBuildDirectory = new File(
             Objects.requireNonNull(getClass().getResource("")).toURI());
 
@@ -77,7 +65,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 EngineConfiguration.class)) {
             mockedStaticEngineConfiguration.when(
                     () -> EngineConfiguration.load(Mockito.eq(mojoBuildDirectory)))
-                .thenReturn(engineConfiguration);
+                .thenReturn(getEngineConfiguration());
 
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate", getTestConfigurartion());
@@ -107,7 +95,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 ParserConfiguration.Plugins.class);
             inOrder.verify(parserProcessor).plugins(parserPluginsCaptor.capture());
             assertEquals(
-                engineConfiguration.getParser().getPlugins().orElseThrow(),
+                getEngineConfiguration().getParser().getPlugins().orElseThrow(),
                 parserPluginsCaptor.getValue());
             inOrder.verify(parserProcessor).process();
 
@@ -115,7 +103,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             var generatorPluginsCaptor =
                 ArgumentCaptor.forClass(GeneratorConfiguration.Plugins.class);
             inOrder.verify(generatorProcessor).plugins(generatorPluginsCaptor.capture());
-            assertEquals(engineConfiguration.getGenerator().getPlugins().orElseThrow(),
+            assertEquals(getEngineConfiguration().getGenerator().getPlugins().orElseThrow(),
                 generatorPluginsCaptor.getValue());
             inOrder.verify(generatorProcessor).process();
         }
