@@ -69,8 +69,7 @@ public final class GeneratorProcessor {
         return this;
     }
 
-    public void process() throws IOException, InterruptedException,
-            GeneratorUnavailableException {
+    public void process() throws IOException, InterruptedException {
         var runner = new GeneratorShellRunner(baseDir.toFile());
         prepareOutputDir(runner);
         preparePlugins(runner);

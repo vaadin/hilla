@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ final class GeneratorShellRunner {
         IS_WINDOWS = osName.contains("windows");
         TSGEN = IS_WINDOWS ? "tsgen.cmd" : "tsgen";
     }
-    private File baseDir;
 
     private final List<String> arguments = new ArrayList<>();
 
@@ -30,7 +28,6 @@ final class GeneratorShellRunner {
             .getLogger(GeneratorShellRunner.class);
 
     private final File workingDirectory;
-    private final Path tsgenPath;
 
     public GeneratorShellRunner(File workingDirectory) {
         this.workingDirectory = workingDirectory;
@@ -40,7 +37,7 @@ final class GeneratorShellRunner {
             arguments.add("/c");
         }
 
-        tsgenPath = Paths.get("node_modules", ".bin", TSGEN);
+        var tsgenPath = Paths.get("node_modules", ".bin", TSGEN);
         arguments.add(tsgenPath.toString());
     }
 
@@ -48,14 +45,8 @@ final class GeneratorShellRunner {
         arguments.addAll(List.of(args));
     }
 
-    public void run(String input) throws InterruptedException, IOException,
-            GeneratorUnavailableException {
+    public void run(String input) throws InterruptedException, IOException {
         Objects.requireNonNull(input);
-
-        if (!Files.exists(workingDirectory.toPath().resolve(tsgenPath))) {
-            throw new GeneratorUnavailableException(
-                    "Hilla generator is not available: TypeScript files won't be generated");
-        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Executing command: {}", String.join(" ", arguments));

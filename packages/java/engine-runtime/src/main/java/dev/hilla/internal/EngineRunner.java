@@ -23,15 +23,13 @@ public class EngineRunner {
         this.classLoader = classLoader;
     }
 
-    public void execute()
-            throws EngineException, GeneratorUnavailableException {
+    public void execute() throws EngineException {
         var result = parseJavaCode();
         var openAPI = saveOpenAPI(result);
         generateTypeScriptCode(openAPI);
     }
 
-    private void generateTypeScriptCode(String openAPI)
-            throws EngineException, GeneratorUnavailableException {
+    private void generateTypeScriptCode(String openAPI) throws EngineException {
         try {
             var executor = new GeneratorProcessor(conf.getBaseDir())
                     .input(openAPI);
@@ -76,8 +74,8 @@ public class EngineRunner {
                     .ifPresent(processor::endpointAnnotation);
             parser.getEndpointExposedAnnotation()
                     .ifPresent(processor::endpointExposedAnnotation);
-            parser.getPlugins().ifPresent(processor::plugins);
             parser.getOpenAPIPath().ifPresent(processor::openAPIBase);
+            parser.getPlugins().ifPresent(processor::plugins);
 
             return processor.process();
         } catch (ParserException e) {
