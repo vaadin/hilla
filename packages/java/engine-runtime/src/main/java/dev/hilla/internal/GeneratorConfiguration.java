@@ -33,7 +33,10 @@ public final class GeneratorConfiguration {
     }
 
     public static class Plugin {
-        private final String path;
+        private String path;
+
+        public Plugin() {
+        }
 
         public Plugin(String path) {
             this.path = path;
