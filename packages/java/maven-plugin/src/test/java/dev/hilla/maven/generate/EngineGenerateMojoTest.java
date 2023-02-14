@@ -63,7 +63,15 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             });
             var mockedConstructionGenerator = Mockito.mockConstruction(
                 GeneratorProcessor.class,
-                Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF));
+                Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF),
+                ((mock, context) -> {
+                    // Verify GeneratorProcessor arguments
+                    assertEquals(1, context.arguments().size(),
+                        "expected 1 GeneratorProcessor argument");
+
+                    var baseDir = (Path) context.arguments().get(0);
+                    assertEquals(getTemporaryDirectory(), baseDir);
+                }));
             var mockedStaticEngineConfiguration = Mockito.mockStatic(
                 EngineConfiguration.class)) {
 
