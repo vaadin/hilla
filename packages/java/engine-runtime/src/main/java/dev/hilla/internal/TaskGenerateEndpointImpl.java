@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import dev.hilla.engine.GeneratorProcessor;
+
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;

@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -69,11 +69,11 @@ public final class ParserConfiguration {
         this.classPath = classPath;
     }
 
-    void setEndpointAnnotation(String endpointAnnotation) {
+    public void setEndpointAnnotation(String endpointAnnotation) {
         this.endpointAnnotation = endpointAnnotation;
     }
 
-    void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
+    public void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
         this.endpointExposedAnnotation = endpointExposedAnnotation;
     }
 

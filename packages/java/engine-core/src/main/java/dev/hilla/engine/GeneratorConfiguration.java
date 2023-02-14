@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 import java.util.List;
 import java.util.Objects;

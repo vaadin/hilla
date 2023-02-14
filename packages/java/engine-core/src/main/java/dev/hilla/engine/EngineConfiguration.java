@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 import java.io.File;
 import java.io.IOException;

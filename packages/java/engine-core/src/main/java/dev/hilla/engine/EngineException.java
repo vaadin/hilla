@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 public class EngineException extends Exception {
     public EngineException(String message, Throwable cause) {

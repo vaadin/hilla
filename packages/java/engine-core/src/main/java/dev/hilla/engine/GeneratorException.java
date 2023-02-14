@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 public final class GeneratorException extends RuntimeException {
     GeneratorException(String message) {

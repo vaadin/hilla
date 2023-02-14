@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import dev.hilla.engine.EngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

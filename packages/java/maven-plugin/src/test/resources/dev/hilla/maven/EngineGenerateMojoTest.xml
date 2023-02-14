@@ -17,7 +17,10 @@
                 <artifactId>engine-maven-plugin</artifactId>
 
                 <configuration>
-                  <buildDirectory>${basedir}/target/test-classes/dev/hilla/maven/generate/build</buildDirectory>
+                  <buildDirectory>${basedir}/target/test-classes/dev/hilla/maven</buildDirectory>
+                  <parser>
+
+                  </parser>
                 </configuration>
             </plugin>
         </plugins>

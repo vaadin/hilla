@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 public final class ParserException extends RuntimeException {
     ParserException(String message) {

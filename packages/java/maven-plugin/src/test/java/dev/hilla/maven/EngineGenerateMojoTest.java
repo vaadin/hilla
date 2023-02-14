@@ -14,8 +14,6 @@ import dev.hilla.internal.GeneratorProcessor;
 import dev.hilla.internal.ParserClassPathConfiguration;
 import dev.hilla.internal.ParserConfiguration;
 import dev.hilla.internal.ParserProcessor;
-import dev.hilla.maven.AbstractMojoTest;
-import dev.hilla.maven.EngineGenerateMojo;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +38,9 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
         var engineConfiguration = EngineConfiguration.load(buildDir.toFile());
         assertNotNull(engineConfiguration, "expected EngineConfiguration to load correctly");
         engineConfiguration.setBaseDir(getTemporaryDirectory());
+
+        var mojoBuildDirectory = new File(
+            Objects.requireNonNull(getClass().getResource("")).toURI());
 
         try (var mockedConstructionParser = Mockito.mockConstruction(
             ParserProcessor.class,
@@ -74,11 +75,11 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 }));
             var mockedStaticEngineConfiguration = Mockito.mockStatic(
                 EngineConfiguration.class)) {
-
             mockedStaticEngineConfiguration.when(
-                    () -> EngineConfiguration.load(Mockito.any()))
+                    () -> EngineConfiguration.load(Mockito.eq(mojoBuildDirectory)))
                 .thenReturn(engineConfiguration);
 
+            // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate", getTestConfigurartion());
             engineGenerateMojo.execute();
 

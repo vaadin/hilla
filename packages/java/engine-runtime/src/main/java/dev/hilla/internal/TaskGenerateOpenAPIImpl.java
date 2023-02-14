@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import dev.hilla.engine.ParserException;
+import dev.hilla.engine.ParserProcessor;
 import dev.hilla.parser.utils.OpenAPIPrinter;
 import io.swagger.v3.oas.models.OpenAPI;
 

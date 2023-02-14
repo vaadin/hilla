@@ -1,4 +1,4 @@
-package dev.hilla.internal;
+package dev.hilla.engine;
 
 import dev.hilla.parser.utils.OpenAPIPrinter;
 import io.swagger.v3.oas.models.OpenAPI;

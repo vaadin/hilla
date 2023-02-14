@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>engine-runtime</artifactId>
+  <artifactId>engine-core</artifactId>
   <packaging>jar</packaging>
-  <name>Hilla Engine Runtime</name>
+  <name>Hilla Engine Core</name>
 
   <properties>
     <flow.version>24.0-SNAPSHOT</flow.version>
@@ -34,11 +34,6 @@
       <artifactId>flow-server</artifactId>
       <version>${flow.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>engine-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>

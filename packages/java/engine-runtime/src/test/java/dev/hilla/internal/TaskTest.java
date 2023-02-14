@@ -10,6 +10,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorConfiguration;
+import dev.hilla.engine.ParserConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
