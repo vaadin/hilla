@@ -18,9 +18,6 @@
 
                 <configuration>
                   <buildDirectory>${basedir}/target/test-classes/dev/hilla/maven</buildDirectory>
-                  <parser>
-
-                  </parser>
                 </configuration>
             </plugin>
         </plugins>

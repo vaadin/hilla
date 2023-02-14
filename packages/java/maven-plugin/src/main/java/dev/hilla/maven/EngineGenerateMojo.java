@@ -7,9 +7,9 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import dev.hilla.internal.EngineConfiguration;
-import dev.hilla.internal.EngineException;
-import dev.hilla.internal.EngineRunner;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.EngineException;
+import dev.hilla.engine.EngineRunner;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Execute;

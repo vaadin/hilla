@@ -8,12 +8,12 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 
-import dev.hilla.internal.EngineConfiguration;
-import dev.hilla.internal.GeneratorConfiguration;
-import dev.hilla.internal.GeneratorProcessor;
-import dev.hilla.internal.ParserClassPathConfiguration;
-import dev.hilla.internal.ParserConfiguration;
-import dev.hilla.internal.ParserProcessor;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorConfiguration;
+import dev.hilla.engine.GeneratorProcessor;
+import dev.hilla.engine.ParserClassPathConfiguration;
+import dev.hilla.engine.ParserConfiguration;
+import dev.hilla.engine.ParserProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
