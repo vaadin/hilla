@@ -78,36 +78,6 @@
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-plugin-backbone</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-utils</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>dev.hilla</groupId>
-        <artifactId>parser-jvm-plugin-nonnull</artifactId>
-        <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-plugin-model</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-plugin-transfertypes</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.hilla</groupId>
       <artifactId>engine-core</artifactId>
       <version>${project.version}</version>
     </dependency>
