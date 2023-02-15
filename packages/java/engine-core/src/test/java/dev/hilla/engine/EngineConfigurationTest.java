@@ -46,7 +46,6 @@ public class EngineConfigurationTest {
         parserConfiguration.setEndpointAnnotation("dev.hilla.test.Endpoint");
         parserConfiguration
                 .setEndpointExposedAnnotation("dev.hilla.test.EndpointExposed");
-        parserConfiguration.setClassPath(new ParserClassPathConfiguration());
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(
             List.of(new ParserConfiguration.Plugin("parser-jvm-plugin-use")),
             List.of(

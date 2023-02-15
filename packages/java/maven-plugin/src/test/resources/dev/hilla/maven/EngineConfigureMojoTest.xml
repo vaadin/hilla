@@ -33,9 +33,6 @@
                     </plugins>
                   </generator>
                   <parser>
-                    <classPath>
-                      <value>maven-test-class-path</value>
-                    </classPath>
                     <endpointAnnotation>dev.hilla.maven.Endpoint</endpointAnnotation>
                     <endpointExposedAnnotation>dev.hilla.maven.EndpointExposed</endpointExposedAnnotation>
                     <openAPIPath>openapi-maven-test-base.json</openAPIPath>

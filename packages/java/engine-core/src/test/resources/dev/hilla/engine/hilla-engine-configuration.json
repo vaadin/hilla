@@ -17,11 +17,6 @@
     }
   },
   "parser": {
-    "classPath": {
-      "delimiter": ";",
-      "override": false,
-      "value": null
-    },
     "endpointAnnotation": "dev.hilla.test.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.test.EndpointExposed",
     "openAPIPath": "test-openapi.json",

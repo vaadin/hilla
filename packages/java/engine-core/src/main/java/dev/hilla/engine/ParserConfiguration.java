@@ -17,15 +17,10 @@ import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private ParserClassPathConfiguration classPath;
     private String endpointAnnotation;
     private String endpointExposedAnnotation;
     private String openAPIPath;
     private Plugins plugins;
-
-    public Optional<ParserClassPathConfiguration> getClassPath() {
-        return Optional.ofNullable(classPath);
-    }
 
     public Optional<String> getEndpointAnnotation() {
         return Optional.ofNullable(endpointAnnotation);
@@ -52,8 +47,7 @@ public final class ParserConfiguration {
             return false;
         }
         var that = (ParserConfiguration) o;
-        return Objects.equals(classPath, that.classPath)
-                && Objects.equals(endpointAnnotation, that.endpointAnnotation)
+        return Objects.equals(endpointAnnotation, that.endpointAnnotation)
                 && Objects.equals(endpointExposedAnnotation,
                         that.endpointExposedAnnotation)
                 && Objects.equals(openAPIPath, that.openAPIPath)
@@ -62,12 +56,8 @@ public final class ParserConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(classPath, endpointAnnotation,
+        return Objects.hash(endpointAnnotation,
                 endpointExposedAnnotation, openAPIPath, plugins);
-    }
-
-    void setClassPath(ParserClassPathConfiguration classPath) {
-        this.classPath = classPath;
     }
 
     void setEndpointAnnotation(String endpointAnnotation) {

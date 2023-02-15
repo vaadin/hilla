@@ -17,11 +17,6 @@
     }
   },
   "parser": {
-    "classPath": {
-      "delimiter": ";",
-      "override": false,
-      "value": "maven-test-class-path"
-    },
     "endpointAnnotation": "dev.hilla.maven.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.maven.EndpointExposed",
     "openAPIPath": "openapi-maven-test-base.json",

@@ -9,11 +9,6 @@
     }
   },
   "parser": {
-    "classPath": {
-      "delimiter": ";",
-      "override": false,
-      "value": "maven-test-class-path"
-    },
     "endpointAnnotation": "dev.hilla.internal.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.internal.EndpointExposed",
     "openAPIPath": null,

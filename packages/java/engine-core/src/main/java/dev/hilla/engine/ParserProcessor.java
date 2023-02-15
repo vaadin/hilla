@@ -43,7 +43,6 @@ public final class ParserProcessor {
             return this;
         }
 
-        parserConfiguration.getClassPath().ifPresent(this::applyClassPath);
         parserConfiguration.getEndpointAnnotation()
             .ifPresent(this::applyEndpointAnnotation);
         parserConfiguration.getEndpointExposedAnnotation()
@@ -64,19 +63,6 @@ public final class ParserProcessor {
         logger.debug("Starting JVM Parser");
 
         return parser.execute();
-    }
-
-    private void applyClassPath(
-        @Nonnull ParserClassPathConfiguration classPath) {
-        var value = Objects.requireNonNull(classPath).getValue();
-        var delimiter = classPath.getDelimiter();
-
-        var userDefinedClassPathElements = Set.of(value.split(delimiter));
-
-        this.classPath = classPath.isOverride() ? userDefinedClassPathElements
-                : Stream.of(this.classPath, userDefinedClassPathElements)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toSet());
     }
 
     private void applyEndpointAnnotation(

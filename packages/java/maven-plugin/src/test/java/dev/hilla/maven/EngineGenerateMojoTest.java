@@ -3,20 +3,15 @@ package dev.hilla.maven;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 
 import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.engine.GeneratorConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
-import dev.hilla.engine.ParserClassPathConfiguration;
-import dev.hilla.engine.ParserConfiguration;
 import dev.hilla.engine.ParserProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -82,14 +77,10 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
 
             // Verify ParserConfiguration is applied to ParserProcessor
-            var classPathCaptor = ArgumentCaptor.forClass(
-                ParserClassPathConfiguration.class);
             inOrder.verify(parserProcessor).apply(getEngineConfiguration().getParser());
             inOrder.verify(parserProcessor).process();
 
             // Verify GeneratorConfiguration is applied to ParserProcessor
-            var generatorPluginsCaptor =
-                ArgumentCaptor.forClass(GeneratorConfiguration.Plugins.class);
             inOrder.verify(generatorProcessor).apply(getEngineConfiguration().getGenerator());
             inOrder.verify(generatorProcessor).process();
         }
