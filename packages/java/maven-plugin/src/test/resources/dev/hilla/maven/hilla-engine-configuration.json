@@ -29,15 +29,13 @@
       "use": [
         {
           "configuration": null,
-          "name": "parser-maven-test-use",
-          "order": null
+          "name": "parser-maven-test-use"
         }
       ],
       "disable": [
         {
           "configuration": null,
-          "name": "parser-maven-test-disable",
-          "order": null
+          "name": "parser-maven-test-disable"
         }
       ],
       "disableAllDefaults": false

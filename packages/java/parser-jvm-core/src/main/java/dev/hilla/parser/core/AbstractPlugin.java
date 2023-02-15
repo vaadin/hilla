@@ -5,7 +5,6 @@ import java.lang.reflect.ParameterizedType;
 public abstract class AbstractPlugin<C extends PluginConfiguration>
         implements Plugin {
     private C configuration;
-    private int order;
 
     private SharedStorage storage;
 
@@ -40,16 +39,6 @@ public abstract class AbstractPlugin<C extends PluginConfiguration>
         }
 
         this.configuration = (C) configuration;
-    }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     protected SharedStorage getStorage() {

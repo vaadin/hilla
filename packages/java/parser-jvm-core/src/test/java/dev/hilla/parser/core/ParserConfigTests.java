@@ -57,38 +57,38 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsAsCollection() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-5);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.plugins(List.of(foo, bar, baz)).getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAddingPluginsAsVararg() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-5);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.plugins(foo, bar, baz).getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAddingPluginsOneByOne() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-1);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.addPlugin(foo).addPlugin(bar).addPlugin(baz)
                 .getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
@@ -166,7 +166,7 @@ public class ParserConfigTests {
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
         var e = assertThrows(IllegalArgumentException.class,
-                () -> new BazPlugin(0)
+                () -> new BazPlugin()
                         .setConfiguration(new PluginConfiguration() {
                         }));
         assertThat(e.getMessage(), startsWith("Requires instance of class "
@@ -183,8 +183,7 @@ public class ParserConfigTests {
     }
 
     private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
-        BarPlugin(int order) {
-            setOrder(order);
+        BarPlugin() {
         }
 
         @Override
@@ -204,8 +203,7 @@ public class ParserConfigTests {
     }
 
     private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
-        BazPlugin(int order) {
-            setOrder(order);
+        BazPlugin() {
         }
 
         @Override
@@ -228,8 +226,7 @@ public class ParserConfigTests {
     }
 
     private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
-        FooPlugin(int order) {
-            setOrder(order);
+        FooPlugin() {
         }
 
         @Override

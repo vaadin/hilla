@@ -89,7 +89,6 @@ public final class ParserConfiguration {
     public static class Plugin {
         private PluginConfiguration configuration;
         private String name;
-        private Integer order;
 
         // Jackson requires a constructor for deserialization
         public Plugin() {
@@ -119,10 +118,6 @@ public final class ParserConfiguration {
         @Nonnull
         public String getName() {
             return name;
-        }
-
-        public Integer getOrder() {
-            return order;
         }
 
         @Override

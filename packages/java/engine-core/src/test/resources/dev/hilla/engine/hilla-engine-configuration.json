@@ -29,16 +29,14 @@
       "disable": [
         {
           "configuration": null,
-          "name": "parser-jvm-plugin-disable",
-          "order": null
+          "name": "parser-jvm-plugin-disable"
         }
       ],
       "disableAllDefaults": true,
       "use": [
         {
           "configuration": null,
-          "name": "parser-jvm-plugin-use",
-          "order": null
+          "name": "parser-jvm-plugin-use"
         }
       ]
     }

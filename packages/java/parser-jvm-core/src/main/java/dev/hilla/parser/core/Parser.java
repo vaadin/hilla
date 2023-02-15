@@ -1,10 +1,13 @@
 package dev.hilla.parser.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -59,8 +62,8 @@ public final class Parser {
      * Adds a parser {@link Plugin}.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of the method calls.
+     * Note that the order of the method calls will be maintained during
+     * processing.
      *
      * @param plugin
      *            An instance of the parser plugin.
@@ -332,8 +335,8 @@ public final class Parser {
      * specified, they will be removed before addition.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of plugins in the collection.
+     * Note that the order of the arguments will be maintained during
+     * processing.
      *
      * @param plugins
      *            a collection of parser plugins.
@@ -349,8 +352,7 @@ public final class Parser {
      * specified plugins, they will be removed before addition.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of plugins in the collection.
+     * Note that the order of collection will be maintained during processing.
      *
      * @param plugins
      *            a collection of parser plugins.
@@ -368,8 +370,7 @@ public final class Parser {
      * initial configuration of the parser during the scan.
      */
     public static final class Config {
-        private final SortedSet<Plugin> plugins = new TreeSet<>(
-                Comparator.comparingInt(Plugin::getOrder));
+        private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
         private String endpointAnnotationName;
         private String endpointExposedAnnotationName;
@@ -439,7 +440,7 @@ public final class Parser {
          * @return the collection of parser plugins.
          */
         @Nonnull
-        public SortedSet<Plugin> getPlugins() {
+        public Collection<Plugin> getPlugins() {
             return plugins;
         }
 

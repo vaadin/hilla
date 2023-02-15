@@ -74,7 +74,7 @@ public final class GeneratorProcessor {
     private void preparePlugins(GeneratorShellRunner runner) {
         pluginsProcessor.process().stream()
             .map(GeneratorConfiguration.Plugin::getPath).distinct()
-            .forEach(path -> runner.add("-p", path));
+            .forEachOrdered(path -> runner.add("-p", path));
     }
 
     private void prepareVerbose(GeneratorShellRunner runner) {
