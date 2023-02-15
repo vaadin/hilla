@@ -24,8 +24,7 @@ public class EngineConfigurationTest {
     private Path temporaryDirectory;
     private File configFile;
 
-    private final EngineConfiguration engineConfiguration =
-        new EngineConfiguration();
+    private final EngineConfiguration engineConfiguration = new EngineConfiguration();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final URL TEST_CONFIG = EngineConfigurationTest.class
@@ -40,6 +39,8 @@ public class EngineConfigurationTest {
 
         this.engineConfiguration.setBaseDir(Path.of("base"));
         this.engineConfiguration.setBuildDir("build");
+        this.engineConfiguration
+                .setOutputDir("src/frontend/typescript/generated");
         this.engineConfiguration.setClassPath(
                 new LinkedHashSet<>(List.of("build/classes", "dependency")));
         var parserConfiguration = new ParserConfiguration();
@@ -47,19 +48,21 @@ public class EngineConfigurationTest {
         parserConfiguration
                 .setEndpointExposedAnnotation("dev.hilla.test.EndpointExposed");
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(
-            List.of(new ParserConfiguration.Plugin("parser-jvm-plugin-use")),
-            List.of(
-                new ParserConfiguration.Plugin("parser-jvm-plugin-disable")),
-            true));
-        parserConfiguration.setOpenAPIPath("test-openapi.json");
+                List.of(new ParserConfiguration.Plugin(
+                        "parser-jvm-plugin-use")),
+                List.of(new ParserConfiguration.Plugin(
+                        "parser-jvm-plugin-disable")),
+                true));
+        parserConfiguration.setOpenAPIBasePath("test-openapi.json");
         this.engineConfiguration.setParser(parserConfiguration);
 
         var generatorConfiguration = new GeneratorConfiguration();
         generatorConfiguration.setPlugins(new GeneratorConfiguration.Plugins(
-            List.of(new GeneratorConfiguration.Plugin(
-                "generator-jvm-plugin" + "-use")), List.of(
-            new GeneratorConfiguration.Plugin(
-                "generator-jvm-plugin" + "-disable")), true));
+                List.of(new GeneratorConfiguration.Plugin(
+                        "generator-jvm-plugin" + "-use")),
+                List.of(new GeneratorConfiguration.Plugin(
+                        "generator-jvm-plugin" + "-disable")),
+                true));
         this.engineConfiguration.setGenerator(generatorConfiguration);
     }
 
@@ -69,6 +72,21 @@ public class EngineConfigurationTest {
             Files.delete(this.configFile.toPath());
         }
         Files.delete(this.temporaryDirectory);
+    }
+
+    @Test
+    public void should_RelativiseOutputDir_WhenGivenAbsolutePath() {
+        engineConfiguration.setOutputDir(engineConfiguration.getBaseDir()
+                .resolve("relative/path").toAbsolutePath());
+
+        assertEquals("relative/path", engineConfiguration.getOutputDir());
+    }
+
+    @Test
+    public void should_NotRelativiseOutputDir_WhenGivenRelative() {
+        engineConfiguration.setOutputDir(Path.of("relative/path"));
+
+        assertEquals("relative/path", engineConfiguration.getOutputDir());
     }
 
     @Test

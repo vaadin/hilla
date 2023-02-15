@@ -19,7 +19,7 @@
   "parser": {
     "endpointAnnotation": "dev.hilla.test.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.test.EndpointExposed",
-    "openAPIPath": "test-openapi.json",
+    "openAPIBasePath": "test-openapi.json",
     "plugins": {
       "disable": [
         {
@@ -36,5 +36,6 @@
       ]
     }
   },
-  "buildDir": "build"
+  "buildDir": "build",
+  "outputDir": "src/frontend/typescript/generated"
 }

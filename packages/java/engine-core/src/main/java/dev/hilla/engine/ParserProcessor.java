@@ -3,22 +3,19 @@ package dev.hilla.engine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.utils.OpenAPIPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.hilla.parser.core.OpenAPIFileType;
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.PluginManager;
-
-import io.swagger.v3.oas.models.OpenAPI;
 
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
@@ -29,40 +26,56 @@ public final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
-    private String openAPIBase;
+    private String openAPIBasePath;
 
-    public ParserProcessor(Path baseDir, ClassLoader classLoader,
-        Set<String> classPath) {
-        this.baseDir = baseDir;
+    private final Path openAPIFile;
+
+    public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader) {
+        this.baseDir = conf.getBaseDir();
+        this.openAPIFile = conf.getOpenAPIFile();
         this.classLoader = classLoader;
-        this.classPath = classPath;
+        this.classPath = conf.getClassPath();
+        applyConfiguration(conf.getParser());
     }
 
-    public ParserProcessor apply(ParserConfiguration parserConfiguration) {
+    private void applyConfiguration(ParserConfiguration parserConfiguration) {
         if (parserConfiguration == null) {
-            return this;
+            return;
         }
 
         parserConfiguration.getEndpointAnnotation()
-            .ifPresent(this::applyEndpointAnnotation);
+                .ifPresent(this::applyEndpointAnnotation);
         parserConfiguration.getEndpointExposedAnnotation()
-            .ifPresent(this::applyEndpointExposedAnnotation);
-        parserConfiguration.getOpenAPIPath().ifPresent(this::applyOpenAPIBase);
+                .ifPresent(this::applyEndpointExposedAnnotation);
+        parserConfiguration.getOpenAPIBasePath()
+                .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
-        return this;
     }
 
-    public OpenAPI process() {
+    public void process() throws ParserException {
         var parser = new Parser().classLoader(classLoader).classPath(classPath)
-            .endpointAnnotation(endpointAnnotationName)
-            .endpointExposedAnnotation(endpointExposedAnnotationName);
+                .endpointAnnotation(endpointAnnotationName)
+                .endpointExposedAnnotation(endpointExposedAnnotationName);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
 
         logger.debug("Starting JVM Parser");
 
-        return parser.execute();
+        var openAPI = parser.execute();
+
+        logger.debug("Saving OpenAPI file to " + openAPIFile);
+
+        try {
+            Files.createDirectories(openAPIFile.getParent());
+            var openAPIString = new OpenAPIPrinter().pretty()
+                    .writeAsString(openAPI);
+            Files.write(openAPIFile, openAPIString.getBytes());
+        } catch (IOException e) {
+            throw new ParserException("Unable to save OpenAPI file", e);
+        }
+
+        logger.debug("OpenAPI file saved");
     }
 
     private void applyEndpointAnnotation(
@@ -78,21 +91,20 @@ public final class ParserProcessor {
     }
 
     private void applyOpenAPIBase(@Nonnull String openAPIBase) {
-        this.openAPIBase = openAPIBase;
+        this.openAPIBasePath = openAPIBasePath;
     }
 
-    private void applyPlugins(
-        @Nonnull ParserConfiguration.Plugins plugins) {
+    private void applyPlugins(@Nonnull ParserConfiguration.Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
     }
 
     private void prepareOpenAPIBase(Parser parser) {
-        if (openAPIBase == null) {
+        if (openAPIBasePath == null) {
             return;
         }
 
         try {
-            var path = baseDir.resolve(openAPIBase);
+            var path = baseDir.resolve(openAPIBasePath);
             var fileName = path.getFileName().toString();
 
             if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")

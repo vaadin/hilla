@@ -10,14 +10,15 @@
     <name>Test Project - Basic</name>
 
     <build>
-        <directory>target</directory>
-        <plugins>
+      <directory>build</directory>
+
+      <plugins>
             <plugin>
                 <groupId>dev.hilla</groupId>
                 <artifactId>engine-maven-plugin</artifactId>
 
                 <configuration>
-                  <buildDirectory>${basedir}/target/test-classes/dev/hilla/maven</buildDirectory>
+                  <!-- intentionally empty, expected to use EngineConfiguration.load() -->
                 </configuration>
             </plugin>
         </plugins>

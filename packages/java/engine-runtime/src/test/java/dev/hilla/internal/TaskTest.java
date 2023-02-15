@@ -17,8 +17,6 @@ import dev.hilla.engine.ParserConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import com.vaadin.flow.server.frontend.FrontendTools;
-import com.vaadin.flow.server.frontend.FrontendToolsSettings;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
@@ -45,13 +43,14 @@ public class TaskTest {
                         .toString()));
         // Create hilla-engine-configuration.json from template
         var configPath = buildDir.resolve(EngineConfiguration.RESOURCE_NAME);
-        Files.copy(Path.of(Objects.requireNonNull(
-                getClass().getResource(EngineConfiguration.RESOURCE_NAME)).toURI()),
-            configPath);
+        Files.copy(Path.of(Objects
+                .requireNonNull(getClass()
+                        .getResource(EngineConfiguration.RESOURCE_NAME))
+                .toURI()), configPath);
         var config = EngineConfiguration.load(buildDir.toFile());
         // Modify runtime settings (base, class path) and save
         // hilla-engine-configuration.json
-        Files.delete(buildDir.resolve(EngineConfiguration.RESOURCE_NAME));
+        Files.delete(configPath);
         config.setBaseDir(temporaryDirectory);
         config.setClassPath(classPath);
         config.store(buildDir.toFile());
@@ -94,5 +93,14 @@ public class TaskTest {
 
     protected String getBuildDirectory() {
         return "build";
+    }
+
+    protected String getOutputDirectory() {
+        return "output";
+    }
+
+    protected Path getOpenAPIFile() {
+        return getTemporaryDirectory().resolve(getBuildDirectory())
+                .resolve("generated-resources/openapi.json");
     }
 }

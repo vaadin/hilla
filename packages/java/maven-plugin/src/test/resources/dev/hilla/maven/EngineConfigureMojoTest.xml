@@ -8,16 +8,16 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Test Project - Basic</name>
-
     <build>
-        <directory>target</directory>
+        <directory>build</directory>
+
         <plugins>
             <plugin>
                 <groupId>dev.hilla</groupId>
                 <artifactId>engine-maven-plugin</artifactId>
 
                 <configuration>
-                  <buildDirectory>${basedir}/target/test-classes/dev/hilla/maven</buildDirectory>
+                  <generatedTsFolder>frontend/maven-generated</generatedTsFolder>
                   <generator>
                     <plugins>
                       <disable>
@@ -35,7 +35,7 @@
                   <parser>
                     <endpointAnnotation>dev.hilla.maven.Endpoint</endpointAnnotation>
                     <endpointExposedAnnotation>dev.hilla.maven.EndpointExposed</endpointExposedAnnotation>
-                    <openAPIPath>openapi-maven-test-base.json</openAPIPath>
+                    <openAPIBasePath>openapi-maven-test-base.json</openAPIBasePath>
                     <plugins>
                       <disable>
                         <plugin>

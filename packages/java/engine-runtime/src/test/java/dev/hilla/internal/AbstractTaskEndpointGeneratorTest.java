@@ -23,7 +23,9 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
     @Test
     void shouldThrowIfProjectDirectoryIsNull() {
         assertThrowsExactly(NullPointerException.class, () -> {
-            new TestTaskEndpointGenerator(null, getBuildDirectory());
+            new TestTaskEndpointGenerator(null, getBuildDirectory(),
+                    getTemporaryDirectory().resolve(getOutputDirectory())
+                            .toFile());
         }, "Project directory cannot be null");
     }
 
@@ -31,14 +33,25 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
     void shouldThrowIfBuildDirectoryNameIsNull() {
         assertThrowsExactly(NullPointerException.class, () -> {
             new TestTaskEndpointGenerator(getTemporaryDirectory().toFile(),
-                    null);
+                    null, getTemporaryDirectory().resolve(getOutputDirectory())
+                            .toFile());
         }, "Build directory name cannot be null");
+    }
+
+    @Test
+    void shouldThrowIfOutputDirectoryIsNull() {
+        assertThrowsExactly(NullPointerException.class, () -> {
+            new TestTaskEndpointGenerator(getTemporaryDirectory().toFile(),
+                    getBuildDirectory(), null);
+        }, "Output directory cannot be null");
     }
 
     @Test
     void executeShouldBeAbleToListFilesInProjectDir() {
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory()) {
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory())
+                        .toFile()) {
             @Override
             List<String> prepareCommand() {
                 return List.of(AbstractTaskEndpointGenerator.MAVEN_COMMAND,
@@ -59,7 +72,9 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         final var errorMessage = "Generated error";
 
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory()) {
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory())
+                        .toFile()) {
             @Override
             void runConfigure(List<String> command)
                     throws ExecutionFailedException {
@@ -85,7 +100,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
     @Test
     void runConfigureShouldExecuteMaven() throws ExecutionFailedException {
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory());
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile());
         task.runConfigure(
                 List.of(AbstractTaskEndpointGenerator.MAVEN_COMMAND, "-v"));
     }
@@ -93,7 +109,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
     @Test
     void runConfigureShouldThrowExceptionForUnknownCommands() {
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory());
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile());
 
         try {
             task.runConfigure(List.of("unknownEvilCommmand"));
@@ -107,7 +124,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
     @Test
     void runCodeGenerationShouldThrowExceptionForBadExitCode() {
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory());
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile());
 
         try {
             task.runConfigure(
@@ -127,7 +145,9 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         try {
             Files.createFile(tmpDir.resolve("pom.xml"));
             var task = new TestTaskEndpointGenerator(
-                    getTemporaryDirectory().toFile(), getBuildDirectory());
+                    getTemporaryDirectory().toFile(), getBuildDirectory(),
+                    getTemporaryDirectory().resolve(getOutputDirectory())
+                            .toFile());
             var command = task.prepareCommand();
             assertFalse(command.isEmpty());
             assertEquals(AbstractTaskEndpointGenerator.MAVEN_COMMAND,
@@ -144,7 +164,9 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         try {
             Files.createFile(tmpDir.resolve("build.gradle"));
             var task = new TestTaskEndpointGenerator(
-                    getTemporaryDirectory().toFile(), getBuildDirectory());
+                    getTemporaryDirectory().toFile(), getBuildDirectory(),
+                    getTemporaryDirectory().resolve(getOutputDirectory())
+                            .toFile());
 
             try {
                 task.prepareCommand();
@@ -156,7 +178,9 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
             final var dummy = "dummy";
 
             var taskNoException = new TestTaskEndpointGenerator(
-                    getTemporaryDirectory().toFile(), getBuildDirectory()) {
+                    getTemporaryDirectory().toFile(), getBuildDirectory(),
+                    getTemporaryDirectory().resolve(getOutputDirectory())
+                            .toFile()) {
                 @Override
                 List<String> prepareGradleCommand() {
                     return List.of(dummy);
@@ -177,7 +201,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         var tmpDir = getTemporaryDirectory();
 
         var task = new TestTaskEndpointGenerator(
-                getTemporaryDirectory().toFile(), getBuildDirectory());
+                getTemporaryDirectory().toFile(), getBuildDirectory(),
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile());
 
         try {
             task.prepareCommand();
@@ -192,18 +217,17 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
      * {@link TaskTest#setUpTaskApplication()}
      */
     @BeforeEach
-    public void removeStoredConfigurationFile() {
+    public void removeStoredConfigurationFile() throws IOException {
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
-        var configFile = new File(buildDir.toFile(),
-                EngineConfiguration.RESOURCE_NAME);
-        configFile.delete();
+        var configFile = buildDir.resolve(EngineConfiguration.RESOURCE_NAME);
+        Files.delete(configFile);
     }
 
     static private class TestTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
         TestTaskEndpointGenerator(File projectDirectory,
-                String buildDirectoryName) {
-            super(projectDirectory, buildDirectoryName);
+                String buildDirectoryName, File outputDirectory) {
+            super(projectDirectory, buildDirectoryName, outputDirectory);
         }
 
         @Override

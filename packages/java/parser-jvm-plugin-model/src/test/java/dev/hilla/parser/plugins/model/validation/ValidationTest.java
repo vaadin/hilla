@@ -17,8 +17,7 @@ public class ValidationTest {
     @Test
     public void should_GenerateValidations()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser()
-                .classLoader(getClass().getClassLoader())
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

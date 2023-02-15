@@ -15,8 +15,7 @@ public class CustomNameTest {
     @Test
     public void should_UseCustomEndpointNames_WhenGivenInAnnotation()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser()
-                .classLoader(getClass().getClassLoader())
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BackbonePlugin()).execute();

@@ -19,7 +19,7 @@
   "parser": {
     "endpointAnnotation": "dev.hilla.maven.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.maven.EndpointExposed",
-    "openAPIPath": "openapi-maven-test-base.json",
+    "openAPIBasePath": "openapi-maven-test-base.json",
     "plugins": {
       "use": [
         {
@@ -36,5 +36,6 @@
       "disableAllDefaults": false
     }
   },
-  "buildDir": "build"
+  "buildDir": "build",
+  "outputDir": "frontend/maven-generated"
 }

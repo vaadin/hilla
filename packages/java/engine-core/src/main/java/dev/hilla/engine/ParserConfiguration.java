@@ -19,7 +19,7 @@ import dev.hilla.parser.utils.ConfigList;
 public final class ParserConfiguration {
     private String endpointAnnotation;
     private String endpointExposedAnnotation;
-    private String openAPIPath;
+    private String openAPIBasePath;
     private Plugins plugins;
 
     public Optional<String> getEndpointAnnotation() {
@@ -30,8 +30,8 @@ public final class ParserConfiguration {
         return Optional.ofNullable(endpointExposedAnnotation);
     }
 
-    public Optional<String> getOpenAPIPath() {
-        return Optional.ofNullable(openAPIPath);
+    public Optional<String> getOpenAPIBasePath() {
+        return Optional.ofNullable(openAPIBasePath);
     }
 
     public Optional<Plugins> getPlugins() {
@@ -50,14 +50,14 @@ public final class ParserConfiguration {
         return Objects.equals(endpointAnnotation, that.endpointAnnotation)
                 && Objects.equals(endpointExposedAnnotation,
                         that.endpointExposedAnnotation)
-                && Objects.equals(openAPIPath, that.openAPIPath)
+                && Objects.equals(openAPIBasePath, that.openAPIBasePath)
                 && Objects.equals(plugins, that.plugins);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpointAnnotation,
-                endpointExposedAnnotation, openAPIPath, plugins);
+        return Objects.hash(endpointAnnotation, endpointExposedAnnotation,
+                openAPIBasePath, plugins);
     }
 
     void setEndpointAnnotation(String endpointAnnotation) {
@@ -68,8 +68,8 @@ public final class ParserConfiguration {
         this.endpointExposedAnnotation = endpointExposedAnnotation;
     }
 
-    void setOpenAPIPath(String openAPIPath) {
-        this.openAPIPath = openAPIPath;
+    void setOpenAPIBasePath(String openAPIBasePath) {
+        this.openAPIBasePath = openAPIBasePath;
     }
 
     void setPlugins(Plugins plugins) {
@@ -127,7 +127,7 @@ public final class ParserConfiguration {
 
         Plugins(@Nonnull Collection<Plugin> use,
                 @Nonnull Collection<Plugin> disable,
-            boolean disableAllDefaults) {
+                boolean disableAllDefaults) {
             this.disable.addAll(disable);
             this.use.addAll(use);
             this.disableAllDefaults = disableAllDefaults;
@@ -170,10 +170,10 @@ public final class ParserConfiguration {
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         private static final List<Plugin> DEFAULTS = List.of(
-            new Plugin(BackbonePlugin.class.getName()),
-            new Plugin(TransferTypesPlugin.class.getName()),
-            new Plugin(NonnullPlugin.class.getName()),
-            new Plugin(ModelPlugin.class.getName()));
+                new Plugin(BackbonePlugin.class.getName()),
+                new Plugin(TransferTypesPlugin.class.getName()),
+                new Plugin(NonnullPlugin.class.getName()),
+                new Plugin(ModelPlugin.class.getName()));
 
         public PluginsProcessor() {
             super(DEFAULTS);

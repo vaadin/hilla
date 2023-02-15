@@ -18,6 +18,7 @@ package dev.hilla.internal;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -43,20 +44,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TaskGenerateOpenAPITest extends TaskTest {
 
     private TaskGenerateOpenAPI taskGenerateOpenApi;
-    private File generatedOpenAPI;
-
-    @BeforeEach
-    public void setUp() {
-        generatedOpenAPI = getTemporaryDirectory()
-                .resolve("generated-openapi.json").toFile();
-    }
 
     @Test
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getClass().getClassLoader(), generatedOpenAPI);
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
+                getClass().getClassLoader());
 
         taskGenerateOpenApi.execute();
 
@@ -83,7 +78,8 @@ public class TaskGenerateOpenAPITest extends TaskTest {
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getClass().getClassLoader(), generatedOpenAPI);
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
+                getClass().getClassLoader());
 
         taskGenerateOpenApi.execute();
 
@@ -104,7 +100,8 @@ public class TaskGenerateOpenAPITest extends TaskTest {
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getClass().getClassLoader(), generatedOpenAPI);
+                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
+                getClass().getClassLoader());
 
         taskGenerateOpenApi.execute();
 
@@ -122,6 +119,6 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
     private OpenAPI getGeneratedOpenAPI() {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        return parser.read(generatedOpenAPI.getAbsolutePath());
+        return parser.read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }

@@ -37,50 +37,45 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
 
-    private File output;
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
     /**
      * Create a task for generating OpenAPI spec.
      *
-     * @param output
-     *            the output path of the generated json file.
+     * @param projectDirectory
+     *            the base directory of the project.
+     *
+     * @param buildDirectoryName
+     *            Java build directory name (relative to the {@code
+     *              projectDirectory}).
+     *
+     * @param outputDirectory
+     *            the output directory for generated TypeScript code.
+     *
+     * @param classLoader
+     *            the Java Class Loader for the parser.
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
-            @Nonnull ClassLoader classLoader, @Nonnull File output) {
-        super(projectDirectory, buildDirectoryName);
-        this.output = Objects.requireNonNull(output,
-                "OpenAPI output file should not be null");
+            File outputDirectory, @Nonnull ClassLoader classLoader) {
+        super(projectDirectory, buildDirectoryName, outputDirectory);
         this.classLoader = Objects.requireNonNull(classLoader,
                 "ClassLoader should not be null");
     }
 
+    /**
+     * Run Java class parser.
+     *
+     * @throws ExecutionFailedException
+     */
     @Override
     public void execute() throws ExecutionFailedException {
         try {
             var engineConfiguration = getEngineConfiguration();
-            var processor = new ParserProcessor(
-                engineConfiguration.getBaseDir(), classLoader,
-                engineConfiguration.getClassPath())
-                .apply(engineConfiguration.getParser());
-
-            var openAPI = processor.process();
-            writeOpenAPI(openAPI);
+            var processor = new ParserProcessor(engineConfiguration,
+                    classLoader);
+            processor.process();
         } catch (ParserException e) {
             throw new ExecutionFailedException("Java code parsing failed", e);
-        }
-    }
-
-    private void writeOpenAPI(OpenAPI openAPI) throws ExecutionFailedException {
-        try {
-            var openAPIFile = output.toPath();
-            Files.createDirectories(openAPIFile.getParent());
-
-            Files.write(openAPIFile, new OpenAPIPrinter().pretty()
-                    .writeAsString(openAPI).getBytes());
-        } catch (IOException e) {
-            throw new ExecutionFailedException(
-                    "Failed to write OpenAPI spec file", e);
         }
     }
 }

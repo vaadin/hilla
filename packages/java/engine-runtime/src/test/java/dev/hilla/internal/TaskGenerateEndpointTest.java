@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
@@ -21,15 +22,17 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
     private TaskGenerateEndpoint taskGenerateEndpoint;
     private Path outputDirectory;
-    private File openApiJson;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, URISyntaxException {
+        var referenceOpenAPIJsonFile = Path.of(Objects
+                .requireNonNull(getClass().getResource(
+                        "openapi/esmodule-generator-TwoEndpointsThreeMethods.json"))
+                .toURI());
+        Files.createDirectories(getOpenAPIFile().getParent());
+        Files.copy(referenceOpenAPIJsonFile, getOpenAPIFile());
         outputDirectory = Files
                 .createDirectory(getTemporaryDirectory().resolve("output"));
-        openApiJson = new File(getClass().getResource(
-                "openapi/esmodule-generator-TwoEndpointsThreeMethods.json")
-                .getPath());
     }
 
     @Test
@@ -45,7 +48,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                openApiJson, outputDirectory.toFile());
+                outputDirectory.toFile());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -79,7 +82,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                openApiJson, outputDirectory.toFile());
+                outputDirectory.toFile());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());

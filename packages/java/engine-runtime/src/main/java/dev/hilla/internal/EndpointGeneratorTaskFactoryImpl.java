@@ -33,7 +33,6 @@ public class EndpointGeneratorTaskFactoryImpl
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
-                options.getEndpointGeneratedOpenAPIFile(),
                 options.getFrontendGeneratedFolder());
     }
 
@@ -41,7 +40,7 @@ public class EndpointGeneratorTaskFactoryImpl
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
         return new TaskGenerateOpenAPIImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
-                options.getClassFinder().getClassLoader(),
-                options.getEndpointGeneratedOpenAPIFile());
+                options.getFrontendGeneratedFolder(),
+                options.getClassFinder().getClassLoader());
     }
 }

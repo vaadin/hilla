@@ -11,12 +11,13 @@
   "parser": {
     "endpointAnnotation": "dev.hilla.internal.Endpoint",
     "endpointExposedAnnotation": "dev.hilla.internal.EndpointExposed",
-    "openAPIPath": null,
+    "openAPIBasePath": null,
     "plugins": {
       "use": [],
       "disable": [],
       "disableAllDefaults": false
     }
   },
-  "buildDir": "build"
+  "buildDir": "build",
+  "outputDir": "output"
 }

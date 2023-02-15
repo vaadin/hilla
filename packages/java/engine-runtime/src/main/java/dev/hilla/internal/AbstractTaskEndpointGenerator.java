@@ -38,6 +38,7 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private final File projectDirectory;
     private final String buildDirectoryName;
+    private final File outputDirectory;
     private EngineConfiguration engineConfiguration;
     static final boolean IS_WINDOWS;
     static final String MAVEN_COMMAND;
@@ -51,19 +52,13 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     AbstractTaskEndpointGenerator(File projectDirectory,
-            String buildDirectoryName) {
+            String buildDirectoryName, File outputDirectory) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
                 "Build directory name cannot be null");
-    }
-
-    protected File getProjectDirectory() {
-        return projectDirectory;
-    }
-
-    protected String getBuildDirectoryName() {
-        return buildDirectoryName;
+        this.outputDirectory = Objects.requireNonNull(outputDirectory,
+                "Output direrctory name cannot be null");
     }
 
     protected EngineConfiguration getEngineConfiguration()
@@ -93,13 +88,17 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                     "Hilla engine configuration not found: configure using build system plugin");
             var command = prepareCommand();
             runConfigure(command);
+
+            try {
+                config = EngineConfiguration.load(buildDir);
+            } catch (IOException e) {
+                throw new ExecutionFailedException(
+                        "Failed to read Hilla engine configuration", e);
+            }
         }
 
-        try {
-            config = EngineConfiguration.load(buildDir);
-        } catch (IOException e) {
-            throw new ExecutionFailedException(
-                    "Failed to read Hilla engine configuration", e);
+        if (config != null) {
+            config.setOutputDir(outputDirectory.toPath());
         }
 
         this.engineConfiguration = config;

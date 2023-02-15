@@ -37,17 +37,14 @@ public final class EngineConfigureMojo extends AbstractMojo {
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
 
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "${project.build.directory}", readonly = true)
-    private File buildDirectory;
-
-    // If set to false, the plugin will not fail if the generator is not
-    // available. This allows to run this goal just to save the configuration,
-    // without having to run 'npm install' to avoid an error
-    @Parameter(property = "hilla.failOnMissingGenerator", defaultValue = "true")
-    private boolean failOnMissingGenerator;
+    /**
+     * The folder where TypeScript endpoints are generated.
+     */
+    @Parameter(defaultValue = "${project.basedir}/frontend/generated")
+    private File generatedTsFolder;
 
     @Override
     public void execute() throws EngineConfigureMojoException {
@@ -60,18 +57,18 @@ public final class EngineConfigureMojo extends AbstractMojo {
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
 
             conf.setBaseDir(project.getBasedir().toPath());
+            conf.setOutputDir(generatedTsFolder.toPath());
             conf.setGenerator(generator);
             conf.setParser(parser);
             var buildDir = project.getBuild().getDirectory();
             conf.setBuildDir(buildDir);
 
             // The configuration gathered from the Maven plugin is saved in a
-            // file
-            // so that further runs can skip running a separate Maven project
-            // just
-            // to get this configuration again
-            Files.createDirectories(Paths.get(buildDir));
-            conf.store(buildDirectory);
+            // file so that further runs can skip running a separate Maven
+            // project just to get this configuration again
+            var configDir = project.getBasedir().toPath().resolve(buildDir);
+            Files.createDirectories(configDir);
+            conf.store(configDir.toFile());
         } catch (DependencyResolutionRequiredException e) {
             throw new EngineConfigureMojoException("Configuration failed", e);
         } catch (IOException e) {

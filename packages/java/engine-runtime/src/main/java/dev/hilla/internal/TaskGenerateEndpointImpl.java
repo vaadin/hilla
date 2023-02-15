@@ -16,10 +16,9 @@
 package dev.hilla.internal;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Objects;
 
+import dev.hilla.engine.GeneratorException;
 import dev.hilla.engine.GeneratorProcessor;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -39,38 +38,37 @@ import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-beta1")
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
-    private final File outputDirectory;
-    private final File openAPI;
 
+    /**
+     * Create a task for generating OpenAPI spec.
+     *
+     * @param projectDirectory
+     *            the base directory of the project.
+     *
+     * @param buildDirectoryName
+     *            Java build directory name (relative to the {@code
+     *              projectDirectory}).
+     *
+     * @param outputDirectory
+     *            the output directory for generated TypeScript code.
+     */
     TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File openAPI, File outputDirectory) {
-
-        super(projectDirectory, buildDirectoryName);
-        this.openAPI = Objects.requireNonNull(openAPI,
-                "OpenAPI file cannot be null");
-        this.outputDirectory = Objects.requireNonNull(outputDirectory,
-                "Output directory cannot be null");
+            File outputDirectory) {
+        super(projectDirectory, buildDirectoryName, outputDirectory);
     }
 
-    private String readOpenApi() throws ExecutionFailedException {
-        try {
-            return Files.readString(openAPI.toPath());
-        } catch (IOException e) {
-            throw new ExecutionFailedException(
-                    "Failed to read OpenAPI spec file " + openAPI.getPath(), e);
-        }
-    }
-
+    /**
+     * Run TypeScript code generator.
+     *
+     * @throws ExecutionFailedException
+     */
     @Override
     public void execute() throws ExecutionFailedException {
         try {
             var engineConfiguration = getEngineConfiguration();
-            var processor = new GeneratorProcessor(
-                    engineConfiguration.getBaseDir())
-                            .outputDir(outputDirectory)
-                .apply(engineConfiguration.getGenerator());
-            processor.input(readOpenApi()).process();
-        } catch (IOException | InterruptedException e) {
+            var processor = new GeneratorProcessor(engineConfiguration);
+            processor.process();
+        } catch (GeneratorException e) {
             throw new ExecutionFailedException(
                     "Failed to run TypeScript endpoint generator", e);
         }

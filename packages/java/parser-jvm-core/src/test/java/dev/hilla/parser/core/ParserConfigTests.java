@@ -147,17 +147,17 @@ public class ParserConfigTests {
 
     @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
-        var e = assertThrows(NullPointerException.class, () -> new Parser()
-                .classLoader(getClass().getClassLoader())
-                .endpointAnnotation(defaultEndpointAnnotationName).execute());
+        var e = assertThrows(NullPointerException.class,
+                () -> new Parser().classLoader(getClass().getClassLoader())
+                        .endpointAnnotation(defaultEndpointAnnotationName)
+                        .execute());
         assertEquals("[JVM Parser] classPath is not provided.", e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
         var e = assertThrows(NullPointerException.class,
-                () -> new Parser()
-                        .classLoader(getClass().getClassLoader())
+                () -> new Parser().classLoader(getClass().getClassLoader())
                         .classPath(defaultClassPathElements).execute());
         assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
                 e.getMessage());

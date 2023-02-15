@@ -12,6 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class EngineConfiguration {
     public static final String RESOURCE_NAME = "hilla-engine-configuration.json";
+
+    private static final String OPEN_API_PATH = "generated-resources/openapi.json";
+
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD,
@@ -22,6 +25,8 @@ public class EngineConfiguration {
     private GeneratorConfiguration generator;
     private ParserConfiguration parser;
     private String buildDir;
+
+    private String outputDir = "frontend/generated";
 
     public static EngineConfiguration load(File targetDir) throws IOException {
         File configFile = new File(targetDir, RESOURCE_NAME);
@@ -81,6 +86,23 @@ public class EngineConfiguration {
         this.buildDir = buildDir;
     }
 
+    public String getOutputDir() {
+        return outputDir;
+    }
+
+    public void setOutputDir(String outputDir) {
+        this.outputDir = outputDir;
+    }
+
+    public void setOutputDir(Path outputDir) {
+        if (outputDir.isAbsolute()) {
+            setOutputDir(baseDir.toAbsolutePath()
+                    .relativize(outputDir.toAbsolutePath()).toString());
+        } else {
+            setOutputDir(outputDir.toString());
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -94,11 +116,20 @@ public class EngineConfiguration {
                 && Objects.equals(classPath, that.classPath)
                 && Objects.equals(generator, that.generator)
                 && Objects.equals(parser, that.parser)
-                && Objects.equals(buildDir, that.buildDir);
+                && Objects.equals(buildDir, that.buildDir)
+                && Objects.equals(outputDir, that.outputDir);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(baseDir, classPath, generator, parser, buildDir);
+    }
+
+    Path getOpenAPIFile() {
+        return baseDir.resolve(buildDir).resolve(OPEN_API_PATH);
+    }
+
+    Path getOutputDirectory() {
+        return baseDir.resolve(outputDir);
     }
 }
