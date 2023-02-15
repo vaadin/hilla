@@ -103,7 +103,7 @@ public interface ConfigList<Item> {
             }
 
             return Collections
-                    .unmodifiableCollection(stream.collect(Collectors.toSet()));
+                    .unmodifiableCollection(stream.collect(Collectors.toList()));
         }
     }
 }

@@ -61,16 +61,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var engineConfiguration = getEngineConfiguration();
             var processor = new ParserProcessor(
                 engineConfiguration.getBaseDir(), classLoader,
-                engineConfiguration.getClassPath());
-
-            var parserConfiguration = engineConfiguration.getParser();
-            parserConfiguration.getClassPath().ifPresent(processor::classPath);
-            parserConfiguration.getEndpointAnnotation()
-                    .ifPresent(processor::endpointAnnotation);
-            parserConfiguration.getEndpointExposedAnnotation()
-                    .ifPresent(processor::endpointExposedAnnotation);
-            parserConfiguration.getOpenAPIPath().ifPresent(processor::openAPIBase);
-            parserConfiguration.getPlugins().ifPresent(processor::plugins);
+                engineConfiguration.getClassPath())
+                .apply(engineConfiguration.getParser());
 
             var openAPI = processor.process();
             writeOpenAPI(openAPI);

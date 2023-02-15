@@ -2,7 +2,19 @@
   "baseDir": "base",
   "classPath": ["build/classes", "dependency"],
   "generator": {
-    "plugins": null
+    "plugins": {
+      "disable": [
+        {
+          "path": "generator-jvm-plugin-disable"
+        }
+      ],
+      "disableAllDefaults": true,
+      "use": [
+        {
+          "path": "generator-jvm-plugin-use"
+        }
+      ]
+    }
   },
   "parser": {
     "classPath": {
@@ -21,7 +33,7 @@
           "order": null
         }
       ],
-      "disableAllDefaults": false,
+      "disableAllDefaults": true,
       "use": [
         {
           "configuration": null,

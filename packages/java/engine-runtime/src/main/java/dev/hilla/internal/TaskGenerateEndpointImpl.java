@@ -67,9 +67,8 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
             var engineConfiguration = getEngineConfiguration();
             var processor = new GeneratorProcessor(
                     engineConfiguration.getBaseDir())
-                            .outputDir(outputDirectory);
-            getEngineConfiguration().getGenerator().getPlugins()
-                    .ifPresent(processor::plugins);
+                            .outputDir(outputDirectory)
+                .apply(engineConfiguration.getGenerator());
             processor.input(readOpenApi()).process();
         } catch (IOException | InterruptedException e) {
             throw new ExecutionFailedException(

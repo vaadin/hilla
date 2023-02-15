@@ -31,13 +31,11 @@ public class EngineRunner {
 
     private void generateTypeScriptCode(String openAPI) throws EngineException {
         try {
-            var executor = new GeneratorProcessor(conf.getBaseDir())
-                    .input(openAPI);
+            var processor = new GeneratorProcessor(conf.getBaseDir())
+                .apply(conf.getGenerator())
+                .input(openAPI);
 
-            var generator = conf.getGenerator();
-            generator.getPlugins().ifPresent(executor::plugins);
-
-            executor.process();
+            processor.process();
         } catch (IOException | InterruptedException | GeneratorException e) {
             throw new EngineException("TS code generation failed", e);
         }
@@ -66,16 +64,7 @@ public class EngineRunner {
     private OpenAPI parseJavaCode() throws EngineException {
         try {
             var processor = new ParserProcessor(conf.getBaseDir(), classLoader,
-                conf.getClassPath());
-            var parser = conf.getParser();
-
-            parser.getClassPath().ifPresent(processor::classPath);
-            parser.getEndpointAnnotation()
-                    .ifPresent(processor::endpointAnnotation);
-            parser.getEndpointExposedAnnotation()
-                    .ifPresent(processor::endpointExposedAnnotation);
-            parser.getOpenAPIPath().ifPresent(processor::openAPIBase);
-            parser.getPlugins().ifPresent(processor::plugins);
+                conf.getClassPath()).apply(conf.getParser());
 
             return processor.process();
         } catch (ParserException e) {

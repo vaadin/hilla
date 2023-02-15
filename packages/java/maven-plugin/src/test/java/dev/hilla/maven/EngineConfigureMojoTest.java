@@ -6,7 +6,6 @@ import dev.hilla.engine.EngineConfiguration;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

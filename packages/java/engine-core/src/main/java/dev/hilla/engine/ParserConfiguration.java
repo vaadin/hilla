@@ -2,6 +2,7 @@ package dev.hilla.engine;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -69,11 +70,11 @@ public final class ParserConfiguration {
         this.classPath = classPath;
     }
 
-    public void setEndpointAnnotation(String endpointAnnotation) {
+    void setEndpointAnnotation(String endpointAnnotation) {
         this.endpointAnnotation = endpointAnnotation;
     }
 
-    public void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
+    void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
         this.endpointExposedAnnotation = endpointExposedAnnotation;
     }
 
@@ -90,10 +91,11 @@ public final class ParserConfiguration {
         private String name;
         private Integer order;
 
+        // Jackson requires a constructor for deserialization
         public Plugin() {
         }
 
-        public Plugin(String name) {
+        Plugin(String name) {
             this.name = name;
         }
 
@@ -131,16 +133,19 @@ public final class ParserConfiguration {
 
     public static class Plugins implements ConfigList<Plugin> {
         private final Set<Plugin> disable = new HashSet<>();
-        private final boolean disableAllDefaults = false;
+        private boolean disableAllDefaults = false;
         private final Set<Plugin> use = new HashSet<>();
 
+        // Jackson requires a constructor for deserialization
         public Plugins() {
         }
 
-        public Plugins(@Nonnull Collection<Plugin> use,
-                @Nonnull Collection<Plugin> disable) {
+        Plugins(@Nonnull Collection<Plugin> use,
+                @Nonnull Collection<Plugin> disable,
+            boolean disableAllDefaults) {
             this.disable.addAll(disable);
             this.use.addAll(use);
+            this.disableAllDefaults = disableAllDefaults;
         }
 
         @Override
@@ -179,14 +184,14 @@ public final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        private static final Set<Plugin> defaults = Set.of(
-                new Plugin(TransferTypesPlugin.class.getName()),
-                new Plugin(BackbonePlugin.class.getName()),
-                new Plugin(NonnullPlugin.class.getName()),
-                new Plugin(ModelPlugin.class.getName()));
+        private static final List<Plugin> DEFAULTS = List.of(
+            new Plugin(BackbonePlugin.class.getName()),
+            new Plugin(TransferTypesPlugin.class.getName()),
+            new Plugin(NonnullPlugin.class.getName()),
+            new Plugin(ModelPlugin.class.getName()));
 
         public PluginsProcessor() {
-            super(defaults);
+            super(DEFAULTS);
         }
     }
 }

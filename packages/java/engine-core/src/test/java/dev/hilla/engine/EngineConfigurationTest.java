@@ -24,9 +24,10 @@ public class EngineConfigurationTest {
     private Path temporaryDirectory;
     private File configFile;
 
-    private EngineConfiguration engineConfiguration = new EngineConfiguration();
+    private final EngineConfiguration engineConfiguration =
+        new EngineConfiguration();
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final URL TEST_CONFIG = EngineConfigurationTest.class
             .getResource("hilla-engine-configuration.json");
 
@@ -47,23 +48,28 @@ public class EngineConfigurationTest {
                 .setEndpointExposedAnnotation("dev.hilla.test.EndpointExposed");
         parserConfiguration.setClassPath(new ParserClassPathConfiguration());
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(
-                List.of(new ParserConfiguration.Plugin(
-                        "parser-jvm-plugin-use")),
-                List.of(new ParserConfiguration.Plugin(
-                        "parser-jvm-plugin-disable"))));
+            List.of(new ParserConfiguration.Plugin("parser-jvm-plugin-use")),
+            List.of(
+                new ParserConfiguration.Plugin("parser-jvm-plugin-disable")),
+            true));
         parserConfiguration.setOpenAPIPath("test-openapi.json");
         this.engineConfiguration.setParser(parserConfiguration);
 
         var generatorConfiguration = new GeneratorConfiguration();
+        generatorConfiguration.setPlugins(new GeneratorConfiguration.Plugins(
+            List.of(new GeneratorConfiguration.Plugin(
+                "generator-jvm-plugin" + "-use")), List.of(
+            new GeneratorConfiguration.Plugin(
+                "generator-jvm-plugin" + "-disable")), true));
         this.engineConfiguration.setGenerator(generatorConfiguration);
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws IOException {
         if (this.configFile.exists()) {
-            this.configFile.delete();
+            Files.delete(this.configFile.toPath());
         }
-        this.temporaryDirectory.toFile().delete();
+        Files.delete(this.temporaryDirectory);
     }
 
     @Test
@@ -86,6 +92,7 @@ public class EngineConfigurationTest {
     @Test
     public void should_DeserializeFromJsonFile()
             throws IOException, URISyntaxException {
+        assertNotNull(TEST_CONFIG);
         Files.copy(Path.of(TEST_CONFIG.toURI()), configFile.toPath());
 
         var loadedConfig = EngineConfiguration

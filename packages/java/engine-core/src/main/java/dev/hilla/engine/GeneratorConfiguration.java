@@ -1,8 +1,15 @@
 package dev.hilla.engine;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+
+import dev.hilla.parser.utils.ConfigList;
 
 public final class GeneratorConfiguration {
     private Plugins plugins;
@@ -35,10 +42,11 @@ public final class GeneratorConfiguration {
     public static class Plugin {
         private String path;
 
+        // Jackson requires a constructor for deserialization
         public Plugin() {
         }
 
-        public Plugin(String path) {
+        Plugin(String path) {
             this.path = path;
         }
 
@@ -65,10 +73,23 @@ public final class GeneratorConfiguration {
         }
     }
 
-    public static class Plugins {
-        private final List<Plugin> disable = List.of();
-        private final boolean disableAllDefaults = false;
-        private final List<Plugin> use = List.of();
+    public static class Plugins implements ConfigList<Plugin> {
+        private final List<Plugin> disable = new ArrayList<>();
+        private boolean disableAllDefaults = false;
+        private final List<Plugin> use = new ArrayList<>();
+
+        // Jackson requires a constructor for deserialization
+        public Plugins() {
+        }
+
+        Plugins(
+            @Nonnull Collection<Plugin> use,
+            @Nonnull Collection<Plugin> disable,
+            boolean disableAllDefaults) {
+            this.use.addAll(use);
+            this.disable.addAll(disable);
+            this.disableAllDefaults = disableAllDefaults;
+        }
 
         public List<Plugin> getDisable() {
             return disable;
@@ -91,14 +112,42 @@ public final class GeneratorConfiguration {
                 return false;
             }
             Plugins plugins = (Plugins) o;
-            return disableAllDefaults == plugins.disableAllDefaults
-                    && Objects.equals(disable, plugins.disable)
-                    && Objects.equals(use, plugins.use);
+            return disableAllDefaults == plugins.disableAllDefaults &&
+                Objects.equals(disable, plugins.disable) &&
+                Objects.equals(use, plugins.use);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(disable, disableAllDefaults, use);
+        }
+
+        @Override
+        public Collection<Plugin> getDisabledOptions() {
+            return disable;
+        }
+
+        @Override
+        public Collection<Plugin> getUsedOptions() {
+            return use;
+        }
+
+        @Override
+        public boolean shouldAllDefaultsBeDisabled() {
+            return disableAllDefaults;
+        }
+    }
+
+    static class PluginsProcessor extends ConfigList.Processor<Plugin> {
+        static private final List<Plugin> DEFAULTS = List.of(
+            new Plugin("@hilla/generator-typescript-plugin-backbone"),
+            new Plugin("@hilla/generator-typescript-plugin-client"),
+            new Plugin("@hilla/generator-typescript-plugin-barrel"),
+            new Plugin("@hilla/generator-typescript-plugin-model"),
+            new Plugin("@hilla/generator-typescript-plugin-push"));
+
+        PluginsProcessor() {
+            super(DEFAULTS);
         }
     }
 }

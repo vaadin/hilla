@@ -1,5 +1,6 @@
 package dev.hilla.engine;
 
+import dev.hilla.parser.utils.ConfigList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,29 +19,26 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 public final class GeneratorProcessor {
-    private static final List<GeneratorConfiguration.Plugin> DEFAULT_PLUGINS = Arrays
-            .asList(new GeneratorConfiguration.Plugin(
-                    "@hilla/generator-typescript-plugin-client"),
-                    new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-backbone"),
-                    new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-barrel"),
-                    new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-model"),
-                    new GeneratorConfiguration.Plugin(
-                            "@hilla/generator-typescript-plugin-push"));
-
     private final Path baseDir;
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
     private String input;
     private File outputDir;
-    private Set<GeneratorConfiguration.Plugin> plugins = new LinkedHashSet<>(
-            DEFAULT_PLUGINS);
+    private final GeneratorConfiguration.PluginsProcessor pluginsProcessor =
+        new GeneratorConfiguration.PluginsProcessor();
 
     public GeneratorProcessor(Path baseDir) {
         this.baseDir = baseDir;
         this.outputDir = new File(baseDir.toFile(), "frontend/generated");
+    }
+
+    public GeneratorProcessor apply(GeneratorConfiguration generatorConfiguration) {
+        if (generatorConfiguration == null) {
+            return this;
+        }
+
+        generatorConfiguration.getPlugins().ifPresent(this::applyPlugins);
+        return this;
     }
 
     public GeneratorProcessor input(@Nonnull String input) {
@@ -49,23 +48,6 @@ public final class GeneratorProcessor {
 
     public GeneratorProcessor outputDir(@Nonnull File outputDir) {
         this.outputDir = Objects.requireNonNull(outputDir);
-        return this;
-    }
-
-    public GeneratorProcessor plugins(
-            @Nonnull GeneratorConfiguration.Plugins plugins) {
-        var pluginStream = Objects.requireNonNull(plugins).getUse().stream();
-
-        if (!plugins.isDisableAllDefaults()) {
-            pluginStream = Stream.concat(
-                    this.plugins.stream().filter(
-                            plugin -> !plugins.getDisable().contains(plugin)),
-                    pluginStream);
-        }
-
-        this.plugins = pluginStream
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
         return this;
     }
 
@@ -84,9 +66,15 @@ public final class GeneratorProcessor {
         runner.add("-o", result.toString());
     }
 
+    private void applyPlugins(
+        @Nonnull GeneratorConfiguration.Plugins plugins) {
+        pluginsProcessor.setConfig(plugins);
+    }
+
     private void preparePlugins(GeneratorShellRunner runner) {
-        plugins.stream().map(GeneratorConfiguration.Plugin::getPath).distinct()
-                .forEach(path -> runner.add("-p", path));
+        pluginsProcessor.process().stream()
+            .map(GeneratorConfiguration.Plugin::getPath).distinct()
+            .forEach(path -> runner.add("-p", path));
     }
 
     private void prepareVerbose(GeneratorShellRunner runner) {

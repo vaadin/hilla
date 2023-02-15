@@ -84,27 +84,13 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             // Verify ParserConfiguration is applied to ParserProcessor
             var classPathCaptor = ArgumentCaptor.forClass(
                 ParserClassPathConfiguration.class);
-            inOrder.verify(parserProcessor)
-                .classPath(classPathCaptor.capture());
-            assertEquals("maven-test-class-path",
-                classPathCaptor.getValue().getValue());
-            inOrder.verify(parserProcessor).endpointAnnotation("dev.hilla.maven.Endpoint");
-            inOrder.verify(parserProcessor).endpointExposedAnnotation("dev.hilla.maven.EndpointExposed");
-            inOrder.verify(parserProcessor).openAPIBase("openapi-maven-test-base.json");
-            var parserPluginsCaptor = ArgumentCaptor.forClass(
-                ParserConfiguration.Plugins.class);
-            inOrder.verify(parserProcessor).plugins(parserPluginsCaptor.capture());
-            assertEquals(
-                getEngineConfiguration().getParser().getPlugins().orElseThrow(),
-                parserPluginsCaptor.getValue());
+            inOrder.verify(parserProcessor).apply(getEngineConfiguration().getParser());
             inOrder.verify(parserProcessor).process();
 
             // Verify GeneratorConfiguration is applied to ParserProcessor
             var generatorPluginsCaptor =
                 ArgumentCaptor.forClass(GeneratorConfiguration.Plugins.class);
-            inOrder.verify(generatorProcessor).plugins(generatorPluginsCaptor.capture());
-            assertEquals(getEngineConfiguration().getGenerator().getPlugins().orElseThrow(),
-                generatorPluginsCaptor.getValue());
+            inOrder.verify(generatorProcessor).apply(getEngineConfiguration().getGenerator());
             inOrder.verify(generatorProcessor).process();
         }
     }

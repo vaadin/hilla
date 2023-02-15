@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import dev.hilla.engine.EngineConfiguration;
@@ -42,17 +43,17 @@ public class TaskTest {
         var classPath = new LinkedHashSet(List
                 .of(Path.of(getClass().getClassLoader().getResource("").toURI())
                         .toString()));
-        // create hilla-engine-configuration.json
-        var config = new EngineConfiguration();
+        // Create hilla-engine-configuration.json from template
+        var configPath = buildDir.resolve(EngineConfiguration.RESOURCE_NAME);
+        Files.copy(Path.of(Objects.requireNonNull(
+                getClass().getResource(EngineConfiguration.RESOURCE_NAME)).toURI()),
+            configPath);
+        var config = EngineConfiguration.load(buildDir.toFile());
+        // Modify runtime settings (base, class path) and save
+        // hilla-engine-configuration.json
+        Files.delete(buildDir.resolve(EngineConfiguration.RESOURCE_NAME));
         config.setBaseDir(temporaryDirectory);
-        config.setBuildDir(getBuildDirectory());
         config.setClassPath(classPath);
-        var parserConfig = new ParserConfiguration();
-        parserConfig.setEndpointAnnotation(Endpoint.class.getName());
-        parserConfig
-                .setEndpointExposedAnnotation(EndpointExposed.class.getName());
-        config.setParser(parserConfig);
-        config.setGenerator(new GeneratorConfiguration());
         config.store(buildDir.toFile());
 
         var nodeModulesDirectory = getTemporaryDirectory()

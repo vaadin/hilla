@@ -1,8 +1,6 @@
 package dev.hilla.engine;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -31,7 +29,7 @@ public final class ParserProcessor {
     private Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
-    private String openAPIPath;
+    private String openAPIBase;
 
     public ParserProcessor(Path baseDir, ClassLoader classLoader,
         Set<String> classPath) {
@@ -40,51 +38,25 @@ public final class ParserProcessor {
         this.classPath = classPath;
     }
 
-    public ParserProcessor classPath(
-            @Nonnull ParserClassPathConfiguration classPath) {
-        var value = Objects.requireNonNull(classPath).getValue();
-        var delimiter = classPath.getDelimiter();
+    public ParserProcessor apply(ParserConfiguration parserConfiguration) {
+        if (parserConfiguration == null) {
+            return this;
+        }
 
-        var userDefinedClassPathElements = Set.of(value.split(delimiter));
-
-        this.classPath = classPath.isOverride() ? userDefinedClassPathElements
-                : Stream.of(this.classPath, userDefinedClassPathElements)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toSet());
-
-        return this;
-    }
-
-    public ParserProcessor endpointAnnotation(
-            @Nonnull String endpointAnnotationName) {
-        this.endpointAnnotationName = Objects
-                .requireNonNull(endpointAnnotationName);
-        return this;
-    }
-
-    public ParserProcessor endpointExposedAnnotation(
-            @Nonnull String endpointExposedAnnotationName) {
-        this.endpointExposedAnnotationName = Objects
-                .requireNonNull(endpointExposedAnnotationName);
-        return this;
-    }
-
-    public ParserProcessor openAPIBase(@Nonnull String openAPIBase) {
-        this.openAPIPath = openAPIBase;
-        return this;
-    }
-
-    public ParserProcessor plugins(
-            @Nonnull ParserConfiguration.Plugins plugins) {
-        this.pluginsProcessor.setConfig(plugins);
-
+        parserConfiguration.getClassPath().ifPresent(this::applyClassPath);
+        parserConfiguration.getEndpointAnnotation()
+            .ifPresent(this::applyEndpointAnnotation);
+        parserConfiguration.getEndpointExposedAnnotation()
+            .ifPresent(this::applyEndpointExposedAnnotation);
+        parserConfiguration.getOpenAPIPath().ifPresent(this::applyOpenAPIBase);
+        parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
         return this;
     }
 
     public OpenAPI process() {
         var parser = new Parser().classLoader(classLoader).classPath(classPath)
-                .endpointAnnotation(endpointAnnotationName)
-                .endpointExposedAnnotation(endpointExposedAnnotationName);
+            .endpointAnnotation(endpointAnnotationName)
+            .endpointExposedAnnotation(endpointExposedAnnotationName);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
@@ -94,13 +66,47 @@ public final class ParserProcessor {
         return parser.execute();
     }
 
+    private void applyClassPath(
+        @Nonnull ParserClassPathConfiguration classPath) {
+        var value = Objects.requireNonNull(classPath).getValue();
+        var delimiter = classPath.getDelimiter();
+
+        var userDefinedClassPathElements = Set.of(value.split(delimiter));
+
+        this.classPath = classPath.isOverride() ? userDefinedClassPathElements
+                : Stream.of(this.classPath, userDefinedClassPathElements)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet());
+    }
+
+    private void applyEndpointAnnotation(
+            @Nonnull String endpointAnnotationName) {
+        this.endpointAnnotationName = Objects
+                .requireNonNull(endpointAnnotationName);
+    }
+
+    private void applyEndpointExposedAnnotation(
+            @Nonnull String endpointExposedAnnotationName) {
+        this.endpointExposedAnnotationName = Objects
+                .requireNonNull(endpointExposedAnnotationName);
+    }
+
+    private void applyOpenAPIBase(@Nonnull String openAPIBase) {
+        this.openAPIBase = openAPIBase;
+    }
+
+    private void applyPlugins(
+        @Nonnull ParserConfiguration.Plugins plugins) {
+        this.pluginsProcessor.setConfig(plugins);
+    }
+
     private void prepareOpenAPIBase(Parser parser) {
-        if (openAPIPath == null) {
+        if (openAPIBase == null) {
             return;
         }
 
         try {
-            var path = baseDir.resolve(openAPIPath);
+            var path = baseDir.resolve(openAPIBase);
             var fileName = path.getFileName().toString();
 
             if (!fileName.endsWith("yml") && !fileName.endsWith("yaml")
