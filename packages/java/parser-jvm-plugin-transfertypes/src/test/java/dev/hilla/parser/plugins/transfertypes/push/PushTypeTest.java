@@ -26,8 +26,9 @@ public class PushTypeTest {
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).execute();
+                .execute();
 
         helper.executeParserWithConfig(openAPI);
     }
