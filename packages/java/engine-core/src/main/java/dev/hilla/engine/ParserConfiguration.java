@@ -1,5 +1,6 @@
 package dev.hilla.engine;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +81,7 @@ public final class ParserConfiguration {
         private PluginConfiguration configuration;
         private String name;
 
-        // Jackson requires a constructor for deserialization
+        // Maven and Jackson require a constructor for deserialization
         public Plugin() {
         }
 
@@ -117,12 +118,13 @@ public final class ParserConfiguration {
     }
 
     public static class Plugins implements ConfigList<Plugin> {
-        private final Set<Plugin> disable = new HashSet<>();
-        private boolean disableAllDefaults = false;
-        private final Set<Plugin> use = new HashSet<>();
+        private final List<Plugin> disable = new ArrayList<>();
+        private final boolean disableAllDefaults;
+        private final List<Plugin> use = new ArrayList<>();
 
-        // Jackson requires a constructor for deserialization
+        // Maven and Jackson require a constructor for deserialization
         public Plugins() {
+            disableAllDefaults = false;
         }
 
         Plugins(@Nonnull Collection<Plugin> use,
@@ -134,12 +136,12 @@ public final class ParserConfiguration {
         }
 
         @Override
-        public Set<Plugin> getDisabledOptions() {
+        public Collection<Plugin> getDisabledOptions() {
             return disable;
         }
 
         @Override
-        public Set<Plugin> getUsedOptions() {
+        public Collection<Plugin> getUsedOptions() {
             return use;
         }
 
@@ -175,7 +177,7 @@ public final class ParserConfiguration {
                 new Plugin(NonnullPlugin.class.getName()),
                 new Plugin(ModelPlugin.class.getName()));
 
-        public PluginsProcessor() {
+        PluginsProcessor() {
             super(DEFAULTS);
         }
     }

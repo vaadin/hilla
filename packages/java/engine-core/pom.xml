@@ -15,7 +15,6 @@
   <name>Hilla Engine Core</name>
 
   <properties>
-    <flow.version>24.0-SNAPSHOT</flow.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 

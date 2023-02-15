@@ -40,7 +40,7 @@ public final class GeneratorConfiguration {
     public static class Plugin {
         private String path;
 
-        // Jackson requires a constructor for deserialization
+        // Maven and Jackson requires a constructor for deserialization
         public Plugin() {
         }
 
@@ -73,11 +73,12 @@ public final class GeneratorConfiguration {
 
     public static class Plugins implements ConfigList<Plugin> {
         private final List<Plugin> disable = new ArrayList<>();
-        private boolean disableAllDefaults = false;
+        private final boolean disableAllDefaults;
         private final List<Plugin> use = new ArrayList<>();
 
-        // Jackson requires a constructor for deserialization
+        // Maven (and Jackson) require a constructor for deserialization
         public Plugins() {
+            disableAllDefaults = false;
         }
 
         Plugins(@Nonnull Collection<Plugin> use,
