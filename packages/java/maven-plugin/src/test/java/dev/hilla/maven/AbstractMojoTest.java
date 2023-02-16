@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class AbstractMojoTest {
     private Path temporaryDirectory;
     private Path buildDirectory;
+    private Path outputDirectory;
     private EngineConfiguration engineConfiguration;
 
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
@@ -38,8 +39,9 @@ public class AbstractMojoTest {
         testCase.setUp();
 
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
-        buildDirectory = temporaryDirectory.resolve("build");
-        Files.createDirectories(buildDirectory);
+        buildDirectory = temporaryDirectory.resolve("target");
+        outputDirectory = buildDirectory.resolve("classes");
+        Files.createDirectories(outputDirectory);
 
         // Maven project is not initialized on the mojo, setup a mock manually
         project = Mockito.mock(MavenProject.class);
@@ -51,7 +53,8 @@ public class AbstractMojoTest {
         Mockito.doReturn(getTemporaryDirectory().toFile()).when(project)
                 .getBasedir();
         var mockBuild = Mockito.mock(Build.class);
-        Mockito.doReturn("build").when(mockBuild).getDirectory();
+        Mockito.doReturn("target").when(mockBuild).getDirectory();
+        Mockito.doReturn("target/classes").when(mockBuild).getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
         // Load reference EngineConfiguration

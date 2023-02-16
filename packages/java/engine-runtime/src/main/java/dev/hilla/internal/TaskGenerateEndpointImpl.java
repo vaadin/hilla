@@ -16,7 +16,6 @@
 package dev.hilla.internal;
 
 import java.io.File;
-import java.util.Objects;
 
 import dev.hilla.engine.GeneratorException;
 import dev.hilla.engine.GeneratorProcessor;

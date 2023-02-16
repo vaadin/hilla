@@ -15,6 +15,11 @@
  */
 package dev.hilla;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -43,6 +51,7 @@ import dev.hilla.EndpointInvocationException.EndpointInternalException;
 import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
+import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.exception.EndpointException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,6 +77,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @NpmPackage(value = "@hilla/frontend", version = "2.0.0-beta1")
 @NpmPackage(value = "@hilla/form", version = "2.0.0-beta1")
 public class EndpointController {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(EndpointController.class);
+
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
     /**
@@ -101,13 +113,25 @@ public class EndpointController {
         this.csrfChecker = csrfChecker;
         this.endpointRegistry = endpointRegistry;
 
-        context.getBeansWithAnnotation(Endpoint.class)
-                .forEach((name, endpointBean) -> endpointRegistry
-                        .registerEndpoint(endpointBean));
-    }
+        // Spring returns bean names in lower camel case, while Hilla OpenAPI
+        // definition use upper camel case, so a case insensitive map is used to
+        // ease searching
+        var endpointBeans = new TreeMap<String, Object>(
+                String.CASE_INSENSITIVE_ORDER);
+        // TODO: the annotation should be configurable
+        endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
 
-    private static Logger getLogger() {
-        return LoggerFactory.getLogger(EndpointController.class);
+        // By default, only register those endpoints included in the Hilla
+        // OpenAPI definition file
+        registerEndpointsFromApiDefinition(endpointBeans);
+
+        if (endpointRegistry.isEmpty() && !endpointBeans.isEmpty()) {
+            LOGGER.debug("No endpoints found in openapi.json:"
+                    + " registering all endpoints found using the Spring context");
+
+            endpointBeans.forEach((name, endpointBean) -> endpointRegistry
+                    .registerEndpoint(endpointBean));
+        }
     }
 
     /**
@@ -140,8 +164,8 @@ public class EndpointController {
             @PathVariable("method") String methodName,
             @RequestBody(required = false) ObjectNode body,
             HttpServletRequest request) {
-        getLogger().debug("Endpoint: {}, method: {}, request body: {}",
-                endpointName, methodName, body);
+        LOGGER.debug("Endpoint: {}, method: {}, request body: {}", endpointName,
+                methodName, body);
 
         if (!csrfChecker.validateCsrfTokenInRequest(request)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -151,7 +175,7 @@ public class EndpointController {
 
         try {
             // Put a VaadinRequest in the instances object so as the request is
-            // available in the end-point method
+            // available in the endpoint method
             VaadinServletService service = (VaadinServletService) VaadinService
                     .getCurrent();
             CurrentInstance.set(VaadinRequest.class,
@@ -168,7 +192,7 @@ public class EndpointController {
                                 + "Double check method's return type or specify a custom mapper bean with qualifier '%s'",
                         endpointName, methodName,
                         EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER);
-                getLogger().error(errorMessage, e);
+                LOGGER.error(errorMessage, e);
                 throw new EndpointInternalException(errorMessage);
             }
         } catch (EndpointException e) {
@@ -178,7 +202,7 @@ public class EndpointController {
             } catch (JsonProcessingException ee) {
                 String errorMessage = String.format(
                         "Failed to serialize error object for endpoint exception. ");
-                getLogger().error(errorMessage, e);
+                LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
             }
         } catch (EndpointNotFoundException e) {
@@ -198,4 +222,53 @@ public class EndpointController {
 
     }
 
+    private void registerEndpointsFromApiDefinition(
+            Map<String, Object> knownBeans) {
+        var resource = getClass()
+                .getResource('/' + EngineConfiguration.OPEN_API_PATH);
+
+        if (resource == null) {
+            LOGGER.error("openapi.json is not available");
+        } else {
+            try (var stream = resource.openStream()) {
+                var rootNode = new ObjectMapper().readTree(stream);
+                var tagsNode = (ArrayNode) rootNode.findValue("tags");
+
+                // Declared endpoints are first searched as Spring Beans. If not
+                // found, they are, if possible, instantiated as regular classes
+                tagsNode.forEach(tag -> {
+                    Optional.ofNullable(tag.get("name")).map(JsonNode::asText)
+                            .map(knownBeans::get)
+                            .or(() -> Optional
+                                    .ofNullable(tag.get("x-class-name"))
+                                    .map(JsonNode::asText)
+                                    .map(this::instantiateEndpointByClassName))
+                            .ifPresent(endpointRegistry::registerEndpoint);
+                });
+            } catch (IOException e) {
+                LOGGER.warn("Failed to read openapi.json", e);
+            }
+        }
+    }
+
+    private Object instantiateEndpointByClassName(String className) {
+        Class<?> cls;
+        try {
+            cls = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            LOGGER.warn("Endpoint class {} is not available", className, e);
+            return null;
+        }
+        try {
+            return cls.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException ex) {
+            LOGGER.error("Failed to create endpoint instance for class"
+                    + " '{}': if an endpoint is not a Spring bean,"
+                    + " it must have a default constructor", className);
+        } catch (ReflectiveOperationException ex) {
+            LOGGER.warn("Failed to create endpoint instance for class '{}'",
+                    className, ex);
+        }
+        return null;
+    }
 }

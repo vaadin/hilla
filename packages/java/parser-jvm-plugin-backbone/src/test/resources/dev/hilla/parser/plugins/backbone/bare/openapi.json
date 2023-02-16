@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "BareTypeEndpoint"
+      "name": "BareTypeEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.bare.BareTypeEndpoint"
     }
   ],
   "paths": {

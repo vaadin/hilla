@@ -36,6 +36,7 @@
       "disableAllDefaults": false
     }
   },
-  "buildDir": "build",
+  "buildDir": "target",
+  "classesDir": "target/classes",
   "outputDir": "frontend/maven-generated"
 }

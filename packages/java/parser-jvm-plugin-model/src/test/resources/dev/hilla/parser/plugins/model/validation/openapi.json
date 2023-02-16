@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "ValidationEndpoint"
+      "name": "ValidationEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.model.validation.ValidationEndpoint"
     }
   ],
   "paths": {

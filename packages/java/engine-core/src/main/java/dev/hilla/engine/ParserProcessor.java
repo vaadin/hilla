@@ -3,6 +3,8 @@ package dev.hilla.engine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,9 +25,10 @@ public final class ParserProcessor {
     private final Path baseDir;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
     private final ClassLoader classLoader;
-    private Set<String> classPath;
+    private final Set<String> classPath;
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
+    private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
     private final Path openAPIFile;
@@ -50,12 +53,14 @@ public final class ParserProcessor {
         parserConfiguration.getOpenAPIBasePath()
                 .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
+        parserConfiguration.getPackages().ifPresent(this::applyExposedPackages);
     }
 
     public void process() throws ParserException {
         var parser = new Parser().classLoader(classLoader).classPath(classPath)
                 .endpointAnnotation(endpointAnnotationName)
-                .endpointExposedAnnotation(endpointExposedAnnotationName);
+                .endpointExposedAnnotation(endpointExposedAnnotationName)
+                .exposedPackages(exposedPackages);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
@@ -90,12 +95,16 @@ public final class ParserProcessor {
                 .requireNonNull(endpointExposedAnnotationName);
     }
 
-    private void applyOpenAPIBase(@Nonnull String openAPIBase) {
+    private void applyOpenAPIBase(@Nonnull String openAPIBasePath) {
         this.openAPIBasePath = openAPIBasePath;
     }
 
     private void applyPlugins(@Nonnull ParserConfiguration.Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
+    }
+
+    private void applyExposedPackages(@Nonnull List<String> exposedPackages) {
+        this.exposedPackages = exposedPackages;
     }
 
     private void prepareOpenAPIBase(Parser parser) {

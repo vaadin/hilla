@@ -62,6 +62,8 @@ public final class MethodPlugin
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
         rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
+        endpointNode.getTarget().addExtension("x-class-name",
+                endpointNode.getSource().getName());
     }
 
     @Nonnull

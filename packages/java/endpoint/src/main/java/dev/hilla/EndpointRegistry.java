@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
@@ -31,6 +33,9 @@ import org.springframework.util.ClassUtils;
  */
 @Component
 public class EndpointRegistry {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(EndpointRegistry.class);
+
     /**
      * Tracks methods inside a given endpoint class.
      */
@@ -67,7 +72,7 @@ public class EndpointRegistry {
         }
     }
 
-    private EndpointNameChecker endpointNameChecker;
+    private final EndpointNameChecker endpointNameChecker;
     private final Map<String, VaadinEndpointData> vaadinEndpoints = new HashMap<>();
 
     /**
@@ -116,11 +121,15 @@ public class EndpointRegistry {
 
         vaadinEndpoints.put(endpointName.toLowerCase(Locale.ENGLISH),
                 new VaadinEndpointData(endpointBean, endpointPublicMethods));
-
+        LOGGER.info("Registered endpoint '{}' with class '{}'", endpointName,
+                beanType);
     }
 
     VaadinEndpointData get(String endpointName) {
         return vaadinEndpoints.get(endpointName.toLowerCase(Locale.ENGLISH));
     }
 
+    boolean isEmpty() {
+        return vaadinEndpoints.isEmpty();
+    }
 }

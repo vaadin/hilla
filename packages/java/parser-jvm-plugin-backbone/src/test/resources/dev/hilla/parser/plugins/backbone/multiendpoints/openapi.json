@@ -12,13 +12,16 @@
   ],
   "tags": [
     {
-      "name": "MultiEndpointsBarEndpoint"
+      "name": "MultiEndpointsBarEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsBarEndpoint"
     },
     {
-      "name": "MultiEndpointsBazEndpoint"
+      "name": "MultiEndpointsBazEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsBazEndpoint"
     },
     {
-      "name": "MultiEndpointsFooEndpoint"
+      "name": "MultiEndpointsFooEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsFooEndpoint"
     }
   ],
   "paths": {

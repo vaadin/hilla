@@ -17,16 +17,10 @@ package dev.hilla.internal;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 
 import dev.hilla.engine.ParserException;
 import dev.hilla.engine.ParserProcessor;
-import dev.hilla.parser.utils.OpenAPIPrinter;
-import io.swagger.v3.oas.models.OpenAPI;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;

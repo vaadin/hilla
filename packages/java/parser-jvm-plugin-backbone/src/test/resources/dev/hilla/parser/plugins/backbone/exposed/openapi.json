@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "ExposedEndpoint"
+      "name": "ExposedEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.exposed.ExposedEndpoint"
     }
   ],
   "paths": {

@@ -19,6 +19,8 @@ import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 
+import dev.hilla.engine.EngineConfiguration;
+
 public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
 
@@ -62,7 +64,7 @@ public class NodeTasksEndpointTest extends TaskTest {
                 "frontend/index.html", "frontend/generated/index.ts",
                 // withConnectJavaSourceFolder and
                 // withConnectGeneratedOpenApiJson
-                "build/generated-resources/openapi.json",
+                "build/classes/dev/hilla/openapi.json",
                 // withConnectClientTsApiFolder
                 "api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertTrue(

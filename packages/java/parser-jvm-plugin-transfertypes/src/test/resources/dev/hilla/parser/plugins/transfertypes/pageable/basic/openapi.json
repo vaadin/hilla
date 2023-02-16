@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "PageableEndpoint"
+      "name": "PageableEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.transfertypes.pageable.basic.PageableEndpoint"
     }
   ],
   "paths": {

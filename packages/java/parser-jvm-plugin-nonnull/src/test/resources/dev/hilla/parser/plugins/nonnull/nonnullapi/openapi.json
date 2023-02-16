@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "NonNullApiEndpoint"
+      "name": "NonNullApiEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint"
     }
   ],
   "paths": {
