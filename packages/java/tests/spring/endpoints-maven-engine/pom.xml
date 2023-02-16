@@ -81,7 +81,7 @@
                 <artifactId>flow-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>prepare-frontend-build</id>
+                        <id>default</id>
                         <goals>
                             <goal>prepare-frontend</goal>
                             <goal>build-frontend</goal>
@@ -89,6 +89,17 @@
                         <phase>compile</phase>
                         <configuration>
                             <generateBundle>false</generateBundle>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>main-frontend-build</id>
+                        <goals>
+                            <goal>build-frontend</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <nodeAutoUpdate>false</nodeAutoUpdate>
+                            <runNpmInstall>false</runNpmInstall>
                         </configuration>
                     </execution>
                 </executions>
@@ -99,7 +110,7 @@
                 <artifactId>engine-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>hilla-generate</id>
+                        <id>default</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -112,17 +123,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>main-frontend-build</id>
-                        <goals>
-                            <goal>build-frontend</goal>
-                        </goals>
-                        <phase>compile</phase>
-                        <configuration>
-                            <nodeAutoUpdate>false</nodeAutoUpdate>
-                            <runNpmInstall>false</runNpmInstall>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 
