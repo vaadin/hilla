@@ -12,15 +12,10 @@ public final class PluginManager
         super(plugins.toArray(Plugin[]::new));
     }
 
-    public static Plugin load(String name, Integer order,
-            PluginConfiguration configuration) {
+    public static Plugin load(String name, PluginConfiguration configuration) {
         var cls = processClass(loadClass(name));
         var instance = instantiatePlugin(cls);
         instance.setConfiguration(configuration);
-
-        if (order != null) {
-            instance.setOrder(order);
-        }
 
         return instance;
     }

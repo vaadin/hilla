@@ -26,7 +26,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     public ModelPlugin() {
         super();
-        setOrder(200);
     }
 
     private static ValidationConstraint convertAnnotation(

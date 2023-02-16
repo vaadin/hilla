@@ -1,10 +1,13 @@
 package dev.hilla.parser.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -59,8 +62,8 @@ public final class Parser {
      * Adds a parser {@link Plugin}.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of the method calls.
+     * Note that the order of the method calls will be maintained during
+     * processing.
      *
      * @param plugin
      *            An instance of the parser plugin.
@@ -82,6 +85,20 @@ public final class Parser {
     @Nonnull
     public Parser adjustOpenAPI(@Nonnull Consumer<OpenAPI> action) {
         action.accept(config.openAPI);
+        return this;
+    }
+
+    /**
+     * Allows to change the class loader that the parser uses for reflection.
+     *
+     * @param classLoader
+     *            a class loader instance.
+     *
+     * @return this (for method chaining).
+     */
+    @Nonnull
+    public Parser classLoader(@Nonnull ClassLoader classLoader) {
+        config.classLoader = classLoader;
         return this;
     }
 
@@ -246,6 +263,8 @@ public final class Parser {
      */
     @Nonnull
     public OpenAPI execute() {
+        Objects.requireNonNull(config.classLoader,
+                "[JVM Parser] classLoader is not provided.");
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
         Objects.requireNonNull(config.endpointAnnotationName,
@@ -257,7 +276,8 @@ public final class Parser {
 
         try (var scanResult = new ClassGraph().enableAnnotationInfo()
                 .ignoreClassVisibility()
-                .overrideClasspath(config.getClassPathElements()).scan()) {
+                .overrideClasspath(config.getClassPathElements())
+                .overrideClassLoaders(config.getClassLoader()).scan()) {
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
             var pluginManager = new PluginManager(
@@ -315,8 +335,8 @@ public final class Parser {
      * specified, they will be removed before addition.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of plugins in the collection.
+     * Note that the order of the arguments will be maintained during
+     * processing.
      *
      * @param plugins
      *            a collection of parser plugins.
@@ -332,8 +352,7 @@ public final class Parser {
      * specified plugins, they will be removed before addition.
      *
      * <p>
-     * Note that the order will be defined by {@link Plugin#getOrder} method,
-     * not by order of plugins in the collection.
+     * Note that the order of collection will be maintained during processing.
      *
      * @param plugins
      *            a collection of parser plugins.
@@ -351,15 +370,25 @@ public final class Parser {
      * initial configuration of the parser during the scan.
      */
     public static final class Config {
-        private final SortedSet<Plugin> plugins = new TreeSet<>(
-                Comparator.comparingInt(Plugin::getOrder));
+        private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
         private String endpointAnnotationName;
         private String endpointExposedAnnotationName;
         private OpenAPI openAPI;
+        private ClassLoader classLoader;
 
         private Config(OpenAPI openAPI) {
             this.openAPI = openAPI;
+        }
+
+        /**
+         * Gets the class loader for reflection in the parser.
+         *
+         * @return the class loader
+         */
+        @Nonnull
+        public ClassLoader getClassLoader() {
+            return classLoader;
         }
 
         /**
@@ -411,8 +440,9 @@ public final class Parser {
          * @return the collection of parser plugins.
          */
         @Nonnull
-        public SortedSet<Plugin> getPlugins() {
+        public Collection<Plugin> getPlugins() {
             return plugins;
         }
+
     }
 }

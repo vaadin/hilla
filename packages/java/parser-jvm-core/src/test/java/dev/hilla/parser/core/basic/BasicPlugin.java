@@ -12,15 +12,4 @@ final class BasicPlugin extends AbstractCompositePlugin<PluginConfiguration> {
         super(new AddPlugin(), new ReplacePlugin(), new RemovePlugin(),
                 new FinalizePlugin());
     }
-
-    @Override
-    public int getOrder() {
-        return order;
-    }
-
-    @Override
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
 }
