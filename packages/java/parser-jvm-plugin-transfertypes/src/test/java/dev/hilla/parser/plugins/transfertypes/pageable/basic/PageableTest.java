@@ -20,12 +20,12 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin()).execute();
 
         helper.executeParserWithConfig(openAPI);
     }
@@ -35,12 +35,12 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin()).execute();
 
         helper.executeParserWithConfig(openAPI);
     }

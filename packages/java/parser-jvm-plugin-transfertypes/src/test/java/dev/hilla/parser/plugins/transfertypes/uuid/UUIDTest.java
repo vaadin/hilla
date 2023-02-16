@@ -17,12 +17,12 @@ public class UUIDTest {
     @Test
     public void should_ReplaceUUIDClassWithString()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin()).execute();
 
         helper.executeParserWithConfig(openAPI);
     }

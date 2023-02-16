@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "My super application",
+    "version": "1.1.1"
+  },
+  "servers": [
+    {
+      "url": "https://myhost.com/myprefix",
+      "description": "Vaadin backend server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "FooBarEndpoint",
+      "description": "FooBar Endpoint description"
+    },
+    {
+      "name": "FooFooEndpoint",
+      "description": "FooFoo Endpoint description"
+    }
+  ],
+  "paths": {
+    "/FooBarEndpoint/firstMethod": {
+      "post": {
+        "tags": ["FooBarEndpoint"],
+        "operationId": "FooBarEndpoint_firstMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/FooBarEndpoint/secondMethod": {
+      "post": {
+        "tags": ["FooBarEndpoint"],
+        "operationId": "FooBarEndpoint_secondMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    },
+    "/FooFooEndpoint/foofooMethod": {
+      "post": {
+        "tags": ["FooFooEndpoint"],
+        "operationId": "FooFooEndpoint_foofooMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "vaadin-connect-oauth2": []
+          }
+        ]
+      }
+    }
+  }
+}

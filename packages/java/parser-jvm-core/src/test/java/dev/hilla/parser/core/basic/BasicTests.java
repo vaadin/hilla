@@ -51,7 +51,8 @@ public class BasicTests {
 
     @Test
     public void should_TraverseInConsistentOrder() {
-        var openAPI = new Parser().classPath(classPath)
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+                .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BasicPlugin()).execute();
 
@@ -61,7 +62,8 @@ public class BasicTests {
 
     @Test
     public void should_UpdateNodesAndCollectNames() {
-        var openAPI = new Parser().classPath(classPath)
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+                .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
                 .addPlugin(new BasicPlugin()).execute();
 

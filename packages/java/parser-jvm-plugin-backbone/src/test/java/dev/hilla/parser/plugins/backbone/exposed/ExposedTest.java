@@ -16,7 +16,7 @@ public class ExposedTest {
     @Test
     public void should_CorrectlyHandleEndpointExposedAnnotation()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

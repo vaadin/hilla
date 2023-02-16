@@ -37,7 +37,6 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
     public NonnullPlugin() {
         super();
-        setOrder(100);
     }
 
     static private Map<String, AnnotationMatcher> mapByName(

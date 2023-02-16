@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "NameFromAnnotationExplicitValueEndpoint"
+    },
+    {
+      "name": "NameFromAnnotationEndpoint"
+    }
+  ],
+  "paths": {
+    "/NameFromAnnotationExplicitValueEndpoint/doSomething": {
+      "post": {
+        "tags": ["NameFromAnnotationExplicitValueEndpoint"],
+        "operationId": "NameFromAnnotationExplicitValueEndpoint_doSomething_POST",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/NameFromAnnotationEndpoint/doSomething": {
+      "post": {
+        "tags": ["NameFromAnnotationEndpoint"],
+        "operationId": "NameFromAnnotationEndpoint_doSomething_POST",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}
