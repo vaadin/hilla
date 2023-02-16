@@ -51,7 +51,7 @@ public final class EngineConfigureMojo extends AbstractMojo {
         try {
             EngineConfiguration conf = new EngineConfiguration();
             conf.setClassPath(
-                new LinkedHashSet<>(project.getRuntimeClasspathElements()));
+                    new LinkedHashSet<>(project.getRuntimeClasspathElements()));
 
             conf.setBaseDir(project.getBasedir().toPath());
             conf.setOutputDir(generatedTsFolder.toPath());
