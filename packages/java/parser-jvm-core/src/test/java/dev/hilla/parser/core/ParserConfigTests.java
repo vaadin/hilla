@@ -1,5 +1,7 @@
 package dev.hilla.parser.core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,12 +43,13 @@ public class ParserConfigTests {
         defaultClassPathElements = Set.of(targetDir.toString());
         defaultEndpointExposedAnnotationName = "dev.hilla.EndpointExposed";
         defaultOpenAPI = new OpenAPI()
-                .info(new Info().title("Vaadin Application").version("1.0.0"))
+                .info(new Info().title("Hilla Application").version("1.0.0"))
                 .servers(List
                         .of(new Server().url("http://localhost:8080/connect")
-                                .description("Vaadin Backend")))
+                                .description("Hilla Backend")))
                 .paths(new Paths());
-        parser = new Parser().classPath(defaultClassPathElements)
+        parser = new Parser().classLoader(getClass().getClassLoader())
+                .classPath(defaultClassPathElements)
                 .endpointAnnotation(defaultEndpointAnnotationName)
                 .endpointExposedAnnotation(
                         defaultEndpointExposedAnnotationName);
@@ -54,38 +57,38 @@ public class ParserConfigTests {
 
     @Test
     public void should_AllowAddingPluginsAsCollection() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-5);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.plugins(List.of(foo, bar, baz)).getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAddingPluginsAsVararg() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-5);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.plugins(foo, bar, baz).getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
     @Test
     public void should_AllowAddingPluginsOneByOne() {
-        var foo = new FooPlugin(1);
-        var bar = new BarPlugin(0);
-        var baz = new BazPlugin(-1);
+        var foo = new FooPlugin();
+        var bar = new BarPlugin();
+        var baz = new BazPlugin();
 
         var config = parser.addPlugin(foo).addPlugin(bar).addPlugin(baz)
                 .getConfig();
 
-        assertEquals(List.of(baz, bar, foo),
+        assertEquals(List.of(foo, bar, baz),
                 new ArrayList<>(config.getPlugins()));
     }
 
@@ -133,24 +136,41 @@ public class ParserConfigTests {
     }
 
     @Test
+    public void should_ThrowError_When_ClassLoaderIsNotSet() {
+        var e = assertThrows(NullPointerException.class,
+                () -> new Parser().classPath(defaultClassPathElements)
+                        .endpointAnnotation(defaultEndpointAnnotationName)
+                        .execute());
+        assertEquals("[JVM Parser] classLoader is not provided.",
+                e.getMessage());
+    }
+
+    @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
-        assertThrows(NullPointerException.class, () -> new Parser().execute(),
-                "[JVM Parser] classPath is not provided.");
+        var e = assertThrows(NullPointerException.class,
+                () -> new Parser().classLoader(getClass().getClassLoader())
+                        .endpointAnnotation(defaultEndpointAnnotationName)
+                        .execute());
+        assertEquals("[JVM Parser] classPath is not provided.", e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
-        assertThrows(NullPointerException.class,
-                () -> new Parser().classPath(defaultClassPathElements)
-                        .execute(),
-                "[JVM Parser] endpointAnnotationName is not provided.");
+        var e = assertThrows(NullPointerException.class,
+                () -> new Parser().classLoader(getClass().getClassLoader())
+                        .classPath(defaultClassPathElements).execute());
+        assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
+                e.getMessage());
     }
 
     @Test
     public void should_ThrowError_When_UsingWrongPluginConfigInstance() {
-        assertThrows(IllegalArgumentException.class, () -> new BazPlugin(0)
-                .setConfiguration(new PluginConfiguration() {
-                }), "Requires instance of " + BazPluginConfig.class.getName());
+        var e = assertThrows(IllegalArgumentException.class,
+                () -> new BazPlugin()
+                        .setConfiguration(new PluginConfiguration() {
+                        }));
+        assertThat(e.getMessage(), startsWith("Requires instance of class "
+                + BazPluginConfig.class.getName()));
     }
 
     private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
@@ -163,8 +183,7 @@ public class ParserConfigTests {
     }
 
     private static class BarPlugin extends AbstractPlugin<PluginConfiguration> {
-        BarPlugin(int order) {
-            setOrder(order);
+        BarPlugin() {
         }
 
         @Override
@@ -184,8 +203,7 @@ public class ParserConfigTests {
     }
 
     private static class BazPlugin extends AbstractPlugin<BazPluginConfig> {
-        BazPlugin(int order) {
-            setOrder(order);
+        BazPlugin() {
         }
 
         @Override
@@ -208,8 +226,7 @@ public class ParserConfigTests {
     }
 
     private static class FooPlugin extends AbstractPlugin<PluginConfiguration> {
-        FooPlugin(int order) {
-            setOrder(order);
+        FooPlugin() {
         }
 
         @Override

@@ -1,12 +1,12 @@
 {
   "info": {
-    "title": "My Cool Application",
-    "version": "2.5.9-SNAPSHOT"
+    "title": "Hilla Application",
+    "version": "0.0.0-SNAPSHOT"
   },
   "servers": [
     {
-      "url": "https://app.cool.my/connect",
-      "description": "My Cool Backend"
+      "url": "https://app.example.com/connect",
+      "description": "Hilla Backend"
     }
   ],
   "paths": {}

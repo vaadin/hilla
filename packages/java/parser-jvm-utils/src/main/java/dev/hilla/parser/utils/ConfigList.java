@@ -102,8 +102,8 @@ public interface ConfigList<Item> {
                         stream);
             }
 
-            return Collections
-                    .unmodifiableCollection(stream.collect(Collectors.toSet()));
+            return Collections.unmodifiableCollection(
+                    stream.collect(Collectors.toList()));
         }
     }
 }

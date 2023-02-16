@@ -30,7 +30,7 @@ public class NonNullApiTest {
                         20)),
                 null));
 
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

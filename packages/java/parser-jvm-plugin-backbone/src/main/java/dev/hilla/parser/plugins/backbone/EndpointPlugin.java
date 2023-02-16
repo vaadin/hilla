@@ -1,10 +1,12 @@
 package dev.hilla.parser.plugins.backbone;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,7 @@ public final class EndpointPlugin
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EndpointNode) {
             var endpointNode = (EndpointNode) nodePath.getNode();
-            var name = endpointNode.getSource().getSimpleName();
+            var name = getEndpointName(endpointNode.getSource());
             endpointNode.setTarget(new Tag().name(name));
         }
     }
@@ -73,5 +75,24 @@ public final class EndpointPlugin
                             .map(EndpointNode::of));
         }
         return nodeDependencies;
+    }
+
+    private String getEndpointName(ClassInfoModel endpointCls) {
+        var endpointAnnotationName = getStorage().getParserConfig()
+                .getEndpointAnnotationName();
+        var endpointAnnotation = endpointCls.getAnnotations().stream()
+                .filter(annotation -> annotation.getName()
+                        .equals(endpointAnnotationName))
+                .findFirst();
+        return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
+                .filter(name -> !name.isEmpty())
+                .orElseGet(endpointCls::getSimpleName);
+    }
+
+    private Optional<String> getEndpointAnnotationValue(
+            AnnotationInfoModel endpointAnnotation) {
+        return endpointAnnotation.getParameters().stream()
+                .filter(param -> param.getName().equals("value")).findFirst()
+                .map(param -> (String) param.getValue());
     }
 }

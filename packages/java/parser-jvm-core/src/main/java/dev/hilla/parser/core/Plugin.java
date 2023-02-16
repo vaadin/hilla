@@ -15,10 +15,6 @@ public interface Plugin {
 
     void setConfiguration(PluginConfiguration configuration);
 
-    int getOrder();
-
-    void setOrder(int order);
-
     default Collection<Class<? extends Plugin>> getRequiredPlugins() {
         return Collections.emptyList();
     }
