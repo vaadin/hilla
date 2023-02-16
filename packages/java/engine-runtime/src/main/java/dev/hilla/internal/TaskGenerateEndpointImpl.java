@@ -28,14 +28,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 /**
  * Starts the generation of TS files for endpoints.
  */
-@NpmPackage(value = "@hilla/generator-typescript-core", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-utils", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-cli", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.0.0-beta1")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-beta1")
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
 
