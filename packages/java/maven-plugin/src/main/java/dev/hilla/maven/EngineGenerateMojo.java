@@ -44,7 +44,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
             for (var classPathItem : classPath) {
                 urls.add(new File(classPathItem).toURI().toURL());
             }
-            var classLoader = new URLClassLoader(urls.toArray(URL[]::new));
+            var classLoader = new URLClassLoader(urls.toArray(URL[]::new),
+                    getClass().getClassLoader());
             var parserProcessor = new ParserProcessor(conf, classLoader);
             var generatorProcessor = new GeneratorProcessor(conf);
 

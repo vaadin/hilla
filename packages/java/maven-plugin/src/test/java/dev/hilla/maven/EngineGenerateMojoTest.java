@@ -34,6 +34,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     // Verify class loader argument
                     var classLoader = (ClassLoader) context.arguments().get(1);
                     assertInstanceOf(URLClassLoader.class, classLoader);
+                    assertEquals(classLoader.getParent(),
+                            EngineGenerateMojo.class.getClassLoader());
                     assertArrayEquals(
                             new URL[] { new File("target/test-classes").toURI()
                                     .toURL() },
