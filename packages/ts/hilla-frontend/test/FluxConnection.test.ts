@@ -26,7 +26,6 @@ describe('FluxConnection', () => {
   };
 
   beforeEach(() => {
-    (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
     fluxConnection = new FluxConnection();
     const socket = () => (fluxConnection as any).socket;
     (atmosphere as any).reset();
