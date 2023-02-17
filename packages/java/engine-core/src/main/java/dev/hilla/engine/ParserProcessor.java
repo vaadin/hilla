@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,16 +72,41 @@ public final class ParserProcessor {
 
         logger.debug("Saving OpenAPI file to " + openAPIFile);
 
+        String openAPIString;
+
         try {
             Files.createDirectories(openAPIFile.getParent());
-            var openAPIString = new OpenAPIPrinter().pretty()
+            openAPIString = new OpenAPIPrinter().pretty()
                     .writeAsString(openAPI);
-            Files.write(openAPIFile, openAPIString.getBytes());
         } catch (IOException e) {
-            throw new ParserException("Unable to save OpenAPI file", e);
+            throw new ParserException("Unable to prepare OpenAPI definition",
+                    e);
         }
 
-        logger.debug("OpenAPI file saved");
+        // Only save the file if it has changed
+        Optional.of(openAPIFile).filter(Files::isRegularFile)
+                .map(this::readFromFile).filter(openAPIString::equals)
+                .ifPresentOrElse(s -> {
+                    logger.debug("OpenAPI definition has not changed");
+                }, () -> {
+                    try {
+                        Files.write(openAPIFile, openAPIString.getBytes());
+                        logger.debug("OpenAPI definition file saved");
+                    } catch (IOException e) {
+                        throw new ParserException("Unable to save OpenAPI file",
+                                e);
+                    }
+                });
+    }
+
+    // Workaround for IOException in lambda
+    private String readFromFile(Path path) {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            logger.error("Unable to read file", e);
+            return null;
+        }
     }
 
     private void applyEndpointAnnotation(
