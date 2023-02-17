@@ -113,8 +113,8 @@ public class EndpointController {
         this.csrfChecker = csrfChecker;
         this.endpointRegistry = endpointRegistry;
 
-        // Spring returns bean names in lower camel case, while Hilla OpenAPI
-        // definition use upper camel case, so a case insensitive map is used to
+        // Spring returns bean names in lower camel case, while Hilla names
+        // endpoints in upper camel case, so a case insensitive map is used to
         // ease searching
         var endpointBeans = new TreeMap<String, Object>(
                 String.CASE_INSENSITIVE_ORDER);
@@ -222,15 +222,24 @@ public class EndpointController {
 
     }
 
+    /**
+     * Parses the <code>openapi.json</code> file to discover defined endpoints.
+     *
+     * @param knownEndpointBeans
+     *            the endpoint beans found in the Spring context
+     */
     private void registerEndpointsFromApiDefinition(
-            Map<String, Object> knownBeans) {
+            Map<String, Object> knownEndpointBeans) {
         var resource = getClass()
                 .getResource('/' + EngineConfiguration.OPEN_API_PATH);
 
         if (resource == null) {
-            LOGGER.error("openapi.json is not available");
+            LOGGER.error("{} is not available",
+                    EngineConfiguration.OPEN_API_PATH);
         } else {
             try (var stream = resource.openStream()) {
+                // Read the openapi.json file and extract the tags, which in
+                // turn define the endpoints and their implementation classes
                 var rootNode = new ObjectMapper().readTree(stream);
                 var tagsNode = (ArrayNode) rootNode.findValue("tags");
 
@@ -238,7 +247,7 @@ public class EndpointController {
                 // found, they are, if possible, instantiated as regular classes
                 tagsNode.forEach(tag -> {
                     Optional.ofNullable(tag.get("name")).map(JsonNode::asText)
-                            .map(knownBeans::get)
+                            .map(knownEndpointBeans::get)
                             .or(() -> Optional
                                     .ofNullable(tag.get("x-class-name"))
                                     .map(JsonNode::asText)
@@ -251,6 +260,16 @@ public class EndpointController {
         }
     }
 
+    /**
+     * Instantiates an endpoint by its class name. Nothing special here, the
+     * main purpose is to allow to instantiate in a lambda expression and log
+     * checked exceptions properly.
+     *
+     * @param className
+     *            the name of the class to instantiate
+     * @return the instantiated instance or <code>null</code> if the class
+     *         cannot be instantiated
+     */
     private Object instantiateEndpointByClassName(String className) {
         Class<?> cls;
         try {
@@ -259,6 +278,7 @@ public class EndpointController {
             LOGGER.warn("Endpoint class {} is not available", className, e);
             return null;
         }
+
         try {
             return cls.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException ex) {
@@ -269,6 +289,7 @@ public class EndpointController {
             LOGGER.warn("Failed to create endpoint instance for class '{}'",
                     className, ex);
         }
+
         return null;
     }
 }

@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EndpointGenerationIT  {
+public class EndpointGenerationIT {
     Path frontendDir = Paths.get("frontend", "generated");
 
     /**
@@ -18,8 +18,10 @@ public class EndpointGenerationIT  {
     public void shouldGenerateExampleEndpointAndEntities() {
         assertTrue(Files.exists(frontendDir.resolve("ExampleEndpoint.ts")));
         assertTrue(Files.exists(frontendDir.resolve("InvalidEndpoint.ts")));
-        assertTrue(Files.exists(frontendDir.resolve("com/example/application/ExampleEntity.ts")));
-        assertTrue(Files.exists(frontendDir.resolve("com/external2/ExternalEntity2.ts")));
+        assertTrue(Files.exists(frontendDir
+                .resolve("com/example/application/ExampleEntity.ts")));
+        assertTrue(Files.exists(
+                frontendDir.resolve("com/external2/ExternalEntity2.ts")));
     }
 
     /**
@@ -28,6 +30,7 @@ public class EndpointGenerationIT  {
     @Test
     public void shouldNotGenerateExternalEndpointAndEntities() {
         assertFalse(Files.exists(frontendDir.resolve("ExternalEndpoint.ts")));
-        assertFalse(Files.exists(frontendDir.resolve("com/external/ExternalEntity.ts")));
+        assertFalse(Files
+                .exists(frontendDir.resolve("com/external/ExternalEntity.ts")));
     }
 }

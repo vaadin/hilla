@@ -39,13 +39,13 @@ public class AbstractMojoTest {
         testCase.setUp();
 
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
-        buildDirectory = temporaryDirectory.resolve("target");
+        buildDirectory = temporaryDirectory.resolve("build");
         outputDirectory = buildDirectory.resolve("classes");
         Files.createDirectories(outputDirectory);
 
         // Maven project is not initialized on the mojo, setup a mock manually
         project = Mockito.mock(MavenProject.class);
-        var classPathElements = List.of("target/test-classes");
+        var classPathElements = List.of("build/test-classes");
         Mockito.doReturn(classPathElements).when(project)
                 .getCompileClasspathElements();
         Mockito.doReturn(classPathElements).when(project)
@@ -53,8 +53,8 @@ public class AbstractMojoTest {
         Mockito.doReturn(getTemporaryDirectory().toFile()).when(project)
                 .getBasedir();
         var mockBuild = Mockito.mock(Build.class);
-        Mockito.doReturn("target").when(mockBuild).getDirectory();
-        Mockito.doReturn("target/classes").when(mockBuild).getOutputDirectory();
+        Mockito.doReturn("build").when(mockBuild).getDirectory();
+        Mockito.doReturn("build/classes").when(mockBuild).getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
         // Load reference EngineConfiguration

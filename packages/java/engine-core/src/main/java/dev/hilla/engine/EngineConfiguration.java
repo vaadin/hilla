@@ -56,7 +56,8 @@ public class EngineConfiguration {
             return MAPPER.readValue(configFile, EngineConfiguration.class);
         }
         // This is mainly to wrap Jackson exceptions, but declaring them
-        // explicitly causes problems in tests as they are not on the classpath
+        // explicitly can cause problems in tests if they are not on the
+        // classpath
         catch (RuntimeException e) {
             throw new ConfigurationException(e);
         }
@@ -153,14 +154,6 @@ public class EngineConfiguration {
     public int hashCode() {
         return Objects.hash(baseDir, classPath, generator, parser, buildDir,
                 classesDir, outputDir);
-    }
-
-    @Override
-    public String toString() {
-        return "EngineConfiguration{" + "baseDir=" + baseDir + ", classPath="
-                + classPath + ", generator=" + generator + ", parser=" + parser
-                + ", buildDir='" + buildDir + '\'' + ", classesDir='"
-                + classesDir + '\'' + ", outputDir='" + outputDir + '\'' + '}';
     }
 
     Path getOpenAPIFile() {
