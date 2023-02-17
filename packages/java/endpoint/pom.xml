@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>dev.hilla</groupId>
-            <artifactId>engine-core</artifactId>
+            <artifactId>engine-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
 
