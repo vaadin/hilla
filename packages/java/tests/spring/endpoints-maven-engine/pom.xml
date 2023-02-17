@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.hilla</groupId>
+        <artifactId>tests-spring</artifactId>
+        <version>2.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>tests-spring-endpoints-maven-engine</artifactId>
+    <name>ITs for Endpoints / Maven Engine</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <formatter.basedir>${project.parent.parent.parent.basedir}</formatter.basedir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-polymer-template</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>engine-runtime</artifactId>
+            <version>${project.version}</version>
+            <!--
+             Overriding engine-runtime to test scope effectively removes its
+             tasks from flow-maven-plugin execution. This is to replace with
+              -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>engine-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!--
+             The order of execution is important. This intentionally uses
+             the TypeScript generator output of the Hilla plugin goal output
+             in production frontend bundle.
+             -->
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                            <goal>build-frontend</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <generateBundle>false</generateBundle>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>main-frontend-build</id>
+                        <goals>
+                            <goal>build-frontend</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <nodeAutoUpdate>false</nodeAutoUpdate>
+                            <runNpmInstall>false</runNpmInstall>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>dev.hilla</groupId>
+                <artifactId>engine-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+                <executions>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

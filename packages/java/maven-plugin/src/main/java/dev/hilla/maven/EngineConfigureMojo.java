@@ -50,11 +50,8 @@ public final class EngineConfigureMojo extends AbstractMojo {
     public void execute() throws EngineConfigureMojoException {
         try {
             EngineConfiguration conf = new EngineConfiguration();
-            conf.setClassPath(Stream
-                    .of(project.getCompileClasspathElements(),
-                            project.getRuntimeClasspathElements())
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+            conf.setClassPath(
+                    new LinkedHashSet<>(project.getRuntimeClasspathElements()));
 
             conf.setBaseDir(project.getBasedir().toPath());
             conf.setOutputDir(generatedTsFolder.toPath());

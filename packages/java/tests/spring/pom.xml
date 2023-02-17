@@ -143,6 +143,7 @@
       <modules>
         <module>endpoints</module>
         <module>endpoints-custom-client</module>
+        <module>endpoints-maven-engine</module>
 
         <module>security</module>
         <module>security-contextpath</module>
