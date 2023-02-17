@@ -41,10 +41,7 @@ import reactor.core.publisher.Flux;
  * returned from endpoints.
  */
 @Service
-@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public class PushMessageHandler {
-
-    static final String PUSH_FEATURE_FLAG = "hillaPush";
 
     static class SubscriptionInfo {
         private final Disposable fluxSubscriptionDisposable;
