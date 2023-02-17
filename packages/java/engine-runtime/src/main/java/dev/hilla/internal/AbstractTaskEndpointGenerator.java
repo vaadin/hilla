@@ -21,15 +21,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+import dev.hilla.engine.ConfigurationException;
 import dev.hilla.engine.EngineConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FallibleCommand;
-
-import dev.hilla.engine.ConfigurationException;
 
 /**
  * Abstract class for endpoint related generators.

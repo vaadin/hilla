@@ -1,11 +1,8 @@
 package com.vaadin.flow.connect;
 
-import javax.annotation.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
-import jakarta.annotation.security.PermitAll;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 

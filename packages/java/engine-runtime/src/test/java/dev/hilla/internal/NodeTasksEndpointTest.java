@@ -19,8 +19,6 @@ import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 
-import dev.hilla.engine.EngineConfiguration;
-
 public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
 

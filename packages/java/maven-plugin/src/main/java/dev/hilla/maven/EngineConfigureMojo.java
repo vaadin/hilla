@@ -3,10 +3,7 @@ package dev.hilla.maven;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorConfiguration;
