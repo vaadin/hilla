@@ -87,11 +87,16 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
+    private final ApplicationContext context;
+
     EndpointRegistry endpointRegistry;
 
     private final CsrfChecker csrfChecker;
 
     private final EndpointInvoker endpointInvoker;
+
+    private String openApiResourceName = '/'
+            + EngineConfiguration.OPEN_API_PATH;
 
     /**
      * A constructor used to initialize the controller.
@@ -109,10 +114,29 @@ public class EndpointController {
     public EndpointController(ApplicationContext context,
             EndpointRegistry endpointRegistry, EndpointInvoker endpointInvoker,
             CsrfChecker csrfChecker) {
+        this.context = context;
         this.endpointInvoker = endpointInvoker;
         this.csrfChecker = csrfChecker;
         this.endpointRegistry = endpointRegistry;
+    }
 
+    /**
+     * Sets the name of the OpenAPI definition resource.
+     * <p>
+     * The default value is {@code /dev/hilla/openapi.json}.
+     *
+     * @param openApiResourceName
+     *            the name of the OpenAPI definition resource
+     */
+    void setOpenApiResourceName(String openApiResourceName) {
+        this.openApiResourceName = openApiResourceName;
+    }
+
+    /**
+     * Initializes the controller by registering all endpoints found in the
+     * OpenApi definition or, as a fallback, in the Spring context.
+     */
+    public void registerEndpoints() {
         // Spring returns bean names in lower camel case, while Hilla names
         // endpoints in upper camel case, so a case insensitive map is used to
         // ease searching
@@ -230,12 +254,10 @@ public class EndpointController {
      */
     private void registerEndpointsFromApiDefinition(
             Map<String, Object> knownEndpointBeans) {
-        var resource = getClass()
-                .getResource('/' + EngineConfiguration.OPEN_API_PATH);
+        var resource = getClass().getResource(openApiResourceName);
 
         if (resource == null) {
-            LOGGER.error("{} is not available",
-                    EngineConfiguration.OPEN_API_PATH);
+            LOGGER.error("Resource '{}' is not available", openApiResourceName);
         } else {
             try (var stream = resource.openStream()) {
                 // Read the openapi.json file and extract the tags, which in

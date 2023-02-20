@@ -54,6 +54,7 @@ public abstract class BaseTypeConversionTest {
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
         EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
+        controller.registerEndpoints();
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Assert.assertNotEquals(null, applicationContext);
     }
