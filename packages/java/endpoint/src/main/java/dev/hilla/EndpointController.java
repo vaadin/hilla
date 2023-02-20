@@ -54,6 +54,7 @@ import dev.hilla.auth.EndpointAccessChecker;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.exception.EndpointException;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -136,9 +137,10 @@ public class EndpointController {
      * Initializes the controller by registering all endpoints found in the
      * OpenApi definition or, as a fallback, in the Spring context.
      */
+    @PostConstruct
     public void registerEndpoints() {
         // Spring returns bean names in lower camel case, while Hilla names
-        // endpoints in upper camel case, so a case insensitive map is used to
+        // endpoints in upper camel case, so a case-insensitive map is used to
         // ease searching
         var endpointBeans = new TreeMap<String, Object>(
                 String.CASE_INSENSITIVE_ORDER);
