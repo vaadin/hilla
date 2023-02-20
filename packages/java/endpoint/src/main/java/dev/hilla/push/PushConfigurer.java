@@ -28,7 +28,6 @@ import jakarta.servlet.ServletException;
  * Defines the beans needed for push in Hilla.
  */
 @Configuration
-@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public class PushConfigurer {
 
     @Bean

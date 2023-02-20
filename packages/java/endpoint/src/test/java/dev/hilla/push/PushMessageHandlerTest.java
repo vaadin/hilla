@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.server.VaadinServletContext;
 
 import org.junit.After;
@@ -92,14 +91,6 @@ public class PushMessageHandlerTest {
     public void setup()
             throws EndpointNotFoundException, EndpointAccessDeniedException,
             EndpointBadRequestException, EndpointInternalException {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(new VaadinServletContext(servletContext));
-        try {
-            featureFlags.setEnabled(FeatureFlags.HILLA_PUSH.getId(), true);
-        } catch (Exception e) {
-            // Ignore that the file cannot be saved
-        }
-
         Mockito.when(endpointInvoker.getReturnType(Mockito.anyString(),
                 Mockito.anyString())).thenAnswer(request -> {
                     if (!request.getArgument(0).equals(ENDPOINT_NAME)) {
