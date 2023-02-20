@@ -26,7 +26,6 @@ describe('FluxConnection', () => {
   };
 
   beforeEach(() => {
-    (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
     fluxConnection = new FluxConnection();
     const socket = () => (fluxConnection as any).socket;
     (atmosphere as any).reset();
@@ -46,15 +45,6 @@ describe('FluxConnection', () => {
 
   it('should be exported', () => {
     expect(FluxConnection).to.be.ok;
-  });
-  it('requires a feature flag', () => {
-    delete (window as any).Vaadin;
-    try {
-      new FluxConnection(); // eslint-disable-line no-new
-      expect.fail('Should not work without a feature flag');
-    } catch (e) {
-      // Just to ensure something is thrown
-    }
   });
 
   it('should establish a websocket connection when using an endpoint', () => {

@@ -41,10 +41,7 @@ import reactor.core.publisher.Flux;
  * returned from endpoints.
  */
 @Service
-@ConditionalOnFeatureFlag(PushMessageHandler.PUSH_FEATURE_FLAG)
 public class PushMessageHandler {
-
-    static final String PUSH_FEATURE_FLAG = "hillaPush";
 
     static class SubscriptionInfo {
         private final Disposable fluxSubscriptionDisposable;
@@ -116,16 +113,6 @@ public class PushMessageHandler {
     private void handleBrowserSubscribe(String connectionId,
             SubscribeMessage message, Consumer<AbstractClientMessage> sender) {
         String fluxId = message.getId();
-
-        FeatureFlags featureFlags = FeatureFlags
-                .get(new VaadinServletContext(servletContext));
-        if (!featureFlags.isEnabled(FeatureFlags.HILLA_PUSH)) {
-            String msg = featureFlags
-                    .getEnableHelperMessage(FeatureFlags.HILLA_PUSH);
-            getLogger().error(msg);
-            sender.accept(new ClientMessageError(fluxId, msg));
-            return;
-        }
 
         if (fluxSubscriptionInfos.get(connectionId).containsKey(fluxId)) {
             String msg = "A subscription for flux id " + fluxId
