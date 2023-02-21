@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "TransientEndpoint"
+      "name": "TransientEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.transients.TransientEndpoint"
     }
   ],
   "paths": {

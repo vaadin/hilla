@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "CustomConfigEndpoint"
+      "name": "CustomConfigEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.config.CustomConfigEndpoint"
     }
   ],
   "paths": {

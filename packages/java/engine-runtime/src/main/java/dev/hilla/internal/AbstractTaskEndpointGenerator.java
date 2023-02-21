@@ -15,16 +15,13 @@
  */
 package dev.hilla.internal;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 
+import dev.hilla.engine.ConfigurationException;
 import dev.hilla.engine.EngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +74,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         var buildDir = new File(projectDirectory, buildDirectoryName);
         try {
             config = EngineConfiguration.load(buildDir);
-        } catch (IOException e) {
+        } catch (IOException | ConfigurationException e) {
             logger.warn(
                     "Hilla engine configuration found, but not read correctly",
                     e);

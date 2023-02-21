@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "JacksonEndpoint"
+      "name": "JacksonEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint"
     }
   ],
   "paths": {

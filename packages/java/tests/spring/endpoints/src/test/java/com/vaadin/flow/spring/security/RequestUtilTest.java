@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.router.internal.NavigationRouteTarget;
 import com.vaadin.flow.router.internal.RouteTarget;
-import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.HandlerHelper.RequestType;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.auth.AnonymousAllowed;

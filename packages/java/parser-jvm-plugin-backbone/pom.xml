@@ -29,6 +29,7 @@
             <groupId>dev.hilla</groupId>
             <artifactId>parser-jvm-test-utils</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

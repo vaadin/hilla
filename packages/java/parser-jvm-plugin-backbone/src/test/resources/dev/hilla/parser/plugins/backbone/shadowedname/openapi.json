@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "ShadowedNameEndpoint"
+      "name": "ShadowedNameEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint"
     }
   ],
   "paths": {

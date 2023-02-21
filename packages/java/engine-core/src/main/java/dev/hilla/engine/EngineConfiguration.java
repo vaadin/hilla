@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class EngineConfiguration {
     public static final String RESOURCE_NAME = "hilla-engine-configuration.json";
 
-    private static final String OPEN_API_PATH = "generated-resources/openapi.json";
+    public static final String OPEN_API_PATH = "dev/hilla/openapi.json";
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
@@ -25,9 +25,22 @@ public class EngineConfiguration {
     private GeneratorConfiguration generator;
     private ParserConfiguration parser;
     private String buildDir;
+    private String classesDir;
 
     private String outputDir = "frontend/generated";
 
+    /**
+     * Reads the configuration from the given base directory.
+     *
+     * @param targetDir
+     *            the directory where the configuration file is expected to be
+     * @return the configuration, or <code>null</code> if the configuration file
+     *         does not exist
+     * @throws IOException
+     *             if thrown while reading the configuration file
+     * @throws ConfigurationException
+     *             if the configuration file is invalid
+     */
     public static EngineConfiguration load(File targetDir) throws IOException {
         File configFile = new File(targetDir, RESOURCE_NAME);
 
@@ -39,7 +52,15 @@ public class EngineConfiguration {
         // one each time the project is run
         configFile.deleteOnExit();
 
-        return MAPPER.readValue(configFile, EngineConfiguration.class);
+        try {
+            return MAPPER.readValue(configFile, EngineConfiguration.class);
+        }
+        // This is mainly to wrap Jackson exceptions, but declaring them
+        // explicitly can cause problems in tests if they are not on the
+        // classpath
+        catch (RuntimeException e) {
+            throw new ConfigurationException(e);
+        }
     }
 
     public void store(File targetDir) throws IOException {
@@ -86,6 +107,14 @@ public class EngineConfiguration {
         this.buildDir = buildDir;
     }
 
+    public String getClassesDir() {
+        return classesDir;
+    }
+
+    public void setClassesDir(String classesDir) {
+        this.classesDir = classesDir;
+    }
+
     public String getOutputDir() {
         return outputDir;
     }
@@ -117,16 +146,18 @@ public class EngineConfiguration {
                 && Objects.equals(generator, that.generator)
                 && Objects.equals(parser, that.parser)
                 && Objects.equals(buildDir, that.buildDir)
+                && Objects.equals(classesDir, that.classesDir)
                 && Objects.equals(outputDir, that.outputDir);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(baseDir, classPath, generator, parser, buildDir);
+        return Objects.hash(baseDir, classPath, generator, parser, buildDir,
+                classesDir, outputDir);
     }
 
     Path getOpenAPIFile() {
-        return baseDir.resolve(buildDir).resolve(OPEN_API_PATH);
+        return baseDir.resolve(classesDir).resolve(OPEN_API_PATH);
     }
 
     Path getOutputDirectory() {

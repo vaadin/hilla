@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "DateTimeEndpoint"
+      "name": "DateTimeEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.datetime.DateTimeEndpoint"
     }
   ],
   "paths": {

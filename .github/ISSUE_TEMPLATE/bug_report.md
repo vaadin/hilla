@@ -19,9 +19,6 @@ Good quality bug report increases the likelihood to get the bug fixed. A bad qua
 -->
 ### Description of the bug 
 <!-- Explain briefly what is broken or what you want to achieve -->
-
-- [ ] I am using the multi-module engine (`hillaEngine=true` feature flag)
-
 ### Minimal reproducible example
 <!-- What are the steps to reproduce the issue, example project or a code snippet without dependencies -->
 ### Expected behavior

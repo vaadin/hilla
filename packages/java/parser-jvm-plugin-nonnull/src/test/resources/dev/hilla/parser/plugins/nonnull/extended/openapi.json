@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "ExtendedEndpoint"
+      "name": "ExtendedEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint"
     }
   ],
   "paths": {

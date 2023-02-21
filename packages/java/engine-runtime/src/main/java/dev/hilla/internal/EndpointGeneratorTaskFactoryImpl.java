@@ -15,8 +15,6 @@
  */
 package dev.hilla.internal;
 
-import java.util.Objects;
-
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;

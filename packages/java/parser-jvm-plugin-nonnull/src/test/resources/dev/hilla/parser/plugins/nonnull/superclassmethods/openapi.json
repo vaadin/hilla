@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "PersonEndpoint"
+      "name": "PersonEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.nonnull.superclassmethods.PersonEndpoint"
     }
   ],
   "paths": {

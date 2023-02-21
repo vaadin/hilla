@@ -34,8 +34,10 @@
           "name": "parser-jvm-plugin-use"
         }
       ]
-    }
+    },
+    "packages": null
   },
   "buildDir": "build",
+  "classesDir": null,
   "outputDir": "src/frontend/typescript/generated"
 }

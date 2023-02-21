@@ -23,6 +23,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -61,6 +62,7 @@ import dev.hilla.exception.EndpointException;
 import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.generator.endpoints.iterableendpoint.IterableEndpoint;
 import dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint;
+import dev.hilla.packages.application.ApplicationEndpoint;
 import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
 import dev.hilla.testendpoint.BridgeMethodTestEndpoint;
 
@@ -806,7 +808,8 @@ public class EndpointControllerTest {
         EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
                 mock(ExplicitNullableTypeChecker.class),
                 mock(ServletContext.class), registry);
-        new EndpointController(contextMock, registry, invoker, null);
+        new EndpointController(contextMock, registry, invoker, null)
+                .registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1108,6 +1111,20 @@ public class EndpointControllerTest {
         assertFailsCsrf("testMethod", 1);
     }
 
+    @Test
+    public void should_Instantiate_endpoints_correctly() throws Exception {
+        var context = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(Map.of("regularEndpoint", new ApplicationEndpoint()))
+                .when(context).getBeansWithAnnotation(Endpoint.class);
+        var controller = createVaadinControllerWithApplicationContext(context);
+        controller.setOpenApiResourceName("/dev/hilla/packages/openapi.json");
+        controller.registerEndpoints();
+        assertNotNull(controller.endpointRegistry.get("applicationEndpoint"));
+        assertNotNull(controller.endpointRegistry.get("libraryEndpoint"));
+        assertNull(controller.endpointRegistry
+                .get("libraryEndpointWithConstructor"));
+    }
+
     private void createDifferentCookieToken() {
         when(requestMock.getCookies()).thenReturn(new Cookie[] {
                 new Cookie(ApplicationConstants.CSRF_TOKEN, "Fusion token") });
@@ -1231,6 +1248,7 @@ public class EndpointControllerTest {
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,
                         invoker, csrfChecker));
+        connectController.registerEndpoints();
         return connectController;
     }
 
@@ -1246,6 +1264,7 @@ public class EndpointControllerTest {
         EndpointController hillaController = controllerMockBuilder
                 .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
                 .withApplicationContext(applicationContext).build();
+        hillaController.registerEndpoints();
         return hillaController;
     }
 
