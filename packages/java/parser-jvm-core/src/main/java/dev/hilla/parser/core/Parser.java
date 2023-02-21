@@ -4,14 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -256,6 +252,20 @@ public final class Parser {
         return this;
     }
 
+    @Nonnull
+    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages) {
+        return exposedPackages(exposedPackages, true);
+    }
+
+    @Nonnull
+    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages,
+            boolean override) {
+        if (override || config.exposedPackages == null) {
+            config.exposedPackages = Objects.requireNonNull(exposedPackages);
+        }
+        return this;
+    }
+
     /**
      * Scans the classpath, blocking until the scan is complete.
      *
@@ -274,10 +284,29 @@ public final class Parser {
 
         var storage = new SharedStorage(config);
 
-        try (var scanResult = new ClassGraph().enableAnnotationInfo()
+        var classGraph = new ClassGraph().enableAnnotationInfo()
                 .ignoreClassVisibility()
-                .overrideClasspath(config.getClassPathElements())
-                .overrideClassLoaders(config.getClassLoader()).scan()) {
+                .overrideClassLoaders(config.getClassLoader());
+
+        Collection<String> packages = config.exposedPackages;
+
+        // Packages explicitly defined in pom.xml have priority
+        if (packages != null && !packages.isEmpty()) {
+            logger.info("Search for endpoints in packages {}", packages);
+            classGraph.acceptPackages(packages.toArray(String[]::new));
+            classGraph.overrideClasspath(config.getClassPathElements());
+        }
+        // If no packages are defined, then scan the whole classpath except
+        // jars, which basically means scanning the build or target folder
+        else {
+            var buildDirectories = config.getClassPathElements().stream()
+                    .filter(e -> !e.endsWith(".jar")).toList();
+            logger.info("Search for endpoints in directories {}",
+                    buildDirectories);
+            classGraph.overrideClasspath(buildDirectories);
+        }
+
+        try (var scanResult = classGraph.scan()) {
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
             var pluginManager = new PluginManager(
@@ -374,6 +403,7 @@ public final class Parser {
         private Set<String> classPathElements;
         private String endpointAnnotationName;
         private String endpointExposedAnnotationName;
+        private Collection<String> exposedPackages;
         private OpenAPI openAPI;
         private ClassLoader classLoader;
 
@@ -419,6 +449,11 @@ public final class Parser {
         @Nonnull
         public String getEndpointExposedAnnotationName() {
             return endpointExposedAnnotationName;
+        }
+
+        @Nonnull
+        public Collection<String> getExposedPackages() {
+            return exposedPackages;
         }
 
         /**

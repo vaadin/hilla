@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "UUIDEndpoint"
+      "name": "UUIDEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.transfertypes.uuid.UUIDEndpoint"
     }
   ],
   "paths": {

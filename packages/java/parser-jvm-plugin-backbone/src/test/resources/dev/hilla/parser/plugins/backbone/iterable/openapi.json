@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "IterableEndpoint"
+      "name": "IterableEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.iterable.IterableEndpoint"
     }
   ],
   "paths": {

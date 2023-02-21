@@ -27,6 +27,11 @@
             <artifactId>flow-server</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>engine-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- API DEPENDENCIES -->
 

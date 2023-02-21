@@ -1,6 +1,6 @@
 {
   "baseDir": "base",
-  "classPath": ["target/test-classes"],
+  "classPath": ["build/test-classes"],
   "generator": {
     "plugins": {
       "use": [
@@ -37,5 +37,6 @@
     }
   },
   "buildDir": "build",
+  "classesDir": "build/classes",
   "outputDir": "frontend/maven-generated"
 }

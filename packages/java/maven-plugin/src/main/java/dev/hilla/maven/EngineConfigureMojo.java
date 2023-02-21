@@ -3,11 +3,7 @@ package dev.hilla.maven;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorConfiguration;
@@ -59,6 +55,7 @@ public final class EngineConfigureMojo extends AbstractMojo {
             conf.setParser(parser);
             var buildDir = project.getBuild().getDirectory();
             conf.setBuildDir(buildDir);
+            conf.setClassesDir(project.getBuild().getOutputDirectory());
 
             // The configuration gathered from the Maven plugin is saved in a
             // file so that further runs can skip running a separate Maven

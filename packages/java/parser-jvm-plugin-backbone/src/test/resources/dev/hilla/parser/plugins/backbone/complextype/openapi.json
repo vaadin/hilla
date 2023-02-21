@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "ComplexTypeEndpoint"
+      "name": "ComplexTypeEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint"
     }
   ],
   "paths": {

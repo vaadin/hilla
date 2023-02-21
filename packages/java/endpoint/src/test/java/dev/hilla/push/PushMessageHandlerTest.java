@@ -47,7 +47,6 @@ import dev.hilla.push.messages.toclient.ClientMessageComplete;
 import dev.hilla.push.messages.toclient.ClientMessageError;
 import dev.hilla.push.messages.toclient.ClientMessageUpdate;
 import net.jcip.annotations.NotThreadSafe;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,

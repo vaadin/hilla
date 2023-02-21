@@ -16,12 +16,10 @@
 package dev.hilla.internal;
 
 import java.io.File;
-import java.util.Objects;
 
 import dev.hilla.engine.GeneratorException;
 import dev.hilla.engine.GeneratorProcessor;
 
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 

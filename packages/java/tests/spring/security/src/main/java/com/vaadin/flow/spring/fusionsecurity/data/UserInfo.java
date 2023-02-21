@@ -3,7 +3,6 @@ package com.vaadin.flow.spring.fusionsecurity.data;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
