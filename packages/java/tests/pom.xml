@@ -146,7 +146,7 @@
             <execution>
               <goals>
                 <goal>prepare-frontend</goal>
-                <goal>build-frontend</goal>
+                <goal>build-frontend</goal> <!-- FIXME: why is this needed? -->
               </goals>
             </execution>
           </executions>

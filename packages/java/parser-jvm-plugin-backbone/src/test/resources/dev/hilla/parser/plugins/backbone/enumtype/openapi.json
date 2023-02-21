@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "EnumTypeEndpoint"
+      "name": "EnumTypeEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint"
     }
   ],
   "paths": {

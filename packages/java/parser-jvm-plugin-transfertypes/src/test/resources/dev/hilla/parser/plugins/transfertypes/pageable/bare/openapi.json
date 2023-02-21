@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "BarePageableEndpoint"
+      "name": "BarePageableEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.transfertypes.pageable.bare.BarePageableEndpoint"
     }
   ],
   "paths": {

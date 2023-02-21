@@ -12,16 +12,20 @@
   ],
   "tags": [
     {
-      "name": "GenericsBareEndpoint"
+      "name": "GenericsBareEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsBareEndpoint"
     },
     {
-      "name": "GenericsExtendedEndpoint"
+      "name": "GenericsExtendedEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsExtendedEndpoint"
     },
     {
-      "name": "GenericsMethodsEndpoint"
+      "name": "GenericsMethodsEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsMethodsEndpoint"
     },
     {
-      "name": "GenericsRefEndpoint"
+      "name": "GenericsRefEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsRefEndpoint"
     }
   ],
   "paths": {

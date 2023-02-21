@@ -19,5 +19,6 @@
     }
   },
   "buildDir": "build",
+  "classesDir": "build/classes",
   "outputDir": "output"
 }

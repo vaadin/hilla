@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "BasicEndpoint"
+      "name": "BasicEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint"
     }
   ],
   "paths": {

@@ -62,7 +62,7 @@ public class NodeTasksEndpointTest extends TaskTest {
                 "frontend/index.html", "frontend/generated/index.ts",
                 // withConnectJavaSourceFolder and
                 // withConnectGeneratedOpenApiJson
-                "build/generated-resources/openapi.json",
+                "build/classes/dev/hilla/openapi.json",
                 // withConnectClientTsApiFolder
                 "api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertTrue(

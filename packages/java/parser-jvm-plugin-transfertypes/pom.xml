@@ -66,6 +66,12 @@
       <artifactId>spring-data-commons</artifactId>
     </dependency>
     <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>parser-jvm-test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
       <scope>test</scope>

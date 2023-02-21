@@ -126,6 +126,21 @@
 
     <plugins>
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <!-- Remove generated files on clean -->
+            <fileset>
+              <directory>frontend/generated</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
       </plugin>
@@ -142,6 +157,7 @@
       </activation>
       <modules>
         <module>endpoints</module>
+        <module>endpoints-discovery</module>
         <module>endpoints-custom-client</module>
         <module>endpoints-maven-engine</module>
 

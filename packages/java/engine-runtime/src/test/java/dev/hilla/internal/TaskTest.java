@@ -1,6 +1,5 @@
 package dev.hilla.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -9,11 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.engine.GeneratorConfiguration;
-import dev.hilla.engine.ParserConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -55,8 +51,6 @@ public class TaskTest {
         config.setClassPath(classPath);
         config.store(buildDir.toFile());
 
-        var nodeModulesDirectory = getTemporaryDirectory()
-                .resolve("node_modules");
         var packagesDirectory = Path
                 .of(getClass().getClassLoader().getResource("").toURI())
                 .getParent() // target
@@ -95,12 +89,16 @@ public class TaskTest {
         return "build";
     }
 
+    protected String getClassesDirectory() {
+        return "build/classes";
+    }
+
     protected String getOutputDirectory() {
         return "output";
     }
 
     protected Path getOpenAPIFile() {
-        return getTemporaryDirectory().resolve(getBuildDirectory())
-                .resolve("generated-resources/openapi.json");
+        return getTemporaryDirectory().resolve(getClassesDirectory())
+                .resolve(EngineConfiguration.OPEN_API_PATH);
     }
 }

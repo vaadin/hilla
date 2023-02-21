@@ -18,8 +18,10 @@ package dev.hilla;
 
 import java.lang.reflect.Method;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +32,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 
 import dev.hilla.auth.CsrfChecker;
 import dev.hilla.auth.EndpointAccessChecker;
@@ -200,6 +203,25 @@ public class EndpointControllerConfiguration {
                 };
             }
         };
+    }
+
+    private static final String ENDPOINT_GENERATOR_IMPL = "dev.hilla.internal.EndpointGeneratorTaskFactoryImpl";
+
+    @Bean
+    @ConditionalOnClass(name = ENDPOINT_GENERATOR_IMPL)
+    EndpointGeneratorTaskFactory endpointGeneratorTaskFactory() {
+        try {
+            // In some cases the class is not available in the classpath and
+            // even if there's the ConditionalOnClass annotation, the whole
+            // EndpointControllerConfiguration class wouldn't be created if
+            // using the class directly
+            return (EndpointGeneratorTaskFactory) Class
+                    .forName(ENDPOINT_GENERATOR_IMPL).getDeclaredConstructor()
+                    .newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new BeanCreationException(
+                    ENDPOINT_GENERATOR_IMPL + " cannot be instantiated", e);
+        }
     }
 
     /**

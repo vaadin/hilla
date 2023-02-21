@@ -12,10 +12,12 @@
   ],
   "tags": [
     {
-      "name": "ComplexHierarchyEndpoint"
+      "name": "ComplexHierarchyEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.complexhierarchy.ComplexHierarchyEndpoint"
     },
     {
-      "name": "ComplexHierarchyGrandParentEndpoint"
+      "name": "ComplexHierarchyGrandParentEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentEndpoint"
     }
   ],
   "paths": {

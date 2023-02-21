@@ -12,7 +12,8 @@
   ],
   "tags": [
     {
-      "name": "SimpleTypeEndpoint"
+      "name": "SimpleTypeEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.simpletype.SimpleTypeEndpoint"
     }
   ],
   "paths": {

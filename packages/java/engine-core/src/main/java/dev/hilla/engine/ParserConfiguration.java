@@ -2,11 +2,9 @@ package dev.hilla.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -22,6 +20,7 @@ public final class ParserConfiguration {
     private String endpointExposedAnnotation;
     private String openAPIBasePath;
     private Plugins plugins;
+    private List<String> packages;
 
     public Optional<String> getEndpointAnnotation() {
         return Optional.ofNullable(endpointAnnotation);
@@ -52,13 +51,18 @@ public final class ParserConfiguration {
                 && Objects.equals(endpointExposedAnnotation,
                         that.endpointExposedAnnotation)
                 && Objects.equals(openAPIBasePath, that.openAPIBasePath)
-                && Objects.equals(plugins, that.plugins);
+                && Objects.equals(plugins, that.plugins)
+                && Objects.equals(packages, that.packages);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(endpointAnnotation, endpointExposedAnnotation,
-                openAPIBasePath, plugins);
+                openAPIBasePath, plugins, packages);
+    }
+
+    public Optional<List<String>> getPackages() {
+        return Optional.ofNullable(packages);
     }
 
     void setEndpointAnnotation(String endpointAnnotation) {
@@ -75,6 +79,10 @@ public final class ParserConfiguration {
 
     void setPlugins(Plugins plugins) {
         this.plugins = plugins;
+    }
+
+    void setPackages(List<String> packages) {
+        this.packages = packages;
     }
 
     public static class Plugin {
