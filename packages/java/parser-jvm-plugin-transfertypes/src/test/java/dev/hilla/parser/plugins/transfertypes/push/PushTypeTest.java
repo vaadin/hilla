@@ -22,12 +22,12 @@ public class PushTypeTest {
         var classpath = helper.getExtendedClassPath(Flux.class,
                 EndpointSubscription.class);
 
-        var openAPI = new Parser()
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin()).execute();
 
         helper.executeParserWithConfig(openAPI);
     }

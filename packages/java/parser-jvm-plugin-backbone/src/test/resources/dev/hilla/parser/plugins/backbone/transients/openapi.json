@@ -1,18 +1,19 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Vaadin Application",
+    "title": "Hilla Application",
     "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:8080/connect",
-      "description": "Vaadin Backend"
+      "description": "Hilla Backend"
     }
   ],
   "tags": [
     {
-      "name": "TransientEndpoint"
+      "name": "TransientEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.transients.TransientEndpoint"
     }
   ],
   "paths": {

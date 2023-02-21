@@ -1,6 +1,5 @@
 package dev.hilla.parser.core;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -16,7 +15,6 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
 
     protected AbstractCompositePlugin(@Nonnull Plugin... plugins) {
         Stream.of(plugins).map(Objects::requireNonNull)
-                .sorted(Comparator.comparingInt(Plugin::getOrder))
                 .forEachOrdered(this.plugins::add);
         verifyPluginsOrder();
     }

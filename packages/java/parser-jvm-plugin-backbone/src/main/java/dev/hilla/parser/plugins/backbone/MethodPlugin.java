@@ -62,6 +62,10 @@ public final class MethodPlugin
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
         rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
+        // The class name is needed to map the endpoint to its implementation at
+        // runtime
+        endpointNode.getTarget().addExtension("x-class-name",
+                endpointNode.getSource().getName());
     }
 
     @Nonnull

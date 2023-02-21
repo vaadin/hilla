@@ -601,7 +601,6 @@ describe('ConnectClient', () => {
     let client: ConnectClient;
 
     beforeEach(() => {
-      (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
       client = new ConnectClient();
       (atmosphere as any).reset();
     });

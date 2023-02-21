@@ -68,6 +68,7 @@ public class EndpointWithRestControllerTest {
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
         EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
+        controller.registerEndpoints();
         mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
                 .build();
         Assert.assertNotEquals(null, applicationContext);

@@ -15,7 +15,6 @@
   <name>Hilla Engine Runtime</name>
 
   <properties>
-    <flow.version>24.0-SNAPSHOT</flow.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
@@ -30,15 +29,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>engine-maven-plugin</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
       <version>${flow.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>engine-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -47,6 +46,22 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.parser.v3</groupId>
+      <artifactId>swagger-parser-v3</artifactId>
+      <version>2.0.20</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
