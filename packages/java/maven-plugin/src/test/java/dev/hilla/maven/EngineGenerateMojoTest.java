@@ -75,7 +75,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     "expected to construct " + "ParserProcessor");
             var parserProcessor = mockedConstructionParser.constructed().get(0);
 
-            assertEquals(1, mockedConstructionParser.constructed().size(),
+            assertEquals(1, mockedConstructionGenerator.constructed().size(),
                     "expected to construct " + "GeneratorProcessor");
             var generatorProcessor = mockedConstructionGenerator.constructed()
                     .get(0);
