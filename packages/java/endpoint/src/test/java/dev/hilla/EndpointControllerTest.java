@@ -1127,6 +1127,7 @@ public class EndpointControllerTest {
 
     @Test
     public void should_Fallback_to_Spring_Context() throws Exception {
+        // this also tests that an empty definition is not a problem
         var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
         // this one is found by Spring
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
@@ -1142,7 +1143,6 @@ public class EndpointControllerTest {
                 new ApplicationEndpoint(applicationComponent))).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        // this also tests that an empty definition is not a problem
         controller.setOpenApiResourceName(
                 "/dev/hilla/packages/" + openApiFilename);
         controller.registerEndpoints();
