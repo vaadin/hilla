@@ -28,12 +28,6 @@ public class NodeTasksEndpointTest extends TaskTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        File src = Files
-                .createDirectories(getTemporaryDirectory().resolve("src"))
-                .toFile();
-        File json = getTemporaryDirectory().toAbsolutePath()
-                .resolve("api-file.json").toFile();
-
         Lookup mockLookup = Mockito.mock(Lookup.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
@@ -45,8 +39,6 @@ public class NodeTasksEndpointTest extends TaskTest {
                 .withBuildDirectory(getBuildDirectory())
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
-                .withEndpointSourceFolder(src)
-                .withEndpointGeneratedOpenAPIFile(json)
                 .withFrontendGeneratedFolder(
                         getTemporaryDirectory().resolve("api").toFile())
                 .withJarFrontendResourcesFolder(getTemporaryDirectory()
