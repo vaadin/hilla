@@ -265,7 +265,7 @@ public class EndpointController {
                 // Read the openapi.json file and extract the tags, which in
                 // turn define the endpoints and their implementation classes
                 var rootNode = new ObjectMapper().readTree(stream);
-                var tagsNode = (ArrayNode) rootNode.findValue("tags");
+                var tagsNode = (ArrayNode) rootNode.get("tags");
 
                 if (tagsNode != null) {
                     // Declared endpoints are first searched as Spring Beans. If
