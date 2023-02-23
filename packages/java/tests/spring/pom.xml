@@ -160,6 +160,7 @@
         <module>endpoints-discovery</module>
         <module>endpoints-custom-client</module>
         <module>endpoints-maven-engine</module>
+        <module>endpoints-latest-java</module>
 
         <module>security</module>
         <module>security-contextpath</module>
@@ -168,18 +169,6 @@
       </modules>
     </profile>
 
-    <profile>
-      <id>java17</id>
-      <activation>
-        <jdk>[17,)</jdk>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <modules>
-        <module>endpoints-latest-java</module>
-      </modules>
-    </profile>
     <profile>
       <id>validation</id>
       <properties>

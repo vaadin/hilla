@@ -15,6 +15,11 @@
  */
 package dev.hilla.internal;
 
+import dev.hilla.engine.ParserProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
@@ -26,9 +31,17 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
  */
 public class EndpointGeneratorTaskFactoryImpl
         implements EndpointGeneratorTaskFactory {
+    private static final Logger logger = LoggerFactory
+            .getLogger(ParserProcessor.class);
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !isProductionMode(options)) {
+            // Skip for prepare-frontend phase and in production server
+            return new SkipTaskGenerateEndpoint();
+        }
+
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder());
@@ -36,9 +49,42 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !isProductionMode(options)) {
+            // Skip for prepare-frontend phase and in production server
+            return new SkipTaskGenerateOpenAPI();
+        }
+
         return new TaskGenerateOpenAPIImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder(),
                 options.getClassFinder().getClassLoader());
+    }
+
+    private static class SkipTaskGenerateEndpoint
+            implements TaskGenerateEndpoint {
+        @Override
+        public void execute() throws ExecutionFailedException {
+            logger.debug("Skipping generating TypeScript endpoints");
+        }
+    }
+
+    private static class SkipTaskGenerateOpenAPI
+            implements TaskGenerateOpenAPI {
+        @Override
+        public void execute() throws ExecutionFailedException {
+            logger.debug("Skipping generating OpenAPI spec");
+        }
+    }
+
+    // FIXME: remove after https://github.com/vaadin/flow/issues/16005 is done
+    private boolean isProductionMode(Options options) {
+        try {
+            var field = Options.class.getDeclaredField("productionMode");
+            field.setAccessible(true);
+            return (Boolean) field.get(options);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            return false;
+        }
     }
 }
