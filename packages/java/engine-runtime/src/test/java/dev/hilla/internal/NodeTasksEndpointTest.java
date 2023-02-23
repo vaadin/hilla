@@ -36,6 +36,7 @@ public class NodeTasksEndpointTest extends TaskTest {
                 .when(mockLookup).lookup(ClassFinder.class);
 
         options = new Options(mockLookup, getTemporaryDirectory().toFile())
+                .withProductionMode(false)
                 .withBuildDirectory(getBuildDirectory())
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
@@ -52,8 +53,17 @@ public class NodeTasksEndpointTest extends TaskTest {
     }
 
     @Test
-    public void should_GenerateEndpointFilesInBuildTask() throws Exception {
+    public void should_GenerateEndpointFilesInDevBuildTask() throws Exception {
         options = options.withDevBundleBuild(true);
+
+        new NodeTasks(options).execute();
+        assertEndpointFiles(true);
+    }
+
+    @Test
+    public void should_GenerateEndpointFilesInProductionBuildTask()
+            throws Exception {
+        options = options.withProductionMode(true);
 
         new NodeTasks(options).execute();
         assertEndpointFiles(true);

@@ -36,8 +36,9 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()) {
-            // Skip for prepare-frontend phase and production mode
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !isProductionMode(options)) {
+            // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateEndpoint();
         }
 
@@ -48,8 +49,9 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
-        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()) {
-            // Skip for prepare-frontend phase and production mode
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !isProductionMode(options)) {
+            // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateOpenAPI();
         }
 
@@ -72,6 +74,17 @@ public class EndpointGeneratorTaskFactoryImpl
         @Override
         public void execute() throws ExecutionFailedException {
             logger.debug("Skipping generating OpenAPI spec");
+        }
+    }
+
+    // FIXME: remove after https://github.com/vaadin/flow/issues/16005 is done
+    private boolean isProductionMode(Options options) {
+        try {
+            var field = Options.class.getDeclaredField("productionMode");
+            field.setAccessible(true);
+            return (Boolean) field.get(options);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            return false;
         }
     }
 }
