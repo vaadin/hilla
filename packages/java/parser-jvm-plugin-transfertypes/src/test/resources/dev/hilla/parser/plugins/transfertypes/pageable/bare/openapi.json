@@ -30,7 +30,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Sort"
                     }
                   ]
                 }
@@ -43,7 +43,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.runtime.transfertypes.Sort": {
+      "dev.hilla.mappedtypes.Sort": {
         "type": "object",
         "properties": {
           "orders": {
@@ -53,14 +53,14 @@
               "nullable": true,
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                  "$ref": "#/components/schemas/dev.hilla.mappedtypes.Order"
                 }
               ]
             }
           }
         }
       },
-      "dev.hilla.runtime.transfertypes.Order": {
+      "dev.hilla.mappedtypes.Order": {
         "type": "object",
         "properties": {
           "direction": {

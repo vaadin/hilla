@@ -30,7 +30,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Order"
                     }
                   ]
                 }
@@ -76,7 +76,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Pageable"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Pageable"
                     }
                   ]
                 }
@@ -99,7 +99,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Sort"
                     }
                   ]
                 }
@@ -112,7 +112,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.runtime.transfertypes.Order": {
+      "dev.hilla.mappedtypes.Order": {
         "type": "object",
         "properties": {
           "direction": {
@@ -140,7 +140,7 @@
           }
         }
       },
-      "dev.hilla.runtime.transfertypes.Pageable": {
+      "dev.hilla.mappedtypes.Pageable": {
         "type": "object",
         "properties": {
           "pageNumber": {
@@ -155,13 +155,13 @@
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+                "$ref": "#/components/schemas/dev.hilla.mappedtypes.Sort"
               }
             ]
           }
         }
       },
-      "dev.hilla.runtime.transfertypes.Sort": {
+      "dev.hilla.mappedtypes.Sort": {
         "type": "object",
         "properties": {
           "orders": {
@@ -171,7 +171,7 @@
               "nullable": true,
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                  "$ref": "#/components/schemas/dev.hilla.mappedtypes.Order"
                 }
               ]
             }

@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -99,6 +100,10 @@ public class EndpointInvoker {
         this.endpointMapper = endpointMapperFactory != null
                 ? endpointMapperFactory.build()
                 : createDefaultEndpointMapper(applicationContext);
+        if (this.endpointMapper != null) {
+            this.endpointMapper
+                    .registerModule(endpointTransferMapper.getJacksonModule());
+        }
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
     }
@@ -289,14 +294,6 @@ public class EndpointInvoker {
         return parametersData;
     }
 
-    private Class<?> getTransferType(Type type) {
-        if (!(type instanceof Class)) {
-            return null;
-        }
-
-        return endpointTransferMapper.getTransferType((Class) type);
-    }
-
     private Object[] getVaadinEndpointParameters(
             Map<String, JsonNode> requestParameters, Type[] javaParameters,
             String methodName, String endpointName) {
@@ -310,18 +307,10 @@ public class EndpointInvoker {
             Type parameterType = javaParameters[i];
             Type incomingType = parameterType;
             try {
-                Class<?> mappedType = getTransferType(parameterType);
-                if (mappedType != null) {
-                    incomingType = mappedType;
-                }
                 Object parameter = endpointMapper
                         .readerFor(endpointMapper.getTypeFactory()
                                 .constructType(incomingType))
                         .readValue(requestParameters.get(parameterNames[i]));
-                if (mappedType != null) {
-                    parameter = endpointTransferMapper.toEndpointType(parameter,
-                            (Class) parameterType);
-                }
                 endpointParameters[i] = parameter;
 
                 if (parameter != null) {
@@ -427,8 +416,6 @@ public class EndpointInvoker {
         } catch (InvocationTargetException e) {
             return handleMethodExecutionError(endpointName, methodName, e);
         }
-
-        returnValue = endpointTransferMapper.toTransferType(returnValue);
 
         String implicitNullError = this.explicitNullableTypeChecker
                 .checkValueForAnnotatedElement(returnValue, methodToInvoke,
