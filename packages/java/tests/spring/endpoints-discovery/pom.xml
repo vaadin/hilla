@@ -70,6 +70,18 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                            <!--
+                             Needs explicit frontend build, because the tests
+                             dont wait for DevServer's startup frontend tasks
+                              -->
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
