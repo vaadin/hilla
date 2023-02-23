@@ -292,14 +292,6 @@ public class EndpointInvoker {
         return parametersData;
     }
 
-//    private Class<?> getTransferType(Type type) {
-//        if (!(type instanceof Class)) {
-//            return null;
-//        }
-//
-//        return endpointTransferMapper.getTransferType((Class) type);
-//    }
-
     private Object[] getVaadinEndpointParameters(
             Map<String, JsonNode> requestParameters, Type[] javaParameters,
             String methodName, String endpointName) {
@@ -313,18 +305,10 @@ public class EndpointInvoker {
             Type parameterType = javaParameters[i];
             Type incomingType = parameterType;
             try {
-//                Class<?> mappedType = getTransferType(parameterType);
-//                if (mappedType != null) {
-//                    incomingType = mappedType;
-//                }
                 Object parameter = endpointMapper
                         .readerFor(endpointMapper.getTypeFactory()
                                 .constructType(incomingType))
                         .readValue(requestParameters.get(parameterNames[i]));
-//                if (mappedType != null) {
-//                    parameter = endpointTransferMapper.toEndpointType(parameter,
-//                            (Class) parameterType);
-//                }
                 endpointParameters[i] = parameter;
 
                 if (parameter != null) {
@@ -430,8 +414,6 @@ public class EndpointInvoker {
         } catch (InvocationTargetException e) {
             return handleMethodExecutionError(endpointName, methodName, e);
         }
-
-//        returnValue = endpointTransferMapper.toTransferType(returnValue);
 
         String implicitNullError = this.explicitNullableTypeChecker
                 .checkValueForAnnotatedElement(returnValue, methodToInvoke,
