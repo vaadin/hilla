@@ -55,8 +55,7 @@
                   "items": {
                     "type": "string",
                     "nullable": true
-                  },
-                  "x-class-name": "org.springframework.data.domain.Page"
+                  }
                 }
               }
             }
