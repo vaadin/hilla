@@ -265,19 +265,23 @@ public class EndpointController {
                 // Read the openapi.json file and extract the tags, which in
                 // turn define the endpoints and their implementation classes
                 var rootNode = new ObjectMapper().readTree(stream);
-                var tagsNode = (ArrayNode) rootNode.findValue("tags");
+                var tagsNode = (ArrayNode) rootNode.get("tags");
 
-                // Declared endpoints are first searched as Spring Beans. If not
-                // found, they are, if possible, instantiated as regular classes
-                tagsNode.forEach(tag -> {
-                    Optional.ofNullable(tag.get("name")).map(JsonNode::asText)
-                            .map(knownEndpointBeans::get)
-                            .or(() -> Optional
-                                    .ofNullable(tag.get("x-class-name"))
-                                    .map(JsonNode::asText)
-                                    .map(this::instantiateEndpointByClassName))
-                            .ifPresent(endpointRegistry::registerEndpoint);
-                });
+                if (tagsNode != null) {
+                    // Declared endpoints are first searched as Spring Beans. If
+                    // not found, they are, if possible, instantiated as regular
+                    // classes using their default constructor
+                    tagsNode.forEach(tag -> {
+                        Optional.ofNullable(tag.get("name"))
+                                .map(JsonNode::asText)
+                                .map(knownEndpointBeans::get)
+                                .or(() -> Optional
+                                        .ofNullable(tag.get("x-class-name"))
+                                        .map(JsonNode::asText)
+                                        .map(this::instantiateEndpointByClassName))
+                                .ifPresent(endpointRegistry::registerEndpoint);
+                    });
+                }
             } catch (IOException e) {
                 LOGGER.warn("Failed to read openapi.json", e);
             }

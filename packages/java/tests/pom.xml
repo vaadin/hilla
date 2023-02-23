@@ -146,7 +146,8 @@
             <execution>
               <goals>
                 <goal>prepare-frontend</goal>
-                <goal>build-frontend</goal> <!-- FIXME: why is this needed? -->
+                <!-- FIXME: CI build timeouts with dev server -->
+                <goal>build-frontend</goal>
               </goals>
             </execution>
           </executions>

@@ -62,6 +62,7 @@ import dev.hilla.exception.EndpointException;
 import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.generator.endpoints.iterableendpoint.IterableEndpoint;
 import dev.hilla.generator.endpoints.superclassmethods.PersonEndpoint;
+import dev.hilla.packages.application.ApplicationComponent;
 import dev.hilla.packages.application.ApplicationEndpoint;
 import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
 import dev.hilla.testendpoint.BridgeMethodTestEndpoint;
@@ -1113,16 +1114,39 @@ public class EndpointControllerTest {
 
     @Test
     public void should_Instantiate_endpoints_correctly() throws Exception {
+        var endpointRegistry = registerEndpoints("openapi.json");
+        // this one has a constructor with a parameter, but is instantiated by
+        // Spring
+        assertNotNull(endpointRegistry.get("applicationEndpoint"));
+        // this one is not found by Spring, but is instantiated directly since
+        // it has the default no-arg constructor
+        assertNotNull(endpointRegistry.get("libraryEndpoint"));
+        // this one cannot be instantiated
+        assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
+    }
+
+    @Test
+    public void should_Fallback_to_Spring_Context() throws Exception {
+        // this also tests that an empty definition is not a problem
+        var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
+        // this one is found by Spring
+        assertNotNull(endpointRegistry.get("applicationEndpoint"));
+        // the others are outside the Spring context
+        assertNull(endpointRegistry.get("libraryEndpoint"));
+        assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
+    }
+
+    private EndpointRegistry registerEndpoints(String openApiFilename) {
         var context = Mockito.mock(ApplicationContext.class);
-        Mockito.doReturn(Map.of("regularEndpoint", new ApplicationEndpoint()))
-                .when(context).getBeansWithAnnotation(Endpoint.class);
+        var applicationComponent = new ApplicationComponent();
+        Mockito.doReturn(Map.of("regularEndpoint",
+                new ApplicationEndpoint(applicationComponent))).when(context)
+                .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        controller.setOpenApiResourceName("/dev/hilla/packages/openapi.json");
+        controller.setOpenApiResourceName(
+                "/dev/hilla/packages/" + openApiFilename);
         controller.registerEndpoints();
-        assertNotNull(controller.endpointRegistry.get("applicationEndpoint"));
-        assertNotNull(controller.endpointRegistry.get("libraryEndpoint"));
-        assertNull(controller.endpointRegistry
-                .get("libraryEndpointWithConstructor"));
+        return controller.endpointRegistry;
     }
 
     private void createDifferentCookieToken() {
