@@ -129,48 +129,49 @@ public class EndpointTransferMapper {
      * @param mapper
      *            the mapper to register
      */
-    private <ENDPOINTTYPE, TRANSFERTYPE> void registerMapper(Mapper<ENDPOINTTYPE, TRANSFERTYPE> mapper) {
+    private <ENDPOINTTYPE, TRANSFERTYPE> void registerMapper(
+            Mapper<ENDPOINTTYPE, TRANSFERTYPE> mapper) {
         var endpointType = (Class<ENDPOINTTYPE>) mapper.getEndpointType();
         var transferType = mapper.getTransferType();
         endpointToTransfer.put(endpointType, mapper.getTransferType());
         mappers.put(endpointType, mapper);
 
         var serializer = new StdDelegatingSerializer(
-            new StdConverter<ENDPOINTTYPE, TRANSFERTYPE>() {
-                @Override
-                public TRANSFERTYPE convert(ENDPOINTTYPE value) {
-                    return mapper.toTransferType(value);
-                }
+                new StdConverter<ENDPOINTTYPE, TRANSFERTYPE>() {
+                    @Override
+                    public TRANSFERTYPE convert(ENDPOINTTYPE value) {
+                        return mapper.toTransferType(value);
+                    }
 
-                @Override
-                public JavaType getInputType(TypeFactory typeFactory) {
-                    return typeFactory.constructType(endpointType);
-                }
+                    @Override
+                    public JavaType getInputType(TypeFactory typeFactory) {
+                        return typeFactory.constructType(endpointType);
+                    }
 
-                @Override
-                public JavaType getOutputType(TypeFactory typeFactory) {
-                    return typeFactory.constructType(transferType);
-                }
-            });
+                    @Override
+                    public JavaType getOutputType(TypeFactory typeFactory) {
+                        return typeFactory.constructType(transferType);
+                    }
+                });
         jacksonModule.addSerializer(endpointType, serializer);
 
         var deserializer = new StdDelegatingDeserializer<>(
-            new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
-                @Override
-                public ENDPOINTTYPE convert(TRANSFERTYPE value) {
-                    return mapper.toEndpointType(value);
-                }
+                new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
+                    @Override
+                    public ENDPOINTTYPE convert(TRANSFERTYPE value) {
+                        return mapper.toEndpointType(value);
+                    }
 
-                @Override
-                public JavaType getInputType(TypeFactory typeFactory) {
-                    return typeFactory.constructType(transferType);
-                }
+                    @Override
+                    public JavaType getInputType(TypeFactory typeFactory) {
+                        return typeFactory.constructType(transferType);
+                    }
 
-                @Override
-                public JavaType getOutputType(TypeFactory typeFactory) {
-                    return typeFactory.constructType(endpointType);
-                }
-            });
+                    @Override
+                    public JavaType getOutputType(TypeFactory typeFactory) {
+                        return typeFactory.constructType(endpointType);
+                    }
+                });
 
         jacksonModule.addDeserializer(endpointType, deserializer);
     }
@@ -179,7 +180,8 @@ public class EndpointTransferMapper {
      * Gets the Jackson 2 module configured with the mapping serializers and
      * deserializers.
      *
-     * <p>For internal use only. May be changed or removed in a future release.
+     * <p>
+     * For internal use only. May be changed or removed in a future release.
      *
      * @return Jackson 2 module.
      */

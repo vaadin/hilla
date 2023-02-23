@@ -19,25 +19,21 @@ import org.springframework.data.support.PageableExecutionUtils;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
-
+ * 
  * {@link org.springframework.data.domain.Page} data.
  */
 @Endpoint
 @AnonymousAllowed
 public class PagedEndpoint {
-    private static List<Entity> DATA = List.of(
-        new Entity("Foo", 30),
-        new Entity("Bar", 20),
-        new Entity("Baz", 10)
-    );
+    private static List<Entity> DATA = List.of(new Entity("Foo", 30),
+            new Entity("Bar", 20), new Entity("Baz", 10));
 
     public Page<@Nonnull Entity> list(@Nullable Pageable p) {
         if (p == null) {
             p = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "qty"));
         }
 
-        var toIndex =
-            Math.min(p.getOffset() + p.getPageSize(), DATA.size());
+        var toIndex = Math.min(p.getOffset() + p.getPageSize(), DATA.size());
         var content = DATA.subList((int) p.getOffset(), (int) toIndex);
         return new PageImpl<>(content, p, DATA.size());
     }
@@ -77,7 +73,8 @@ public class PagedEndpoint {
         private final Page<Entity> page;
         private final Pageable pageable;
 
-        public PageOfEntities(@Nonnull Page<Entity> page, @Nonnull Pageable pageable) {
+        public PageOfEntities(@Nonnull Page<Entity> page,
+                @Nonnull Pageable pageable) {
             this.page = page;
             this.pageable = pageable;
         }

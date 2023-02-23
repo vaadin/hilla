@@ -252,17 +252,18 @@ public class AppViewIT extends ChromeBrowserTest {
     @Test
     public void should_getPageOne() {
         WebElement button = testComponent.$(TestBenchElement.class)
-            .id("pageOne");
+                .id("pageOne");
         button.click();
 
         // Wait for the server connect response
-        verifyContent("[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}]");
+        verifyContent(
+                "[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}]");
     }
 
     @Test
     public void should_getPageTwo() {
         WebElement button = testComponent.$(TestBenchElement.class)
-            .id("pageTwo");
+                .id("pageTwo");
         button.click();
 
         // Wait for the server connect response
@@ -272,12 +273,12 @@ public class AppViewIT extends ChromeBrowserTest {
     @Test
     public void should_getPageOfEntities() {
         WebElement button = testComponent.$(TestBenchElement.class)
-            .id("pageOfEntities");
+                .id("pageOfEntities");
         button.click();
 
         // Wait for the server connect response
         verifyContent(
-            "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
+                "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
     }
 
     private void load() {
