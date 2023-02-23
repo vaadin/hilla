@@ -26,8 +26,6 @@ import org.springframework.data.domain.PageImpl;
  */
 public class PageMapper implements Mapper<Page<?>, List<?>> {
 
-    private PageableMapper pageableMapper = new PageableMapper();
-
     @Override
     public Class<? extends Page<?>> getEndpointType() {
         return (Class) Page.class;
