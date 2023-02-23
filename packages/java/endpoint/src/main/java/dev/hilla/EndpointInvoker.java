@@ -101,8 +101,8 @@ public class EndpointInvoker {
                 ? endpointMapperFactory.build()
                 : createDefaultEndpointMapper(applicationContext);
         if (this.endpointMapper != null) {
-            this.endpointMapper.registerModule(
-                endpointTransferMapper.getJacksonModule());
+            this.endpointMapper
+                    .registerModule(endpointTransferMapper.getJacksonModule());
         }
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
