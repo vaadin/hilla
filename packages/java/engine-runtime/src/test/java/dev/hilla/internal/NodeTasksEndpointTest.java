@@ -1,10 +1,10 @@
 package dev.hilla.internal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -46,21 +46,34 @@ public class NodeTasksEndpointTest extends TaskTest {
     }
 
     @Test
-    public void should_GenerateEndpointFiles() throws Exception {
+    public void should_NotGenerateEndpointFiles() throws Exception {
         new NodeTasks(options).execute();
-
-        Arrays.asList(
-                // enableClientSide
-                "frontend/index.html", "frontend/generated/index.ts",
-                // withConnectJavaSourceFolder and
-                // withConnectGeneratedOpenApiJson
-                "build/classes/dev/hilla/openapi.json",
-                // withConnectClientTsApiFolder
-                "api/connect-client.default.ts", "api/MyEndpoint.ts")
-                .forEach(name -> assertTrue(
-                        new File(getTemporaryDirectory().toFile(), name)
-                                .exists(),
-                        name + " not created."));
+        assertEndpointFiles(false);
     }
 
+    @Test
+    public void should_GenerateEndpointFilesInBuildTask() throws Exception {
+        options = options.withDevBundleBuild(true);
+
+        new NodeTasks(options).execute();
+        assertEndpointFiles(true);
+    }
+
+    @Test
+    public void should_GenerateEndpointFilesInDevServerTask() throws Exception {
+        options = options.withFrontendHotdeploy(true);
+
+        new NodeTasks(options).execute();
+        assertEndpointFiles(true);
+    }
+
+    private void assertEndpointFiles(boolean shouldExist) {
+        Arrays.asList("build/classes/dev/hilla/openapi.json",
+                "api/connect-client.default.ts", "api/MyEndpoint.ts")
+                .forEach(name -> assertEquals(shouldExist,
+                        new File(getTemporaryDirectory().toFile(), name)
+                                .exists(),
+                        name + " should " + (shouldExist ? "" : "not ")
+                                + "be created"));
+    }
 }
