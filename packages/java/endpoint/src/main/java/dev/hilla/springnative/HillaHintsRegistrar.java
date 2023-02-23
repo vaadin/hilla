@@ -1,12 +1,18 @@
 package dev.hilla.springnative;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import dev.hilla.engine.EngineConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +35,8 @@ import dev.hilla.push.messages.toclient.AbstractClientMessage;
  */
 public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
-    private static final String GENERATED_OPENAPI_JSON = "target/generated-resources/openapi.json";
+    private static final String openApiResourceName = "/"
+            + EngineConfiguration.OPEN_API_PATH;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -48,17 +55,18 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     }
 
     private void registerEndpointTypes(RuntimeHints hints) {
-        File openApiFile = new File(GENERATED_OPENAPI_JSON);
-        if (!openApiFile.exists()) {
-            logger.warn(
-                    "Open API definition not found in {}. Endpoint types will not be registered",
-                    openApiFile.getAbsoluteFile());
-            return;
-        }
-
         try {
-            String openApiAsText = FileUtils.readFileToString(openApiFile,
-                    StandardCharsets.UTF_8);
+            var resource = getClass().getResource(openApiResourceName);
+            if (resource == null) {
+                logger.error("Resource {} is not available",
+                        openApiResourceName);
+                return;
+            }
+
+            var reader = new BufferedReader(
+                    new InputStreamReader(resource.openStream()));
+            String openApiAsText = reader.lines()
+                    .collect(Collectors.joining("\n"));
             List<Class<?>> types = parseOpenApi(openApiAsText);
             for (Class<?> type : types) {
                 hints.reflection().registerType(type, MemberCategory.values());
@@ -71,7 +79,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
     /**
      * Parses the given open api and finds the used custom types.
-     * 
+     *
      * @param openApiAsText
      *            the open api JSON as text
      * @return a list of custom types used
