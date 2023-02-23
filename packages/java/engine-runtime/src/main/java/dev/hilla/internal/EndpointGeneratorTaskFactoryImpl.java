@@ -32,7 +32,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 public class EndpointGeneratorTaskFactoryImpl
         implements EndpointGeneratorTaskFactory {
     private static final Logger logger = LoggerFactory
-        .getLogger(ParserProcessor.class);
+            .getLogger(ParserProcessor.class);
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
@@ -59,18 +59,19 @@ public class EndpointGeneratorTaskFactoryImpl
                 options.getClassFinder().getClassLoader());
     }
 
-    private static class SkipTaskGenerateEndpoint implements TaskGenerateEndpoint {
+    private static class SkipTaskGenerateEndpoint
+            implements TaskGenerateEndpoint {
         @Override
         public void execute() throws ExecutionFailedException {
             logger.debug("Skipping generating TypeScript endpoints");
         }
     }
 
-    private static class SkipTaskGenerateOpenAPI implements TaskGenerateOpenAPI {
+    private static class SkipTaskGenerateOpenAPI
+            implements TaskGenerateOpenAPI {
         @Override
         public void execute() throws ExecutionFailedException {
-            logger.debug(
-                "Skipping generating OpenAPI spec");
+            logger.debug("Skipping generating OpenAPI spec");
         }
     }
 }
