@@ -2,7 +2,8 @@ import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import * as appEndpoint from '../generated/AppEndpoint';
 import * as packagePrivateEndpoint from '../generated/PackagePrivateEndpoint';
-import { AppEndpoint } from '../generated/endpoints';
+import { AppEndpoint, PagedEndpoint } from '../generated/endpoints';
+import Direction from '../generated/org/springframework/data/domain/Sort/Direction';
 
 class TestComponent extends PolymerElement {
   static get template() {
@@ -25,6 +26,9 @@ class TestComponent extends PolymerElement {
       <button id="getObjectWithNullValues" on-click="getObjectWithNullValues">
         Get Object With Null Values From Endpoint</button
       ><br />
+      <button id="pageOne" on-click="getPageOne">Get page one</button>
+      <button id="pageTwo" on-click="getPageTwo">Get page two</button>
+      <button id="pageOfEntities" on-click="getPageOfEntities">Get page of entities</button>
       <button id="denied" on-click="denied">endpoint denied</button><br />
       <button id="logout" on-click="logout">logout</button><br />
       <form method="POST" action="login">
@@ -104,6 +108,48 @@ class TestComponent extends PolymerElement {
       .getObjectWithNullValues()
       .then((response) => (this.$.content.textContent = '' + response['propWithNullValue']))
       .catch((error) => (this.$.content.textContent = 'Error:' + error));
+  }
+
+  getPageOne(e) {
+    PagedEndpoint.list(undefined)
+      .then((response) => {
+        this.$.content.textContent = JSON.stringify(response);
+      })
+      .catch((error) => {
+        this.$.content.textContent = 'Error:' + error;
+      });
+  }
+
+  getPageTwo() {
+    PagedEndpoint.list({
+      pageNumber: 1,
+      pageSize: 2,
+      sort: {
+        orders: [
+          {
+            property: 'qty',
+            direction: Direction.DESC,
+            ignoreCase: false,
+          },
+        ],
+      },
+    })
+      .then((response) => {
+        this.$.content.textContent = JSON.stringify(response);
+      })
+      .catch((error) => {
+        this.$.content.textContent = 'Error:' + error;
+      });
+  }
+
+  getPageOfEntities(e) {
+    PagedEndpoint.listEntities(undefined)
+      .then((response) => {
+        this.$.content.textContent = JSON.stringify(response);
+      })
+      .catch((error) => {
+        this.$.content.textContent = 'Error:' + error;
+      });
   }
 
   denied(e) {

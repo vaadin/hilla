@@ -15,15 +15,14 @@
  */
 package dev.hilla.mappedtypes;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
-
-import dev.hilla.Nonnull;
 
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
 
 /**
- * A DTO for {@link org.springframework.data.domain.Sort.Order}.
+ * A DTO for {@code org.springframework.data.domain.Sort.Order}.
  */
 public class Order {
     @Nonnull
