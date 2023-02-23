@@ -15,11 +15,19 @@
  */
 package dev.hilla.generator.endpoints.model;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
 import dev.hilla.generator.endpoints.AbstractEndpointGenerationTest;
 import dev.hilla.generator.endpoints.model.subpackage.ModelFromDifferentPackage;
-import org.junit.Test;
+import dev.hilla.springnative.HillaHintsRegistrar;
 
 public class ModelEndpointTest extends AbstractEndpointGenerationTest {
     public ModelEndpointTest() {
@@ -32,5 +40,17 @@ public class ModelEndpointTest extends AbstractEndpointGenerationTest {
     @Test
     public void should_GenerateCorrectModels_When_ModelsHaveComplexStructure() {
         verifyOpenApiObjectAndGeneratedTs();
+    }
+
+    @Test
+    public void should_registerCustomTypes_When_CompilingForNative()
+            throws Exception {
+        generateOpenApi(null);
+        List<Class<?>> types = HillaHintsRegistrar.parseOpenApi(IOUtils
+                .toString(openApiJsonOutput.toUri(), StandardCharsets.UTF_8));
+        Assert.assertEquals(
+                Set.of(ModelFromDifferentPackage.class,
+                        ModelEndpoint.Account.class, ModelEndpoint.Group.class),
+                new HashSet<>(types));
     }
 }
