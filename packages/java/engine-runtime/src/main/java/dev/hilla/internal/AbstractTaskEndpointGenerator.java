@@ -36,6 +36,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private final File projectDirectory;
     private final String buildDirectoryName;
     private final File outputDirectory;
+
     private EngineConfiguration engineConfiguration;
     static final boolean IS_WINDOWS;
     static final String MAVEN_COMMAND;
