@@ -146,6 +146,8 @@
             <execution>
               <goals>
                 <goal>prepare-frontend</goal>
+                <!-- FIXME: CI build timeouts with dev server -->
+                <goal>build-frontend</goal>
               </goals>
             </execution>
           </executions>
