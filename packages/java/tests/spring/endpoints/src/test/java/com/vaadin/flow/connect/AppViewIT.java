@@ -249,6 +249,38 @@ public class AppViewIT extends ChromeBrowserTest {
         verifyContent("Access denied");
     }
 
+    @Test
+    public void should_getPageOne() {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("pageOne");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent(
+                "[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}]");
+    }
+
+    @Test
+    public void should_getPageTwo() {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("pageTwo");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("[{\"name\":\"Baz\",\"qty\":10}]");
+    }
+
+    @Test
+    public void should_getPageOfEntities() {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("pageOfEntities");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent(
+                "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
+    }
+
     private void load() {
         openTestUrl("/");
         testComponent = $("test-component").waitForFirst();

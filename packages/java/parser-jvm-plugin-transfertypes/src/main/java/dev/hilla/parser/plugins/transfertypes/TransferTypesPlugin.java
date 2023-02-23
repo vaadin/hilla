@@ -9,6 +9,9 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.mappedtypes.Order;
+import dev.hilla.mappedtypes.Pageable;
+import dev.hilla.mappedtypes.Sort;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
@@ -22,9 +25,6 @@ import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import dev.hilla.runtime.transfertypes.EndpointSubscription;
 import dev.hilla.runtime.transfertypes.Flux;
-import dev.hilla.runtime.transfertypes.Order;
-import dev.hilla.runtime.transfertypes.Pageable;
-import dev.hilla.runtime.transfertypes.Sort;
 
 public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {

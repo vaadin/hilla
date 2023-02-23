@@ -18,7 +18,6 @@ package dev.hilla.endpointransfermapper;
 import java.util.List;
 
 import dev.hilla.endpointransfermapper.EndpointTransferMapper.Mapper;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
@@ -38,12 +37,12 @@ public class PageMapper implements Mapper<Page<?>, List<?>> {
     }
 
     @Override
-    public List toTransferType(Page page) {
+    public List<?> toTransferType(Page<?> page) {
         return page.getContent();
     }
 
     @Override
-    public Page toEndpointType(List list) {
-        return new PageImpl(list);
+    public Page<?> toEndpointType(List<?> list) {
+        return new PageImpl<>(list);
     }
 }
