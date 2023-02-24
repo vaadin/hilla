@@ -19,6 +19,7 @@ import dev.hilla.parser.core.Plugin;
 import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
+import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.models.SpecializedModel;
@@ -70,6 +71,14 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                     annotations = Stream.concat(annotations,
                             ((AnnotatedModel) nodeSource).getAnnotations()
                                     .stream());
+                }
+
+                if (nodeSource instanceof ArraySignatureModel) {
+                    // Apply nested type annotations for arrays
+                    annotations = Stream.concat(
+                            ((ArraySignatureModel) nodeSource).getNestedType()
+                                    .getAnnotations().stream(),
+                            annotations);
                 }
 
                 annotations = considerAscendantAnnotations(annotations,

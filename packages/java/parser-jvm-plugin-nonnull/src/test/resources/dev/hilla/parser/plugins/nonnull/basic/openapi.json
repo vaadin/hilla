@@ -404,6 +404,20 @@
               }
             }
           },
+          "imageField": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "imageProp": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
           "nullableField": {
             "type": "string",
             "nullable": true

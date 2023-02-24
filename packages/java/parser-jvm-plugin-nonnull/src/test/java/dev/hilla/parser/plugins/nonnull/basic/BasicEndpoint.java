@@ -62,6 +62,15 @@ public class BasicEndpoint {
 
     public static class NonNullableModel {
         @Nonnull
+        public byte[] imageField = {};
+        private final byte[] imageProp = {};
+
+        @Nonnull
+        public byte[] getImageProp() {
+            return imageProp;
+        }
+
+        @Nonnull
         public Map<String, @Nonnull List<@Nonnull NonNullableModel>> complexTypeField;
         public String nullableField;
         @Nonnull
