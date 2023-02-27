@@ -1,13 +1,13 @@
 package dev.hilla.engine;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -20,24 +20,24 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.0.0-beta1")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.0.0-beta1")
 public final class GeneratorProcessor {
-    private final Path baseDir;
-
-    private final Path openAPIFile;
-
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
+    private final Path baseDir;
+    private final String nodeCommand;
+    private final Path openAPIFile;
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
 
-    public GeneratorProcessor(EngineConfiguration conf) {
+    public GeneratorProcessor(EngineConfiguration conf, String nodeCommand) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.outputDirectory = conf.getOutputDirectory();
+        this.nodeCommand = nodeCommand;
         applyConfiguration(conf.getGenerator());
     }
 
     public void process() throws GeneratorException {
-        var runner = new GeneratorShellRunner(baseDir.toFile());
+        var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand);
         prepareOutputDir(runner);
         preparePlugins(runner);
         prepareVerbose(runner);
@@ -47,12 +47,6 @@ public final class GeneratorProcessor {
         } catch (IOException | InterruptedException e) {
             throw new GeneratorException("Unable to generate code", e);
         }
-    }
-
-    private void prepareOutputDir(GeneratorShellRunner runner) {
-        var result = outputDirectory.isAbsolute() ? outputDirectory
-                : baseDir.resolve(outputDirectory);
-        runner.add("-o", result.toString());
     }
 
     private GeneratorProcessor applyConfiguration(
@@ -67,6 +61,12 @@ public final class GeneratorProcessor {
 
     private void applyPlugins(@Nonnull GeneratorConfiguration.Plugins plugins) {
         pluginsProcessor.setConfig(plugins);
+    }
+
+    private void prepareOutputDir(GeneratorShellRunner runner) {
+        var result = outputDirectory.isAbsolute() ? outputDirectory
+                : baseDir.resolve(outputDirectory);
+        runner.add("-o", result.toString());
     }
 
     private void preparePlugins(GeneratorShellRunner runner) {

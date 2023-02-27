@@ -7,12 +7,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import dev.hilla.engine.EngineConfiguration;
-
-import dev.hilla.engine.GeneratorException;
-import dev.hilla.engine.GeneratorProcessor;
-import dev.hilla.engine.ParserException;
-import dev.hilla.engine.ParserProcessor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -20,6 +14,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorException;
+import dev.hilla.engine.GeneratorProcessor;
+import dev.hilla.engine.ParserException;
+import dev.hilla.engine.ParserProcessor;
 
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
@@ -29,6 +29,8 @@ import org.apache.maven.project.MavenProject;
 @Execute(goal = "configure")
 public final class EngineGenerateMojo extends AbstractMojo {
 
+    @Parameter(defaultValue = "node")
+    private String nodeCommand;
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
@@ -47,7 +49,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
             var classLoader = new URLClassLoader(urls.toArray(URL[]::new),
                     getClass().getClassLoader());
             var parserProcessor = new ParserProcessor(conf, classLoader);
-            var generatorProcessor = new GeneratorProcessor(conf);
+            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand);
 
             parserProcessor.process();
             generatorProcessor.process();
