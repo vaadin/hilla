@@ -96,6 +96,7 @@ public class MavenRunner implements CommandRunner {
 
         var exitCode = 0;
         try {
+            LOGGER.debug("Running command: {}", command);
             ProcessBuilder builder = new ProcessBuilder(command)
                     .directory(projectDir.toFile()).inheritIO();
             exitCode = builder.start().waitFor();
