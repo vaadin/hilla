@@ -80,15 +80,21 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                     "Hilla engine configuration not found: configure using build system plugin");
 
             try {
+                // Create a runner for Maven
                 MavenRunner
                         .forProject(projectDirectory.toPath(), "-q",
                                 "hilla:configure")
+                        // Create a runner for Gradle. Even if Gradle is not
+                        // supported yet, this is useful to emit an error
+                        // message if pom.xml is not found and build.gradle is
                         .or(() -> GradleRunner
                                 .forProject(projectDirectory.toPath()))
+                        // If no runner is found, throw an exception.
                         .orElseThrow(() -> new IllegalStateException(String
                                 .format("Failed to determine project directory for dev mode. "
                                         + "Directory '%s' does not look like a Maven or "
                                         + "Gradle project.", projectDirectory)))
+                        // Run the first valid runner
                         .run();
             } catch (RunnerException e) {
                 throw new ExecutionFailedException(

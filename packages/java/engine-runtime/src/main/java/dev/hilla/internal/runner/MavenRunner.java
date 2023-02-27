@@ -10,7 +10,10 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MavenRunner extends CommandRunner {
+/**
+ * Runs a Maven command.
+ */
+public class MavenRunner implements CommandRunner {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MavenRunner.class);
@@ -19,12 +22,32 @@ public class MavenRunner extends CommandRunner {
     private final boolean windowsOS;
     private final String[] args;
 
+    /**
+     * Creates a Maven runner.
+     *
+     * @param projectDir
+     *            the project directory
+     * @param windowsOS
+     *            whether the OS is Windows
+     * @param args
+     *            the arguments to pass to the Maven command
+     */
     public MavenRunner(Path projectDir, boolean windowsOS, String... args) {
         this.projectDir = projectDir;
         this.windowsOS = windowsOS;
         this.args = args;
     }
 
+    /**
+     * Creates a Maven runner for the given project directory.
+     *
+     * @param projectDir
+     *            the project directory
+     * @param args
+     *            the arguments to pass to the Maven command
+     * @return a Maven runner if the project directory contains a Maven project,
+     *         an empty optional otherwise
+     */
     public static Optional<CommandRunner> forProject(Path projectDir,
             String... args) {
         if (Files.exists(projectDir.resolve("pom.xml"))) {
@@ -36,14 +59,24 @@ public class MavenRunner extends CommandRunner {
         return Optional.empty();
     }
 
+    /**
+     * Returns the name of the maven executable, depending on the OS.
+     */
     public String mavenExecutable() {
         return windowsOS ? "mvn.cmd" : "mvn";
     }
 
+    /**
+     * Returns the name of the maven wrapper executable, depending on the OS.
+     */
     public String wrapperExecutable() {
         return windowsOS ? ".\\mvnw.cmd" : "./mvnw";
     }
 
+    /**
+     * Selects the maven executable to use. Prefer the maven wrapper if it
+     * exists.
+     */
     public String chooseExecutable() {
         var command = wrapperExecutable();
 
