@@ -1,0 +1,89 @@
+package dev.hilla.internal.runner;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MavenRunner extends CommandRunner {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MavenRunner.class);
+
+    private final Path projectDir;
+    private final boolean windowsOS;
+    private final String[] args;
+
+    public MavenRunner(Path projectDir, boolean windowsOS, String... args) {
+        this.projectDir = projectDir;
+        this.windowsOS = windowsOS;
+        this.args = args;
+    }
+
+    public static Optional<CommandRunner> forProject(Path projectDir,
+            String... args) {
+        if (Files.exists(projectDir.resolve("pom.xml"))) {
+            var os = System.getProperty("os.name").toLowerCase();
+            var windowsOS = os.contains("windows");
+            return Optional.of(new MavenRunner(projectDir, windowsOS, args));
+        }
+
+        return Optional.empty();
+    }
+
+    public String mavenExecutable() {
+        return windowsOS ? "mvn.cmd" : "mvn";
+    }
+
+    public String wrapperExecutable() {
+        return windowsOS ? ".\\mvnw.cmd" : "./mvnw";
+    }
+
+    public String chooseExecutable() {
+        var command = wrapperExecutable();
+
+        if (Files.exists(projectDir.resolve(command))) {
+            return command;
+        } else {
+            LOGGER.debug("No maven wrapper found");
+            return mavenExecutable();
+        }
+    }
+
+    @Override
+    public void run() throws RunnerException {
+        var command = new ArrayList<String>();
+        command.add(chooseExecutable());
+        command.addAll(Arrays.asList(args));
+
+        var exitCode = 0;
+        try {
+            ProcessBuilder builder = new ProcessBuilder(command)
+                    .directory(projectDir.toFile()).inheritIO();
+            exitCode = builder.start().waitFor();
+        } catch (IOException e) {
+            if (e.getCause() != null && e.getCause().getMessage()
+                    .contains("No such file or directory")) {
+                LOGGER.error(
+                        """
+                                No maven executable found. You can install the Maven Wrapper by
+                                running the following command in your project directory:
+                                `mvn wrapper:wrapper` where `mvn` is the path to your Maven executable.
+                                Alternatively, you can add the Maven executable to your PATH environment variable.
+                                """);
+            }
+            throw new RunnerException("Maven not found", e);
+        } catch (Exception e) {
+            throw new RunnerException("Maven command execution failed", e);
+        }
+        if (exitCode != 0) {
+            throw new RunnerException(
+                    "Maven command execution failed with exit code" + exitCode);
+        }
+    }
+}
