@@ -37,13 +37,13 @@ public class EndpointGeneratorTaskFactoryImpl
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ParserProcessor.class);
 
-    private static FrontendTools buildTools(FlowOptions options) {
+    private static FrontendTools buildTools(Options options) {
         var settings = new FrontendToolsSettings(
                 options.getNpmFolder().getAbsolutePath(),
                 () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
         settings.setNodeDownloadRoot(options.getNodeDownloadRoot());
         settings.setForceAlternativeNode(options.isRequireHomeNodeExec());
-        settings.setUseGlobalPnpm(options.shouldUseGlobalPnpm());
+        settings.setUseGlobalPnpm(options.isUseGlobalPnpm());
         settings.setAutoUpdate(options.isNodeAutoUpdate());
         settings.setNodeVersion(options.getNodeVersion());
 
@@ -52,15 +52,13 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        var _options = new FlowOptions(options);
-
-        if (!_options.isDevBundleBuild() && !_options.isFrontendHotdeploy()
-                && !_options.isProductionMode()) {
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateEndpoint();
         }
 
-        var nodeExecutable = buildTools(_options).getNodeExecutable();
+        var nodeExecutable = buildTools(options).getNodeExecutable();
 
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
@@ -69,10 +67,8 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
-        var _options = new FlowOptions(options);
-
-        if (!_options.isDevBundleBuild() && !_options.isFrontendHotdeploy()
-                && !_options.isProductionMode()) {
+        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+                && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateOpenAPI();
         }
