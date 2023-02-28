@@ -1,22 +1,24 @@
 package dev.hilla.internal;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
+import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import dev.hilla.engine.EngineConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
-import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
-import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
+import dev.hilla.engine.EngineConfiguration;
 
 public class TaskTest {
     private Path temporaryDirectory;
@@ -58,18 +60,25 @@ public class TaskTest {
                 .getParent() // java
                 .getParent() // packages
                 .resolve("ts");
-        var generatorPackages = Files
+
+        var shellCmd = FrontendUtils.isWindows() ? Stream.of("cmd.exe", "/c")
+                : Stream.<String> empty();
+
+        var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
+                "install", "--no-save");
+
+        var generatedFiles = Files
                 .list(packagesDirectory).filter(dirName -> dirName.getFileName()
                         .toString().startsWith("generator-"))
-                .map(Path::toString).toList();
+                .map(Path::toString);
 
-        var command = new ArrayList<>(List.of("npm", "--no-update-notifier",
-                "--no-audit", "install", "--no-save"));
-        command.addAll(generatorPackages);
-        var processBuilder = FrontendUtils.createProcessBuilder(command);
-        processBuilder.directory(temporaryDirectory.toFile());
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        var command = Stream.of(shellCmd, npmCmd, generatedFiles)
+                .flatMap(Function.identity()).toList();
+
+        var processBuilder = FrontendUtils.createProcessBuilder(command)
+                .directory(temporaryDirectory.toFile())
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
         var exitCode = processBuilder.start().waitFor();
         if (exitCode != 0) {
             throw new FrontendUtils.CommandExecutionException(exitCode);
