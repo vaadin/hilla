@@ -10,11 +10,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.server.frontend.FrontendUtils;
+
 /**
  * Runs a Maven command.
  */
 public class MavenRunner implements CommandRunner {
-
+    private static final boolean IS_WINDOWS = FrontendUtils.isWindows();
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MavenRunner.class);
 
@@ -51,9 +53,7 @@ public class MavenRunner implements CommandRunner {
     public static Optional<CommandRunner> forProject(Path projectDir,
             String... args) {
         if (Files.exists(projectDir.resolve("pom.xml"))) {
-            var os = System.getProperty("os.name").toLowerCase();
-            var windowsOS = os.contains("windows");
-            return Optional.of(new MavenRunner(projectDir, windowsOS, args));
+            return Optional.of(new MavenRunner(projectDir, IS_WINDOWS, args));
         }
 
         return Optional.empty();
@@ -97,7 +97,7 @@ public class MavenRunner implements CommandRunner {
         var exitCode = 0;
         try {
             LOGGER.debug("Running command: {}", command);
-            ProcessBuilder builder = new ProcessBuilder(command)
+            var builder = new ProcessBuilder(command)
                     .directory(projectDir.toFile()).inheritIO();
             exitCode = builder.start().waitFor();
         } catch (IOException e) {

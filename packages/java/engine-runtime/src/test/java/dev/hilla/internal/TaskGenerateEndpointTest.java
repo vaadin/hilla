@@ -1,5 +1,10 @@
 package dev.hilla.internal;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -7,21 +12,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
 public class TaskGenerateEndpointTest extends TaskTest {
 
-    private TaskGenerateEndpoint taskGenerateEndpoint;
     private Path outputDirectory;
+    private TaskGenerateEndpoint taskGenerateEndpoint;
 
     @BeforeEach
     public void setUp() throws IOException, URISyntaxException {
@@ -48,7 +48,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile());
+                outputDirectory.toFile(), "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -82,7 +82,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile());
+                outputDirectory.toFile(), "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());

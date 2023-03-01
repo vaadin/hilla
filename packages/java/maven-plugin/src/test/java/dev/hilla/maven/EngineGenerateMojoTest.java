@@ -46,8 +46,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
                             // Verify GeneratorProcessor arguments
-                            assertEquals(1, context.arguments().size(),
-                                    "expected 1 GeneratorProcessor argument");
+                            assertEquals(2, context.arguments().size(),
+                                    "expected 2 GeneratorProcessor arguments");
 
                             // Verify configuration argument
                             var conf = (EngineConfiguration) context.arguments()
