@@ -17,17 +17,19 @@ package dev.hilla.internal;
 
 import java.io.File;
 
-import dev.hilla.engine.GeneratorException;
-import dev.hilla.engine.GeneratorProcessor;
-
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+
+import dev.hilla.engine.GeneratorException;
+import dev.hilla.engine.GeneratorProcessor;
 
 /**
  * Starts the generation of TS files for endpoints.
  */
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
+
+    private final String nodeCommand;
 
     /**
      * Create a task for generating OpenAPI spec.
@@ -41,10 +43,15 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      *
      * @param outputDirectory
      *            the output directory for generated TypeScript code.
+     *
+     * @param nodeCommand
+     *            a command to run NodeJS, either absolute path to the
+     *            executable or PATH-related command
      */
     TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory) {
+            File outputDirectory, String nodeCommand) {
         super(projectDirectory, buildDirectoryName, outputDirectory);
+        this.nodeCommand = nodeCommand;
     }
 
     /**
@@ -56,7 +63,8 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         try {
             var engineConfiguration = getEngineConfiguration();
-            var processor = new GeneratorProcessor(engineConfiguration);
+            var processor = new GeneratorProcessor(engineConfiguration,
+                    nodeCommand);
             processor.process();
         } catch (GeneratorException e) {
             throw new ExecutionFailedException(

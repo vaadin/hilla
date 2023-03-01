@@ -15,15 +15,18 @@
  */
 package dev.hilla.internal;
 
-import dev.hilla.engine.ParserProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
+import com.vaadin.flow.server.frontend.FrontendTools;
+import com.vaadin.flow.server.frontend.FrontendToolsSettings;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
+
+import dev.hilla.engine.ParserProcessor;
 
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
@@ -31,26 +34,41 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
  */
 public class EndpointGeneratorTaskFactoryImpl
         implements EndpointGeneratorTaskFactory {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(ParserProcessor.class);
+
+    private static FrontendTools buildTools(Options options) {
+        var settings = new FrontendToolsSettings(
+                options.getNpmFolder().getAbsolutePath(),
+                () -> FrontendUtils.getVaadinHomeDirectory().getAbsolutePath());
+        settings.setNodeDownloadRoot(options.getNodeDownloadRoot());
+        settings.setForceAlternativeNode(options.isRequireHomeNodeExec());
+        settings.setUseGlobalPnpm(options.isUseGlobalPnpm());
+        settings.setAutoUpdate(options.isNodeAutoUpdate());
+        settings.setNodeVersion(options.getNodeVersion());
+
+        return new FrontendTools(settings);
+    }
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
         if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
-                && !isProductionMode(options)) {
+                && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateEndpoint();
         }
 
+        var nodeExecutable = buildTools(options).getNodeExecutable();
+
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder());
+                options.getFrontendGeneratedFolder(), nodeExecutable);
     }
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
         if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
-                && !isProductionMode(options)) {
+                && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateOpenAPI();
         }
@@ -64,27 +82,16 @@ public class EndpointGeneratorTaskFactoryImpl
     private static class SkipTaskGenerateEndpoint
             implements TaskGenerateEndpoint {
         @Override
-        public void execute() throws ExecutionFailedException {
-            logger.debug("Skipping generating TypeScript endpoints");
+        public void execute() {
+            LOGGER.debug("Skipping generating TypeScript endpoints");
         }
     }
 
     private static class SkipTaskGenerateOpenAPI
             implements TaskGenerateOpenAPI {
         @Override
-        public void execute() throws ExecutionFailedException {
-            logger.debug("Skipping generating OpenAPI spec");
-        }
-    }
-
-    // FIXME: remove after https://github.com/vaadin/flow/issues/16005 is done
-    private boolean isProductionMode(Options options) {
-        try {
-            var field = Options.class.getDeclaredField("productionMode");
-            field.setAccessible(true);
-            return (Boolean) field.get(options);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            return false;
+        public void execute() {
+            LOGGER.debug("Skipping generating OpenAPI spec");
         }
     }
 }
