@@ -11,13 +11,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 /**
- * A converter for relative paths of
- * {@link dev.hilla.engine.EngineConfiguration}. It solves an issue of testing
- * absolute paths on different OSes.
+ * A converter for relative paths of dev.hilla.engine.EngineConfiguration. It
+ * solves an issue of testing absolute paths on different OSes.
  * <p>
  * The class is detached (has no dependency to the real
- * {@link dev.hilla.engine.EngineConfiguration} class) to avoid circular
- * dependencies with the `engine-core` package.
+ * dev.hilla.engine.EngineConfiguration class) to avoid circular dependencies
+ * with the `engine-core` package.
  */
 public final class TestEngineConfigurationPathResolver {
     private static final String BASE_FIELD_NAME = "baseDir";
