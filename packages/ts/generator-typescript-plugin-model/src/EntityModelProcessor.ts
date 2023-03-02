@@ -6,7 +6,6 @@ import {
   isComposedSchema,
   isEmptyObject,
   isEnumSchema,
-  isNullableSchema,
   isObjectSchema,
   isReferenceSchema,
   ObjectSchema,
@@ -147,9 +146,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
 
     return Object.entries(properties).map(([name, schema]) => {
       const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
-      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies], (_) =>
-        isNullableSchema(schema),
-      ).process();
+      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies]).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
