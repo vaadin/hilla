@@ -7,13 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
 
-public final class OpenAPIPrinter {
+public final class JsonPrinter {
     private final ObjectMapper mapper = Json.mapper();
     private final Pretty pretty;
 
-    public OpenAPIPrinter() {
+    public JsonPrinter() {
         // Putting the `pretty` initialization here allows preserving correct
         // class initialization sequence.
         pretty = new Pretty();
@@ -23,7 +22,7 @@ public final class OpenAPIPrinter {
         return pretty;
     }
 
-    public String writeAsString(OpenAPI value) throws JsonProcessingException {
+    public String writeAsString(Object value) throws JsonProcessingException {
         return mapper.writeValueAsString(value);
     }
 
@@ -38,7 +37,7 @@ public final class OpenAPIPrinter {
             writer = mapper.writer(printer);
         }
 
-        public String writeAsString(OpenAPI value)
+        public String writeAsString(Object value)
                 throws JsonProcessingException {
             return writer.writeValueAsString(value);
         }
