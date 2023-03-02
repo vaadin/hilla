@@ -15,20 +15,17 @@
  */
 package dev.hilla.internal;
 
-import java.util.List;
-
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.junit.jupiter.api.Test;
-
-import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
@@ -40,7 +37,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     private TaskGenerateOpenAPI taskGenerateOpenApi;
 
     @Test
-    public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
+    public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
@@ -49,22 +46,16 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
         taskGenerateOpenApi.execute();
 
-        OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
-        Info info = generatedOpenAPI.getInfo();
-        assertEquals("Hilla Application", info.getTitle(),
-                "Generated OpenAPI should have default application title");
+        var generatedOpenAPI = getGeneratedOpenAPI();
 
-        assertEquals("1.0.0", info.getVersion(),
-                "Generated OpenAPI should have default application API version");
-
-        List<Server> servers = generatedOpenAPI.getServers();
-        assertEquals(1, servers.size(),
-                "Generated OpenAPI should a default server");
-        assertEquals("http://localhost:8080/connect", servers.get(0).getUrl(),
-                "Generated OpenAPI should have default url server");
-
-        assertEquals("Hilla Backend", servers.get(0).getDescription(),
-                "Generated OpenAPI should have default server description");
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/WithoutValueEqual/bar"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/EndpointNoValue/bar")));
+        assertThat(generatedOpenAPI.getPaths(),
+                hasKey("/WithoutValueEqual/foo"));
+        assertThat(generatedOpenAPI.getPaths(),
+                not(hasKey("/EndpointNoValue/foo")));
     }
 
     @Test
@@ -77,7 +68,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
         taskGenerateOpenApi.execute();
 
-        OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
+        var generatedOpenAPI = getGeneratedOpenAPI();
 
         assertThat(generatedOpenAPI.getPaths(),
                 hasKey("/CustomEndpointName/bar"));
@@ -90,7 +81,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     }
 
     @Test
-    public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
+    public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
@@ -99,20 +90,26 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
         taskGenerateOpenApi.execute();
 
-        OpenAPI generatedOpenAPI = getGeneratedOpenAPI();
+        var generatedOpenAPI = getGeneratedOpenAPI();
+        var info = generatedOpenAPI.getInfo();
+        assertEquals("Hilla Application", info.getTitle(),
+                "Generated OpenAPI should have default application title");
 
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/WithoutValueEqual/bar"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/EndpointNoValue/bar")));
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/WithoutValueEqual/foo"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/EndpointNoValue/foo")));
+        assertEquals("1.0.0", info.getVersion(),
+                "Generated OpenAPI should have default application API version");
+
+        var servers = generatedOpenAPI.getServers();
+        assertEquals(1, servers.size(),
+                "Generated OpenAPI should a default server");
+        assertEquals("http://localhost:8080/connect", servers.get(0).getUrl(),
+                "Generated OpenAPI should have default url server");
+
+        assertEquals("Hilla Backend", servers.get(0).getDescription(),
+                "Generated OpenAPI should have default server description");
     }
 
     private OpenAPI getGeneratedOpenAPI() {
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        return parser.read(getOpenAPIFile().toFile().getAbsolutePath());
+        return new OpenAPIV3Parser()
+                .read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }

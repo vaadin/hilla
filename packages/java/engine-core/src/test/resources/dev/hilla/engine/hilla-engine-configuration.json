@@ -1,5 +1,7 @@
 {
   "baseDir": "base",
+  "buildDir": "build",
+  "classesDir": null,
   "classPath": ["build/classes", "dependency"],
   "generator": {
     "plugins": {
@@ -37,7 +39,5 @@
     },
     "packages": null
   },
-  "buildDir": "build",
-  "classesDir": null,
   "outputDir": "src/frontend/typescript/generated"
 }
