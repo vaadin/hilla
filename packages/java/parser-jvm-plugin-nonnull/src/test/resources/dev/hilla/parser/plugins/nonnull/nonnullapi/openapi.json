@@ -263,6 +263,46 @@
           }
         }
       }
+    },
+    "/NonNullApiEndpoint/subPackageMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_subPackageMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -280,6 +320,14 @@
           "nullableSignatureField": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency": {
+        "type": "object",
+        "properties": {
+          "defaultField": {
+            "type": "string"
           }
         }
       }

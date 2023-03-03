@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency;
+
 @Endpoint
 public class NonNullApiEndpoint {
     public Dependency defaultMethod(String param) {
@@ -40,5 +42,9 @@ public class NonNullApiEndpoint {
 
     public Optional<String> optionalMethod(Optional<String> opt) {
         return opt;
+    }
+
+    public SubPackageDependency subPackageMethod(SubPackageDependency entity) {
+        return entity;
     }
 }
