@@ -31,7 +31,7 @@ class PackageInfoReflectionModel extends PackageInfoModel {
         var classLoader = getClass().getClassLoader();
         return getAllAncestorPackageNames(origin.getName())
                 .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
-                .map(PackageInfoModel::of).toList();
+                .map(PackageInfoModel::of).collect(Collectors::toList);
     }
 
     /**
