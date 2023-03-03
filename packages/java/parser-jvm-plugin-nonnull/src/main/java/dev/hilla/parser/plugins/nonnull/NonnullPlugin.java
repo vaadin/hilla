@@ -115,43 +115,10 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 .map(ClassInfoModel::getPackage);
     }
 
-    /**
-     * Returns a stream of all ancestor packages, starting with the immediate
-     * parent package.
-     *
-     * @param nodePath
-     *            the node path
-     * @return the stream of all ancestor packages
-     */
-    private Stream<PackageInfoModel> findAscendantPackages(
-            NodePath<?> nodePath) {
-        var pkg = (Package) findClosestPackage(nodePath).orElseThrow().get();
-        // Packages are searched by name using the class loader from the node
-        // source. Not all packages exist, so we need to filter them out.
-        var classLoader = nodePath.getNode().getSource().getClass()
-                .getClassLoader();
-        return getAllAncestorPackageNames(pkg.getName())
-                .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
-                .map(PackageInfoModel::of);
-    }
-
-    /**
-     * Returns a stream of all ancestor package names, starting with the
-     * immediate parent package.
-     *
-     * @param packageName
-     *            the package name
-     * @return the stream of all ancestor package names
-     */
-    private static Stream<String> getAllAncestorPackageNames(
-            String packageName) {
-        return Stream.iterate(packageName, p -> p.contains("."),
-                p -> p.substring(0, p.lastIndexOf('.')));
-    }
-
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
-        return findAscendantPackages(nodePath)
+        return findClosestPackage(nodePath).map(PackageInfoModel::getAncestors)
+                .map(Collection::stream).orElseGet(Stream::empty)
                 .map(PackageInfoModel::getAnnotations)
                 .flatMap(Collection::stream);
     }
