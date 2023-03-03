@@ -53,7 +53,8 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.153</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.version>2.1.13</swagger.version>
+    <swagger.core.version>2.2.8</swagger.core.version>
+    <swagger.parser.version>2.1.12</swagger.parser.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
     <jackson.version>2.14.1</jackson.version>
@@ -153,12 +154,12 @@
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-core</artifactId>
-        <version>${swagger.version}</version>
+        <version>${swagger.core.version}</version>
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-models</artifactId>
-        <version>${swagger.version}</version>
+        <version>${swagger.core.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -257,7 +258,7 @@
       <dependency>
         <groupId>io.swagger.parser.v3</groupId>
         <artifactId>swagger-parser-v3</artifactId>
-        <version>${swagger.version}</version>
+        <version>${swagger.parser.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
