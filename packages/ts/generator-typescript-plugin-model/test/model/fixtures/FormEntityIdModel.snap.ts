@@ -3,7 +3,7 @@ import type FormEntityId_1 from "./FormEntityId";
 class FormEntityIdModel<T extends FormEntityId_1 = FormEntityId_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormEntityId_1;
     get Id(): NumberModel_1 {
-        return this[_getPropertyModel_1]("Id", NumberModel_1, [true, new NotNull_1()]) as NumberModel_1;
+        return this[_getPropertyModel_1]("Id", NumberModel_1, [false, new NotNull_1()]) as NumberModel_1;
     }
 }
 export default FormEntityIdModel;

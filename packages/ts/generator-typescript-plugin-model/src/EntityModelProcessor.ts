@@ -139,19 +139,14 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     return this.#processModelClass(entitySchema, this[$entity].id, parent);
   }
 
-  #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
+  #processClassElements({ properties }: ObjectSchema): readonly ClassElement[] {
     if (!properties) {
       return [];
     }
 
-    const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
       const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
-      const args = new ModelSchemaExpressionProcessor(
-        schema,
-        this[$dependencies],
-        (_) => !requiredSet.has(name),
-      ).process();
+      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies]).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,
