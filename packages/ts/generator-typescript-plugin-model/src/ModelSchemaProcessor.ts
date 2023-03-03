@@ -220,12 +220,10 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 }
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #checkOptional: OptionalChecker;
   readonly #parse: typeof AnnotationParser.prototype.parse;
 
-  constructor(schema: Schema, dependencies: DependencyManager, checkOptional: OptionalChecker = isNullableSchema) {
+  constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
-    this.#checkOptional = checkOptional;
     const parser = new AnnotationParser((name) => importBuiltInFormModel(name, dependencies));
     this.#parse = parser.parse.bind(parser);
   }
@@ -243,7 +241,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
       result = [...result, ...this.#getValidatorsFromValidationConstraints(schema)];
     }
 
-    return [this.#checkOptional(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
+    return [isNullableSchema(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
   }
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {
