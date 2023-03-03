@@ -37,8 +37,8 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
 
     /**
      * Returns a list of all ancestor packages, starting with the immediate
-     * parent package. Note that not all packages are available in the class
-     * loader, so the list can have "holes".
+     * parent package. Note that not all packages are available in the
+     * hierarchy, so the list can have "holes".
      *
      * @return the list of all valid ancestor packages
      */
