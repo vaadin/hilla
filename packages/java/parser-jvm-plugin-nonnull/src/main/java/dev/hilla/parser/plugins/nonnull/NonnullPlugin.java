@@ -117,7 +117,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
 
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
-        return findClosestPackage(nodePath).stream()
+        return findClosestPackage(nodePath).map(PackageInfoModel::getAncestors)
+                .map(Collection::stream).orElseGet(Stream::empty)
                 .map(PackageInfoModel::getAnnotations)
                 .flatMap(Collection::stream);
     }
