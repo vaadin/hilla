@@ -105,7 +105,7 @@ public class PackageInfoModelTests {
         var model = PackageInfoModel.of(ctx.getReflectionOrigin());
         var ancestors = model.getAncestors();
         var ancestorNames = ancestors.stream().map(PackageInfoModel::getName)
-                .sorted().toList();
+                .sorted().collect(Collectors.toList());
 
         // `getAncestors()` returns only valid packages, so the result of this
         // test could vary if some class is added to, or removed from, any
