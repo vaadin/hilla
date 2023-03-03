@@ -99,6 +99,21 @@ public class PackageInfoModelTests {
         }
     }
 
+    @DisplayName("It should return all valid ancestors")
+    @Test
+    public void should_ReturnAllValidAncestors() {
+        var model = PackageInfoModel.of(ctx.getReflectionOrigin());
+        var ancestors = model.getAncestors();
+        var ancestorNames = ancestors.stream().map(PackageInfoModel::getName)
+                .sorted().collect(Collectors.toList());
+
+        // `getAncestors()` returns only valid packages, so the result of this
+        // test could vary if some class is added to, or removed from, any
+        // ancestor package
+        assertEquals(List.of("dev.hilla.parser.models",
+                "dev.hilla.parser.models.pack"), ancestorNames);
+    }
+
     static class Context {
         private static final Package reflectionOrigin = PackageInfoModelSample.class
                 .getPackage();
