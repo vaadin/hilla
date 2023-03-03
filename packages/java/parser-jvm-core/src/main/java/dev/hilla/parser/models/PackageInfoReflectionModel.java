@@ -2,6 +2,7 @@ package dev.hilla.parser.models;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class PackageInfoReflectionModel extends PackageInfoModel {
@@ -31,7 +32,7 @@ class PackageInfoReflectionModel extends PackageInfoModel {
         var classLoader = getClass().getClassLoader();
         return getAllAncestorPackageNames(origin.getName())
                 .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
-                .map(PackageInfoModel::of).collect(Collectors::toList);
+                .map(PackageInfoModel::of).collect(Collectors.toList());
     }
 
     /**
