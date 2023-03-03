@@ -1,6 +1,6 @@
 <div align="center">
 <img src="hilla-logo.svg" style="width: 6em;">
-<h1>Hilla</h1>
+<h1>Hilla!!!</h1>
 
 The modern web framework
 for Java
