@@ -25,7 +25,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": ["name"],
                 "type": "object",
                 "properties": {
                   "name": {
@@ -316,7 +315,6 @@
         }
       },
       "com.example.application.endpoints.TsFormEndpoint.FormAnnotations": {
-        "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
         "type": "object",
         "properties": {
           "list": {
@@ -424,7 +422,6 @@
         }
       },
       "com.example.application.endpoints.TsFormEndpoint.FormValidationConstraints": {
-        "required": ["decimalMax", "decimalMin", "negative", "negativeOrZero", "positive", "positiveOrZero"],
         "type": "object",
         "properties": {
           "list": {
@@ -654,7 +651,6 @@
         }
       },
       "com.example.application.endpoints.TsFormEndpoint.FormDataPrimitives": {
-        "required": ["booleanProp", "doubleProp", "floatProp", "integerProp", "longProp"],
         "type": "object",
         "properties": {
           "stringProp": {
@@ -810,7 +806,6 @@
         }
       },
       "com.example.application.endpoints.TsFormEndpoint.FormNonnullTypes": {
-        "required": ["nonNullableList", "nonNullableMatrix", "nonNullableString"],
         "type": "object",
         "properties": {
           "nonNullableString": {
