@@ -2,7 +2,7 @@
 export function getCookie(name: string): string | undefined {
   const prefix = `${name}=`;
   return document.cookie
-    .split(/;[ ]?/)
+    .split(/;[ ]?/u)
     .filter((cookie) => cookie.startsWith(prefix))
     .map((cookie) => cookie.slice(prefix.length))[0];
 }
@@ -28,13 +28,11 @@ export function cookieExists(name: string): boolean {
   return getCookie(name) !== undefined;
 }
 
+const trailingSlashPattern = /.+\/$/u;
 /**
  * Remove trailing '/' if the path is not exactly '/'.
  * @internal
  */
-export function removeTrailingSlashFromPath(path: string) {
-  if (path.length > 1 && path.substr(-1, 1) === '/') {
-    path = path.substr(0, path.length - 1);
-  }
-  return path;
+export function removeTrailingSlashFromPath(path: string): string {
+  return path.replace(trailingSlashPattern, '');
 }

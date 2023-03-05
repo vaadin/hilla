@@ -1,5 +1,5 @@
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
@@ -15,7 +15,7 @@ export default class EndpointMethodResponseProcessor {
   readonly #owner: Plugin;
   readonly #response: EndpointMethodResponse;
 
-  public constructor(
+  constructor(
     code: string,
     response: EndpointMethodResponses[string],
     dependencyManager: DependencyManager,
@@ -27,7 +27,7 @@ export default class EndpointMethodResponseProcessor {
     this.#response = owner.resolver.resolve(response);
   }
 
-  public process(): readonly TypeNode[] {
+  process(): readonly TypeNode[] {
     switch (this.#code) {
       case '200':
         return this.#processOk();
@@ -39,7 +39,6 @@ export default class EndpointMethodResponseProcessor {
 
   #processOk(): readonly TypeNode[] {
     const rawSchema = this.#response.content?.[defaultMediaType]?.schema;
-
     return rawSchema ? new TypeSchemaProcessor(rawSchema, this.#dependencies).process() : [];
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import { isAbsolute, resolve } from 'path';
 import getStdin from 'get-stdin';
 import type GeneratorIO from './GeneratorIO.js';

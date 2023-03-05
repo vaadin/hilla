@@ -1,7 +1,5 @@
-import Pino from 'pino';
-import PinoPretty from 'pino-pretty';
-
-export type Logger = Pino.Logger;
+import { pino, type Logger } from 'pino';
+import { PinoPretty } from 'pino-pretty';
 
 export type LoggerOptions = Readonly<{
   name?: string;
@@ -9,15 +7,15 @@ export type LoggerOptions = Readonly<{
 }>;
 
 export default class LoggerFactory {
-  readonly #children = new Map<string, Pino.Logger>();
-  readonly #logger: Pino.Logger;
+  readonly #children = new Map<string, Logger>();
+  readonly #logger: Logger;
 
   constructor({ name, verbose }: LoggerOptions) {
     const pretty = PinoPretty({
       ignore: 'time',
     });
 
-    this.#logger = Pino(
+    this.#logger = pino(
       {
         base: undefined,
         level: verbose ? 'debug' : 'info',
@@ -27,11 +25,11 @@ export default class LoggerFactory {
     );
   }
 
-  get global(): Pino.Logger {
+  get global(): Logger {
     return this.#logger;
   }
 
-  for(caller: string): Pino.Logger {
+  for(caller: string): Logger {
     if (this.#children.has(caller)) {
       return this.#children.get(caller)!;
     }

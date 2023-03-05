@@ -3,19 +3,18 @@ import createFullyUniqueIdentifier from '@hilla/generator-typescript-utils/creat
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import type { SourceFile } from 'typescript';
-import ts from 'typescript';
+import ts, { type SourceFile } from 'typescript';
 
 export default class ClientProcessor {
   readonly #filePath: string;
   readonly #owner: Plugin;
 
-  public constructor(fileName: string, owner: Plugin) {
+  constructor(fileName: string, owner: Plugin) {
     this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
     this.#owner = owner;
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     this.#owner.logger.debug(`Generating ${this.#filePath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager());

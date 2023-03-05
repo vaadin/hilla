@@ -2,14 +2,13 @@ import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
-  NonEmptyObjectSchema,
-  Schema,
+  type NonEmptyObjectSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
-import ts from 'typescript';
+import ts, { type ObjectLiteralExpression, type ParameterDeclaration } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { defaultMediaType } from './utils.js';
 
@@ -29,7 +28,7 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #requestBody?: EndpointMethodRequestBody;
   readonly #initTypeIdentifier: ts.Identifier;
 
-  public constructor(
+  constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
     owner: Plugin,
@@ -41,12 +40,13 @@ export default class EndpointMethodRequestBodyProcessor {
     this.#initTypeIdentifier = initTypeIdentifier;
   }
 
-  public process(): EndpointMethodRequestBodyProcessingResult {
+  process(): EndpointMethodRequestBodyProcessingResult {
     if (!this.#requestBody) {
       return {
+        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
+        packedParameters: ts.factory.createObjectLiteralExpression(),
         parameters: [
           ts.factory.createParameterDeclaration(
-            undefined,
             undefined,
             undefined,
             EndpointMethodRequestBodyProcessor.#defaultInitParamName,
@@ -54,12 +54,10 @@ export default class EndpointMethodRequestBodyProcessor {
             ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
           ),
         ],
-        packedParameters: ts.factory.createObjectLiteralExpression(),
-        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
       };
     }
 
-    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
+    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType].schema);
     const parameterNames = parameterData.map(([name]) => name);
     let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
 
@@ -68,12 +66,15 @@ export default class EndpointMethodRequestBodyProcessor {
     }
 
     return {
+      initParam: ts.factory.createIdentifier(initParamName),
+      packedParameters: ts.factory.createObjectLiteralExpression(
+        parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
+      ),
       parameters: [
         ...parameterData.map(([name, schema]) => {
           const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
           return ts.factory.createParameterDeclaration(
-            undefined,
             undefined,
             undefined,
             name,
@@ -84,16 +85,11 @@ export default class EndpointMethodRequestBodyProcessor {
         ts.factory.createParameterDeclaration(
           undefined,
           undefined,
-          undefined,
           initParamName,
           ts.factory.createToken(ts.SyntaxKind.QuestionToken),
           ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
         ),
       ],
-      packedParameters: ts.factory.createObjectLiteralExpression(
-        parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
-      ),
-      initParam: ts.factory.createIdentifier(initParamName),
     };
   }
 

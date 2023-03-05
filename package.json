@@ -34,16 +34,19 @@
     "@web/test-runner-chrome": "^0.10.2",
     "@web/test-runner-puppeteer": "^0.10.5",
     "concurrently": "^6.2.1",
-    "esbuild": "^0.15.10",
-    "eslint": "^7.32.0",
-    "eslint-config-vaadin": "^0.4.0",
-    "eslint-plugin-chai-friendly": "^0.7.2",
+    "eslint": "^8.35.0",
+    "eslint-config-vaadin": "file:../eslint-config-vaadin/eslint-config-vaadin-1.0.0-alpha.11.tgz",
     "lerna": "^4.0.0",
     "lint-staged": "^13.0.3",
     "meow": "^10.1.5",
     "micromatch": "^4.0.4",
     "prettier": "^2.7.1",
     "simple-git-hooks": "^2.6.1",
+    "tslib": "^2.5.0",
+    "tsx": "^3.12.3",
     "typescript": "^4.9.4"
+  },
+  "overrides": {
+    "tslib": "$tslib"
   }
 }

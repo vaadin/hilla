@@ -1,12 +1,9 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "rootDir": "src",
-    "outDir": ".",
+    "target": "esnext",
     "skipLibCheck": true
   },
-  "include": ["src"],
-  "exclude": ["!src/**/*"]
+  "include": ["src", "test"],
+  "exclude": ["!{src,test}/**/*"]
 }

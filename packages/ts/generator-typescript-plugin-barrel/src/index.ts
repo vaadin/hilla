@@ -6,11 +6,12 @@ import type { SourceFile } from 'typescript';
 import BarrelProcessor from './BarrelProcessor.js';
 
 export default class BarrelPlugin extends Plugin {
-  public override get path(): string {
+  // eslint-disable-next-line class-methods-use-this
+  override get path(): string {
     return import.meta.url;
   }
 
-  public override async execute({ pluginStorage, sources }: SharedStorage): Promise<void> {
+  override async execute({ pluginStorage, sources }: SharedStorage): Promise<void> {
     const tags = pluginStorage.get(BackbonePlugin.BACKBONE_PLUGIN_FILE_TAGS) as WeakMap<SourceFile, string> | undefined;
 
     if (!tags) {

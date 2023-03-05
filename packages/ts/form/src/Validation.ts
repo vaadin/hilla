@@ -1,45 +1,39 @@
 // TODO: Fix dependency cycle
 
-// eslint-disable-next-line import/no-cycle
-import { AbstractModel, NumberModel, getBinderNode } from './Models.js';
-
 import type { Binder } from './Binder.js';
 import type { BinderNode } from './BinderNode.js';
+import { getBinderNode } from './BinderNode.js';
+// eslint-disable-next-line import/no-cycle
+import { type AbstractModel, NumberModel } from './Models.js';
 // eslint-disable-next-line import/no-cycle
 import { Required } from './Validators.js';
 
 export interface ValueError<T> {
-  property: string | AbstractModel<any>;
   message: string;
-  value: T;
+  property: AbstractModel<any> | string;
   validator: Validator<T>;
+  value: T;
 }
 
 export interface ValidationResult {
-  property: string | AbstractModel<any>;
   message?: string;
+  property: AbstractModel<any> | string;
 }
 
 export class ValidationError extends Error {
-  public constructor(public errors: ReadonlyArray<ValueError<any>>) {
+  readonly errors: ReadonlyArray<ValueError<unknown>>;
+
+  constructor(errors: ReadonlyArray<ValueError<unknown>>) {
     super(
       [
         'There are validation errors in the form.',
         ...errors.map((e) => `${e.property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`),
       ].join('\n - '),
     );
+    this.errors = errors;
     this.name = this.constructor.name;
   }
 }
-
-export type ValidationCallback<T> = (
-  value: T,
-  binder: Binder<any, AbstractModel<T>>,
-) =>
-  | boolean
-  | ValidationResult
-  | ReadonlyArray<ValidationResult>
-  | Promise<boolean | ValidationResult | ReadonlyArray<ValidationResult>>;
 
 export type InterpolateMessageCallback<T> = (
   message: string,
@@ -48,19 +42,29 @@ export type InterpolateMessageCallback<T> = (
 ) => string;
 
 export interface Validator<T> {
-  validate: ValidationCallback<T>;
-  message: string;
   impliesRequired?: boolean;
+  message: string;
+  validate(
+    value: T,
+    binder: Binder<any, AbstractModel<T>>,
+  ):
+    | Promise<ValidationResult | boolean | readonly ValidationResult[]>
+    | ValidationResult
+    | boolean
+    | readonly ValidationResult[];
 }
 
-export class ServerValidator implements Validator<any> {
-  public message: string;
+export class ServerValidator implements Validator<boolean> {
+  readonly message: string;
 
-  public constructor(message: string) {
+  constructor(message: string) {
     this.message = message;
   }
 
-  public validate = () => false;
+  // eslint-disable-next-line class-methods-use-this
+  validate(): boolean {
+    return false;
+  }
 }
 
 // The `property` field of `ValidationResult`s is a path relative to the parent.

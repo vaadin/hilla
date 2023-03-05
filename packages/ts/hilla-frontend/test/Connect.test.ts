@@ -1,10 +1,11 @@
 /* eslint-disable no-new */
-/* tslint:disable: no-unused-expression */
 import { assert, expect } from '@open-wc/testing';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { atmosphere } from 'a-atmosphere-javascript';
-import fetchMock from 'fetch-mock/esm/client.js';
+import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
+import { deleteCookie, setCookie } from '../src/CookieUtils.js';
+import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   ConnectClient,
   EndpointError,
@@ -14,8 +15,6 @@ import {
   ForbiddenResponseError,
   UnauthorizedResponseError,
 } from '../src/index.js';
-import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
-import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
@@ -31,7 +30,7 @@ describe('ConnectClient', () => {
   let myMiddleware: (ctx: any, next?: any) => any;
 
   beforeEach(() => {
-    myMiddleware = (ctx: any, next?: any) => next(ctx);
+    myMiddleware = (ctx: any, next?: (ctx: any) => void) => next?.(ctx);
 
     const connectionStateStore = new ConnectionStateStore(ConnectionState.CONNECTED);
     (window as any).Vaadin = { connectionState: connectionStateStore };
@@ -147,7 +146,7 @@ describe('ConnectClient', () => {
     it('should require 2 arguments', async () => {
       let thrownError;
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await client.call();
       } catch (err) {
         thrownError = err;
@@ -159,7 +158,7 @@ describe('ConnectClient', () => {
 
       thrownError = undefined;
       try {
-        // @ts-ignore
+        // @ts-expect-error
         await client.call('FooEndpoint');
       } catch (err) {
         thrownError = err;
@@ -214,7 +213,7 @@ describe('ConnectClient', () => {
     });
 
     it('should be able to abort a call', async () => {
-      const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+      const getDelayedOk = async () => new Promise((res) => setTimeout(() => res(200), 500));
       fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
 
       const controller = new AbortController();
@@ -490,9 +489,7 @@ describe('ConnectClient', () => {
 
     describe('middleware invocation', () => {
       it('should not invoke middleware before call', async () => {
-        const spyMiddleware = sinon.spy(async (context: any, next?: any) => {
-          return next(context);
-        });
+        const spyMiddleware = sinon.spy(async (context: any, next?: any) => next(context));
         client.middlewares = [spyMiddleware];
 
         expect(spyMiddleware).to.not.be.called;

@@ -1,7 +1,7 @@
 import {
   isNonComposedRegularSchema,
-  NonComposedRegularSchema,
-  Schema,
+  type NonComposedRegularSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import { template, transform } from '@hilla/generator-typescript-utils/ast.js';
 import ts, {
@@ -12,9 +12,9 @@ import ts, {
   type VariableStatement,
 } from 'typescript';
 
-export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
+export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': readonly string[] }>;
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
-  Readonly<{ 'x-validation-constraints': ReadonlyArray<Annotation> }>;
+  Readonly<{ 'x-validation-constraints': readonly Annotation[] }>;
 
 export function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
   return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
@@ -25,8 +25,8 @@ export function isValidationConstrainedSchema(schema: Schema): schema is Validat
 }
 
 export interface Annotation {
-  simpleName: string;
   attributes?: Record<string, unknown>;
+  simpleName: string;
 }
 
 export type AnnotationImporter = (name: string) => Identifier;
@@ -37,6 +37,19 @@ function selector<T extends Expression>([statement]: readonly Statement[]): T {
 
 const variableStatementVar = 'const a';
 
+function parseAnnotationAttributes(attributes: Record<string, unknown>): Expression {
+  const names = Object.keys(attributes);
+  const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
+
+  return template(`${variableStatementVar}=${tpl}`, selector, [
+    transform((node) =>
+      ts.isPropertyAssignment(node) && ts.isStringLiteral(node.name)
+        ? ts.factory.createPropertyAssignment(node.name.text, node.initializer)
+        : node,
+    ),
+  ]);
+}
+
 export class AnnotationParser {
   readonly #importer: AnnotationImporter;
 
@@ -44,7 +57,7 @@ export class AnnotationParser {
     this.#importer = importer;
   }
 
-  parse(annotation: string | Annotation) {
+  parse(annotation: Annotation | string): NewExpression {
     if (typeof annotation === 'string') {
       const nameEndIndex = annotation.indexOf('(');
       const simpleName = nameEndIndex >= 0 ? annotation.slice(0, nameEndIndex) : annotation;
@@ -58,20 +71,7 @@ export class AnnotationParser {
     return ts.factory.createNewExpression(
       this.#importer(annotation.simpleName),
       undefined,
-      annotation.attributes ? [this.#parseAnnotationAttributes(annotation.attributes)] : [],
+      annotation.attributes ? [parseAnnotationAttributes(annotation.attributes)] : [],
     );
-  }
-
-  #parseAnnotationAttributes(attributes: Record<string, unknown>): Expression {
-    const names = Object.keys(attributes);
-    const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
-
-    return template(`${variableStatementVar}=${tpl}`, selector, [
-      transform((node) =>
-        ts.isPropertyAssignment(node) && ts.isStringLiteral(node.name)
-          ? ts.factory.createPropertyAssignment(node.name.text, node.initializer)
-          : node,
-      ),
-    ]);
   }
 }

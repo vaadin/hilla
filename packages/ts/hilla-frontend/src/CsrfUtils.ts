@@ -39,6 +39,7 @@ export function getSpringCsrfInfo(doc: Document): Record<string, string> {
   const headers: Record<string, string> = {};
   if (csrf && csrfHeader) {
     headers._csrf = csrf;
+    // eslint-disable-next-line camelcase
     headers._csrf_header = csrfHeader;
   }
   return headers;
@@ -62,7 +63,7 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   if (csrfInfo._csrf && csrfInfo._csrf_header) {
     headers[csrfInfo._csrf_header] = csrfInfo._csrf;
   } else {
-    headers[VAADIN_CSRF_HEADER] = getCookie(VAADIN_CSRF_COOKIE_NAME) || '';
+    headers[VAADIN_CSRF_HEADER] = getCookie(VAADIN_CSRF_COOKIE_NAME) ?? '';
   }
 
   return headers;

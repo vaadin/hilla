@@ -1,9 +1,38 @@
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import ts from 'typescript';
+import ts, { type NodeArray, type SourceFile } from 'typescript';
 
 const initParameterTypeName = 'EndpointRequestInit';
+
+function checkInitParameterExistence(parameters: NodeArray<ts.ParameterDeclaration>): boolean {
+  const last = parameters[parameters.length - 1];
+  const lastType = last.type as ts.TypeReferenceNode;
+  const lastTypeName = lastType.typeName as ts.Identifier;
+
+  return lastTypeName.text === initParameterTypeName;
+}
+
+function updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
+  const returnStatement = declaration.body!.statements[0] as ts.ReturnStatement;
+  const { arguments: args, expression, typeArguments } = returnStatement.expression! as ts.CallExpression;
+  const call = expression as ts.PropertyAccessExpression;
+
+  return ts.factory.createBlock([
+    ts.factory.createReturnStatement(
+      ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+          call.expression,
+          // `subscribe` instead of `call`
+          ts.factory.createIdentifier('subscribe'),
+        ),
+        typeArguments,
+        // remove the `init` parameter
+        doesInitParameterExist ? args.slice(0, -1) : args,
+      ),
+    ),
+  ]);
+}
 
 export default class PushProcessor {
   readonly #dependencies = new DependencyManager(new PathManager());
@@ -11,7 +40,7 @@ export default class PushProcessor {
   readonly #source: ts.SourceFile;
   readonly #subscriptionId: ts.Identifier;
 
-  constructor(source: ts.SourceFile, methods: readonly string[]) {
+  constructor(source: SourceFile, methods: readonly string[]) {
     this.#methods = methods;
     this.#source = source;
 
@@ -21,7 +50,7 @@ export default class PushProcessor {
     this.#subscriptionId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription');
   }
 
-  public process(): ts.SourceFile {
+  process(): SourceFile {
     const importStatements = this.#dependencies.imports.toCode();
 
     const updatedStatements: readonly ts.Statement[] = [
@@ -45,14 +74,6 @@ export default class PushProcessor {
     return createSourceFile(updatedStatements, this.#source.fileName);
   }
 
-  #doesInitParameterExist(parameters: ts.NodeArray<ts.ParameterDeclaration>): boolean {
-    const last = parameters[parameters.length - 1];
-    const lastType = last.type as ts.TypeReferenceNode;
-    const lastTypeName = lastType.typeName as ts.Identifier;
-
-    return lastTypeName.text === initParameterTypeName;
-  }
-
   /**
    * Replace returned `Promise<Array<T>>` by the `Subscription<T>` type
    * @param declaration
@@ -60,19 +81,16 @@ export default class PushProcessor {
    */
   #replacePromiseType(declaration: ts.FunctionDeclaration) {
     const promiseType = (declaration.type as ts.TypeReferenceNode).typeArguments![0];
-    const promiseArray = (
-      ts.isUnionTypeNode(promiseType) ? (promiseType as ts.UnionTypeNode).types[0] : promiseType
-    ) as ts.TypeReferenceNode;
+    const promiseArray = (ts.isUnionTypeNode(promiseType) ? promiseType.types[0] : promiseType) as ts.TypeReferenceNode;
 
     return ts.factory.createTypeReferenceNode(this.#subscriptionId, promiseArray.typeArguments);
   }
 
   #updateFunction(declaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
     const { parameters } = declaration;
-    const doesInitParameterExist = this.#doesInitParameterExist(parameters);
+    const doesInitParameterExist = checkInitParameterExistence(parameters);
 
     return ts.factory.createFunctionDeclaration(
-      declaration.decorators,
       undefined, // no async
       declaration.asteriskToken,
       declaration.name,
@@ -80,28 +98,7 @@ export default class PushProcessor {
       // Remove the `init` parameter
       doesInitParameterExist ? parameters.slice(0, -1) : parameters,
       this.#replacePromiseType(declaration),
-      this.#updateFunctionBody(declaration, doesInitParameterExist),
+      updateFunctionBody(declaration, doesInitParameterExist),
     );
-  }
-
-  #updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
-    const returnStatement = declaration.body!.statements[0] as ts.ReturnStatement;
-    const { arguments: args, expression, typeArguments } = returnStatement.expression! as ts.CallExpression;
-    const call = expression! as ts.PropertyAccessExpression;
-
-    return ts.factory.createBlock([
-      ts.factory.createReturnStatement(
-        ts.factory.createCallExpression(
-          ts.factory.createPropertyAccessExpression(
-            call.expression,
-            // `subscribe` instead of `call`
-            ts.factory.createIdentifier('subscribe'),
-          ),
-          typeArguments,
-          // remove the `init` parameter
-          doesInitParameterExist ? args.slice(0, -1) : args,
-        ),
-      ),
-    ]);
   }
 }

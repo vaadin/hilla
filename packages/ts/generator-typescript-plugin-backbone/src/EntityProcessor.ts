@@ -1,5 +1,11 @@
+import { dirname } from 'path/posix';
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type { EnumSchema, ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
+import type {
+  EnumSchema,
+  ReferenceSchema,
+  Schema,
+  NonEmptyObjectSchema,
+} from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -10,7 +16,6 @@ import {
   isNullableSchema,
   isObjectSchema,
   isReferenceSchema,
-  NonEmptyObjectSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -19,12 +24,16 @@ import {
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import { dirname } from 'path/posix';
-import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { TypeElement } from 'typescript';
+import ts, {
+  type Identifier,
+  type InterfaceDeclaration,
+  type SourceFile,
+  type Statement,
+  type TypeElement,
+} from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 
-export class EntityProcessor {
+export default class EntityProcessor {
   readonly #component: Schema;
   readonly #dependencies;
   readonly #fullyQualifiedName: string;
@@ -33,7 +42,7 @@ export class EntityProcessor {
   readonly #path: string;
   readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
-  public constructor(name: string, component: Schema, owner: Plugin) {
+  constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
     this.#owner = owner;
     this.#fullyQualifiedName = name;
@@ -50,7 +59,7 @@ export class EntityProcessor {
     return id;
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     this.#owner.logger.debug(`Processing entity: ${this.#name}`);
 
     const declaration = isEnumSchema(this.#component)
@@ -92,9 +101,8 @@ export class EntityProcessor {
   #processEnum({ enum: members }: EnumSchema): Statement {
     return ts.factory.createEnumDeclaration(
       undefined,
-      undefined,
       this.#id,
-      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
+      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))),
     );
   }
 
@@ -123,7 +131,6 @@ export class EntityProcessor {
         declaration &&
         ts.factory.updateInterfaceDeclaration(
           declaration,
-          undefined,
           declaration.modifiers,
           declaration.name,
           undefined,
@@ -150,17 +157,15 @@ export class EntityProcessor {
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
-    return properties
-      ? Object.entries(properties).map(([name, schema]) => {
-          const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
+    return Object.entries(properties).map(([name, schema]) => {
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
-          return ts.factory.createPropertySignature(
-            undefined,
-            name,
-            isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-            type,
-          );
-        })
-      : [];
+      return ts.factory.createPropertySignature(
+        undefined,
+        name,
+        isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+        type,
+      );
+    });
   }
 }

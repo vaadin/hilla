@@ -1,11 +1,11 @@
-/* eslint-disable symbol-description */
+/* eslint-disable max-classes-per-file */
 import {
-  ArraySchema,
-  BooleanSchema,
+  type ArraySchema,
+  type BooleanSchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
-  IntegerSchema,
+  type IntegerSchema,
   isArraySchema,
   isBooleanSchema,
   isComposedSchema,
@@ -15,20 +15,20 @@ import {
   isNumberSchema,
   isReferenceSchema,
   isStringSchema,
-  MapSchema,
-  NumberSchema,
-  ReferenceSchema,
-  Schema,
-  StringSchema,
+  type MapSchema,
+  type NumberSchema,
+  type ReferenceSchema,
+  type Schema,
+  type StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
-import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
 import {
-  AnnotatedSchema,
+  type AnnotatedSchema,
   AnnotationParser,
   isAnnotatedSchema,
   isValidationConstrainedSchema,
-  ValidationConstrainedSchema,
+  type ValidationConstrainedSchema,
 } from './annotation.js';
 import { importBuiltInFormModel } from './utils.js';
 
@@ -88,7 +88,7 @@ export abstract class ModelSchemaPartProcessor<T> {
 
   protected abstract [$processArray](schema: ArraySchema): T;
   protected abstract [$processBoolean](schema: BooleanSchema): T;
-  protected abstract [$processNumber](schema: NumberSchema | IntegerSchema): T;
+  protected abstract [$processNumber](schema: IntegerSchema | NumberSchema): T;
   protected abstract [$processRecord](schema: MapSchema): T;
   protected abstract [$processReference](schema: ReferenceSchema): T;
   protected abstract [$processString](schema: StringSchema): T;
@@ -102,11 +102,13 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     ]);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processBoolean](_: BooleanSchema): TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
   }
 
-  protected override [$processNumber](_: NumberSchema | IntegerSchema): TypeNode {
+  // eslint-disable-next-line class-methods-use-this
+  protected override [$processNumber](_: IntegerSchema | NumberSchema): TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
   }
 
@@ -131,10 +133,12 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     );
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processString](_: StringSchema): TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processUnknown](_: Schema): TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
   }
@@ -149,7 +153,7 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
     return importBuiltInFormModel('BooleanModel', this[$dependencies]);
   }
 
-  override [$processNumber](_: NumberSchema | IntegerSchema): Identifier {
+  override [$processNumber](_: IntegerSchema | NumberSchema): Identifier {
     return importBuiltInFormModel('NumberModel', this[$dependencies]);
   }
 
@@ -194,7 +198,7 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
     return ts.factory.createTypeReferenceNode(this.#id[$processBoolean](schema));
   }
 
-  protected override [$processNumber](schema: NumberSchema | IntegerSchema): TypeReferenceNode {
+  protected override [$processNumber](schema: IntegerSchema | NumberSchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processNumber](schema));
   }
 
@@ -228,7 +232,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     this.#parse = parser.parse.bind(parser);
   }
 
-  public override process(): readonly ts.Expression[] {
+  override process(): readonly ts.Expression[] {
     const schema = this[$schema];
 
     let result = super.process();
@@ -253,26 +257,32 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     ];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processBoolean](_: BooleanSchema): readonly Expression[] {
     return [];
   }
 
-  protected override [$processNumber](_: NumberSchema | IntegerSchema): readonly Expression[] {
+  // eslint-disable-next-line class-methods-use-this
+  protected override [$processNumber](_: IntegerSchema | NumberSchema): readonly Expression[] {
     return [];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processRecord](_: MapSchema): readonly Expression[] {
     return [];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processReference](_: ReferenceSchema): readonly Expression[] {
     return [];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processString](_: StringSchema): readonly Expression[] {
     return [];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   protected override [$processUnknown](_: Schema): readonly Expression[] {
     return [];
   }

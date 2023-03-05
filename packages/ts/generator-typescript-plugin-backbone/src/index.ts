@@ -1,10 +1,10 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
-import { EntityProcessor } from './EntityProcessor.js';
+import EntityProcessor from './EntityProcessor.js';
 
 export enum BackbonePluginSourceType {
   Endpoint = 'endpoint',
@@ -12,15 +12,16 @@ export enum BackbonePluginSourceType {
 }
 
 export default class BackbonePlugin extends Plugin {
-  public static readonly BACKBONE_PLUGIN_FILE_TAGS = 'BACKBONE_PLUGIN_FILE_TAGS';
-  public declare ['constructor']: typeof BackbonePlugin;
+  static readonly BACKBONE_PLUGIN_FILE_TAGS = 'BACKBONE_PLUGIN_FILE_TAGS';
+  declare ['constructor']: typeof BackbonePlugin;
   readonly #tags = new WeakMap<SourceFile, BackbonePluginSourceType>();
 
-  public override get path(): string {
+  // eslint-disable-next-line class-methods-use-this
+  override get path(): string {
     return import.meta.url;
   }
 
-  public override async execute(storage: SharedStorage): Promise<void> {
+  override async execute(storage: SharedStorage): Promise<void> {
     const endpointSourceFiles = await this.#processEndpoints(storage);
     const entitySourceFiles = this.#processEntities(storage);
 
@@ -53,19 +54,19 @@ export default class BackbonePlugin extends Plugin {
       });
 
     const processors = await Promise.all(
-      [...endpoints.entries()].map(([endpointName, methods]) =>
+      [...endpoints.entries()].map(async ([endpointName, methods]) =>
         EndpointProcessor.create(endpointName, this, methods, storage.outputDir),
       ),
     );
 
-    return Promise.all(processors.map((processor) => processor.process()));
+    return Promise.all(processors.map(async (processor) => processor.process()));
   }
 
   #processEntities(storage: SharedStorage): readonly SourceFile[] {
     this.logger.debug('Processing entities');
 
     return storage.api.components?.schemas
-      ? Object.entries(storage.api.components?.schemas).map(([name, component]) =>
+      ? Object.entries(storage.api.components.schemas).map(([name, component]) =>
           new EntityProcessor(name, component, this).process(),
         )
       : [];

@@ -10,7 +10,7 @@
   "scripts": {
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc -p ./tsconfig.build.json --isolatedModules",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
@@ -35,6 +35,9 @@
     },
     "./Schema.js": {
       "default": "./Schema.js"
+    },
+    "./SharedStorage.js": {
+      "types": "./SharedStorage.d.ts"
     },
     "./utils.js": {
       "default": "./utils.js"

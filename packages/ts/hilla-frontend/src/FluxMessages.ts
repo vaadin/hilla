@@ -14,7 +14,12 @@ export interface ClientUpdateMessage extends AbstractMessage {
   item: any;
 }
 
-export type ClientMessage = ClientUpdateMessage | ClientCompleteMessage | ClientErrorMessage;
+export type ClientMessage = ClientCompleteMessage | ClientErrorMessage | ClientUpdateMessage;
+
+const clientMessageTypes = ['complete', 'error', 'update'];
+export function isClientMessage(obj: object): obj is ClientMessage {
+  return '@type' in obj && typeof obj['@type'] === 'string' && clientMessageTypes.includes(obj['@type']);
+}
 
 export interface ServerConnectMessage extends AbstractMessage {
   id: string;

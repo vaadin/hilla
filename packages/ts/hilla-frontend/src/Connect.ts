@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
 import type { ReactiveElement } from 'lit';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
@@ -6,8 +6,8 @@ import { FluxConnection } from './FluxConnection.js';
 
 const $wnd = window as any;
 /* c8 ignore next 2 */
-$wnd.Vaadin = $wnd.Vaadin || {};
-$wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
+$wnd.Vaadin ||= {};
+$wnd.Vaadin.registrations ||= [];
 $wnd.Vaadin.registrations.push({
   is: 'endpoint',
 });
@@ -18,22 +18,21 @@ $wnd.Vaadin.registrations.push({
  */
 export class EndpointError extends Error {
   /**
-   * The optional name of the exception that was thrown on a backend
-   */
-  public type?: string;
-
-  /**
    * The optional detail object, containing additional information sent
    * from a backend
    */
-  public detail?: any;
+  detail?: any;
+  /**
+   * The optional name of the exception that was thrown on a backend
+   */
+  type?: string;
 
   /**
    * @param message the `message` property value
    * @param type the `type` property value
    * @param detail the `detail` property value
    */
-  public constructor(message: string, type?: string, detail?: any) {
+  constructor(message: string, type?: string, detail?: any) {
     super(message);
     this.type = type;
     this.detail = detail;
@@ -47,21 +46,20 @@ export class EndpointError extends Error {
  */
 export class EndpointValidationError extends EndpointError {
   /**
-   * An original validation error message.
-   */
-  public validationErrorMessage: string;
-
-  /**
    * An array of the validation errors.
    */
-  public validationErrorData: ValidationErrorData[];
+  validationErrorData: ValidationErrorData[];
+  /**
+   * An original validation error message.
+   */
+  validationErrorMessage: string;
 
   /**
    * @param message the `message` property value
    * @param validationErrorData the `validationErrorData` property value
    * @param type the `type` property value
    */
-  public constructor(message: string, validationErrorData: ValidationErrorData[], type?: string) {
+  constructor(message: string, validationErrorData: ValidationErrorData[], type?: string) {
     super(message, type, validationErrorData);
     this.validationErrorMessage = message;
     this.detail = null;
@@ -76,13 +74,13 @@ export class EndpointResponseError extends EndpointError {
   /**
    * The optional response object, containing the HTTP response error
    */
-  public response: Response;
+  response: Response;
 
   /**
    * @param message the `message` property value
    * @param response the `response` property value
    */
-  public constructor(message: string, response: Response) {
+  constructor(message: string, response: Response) {
     super(message, 'EndpointResponseError', response);
     this.response = response;
   }
@@ -90,20 +88,20 @@ export class EndpointResponseError extends EndpointError {
   /**
    * Convenience property to get the HTTP code status directly
    */
-  public get status(): number {
+  get status(): number {
     return this.response.status;
   }
 }
 
 export class UnauthorizedResponseError extends EndpointResponseError {
-  public constructor(message: string, response: Response) {
+  constructor(message: string, response: Response) {
     super(message, response);
     this.type = 'UnauthorizedResponseError';
   }
 }
 
 export class ForbiddenResponseError extends EndpointResponseError {
-  public constructor(message: string, response: Response) {
+  constructor(message: string, response: Response) {
     super(message, response);
     this.type = 'ForbiddenResponseError';
   }
@@ -114,23 +112,27 @@ export class ForbiddenResponseError extends EndpointResponseError {
  */
 export interface Subscription<T> {
   /** Cancels the subscription.  No values are made available after calling this. */
-  cancel: () => void;
-  /** Called when a new value is available. */
-  onNext: (callback: (value: T) => void) => Subscription<T>;
-  /** Called when an exception occured in the subscription. */
-  onError: (callback: () => void) => Subscription<T>;
-  /** Called when the subscription has completed. No values are made available after calling this. */
-  onComplete: (callback: () => void) => Subscription<T>;
+  cancel(): void;
+
   /*
    * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
    */
-  context: (context: ReactiveElement) => Subscription<T>;
+  context(context: ReactiveElement): Subscription<T>;
+
+  /** Called when the subscription has completed. No values are made available after calling this. */
+  onComplete(callback: () => void): Subscription<T>;
+
+  /** Called when an exception occured in the subscription. */
+  onError(callback: () => void): Subscription<T>;
+
+  /** Called when a new value is available. */
+  onNext(callback: (value: T) => void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
+  detail?: any;
   message: string;
   type: string;
-  detail?: any;
   validationErrorData?: ValidationErrorData[];
 }
 
@@ -160,7 +162,7 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
 
     if (errorJson !== null) {
       throwConnectException(errorJson);
-    } else if (errorText !== null && errorText.length > 0) {
+    } else if (errorText) {
       throw new EndpointResponseError(errorText, response);
     } else {
       const message = `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
@@ -184,18 +186,18 @@ export class ValidationErrorData {
   /**
    * The validation error message.
    */
-  public message: string;
+  message: string;
 
   /**
    * The parameter name that caused the validation error.
    */
-  public parameterName?: string;
+  parameterName?: string;
 
   /**
    * @param message the `message` property value
    * @param parameterName the `parameterName` property value
    */
-  public constructor(message: string, parameterName?: string) {
+  constructor(message: string, parameterName?: string) {
     this.message = message;
     this.parameterName = parameterName;
   }
@@ -206,14 +208,13 @@ export class ValidationErrorData {
  */
 export interface ConnectClientOptions {
   /**
-   * The `prefix` property value.
-   */
-  prefix?: string;
-
-  /**
    * The `middlewares` property value.
    */
   middlewares?: Middleware[];
+  /**
+   * The `prefix` property value.
+   */
+  prefix?: string;
 }
 
 export interface EndpointCallMetaInfo {
@@ -312,21 +313,19 @@ export interface EndpointRequestInit {
  */
 export class ConnectClient {
   /**
-   * The Hilla endpoint prefix
-   */
-  public prefix = '/connect';
-
-  /**
    * The array of middlewares that are invoked during a call.
    */
-  public middlewares: Middleware[] = [];
-
-  private _fluxConnection: FluxConnection | undefined = undefined;
+  middlewares: Middleware[] = [];
+  /**
+   * The Hilla endpoint prefix
+   */
+  prefix = '/connect';
+  #fluxConnection: FluxConnection | undefined = undefined;
 
   /**
    * @param options Constructor options.
    */
-  public constructor(options: ConnectClientOptions = {}) {
+  constructor(options: ConnectClientOptions = {}) {
     if (options.prefix) {
       this.prefix = options.prefix;
     }
@@ -353,6 +352,16 @@ export class ConnectClient {
   }
 
   /**
+   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
+   */
+  get fluxConnection(): FluxConnection {
+    if (!this.#fluxConnection) {
+      this.#fluxConnection = new FluxConnection();
+    }
+    return this.#fluxConnection;
+  }
+
+  /**
    * Calls the given endpoint method defined using the endpoint and method
    * parameters with the parameters given as params.
    * Asynchronously returns the parsed JSON response data.
@@ -363,7 +372,7 @@ export class ConnectClient {
    * @param __init Optional parameters for the request
    * @returns {} Decoded JSON response data.
    */
-  public async call(endpoint: string, method: string, params?: any, __init?: EndpointRequestInit): Promise<any> {
+  async call(endpoint: string, method: string, params?: any, __init?: EndpointRequestInit): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -386,9 +395,9 @@ export class ConnectClient {
       }, obj);
 
     const request = new Request(`${this.prefix}/${endpoint}/${method}`, {
-      method: 'POST',
-      headers,
       body: params !== undefined ? JSON.stringify(nullForUndefined(params)) : undefined,
+      headers,
+      method: 'POST',
     });
 
     // The middleware `context`, includes the call arguments and the request
@@ -424,7 +433,7 @@ export class ConnectClient {
           $wnd.Vaadin.connectionState.loadingFinished();
           return response;
         })
-        .catch((error) => {
+        .catch(async (error) => {
           // don't bother about connections aborted by purpose
           if (error.name === 'AbortError') {
             $wnd.Vaadin.connectionState.loadingFinished();
@@ -441,17 +450,16 @@ export class ConnectClient {
 
     // Fold the final middlewares array into a single function
     const chain = middlewares.reduceRight(
-      (next: MiddlewareNext, middleware: Middleware) => {
+      (next: MiddlewareNext, middleware: Middleware) =>
         // Compose and return the new chain step, that takes the context and
         // invokes the current middleware with the context and the further chain
         // as the next argument
-        return ((context) => {
+        (async (context) => {
           if (typeof middleware === 'function') {
             return middleware(context, next);
           }
-          return (middleware as MiddlewareClass).invoke(context, next);
-        }) as MiddlewareNext;
-      },
+          return middleware.invoke(context, next);
+        }) as MiddlewareNext,
       // Initialize reduceRight the accumulator with `fetchNext`
       fetchNext,
     );
@@ -471,17 +479,7 @@ export class ConnectClient {
    * @param params Optional parameters to pass to the method.
    * @returns {} A subscription used to handles values as they become available.
    */
-  public subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
+  subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
-  }
-
-  /**
-   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
-   */
-  get fluxConnection(): FluxConnection {
-    if (!this._fluxConnection) {
-      this._fluxConnection = new FluxConnection();
-    }
-    return this._fluxConnection;
   }
 }

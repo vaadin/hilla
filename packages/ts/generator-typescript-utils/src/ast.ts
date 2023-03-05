@@ -19,12 +19,13 @@ export function template<T>(
 ): T;
 export function template<T>(
   code: string,
-  selectorOrTransformers?: TemplateSelector<T> | ReadonlyArray<TransformerFactory<SourceFile>>,
+  selectorOrTransformers?: ReadonlyArray<TransformerFactory<SourceFile>> | TemplateSelector<T>,
   transformers?: ReadonlyArray<TransformerFactory<SourceFile>>,
-) {
+): T | readonly Statement[] {
   let selector: TemplateSelector<T> | undefined;
 
   if (Array.isArray(selectorOrTransformers)) {
+    // eslint-disable-next-line no-param-reassign
     transformers = selectorOrTransformers;
   } else {
     selector = selectorOrTransformers as TemplateSelector<T>;

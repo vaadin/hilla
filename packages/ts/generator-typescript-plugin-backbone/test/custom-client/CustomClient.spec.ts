@@ -1,11 +1,13 @@
-/* eslint-disable import/no-extraneous-dependencies */
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ClientPlugin from '@hilla/generator-typescript-plugin-client';
 import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
-import path from 'path';
 import sinonChai from 'sinon-chai';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 use(sinonChai);
 use(snapshotMatcher);
@@ -15,10 +17,10 @@ describe('BackbonePlugin', () => {
     const sectionName = 'CustomClient';
 
     it('correctly generates code', async () => {
-      const generator = createGenerator([BackbonePlugin, ClientPlugin], path.join(import.meta.url, '../fixtures'));
+      const generator = createGenerator([BackbonePlugin, ClientPlugin], resolve(__dirname, '../fixtures'));
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(1);
+      expect(files.length).to.equal(2);
 
       const [endpointFile] = files;
       await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);

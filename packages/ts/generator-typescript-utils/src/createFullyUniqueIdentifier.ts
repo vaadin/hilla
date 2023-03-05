@@ -1,7 +1,6 @@
-import type { GeneratedIdentifierFlags } from 'typescript';
-import ts from 'typescript';
+import ts, { type GeneratedIdentifierFlags, type Identifier } from 'typescript';
 
-export default function createFullyUniqueIdentifier(name: string, flags?: GeneratedIdentifierFlags) {
+export default function createFullyUniqueIdentifier(name: string, flags?: GeneratedIdentifierFlags): Identifier {
   return ts.factory.createUniqueName(
     name,
     // eslint-disable-next-line no-bitwise

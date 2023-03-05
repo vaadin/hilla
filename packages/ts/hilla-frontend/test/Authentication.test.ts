@@ -1,8 +1,16 @@
 import { expect } from '@open-wc/testing';
-import fetchMock from 'fetch-mock/esm/client.js';
+import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
-import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
+import { cookieExists, deleteCookie, setCookie } from '../src/CookieUtils.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
+import {
+  ConnectClient,
+  InvalidSessionMiddleware,
+  login,
+  type LoginResult,
+  logout,
+  type OnInvalidSessionCallback,
+} from '../src/index.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
@@ -11,7 +19,6 @@ import {
   TEST_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test.js';
-import { cookieExists, deleteCookie, setCookie } from '../src/CookieUtils.js';
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -25,11 +32,11 @@ describe('Authentication', () => {
   const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TEST_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
   const happyCaseLoginResponseText = '';
   const happyCaseResponseHeaders = {
-    'Vaadin-CSRF': vaadinCsrfToken,
-    Result: 'success',
     'Default-url': '/',
+    Result: 'success',
     'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
     'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
+    'Vaadin-CSRF': vaadinCsrfToken,
   };
 
   function verifySpringCsrfToken(token: string) {
@@ -44,8 +51,8 @@ describe('Authentication', () => {
     requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
   });
   afterEach(() => {
-    // @ts-ignore
-    delete window.Vaadin.TypeScript;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    delete (window as any).Vaadin.TypeScript;
     clearSpringCsrfMetaTags();
   });
 
@@ -59,8 +66,8 @@ describe('Authentication', () => {
       const result = await login('invalid-username', 'invalid-password');
       const expectedResult: LoginResult = {
         error: true,
-        errorTitle: 'Incorrect username or password.',
         errorMessage: 'Check that you have entered the correct username and password and try again.',
+        errorTitle: 'Incorrect username or password.',
       };
 
       expect(fetchMock.calls()).to.have.lengthOf(1);
@@ -78,10 +85,10 @@ describe('Authentication', () => {
       );
       const result = await login('valid-username', 'valid-password');
       const expectedResult: LoginResult = {
-        error: false,
-        token: vaadinCsrfToken,
         defaultUrl: '/',
+        error: false,
         redirectUrl: undefined,
+        token: vaadinCsrfToken,
       };
 
       expect(fetchMock.calls()).to.have.lengthOf(1);
@@ -95,9 +102,9 @@ describe('Authentication', () => {
           body: happyCaseLoginResponseText,
           headers: {
             ...happyCaseResponseHeaders,
-            'Vaadin-CSRF': 'some-new-token',
             'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
             'Spring-CSRF-token': 'some-new-spring-token',
+            'Vaadin-CSRF': 'some-new-token',
           },
         },
         { headers: requestHeaders },
@@ -122,10 +129,10 @@ describe('Authentication', () => {
       );
       const result = await login('valid-username', 'valid-password');
       const expectedResult: LoginResult = {
-        error: false,
-        token: vaadinCsrfToken,
         defaultUrl: '/',
+        error: false,
         redirectUrl: '/protected-view',
+        token: vaadinCsrfToken,
       };
 
       expect(fetchMock.calls()).to.have.lengthOf(1);

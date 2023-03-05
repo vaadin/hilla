@@ -1,6 +1,7 @@
 import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
-import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import { getBinderNode } from './BinderNode.js';
+import { _fromString, AbstractModel, ArrayModel, ObjectModel, hasFromString } from './Models.js';
 
 interface FieldBase<T> {
   required: boolean;

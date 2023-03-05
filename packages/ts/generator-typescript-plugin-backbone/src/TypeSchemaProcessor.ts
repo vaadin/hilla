@@ -1,5 +1,5 @@
 import {
-  ArraySchema,
+  type ArraySchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
@@ -12,14 +12,13 @@ import {
   isNumberSchema,
   isReferenceSchema,
   isStringSchema,
-  MapSchema,
-  NonComposedSchema,
-  ReferenceSchema,
-  Schema,
+  type MapSchema,
+  type NonComposedSchema,
+  type ReferenceSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
-import type { TypeNode } from 'typescript';
-import ts from 'typescript';
+import ts, { type TypeNode } from 'typescript';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -52,16 +51,16 @@ function unwrapPossiblyNullableSchema(schema: Schema): NonComposedSchema {
 }
 
 export default class TypeSchemaProcessor {
-  public declare ['constructor']: typeof TypeSchemaProcessor;
+  declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
 
-  public constructor(schema: Schema, dependencies: DependencyManager) {
+  constructor(schema: Schema, dependencies: DependencyManager) {
     this.#schema = schema;
     this.#dependencies = dependencies;
   }
 
-  public process(): readonly TypeNode[] {
+  process(): readonly TypeNode[] {
     let node: TypeNode;
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);

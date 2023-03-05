@@ -1,7 +1,6 @@
-const { resolve } = require('path');
-const { pathToFileURL } = require('url');
+const { pathToFileURL } = require('node:url');
 
 module.exports = {
   extension: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'],
-  loader: pathToFileURL(resolve(__dirname, 'scripts/node/esbuild.js')),
+  loader: pathToFileURL(require.resolve('tsx')),
 };
