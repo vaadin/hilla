@@ -13,7 +13,7 @@ public class EngineConfigureMojoTest extends AbstractMojoTest {
     public void should_StoreConfigurationJson() throws Exception {
         // Lookup and initialize mojo
         var engineConfigureMojo = (EngineConfigureMojo) lookupMojo("configure",
-                getTestConfigurartion());
+                getTestConfiguration());
         setVariableValueToObject(engineConfigureMojo, "project",
                 getMavenProject());
         engineConfigureMojo.execute();

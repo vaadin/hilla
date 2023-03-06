@@ -36,9 +36,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     assertInstanceOf(URLClassLoader.class, classLoader);
                     assertEquals(classLoader.getParent(),
                             EngineGenerateMojo.class.getClassLoader());
-                    assertArrayEquals(
-                            new URL[] { new File("build/test-classes").toURI()
-                                    .toURL() },
+                    assertArrayEquals(new URL[] { getTemporaryDirectory()
+                            .resolve("build/test-classes").toUri().toURL() },
                             ((URLClassLoader) classLoader).getURLs());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
@@ -59,14 +58,15 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                         .mockStatic(EngineConfiguration.class)) {
 
             // Use reference EngineConfiguration
-            mockedStaticEngineConfiguration
-                    .when(() -> EngineConfiguration
-                            .load(Mockito.eq(getBuildDirectory().toFile())))
+            mockedStaticEngineConfiguration.when(() -> EngineConfiguration
+                    .load(Mockito.eq(getBuildDirectory().resolve(
+                            EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
+                            .toFile())))
                     .thenReturn(getEngineConfiguration());
 
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
-                    getTestConfigurartion());
+                    getTestConfiguration());
             setVariableValueToObject(engineGenerateMojo, "project",
                     getMavenProject());
             engineGenerateMojo.execute();
