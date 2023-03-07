@@ -113,7 +113,7 @@ public class AbstractMojoTest {
         return temporaryDirectory;
     }
 
-    protected File getTestConfigurartion() throws URISyntaxException {
+    protected File getTestConfiguration() throws URISyntaxException {
         return new File(Objects
                 .requireNonNull(getClass()
                         .getResource(getClass().getSimpleName() + ".xml"))
