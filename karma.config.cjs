@@ -6,11 +6,13 @@ const karmaMocha = require('karma-mocha');
 const karmaVite = require('karma-vite');
 const puppeteer = require('puppeteer');
 
-process.env.CHROME_BIN = puppeteer.executablePath();
+console.log(puppeteer.executablePath())
 
 const cwd = process.cwd();
 
-const { values } = parseArgs({
+const {
+  values: { coverage, watch: _watch },
+} = parseArgs({
   options: {
     watch: {
       type: 'boolean',
@@ -20,12 +22,11 @@ const { values } = parseArgs({
       type: 'boolean',
     },
   },
-  strict: false,
+  strict: false
 });
 
 const isCI = !!process.env.CI;
-const { coverage, watch: _watch } = values;
-const watch = _watch && !isCI;
+const watch = !!_watch && !isCI;
 
 module.exports = (config) => {
   config.set({
@@ -51,7 +52,7 @@ module.exports = (config) => {
       },
     ],
 
-    reporters: ['progress', coverage && 'coverage'].filter(Boolean),
+    reporters: ['progress', !!coverage && 'coverage'].filter(Boolean),
 
     autoWatch: watch,
     singleRun: !watch,
