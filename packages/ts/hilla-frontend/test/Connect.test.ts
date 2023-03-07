@@ -1,12 +1,10 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { assert, expect, use } from '@esm-bundle/chai';
+import { assert, expect } from '@esm-bundle/chai';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { atmosphere } from 'a-atmosphere-javascript';
-import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import Cookie from '../src/CookieUtils.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
@@ -24,9 +22,6 @@ import {
   TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
 } from './SpringCsrfTestUtils.test.js';
-
-use(sinonChai);
-use(chaiDom);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
