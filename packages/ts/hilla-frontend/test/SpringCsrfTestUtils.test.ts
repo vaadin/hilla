@@ -1,4 +1,9 @@
-import { expect } from '@open-wc/testing';
+import { expect, use } from '@esm-bundle/chai';
+import chaiDom from 'chai-dom';
+import sinonChai from 'sinon-chai';
+
+use(sinonChai);
+use(chaiDom);
 
 export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
 export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';

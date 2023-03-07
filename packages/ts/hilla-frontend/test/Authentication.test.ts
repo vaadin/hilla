@@ -1,23 +1,28 @@
-import { expect } from '@open-wc/testing';
+import { expect, use } from '@esm-bundle/chai';
+import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import { ConnectClient, InvalidSessionMiddleware, login, LoginResult, logout, OnInvalidSessionCallback } from '../src';
+import Cookie from '../src/CookieUtils.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
+  TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
   TEST_VAADIN_CSRF_TOKEN_VALUE,
-  TEST_SPRING_CSRF_HEADER_NAME,
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.test.js';
-import { cookieExists, deleteCookie, setCookie } from '../src/CookieUtils.js';
+
+use(sinonChai);
+use(chaiDom);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
 
-const jwtCookieName = 'jwt.headerAndPayload';
+const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
 
 describe('Authentication', () => {
   const requestHeaders: Record<string, string> = {};
@@ -33,8 +38,9 @@ describe('Authentication', () => {
   };
 
   function verifySpringCsrfToken(token: string) {
-    expect(document.head.querySelector('meta[name="_csrf"]')!.getAttribute('content')).to.equal(token);
-    expect(document.head.querySelector('meta[name="_csrf_header"]')!.getAttribute('content')).to.equal(
+    expect(document.head.querySelector('meta[name="_csrf"]')).to.have.attribute('content', token);
+    expect(document.head.querySelector('meta[name="_csrf_header"]')).to.have.attribute(
+      'content',
       TEST_SPRING_CSRF_HEADER_NAME,
     );
   }
@@ -136,7 +142,7 @@ describe('Authentication', () => {
   describe('logout', () => {
     afterEach(() => {
       fetchMock.restore();
-      deleteCookie(jwtCookieName);
+      Cookie.remove(JWT_COOKIE_NAME);
     });
 
     it('should set the csrf token on logout', async () => {
@@ -187,11 +193,11 @@ describe('Authentication', () => {
         { headers: requestHeaders },
       );
 
-      setCookie(jwtCookieName, 'mock value');
+      Cookie.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
       await logout();
 
       expect(fetchMock.calls()).to.have.lengthOf(1);
-      expect(cookieExists(jwtCookieName)).to.be.false;
+      expect(Cookie.get(JWT_COOKIE_NAME)).to.be.undefined;
     });
 
     it('should clear the JWT cookie on failed server logout', async () => {
@@ -203,7 +209,7 @@ describe('Authentication', () => {
         throw fakeError;
       });
 
-      setCookie(jwtCookieName, 'mock value');
+      Cookie.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
       let thrownError;
       try {
         await logout();
@@ -211,7 +217,7 @@ describe('Authentication', () => {
         thrownError = err;
       }
       expect(thrownError).to.equal(fakeError);
-      expect(cookieExists(jwtCookieName)).to.be.false;
+      expect(Cookie.get(JWT_COOKIE_NAME)).to.be.undefined;
     });
 
     // when started the app offline, the spring csrf meta tags are not available

@@ -1,10 +1,14 @@
 /* eslint-disable no-new */
 /* tslint:disable: no-unused-expression */
-import { assert, expect } from '@open-wc/testing';
+import { assert, expect, use } from '@esm-bundle/chai';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { atmosphere } from 'a-atmosphere-javascript';
+import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import Cookie from '../src/CookieUtils.js';
+import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   ConnectClient,
   EndpointError,
@@ -14,14 +18,15 @@ import {
   ForbiddenResponseError,
   UnauthorizedResponseError,
 } from '../src/index.js';
-import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
-import { deleteCookie, setCookie } from '../src/CookieUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
 } from './SpringCsrfTestUtils.test.js';
+
+use(sinonChai);
+use(chaiDom);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -142,6 +147,7 @@ describe('ConnectClient', () => {
 
     afterEach(() => {
       fetchMock.restore();
+      Cookie.remove(VAADIN_CSRF_COOKIE_NAME);
     });
 
     it('should require 2 arguments', async () => {
@@ -269,7 +275,7 @@ describe('ConnectClient', () => {
 
     it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
       try {
-        setCookie(SPRING_CSRF_COOKIE_NAME, TEST_SPRING_CSRF_TOKEN_VALUE);
+        Cookie.set(SPRING_CSRF_COOKIE_NAME, TEST_SPRING_CSRF_TOKEN_VALUE);
         setupSpringCsrfMetaTags();
 
         await client.call('FooEndpoint', 'fooMethod');
@@ -278,7 +284,7 @@ describe('ConnectClient', () => {
           [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
         });
       } finally {
-        deleteCookie(SPRING_CSRF_COOKIE_NAME);
+        Cookie.remove(SPRING_CSRF_COOKIE_NAME);
         clearSpringCsrfMetaTags();
       }
     });
@@ -298,18 +304,14 @@ describe('ConnectClient', () => {
     });
 
     it('should set header for preventing CSRF using Hilla csrfToken cookie when no Spring csrf token presents', async () => {
-      try {
-        const csrfToken = 'foo';
-        setCookie('csrfToken', csrfToken);
+      const csrfToken = 'foo';
+      Cookie.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
 
-        await client.call('FooEndpoint', 'fooMethod');
+      await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.lastOptions()?.headers).to.deep.include({
-          [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
-        });
-      } finally {
-        deleteCookie('csrfToken');
-      }
+      expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
+      });
     });
 
     it('should set header for preventing CSRF using Hilla csrf when having Spring csrf meta tags with string undefined', async () => {
@@ -319,7 +321,7 @@ describe('ConnectClient', () => {
         setupSpringCsrfMetaTags('undefined', 'undefined');
 
         const csrfToken = 'foo';
-        setCookie('csrfToken', csrfToken);
+        Cookie.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
 
         await client.call('FooEndpoint', 'fooMethod');
 
@@ -327,6 +329,7 @@ describe('ConnectClient', () => {
           [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
         });
       } finally {
+        Cookie.remove('csrfToken');
         clearSpringCsrfMetaTags();
       }
     });

@@ -1,6 +1,8 @@
-import { expect } from '@open-wc/testing';
+import { expect, use } from '@esm-bundle/chai';
 import { atmosphere } from 'a-atmosphere-javascript';
+import chaiDom from 'chai-dom';
 import type { ReactiveController } from 'lit';
+import sinonChai from 'sinon-chai';
 import { FluxConnection, State } from '../src/FluxConnection';
 import type {
   AbstractMessage,
@@ -9,6 +11,8 @@ import type {
   ClientUpdateMessage,
 } from '../src/FluxMessages';
 
+use(sinonChai);
+use(chaiDom);
 function expectNoDataRetained(fluxConnectionAny: any) {
   expect(fluxConnectionAny.endpointInfos.size).to.equal(0);
   expect(fluxConnectionAny.onNextCallbacks.size).to.equal(0);
@@ -26,9 +30,9 @@ describe('FluxConnection', () => {
   };
 
   beforeEach(() => {
+    (atmosphere as any).reset();
     fluxConnection = new FluxConnection();
     const socket = () => (fluxConnection as any).socket;
-    (atmosphere as any).reset();
     fluxConnectionHelper = {
       socket,
       handleMessage(msg) {
