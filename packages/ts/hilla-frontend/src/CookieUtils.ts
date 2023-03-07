@@ -1,5 +1,6 @@
 import _Cookie from 'js-cookie';
 
-const Cookie = _Cookie.withAttributes({ path: new URL(document.baseURI).pathname.replace(/.+\/$/, '') });
+const { pathname } = new URL(document.baseURI);
+const Cookie = _Cookie.withAttributes({ path: pathname.endsWith('/') ? pathname.slice(0, -1) : pathname });
 
 export default Cookie;
