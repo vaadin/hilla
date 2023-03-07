@@ -4,9 +4,6 @@ const karmaChromeLauncher = require('karma-chrome-launcher');
 const karmaCoverage = require('karma-coverage');
 const karmaMocha = require('karma-mocha');
 const karmaVite = require('karma-vite');
-const puppeteer = require('puppeteer');
-
-console.log(puppeteer.executablePath())
 
 const cwd = process.cwd();
 
