@@ -1,19 +1,19 @@
 package dev.hilla.maven;
 
-import java.io.File;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.engine.GeneratorProcessor;
-import dev.hilla.engine.ParserProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorProcessor;
+import dev.hilla.engine.ParserProcessor;
 
 public class EngineGenerateMojoTest extends AbstractMojoTest {
 
@@ -58,10 +58,9 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                         .mockStatic(EngineConfiguration.class)) {
 
             // Use reference EngineConfiguration
-            mockedStaticEngineConfiguration.when(() -> EngineConfiguration
-                    .load(Mockito.eq(getBuildDirectory().resolve(
-                            EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                            .toFile())))
+            mockedStaticEngineConfiguration
+                    .when(() -> EngineConfiguration
+                            .loadDirectory(Mockito.eq(getBuildDirectory())))
                     .thenReturn(getEngineConfiguration());
 
             // Lookup and initialize mojo

@@ -19,9 +19,7 @@ public class EngineConfigureMojoTest extends AbstractMojoTest {
         engineConfigureMojo.execute();
 
         var storedEngineConfiguration = EngineConfiguration
-                .load(getBuildDirectory()
-                        .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                        .toFile());
+                .loadDirectory(getBuildDirectory());
         assertNotNull(storedEngineConfiguration);
         JsonAssertions.assertEquals(getEngineConfiguration(),
                 storedEngineConfiguration);

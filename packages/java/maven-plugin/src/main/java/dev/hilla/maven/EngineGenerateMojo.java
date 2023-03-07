@@ -38,9 +38,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
         try {
             var baseDir = project.getBasedir().toPath();
             var buildDir = baseDir.resolve(project.getBuild().getDirectory());
-            var conf = Objects.requireNonNull(EngineConfiguration.load(buildDir
-                    .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                    .toFile()));
+            var conf = Objects.requireNonNull(
+                    EngineConfiguration.loadDirectory(buildDir));
             var classPath = conf.getClassPath();
             var urls = new ArrayList<URL>(classPath.size());
             for (var classPathItem : classPath) {

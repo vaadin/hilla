@@ -34,8 +34,28 @@ public class EngineConfiguration {
     }
 
     /**
-     * Reads the configuration from the given base directory.
+     * Reads the configuration from the given base directory. Reads only files
+     * with the default name.
      *
+     * @param configDir
+     *            a directory that contains the configuration file.
+     * @return the configuration, or <code>null</code> if the configuration file
+     *         does not exist
+     * @throws IOException
+     *             if thrown while reading the configuration file
+     * @throws ConfigurationException
+     *             if the configuration file is invalid
+     */
+    public static EngineConfiguration loadDirectory(Path configDir)
+            throws IOException {
+        return load(configDir.resolve(DEFAULT_CONFIG_FILE_NAME).toFile());
+    }
+
+    /**
+     * Reads the configuration from the given file path.
+     *
+     * @param configFile
+     *            a path to a configuration file.
      * @return the configuration, or <code>null</code> if the configuration file
      *         does not exist
      * @throws IOException

@@ -124,9 +124,7 @@ public class TaskTest {
                 .of(Path.of(getClass().getClassLoader().getResource("").toURI())
                         .toString()));
 
-        var config = EngineConfiguration.load(
-                buildDir.resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                        .toFile());
+        var config = EngineConfiguration.loadDirectory(buildDir);
 
         config = TestEngineConfigurationPathResolver.resolve(config,
                 temporaryDirectory);

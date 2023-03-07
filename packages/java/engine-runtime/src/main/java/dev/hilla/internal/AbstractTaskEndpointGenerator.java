@@ -64,11 +64,10 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             throws ExecutionFailedException {
         EngineConfiguration config = null;
 
-        var configFile = projectDirectory.toPath().resolve(buildDirectoryName)
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME).toFile();
+        var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
 
         try {
-            config = EngineConfiguration.load(configFile);
+            config = EngineConfiguration.loadDirectory(configDir);
         } catch (IOException | ConfigurationException e) {
             logger.warn(
                     "Hilla engine configuration found, but not read correctly",
@@ -102,7 +101,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             }
 
             try {
-                config = EngineConfiguration.load(configFile);
+                config = EngineConfiguration.loadDirectory(configDir);
             } catch (IOException e) {
                 throw new ExecutionFailedException(
                         "Failed to read Hilla engine configuration", e);
