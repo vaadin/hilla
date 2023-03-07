@@ -1,5 +1,5 @@
 /* eslint-disable lit/no-template-arrow, no-unused-expressions, no-shadow */
-import { assert, expect } from '@open-wc/testing';
+import { assert, expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';

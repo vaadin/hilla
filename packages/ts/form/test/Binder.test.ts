@@ -1,6 +1,4 @@
-/* tslint:disable:max-classes-per-file */
-
-import { assert, expect } from '@open-wc/testing';
+import { assert, expect } from '@esm-bundle/chai';
 import { LitElement } from 'lit';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

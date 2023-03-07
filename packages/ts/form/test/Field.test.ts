@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions, no-shadow */
-import { assert, expect } from '@open-wc/testing';
+import { assert, expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { LitElement, nothing, render } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';

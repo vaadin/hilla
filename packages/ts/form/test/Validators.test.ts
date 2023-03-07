@@ -1,4 +1,4 @@
-import { assert } from '@open-wc/testing';
+import { assert } from '@esm-bundle/chai';
 // API to test
 import {
   AssertFalse,
