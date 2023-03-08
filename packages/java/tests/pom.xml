@@ -118,8 +118,6 @@
           <!-- export test server port to integration tests -->
           <systemPropertyVariables>
             <serverPort>${server.port}</serverPort>
-            <webdriver.chrome.driver>${webdriver.chrome.driver}
-            </webdriver.chrome.driver>
           </systemPropertyVariables>
           <excludes>
             <exclude>**/*$*</exclude>
