@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -107,20 +106,40 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .process());
     }
 
-    private Optional<PackageInfoModel> findClosestPackage(
-            NodePath<?> nodePath) {
-        return nodePath.stream().map(NodePath::getNode)
-                .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
-                .map(ClassInfoModel::getPackage);
-    }
-
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
-        return findClosestPackage(nodePath).map(PackageInfoModel::getAncestors)
-                .map(Collection::stream).orElseGet(Stream::empty)
-                .map(PackageInfoModel::getAnnotations)
+        // Find the closest (enclosing) class
+        var classModel = nodePath.stream().map(NodePath::getNode)
+                .filter(node -> node.getSource() instanceof ClassInfoModel)
+                .map(node -> (ClassInfoModel) node.getSource()).findFirst();
+
+        // Get the classloader of that class, defaults to the system one
+        var classLoader = classModel.map(ClassInfoModel::get)
+                .map(Class.class::cast).map(Class::getClassLoader)
+                .orElse(ClassLoader.getSystemClassLoader());
+
+        return classModel.map(ClassInfoModel::getPackage).stream()
+                // Convert the package to a list of all ancestor package names
+                .flatMap(p -> getAllAncestorPackageNames(p.getName()))
+                // Convert names to real packages and remove those not found
+                .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
+                // Convert packages to models and finally to their annotations
+                .map(PackageInfoModel::of).map(PackageInfoModel::getAnnotations)
                 .flatMap(Collection::stream);
+    }
+
+    /**
+     * Returns a stream of all ancestor package names, starting with the
+     * immediate parent package.
+     *
+     * @param packageName
+     *            the package name
+     * @return the stream of all ancestor package names
+     */
+    private static Stream<String> getAllAncestorPackageNames(
+            String packageName) {
+        return Stream.iterate(packageName, p -> p.contains("."),
+                p -> p.substring(0, p.lastIndexOf('.')));
     }
 
     /**
