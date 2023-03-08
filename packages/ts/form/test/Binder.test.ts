@@ -1,12 +1,15 @@
-import { assert, expect } from '@esm-bundle/chai';
+import { assert, expect, use } from '@esm-bundle/chai';
 import { LitElement } from 'lit';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 // API to test
 import { Binder, BinderConfiguration } from '../src';
 import { Employee, EmployeeModel, Order, OrderModel, TestEntity, TestModel } from './TestModels.js';
+
+use(sinonChai);
 
 @customElement('lit-order-view')
 class LitOrderView extends LitElement {}

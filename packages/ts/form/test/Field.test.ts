@@ -1,11 +1,13 @@
 /* eslint-disable no-unused-expressions, no-shadow */
-import { assert, expect } from '@esm-bundle/chai';
+import { assert, expect, use } from '@esm-bundle/chai';
+import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import { LitElement, nothing, render } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement, query } from 'lit/decorators.js';
+import sinonChai from 'sinon-chai';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
 import {
@@ -23,6 +25,9 @@ import {
   MultiSelectComboBoxFieldStrategy,
 } from '../src';
 import { OrderModel, TestModel, TestEntity, Order } from './TestModels';
+
+use(sinonChai);
+use(chaiDom);
 
 describe('form/Field', () => {
   describe('field with text-field', () => {

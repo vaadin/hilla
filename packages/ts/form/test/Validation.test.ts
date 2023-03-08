@@ -1,11 +1,13 @@
 /* eslint-disable lit/no-template-arrow, no-unused-expressions, no-shadow */
-import { assert, expect } from '@esm-bundle/chai';
+import { assert, expect, use } from '@esm-bundle/chai';
+import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement, query } from 'lit/decorators.js';
+import sinonChai from 'sinon-chai';
 // API to test
 import {
   Binder,
@@ -17,7 +19,7 @@ import {
   ValidationError,
   Validator,
   ValueError,
-} from '../src';
+} from '../src/index.js';
 import {
   Customer,
   IdEntity,
@@ -28,7 +30,10 @@ import {
   TestModel,
   TestMessageInterpolationEntity,
   TestMessageInterpolationModel,
-} from './TestModels';
+} from './TestModels.js';
+
+use(sinonChai);
+use(chaiDom);
 
 @customElement('order-view')
 class OrderView extends LitElement {
@@ -93,6 +98,12 @@ class OrderView extends LitElement {
       )}
       <div id="submitting">${this.binder.submitting}</div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'order-view': OrderView;
   }
 }
 
@@ -471,51 +482,59 @@ describe('form/Validation', () => {
     let orderView: OrderView;
 
     beforeEach(async () => {
-      orderView = document.createElement('order-view') as OrderView;
+      orderView = new OrderView();
       binder = orderView.binder;
-      document.body.appendChild(orderView);
+      document.body.append(orderView);
       await orderView.updateComplete;
     });
 
-    afterEach(async () => {
-      document.body.removeChild(orderView);
+    afterEach(() => {
+      orderView.remove();
     });
 
-    ['change', 'blur'].forEach((event) => {
-      it(`should validate field on ${event}`, async () => {
-        expect(orderView.notes.hasAttribute('invalid')).to.be.false;
-        await fireEvent(orderView.notes, event);
-        expect(orderView.notes.hasAttribute('invalid')).to.be.true;
-      });
+    const EVENTS = ['change', 'blur'];
 
-      it(`should validate field of nested model on  ${event}`, async () => {
-        await fireEvent(orderView.add, 'click');
-        expect(orderView.description.hasAttribute('invalid')).to.be.false;
-        await fireEvent(orderView.description, event);
-        expect(orderView.description.hasAttribute('invalid')).to.be.true;
+    describe('should validate field on events', () => {
+      EVENTS.forEach((event) => {
+        it(event, async () => {
+          expect(orderView.notes).to.not.have.attribute('invalid');
+          await fireEvent(orderView.notes, event);
+          expect(orderView.notes).to.have.attribute('invalid');
+        });
+      });
+    });
+
+    describe('should validate field of nested model on events', () => {
+      EVENTS.forEach((event) => {
+        it(event, async () => {
+          await fireEvent(orderView.add, 'click');
+          expect(orderView.description).to.not.have.attribute('invalid');
+          await fireEvent(orderView.description, event);
+          expect(orderView.description).to.have.attribute('invalid');
+        });
       });
     });
 
     it(`should not validate field on input when first visit`, async () => {
-      expect(orderView.notes.hasAttribute('invalid')).to.be.false;
+      expect(orderView.notes).to.not.have.attribute('invalid');
       await fireEvent(orderView.notes, 'input');
-      expect(orderView.notes.hasAttribute('invalid')).to.be.false;
+      expect(orderView.notes).to.not.have.attribute('invalid');
     });
 
     it(`should validate field on input after first visit`, async () => {
       orderView.notes.value = 'foo';
       await fireEvent(orderView.notes, 'blur');
-      expect(orderView.notes.hasAttribute('invalid')).to.be.false;
+      expect(orderView.notes).to.not.have.attribute('invalid');
 
       orderView.notes.value = '';
       await fireEvent(orderView.notes, 'input');
-      expect(orderView.notes.hasAttribute('invalid')).to.be.true;
+      expect(orderView.notes).to.have.attribute('invalid');
     });
 
     it(`should validate fields on submit`, async () => {
-      expect(orderView.notes.hasAttribute('invalid')).to.be.false;
-      expect(orderView.fullName.hasAttribute('invalid')).to.be.false;
-      expect(orderView.nickName.hasAttribute('invalid')).to.be.false;
+      expect(orderView.notes).to.not.have.attribute('invalid');
+      expect(orderView.fullName).to.not.have.attribute('invalid');
+      expect(orderView.nickName).to.not.have.attribute('invalid');
 
       try {
         await orderView.binder.submitTo(async (item) => item);
@@ -524,9 +543,9 @@ describe('form/Validation', () => {
         // do nothing
       }
 
-      expect(orderView.notes.hasAttribute('invalid')).to.be.true;
-      expect(orderView.fullName.hasAttribute('invalid')).to.be.true;
-      expect(orderView.nickName.hasAttribute('invalid')).to.be.false;
+      expect(orderView.notes).to.have.attribute('invalid');
+      expect(orderView.fullName).to.have.attribute('invalid');
+      expect(orderView.nickName).to.not.have.attribute('invalid');
     });
 
     it(`should validate fields of nested model on submit`, async () => {
@@ -534,8 +553,8 @@ describe('form/Validation', () => {
       await fireEvent(orderView.add, 'click');
       await fireEvent(orderView.add, 'click');
 
-      expect(orderView.description.hasAttribute('invalid')).to.be.false;
-      expect(orderView.price.hasAttribute('invalid')).to.be.false;
+      expect(orderView.description).to.not.have.attribute('invalid');
+      expect(orderView.price).to.not.have.attribute('invalid');
 
       try {
         await orderView.binder.submitTo(async (item) => item);
@@ -552,8 +571,8 @@ describe('form/Validation', () => {
         ]);
       }
 
-      expect(orderView.description.hasAttribute('invalid')).to.be.true;
-      expect(orderView.price.hasAttribute('invalid')).to.be.true;
+      expect(orderView.description).to.have.attribute('invalid');
+      expect(orderView.price).to.have.attribute('invalid');
       expect(String(orderView.priceError.textContent).trim()).to.equal('must be greater than 0');
     });
 
@@ -562,8 +581,8 @@ describe('form/Validation', () => {
       await fireEvent(orderView.add, 'click');
       await fireEvent(orderView.add, 'click');
 
-      expect(orderView.description.hasAttribute('invalid')).to.be.false;
-      expect(orderView.price.hasAttribute('invalid')).to.be.false;
+      expect(orderView.description).to.not.have.attribute('invalid');
+      expect(orderView.price).to.not.have.attribute('invalid');
 
       try {
         await orderView.binder.submitTo(async (item) => item);
@@ -572,8 +591,8 @@ describe('form/Validation', () => {
         // do nothing
       }
 
-      expect(orderView.description.hasAttribute('invalid')).to.be.true;
-      expect(orderView.price.hasAttribute('invalid')).to.be.true;
+      expect(orderView.description).to.have.attribute('invalid');
+      expect(orderView.price).to.have.attribute('invalid');
     });
 
     it(`should not submit when just validation fails`, async () => {

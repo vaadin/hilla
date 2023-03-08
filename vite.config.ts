@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
@@ -14,9 +15,22 @@ const aliasConfig = cwd.includes('hilla-frontend')
   : {};
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  build: {
-    target: 'esnext',
-  },
-  ...aliasConfig,
+export default defineConfig(async () => {
+  const tsconfig = JSON.parse(await readFile(resolve(cwd, '../../../tsconfig.json'), 'utf8'));
+
+  return {
+    build: {
+      target: 'esnext',
+    },
+    esbuild: {
+      tsconfigRaw: {
+        ...tsconfig,
+        compilerOptions: {
+          ...tsconfig.compilerOptions,
+          useDefineForClassFields: false,
+        },
+      },
+    },
+    ...aliasConfig,
+  };
 });
