@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -63,7 +65,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     new InputStreamReader(resource.openStream()));
             String openApiAsText = reader.lines()
                     .collect(Collectors.joining("\n"));
-            List<String> types = parseOpenApi(openApiAsText);
+            Set<String> types = parseOpenApi(openApiAsText);
             for (String type : types) {
                 hints.reflection().registerType(TypeReference.of(type),
                         MemberCategory.values());
@@ -79,20 +81,20 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
      *
      * @param openApiAsText
      *            the open api JSON as text
-     * @return a list of custom types used
+     * @return a set of custom types used
      * @throws IOException
      *             if parsing fails
      */
-    public static List<String> parseOpenApi(String openApiAsText)
+    public static Set<String> parseOpenApi(String openApiAsText)
             throws IOException {
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
         if (!openApi.has("components")) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         ObjectNode schemas = (ObjectNode) openApi.get("components")
                 .get("schemas");
 
-        List<String> types = new ArrayList<>();
+        Set<String> types = new HashSet<>();
         if (schemas != null) {
 
             schemas.fieldNames().forEachRemaining(type -> {
