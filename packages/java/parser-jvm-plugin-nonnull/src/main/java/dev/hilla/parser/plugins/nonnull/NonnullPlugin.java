@@ -129,8 +129,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
     }
 
     /**
-     * Returns a stream of all ancestor package names, starting with the
-     * immediate parent package.
+     * Returns a stream of all ancestor package names, starting with the package
+     * itself.
      *
      * @param packageName
      *            the package name
