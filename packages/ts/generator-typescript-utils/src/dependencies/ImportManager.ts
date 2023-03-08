@@ -68,7 +68,6 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(
             false,
             undefined,
@@ -119,9 +118,8 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
-          ts.factory.createStringLiteral(path),
+          ts.factory.createStringLiteral(`${path}.js`),
         ),
       ];
     }
@@ -165,9 +163,8 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(isType, id, undefined),
-          ts.factory.createStringLiteral(path),
+          ts.factory.createStringLiteral(`${path}.js`),
         ),
       ];
     }
