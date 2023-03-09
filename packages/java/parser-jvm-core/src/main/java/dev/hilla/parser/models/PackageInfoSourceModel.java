@@ -25,10 +25,4 @@ class PackageInfoSourceModel extends PackageInfoModel {
     protected List<AnnotationInfoModel> prepareAnnotations() {
         return processAnnotations(origin.getAnnotationInfo());
     }
-
-    @Override
-    public List<PackageInfoModel> getAncestors() {
-        // not implemented
-        return List.of();
-    }
 }
