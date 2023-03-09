@@ -6,8 +6,10 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class ClassInfoReflectionModel extends ClassInfoModel
         implements ReflectionModel {
@@ -220,8 +222,26 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected PackageInfoModel preparePackage() {
-        return PackageInfoModel.of(origin.getPackage());
+    protected List<PackageInfoModel> prepareAncestors() {
+        var classLoader = origin.getClassLoader();
+
+        return getAllAncestorPackageNames(origin.getPackageName())
+                .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
+                .map(PackageInfoModel::of).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a stream of all ancestor package names, starting with the package
+     * itself.
+     *
+     * @param packageName
+     *            the package packageName
+     * @return the stream of all ancestor package names
+     */
+    private static Stream<String> getAllAncestorPackageNames(
+            String packageName) {
+        return Stream.iterate(packageName, n -> n.contains("."),
+                n -> n.substring(0, n.lastIndexOf('.')));
     }
 
     @Override
