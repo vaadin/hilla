@@ -1,7 +1,5 @@
 package dev.hilla.parser.models;
 
-import java.util.List;
-
 import io.github.classgraph.PackageInfo;
 
 public abstract class PackageInfoModel extends AnnotatedAbstractModel
@@ -34,18 +32,6 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
     public Class<PackageInfoModel> getCommonModelClass() {
         return PackageInfoModel.class;
     }
-
-    /**
-     * Returns a list of all ancestor packages, starting with the immediate
-     * parent package. Note that not all packages are available in the
-     * hierarchy, so the list can have "holes".
-     *
-     * @return the list of all valid ancestor packages
-     * @deprecated the implementation is flawed and cannot be fixed, will be
-     *             replaced by a similar method in {@link ClassInfoModel}
-     */
-    @Deprecated(forRemoval = true)
-    public abstract List<PackageInfoModel> getAncestors();
 
     @Override
     public int hashCode() {

@@ -33,6 +33,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassRefSignatureModel> interfaces;
     private List<MethodInfoModel> methods;
     private PackageInfoModel pkg;
+    private List<PackageInfoModel> ancestors;
     private Optional<ClassRefSignatureModel> superClass;
     private List<TypeParameterModel> typeParameters;
 
@@ -307,6 +308,22 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return pkg;
     }
 
+    /**
+     * Tries to find all packages that are ancestors of this class. From the
+     * list of all possible ancestor packages, only those whose existence is
+     * confirmed are returned. This is a "best effort" to find them as, even if
+     * they exist, there is no guarantee that they have already been loaded.
+     *
+     * @return a list of packages that are ancestors of this class
+     */
+    public List<PackageInfoModel> findAllAvailableAncestors() {
+        if (ancestors == null) {
+            ancestors = prepareAncestors();
+        }
+
+        return ancestors;
+    }
+
     public abstract String getSimpleName();
 
     @Override
@@ -318,6 +335,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return typeParameters;
     }
 
+    @Override
     public int hashCode() {
         return 3 + getName().hashCode();
     }
@@ -394,6 +412,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return isAssignableFrom(cls.getClass());
     }
 
+    @Override
     public abstract boolean isEnum();
 
     public abstract boolean isFinal();
@@ -432,6 +451,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     protected abstract List<MethodInfoModel> prepareMethods();
 
     protected abstract PackageInfoModel preparePackage();
+
+    protected abstract List<PackageInfoModel> prepareAncestors();
 
     protected abstract ClassRefSignatureModel prepareSuperClass();
 
