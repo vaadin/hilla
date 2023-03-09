@@ -5,7 +5,7 @@ import dev.hilla.endpoints.PersonEndpoint.Person;
 
 @Endpoint
 public class PersonEndpoint extends CrudEndpoint<Person, Integer>
-    implements PagedData<Person> {
+        implements PagedData<Person> {
 
     public static class Person {
         private String name;

@@ -21,7 +21,7 @@ import dev.hilla.EndpointExposed;
 
 @EndpointExposed
 public class ReadOnlyEndpoint<T, ID> extends NonEndpointImpl
-    implements NonEndpoint {
+        implements NonEndpoint {
     public Optional<T> get(ID id) {
         return Optional.ofNullable(null);
     }

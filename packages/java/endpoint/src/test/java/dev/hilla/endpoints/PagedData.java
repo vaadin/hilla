@@ -19,22 +19,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import dev.hilla.EndpointExposed;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import dev.hilla.EndpointExposed;
 
 @EndpointExposed
 public interface PagedData<T> {
-    default int size() {
-        return 0;
+    default List<@NonNull T> getNonNullablePage(int pageSize, int pageNumber,
+            Map<String, @NonNull T> parameters) {
+        return Collections.emptyList();
     }
 
     default List<T> getPage(int pageSize, int pageNumber) {
         return Collections.emptyList();
     }
 
-    default List<@NonNull T> getNonNullablePage(int pageSize, int pageNumber,
-        Map<String, @NonNull T> parameters) {
-        return Collections.emptyList();
+    default int size() {
+        return 0;
     }
 }
