@@ -220,15 +220,10 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     }
 
     @Override
-    protected PackageInfoModel preparePackage() {
-        return PackageInfoModel.of(origin.getPackageInfo());
-    }
-
-    @Override
     protected List<PackageInfoModel> prepareAncestors() {
         // This is just a dummy implementation, as source models are no longer
-        // used
-        return List.of(getPackage());
+        // used. It only returns the package of the class.
+        return List.of(PackageInfoModel.of(origin.getPackageInfo()));
     }
 
     @Override

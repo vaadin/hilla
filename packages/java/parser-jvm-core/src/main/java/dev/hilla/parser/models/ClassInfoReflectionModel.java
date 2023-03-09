@@ -222,11 +222,6 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected PackageInfoModel preparePackage() {
-        return PackageInfoModel.of(origin.getPackage());
-    }
-
-    @Override
     protected List<PackageInfoModel> prepareAncestors() {
         var classLoader = origin.getClassLoader();
 
