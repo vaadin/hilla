@@ -234,12 +234,13 @@ final class ClassInfoReflectionModel extends ClassInfoModel
      * Returns a stream of all ancestor package names, starting with the package
      * itself.
      *
-     * @param name
-     *            the package name
+     * @param packageName
+     *            the package packageName
      * @return the stream of all ancestor package names
      */
-    private static Stream<String> getAllAncestorPackageNames(String name) {
-        return Stream.iterate(name, n -> n.contains("."),
+    private static Stream<String> getAllAncestorPackageNames(
+            String packageName) {
+        return Stream.iterate(packageName, n -> n.contains("."),
                 n -> n.substring(0, n.lastIndexOf('.')));
     }
 

@@ -307,7 +307,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
      *
      * @return a list of packages that are ancestors of this class
      */
-    public List<PackageInfoModel> findAllAvailableAncestors() {
+    public List<PackageInfoModel> findAncestors() {
         if (ancestors == null) {
             ancestors = prepareAncestors();
         }

@@ -117,8 +117,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
             NodePath<?> nodePath) {
         return findClosestClass(nodePath)
                 // Find all available ancestor packages
-                .map(ClassInfoModel::findAllAvailableAncestors)
-                .map(Collection::stream).orElseGet(Stream::empty)
+                .map(ClassInfoModel::findAncestors).map(Collection::stream)
+                .orElseGet(Stream::empty)
                 // Get all annotations from packages
                 .map(PackageInfoModel::getAnnotations)
                 .flatMap(Collection::stream);

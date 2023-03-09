@@ -350,13 +350,13 @@ public class ClassInfoModelTests {
         // Load the `dev.hilla` package
         var dummy = new dev.hilla.Dummy();
         var model = ClassInfoModel.of(ctx.getReflectionOrigin());
-        var ancestors = model.findAllAvailableAncestors();
+        var ancestors = model.findAncestors();
         var ancestorNames = ancestors.stream().map(PackageInfoModel::getName)
                 .sorted().collect(Collectors.toList());
 
-        // `findAllAvailableAncestors()` returns only valid packages, so the
-        // result of this test could vary if some class is added to, or removed
-        // from, any ancestor package
+        // `findAncestors()` returns only valid packages, so the result of this
+        // test could vary if some class is added to, or removed from, any
+        // ancestor package
         assertEquals(List.of("dev.hilla", "dev.hilla.parser.models"),
                 ancestorNames);
     }
