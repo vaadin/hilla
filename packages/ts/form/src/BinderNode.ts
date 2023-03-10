@@ -40,6 +40,30 @@ function getErrorPropertyName(valueError: ValueError<any>): string {
 }
 
 /**
+ * Validator for verifyng that the `validity.valid` state is true. Used
+ * internally in the binder nodes to take the bound HTML element's internal
+ * validation state into account.
+ */
+export class ValidityStateValidator<T, M extends AbstractModel<T>> implements Validator<T> {
+  public message = '';
+
+  private binderNode: BinderNode<T, M>;
+
+  // eslint-disable-next-line no-useless-constructor
+  constructor(binderNode: BinderNode<T, M>) {
+    this.binderNode = binderNode;
+  }
+
+  validate(): boolean {
+    if (!this.binderNode.validity) {
+      return true;
+    }
+
+    return this.binderNode.validity.valid;
+  }
+}
+
+/**
  * The BinderNode<T, M> class provides the form binding related APIs
  * with respect to a particular model instance.
  *
@@ -58,9 +82,21 @@ export class BinderNode<T, M extends AbstractModel<T>> {
 
   private defaultArrayItemValue?: T;
 
+  /**
+   * The validity state read from the bound element, if any. Represents the
+   * HTML element internal validation.
+   *
+   * For elements with `validity.valid === false`, the value in the
+   * bound element is considered as invalid.
+   */
+  public validity?: ValidityState;
+
+  private readonly validityStateValidator: ValidityStateValidator<T, M>;
+
   public constructor(model: M) {
     this.model = model;
     model[_binderNode] = this;
+    this.validityStateValidator = new ValidityStateValidator<T, M>(this);
     this.initializeValue();
     this[_validators] = model[_validators];
   }
@@ -353,6 +389,18 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   }
 
   private runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
+    if (this.validity && !this.validity.valid) {
+      // The element's internal validation reported invalid state.
+      // This means the `value` cannot be used and even meaningfully
+      // validated with the validators in the binder, because it is
+      // possibly cannot be parsed due to bad input in the element,
+      // for example, if date is typed with incorrect format.
+      //
+      // Skip running the validators, and instead assume the error
+      // from the validity state.
+      return [this.binder.requestValidation(this.model, this.validityStateValidator)];
+    }
+
     return this[_validators].map((validator) => this.binder.requestValidation(this.model, validator));
   }
 
