@@ -3,37 +3,42 @@ package dev.hilla.engine;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class EngineConfiguration {
-    public static final String RESOURCE_NAME = "hilla-engine-configuration.json";
-
+    public static final String DEFAULT_CONFIG_FILE_NAME = "hilla-engine-configuration.json";
     public static final String OPEN_API_PATH = "dev/hilla/openapi.json";
-
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD,
                     JsonAutoDetect.Visibility.ANY);
-
     private Path baseDir;
-    private LinkedHashSet<String> classPath;
+    private Path buildDir;
+    @JsonDeserialize(as = LinkedHashSet.class)
+    private Set<Path> classPath;
+    private Path classesDir;
     private GeneratorConfiguration generator;
+    private Path outputDir;
     private ParserConfiguration parser;
-    private String buildDir;
-    private String classesDir;
 
-    private String outputDir = "frontend/generated";
+    private EngineConfiguration() {
+    }
 
     /**
-     * Reads the configuration from the given base directory.
+     * Reads the configuration from the given base directory. Reads only files
+     * with the default name.
      *
-     * @param targetDir
-     *            the directory where the configuration file is expected to be
+     * @param configDir
+     *            a directory that contains the configuration file.
      * @return the configuration, or <code>null</code> if the configuration file
      *         does not exist
      * @throws IOException
@@ -41,9 +46,24 @@ public class EngineConfiguration {
      * @throws ConfigurationException
      *             if the configuration file is invalid
      */
-    public static EngineConfiguration load(File targetDir) throws IOException {
-        File configFile = new File(targetDir, RESOURCE_NAME);
+    public static EngineConfiguration loadDirectory(Path configDir)
+            throws IOException {
+        return load(configDir.resolve(DEFAULT_CONFIG_FILE_NAME).toFile());
+    }
 
+    /**
+     * Reads the configuration from the given file path.
+     *
+     * @param configFile
+     *            a path to a configuration file.
+     * @return the configuration, or <code>null</code> if the configuration file
+     *         does not exist
+     * @throws IOException
+     *             if thrown while reading the configuration file
+     * @throws ConfigurationException
+     *             if the configuration file is invalid
+     */
+    public static EngineConfiguration load(File configFile) throws IOException {
         if (!configFile.isFile()) {
             return null;
         }
@@ -60,75 +80,6 @@ public class EngineConfiguration {
         // classpath
         catch (RuntimeException e) {
             throw new ConfigurationException(e);
-        }
-    }
-
-    public void store(File targetDir) throws IOException {
-        MAPPER.writeValue(new File(targetDir, RESOURCE_NAME), this);
-    }
-
-    public Path getBaseDir() {
-        return baseDir;
-    }
-
-    public void setBaseDir(Path baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    public LinkedHashSet<String> getClassPath() {
-        return classPath;
-    }
-
-    public void setClassPath(LinkedHashSet<String> classPath) {
-        this.classPath = classPath;
-    }
-
-    public GeneratorConfiguration getGenerator() {
-        return generator;
-    }
-
-    public void setGenerator(GeneratorConfiguration generator) {
-        this.generator = generator;
-    }
-
-    public ParserConfiguration getParser() {
-        return parser;
-    }
-
-    public void setParser(ParserConfiguration parser) {
-        this.parser = parser;
-    }
-
-    public String getBuildDir() {
-        return buildDir;
-    }
-
-    public void setBuildDir(String buildDir) {
-        this.buildDir = buildDir;
-    }
-
-    public String getClassesDir() {
-        return classesDir;
-    }
-
-    public void setClassesDir(String classesDir) {
-        this.classesDir = classesDir;
-    }
-
-    public String getOutputDir() {
-        return outputDir;
-    }
-
-    public void setOutputDir(String outputDir) {
-        this.outputDir = outputDir;
-    }
-
-    public void setOutputDir(Path outputDir) {
-        if (outputDir.isAbsolute()) {
-            setOutputDir(baseDir.toAbsolutePath()
-                    .relativize(outputDir.toAbsolutePath()).toString());
-        } else {
-            setOutputDir(outputDir.toString());
         }
     }
 
@@ -150,17 +101,122 @@ public class EngineConfiguration {
                 && Objects.equals(outputDir, that.outputDir);
     }
 
+    public Path getBaseDir() {
+        return baseDir;
+    }
+
+    public Path getBuildDir() {
+        return buildDir;
+    }
+
+    public Set<Path> getClassPath() {
+        return classPath;
+    }
+
+    public Path getClassesDir() {
+        return classesDir;
+    }
+
+    public GeneratorConfiguration getGenerator() {
+        return generator;
+    }
+
+    public Path getOutputDir() {
+        return outputDir;
+    }
+
+    public ParserConfiguration getParser() {
+        return parser;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(baseDir, classPath, generator, parser, buildDir,
                 classesDir, outputDir);
     }
 
-    Path getOpenAPIFile() {
-        return baseDir.resolve(classesDir).resolve(OPEN_API_PATH);
+    public void store(File file) throws IOException {
+        MAPPER.writeValue(file, this);
     }
 
-    Path getOutputDirectory() {
-        return baseDir.resolve(outputDir);
+    Path getOpenAPIFile() {
+        return classesDir.resolve(OPEN_API_PATH);
+    }
+
+    public static final class Builder {
+        private final EngineConfiguration configuration = new EngineConfiguration();
+
+        public Builder(Path baseDir) {
+            configuration.baseDir = baseDir;
+            configuration.outputDir = baseDir.resolve("frontend/generated");
+        }
+
+        public Builder(EngineConfiguration configuration) {
+            this.configuration.baseDir = configuration.baseDir;
+            this.configuration.classPath = configuration.classPath;
+            this.configuration.generator = configuration.generator;
+            this.configuration.parser = configuration.parser;
+            this.configuration.buildDir = configuration.buildDir;
+            this.configuration.classesDir = configuration.classesDir;
+            this.configuration.outputDir = configuration.outputDir;
+        }
+
+        public Builder baseDir(Path value) {
+            configuration.baseDir = value;
+            return this;
+        }
+
+        public Builder buildDir(String value) {
+            return buildDir(Path.of(value));
+        }
+
+        public Builder buildDir(Path value) {
+            configuration.buildDir = resolve(value);
+            return this;
+        }
+
+        public Builder classPath(Collection<String> value) {
+            configuration.classPath = value.stream().map(Path::of)
+                    .map(this::resolve)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            return this;
+        }
+
+        public Builder classesDir(Path value) {
+            configuration.classesDir = resolve(value);
+            return this;
+        }
+
+        public Builder classesDir(String value) {
+            return classesDir(Path.of(value));
+        }
+
+        public EngineConfiguration create() {
+            return configuration;
+        }
+
+        public Builder generator(GeneratorConfiguration value) {
+            configuration.generator = value;
+            return this;
+        }
+
+        public Builder outputDir(String value) {
+            return outputDir(Path.of(value));
+        }
+
+        public Builder outputDir(Path value) {
+            configuration.outputDir = resolve(value);
+            return this;
+        }
+
+        public Builder parser(ParserConfiguration value) {
+            configuration.parser = value;
+            return this;
+        }
+
+        private Path resolve(Path path) {
+            return path.isAbsolute() ? path.normalize()
+                    : configuration.baseDir.resolve(path).normalize();
+        }
     }
 }
