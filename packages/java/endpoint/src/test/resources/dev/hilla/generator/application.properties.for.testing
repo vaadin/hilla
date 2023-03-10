@@ -1,7 +1,0 @@
-vaadin.connect.server=https://myhost.com
-vaadin.endpoint.prefix=/myprefix
-vaadin.connect.server.description=Vaadin backend server
-vaadin.connect.api.version=1.1.1
-vaadin.connect.application.title=My super application
-unrelated.property=empty value
-unexpected,format
