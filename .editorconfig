@@ -16,6 +16,3 @@ indent_size = 4
 [*.md]
 insert_final_newline = false
 trim_trailing_whitespace = false
-
-[{pom.xml, pom-*.xml}]
-indent_size = 4

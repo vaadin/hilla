@@ -19,15 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-import dev.hilla.engine.ConfigurationException;
-import dev.hilla.engine.EngineConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FallibleCommand;
 
+import dev.hilla.engine.ConfigurationException;
+import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.internal.runner.GradleRunner;
 import dev.hilla.internal.runner.MavenRunner;
 import dev.hilla.internal.runner.RunnerException;
@@ -36,12 +35,11 @@ import dev.hilla.internal.runner.RunnerException;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
-    private final File projectDirectory;
     private final String buildDirectoryName;
-    private final File outputDirectory;
-    private EngineConfiguration engineConfiguration;
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final File outputDirectory;
+    private final File projectDirectory;
+    private EngineConfiguration engineConfiguration;
 
     AbstractTaskEndpointGenerator(File projectDirectory,
             String buildDirectoryName, File outputDirectory) {
@@ -66,9 +64,10 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             throws ExecutionFailedException {
         EngineConfiguration config = null;
 
-        var buildDir = new File(projectDirectory, buildDirectoryName);
+        var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
+
         try {
-            config = EngineConfiguration.load(buildDir);
+            config = EngineConfiguration.loadDirectory(configDir);
         } catch (IOException | ConfigurationException e) {
             logger.warn(
                     "Hilla engine configuration found, but not read correctly",
@@ -102,7 +101,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             }
 
             try {
-                config = EngineConfiguration.load(buildDir);
+                config = EngineConfiguration.loadDirectory(configDir);
             } catch (IOException e) {
                 throw new ExecutionFailedException(
                         "Failed to read Hilla engine configuration", e);
@@ -110,7 +109,8 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         }
 
         if (config != null) {
-            config.setOutputDir(outputDirectory.toPath());
+            config = new EngineConfiguration.Builder(config)
+                    .outputDir(outputDirectory.toPath()).create();
         }
 
         this.engineConfiguration = config;

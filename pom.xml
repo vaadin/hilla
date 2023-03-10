@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
@@ -53,9 +53,9 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.153</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.version>2.1.13</swagger.version>
-    <swagger.codegen.version>3.0.20</swagger.codegen.version>
-    <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
+    <swagger.core.version>2.2.8</swagger.core.version>
+    <swagger.models.version>2.2.8</swagger.models.version>
+    <swagger.parser.v3.version>2.1.12</swagger.parser.v3.version>
     <jackson.version>2.14.1</jackson.version>
     <jackson.databind.version>2.14.1</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
@@ -66,7 +66,7 @@
     <spring.boot.version>3.0.2</spring.boot.version>
     <spring.data.commons.version>3.0.1</spring.data.commons.version>
     <spring.security.version>6.0.1</spring.security.version>
-    <testbench.version>9.0.0.alpha1</testbench.version>
+    <testbench.version>9.0.1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.1</jakarta.activation.api.version>
@@ -151,16 +151,6 @@
         <version>${jsr305.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-core</artifactId>
-        <version>${swagger.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-models</artifactId>
-        <version>${swagger.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
@@ -221,6 +211,11 @@
         <version>${slf4j.version}</version>
       </dependency>
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.11.0</version>
+      </dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.2</version>
@@ -248,11 +243,6 @@
         <artifactId>hamcrest-all</artifactId>
         <version>1.3</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -314,6 +304,8 @@
         <version>3.0.0-M7</version>
         <configuration>
           <useModulePath>false</useModulePath>
+          <parallel>all</parallel>
+          <useUnlimitedThreads>true</useUnlimitedThreads>
         </configuration>
       </plugin>
       <plugin>
