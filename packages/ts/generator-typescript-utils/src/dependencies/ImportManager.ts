@@ -116,8 +116,6 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 
   public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, id] of this.#map) {
-      // eslint-disable-next-line no-console
-      console.log(path);
       yield [
         path,
         ts.factory.createImportDeclaration(
@@ -163,8 +161,6 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, { id, isType }] of this.#map) {
-      // eslint-disable-next-line no-console
-      console.log(path, isType);
       yield [
         path,
         ts.factory.createImportDeclaration(
