@@ -12,27 +12,26 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import dev.hilla.parser.utils.OpenAPIPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.hilla.parser.core.OpenAPIFileType;
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.core.PluginManager;
+import dev.hilla.parser.utils.JsonPrinter;
 
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
     private final Path baseDir;
-    private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
     private final ClassLoader classLoader;
-    private final Set<String> classPath;
+    private final Set<Path> classPath;
+    private final Path openAPIFile;
+    private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
     private String endpointAnnotationName = "dev.hilla.Endpoint";
     private String endpointExposedAnnotationName = "dev.hilla.EndpointExposed";
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
-
-    private final Path openAPIFile;
 
     public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader) {
         this.baseDir = conf.getBaseDir();
@@ -42,23 +41,10 @@ public final class ParserProcessor {
         applyConfiguration(conf.getParser());
     }
 
-    private void applyConfiguration(ParserConfiguration parserConfiguration) {
-        if (parserConfiguration == null) {
-            return;
-        }
-
-        parserConfiguration.getEndpointAnnotation()
-                .ifPresent(this::applyEndpointAnnotation);
-        parserConfiguration.getEndpointExposedAnnotation()
-                .ifPresent(this::applyEndpointExposedAnnotation);
-        parserConfiguration.getOpenAPIBasePath()
-                .ifPresent(this::applyOpenAPIBase);
-        parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
-        parserConfiguration.getPackages().ifPresent(this::applyExposedPackages);
-    }
-
     public void process() throws ParserException {
-        var parser = new Parser().classLoader(classLoader).classPath(classPath)
+        var parser = new Parser().classLoader(classLoader)
+                .classPath(classPath.stream().map(Path::toString)
+                        .collect(Collectors.toSet()))
                 .endpointAnnotation(endpointAnnotationName)
                 .endpointExposedAnnotation(endpointExposedAnnotationName)
                 .exposedPackages(exposedPackages);
@@ -76,8 +62,7 @@ public final class ParserProcessor {
 
         try {
             Files.createDirectories(openAPIFile.getParent());
-            openAPIString = new OpenAPIPrinter().pretty()
-                    .writeAsString(openAPI);
+            openAPIString = new JsonPrinter().pretty().writeAsString(openAPI);
         } catch (IOException e) {
             throw new ParserException("Unable to prepare OpenAPI definition",
                     e);
@@ -99,14 +84,19 @@ public final class ParserProcessor {
                 });
     }
 
-    // Workaround for IOException in lambda
-    private String readFromFile(Path path) {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            logger.error("Unable to read file", e);
-            return null;
+    private void applyConfiguration(ParserConfiguration parserConfiguration) {
+        if (parserConfiguration == null) {
+            return;
         }
+
+        parserConfiguration.getEndpointAnnotation()
+                .ifPresent(this::applyEndpointAnnotation);
+        parserConfiguration.getEndpointExposedAnnotation()
+                .ifPresent(this::applyEndpointExposedAnnotation);
+        parserConfiguration.getOpenAPIBasePath()
+                .ifPresent(this::applyOpenAPIBase);
+        parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
+        parserConfiguration.getPackages().ifPresent(this::applyExposedPackages);
     }
 
     private void applyEndpointAnnotation(
@@ -121,16 +111,16 @@ public final class ParserProcessor {
                 .requireNonNull(endpointExposedAnnotationName);
     }
 
+    private void applyExposedPackages(@Nonnull List<String> exposedPackages) {
+        this.exposedPackages = exposedPackages;
+    }
+
     private void applyOpenAPIBase(@Nonnull String openAPIBasePath) {
         this.openAPIBasePath = openAPIBasePath;
     }
 
     private void applyPlugins(@Nonnull ParserConfiguration.Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
-    }
-
-    private void applyExposedPackages(@Nonnull List<String> exposedPackages) {
-        this.exposedPackages = exposedPackages;
     }
 
     private void prepareOpenAPIBase(Parser parser) {
@@ -162,5 +152,15 @@ public final class ParserProcessor {
                 .collect(Collectors.toList());
 
         parser.plugins(loadedPlugins);
+    }
+
+    // Workaround for IOException in lambda
+    private String readFromFile(Path path) {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            logger.error("Unable to read file", e);
+            return null;
+        }
     }
 }

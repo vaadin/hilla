@@ -62,19 +62,4 @@ public final class TestUtils {
         }
         return text;
     }
-
-    public static void equalsIgnoreWhiteSpaces(String expected, String actual) {
-        equalsIgnoreWhiteSpaces(null, expected, actual);
-    }
-
-    public static void equalsIgnoreWhiteSpaces(String msg, String expected,
-            String actual) {
-        try {
-            Assert.assertEquals(msg,
-                    IndentationUtils.unifyIndentation(expected, 2),
-                    IndentationUtils.unifyIndentation(actual, 2));
-        } catch (IndentationUtils.IndentationSyntaxException e) {
-            throw new AssertionError("Failed to unify indentation", e);
-        }
-    }
 }
