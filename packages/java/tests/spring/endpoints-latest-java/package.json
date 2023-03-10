@@ -1,6 +1,7 @@
 {
   "name": "no-name",
   "license": "UNLICENSED",
+  "type": "module",
   "dependencies": {
     "@hilla/form": "../../../../ts/form",
     "@hilla/frontend": "../../../../ts/hilla-frontend",
