@@ -107,18 +107,19 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .process());
     }
 
-    private Optional<PackageInfoModel> findClosestPackage(
-            NodePath<?> nodePath) {
+    private Optional<ClassInfoModel> findClosestClass(NodePath<?> nodePath) {
         return nodePath.stream().map(NodePath::getNode)
                 .filter(node -> node.getSource() instanceof ClassInfoModel)
-                .map(node -> (ClassInfoModel) node.getSource()).findFirst()
-                .map(ClassInfoModel::getPackage);
+                .map(node -> (ClassInfoModel) node.getSource()).findFirst();
     }
 
     private Stream<AnnotationInfoModel> getPackageAnnotationsStream(
             NodePath<?> nodePath) {
-        return findClosestPackage(nodePath).map(PackageInfoModel::getAncestors)
-                .map(Collection::stream).orElseGet(Stream::empty)
+        return findClosestClass(nodePath)
+                // Find all available ancestor packages
+                .map(ClassInfoModel::findAncestors).map(Collection::stream)
+                .orElseGet(Stream::empty)
+                // Get all annotations from packages
                 .map(PackageInfoModel::getAnnotations)
                 .flatMap(Collection::stream);
     }
