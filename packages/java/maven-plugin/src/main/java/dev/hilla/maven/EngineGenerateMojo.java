@@ -1,6 +1,5 @@
 package dev.hilla.maven;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -40,11 +39,11 @@ public final class EngineGenerateMojo extends AbstractMojo {
             var baseDir = project.getBasedir().toPath();
             var buildDir = baseDir.resolve(project.getBuild().getDirectory());
             var conf = Objects.requireNonNull(
-                    EngineConfiguration.load(buildDir.toFile()));
+                    EngineConfiguration.loadDirectory(buildDir));
             var classPath = conf.getClassPath();
             var urls = new ArrayList<URL>(classPath.size());
             for (var classPathItem : classPath) {
-                urls.add(new File(classPathItem).toURI().toURL());
+                urls.add(classPathItem.toUri().toURL());
             }
             var classLoader = new URLClassLoader(urls.toArray(URL[]::new),
                     getClass().getClassLoader());

@@ -1,19 +1,19 @@
 package dev.hilla.maven;
 
-import java.io.File;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.engine.GeneratorProcessor;
-import dev.hilla.engine.ParserProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.engine.GeneratorProcessor;
+import dev.hilla.engine.ParserProcessor;
 
 public class EngineGenerateMojoTest extends AbstractMojoTest {
 
@@ -36,9 +36,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     assertInstanceOf(URLClassLoader.class, classLoader);
                     assertEquals(classLoader.getParent(),
                             EngineGenerateMojo.class.getClassLoader());
-                    assertArrayEquals(
-                            new URL[] { new File("build/test-classes").toURI()
-                                    .toURL() },
+                    assertArrayEquals(new URL[] { getTemporaryDirectory()
+                            .resolve("build/test-classes").toUri().toURL() },
                             ((URLClassLoader) classLoader).getURLs());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
@@ -61,12 +60,12 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             // Use reference EngineConfiguration
             mockedStaticEngineConfiguration
                     .when(() -> EngineConfiguration
-                            .load(Mockito.eq(getBuildDirectory().toFile())))
+                            .loadDirectory(Mockito.eq(getBuildDirectory())))
                     .thenReturn(getEngineConfiguration());
 
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
-                    getTestConfigurartion());
+                    getTestConfiguration());
             setVariableValueToObject(engineGenerateMojo, "project",
                     getMavenProject());
             engineGenerateMojo.execute();

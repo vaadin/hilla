@@ -1,6 +1,6 @@
 package dev.hilla.parser.plugins.backbone.test.helpers;
 
-import static dev.hilla.parser.testutils.OpenAPIAssertions.assertEquals;
+import static dev.hilla.parser.testutils.JsonAssertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -19,10 +19,9 @@ public class MavenRunner implements CommandRunner {
     private static final boolean IS_WINDOWS = FrontendUtils.isWindows();
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MavenRunner.class);
-
+    private final String[] args;
     private final Path projectDir;
     private final boolean windowsOS;
-    private final String[] args;
 
     /**
      * Creates a Maven runner.
@@ -60,20 +59,6 @@ public class MavenRunner implements CommandRunner {
     }
 
     /**
-     * Returns the name of the maven executable, depending on the OS.
-     */
-    public String mavenExecutable() {
-        return windowsOS ? "mvn.cmd" : "mvn";
-    }
-
-    /**
-     * Returns the name of the maven wrapper executable, depending on the OS.
-     */
-    public String wrapperExecutable() {
-        return windowsOS ? ".\\mvnw.cmd" : "./mvnw";
-    }
-
-    /**
      * Selects the maven executable to use. Prefer the maven wrapper if it
      * exists.
      */
@@ -86,6 +71,13 @@ public class MavenRunner implements CommandRunner {
             LOGGER.debug("No maven wrapper found");
             return mavenExecutable();
         }
+    }
+
+    /**
+     * Returns the name of the maven executable, depending on the OS.
+     */
+    public String mavenExecutable() {
+        return windowsOS ? "mvn.cmd" : "mvn";
     }
 
     @Override
@@ -119,5 +111,12 @@ public class MavenRunner implements CommandRunner {
             throw new RunnerException(
                     "Maven command execution failed with exit code" + exitCode);
         }
+    }
+
+    /**
+     * Returns the name of the maven wrapper executable, depending on the OS.
+     */
+    public String wrapperExecutable() {
+        return windowsOS ? ".\\mvnw.cmd" : "./mvnw";
     }
 }

@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import dev.hilla.generator.tsmodel.TsFormEndpoint.Id;
+import dev.hilla.endpoints.Id;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
