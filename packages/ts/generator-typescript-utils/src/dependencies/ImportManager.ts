@@ -6,6 +6,8 @@ import StatementRecordManager, { StatementRecord } from './StatementRecordManage
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 
+const addJsExtension = (path: string) => path.replace(/^(.*?)(\.js)?$/, '$1.js');
+
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
@@ -114,12 +116,14 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 
   public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, id] of this.#map) {
+      // eslint-disable-next-line no-console
+      console.log(path);
       yield [
         path,
         ts.factory.createImportDeclaration(
           undefined,
           ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
-          ts.factory.createStringLiteral(`${path}.js`),
+          ts.factory.createStringLiteral(addJsExtension(path)),
         ),
       ];
     }
@@ -159,12 +163,14 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, { id, isType }] of this.#map) {
+      // eslint-disable-next-line no-console
+      console.log(path, isType);
       yield [
         path,
         ts.factory.createImportDeclaration(
           undefined,
           ts.factory.createImportClause(isType, id, undefined),
-          ts.factory.createStringLiteral(`${path}.js`),
+          ts.factory.createStringLiteral(addJsExtension(path)),
         ),
       ];
     }
