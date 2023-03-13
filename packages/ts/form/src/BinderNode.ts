@@ -26,8 +26,8 @@ import {
   AbstractModel,
   ArrayModel,
   getBinderNode,
-  ModelConstructor,
-  ModelValue,
+  type ModelConstructor,
+  type ModelValue,
   ObjectModel,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';

@@ -1,6 +1,9 @@
-import _Cookie from 'js-cookie';
+import Cookies from 'js-cookie';
 
 const { pathname } = new URL(document.baseURI);
-const Cookie = _Cookie.withAttributes({ path: pathname.endsWith('/') ? pathname.slice(0, -1) : pathname });
 
-export default Cookie;
+const _Cookies: Cookies.CookiesStatic<string> = Cookies.withAttributes({
+  path: pathname.endsWith('/') ? pathname.slice(0, -1) : pathname,
+});
+
+export default _Cookies;

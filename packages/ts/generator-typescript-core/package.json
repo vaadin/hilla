@@ -10,16 +10,19 @@
   "scripts": {
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc --isolatedModules -p ./tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {
       "default": "./index.js"
+    },
+    "./File.js": {
+      "default": "./File.js"
     },
     "./Generator.js": {
       "default": "./Generator.js"
@@ -35,6 +38,9 @@
     },
     "./Schema.js": {
       "default": "./Schema.js"
+    },
+    "./SharedStorage.js": {
+      "types": "./SharedStorage.d.ts"
     },
     "./utils.js": {
       "default": "./utils.js"
@@ -67,7 +73,7 @@
     "@hilla/generator-typescript-utils": "^2.0.0-beta1",
     "meow": "^10.1.1",
     "openapi-types": "^9.3.0",
-    "typescript": "^4.5.0-beta"
+    "typescript": "^5.0.1-rc"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",

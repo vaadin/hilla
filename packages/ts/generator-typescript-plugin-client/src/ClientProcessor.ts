@@ -7,18 +7,18 @@ import type { SourceFile } from 'typescript';
 import ts from 'typescript';
 
 export default class ClientProcessor {
-  readonly #filePath: string;
   readonly #owner: Plugin;
+  readonly #outputPath: string;
 
   public constructor(fileName: string, owner: Plugin) {
-    this.#filePath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
+    this.#outputPath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
     this.#owner = owner;
   }
 
   public process(): SourceFile {
-    this.#owner.logger.debug(`Generating ${this.#filePath}`);
+    this.#owner.logger.debug(`Generating ${this.#outputPath}`);
 
-    const { exports, imports, paths } = new DependencyManager(new PathManager());
+    const { exports, imports, paths } = new DependencyManager(new PathManager({ extension: '.js' }));
     const clientClassId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'ConnectClient');
 
     const clientVarId = createFullyUniqueIdentifier('client');
@@ -49,6 +49,6 @@ export default class ClientProcessor {
       ),
     );
 
-    return createSourceFile([...imports.toCode(), declaration, ...exports.toCode()], this.#filePath);
+    return createSourceFile([...imports.toCode(), declaration, ...exports.toCode()], this.#outputPath);
   }
 }

@@ -98,7 +98,6 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     const responseType = this.#prepareResponseType();
 
     return ts.factory.createFunctionDeclaration(
-      undefined,
       [ts.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
       undefined,
       methodIdentifier,

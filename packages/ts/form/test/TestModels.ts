@@ -6,7 +6,7 @@ import {
   ArrayModel,
   BooleanModel,
   EnumModel,
-  ModelConstructor,
+  type ModelConstructor,
   NotBlank,
   NumberModel,
   ObjectModel,
@@ -15,7 +15,7 @@ import {
   Required,
   Size,
   StringModel,
-} from '../src';
+} from '../src/index.js';
 
 export interface IdEntity {
   idString: string;

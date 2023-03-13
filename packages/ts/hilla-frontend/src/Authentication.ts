@@ -1,5 +1,5 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import Cookie from './CookieUtils.js';
+import Cookies from './CookieUtils.js';
 import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
@@ -152,7 +152,7 @@ export async function logout(options?: LogoutOptions) {
       throw error;
     }
   } finally {
-    Cookie.remove(JWT_COOKIE_NAME);
+    Cookies.remove(JWT_COOKIE_NAME);
   }
 }
 

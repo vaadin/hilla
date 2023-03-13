@@ -1,5 +1,5 @@
-import { readFile, writeFile } from 'fs/promises';
-import { fileURLToPath, URL } from 'url';
+import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 const argv = process.argv.slice(2);
 const shouldUpdate = argv.includes('-u') || argv.includes('--update');
