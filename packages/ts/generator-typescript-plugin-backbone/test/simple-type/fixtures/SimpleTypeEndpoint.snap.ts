@@ -1,5 +1,5 @@
 import { EndpointRequestInit as EndpointRequestInit_1 } from "@hilla/frontend";
-import client_1 from "./connect-client.default";
+import client_1 from "./connect-client.default.js";
 async function getArray_1(init?: EndpointRequestInit_1): Promise<Array<number> | undefined> { return client_1.call("SimpleTypeEndpoint", "getArray", {}, init); }
 async function getBigDecimal_1(init?: EndpointRequestInit_1): Promise<number | undefined> { return client_1.call("SimpleTypeEndpoint", "getBigDecimal", {}, init); }
 async function getBigInteger_1(init?: EndpointRequestInit_1): Promise<number | undefined> { return client_1.call("SimpleTypeEndpoint", "getBigInteger", {}, init); }
