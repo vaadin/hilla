@@ -41,26 +41,20 @@ function getErrorPropertyName(valueError: ValueError<any>): string {
 }
 
 /**
- * Validator for verifyng that the `validity.valid` state is true. Used
- * internally in the binder nodes to take the bound HTML element's internal
- * validation state into account.
+ * Validator that reports an error when the bound HTML element validation
+ * returns false from `element.checkValidity()` and `element.validity.valid`.
  */
 export class ValidityStateValidator<T, M extends AbstractModel<T>> implements Validator<T> {
   public message = '';
 
   private binderNode: BinderNode<T, M>;
 
-  // eslint-disable-next-line no-useless-constructor
   constructor(binderNode: BinderNode<T, M>) {
     this.binderNode = binderNode;
   }
 
   validate(): boolean {
-    if (!this.binderNode[_validity]) {
-      return true;
-    }
-
-    return this.binderNode[_validity].valid;
+    return false;
   }
 }
 
