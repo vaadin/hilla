@@ -1,6 +1,6 @@
 import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, AssertFalse as AssertFalse_1, AssertTrue as AssertTrue_1, DecimalMax as DecimalMax_1, DecimalMin as DecimalMin_1, Digits as Digits_1, Email as Email_1, Future as Future_1, Max as Max_1, Min as Min_1, Negative as Negative_1, NegativeOrZero as NegativeOrZero_1, NotBlank as NotBlank_1, NotEmpty as NotEmpty_1, NotNull as NotNull_1, Null as Null_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, Past as Past_1, Pattern as Pattern_1, Positive as Positive_1, PositiveOrZero as PositiveOrZero_1, Size as Size_1, StringModel as StringModel_1 } from "@hilla/form";
-import FormEntityModel_1 from "./FormEntityModel";
-import type FormValidationConstraints_1 from "./FormValidationConstraints";
+import FormEntityModel_1 from "./FormEntityModel.js";
+import type FormValidationConstraints_1 from "./FormValidationConstraints.js";
 class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormValidationConstraints_1;
     get list(): ArrayModel_1<string, StringModel_1> {

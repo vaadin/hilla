@@ -1,5 +1,5 @@
 import { _getPropertyModel as _getPropertyModel_1, BooleanModel as BooleanModel_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
-import type FormDataPrimitives_1 from "./FormDataPrimitives";
+import type FormDataPrimitives_1 from "./FormDataPrimitives.js";
 class FormDataPrimitivesModel<T extends FormDataPrimitives_1 = FormDataPrimitives_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormDataPrimitives_1;
     get stringProp(): StringModel_1 {

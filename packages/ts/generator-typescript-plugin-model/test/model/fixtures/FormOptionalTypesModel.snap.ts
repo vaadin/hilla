@@ -1,6 +1,6 @@
 import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
-import FormEntityModel_1 from "./FormEntityModel";
-import type FormOptionalTypes_1 from "./FormOptionalTypes";
+import FormEntityModel_1 from "./FormEntityModel.js";
+import type FormOptionalTypes_1 from "./FormOptionalTypes.js";
 class FormOptionalTypesModel<T extends FormOptionalTypes_1 = FormOptionalTypes_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormOptionalTypes_1;
     get optionalString(): StringModel_1 {
