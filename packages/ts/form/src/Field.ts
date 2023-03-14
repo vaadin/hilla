@@ -1,6 +1,7 @@
 import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
 import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import { _validity, defaultValidity } from './Validity.js';
 
 interface FieldBase<T> {
   required: boolean;
@@ -40,29 +41,6 @@ interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
 }
 
 export type FieldStrategy<T = any> = Field<T> & FieldConstraintValidation;
-
-/**
- * Default validity state with `valid` flag set, assuming a valid state.
- */
-export const defaultValidity: ValidityState = {
-  badInput: false,
-  customError: false,
-  patternMismatch: false,
-  rangeOverflow: false,
-  rangeUnderflow: false,
-  stepMismatch: false,
-  tooLong: false,
-  tooShort: false,
-  typeMismatch: false,
-  valueMissing: false,
-  valid: true,
-};
-
-/**
- * Fallback checkValidity() implementation that assumes a valid state.
- * @return true
- */
-const checkValidityFallback: FieldConstraintValidation['checkValidity'] = () => true;
 
 export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T> {
   public abstract required: boolean;
@@ -117,7 +95,7 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
 
   public checkValidity() {
     if (!this.element.checkValidity) {
-      return checkValidityFallback();
+      return true;
     }
 
     const valid = this.element.checkValidity();
@@ -281,7 +259,7 @@ export const field = directive(
             fieldState.value = fieldState.strategy.value;
           }
           fieldState.validity = fieldState.strategy.validity;
-          binderNode.validity = fieldState.validity;
+          binderNode[_validity] = fieldState.validity;
           binderNode.value = convertFieldValue(model, fieldState.value);
           if (effect !== undefined) {
             effect.call(element, element);

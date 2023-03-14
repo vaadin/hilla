@@ -31,6 +31,7 @@ import {
   ObjectModel,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';
+import { _validity } from './Validity.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
 const _visited = Symbol('visited');
@@ -55,11 +56,11 @@ export class ValidityStateValidator<T, M extends AbstractModel<T>> implements Va
   }
 
   validate(): boolean {
-    if (!this.binderNode.validity) {
+    if (!this.binderNode[_validity]) {
       return true;
     }
 
-    return this.binderNode.validity.valid;
+    return this.binderNode[_validity].valid;
   }
 }
 
@@ -89,7 +90,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * For elements with `validity.valid === false`, the value in the
    * bound element is considered as invalid.
    */
-  public validity?: ValidityState;
+  public [_validity]?: ValidityState;
 
   private readonly validityStateValidator: ValidityStateValidator<T, M>;
 
@@ -389,7 +390,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   }
 
   private runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
-    if (this.validity && !this.validity.valid) {
+    if (this[_validity] && !this[_validity].valid) {
       // The element's internal validation reported invalid state.
       // This means the `value` cannot be used and even meaningfully
       // validated with the validators in the binder, because it is
