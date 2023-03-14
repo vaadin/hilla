@@ -92,6 +92,8 @@ describe('form/Validators', () => {
     assert.isTrue(validator.validate('a'));
     assert.isFalse(validator.validate(''));
     assert.isFalse(validator.validate(undefined));
+    assert.isFalse(validator.validate(' '));
+    assert.isFalse(validator.validate('\t'));
   });
 
   it('AssertTrue', () => {
