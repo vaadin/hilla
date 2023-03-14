@@ -390,3 +390,17 @@ export class Pattern extends AbstractValidator<string> {
     return matches(value, this.regexp);
   }
 }
+
+/**
+ * Validator that reports an error when the bound HTML element validation
+ * returns false from `element.checkValidity()` and `element.validity.valid`.
+ */
+export class ValidityStateValidator<T> extends AbstractValidator<T> {
+  public constructor(attrs: ValidatorAttributes = {}) {
+    super({ message: '', ...attrs });
+  }
+
+  public override validate(): boolean {
+    return false;
+  }
+}

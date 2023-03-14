@@ -31,6 +31,7 @@ import {
   ObjectModel,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';
+import { ValidityStateValidator } from './Validators.js';
 import { _validity } from './Validity.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
@@ -38,24 +39,6 @@ const _visited = Symbol('visited');
 
 function getErrorPropertyName(valueError: ValueError<any>): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
-}
-
-/**
- * Validator that reports an error when the bound HTML element validation
- * returns false from `element.checkValidity()` and `element.validity.valid`.
- */
-export class ValidityStateValidator<T, M extends AbstractModel<T>> implements Validator<T> {
-  public message = '';
-
-  private binderNode: BinderNode<T, M>;
-
-  constructor(binderNode: BinderNode<T, M>) {
-    this.binderNode = binderNode;
-  }
-
-  validate(): boolean {
-    return false;
-  }
 }
 
 /**
@@ -86,12 +69,12 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    */
   public [_validity]?: ValidityState;
 
-  private readonly validityStateValidator: ValidityStateValidator<T, M>;
+  private readonly validityStateValidator: ValidityStateValidator<T>;
 
   public constructor(model: M) {
     this.model = model;
     model[_binderNode] = this;
-    this.validityStateValidator = new ValidityStateValidator<T, M>(this);
+    this.validityStateValidator = new ValidityStateValidator<T>();
     this.initializeValue();
     this[_validators] = model[_validators];
   }
