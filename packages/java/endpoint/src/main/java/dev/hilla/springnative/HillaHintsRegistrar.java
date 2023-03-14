@@ -1,19 +1,16 @@
 package dev.hilla.springnative;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import dev.hilla.engine.EngineConfiguration;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -26,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.push.PushEndpoint;
 import dev.hilla.push.messages.fromclient.AbstractServerMessage;
 import dev.hilla.push.messages.toclient.AbstractClientMessage;
@@ -67,9 +65,10 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     new InputStreamReader(resource.openStream()));
             String openApiAsText = reader.lines()
                     .collect(Collectors.joining("\n"));
-            List<Class<?>> types = parseOpenApi(openApiAsText);
-            for (Class<?> type : types) {
-                hints.reflection().registerType(type, MemberCategory.values());
+            Set<String> types = parseOpenApi(openApiAsText);
+            for (String type : types) {
+                hints.reflection().registerType(TypeReference.of(type),
+                        MemberCategory.values());
             }
         } catch (IOException e) {
             logger.error("Error while scanning and registering endpoint types",
@@ -82,34 +81,27 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
      *
      * @param openApiAsText
      *            the open api JSON as text
-     * @return a list of custom types used
+     * @return a set of custom types used
      * @throws IOException
      *             if parsing fails
      */
-    public static List<Class<?>> parseOpenApi(String openApiAsText)
+    public static Set<String> parseOpenApi(String openApiAsText)
             throws IOException {
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
+        if (!openApi.has("components")) {
+            return Collections.emptySet();
+        }
         ObjectNode schemas = (ObjectNode) openApi.get("components")
                 .get("schemas");
-        List<Class<?>> types = new ArrayList<>();
-        schemas.fieldNames().forEachRemaining(type -> {
-            try {
-                types.add(Class.forName(type));
-            } catch (ClassNotFoundException e) {
-                // The type in openapi.json is currently the canonical name so
-                // if it is an inner
-                // class it should use $ instead of .
-                int lastDot = type.lastIndexOf('.');
-                if (lastDot >= 0) {
-                    String modifiedName = type.substring(0, lastDot) + "$"
-                            + type.substring(lastDot + 1);
-                    try {
-                        types.add(Class.forName(modifiedName));
-                    } catch (ClassNotFoundException ee) {
-                    }
-                }
-            }
-        });
+
+        Set<String> types = new HashSet<>();
+        if (schemas != null) {
+
+            schemas.fieldNames().forEachRemaining(type -> {
+                types.add(type);
+            });
+        }
+
         return types;
 
     }
