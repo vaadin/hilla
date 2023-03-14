@@ -139,7 +139,7 @@ export class NotBlank extends Required<any> {
   }
 
   public override validate(value: any) {
-    return new NotEmpty().validate(value);
+    return super.validate(value) && new NotNull().validate(value) && value.trim().length > 0;
   }
 }
 export class AssertTrue extends AbstractValidator<any> {

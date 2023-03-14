@@ -136,19 +136,6 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Override snakeyaml via jackson-dataformat-yaml in swagger-codegen -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-
-        <!-- Override slf4j-ext in swagger-codegen -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-ext</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
         <!-- Needed for security annotations and checks -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
@@ -166,48 +153,6 @@
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
             <version>${javaparser.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.codegen.v3</groupId>
-            <artifactId>swagger-codegen</artifactId>
-            <version>${swagger.codegen.version}</version>
-            <exclusions>
-                <!-- Cause problems when running tests from IDE -->
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-                <!-- Unncessary dependencies that might cause problems
-                if user has a different version -->
-                <exclusion>
-                    <groupId>javax.mail</groupId>
-                    <artifactId>mailapi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.json</groupId>
-                    <artifactId>json</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.codegen.v3</groupId>
-            <artifactId>swagger-codegen-generators</artifactId>
-            <version>${swagger.codegen.generators.version}</version>
-            <exclusions>
-                <!-- Cause problems when running tests from IDE -->
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Fusion Testing dependencies -->

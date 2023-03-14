@@ -31,7 +31,7 @@ public final class GeneratorProcessor {
     public GeneratorProcessor(EngineConfiguration conf, String nodeCommand) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
-        this.outputDirectory = conf.getOutputDirectory();
+        this.outputDirectory = conf.getOutputDir();
         this.nodeCommand = nodeCommand;
         applyConfiguration(conf.getGenerator());
     }
