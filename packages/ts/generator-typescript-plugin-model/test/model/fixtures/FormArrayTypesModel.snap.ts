@@ -1,10 +1,10 @@
 import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
-import type FormArrayTypes_1 from "./FormArrayTypes";
-import FormArrayTypesModel_1 from "./FormArrayTypesModel";
-import type FormEntity_1 from "./FormEntity";
-import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
-import FormEntityHierarchyModel_1 from "./FormEntityHierarchyModel";
-import FormEntityModel_1 from "./FormEntityModel";
+import type FormArrayTypes_1 from "./FormArrayTypes.js";
+import FormArrayTypesModel_1 from "./FormArrayTypesModel.js";
+import type FormEntity_1 from "./FormEntity.js";
+import type FormEntityHierarchy_1 from "./FormEntityHierarchy.js";
+import FormEntityHierarchyModel_1 from "./FormEntityHierarchyModel.js";
+import FormEntityModel_1 from "./FormEntityModel.js";
 class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormArrayTypes_1;
     get stringList(): ArrayModel_1<string, StringModel_1> {
