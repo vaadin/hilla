@@ -1,7 +1,7 @@
 /* eslint-disable lit/no-template-arrow, no-unused-expressions, no-shadow */
 import { assert, expect } from '@open-wc/testing';
 import sinon from 'sinon';
-import { css, html, LitElement, property } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -111,7 +111,7 @@ class OrderView extends LitElement {
           </output>
         </div>`,
       )}
-      <h4>Total: <number-output id="total" ${field(total)}"></number-output></h4>
+      <h4>Total: <number-output id="total" ${field(total)}></number-output></h4>
       <div id="submitting">${this.binder.submitting}</div>
     `;
   }
