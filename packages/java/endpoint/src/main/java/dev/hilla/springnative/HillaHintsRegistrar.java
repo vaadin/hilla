@@ -74,6 +74,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             logger.error("Error while scanning and registering endpoint types",
                     e);
         }
+        hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
     }
 
     /**
