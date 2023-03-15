@@ -1,14 +1,10 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'vite';
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
-
-// The monorepo root directory
-const packagesDir = fileURLToPath(new URL('packages/ts', import.meta.url));
 
 async function prepareAliases() {
   try {
@@ -23,13 +19,10 @@ async function prepareAliases() {
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
-  const [packages, tsconfig, alias] = await Promise.all([
-    readdir(packagesDir).then((p) => p.map((filename) => resolve(packagesDir, filename))),
+  const [tsconfig, alias] = await Promise.all([
     readFile(resolve(cwd, 'tsconfig.json'), 'utf8').then((f) => JSON.parse(f)),
     prepareAliases(),
   ]);
-
-  const index = packages.indexOf(cwd);
 
   return {
     build: {
@@ -43,10 +36,6 @@ export default defineConfig(async () => {
           useDefineForClassFields: false,
         },
       },
-    },
-    server: {
-      // necessary to avoid simultaneous port occupation
-      port: 5173 + index,
     },
     resolve: {
       alias,

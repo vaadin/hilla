@@ -1,4 +1,3 @@
-const { readdir } = require('node:fs/promises');
 const { resolve } = require('node:path');
 const { parseArgs } = require('node:util');
 const karmaChromeLauncher = require('karma-chrome-launcher');
@@ -9,9 +8,6 @@ const karmaVite = require('karma-vite');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
-
-// The monorepo root directory
-const packagesDir = resolve(__dirname, 'packages/ts');
 
 const {
   values: { coverage, watch: _watch },
@@ -31,10 +27,7 @@ const {
 const isCI = !!process.env.CI;
 const watch = !!_watch && !isCI;
 
-module.exports = async (config) => {
-  const packages = (await readdir(packagesDir)).map((filename) => resolve(packagesDir, filename));
-  const index = packages.indexOf(cwd);
-
+module.exports = (config) => {
   config.set({
     plugins: [karmaMocha, karmaChromeLauncher, karmaVite, karmaCoverage, karmaSpecReporter],
 
@@ -63,9 +56,6 @@ module.exports = async (config) => {
     autoWatch: watch,
     singleRun: !watch,
 
-    // necessary to avoid simultaneous port occupation
-    port: 9876 + index,
-
     coverageReporter: {
       dir: '.coverage/',
       reporters: [!isCI && { type: 'html', subdir: 'html' }, { type: 'lcovonly', subdir: '.' }].filter(Boolean),
@@ -73,7 +63,7 @@ module.exports = async (config) => {
 
     vite: {
       config: {
-        cacheDir: resolve(cwd, '.vite')
+        cacheDir: resolve(cwd, '.vite'),
       }
     }
   });

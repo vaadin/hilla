@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "karma start ../../../karma.config.cjs",
+    "test": "karma start ../../../karma.config.cjs --port 9878",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
