@@ -11,7 +11,7 @@ import {
   logout,
   type OnInvalidSessionCallback,
 } from '../src/index.js';
-import Cookies from '../src/CookieUtils.js';
+import CookieManager from '../src/CookieManager.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   clearSpringCsrfMetaTags,
@@ -150,7 +150,7 @@ describe('@hilla/frontend', () => {
     describe('logout', () => {
       afterEach(() => {
         fetchMock.restore();
-        Cookies.remove(JWT_COOKIE_NAME);
+        CookieManager.remove(JWT_COOKIE_NAME);
       });
 
       it('should set the csrf token on logout', async () => {
@@ -201,11 +201,11 @@ describe('@hilla/frontend', () => {
           { headers: requestHeaders },
         );
 
-        Cookies.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
+        CookieManager.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
         await logout();
 
         expect(fetchMock.calls()).to.have.lengthOf(1);
-        expect(Cookies.get(JWT_COOKIE_NAME)).to.be.undefined;
+        expect(CookieManager.get(JWT_COOKIE_NAME)).to.be.undefined;
       });
 
       it('should clear the JWT cookie on failed server logout', async () => {
@@ -217,7 +217,7 @@ describe('@hilla/frontend', () => {
           throw fakeError;
         });
 
-        Cookies.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
+        CookieManager.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
         let thrownError;
         try {
           await logout();
@@ -225,7 +225,7 @@ describe('@hilla/frontend', () => {
           thrownError = err;
         }
         expect(thrownError).to.equal(fakeError);
-        expect(Cookies.get(JWT_COOKIE_NAME)).to.be.undefined;
+        expect(CookieManager.get(JWT_COOKIE_NAME)).to.be.undefined;
       });
 
       // when started the app offline, the spring csrf meta tags are not available

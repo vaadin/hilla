@@ -5,7 +5,7 @@ import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { atmosphere } from 'a-atmosphere-javascript';
 import fetchMock from 'fetch-mock/esm/client.js';
 import sinon from 'sinon';
-import Cookies from '../src/CookieUtils.js';
+import CookieManager from '../src/CookieManager.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   ConnectClient,
@@ -146,7 +146,7 @@ describe('@hilla/frontend', () => {
 
       afterEach(() => {
         fetchMock.restore();
-        Cookies.remove(VAADIN_CSRF_COOKIE_NAME);
+        CookieManager.remove(VAADIN_CSRF_COOKIE_NAME);
       });
 
       it('should require 2 arguments', async () => {
@@ -274,7 +274,7 @@ describe('@hilla/frontend', () => {
 
       it('should set header for preventing CSRF using Spring csrf when presents in cookie', async () => {
         try {
-          Cookies.set(SPRING_CSRF_COOKIE_NAME, TEST_SPRING_CSRF_TOKEN_VALUE);
+          CookieManager.set(SPRING_CSRF_COOKIE_NAME, TEST_SPRING_CSRF_TOKEN_VALUE);
           setupSpringCsrfMetaTags();
 
           await client.call('FooEndpoint', 'fooMethod');
@@ -283,7 +283,7 @@ describe('@hilla/frontend', () => {
             [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
           });
         } finally {
-          Cookies.remove(SPRING_CSRF_COOKIE_NAME);
+          CookieManager.remove(SPRING_CSRF_COOKIE_NAME);
           clearSpringCsrfMetaTags();
         }
       });
@@ -304,7 +304,7 @@ describe('@hilla/frontend', () => {
 
       it('should set header for preventing CSRF using Hilla csrfToken cookie when no Spring csrf token presents', async () => {
         const csrfToken = 'foo';
-        Cookies.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
+        CookieManager.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
 
         await client.call('FooEndpoint', 'fooMethod');
 
@@ -320,7 +320,7 @@ describe('@hilla/frontend', () => {
           setupSpringCsrfMetaTags('undefined', 'undefined');
 
           const csrfToken = 'foo';
-          Cookies.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
+          CookieManager.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
 
           await client.call('FooEndpoint', 'fooMethod');
 
@@ -328,7 +328,7 @@ describe('@hilla/frontend', () => {
             [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
           });
         } finally {
-          Cookies.remove('csrfToken');
+          CookieManager.remove('csrfToken');
           clearSpringCsrfMetaTags();
         }
       });
