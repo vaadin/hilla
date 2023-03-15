@@ -1,7 +1,7 @@
 import { _getPropertyModel as _getPropertyModel_1, ObjectModel as ObjectModel_1 } from "@hilla/form";
-import type FormEntityHierarchy_1 from "./FormEntityHierarchy";
-import type FormOptionalTypes_1 from "./FormOptionalTypes";
-import type FormRecordTypes_1 from "./FormRecordTypes";
+import type FormEntityHierarchy_1 from "./FormEntityHierarchy.js";
+import type FormOptionalTypes_1 from "./FormOptionalTypes.js";
+import type FormRecordTypes_1 from "./FormRecordTypes.js";
 class FormRecordTypesModel<T extends FormRecordTypes_1 = FormRecordTypes_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormRecordTypes_1;
     get stringMap(): ObjectModel_1<Record<string, string>> {

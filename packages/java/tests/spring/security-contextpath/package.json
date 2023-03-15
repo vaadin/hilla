@@ -1,6 +1,7 @@
 {
   "name": "no-name",
   "license": "UNLICENSED",
+  "type": "module",
   "dependencies": {
     "@adobe/lit-mobx": "2.0.0-rc.4",
     "@hilla/form": "../../../../ts/form",
