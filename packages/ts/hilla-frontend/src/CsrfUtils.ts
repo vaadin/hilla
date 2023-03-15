@@ -1,4 +1,4 @@
-import { getCookie } from './CookieUtils.js';
+import CookieManager from './CookieManager.js';
 
 /** @internal */
 export const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
@@ -32,7 +32,7 @@ function getSpringCsrfTokenFromMetaTag(doc: Document): string | undefined {
 /** @internal */
 export function getSpringCsrfInfo(doc: Document): Record<string, string> {
   const csrfHeader = getSpringCsrfHeaderFromMetaTag(doc);
-  let csrf = getCookie(SPRING_CSRF_COOKIE_NAME);
+  let csrf = CookieManager.get(SPRING_CSRF_COOKIE_NAME);
   if (!csrf || csrf.length === 0) {
     csrf = getSpringCsrfTokenFromMetaTag(doc);
   }
@@ -62,7 +62,7 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   if (csrfInfo._csrf && csrfInfo._csrf_header) {
     headers[csrfInfo._csrf_header] = csrfInfo._csrf;
   } else {
-    headers[VAADIN_CSRF_HEADER] = getCookie(VAADIN_CSRF_COOKIE_NAME) || '';
+    headers[VAADIN_CSRF_HEADER] = CookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
   }
 
   return headers;

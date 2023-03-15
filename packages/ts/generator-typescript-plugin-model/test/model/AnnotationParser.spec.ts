@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import ts, { type NewExpression } from 'typescript';
-import type { Annotation } from '../../Annotation.js';
-import { AnnotationParser } from '../../src/annotation.js';
+import { AnnotationParser, type Annotation } from '../../src/annotation.js';
 
 type AnnotationPack = Readonly<{
   expected?: string;

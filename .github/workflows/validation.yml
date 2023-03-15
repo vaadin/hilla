@@ -121,6 +121,8 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:

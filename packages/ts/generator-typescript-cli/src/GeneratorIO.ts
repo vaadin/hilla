@@ -1,5 +1,5 @@
 import type File from '@hilla/generator-typescript-core/File.js';
-import Plugin, { PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
+import Plugin, { type PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
 import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import { access, mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { createRequire } from 'module';

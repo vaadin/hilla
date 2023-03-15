@@ -1,5 +1,5 @@
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { TypeNode } from 'typescript';
