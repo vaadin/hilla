@@ -74,6 +74,7 @@ export interface Order extends IdEntity {
   notes: string;
   priority: number;
   products: ReadonlyArray<Product>;
+  total?: number;
 }
 export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
   public declare static createEmptyValue: () => Order;
@@ -96,6 +97,10 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
       ArrayModel as ModelConstructor<ReadonlyArray<Product>, ArrayModel<Product, ProductModel>>,
       [false, ProductModel, [false]],
     );
+  }
+
+  public get total(): NumberModel {
+    return this[_getPropertyModel]('total', NumberModel, [true]);
   }
 }
 
