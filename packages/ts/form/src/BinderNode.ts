@@ -31,6 +31,8 @@ import {
   ObjectModel,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';
+import { ValidityStateValidator } from './Validators.js';
+import { _validity } from './Validity.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
 const _visited = Symbol('visited');
@@ -58,9 +60,21 @@ export class BinderNode<T, M extends AbstractModel<T>> {
 
   private defaultArrayItemValue?: T;
 
+  /**
+   * The validity state read from the bound element, if any. Represents the
+   * HTML element internal validation.
+   *
+   * For elements with `validity.valid === false`, the value in the
+   * bound element is considered as invalid.
+   */
+  public [_validity]?: ValidityState;
+
+  private readonly validityStateValidator: ValidityStateValidator<T>;
+
   public constructor(model: M) {
     this.model = model;
     model[_binderNode] = this;
+    this.validityStateValidator = new ValidityStateValidator<T>();
     this.initializeValue();
     this[_validators] = model[_validators];
   }
@@ -353,6 +367,18 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   }
 
   private runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
+    if (this[_validity] && !this[_validity].valid) {
+      // The element's internal validation reported invalid state.
+      // This means the `value` cannot be used and even meaningfully
+      // validated with the validators in the binder, because it is
+      // possibly cannot be parsed due to bad input in the element,
+      // for example, if date is typed with incorrect format.
+      //
+      // Skip running the validators, and instead assume the error
+      // from the validity state.
+      return [this.binder.requestValidation(this.model, this.validityStateValidator)];
+    }
+
     return this[_validators].map((validator) => this.binder.requestValidation(this.model, validator));
   }
 

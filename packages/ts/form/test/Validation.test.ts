@@ -35,6 +35,22 @@ import {
 use(sinonChai);
 use(chaiDom);
 
+class NumberOutput extends HTMLElement {
+  public get value(): string {
+    return this.checkValidity() ? this.textContent || '' : '';
+  }
+
+  public set value(value: string) {
+    this.textContent = value;
+  }
+
+  public checkValidity(): boolean {
+    const numericValue = Number(this.textContent);
+    return !Number.isNaN(numericValue) && numericValue.toString() === this.textContent;
+  }
+}
+customElements.define('number-output', NumberOutput);
+
 @customElement('order-view')
 class OrderView extends LitElement {
   public binder = new Binder(this, OrderModel);
@@ -63,6 +79,9 @@ class OrderView extends LitElement {
   @query('#priceError0')
   public priceError!: HTMLOutputElement;
 
+  @query('#total')
+  public total!: NumberOutput;
+
   public static override get styles() {
     return css`
       input[invalid] {
@@ -76,6 +95,7 @@ class OrderView extends LitElement {
       notes,
       products,
       customer: { fullName, nickName },
+      total,
     } = this.binder.model;
 
     return html`
@@ -96,6 +116,7 @@ class OrderView extends LitElement {
           </output>
         </div>`,
       )}
+      <h4>Total: <number-output id="total" ${field(total)}></number-output></h4>
       <div id="submitting">${this.binder.submitting}</div>
     `;
   }
@@ -713,6 +734,34 @@ describe('@hilla/form', () => {
         await fireEvent(orderView.price, 'change');
 
         expect(String(orderView.priceError.textContent)).to.contain('must be a number');
+      });
+
+      it('should fail validation when element.checkValidity() is false', async () => {
+        const value = binder.defaultValue;
+        value.customer.fullName = 'Jane Doe';
+        value.notes = '42';
+        value.total = 1;
+        binder.value = value;
+        await orderView.updateComplete;
+
+        // Verify initially valid state
+        let errors = await binder.validate();
+        expect(errors).to.have.length(0);
+
+        // Simulate good user input
+        orderView.total.value = '2';
+        await fireEvent(orderView.total, 'change');
+
+        errors = await binder.validate();
+        expect(errors).to.have.length(0);
+
+        // Simulate bad user input
+        orderView.total.value = 'not a number';
+        await fireEvent(orderView.total, 'change');
+
+        errors = await binder.validate();
+        expect(errors).to.have.length(1);
+        expect(errors[0]).to.have.property('property', 'total');
       });
     });
 

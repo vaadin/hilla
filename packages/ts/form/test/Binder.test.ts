@@ -78,6 +78,7 @@ describe('@hilla/form', () => {
         notes: '',
         priority: 0,
         products: [],
+        total: undefined,
       };
 
       beforeEach(() => {
