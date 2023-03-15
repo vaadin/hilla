@@ -1,6 +1,7 @@
 import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
 import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
 import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import { _validity, defaultValidity } from './Validity.js';
 
 interface FieldBase<T> {
   required: boolean;
@@ -9,7 +10,15 @@ interface FieldBase<T> {
   value: T;
 }
 
-type FieldElement<T> = Element & FieldBase<T>;
+/**
+ * Subset of the HTML constraint validation API with the `checkValidity()` method.
+ */
+type FieldConstraintValidation = Readonly<{
+  validity: ValidityState;
+  checkValidity: () => boolean;
+}>;
+
+type FieldElement<T> = Element & FieldBase<T> & Partial<FieldConstraintValidation>;
 
 interface FieldElementHolder<T> {
   get element(): FieldElement<T>;
@@ -27,10 +36,11 @@ interface Field<T> extends FieldBase<T> {
 
 interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
   name: string;
+  validity: ValidityState;
   strategy: FieldStrategy<T>;
 }
 
-export type FieldStrategy<T = any> = Field<T>;
+export type FieldStrategy<T = any> = Field<T> & FieldConstraintValidation;
 
 export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T> {
   public abstract required: boolean;
@@ -38,6 +48,12 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
   public abstract invalid: boolean;
 
   private _element: FieldElement<T>;
+
+  /**
+   * Fallback for missing .validity property API in Vaadin components.
+   * @private
+   */
+  private _validityFallback: ValidityState = defaultValidity;
 
   public constructor(element: FieldElement<T>, public readonly model?: AbstractModel<T>) {
     this._element = element;
@@ -55,8 +71,6 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
     this._element = element;
   }
 
-  public validate = async () => [];
-
   public get value() {
     return this.element.value;
   }
@@ -73,6 +87,24 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
     } else {
       this.element.removeAttribute(key);
     }
+  }
+
+  public get validity() {
+    return this.element.validity || this._validityFallback;
+  }
+
+  public checkValidity() {
+    if (!this.element.checkValidity) {
+      return true;
+    }
+
+    const valid = this.element.checkValidity();
+    this._validityFallback = {
+      ...defaultValidity,
+      valid,
+      customError: !valid,
+    };
+    return valid;
   }
 }
 
@@ -215,6 +247,7 @@ export const field = directive(
           invalid: false,
           errorMessage: '',
           model,
+          validity: defaultValidity,
           element,
           strategy: binderNode.binder.getFieldStrategy(element, model),
         };
@@ -222,7 +255,11 @@ export const field = directive(
         this.fieldState = fieldState;
 
         const updateValueFromElement = () => {
-          fieldState.value = fieldState.strategy.value;
+          if (fieldState.strategy.checkValidity()) {
+            fieldState.value = fieldState.strategy.value;
+          }
+          fieldState.validity = fieldState.strategy.validity;
+          binderNode[_validity] = fieldState.validity;
           binderNode.value = convertFieldValue(model, fieldState.value);
           if (effect !== undefined) {
             effect.call(element, element);

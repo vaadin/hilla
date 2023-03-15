@@ -23,6 +23,7 @@ import {
   PositiveOrZero,
   Required,
   Size,
+  ValidityStateValidator,
 } from '../src';
 
 describe('form/Validators', () => {
@@ -305,5 +306,12 @@ describe('form/Validators', () => {
     // https://www.kermitproject.org/utf8.html
     assert.isTrue(validator.validate("I can eat glass and it doesn't hurt me."));
     assert.isTrue(validator.validate('Я могу есть стекло, оно мне не вредит.'));
+  });
+
+  it('ValidityStateValidator', () => {
+    const validator = new ValidityStateValidator();
+    assert.isNotTrue(validator.impliesRequired);
+    assert.equal(validator.validate(), false);
+    assert.equal(validator.message, '');
   });
 });
