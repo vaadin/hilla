@@ -1,8 +1,8 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
-import ts, { NamedImports } from 'typescript';
+import ts, { type NamedImports } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
-import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
+import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 

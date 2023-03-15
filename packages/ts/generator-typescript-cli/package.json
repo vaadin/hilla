@@ -9,10 +9,10 @@
   },
   "scripts": {
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },

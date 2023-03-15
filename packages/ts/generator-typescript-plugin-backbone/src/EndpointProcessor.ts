@@ -7,17 +7,17 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, {
-  EndpointMethodOperation,
+  type EndpointMethodOperation,
   HILLA_FRONTEND_NAME,
   INIT_TYPE_NAME,
 } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
-  readonly #dependencies = new DependencyManager(new PathManager());
+  readonly #createdFilePaths = new PathManager({ extension: 'ts' });
+  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
   readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
   readonly #name: string;
   readonly #owner: Plugin;
-  readonly #sourcePaths = new PathManager({ extension: 'ts' });
   readonly #outputDir: string | undefined;
 
   private constructor(
@@ -61,7 +61,7 @@ export default class EndpointProcessor {
 
     return createSourceFile(
       [...imports.toCode(), ...statements, ...exports.toCode()],
-      this.#sourcePaths.createRelativePath(this.#name),
+      this.#createdFilePaths.createRelativePath(this.#name),
     );
   }
 

@@ -10,10 +10,10 @@
   "scripts": {
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:update": "npm test -- --update",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
@@ -49,12 +49,12 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^1.3.8",
-    "@hilla/generator-typescript-plugin-backbone": "^1.3.8"
+    "@hilla/generator-typescript-core": "^1.3.15",
+    "@hilla/generator-typescript-plugin-backbone": "^1.3.15"
   },
   "dependencies": {
     "@hilla/generator-typescript-utils": "^1.3.15",
-    "typescript": "^4.5.2"
+    "typescript": "^5.0.1-rc"
   },
   "devDependencies": {
     "@hilla/generator-typescript-core": "^1.3.15",

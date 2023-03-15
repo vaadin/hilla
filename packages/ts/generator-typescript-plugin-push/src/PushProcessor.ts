@@ -11,7 +11,7 @@ export type EndpointOperations = {
 };
 
 export class PushProcessor {
-  readonly #dependencies = new DependencyManager(new PathManager());
+  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
   readonly #operations: EndpointOperations;
   readonly #source: ts.SourceFile;
   readonly #subscriptionId: ts.Identifier;
@@ -124,7 +124,6 @@ export class PushProcessor {
     const doesInitParameterExist = this.#doesInitParameterExist(parameters);
 
     return ts.factory.createFunctionDeclaration(
-      declaration.decorators,
       undefined, // no async
       declaration.asteriskToken,
       declaration.name,

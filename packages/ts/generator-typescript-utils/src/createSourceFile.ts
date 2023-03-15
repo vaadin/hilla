@@ -1,4 +1,4 @@
-import ts, { SourceFile, Statement } from 'typescript';
+import ts, { type SourceFile, type Statement } from 'typescript';
 
 export default function createSourceFile(statements: readonly Statement[], fileName: string): SourceFile {
   const sourceFile = ts.createSourceFile(fileName, '', ts.ScriptTarget.ES2019, undefined, ts.ScriptKind.TS);

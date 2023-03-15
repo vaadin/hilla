@@ -1,5 +1,5 @@
 import {
-  ArraySchema,
+  type ArraySchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
@@ -12,10 +12,10 @@ import {
   isNumberSchema,
   isReferenceSchema,
   isStringSchema,
-  MapSchema,
-  NonComposedSchema,
-  ReferenceSchema,
-  Schema,
+  type MapSchema,
+  type NonComposedSchema,
+  type ReferenceSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { TypeNode } from 'typescript';

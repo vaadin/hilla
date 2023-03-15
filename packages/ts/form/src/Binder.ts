@@ -3,18 +3,18 @@
 // eslint-disable-next-line import/no-cycle
 import { BinderNode } from './BinderNode.js';
 // eslint-disable-next-line import/no-cycle
-import { _parent, AbstractModel, ModelConstructor } from './Models.js';
+import { _parent, AbstractModel, type ModelConstructor } from './Models.js';
 // eslint-disable-next-line import/no-cycle
 import {
-  InterpolateMessageCallback,
+  type InterpolateMessageCallback,
   runValidator,
   ServerValidator,
   ValidationError,
-  Validator,
-  ValueError,
+  type Validator,
+  type ValueError,
 } from './Validation.js';
 // eslint-disable-next-line import/no-cycle
-import { FieldStrategy, getDefaultFieldStrategy } from './Field.js';
+import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 
 const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');
@@ -28,7 +28,7 @@ const _validationRequestSymbol = Symbol('validationRequest');
 
 /**
  * A Binder controls all aspects of a single form.
- * Typically it is used to get and set the form value,
+ * Typically, it is used to get and set the form value,
  * access the form model, validate, reset, and submit the form.
  *
  * @param <T> is the type of the value that binds to a form

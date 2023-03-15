@@ -1,7 +1,7 @@
-import ts, { ExportAssignment, ExportDeclaration, Identifier, Statement } from 'typescript';
+import ts, { type ExportAssignment, type ExportDeclaration, type Identifier, type Statement } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
-import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
+import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 
@@ -46,7 +46,6 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
     names.sort(this.#collator.compare);
 
     return ts.factory.createExportDeclaration(
-      undefined,
       undefined,
       false,
       ts.factory.createNamedExports(
@@ -103,7 +102,6 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
         path,
         ts.factory.createExportDeclaration(
           undefined,
-          undefined,
           false,
           id !== null ? ts.factory.createNamespaceExport(id) : undefined,
           ts.factory.createStringLiteral(path),
@@ -122,7 +120,7 @@ export class DefaultExportManager implements CodeConvertable<ExportAssignment | 
   }
 
   public toCode(): ExportAssignment | undefined {
-    return this.#id ? ts.factory.createExportAssignment(undefined, undefined, undefined, this.#id) : undefined;
+    return this.#id ? ts.factory.createExportAssignment(undefined, undefined, this.#id) : undefined;
   }
 }
 
