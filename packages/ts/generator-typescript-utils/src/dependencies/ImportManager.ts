@@ -6,6 +6,8 @@ import StatementRecordManager, { StatementRecord } from './StatementRecordManage
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 
+const addJsExtension = (path: string) => path.replace(/^(.*?)(\.js)?$/, '$1.js');
+
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
@@ -68,7 +70,6 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(
             false,
             undefined,
@@ -119,9 +120,8 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
-          ts.factory.createStringLiteral(path),
+          ts.factory.createStringLiteral(addJsExtension(path)),
         ),
       ];
     }
@@ -165,9 +165,8 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(isType, id, undefined),
-          ts.factory.createStringLiteral(path),
+          ts.factory.createStringLiteral(addJsExtension(path)),
         ),
       ];
     }
