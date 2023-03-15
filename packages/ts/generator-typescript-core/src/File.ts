@@ -1,4 +1,4 @@
-import { Blob, BlobOptions } from 'node:buffer';
+import { Blob, type BlobOptions } from 'node:buffer';
 import type { BinaryLike } from 'node:crypto';
 
 export type FileOptions = Readonly<

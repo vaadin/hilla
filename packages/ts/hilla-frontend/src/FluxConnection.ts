@@ -1,8 +1,8 @@
 import type { ReactiveElement } from 'lit';
 import { atmosphere } from 'a-atmosphere-javascript';
-import type { Subscription } from './Connect';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
-import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
+import type { Subscription } from './Connect.js';
+import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
 
 export enum State {
   ACTIVE = 'active',

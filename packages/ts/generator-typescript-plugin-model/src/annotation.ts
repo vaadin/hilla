@@ -1,7 +1,7 @@
 import {
   isNonComposedRegularSchema,
-  NonComposedRegularSchema,
-  Schema,
+  type NonComposedRegularSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import { template, transform } from '@hilla/generator-typescript-utils/ast.js';
 import ts, {

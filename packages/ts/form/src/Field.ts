@@ -1,5 +1,5 @@
-import { ElementPart, noChange, nothing, PropertyPart } from 'lit';
-import { directive, Directive, DirectiveParameters, PartInfo, PartType } from 'lit/directive.js';
+import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
+import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
 import { _validity, defaultValidity } from './Validity.js';
 

@@ -2,7 +2,7 @@ import Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
-import { EndpointOperations, PushProcessor } from './PushProcessor.js';
+import { type EndpointOperations, PushProcessor } from './PushProcessor.js';
 
 type ExtendedMediaTypeSchema = ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> &
   Readonly<{ 'x-class-name': string }>;

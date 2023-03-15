@@ -1,6 +1,6 @@
 export * from './Authentication.js';
 export * from './Connect.js';
-export { FluxConnection, State } from './FluxConnection';
+export { FluxConnection, State } from './FluxConnection.js';
 
 const $wnd = window as any;
 /* c8 ignore next 2 */

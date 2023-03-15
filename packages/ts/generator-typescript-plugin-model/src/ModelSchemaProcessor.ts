@@ -1,11 +1,11 @@
 /* eslint-disable symbol-description */
 import {
-  ArraySchema,
-  BooleanSchema,
+  type ArraySchema,
+  type BooleanSchema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
-  IntegerSchema,
+  type IntegerSchema,
   isArraySchema,
   isBooleanSchema,
   isComposedSchema,
@@ -15,20 +15,20 @@ import {
   isNumberSchema,
   isReferenceSchema,
   isStringSchema,
-  MapSchema,
-  NumberSchema,
-  ReferenceSchema,
-  Schema,
-  StringSchema,
+  type MapSchema,
+  type NumberSchema,
+  type ReferenceSchema,
+  type Schema,
+  type StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
-import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager';
+import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
 import {
-  AnnotatedSchema,
+  type AnnotatedSchema,
   AnnotationParser,
   isAnnotatedSchema,
   isValidationConstrainedSchema,
-  ValidationConstrainedSchema,
+  type ValidationConstrainedSchema,
 } from './annotation.js';
 import { importBuiltInFormModel } from './utils.js';
 
