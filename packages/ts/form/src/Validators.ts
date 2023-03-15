@@ -396,8 +396,11 @@ export class Pattern extends AbstractValidator<string> {
  * returns false from `element.checkValidity()` and `element.validity.valid`.
  */
 export class ValidityStateValidator<T> extends AbstractValidator<T> {
-  public constructor(attrs: ValidatorAttributes = {}) {
-    super({ message: '', ...attrs });
+  public override message = '';
+
+  // eslint-disable-next-line no-useless-constructor
+  public constructor() {
+    super();
   }
 
   public override validate(): boolean {

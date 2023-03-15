@@ -313,9 +313,5 @@ describe('form/Validators', () => {
     assert.isNotTrue(validator.impliesRequired);
     assert.equal(validator.validate(), false);
     assert.equal(validator.message, '');
-
-    validator = new ValidityStateValidator({ message: 'custom' });
-    assert.equal(validator.validate(), false);
-    assert.equal(validator.message, 'custom');
   });
 });
