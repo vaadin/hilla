@@ -309,7 +309,7 @@ describe('form/Validators', () => {
   });
 
   it('ValidityStateValidator', () => {
-    let validator = new ValidityStateValidator();
+    const validator = new ValidityStateValidator();
     assert.isNotTrue(validator.impliesRequired);
     assert.equal(validator.validate(), false);
     assert.equal(validator.message, '');
