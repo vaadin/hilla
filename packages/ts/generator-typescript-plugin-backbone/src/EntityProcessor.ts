@@ -10,7 +10,7 @@ import {
   isNullableSchema,
   isObjectSchema,
   isReferenceSchema,
-  NonEmptyObjectSchema,
+  type NonEmptyObjectSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -21,7 +21,7 @@ import DependencyManager from '@hilla/generator-typescript-utils/dependencies/De
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import { dirname } from 'path/posix';
 import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { TypeElement } from 'typescript';
+import ts, { type TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 
 export class EntityProcessor {
@@ -29,9 +29,9 @@ export class EntityProcessor {
   readonly #dependencies;
   readonly #fullyQualifiedName: string;
   readonly #name: string;
+  readonly #outputPathManager = new PathManager({ extension: 'ts' });
   readonly #owner: Plugin;
   readonly #path: string;
-  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
@@ -39,7 +39,7 @@ export class EntityProcessor {
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
-    this.#dependencies = new DependencyManager(new PathManager({ relativeTo: dirname(this.#path) }));
+    this.#dependencies = new DependencyManager(new PathManager({ extension: '.js', relativeTo: dirname(this.#path) }));
   }
 
   get #id(): Identifier {
@@ -63,7 +63,7 @@ export class EntityProcessor {
 
     return createSourceFile(
       [...imports.toCode(), ...statements, ...exports.toCode()],
-      this.#sourcePaths.createRelativePath(this.#path),
+      this.#outputPathManager.createRelativePath(this.#path),
     );
   }
 
@@ -81,7 +81,6 @@ export class EntityProcessor {
 
     return ts.factory.createInterfaceDeclaration(
       undefined,
-      undefined,
       this.#id,
       undefined,
       undefined,
@@ -91,7 +90,6 @@ export class EntityProcessor {
 
   #processEnum({ enum: members }: EnumSchema): Statement {
     return ts.factory.createEnumDeclaration(
-      undefined,
       undefined,
       this.#id,
       members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
@@ -123,7 +121,6 @@ export class EntityProcessor {
         declaration &&
         ts.factory.updateInterfaceDeclaration(
           declaration,
-          undefined,
           declaration.modifiers,
           declaration.name,
           undefined,

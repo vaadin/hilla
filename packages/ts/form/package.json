@@ -15,12 +15,12 @@
     "Form"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules",
+    "build": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "web-test-runner \"test/**/*.test.ts\" --config ../../../web-test-runner.config.js",
+    "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
-    "typecheck": "tsc --noEmit --project test/tsconfig.json"
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {
@@ -68,14 +68,16 @@
     "lit": "^2.3.0"
   },
   "devDependencies": {
-    "@open-wc/testing": "^2.5.33",
+    "@esm-bundle/chai": "^4.3.4-fix.0",
     "@types/chai": "^4.2.21",
+    "@types/chai-dom": "^1.11.0",
     "@types/mocha": "^9.0.0",
     "@types/sinon": "^10.0.2",
     "@types/sinon-chai": "^3.2.5",
     "@types/validator": "^13.6.0",
-    "@web/test-runner": "^0.13.16",
+    "chai-dom": "^1.11.0",
     "sinon": "^11.1.2",
-    "typescript": "^4.5.2"
+    "sinon-chai": "^3.7.0",
+    "typescript": "^5.0.1-rc"
   }
 }

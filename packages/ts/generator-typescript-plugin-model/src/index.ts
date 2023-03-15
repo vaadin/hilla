@@ -1,5 +1,5 @@
 import Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage';
+import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';

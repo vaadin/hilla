@@ -1,12 +1,10 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
-import ts, { NamedImports } from 'typescript';
+import ts, { type NamedImports } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
-import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
+import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
-
-const addJsExtension = (path: string) => path.replace(/^(.*?)(\.js)?$/, '$1.js');
 
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #collator: Intl.Collator;
@@ -121,7 +119,7 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
         ts.factory.createImportDeclaration(
           undefined,
           ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
-          ts.factory.createStringLiteral(addJsExtension(path)),
+          ts.factory.createStringLiteral(path),
         ),
       ];
     }
@@ -166,7 +164,7 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
         ts.factory.createImportDeclaration(
           undefined,
           ts.factory.createImportClause(isType, id, undefined),
-          ts.factory.createStringLiteral(addJsExtension(path)),
+          ts.factory.createStringLiteral(path),
         ),
       ];
     }

@@ -13,20 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import { assert } from '@open-wc/testing';
+import { assert } from '@esm-bundle/chai';
 
-describe('form/Index', () => {
-  const $wnd = window as any;
+describe('@hilla/form', () => {
+  describe('Index', () => {
+    const $wnd = window as any;
 
-  beforeEach(() => {
-    delete $wnd.Vaadin;
-  });
-
-  it('should add registration', async () => {
-    await import('../src');
-    assert.isDefined($wnd.Vaadin);
-    assert.isArray($wnd.Vaadin.registrations);
-    const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@hilla/form');
-    assert.lengthOf(formRegistrations, 1);
+    it('should add registration', async () => {
+      assert.isDefined($wnd.Vaadin);
+      assert.isArray($wnd.Vaadin.registrations);
+      const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@hilla/form');
+      assert.lengthOf(formRegistrations, 1);
+    });
   });
 });
