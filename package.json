@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": "^12.20.0 || ^14.13.1 || >=16.0.0",
-    "npm": ">=7"
+    "node": ">=16.19.0",
+    "npm": ">=9"
   },
   "workspaces": [
     "packages/ts/*"
@@ -29,15 +29,14 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@open-wc/testing": "^3.1.7",
     "@types/karma": "^6.3.3",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.14.6",
+    "@types/node": "^18.15.3",
     "@types/sinon": "^10.0.13",
-    "@types/validator": "^13.7.13",
+    "@types/validator": "^13.7.14",
     "chai-dom": "^1.11.0",
-    "concurrently": "^6.5.1",
-    "esbuild": "^0.15.10",
+    "concurrently": "^7.6.0",
+    "esbuild": "^0.17.12",
     "eslint": "^7.32.0",
     "eslint-config-vaadin": "^0.4.0",
     "eslint-plugin-chai-friendly": "^0.7.2",
@@ -47,18 +46,16 @@
     "karma-mocha": "^2.0.1",
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
-    "lerna": "^4.0.0",
-    "lint-staged": "^13.0.3",
-    "meow": "^10.1.5",
-    "minimist": "^1.2.8",
+    "lerna": "^6.5.1",
+    "lint-staged": "^13.2.0",
+    "meow": "^11.0.0",
     "mocha": "^10.2.0",
-    "pm2": "^5.2.2",
-    "prettier": "^2.7.1",
-    "simple-git-hooks": "^2.6.1",
-    "sinon": "^15.0.1",
-    "start-server-and-test": "^2.0.0",
-    "tsx": "^3.12.3",
-    "typescript": "^5.0.1-rc",
-    "vite": "^4.1.4"
+    "nx": "^15.8.6",
+    "prettier": "^2.8.4",
+    "simple-git-hooks": "^2.8.1",
+    "sinon": "^15.0.2",
+    "tsx": "^3.12.5",
+    "typescript": "^5.0.2",
+    "vite": "^4.2.0"
   }
 }
