@@ -6,7 +6,7 @@
   <parent>
     <groupId>dev.hilla</groupId>
     <artifactId>tests</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>tests-spring</artifactId>
@@ -126,6 +126,21 @@
 
     <plugins>
       <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <!-- Remove generated files on clean -->
+            <fileset>
+              <directory>frontend/generated</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
       </plugin>
@@ -142,7 +157,10 @@
       </activation>
       <modules>
         <module>endpoints</module>
+        <module>endpoints-discovery</module>
         <module>endpoints-custom-client</module>
+        <module>endpoints-maven-engine</module>
+        <module>endpoints-latest-java</module>
 
         <module>security</module>
         <module>security-contextpath</module>
@@ -151,18 +169,6 @@
       </modules>
     </profile>
 
-    <profile>
-      <id>java17</id>
-      <activation>
-        <jdk>[17,)</jdk>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <modules>
-        <module>endpoints-latest-java</module>
-      </modules>
-    </profile>
     <profile>
       <id>validation</id>
       <properties>

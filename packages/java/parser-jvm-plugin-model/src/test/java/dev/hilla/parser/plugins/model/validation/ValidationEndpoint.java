@@ -32,73 +32,73 @@ public class ValidationEndpoint {
 
     public static class ValidationData {
         @AssertFalse
-        private String assertFalse;
+        public String assertFalse;
 
         @AssertTrue
-        private String assertTrue;
+        public String assertTrue;
 
         @DecimalMax(value = "0.01", inclusive = false)
-        private double decimalMax;
+        public double decimalMax;
 
         @DecimalMin("0.01")
-        private double decimalMin;
+        public double decimalMin;
 
         @Digits(integer = 5, fraction = 2)
-        private String digits;
+        public String digits;
 
         @Email(message = "foo")
-        private String email;
+        public String email;
 
         @Future
-        private LocalDate future;
+        public LocalDate future;
 
         @Null
-        private String isNull;
+        public String isNull;
 
         @NotEmpty
-        private List<String> list;
+        public List<String> list;
 
         @Max(2)
-        private Integer max;
+        public Integer max;
 
         @Min(value = 1, message = "foo")
-        private Integer min;
+        public Integer min;
 
         @Negative
-        private int negative;
+        public int negative;
 
         @NegativeOrZero
-        private int negativeOrZero;
+        public int negativeOrZero;
 
         @NotBlank
-        private String notBlank;
+        public String notBlank;
 
         @NotNull
         @NotEmpty
-        private String notEmpty;
+        public String notEmpty;
 
         @NotNull
-        private String notNull;
+        public String notNull;
 
         @NotNull
-        private ValidationData notNullEntity;
+        public ValidationData notNullEntity;
 
         @Past
-        private LocalDate past;
+        public LocalDate past;
 
         @Pattern(regexp = "\\d+\\..+")
-        private String pattern;
+        public String pattern;
 
         @Positive
-        private int positive;
+        public int positive;
 
         @PositiveOrZero
-        private int positiveOrZero;
+        public int positiveOrZero;
 
         @Size
-        private String size;
+        public String size;
 
         @Size(min = 1)
-        private String size1;
+        public String size1;
     }
 }

@@ -76,21 +76,21 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();
             return nodeDependencies.appendChildNodes(
-                    cleanup(cls.getMethodsStream()).map(MethodNode::of));
+                    cleanup(cls.getMethods().stream()).map(MethodNode::of));
         } else if (node instanceof MethodNode) {
             var methodNode = (MethodNode) node;
             var resultTypeNode = TypeSignatureNode
                     .of(methodNode.getSource().getResultType());
             return nodeDependencies.prependChildNodes(Stream.of(resultTypeNode))
                     .appendChildNodes(
-                            methodNode.getSource().getParametersStream()
+                            methodNode.getSource().getParameters().stream()
                                     .map(param -> MethodParameterNode.of(param,
                                             Optional.ofNullable(param.getName())
                                                     .orElse("_unnamed"))));
         } else if ((node instanceof EntityNode)) {
             var cls = (ClassInfoModel) node.getSource();
-            return nodeDependencies
-                    .appendChildNodes(cls.getFieldsStream().map(FieldNode::of));
+            return nodeDependencies.appendChildNodes(
+                    cls.getFields().stream().map(FieldNode::of));
         } else if (node instanceof FieldNode) {
             var fieldNode = (FieldNode) node;
             return nodeDependencies.appendChildNodes(Stream

@@ -139,7 +139,7 @@ export class NotBlank extends Required<any> {
   }
 
   public override validate(value: any) {
-    return new NotEmpty().validate(value);
+    return super.validate(value) && new NotNull().validate(value) && value.trim().length > 0;
   }
 }
 export class AssertTrue extends AbstractValidator<any> {
@@ -388,5 +388,22 @@ export class Pattern extends AbstractValidator<string> {
 
   public override validate(value: any) {
     return matches(value, this.regexp);
+  }
+}
+
+/**
+ * Validator that reports an error when the bound HTML element validation
+ * returns false from `element.checkValidity()` and `element.validity.valid`.
+ */
+export class ValidityStateValidator<T> extends AbstractValidator<T> {
+  public override message = '';
+
+  // eslint-disable-next-line no-useless-constructor
+  public constructor() {
+    super();
+  }
+
+  public override validate(): boolean {
+    return false;
   }
 }

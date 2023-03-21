@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-cli",
-  "version": "2.0.0-alpha8",
+  "version": "2.0.0-beta1",
   "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
@@ -9,10 +9,10 @@
   },
   "scripts": {
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
@@ -42,15 +42,15 @@
     "tsgen": "bin/index.js"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^2.0.0-alpha8"
+    "@hilla/generator-typescript-core": "^2.0.0-beta1"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.0.0-alpha8",
+    "@hilla/generator-typescript-utils": "^2.0.0-beta1",
     "get-stdin": "^9.0.0",
     "meow": "^10.1.1"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^2.0.0-alpha8",
+    "@hilla/generator-typescript-core": "^2.0.0-beta1",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.1",

@@ -1,10 +1,12 @@
 package dev.hilla.parser.plugins.backbone;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +14,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.core.Parser;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
@@ -20,13 +21,15 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 
 import io.swagger.v3.oas.models.tags.Tag;
 
-public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EndpointPlugin
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private static void checkIfJavaCompilerParametersFlagIsEnabled(
             Collection<ClassInfoModel> endpoints) {
-        endpoints.stream().flatMap(ClassInfoModel::getMethodsStream)
-                .flatMap(MethodInfoModel::getParametersStream).findFirst()
+        endpoints.stream().map(ClassInfoModel::getMethods)
+                .flatMap(Collection::stream).map(MethodInfoModel::getParameters)
+                .flatMap(Collection::stream).findFirst()
                 .ifPresent((parameter) -> {
                     if (parameter.getName() == null) {
                         logger.info("Missing endpoint method parameter names"
@@ -41,7 +44,7 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EndpointNode) {
             var endpointNode = (EndpointNode) nodePath.getNode();
-            var name = endpointNode.getSource().getSimpleName();
+            var name = getEndpointName(endpointNode.getSource());
             endpointNode.setTarget(new Tag().name(name));
         }
     }
@@ -72,5 +75,24 @@ public final class EndpointPlugin extends AbstractPlugin<PluginConfiguration> {
                             .map(EndpointNode::of));
         }
         return nodeDependencies;
+    }
+
+    private String getEndpointName(ClassInfoModel endpointCls) {
+        var endpointAnnotationName = getStorage().getParserConfig()
+                .getEndpointAnnotationName();
+        var endpointAnnotation = endpointCls.getAnnotations().stream()
+                .filter(annotation -> annotation.getName()
+                        .equals(endpointAnnotationName))
+                .findFirst();
+        return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
+                .filter(name -> !name.isEmpty())
+                .orElseGet(endpointCls::getSimpleName);
+    }
+
+    private Optional<String> getEndpointAnnotationValue(
+            AnnotationInfoModel endpointAnnotation) {
+        return endpointAnnotation.getParameters().stream()
+                .filter(param -> param.getName().equals("value")).findFirst()
+                .map(param -> (String) param.getValue());
     }
 }

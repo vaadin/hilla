@@ -96,6 +96,11 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isSynthetic();
 
+    @Override
+    public String toString() {
+        return "MethodParameterInfoModel[" + get() + "]";
+    }
+
     protected abstract int prepareIndex();
 
     protected abstract MethodInfoModel prepareOwner();

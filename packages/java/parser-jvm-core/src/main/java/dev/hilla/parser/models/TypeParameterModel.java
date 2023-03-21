@@ -3,7 +3,6 @@ package dev.hilla.parser.models;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -47,10 +46,6 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
         return bounds;
     }
 
-    public Stream<SignatureModel> getBoundsStream() {
-        return getBounds().stream();
-    }
-
     @Override
     public Class<TypeParameterModel> getCommonModelClass() {
         return TypeParameterModel.class;
@@ -68,7 +63,7 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
 
     @Override
     public String toString() {
-        return getName();
+        return "TypeParameterModel[" + get() + "]";
     }
 
     protected abstract List<SignatureModel> prepareBounds();

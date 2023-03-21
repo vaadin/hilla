@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -61,13 +60,14 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
         return parameters;
     }
 
-    public Stream<AnnotationParameterModel> getParametersStream() {
-        return getParameters().stream();
-    }
-
     @Override
     public int hashCode() {
         return getName().hashCode() + 11 * getParameters().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationInfoModel[" + get() + "]";
     }
 
     protected abstract Optional<ClassInfoModel> prepareClassInfo();

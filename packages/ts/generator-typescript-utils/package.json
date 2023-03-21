@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-utils",
-  "version": "2.0.0-alpha8",
+  "version": "2.0.0-beta1",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -10,10 +10,10 @@
   "scripts": {
     "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js} testing dependencies",
     "build": "concurrently npm:build:*",
-    "build:transpile": "tsc --isolatedModules",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src/**/*.ts",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
@@ -32,6 +32,9 @@
     },
     "./testing/snapshotMatcher.js": {
       "default": "./testing/snapshotMatcher.js"
+    },
+    "./ast.js": {
+      "default": "./ast.js"
     },
     "./createFullyUniqueIdentifier.js": {
       "default": "./createFullyUniqueIdentifier.js"
@@ -73,7 +76,7 @@
   "dependencies": {
     "pino": "^7.0.5",
     "pino-pretty": "^7.3.0",
-    "typescript": "^4.5.2"
+    "typescript": "^5.0.1-rc"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",

@@ -8,9 +8,9 @@ import {
   isEnumSchema,
   isObjectSchema,
   isReferenceSchema,
-  ObjectSchema,
-  ReferenceSchema,
-  Schema,
+  type ObjectSchema,
+  type ReferenceSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -52,7 +52,7 @@ export abstract class EntityModelProcessor {
   protected readonly [$entity]: DependencyData;
   protected readonly [$fullyQualifiedName]: string;
   protected readonly [$model]: DependencyData;
-  readonly #sourcePaths = new PathManager({ extension: 'ts' });
+  readonly #outputPathManager = new PathManager({ extension: 'ts' });
 
   protected constructor(name: string, shouldImportEntityAsType: boolean) {
     this[$fullyQualifiedName] = name;
@@ -62,7 +62,7 @@ export abstract class EntityModelProcessor {
 
     const modelName = `${entityName}Model`;
     const modelPath = `${entityPath}Model`;
-    this[$dependencies] = new DependencyManager(new PathManager({ relativeTo: dirname(modelPath) }));
+    this[$dependencies] = new DependencyManager(new PathManager({ extension: '.js', relativeTo: dirname(modelPath) }));
 
     const { exports, imports, paths } = this[$dependencies];
 
@@ -86,7 +86,7 @@ export abstract class EntityModelProcessor {
 
     return createSourceFile(
       [...importStatements, declaration, ...exportStatement].filter(Boolean) as readonly Statement[],
-      this.#sourcePaths.createRelativePath(this[$model].path),
+      this.#outputPathManager.createRelativePath(this[$model].path),
     );
   }
 
@@ -139,22 +139,16 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     return this.#processModelClass(entitySchema, this[$entity].id, parent);
   }
 
-  #processClassElements({ required, properties }: ObjectSchema): readonly ClassElement[] {
+  #processClassElements({ properties }: ObjectSchema): readonly ClassElement[] {
     if (!properties) {
       return [];
     }
 
-    const requiredSet = new Set(required);
     return Object.entries(properties).map(([name, schema]) => {
       const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
-      const args = new ModelSchemaExpressionProcessor(
-        schema,
-        this[$dependencies],
-        (_) => !requiredSet.has(name),
-      ).process();
+      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies]).process();
 
       return ts.factory.createGetAccessorDeclaration(
-        undefined,
         undefined,
         ts.factory.createIdentifier(name),
         [],
@@ -203,7 +197,6 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     );
 
     const emptyValueElement = ts.factory.createPropertyDeclaration(
-      undefined,
       [ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword), ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
       'createEmptyValue',
       undefined,
@@ -212,7 +205,6 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     );
 
     return ts.factory.createClassDeclaration(
-      undefined,
       undefined,
       this[$model].id,
       [modelTypeParameters],
@@ -248,7 +240,6 @@ export class EntityEnumModelProcessor extends EntityModelProcessor {
 
     return ts.factory.createClassDeclaration(
       undefined,
-      undefined,
       this[$model].id,
       undefined,
       [
@@ -260,7 +251,6 @@ export class EntityEnumModelProcessor extends EntityModelProcessor {
       ],
       [
         ts.factory.createPropertyDeclaration(
-          undefined,
           [ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)],
           ts.factory.createComputedPropertyName(enumPropertySymbol),
           undefined,

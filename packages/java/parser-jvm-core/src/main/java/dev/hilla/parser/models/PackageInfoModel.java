@@ -37,4 +37,9 @@ public abstract class PackageInfoModel extends AnnotatedAbstractModel
     public int hashCode() {
         return getName().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "PackageInfoModel[" + get() + "]";
+    }
 }

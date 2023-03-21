@@ -8,7 +8,6 @@ import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
@@ -20,7 +19,8 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
-public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class MethodPlugin
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     public static final String MEDIA_TYPE = "application/json";
 
     @Override
@@ -62,6 +62,10 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         var rootNode = (RootNode) nodePath.getRootPath().getNode();
         rootNode.getTarget().path("/" + endpointName + "/" + methodName,
                 methodNode.getTarget());
+        // The class name is needed to map the endpoint to its implementation at
+        // runtime
+        endpointNode.getTarget().addExtension("x-class-name",
+                endpointNode.getSource().getName());
     }
 
     @Nonnull
@@ -71,7 +75,7 @@ public final class MethodPlugin extends AbstractPlugin<PluginConfiguration> {
         if (node instanceof EndpointNode
                 || node instanceof EndpointExposedNode) {
             var endpointCls = (ClassInfoModel) node.getSource();
-            var methodNodes = endpointCls.getMethodsStream()
+            var methodNodes = endpointCls.getMethods().stream()
                     .filter(MethodInfoModel::isPublic)
                     .<Node<?, ?>> map(MethodNode::of);
             return nodeDependencies.appendChildNodes(methodNodes);

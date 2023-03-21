@@ -1,7 +1,10 @@
 package dev.hilla.parser.plugins.nonnull.nonnullapi;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+
+import dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency;
 
 @Endpoint
 public class NonNullApiEndpoint {
@@ -30,10 +33,18 @@ public class NonNullApiEndpoint {
     }
 
     static class Dependency {
-        String defaultField;
+        public String defaultField;
         @NullableField
-        String nullableField;
+        public String nullableField;
         @NullableSignature
-        String nullableSignatureField;
+        public String nullableSignatureField;
+    }
+
+    public Optional<String> optionalMethod(Optional<String> opt) {
+        return opt;
+    }
+
+    public SubPackageDependency subPackageMethod(SubPackageDependency entity) {
+        return entity;
     }
 }

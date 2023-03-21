@@ -1,8 +1,8 @@
 import type { Identifier, ImportDeclaration, Statement } from 'typescript';
-import ts, { NamedImports } from 'typescript';
+import ts, { type NamedImports } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
-import StatementRecordManager, { StatementRecord } from './StatementRecordManager.js';
+import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import type { DependencyRecord } from './utils.js';
 import { createDependencyRecord } from './utils.js';
 
@@ -68,7 +68,6 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(
             false,
             undefined,
@@ -119,7 +118,6 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
         path,
         ts.factory.createImportDeclaration(
           undefined,
-          undefined,
           ts.factory.createImportClause(false, undefined, ts.factory.createNamespaceImport(id)),
           ts.factory.createStringLiteral(path),
         ),
@@ -164,7 +162,6 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
       yield [
         path,
         ts.factory.createImportDeclaration(
-          undefined,
           undefined,
           ts.factory.createImportClause(isType, id, undefined),
           ts.factory.createStringLiteral(path),

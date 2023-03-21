@@ -1,8 +1,8 @@
 import type { ReactiveElement } from 'lit';
 import { atmosphere } from 'a-atmosphere-javascript';
-import type { Subscription } from './Connect';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils';
-import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages';
+import type { Subscription } from './Connect.js';
+import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
 
 export enum State {
   ACTIVE = 'active',
@@ -37,12 +37,6 @@ export class FluxConnection extends EventTarget {
 
   constructor() {
     super();
-    if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
-      // Remove when removing feature flag
-      throw new Error(
-        `Push support in Hilla is not enabled. Enable it in the debug window or by adding com.vaadin.experimental.hillaPush=true to vaadin-featureflags.properties`,
-      );
-    }
     this.connectWebsocket();
   }
 

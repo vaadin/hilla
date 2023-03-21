@@ -3,18 +3,19 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationMap": true,
-    "target": "es2019",
+    "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
-    "lib": ["es2019", "dom"],
+    "moduleResolution": "bundler",
+    "lib": ["es2021", "dom"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
     "strict": true,
     "sourceMap": true,
     "inlineSources": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "noImplicitOverride": true,
     "useDefineForClassFields": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["packages/ts/**/*.{ts,js}", "scripts/**/*.{ts,js}", "*.{ts,js,cjs}"],
-  "exclude": ["packages/ts/*/*.{js,d.ts}"]
+  "include": ["scripts/*.ts", "scripts/*.d.ts", "*.ts", "*.d.ts", "*.js", "*.cjs"]
 }

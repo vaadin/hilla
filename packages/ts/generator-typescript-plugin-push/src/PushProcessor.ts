@@ -6,7 +6,7 @@ import ts from 'typescript';
 const initParameterTypeName = 'EndpointRequestInit';
 
 export default class PushProcessor {
-  readonly #dependencies = new DependencyManager(new PathManager());
+  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
   readonly #methods: readonly string[];
   readonly #source: ts.SourceFile;
   readonly #subscriptionId: ts.Identifier;
@@ -72,7 +72,6 @@ export default class PushProcessor {
     const doesInitParameterExist = this.#doesInitParameterExist(parameters);
 
     return ts.factory.createFunctionDeclaration(
-      declaration.decorators,
       undefined, // no async
       declaration.asteriskToken,
       declaration.name,

@@ -5,11 +5,11 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>2.1-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <artifactId>endpoint</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
@@ -26,6 +26,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
             <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>engine-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- API DEPENDENCIES -->
@@ -113,25 +118,22 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.databind.version}</version>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-parameter-names</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
         </dependency>
-
-        <!-- Override snakeyaml via jackson-dataformat-yaml in swagger-codegen -->
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-
-        <!-- Override slf4j-ext in swagger-codegen -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-ext</artifactId>
-            <version>${slf4j.version}</version>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- Needed for security annotations and checks -->
@@ -151,48 +153,6 @@
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
             <version>${javaparser.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.codegen.v3</groupId>
-            <artifactId>swagger-codegen</artifactId>
-            <version>${swagger.codegen.version}</version>
-            <exclusions>
-                <!-- Cause problems when running tests from IDE -->
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-                <!-- Unncessary dependencies that might cause problems
-                if user has a different version -->
-                <exclusion>
-                    <groupId>javax.mail</groupId>
-                    <artifactId>mailapi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.json</groupId>
-                    <artifactId>json</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.codegen.v3</groupId>
-            <artifactId>swagger-codegen-generators</artifactId>
-            <version>${swagger.codegen.generators.version}</version>
-            <exclusions>
-                <!-- Cause problems when running tests from IDE -->
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Fusion Testing dependencies -->
@@ -247,6 +207,16 @@
             <artifactId>spring-boot-test-autoconfigure</artifactId>
             <version>${spring.boot.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>parser-jvm-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>runtime-plugin-transfertypes</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

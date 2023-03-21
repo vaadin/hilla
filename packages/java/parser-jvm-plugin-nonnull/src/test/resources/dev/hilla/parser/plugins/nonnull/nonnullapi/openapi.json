@@ -1,18 +1,19 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Vaadin Application",
+    "title": "Hilla Application",
     "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:8080/connect",
-      "description": "Vaadin Backend"
+      "description": "Hilla Backend"
     }
   ],
   "tags": [
     {
-      "name": "NonNullApiEndpoint"
+      "name": "NonNullApiEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint"
     }
   ],
   "paths": {
@@ -228,6 +229,80 @@
           }
         }
       }
+    },
+    "/NonNullApiEndpoint/optionalMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_optionalMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "opt": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullApiEndpoint/subPackageMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_subPackageMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -245,6 +320,14 @@
           "nullableSignatureField": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency": {
+        "type": "object",
+        "properties": {
+          "defaultField": {
+            "type": "string"
           }
         }
       }

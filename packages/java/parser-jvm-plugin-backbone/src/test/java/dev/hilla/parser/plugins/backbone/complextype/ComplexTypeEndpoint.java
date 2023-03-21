@@ -17,5 +17,13 @@ public class ComplexTypeEndpoint {
     public static class ComplexTypeModel {
         private List<Map<String, List<String>>> complexList;
         private Map<String, List<String>> complexMap;
+
+        public List<Map<String, List<String>>> getComplexList() {
+            return complexList;
+        }
+
+        public Map<String, List<String>> getComplexMap() {
+            return complexMap;
+        }
     }
 }

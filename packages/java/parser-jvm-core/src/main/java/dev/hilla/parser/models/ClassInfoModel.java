@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -33,7 +32,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private List<ClassInfoModel> innerClasses;
     private List<ClassRefSignatureModel> interfaces;
     private List<MethodInfoModel> methods;
-    private PackageInfoModel pkg;
+    private List<PackageInfoModel> ancestors;
     private Optional<ClassRefSignatureModel> superClass;
     private List<TypeParameterModel> typeParameters;
 
@@ -262,10 +261,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return fields;
     }
 
-    public Stream<FieldInfoModel> getFieldsStream() {
-        return getFields().stream();
-    }
-
     public List<ClassInfoModel> getInheritanceChain() {
         var chain = new ArrayList<ClassInfoModel>();
 
@@ -280,20 +275,12 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return chain;
     }
 
-    public Stream<ClassInfoModel> getInheritanceChainStream() {
-        return getInheritanceChain().stream();
-    }
-
     public List<ClassInfoModel> getInnerClasses() {
         if (innerClasses == null) {
             innerClasses = prepareInnerClasses();
         }
 
         return innerClasses;
-    }
-
-    public Stream<ClassInfoModel> getInnerClassesStream() {
-        return getInnerClasses().stream();
     }
 
     public List<ClassRefSignatureModel> getInterfaces() {
@@ -304,10 +291,6 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return interfaces;
     }
 
-    public Stream<ClassRefSignatureModel> getInterfacesStream() {
-        return getInterfaces().stream();
-    }
-
     public List<MethodInfoModel> getMethods() {
         if (methods == null) {
             methods = prepareMethods();
@@ -316,23 +299,23 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return methods;
     }
 
-    public Stream<MethodInfoModel> getMethodsStream() {
-        return getMethods().stream();
-    }
-
-    public PackageInfoModel getPackage() {
-        if (pkg == null) {
-            pkg = preparePackage();
+    /**
+     * Tries to find all packages that are ancestors of this class. From the
+     * list of all possible ancestor packages, only those whose existence is
+     * confirmed are returned. This is a "best effort" to find them as, even if
+     * they exist, there is no guarantee that they have already been loaded.
+     *
+     * @return a list of packages that are ancestors of this class
+     */
+    public List<PackageInfoModel> findAncestors() {
+        if (ancestors == null) {
+            ancestors = prepareAncestors();
         }
 
-        return pkg;
+        return ancestors;
     }
 
     public abstract String getSimpleName();
-
-    public Stream<ClassRefSignatureModel> getSuperClassStream() {
-        return getSuperClass().stream();
-    }
 
     @Override
     public List<TypeParameterModel> getTypeParameters() {
@@ -343,6 +326,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return typeParameters;
     }
 
+    @Override
     public int hashCode() {
         return 3 + getName().hashCode();
     }
@@ -419,6 +403,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
         return isAssignableFrom(cls.getClass());
     }
 
+    @Override
     public abstract boolean isEnum();
 
     public abstract boolean isFinal();
@@ -443,6 +428,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     public abstract boolean isSynthetic();
 
+    @Override
+    public String toString() {
+        return "ClassInfoModel[" + get() + "]";
+    }
+
     protected abstract List<FieldInfoModel> prepareFields();
 
     protected abstract List<ClassInfoModel> prepareInnerClasses();
@@ -451,7 +441,7 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
 
     protected abstract List<MethodInfoModel> prepareMethods();
 
-    protected abstract PackageInfoModel preparePackage();
+    protected abstract List<PackageInfoModel> prepareAncestors();
 
     protected abstract ClassRefSignatureModel prepareSuperClass();
 

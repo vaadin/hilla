@@ -6,14 +6,13 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import io.github.classgraph.MethodInfo;
 
-public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
-        Model, NamedModel, OwnedModel<ClassInfoModel>, ParameterizedModel {
+public abstract class MethodInfoModel extends AnnotatedAbstractModel
+        implements ClassMemberModel, ParameterizedModel {
     static final Comparator<MethodInfoModel> METHOD_ORDER = Comparator
             .comparing(MethodInfoModel::getName);
     private ClassInfoModel owner;
@@ -95,10 +94,6 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
         return parameters;
     }
 
-    public Stream<MethodParameterInfoModel> getParametersStream() {
-        return getParameters().stream();
-    }
-
     public SignatureModel getResultType() {
         if (resultType == null) {
             resultType = prepareResultType();
@@ -151,6 +146,11 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel implements
     public abstract boolean isSynthetic();
 
     public abstract boolean isVarArgs();
+
+    @Override
+    public String toString() {
+        return "MethodInfoModel[" + get() + "]";
+    }
 
     protected abstract ClassInfoModel prepareOwner();
 

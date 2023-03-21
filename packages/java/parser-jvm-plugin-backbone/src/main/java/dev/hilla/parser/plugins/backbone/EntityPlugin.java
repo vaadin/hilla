@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.NodeDependencies;
 import dev.hilla.parser.core.NodePath;
-import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.core.RootNode;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
@@ -22,7 +21,8 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
-public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
+public final class EntityPlugin
+        extends AbstractPlugin<BackbonePluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof EntityNode) {
@@ -82,8 +82,9 @@ public final class EntityPlugin extends AbstractPlugin<PluginConfiguration> {
     private Schema<?> enumSchema(ClassInfoModel entity) {
         var schema = new StringSchema();
 
-        schema.setEnum(entity.getFieldsStream().filter(FieldInfoModel::isPublic)
-                .map(FieldInfoModel::getName).collect(Collectors.toList()));
+        schema.setEnum(entity.getFields().stream()
+                .filter(FieldInfoModel::isPublic).map(FieldInfoModel::getName)
+                .collect(Collectors.toList()));
 
         return schema;
     }

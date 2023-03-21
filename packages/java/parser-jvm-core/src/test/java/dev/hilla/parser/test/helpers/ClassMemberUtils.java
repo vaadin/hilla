@@ -9,6 +9,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -25,9 +26,19 @@ import io.github.classgraph.ScanResult;
 import io.github.classgraph.TypeSignature;
 
 public final class ClassMemberUtils {
+    public static String capitalize(String str) {
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
     public static Stream<MethodInfoModel> cleanup(
             Stream<MethodInfoModel> models) {
         return models.filter(ClassMemberUtils::skipJacoco);
+    }
+
+    public static Optional<Method> getAnyDeclaredMethod(Class<?> cls,
+            String name) {
+        return Arrays.stream(cls.getDeclaredMethods())
+                .filter(m -> name.equals(m.getName())).findFirst();
     }
 
     public static ClassInfo getClassInfo(Class<?> cls, ScanResult source) {
@@ -180,6 +191,14 @@ public final class ClassMemberUtils {
                 .stream(getDeclaredMethod(method, source).getParameterInfo())
                 .filter(param -> param.getName().equals(parameter.getName()))
                 .findFirst().orElseThrow();
+    }
+
+    public static String toGetterName(String name) {
+        return "get" + capitalize(name);
+    }
+
+    public static String toSetterName(String name) {
+        return "set" + capitalize(name);
     }
 
     private static boolean areParameterTypesEqual(TypeSignature type,

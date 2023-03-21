@@ -278,7 +278,7 @@ public class ClassInfoModelTests {
         var expected = Arrays.stream(Dependency.Sample.class.getInterfaces())
                 .map(ClassInfoModel::of).map(ClassInfoModel::getName)
                 .collect(Collectors.toList());
-        var actual = model.getInterfacesStream()
+        var actual = model.getInterfaces().stream()
                 .map(ClassRefSignatureModel::getName)
                 .collect(Collectors.toList());
 
@@ -342,6 +342,23 @@ public class ClassInfoModelTests {
             assertTrue(model.isSource());
             break;
         }
+    }
+
+    @DisplayName("It should return all valid ancestors packages")
+    @Test
+    public void should_ReturnAllValidAncestorsPackages() {
+        // Load the `dev.hilla` package
+        var dummy = new dev.hilla.Dummy();
+        var model = ClassInfoModel.of(ctx.getReflectionOrigin());
+        var ancestors = model.findAncestors();
+        var ancestorNames = ancestors.stream().map(PackageInfoModel::getName)
+                .sorted().collect(Collectors.toList());
+
+        // `findAncestors()` returns only valid packages, so the result of this
+        // test could vary if some class is added to, or removed from, any
+        // ancestor package
+        assertEquals(List.of("dev.hilla", "dev.hilla.parser.models"),
+                ancestorNames);
     }
 
     static final class Characteristics {
@@ -605,28 +622,6 @@ public class ClassInfoModelTests {
                             ModelKind.SOURCE));
         }
 
-        public static final class Specialization implements ArgumentsProvider {
-            public static final String testNamePattern = "{2} [{3}]";
-
-            @Override
-            public Stream<Arguments> provideArguments(
-                    ExtensionContext context) {
-                var ctx = new Context.Specializations(context);
-
-                return Streams.combine(
-                        ctx.getReflectionSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.REFLECTION,
-                                        entry.getKey().getSimpleName())),
-                        ctx.getSourceSpecializations().entrySet().stream()
-                                .map(entry -> Arguments.of(
-                                        ClassInfoModel.of(entry.getKey()),
-                                        entry.getValue(), ModelKind.SOURCE,
-                                        entry.getKey().getSimpleName())));
-            }
-        }
-
         static final class Characteristics implements ArgumentsProvider {
             public static final String testNamePattern = "{2} [{3}]";
 
@@ -670,6 +665,28 @@ public class ClassInfoModelTests {
             public Checker() {
                 super(SpecializedModel.class,
                         getDeclaredMethods(SpecializedModel.class));
+            }
+        }
+
+        static final class Specialization implements ArgumentsProvider {
+            public static final String testNamePattern = "{2} [{3}]";
+
+            @Override
+            public Stream<Arguments> provideArguments(
+                    ExtensionContext context) {
+                var ctx = new Context.Specializations(context);
+
+                return Streams.combine(
+                        ctx.getReflectionSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.REFLECTION,
+                                        entry.getKey().getSimpleName())),
+                        ctx.getSourceSpecializations().entrySet().stream()
+                                .map(entry -> Arguments.of(
+                                        ClassInfoModel.of(entry.getKey()),
+                                        entry.getValue(), ModelKind.SOURCE,
+                                        entry.getKey().getSimpleName())));
             }
         }
     }

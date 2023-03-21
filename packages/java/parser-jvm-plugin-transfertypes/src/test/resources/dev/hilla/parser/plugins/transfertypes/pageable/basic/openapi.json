@@ -1,18 +1,19 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Vaadin Application",
+    "title": "Hilla Application",
     "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:8080/connect",
-      "description": "Vaadin Backend"
+      "description": "Hilla Backend"
     }
   ],
   "tags": [
     {
-      "name": "PageableEndpoint"
+      "name": "PageableEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.transfertypes.pageable.basic.PageableEndpoint"
     }
   ],
   "paths": {
@@ -29,7 +30,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Order"
                     }
                   ]
                 }
@@ -75,7 +76,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Pageable"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Pageable"
                     }
                   ]
                 }
@@ -98,7 +99,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+                      "$ref": "#/components/schemas/dev.hilla.mappedtypes.Sort"
                     }
                   ]
                 }
@@ -111,7 +112,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.runtime.transfertypes.Order": {
+      "dev.hilla.mappedtypes.Order": {
         "type": "object",
         "properties": {
           "direction": {
@@ -139,7 +140,7 @@
           }
         }
       },
-      "dev.hilla.runtime.transfertypes.Pageable": {
+      "dev.hilla.mappedtypes.Pageable": {
         "type": "object",
         "properties": {
           "pageNumber": {
@@ -154,13 +155,13 @@
             "nullable": true,
             "anyOf": [
               {
-                "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Sort"
+                "$ref": "#/components/schemas/dev.hilla.mappedtypes.Sort"
               }
             ]
           }
         }
       },
-      "dev.hilla.runtime.transfertypes.Sort": {
+      "dev.hilla.mappedtypes.Sort": {
         "type": "object",
         "properties": {
           "orders": {
@@ -170,7 +171,7 @@
               "nullable": true,
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/dev.hilla.runtime.transfertypes.Order"
+                  "$ref": "#/components/schemas/dev.hilla.mappedtypes.Order"
                 }
               ]
             }
