@@ -48,17 +48,17 @@
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
     "lerna": "^4.0.0",
-    "lint-staged": "^13.0.3",
-    "meow": "^10.1.5",
+    "lint-staged": "^13.2.0",
+    "meow": "^11.0.0",
     "minimist": "^1.2.8",
     "mocha": "^10.2.0",
     "pm2": "^5.2.2",
-    "prettier": "^2.7.1",
-    "simple-git-hooks": "^2.6.1",
-    "sinon": "^15.0.1",
+    "prettier": "^2.8.4",
+    "simple-git-hooks": "^2.8.1",
+    "sinon": "^15.0.2",
     "start-server-and-test": "^2.0.0",
-    "tsx": "^3.12.3",
-    "typescript": "^5.0.1-rc",
-    "vite": "^4.1.4"
+    "tsx": "^3.12.5",
+    "typescript": "^5.0.2",
+    "vite": "^4.2.0"
   }
 }
