@@ -1,43 +1,36 @@
 /* eslint-disable import/no-extraneous-dependencies,camelcase,no-console */
-import meow from 'meow';
 import { readFile, writeFile } from 'fs/promises';
 
-const {
-  input: packageFileNames,
-  flags: { version },
-} = meow({
-  importMeta: import.meta,
-  flags: {
-    version: {
-      type: 'string',
-      alias: 'v',
-    },
-  },
-});
+const { npm_new_version: version, npm_package_name: packageName, npm_package_json: packageFile } = process.env;
 
-const errors = new Map();
+if (!version) {
+  console.log(process.env);
+  throw new Error('Version should be defined');
+}
 
-await Promise.all(
-  packageFileNames.map(async (packageFileName) => {
-    try {
-      const packageJson = JSON.parse(await readFile(packageFileName, 'utf8'));
-      const { peerDependencies } = packageJson;
+if (!packageName) {
+  console.log(process.env);
+  throw new Error('Package name should be defined');
+}
 
-      if (peerDependencies) {
-        for (const dependency of Object.keys(peerDependencies)) {
-          if (dependency.startsWith('@hilla')) {
-            peerDependencies[dependency] = `^${version}`;
-          }
-        }
+if (!packageFile) {
+  console.log(process.env);
+  throw new Error('Path to package.json should be defined');
+}
 
-        await writeFile(packageFileName, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
+try {
+  const packageJson = JSON.parse(await readFile(packageFile, 'utf8'));
+  const { peerDependencies } = packageJson;
+
+  if (peerDependencies) {
+    for (const dependency of Object.keys(peerDependencies)) {
+      if (dependency.startsWith('@hilla')) {
+        peerDependencies[dependency] = `^${version}`;
       }
-    } catch (e) {
-      errors.set(packageFileName, e);
     }
-  }),
-);
 
-for (const [file, error] of errors) {
-  console.error(`Error in ${file}:\n`, error);
+    await writeFile(packageFile, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
+  }
+} catch (e) {
+  throw new Error(`Error in ${packageName}`, e);
 }
