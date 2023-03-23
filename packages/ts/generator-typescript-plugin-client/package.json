@@ -17,7 +17,7 @@
     "test:update": "npm test -- --update",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit",
-    "preversion": "node ../../../scripts/bump/package-update.js"
+    "version": "node ../../../scripts/bump/package-update.js"
   },
   "exports": {
     ".": {

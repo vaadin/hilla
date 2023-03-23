@@ -1,12 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies,camelcase,no-console */
 import { readFile, writeFile } from 'fs/promises';
 
-const { npm_new_version: version, npm_package_name: packageName, npm_package_json: packageFile } = process.env;
-
-if (!version) {
-  console.log(process.env);
-  throw new Error('Version should be defined');
-}
+const { npm_package_name: packageName, npm_package_json: packageFile } = process.env;
 
 if (!packageName) {
   console.log(process.env);
@@ -20,7 +15,7 @@ if (!packageFile) {
 
 try {
   const packageJson = JSON.parse(await readFile(packageFile, 'utf8'));
-  const { peerDependencies } = packageJson;
+  const { peerDependencies, version } = packageJson;
 
   if (peerDependencies) {
     for (const dependency of Object.keys(peerDependencies)) {
