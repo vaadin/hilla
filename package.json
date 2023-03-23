@@ -55,7 +55,6 @@
     "prettier": "^2.8.4",
     "simple-git-hooks": "^2.8.1",
     "sinon": "^15.0.2",
-    "start-server-and-test": "^2.0.0",
     "tsx": "^3.12.5",
     "typescript": "^5.0.2",
     "vite": "^4.2.0"
