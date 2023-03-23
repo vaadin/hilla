@@ -4,12 +4,10 @@ import { readFile, writeFile } from 'fs/promises';
 const { npm_package_name: packageName, npm_package_json: packageFile } = process.env;
 
 if (!packageName) {
-  console.log(process.env);
   throw new Error('Package name should be defined');
 }
 
 if (!packageFile) {
-  console.log(process.env);
   throw new Error('Path to package.json should be defined');
 }
 
