@@ -46,7 +46,7 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
             String name) {
-        assertTrue(model.getType().getPrimary().get().toString()
+        assertTrue(model.getAssociatedTypes().toString()
                 .endsWith(JacksonPropertyShared.stringifiedProps.get(name)));
     }
 

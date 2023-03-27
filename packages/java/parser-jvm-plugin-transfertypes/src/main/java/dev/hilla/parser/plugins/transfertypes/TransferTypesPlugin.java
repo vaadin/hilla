@@ -22,7 +22,9 @@ import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.CompositeTypeSignatureNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypedNode;
 import dev.hilla.runtime.transfertypes.EndpointSubscription;
 import dev.hilla.runtime.transfertypes.Flux;
 
@@ -67,27 +69,30 @@ public final class TransferTypesPlugin
     }
 
     private Node<?, ?> mapClassRefNodes(Node<?, ?> node) {
-        if (!(node instanceof TypeSignatureNode)) {
+        if (!(node instanceof TypedNode)) {
             return node;
         }
 
-        var signature = (SignatureModel) node.getSource();
+        return (Node<?, ?>) ((TypedNode) node).processType(this::processType);
+    }
+
+    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
+        return nodes.map(this::mapClassRefNodes);
+    }
+
+    private SignatureModel processType(SignatureModel signature) {
         if (!(signature instanceof ClassRefSignatureModel)) {
-            return node;
+            return signature;
         }
 
         var classRef = (ClassRefSignatureModel) signature;
         var className = classRef.getClassInfo().getName();
         if (!classMap.containsKey(className)) {
-            return node;
+            return signature;
         }
 
         var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
-        return TypeSignatureNode.of(ClassRefSignatureModel.of(mappedClassInfo,
-                classRef.getTypeArguments(), classRef.getAnnotations()));
-    }
-
-    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
-        return nodes.map(this::mapClassRefNodes);
+        return ClassRefSignatureModel.of(mappedClassInfo,
+                classRef.getTypeArguments(), classRef.getAnnotations());
     }
 }

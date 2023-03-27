@@ -294,6 +294,42 @@
                 "simpleName": "Size"
               }
             ]
+          },
+          "withConstraintsOnSetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotBlank"
+              },
+              {
+                "simpleName": "Email"
+              }
+            ]
+          },
+          "withGetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
+          },
+          "withSetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Email"
+              },
+              {
+                "simpleName": "NotBlank"
+              }
+            ]
           }
         }
       }
