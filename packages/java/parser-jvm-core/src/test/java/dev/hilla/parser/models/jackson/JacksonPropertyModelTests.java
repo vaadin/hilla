@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dev.hilla.parser.models.Model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,9 +46,11 @@ public class JacksonPropertyModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
-            String name) {
-        assertTrue(model.getAssociatedTypes().toString()
-                .endsWith(JacksonPropertyShared.stringifiedProps.get(name)));
+        String name) {
+        var expectedTypes = JacksonPropertyShared.stringifiedTypes.get(name);
+        assertEquals(expectedTypes,
+            model.getAssociatedTypes().stream().map(Model::get)
+                .map(Object::toString).toList());
     }
 
     @DisplayName("It should pass equality check")
