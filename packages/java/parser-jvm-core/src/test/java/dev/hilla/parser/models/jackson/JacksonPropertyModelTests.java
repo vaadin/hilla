@@ -46,11 +46,10 @@ public class JacksonPropertyModelTests {
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
-        String name) {
+            String name) {
         var expectedTypes = JacksonPropertyShared.stringifiedTypes.get(name);
-        assertEquals(expectedTypes,
-            model.getAssociatedTypes().stream().map(Model::get)
-                .map(Object::toString).toList());
+        assertEquals(expectedTypes, model.getAssociatedTypes().stream()
+                .map(Model::get).map(Object::toString).toList());
     }
 
     @DisplayName("It should pass equality check")
