@@ -295,7 +295,15 @@ public final class TypeSignaturePlugin
     }
 
     private String signatureToTypeString(SignatureModel type) {
-        return ((AnnotatedType) (((ReflectionSignatureModel) type).get()))
-                .getType().toString();
+        // Only reflection types are supported.
+        // This converts to a name without annotations.
+        var annotatedElement = ((ReflectionSignatureModel) type).get();
+        if (annotatedElement instanceof AnnotatedType) {
+            return ((AnnotatedType) annotatedElement).getType().getTypeName();
+        } else if (annotatedElement instanceof Type) {
+            return ((Type) annotatedElement).getTypeName();
+        } else {
+            return annotatedElement.toString();
+        }
     }
 }
