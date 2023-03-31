@@ -15,6 +15,9 @@ class TestTypeScriptComponent extends LitElement {
       <button id="checkAnnotatedEntityModelType" @click="${this.checkAnnotatedEntityModelType}">
         Check annotated entity model type
       </button>
+      <button id="checkAnnotatedEntityModelValidation" @click="${this.checkAnnotatedEntityModelValidation}">
+        Check annotated entity model validation
+      </button>
       <output id="content"></output>
     `;
   }
@@ -32,5 +35,12 @@ class TestTypeScriptComponent extends LitElement {
     const binder = new Binder(this, AnnotatedEntityModel);
     binder.read({ customName: 'value' });
     this.content.textContent = typeof binder.for(binder.model.customName).value;
+  }
+
+  public async checkAnnotatedEntityModelValidation() {
+    const binder = new Binder(this, AnnotatedEntityModel);
+    binder.read({ customName: ' ' });
+    await binder.validate();
+    this.content.textContent = binder.errors[0]?.message || '';
   }
 }
