@@ -165,6 +165,8 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
+    matrix:
+      group: [1, 2]
 
     steps:
       - name: Checkout Project Code
@@ -197,6 +199,8 @@ jobs:
               -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
+              -P\!it-modules
+              -Pit-modules-group-${{ matrix.group }}
               verify
           )
       - uses: actions/upload-artifact@v3
