@@ -166,8 +166,8 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-    matrix:
-      group: [1, 2]
+      matrix:
+        group: [1, 2]
 
     steps:
       - name: Checkout Project Code
