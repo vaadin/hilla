@@ -35,7 +35,7 @@ public final class JacksonPropertyModel
                 .of(getGetter().map(MethodInfoModel::getResultType), getSetter()
                         .map(setter -> setter.getParameters().get(0).getType()),
                         getField().map(FieldInfoModel::getType))
-                .flatMap(Optional::stream).toList();
+                .flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     public static JacksonPropertyModel of(

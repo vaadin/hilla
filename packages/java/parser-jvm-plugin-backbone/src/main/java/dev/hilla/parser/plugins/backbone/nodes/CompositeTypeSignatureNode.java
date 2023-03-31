@@ -48,7 +48,8 @@ public final class CompositeTypeSignatureNode extends
     @Override
     public TypedNode processType(
             @Nonnull UnaryOperator<SignatureModel> typeProcessor) {
-        var processedTypes = getSource().stream().map(typeProcessor).toList();
+        var processedTypes = getSource().stream().map(typeProcessor)
+                .collect(Collectors.toList());
         if (processedTypes.equals(getSource())) {
             return this;
         }

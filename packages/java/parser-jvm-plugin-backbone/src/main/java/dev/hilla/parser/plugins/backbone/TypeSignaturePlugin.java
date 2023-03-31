@@ -232,7 +232,7 @@ public final class TypeSignaturePlugin
         var types = node.getSource();
         // Find referred types for all composite type items
         var referredTypes = types.stream().map(this::getReferredTypes)
-                .flatMap(List::stream).toList();
+                .flatMap(List::stream).collect(Collectors.toList());
         return scanTypes(referredTypes, nodeDependencies);
     }
 

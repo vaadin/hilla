@@ -300,7 +300,8 @@ public final class Parser {
         // jars, which basically means scanning the build or target folder
         else {
             var buildDirectories = config.getClassPathElements().stream()
-                    .filter(e -> !e.endsWith(".jar")).toList();
+                    .filter(e -> !e.endsWith(".jar"))
+                    .collect(Collectors.toList());
             logger.info("Search for endpoints in directories {}",
                     buildDirectories);
             classGraph.overrideClasspath(buildDirectories);
