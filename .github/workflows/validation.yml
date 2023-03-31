@@ -200,8 +200,8 @@ jobs:
               -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
-              -P\!it-modules
-              -Pit-modules-group-${{ matrix.group }}
+              -P\!it-modules \
+              -Pit-modules-group-${{ matrix.group }} \
               verify
           )
       - uses: actions/upload-artifact@v3
