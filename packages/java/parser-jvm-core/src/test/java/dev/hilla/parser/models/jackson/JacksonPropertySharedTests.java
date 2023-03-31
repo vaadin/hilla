@@ -13,13 +13,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
-final class JacksonPropertyShared {
+final class JacksonPropertySharedTests {
 
     static final Map<String, List<String>> stringifiedTypes = Map.ofEntries(
             Map.entry("privatePropertyWithAccessors", List.of(
-                    "@dev.hilla.parser.models.jackson.JacksonPropertyShared$MethodTypeAnnotation() java.lang.Byte",
-                    "@dev.hilla.parser.models.jackson.JacksonPropertyShared$ParameterTypeAnnotation() java.lang.Byte",
-                    "@dev.hilla.parser.models.jackson.JacksonPropertyShared$FieldTypeAnnotation() java.lang.Byte")),
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$MethodTypeAnnotation() java.lang.Byte",
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$ParameterTypeAnnotation() java.lang.Byte",
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$FieldTypeAnnotation() java.lang.Byte")),
             Map.entry("privateProperty",
                     List.of("java.util.Map<java.lang.String, java.lang.Long>",
                             "java.util.Map<java.lang.String, java.lang.Long>")),
