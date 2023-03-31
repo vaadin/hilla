@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dev.hilla.parser.models.Model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,11 +35,11 @@ import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.models.MethodInfoModel;
 
 public class JacksonPropertyModelTests {
-    private JacksonPropertyShared.Context ctx;
+    private JacksonPropertySharedTests.Context ctx;
 
     @BeforeEach
     public void setUp() {
-        ctx = new JacksonPropertyShared.Context();
+        ctx = new JacksonPropertySharedTests.Context();
     }
 
     @DisplayName("It should have correct type")
@@ -46,8 +47,10 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
             String name) {
-        assertTrue(model.getType().getPrimary().get().toString()
-                .endsWith(JacksonPropertyShared.stringifiedProps.get(name)));
+        var expectedTypes = JacksonPropertySharedTests.stringifiedTypes
+                .get(name);
+        assertEquals(expectedTypes, model.getAssociatedTypes().stream()
+                .map(Model::get).map(Object::toString).toList());
     }
 
     @DisplayName("It should pass equality check")
@@ -134,7 +137,7 @@ public class JacksonPropertyModelTests {
         default -> name;
         };
         assertEquals(n, model.getName());
-        assertEquals(ClassInfoModel.of(JacksonPropertyShared.Sample.class),
+        assertEquals(ClassInfoModel.of(JacksonPropertySharedTests.Sample.class),
                 model.getOwner());
     }
 
@@ -145,9 +148,9 @@ public class JacksonPropertyModelTests {
             String name) {
         var expected = switch (name) {
         case "privatePropertyWithAccessors" -> Set.of(
-                "dev.hilla.parser.models.jackson.JacksonPropertyShared$FieldAnnotation",
-                "dev.hilla.parser.models.jackson.JacksonPropertyShared$MethodAnnotation",
-                "dev.hilla.parser.models.jackson.JacksonPropertyShared$ParameterAnnotation");
+                "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$FieldAnnotation",
+                "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$MethodAnnotation",
+                "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$ParameterAnnotation");
         case "renamedPublicProperty", "renamedPrivateProperty" -> Set
                 .of("com.fasterxml.jackson.annotation.JsonProperty");
         default -> Set.of();
@@ -170,7 +173,7 @@ public class JacksonPropertyModelTests {
         case "propertyGetterOnly", "propertySetterOnly" -> new Expected(false,
                 Optional.empty());
         default -> new Expected(true, Optional.of(FieldInfoModel
-                .of(getDeclaredField(JacksonPropertyShared.Sample.class, name))));
+                .of(getDeclaredField(JacksonPropertySharedTests.Sample.class, name))));
         };
 
         assertEquals(expected.hasField(), model.hasField());
@@ -190,7 +193,7 @@ public class JacksonPropertyModelTests {
                 false, Optional.empty());
         default -> new Expected(true,
                 Optional.of(MethodInfoModel.of(getDeclaredMethod(
-                        JacksonPropertyShared.Sample.class, toGetterName(name)))));
+                        JacksonPropertySharedTests.Sample.class, toGetterName(name)))));
         };
 
         assertEquals(expected.hasGetter(), model.hasGetter());
@@ -207,7 +210,7 @@ public class JacksonPropertyModelTests {
 
         var expected = switch (name) {
         case "privatePropertyWithAccessors", "propertySetterOnly" -> new Expected(
-                true, getAnyDeclaredMethod(JacksonPropertyShared.Sample.class,
+                true, getAnyDeclaredMethod(JacksonPropertySharedTests.Sample.class,
                         toSetterName(name)).map(MethodInfoModel::of));
         default -> new Expected(false, Optional.empty());
         };
@@ -230,7 +233,7 @@ public class JacksonPropertyModelTests {
 
         @Override
         public Stream<Arguments> provideArguments(ExtensionContext context) {
-            var ctx = new JacksonPropertyShared.Context();
+            var ctx = new JacksonPropertySharedTests.Context();
 
             return ctx.getReflectionOrigins().entrySet().stream()
                     .map(entry -> Arguments.of(

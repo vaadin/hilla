@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -300,7 +301,8 @@ public final class Parser {
         // jars, which basically means scanning the build or target folder
         else {
             var buildDirectories = config.getClassPathElements().stream()
-                    .filter(e -> !e.endsWith(".jar")).toList();
+                    .filter(e -> !e.endsWith(".jar"))
+                    .collect(Collectors.toList());
             logger.info("Search for endpoints in directories {}",
                     buildDirectories);
             classGraph.overrideClasspath(buildDirectories);
