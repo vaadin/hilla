@@ -70,6 +70,20 @@ public class TypeScriptIT extends ChromeBrowserTest {
         assertContent("must not be blank");
     }
 
+    @Test
+    public void annotatedEntityModelConstraintsNotBlank() {
+        String endpoint = "checkAnnotatedEntityModelConstraintsNotBlank";
+        exec(endpoint);
+        assertContent("must not be blank");
+    }
+
+    @Test
+    public void annotatedEntityModelConstraintsEmail() {
+        String endpoint = "checkAnnotatedEntityModelConstraintsEmail";
+        exec(endpoint);
+        assertContent("must be a well-formed email address");
+    }
+
     private void exec(String id) {
         content.setProperty("innerText", "");
         WebElement button = testTypeScript.$(TestBenchElement.class).id(id);

@@ -3,6 +3,7 @@ package com.vaadin.flow.connect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -24,6 +25,10 @@ public class AnnotatedEndpoint {
         @NotBlank
         private String defaultName = "value";
 
+        @Email
+        @NotBlank
+        private String email = "";
+
         @JsonProperty("customName")
         @Nonnull
         public String getDefaultName() {
@@ -33,6 +38,15 @@ public class AnnotatedEndpoint {
         @JsonProperty("customName")
         public void setDefaultName(@Nonnull String defaultName) {
             this.defaultName = defaultName;
+        }
+
+        @Nonnull
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(@Nonnull String email) {
+            this.email = email;
         }
     }
 }

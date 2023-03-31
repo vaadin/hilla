@@ -18,6 +18,15 @@ class TestTypeScriptComponent extends LitElement {
       <button id="checkAnnotatedEntityModelValidation" @click="${this.checkAnnotatedEntityModelValidation}">
         Check annotated entity model validation
       </button>
+      <button
+        id="checkAnnotatedEntityModelConstraintsNotBlank"
+        @click="${this.checkAnnotatedEntityModelConstraintsNotBlank}"
+      >
+        Check annotated entity model NotBlank constraint
+      </button>
+      <button id="checkAnnotatedEntityModelConstraintsEmail" @click="${this.checkAnnotatedEntityModelConstraintsEmail}">
+        Check annotated entity model Email constraint
+      </button>
       <output id="content"></output>
     `;
   }
@@ -33,13 +42,27 @@ class TestTypeScriptComponent extends LitElement {
 
   public checkAnnotatedEntityModelType() {
     const binder = new Binder(this, AnnotatedEntityModel);
-    binder.read({ customName: 'value' });
+    binder.read({ customName: 'value', email: 'name@example.com' });
     this.content.textContent = typeof binder.for(binder.model.customName).value;
   }
 
   public async checkAnnotatedEntityModelValidation() {
     const binder = new Binder(this, AnnotatedEntityModel);
-    binder.read({ customName: ' ' });
+    binder.read({ customName: ' ', email: 'name@example.com' });
+    await binder.validate();
+    this.content.textContent = binder.errors[0]?.message || '';
+  }
+
+  public async checkAnnotatedEntityModelConstraintsNotBlank() {
+    const binder = new Binder(this, AnnotatedEntityModel);
+    binder.read({ customName: 'value', email: ' ' });
+    await binder.validate();
+    this.content.textContent = binder.errors[0]?.message || '';
+  }
+
+  public async checkAnnotatedEntityModelConstraintsEmail() {
+    const binder = new Binder(this, AnnotatedEntityModel);
+    binder.read({ customName: 'value', email: 'incorrect' });
     await binder.validate();
     this.content.textContent = binder.errors[0]?.message || '';
   }
