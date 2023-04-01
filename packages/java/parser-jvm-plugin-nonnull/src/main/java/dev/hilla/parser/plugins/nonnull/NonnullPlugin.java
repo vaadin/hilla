@@ -22,12 +22,12 @@ import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.PackageInfoModel;
 import dev.hilla.parser.models.SpecializedModel;
-import dev.hilla.parser.models.jackson.JacksonPropertyModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import dev.hilla.parser.plugins.backbone.nodes.PropertyNode;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -65,11 +65,10 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 // Apply annotations from package (NonNullApi)
                 var annotations = getPackageAnnotationsStream(nodePath);
 
-                // Apply from current node, if source is annotated
-                if (nodeSource instanceof AnnotatedModel) {
+                // Apply from current node, if it is annotated
+                if (node instanceof AnnotatedNode) {
                     annotations = Stream.concat(annotations,
-                            ((AnnotatedModel) nodeSource).getAnnotations()
-                                    .stream());
+                            ((AnnotatedNode) node).getAnnotations().stream());
                 }
 
                 annotations = considerAscendantAnnotations(annotations,
@@ -139,13 +138,7 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         var current = nodePath.getNode();
         var parent = nodePath.getParentPath().getNode();
 
-        if (current instanceof TypeSignatureNode) {
-            if (parent instanceof PropertyNode) {
-                annotations = Stream.concat(annotations,
-                        ((JacksonPropertyModel) parent.getSource()).getType()
-                                .getAnnotations().stream());
-            }
-
+        if (current instanceof TypedNode) {
             if (parent instanceof MethodNode
                     || parent instanceof MethodParameterNode
                     || parent instanceof PropertyNode) {
