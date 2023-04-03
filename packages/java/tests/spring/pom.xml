@@ -170,6 +170,27 @@
     </profile>
 
     <profile>
+      <id>it-modules-group-1</id>
+      <modules>
+        <module>endpoints</module>
+        <module>endpoints-discovery</module>
+        <module>endpoints-custom-client</module>
+        <module>endpoints-maven-engine</module>
+        <module>endpoints-latest-java</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-2</id>
+      <modules>
+        <module>security</module>
+        <module>security-contextpath</module>
+        <module>security-jwt</module>
+        <module>security-urlmapping</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>validation</id>
       <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
