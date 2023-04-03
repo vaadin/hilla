@@ -20,16 +20,22 @@ import dev.hilla.parser.models.NamedModel;
 import dev.hilla.parser.models.OwnedModel;
 import dev.hilla.parser.models.ReflectionModel;
 
+import dev.hilla.parser.models.SignatureModel;
 import jakarta.annotation.Nonnull;
 
 public final class JacksonPropertyModel
         extends JacksonModel<FieldInfoModel, MethodInfoModel, MethodInfoModel>
         implements NamedModel, OwnedModel<ClassInfoModel>, ReflectionModel {
     private ClassInfoModel owner;
-    private JacksonPropertyTypeModel type;
+    private final List<SignatureModel> types;
 
     private JacksonPropertyModel(BeanPropertyDefinition origin) {
         super(origin);
+        this.types = Stream
+                .of(getGetter().map(MethodInfoModel::getResultType), getSetter()
+                        .map(setter -> setter.getParameters().get(0).getType()),
+                        getField().map(FieldInfoModel::getType))
+                .flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     public static JacksonPropertyModel of(
@@ -39,6 +45,10 @@ public final class JacksonPropertyModel
 
     public boolean couldDeserialize() {
         return origin.couldDeserialize();
+    }
+
+    public List<SignatureModel> getAssociatedTypes() {
+        return types;
     }
 
     public Optional<? extends ClassMemberModel> getAccessor() {
@@ -88,14 +98,6 @@ public final class JacksonPropertyModel
         }
 
         return getField().get();
-    }
-
-    public JacksonPropertyTypeModel getType() {
-        if (type == null) {
-            type = JacksonPropertyTypeModel.of(origin);
-        }
-
-        return type;
     }
 
     public boolean isExplicitlyIncluded() {

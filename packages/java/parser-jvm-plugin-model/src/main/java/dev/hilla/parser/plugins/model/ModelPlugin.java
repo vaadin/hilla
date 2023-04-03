@@ -16,7 +16,8 @@ import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import dev.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
+import dev.hilla.parser.plugins.backbone.nodes.TypedNode;
 
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -54,18 +55,18 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (!(nodePath.getNode() instanceof TypeSignatureNode)) {
+        if (!(nodePath.getNode() instanceof TypedNode)) {
             return;
         }
 
-        var signatureNode = (TypeSignatureNode) nodePath.getNode();
-        var signature = (SignatureModel) signatureNode.getSource();
+        var typedNode = (TypedNode) nodePath.getNode();
+        var signature = (SignatureModel) typedNode.getType();
         if (signature.isTypeArgument() || signature.isTypeParameter()) {
             return;
         }
 
-        var schema = signatureNode.getTarget();
-        addConstraintsToSchema(signature, schema);
+        var schema = typedNode.getTarget();
+        addConstraintsToSchema((AnnotatedNode) typedNode, schema);
     }
 
     @Override
@@ -84,9 +85,9 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         return nodeDependencies;
     }
 
-    private void addConstraintsToSchema(SignatureModel signature,
+    private void addConstraintsToSchema(AnnotatedNode annotatedNode,
             Schema<?> schema) {
-        var constraints = signature.getAnnotations().stream()
+        var constraints = annotatedNode.getAnnotations().stream()
                 .filter(ModelPlugin::isValidationConstraintAnnotation)
                 .map(ModelPlugin::convertAnnotation)
                 .collect(Collectors.toList());

@@ -52,6 +52,12 @@ public class BasicEndpoint {
         return opt;
     }
 
+    @Nonnull
+    public NonNullableFieldModel nonNullableFieldModel(
+            @Nonnull NonNullableFieldModel nonNullableFieldModel) {
+        return nonNullableFieldModel;
+    }
+
     public static class ExtendedNonNullableModel extends NonNullableModel {
         @javax.annotation.Nonnull
         public List<@Nonnull String> mixedAnnotations;
@@ -69,5 +75,18 @@ public class BasicEndpoint {
         @Nonnull
         public String publicField;
         public List<@Nonnull String> typeWithTypeArgument;
+    }
+
+    public static class NonNullableFieldModel {
+        @Nonnull
+        private List<@Nonnull String> stringList;
+
+        public List<String> getStringList() {
+            return this.stringList;
+        }
+
+        public void setStringList(List<String> stringList) {
+            this.stringList = stringList;
+        }
     }
 }
