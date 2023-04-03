@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 final class GeneratorShellRunner {
-    private static final boolean IS_WINDOWS = FrontendUtils.isWindows();
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GeneratorShellRunner.class);
     private static final Path TSGEN_PATH = Paths.get("node_modules", "@hilla",
@@ -25,12 +25,6 @@ final class GeneratorShellRunner {
 
     public GeneratorShellRunner(File rootDirectory, String nodeCommand) {
         this.rootDirectory = rootDirectory;
-
-        if (IS_WINDOWS) {
-            arguments.add("cmd.exe");
-            arguments.add("/c");
-        }
-
         arguments.add(nodeCommand);
         arguments.add(TSGEN_PATH.toString());
     }
@@ -41,14 +35,22 @@ final class GeneratorShellRunner {
 
     public void run(String input) throws InterruptedException, IOException {
         Objects.requireNonNull(input);
+        List<String> args;
+
+        if (FrontendUtils.isWindows()) {
+            args = List.of("cmd.exe", "/c", arguments.stream()
+                    .map(arg -> (arg.contains(" ") ? "\"" + arg + "\"" : arg))
+                    .collect(Collectors.joining(" ", "\"", "\"")));
+        } else {
+            args = arguments;
+        }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Executing command: {}", String.join(" ", arguments));
+            LOGGER.debug("Executing command: {}", String.join(" ", args));
         }
 
         var builder = new ProcessBuilder().directory(rootDirectory)
-                .command(arguments)
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .command(args).redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT);
 
         var process = builder.start();
