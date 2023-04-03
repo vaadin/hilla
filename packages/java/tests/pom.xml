@@ -251,5 +251,21 @@
         <module>spring</module>
       </modules>
     </profile>
+
+    <profile>
+      <id>it-modules-group-1</id>
+      <modules>
+        <module>csrf</module>
+        <module>csrf-context</module>
+        <module>spring</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-2</id>
+      <modules>
+        <module>spring</module>
+      </modules>
+    </profile>
   </profiles>
 </project>
