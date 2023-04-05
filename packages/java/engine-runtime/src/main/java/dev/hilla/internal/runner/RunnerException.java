@@ -12,8 +12,4 @@ public class RunnerException extends Exception {
     public RunnerException(String message, Throwable cause) {
         super(message, cause);
     }
-
-    public RunnerException(Throwable cause) {
-        super(cause);
-    }
 }

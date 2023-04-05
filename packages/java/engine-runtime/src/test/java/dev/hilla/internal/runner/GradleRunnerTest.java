@@ -8,23 +8,24 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MavenRunnerTest {
+public class GradleRunnerTest {
     @Test
-    void shouldRunIfPOMAvailable() throws IOException {
+    void shouldThrowUnsupportedIfBuildFileAvailable() throws IOException {
         Path tmpDir = null;
 
         try {
-            tmpDir = Files.createTempDirectory("prepareCommandMaven");
-            Files.createFile(tmpDir.resolve("pom.xml"));
-            var opt = MavenRunner.forProject(tmpDir.toFile(), "-v");
+            tmpDir = Files.createTempDirectory("prepareCommandGradle");
+            Files.createFile(tmpDir.resolve("build.gradle"));
+            var opt = GradleRunner.forProject(tmpDir.toFile());
             assertTrue(opt.isPresent());
             var runner = opt.orElseThrow();
-            assertEquals(1, runner.arguments().length);
-            assertTrue(runner.executables().contains("mvn"));
-            assertDoesNotThrow(runner::run);
+            var e = assertThrows(UnsupportedOperationException.class,
+                    runner::run);
+            assertNull(e.getCause());
+            assertEquals("Gradle is not supported yet", e.getMessage());
         } finally {
             if (tmpDir != null) {
-                Files.deleteIfExists(tmpDir.resolve("pom.xml"));
+                Files.deleteIfExists(tmpDir.resolve("build.gradle"));
                 Files.deleteIfExists(tmpDir);
             }
         }
@@ -35,8 +36,8 @@ public class MavenRunnerTest {
         Path tmpDir = null;
 
         try {
-            tmpDir = Files.createTempDirectory("prepareCommandMaven");
-            var runner = MavenRunner.forProject(tmpDir.toFile());
+            tmpDir = Files.createTempDirectory("prepareCommandGradle");
+            var runner = GradleRunner.forProject(tmpDir.toFile());
             assertTrue(runner.isEmpty());
         } finally {
             if (tmpDir != null) {
