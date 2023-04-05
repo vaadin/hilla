@@ -73,7 +73,7 @@
     "@hilla/generator-typescript-utils": "^2.0.4",
     "meow": "^10.1.1",
     "openapi-types": "^9.3.0",
-    "typescript": "^5.0.1-rc"
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",

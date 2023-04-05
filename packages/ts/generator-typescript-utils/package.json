@@ -76,7 +76,7 @@
   "dependencies": {
     "pino": "^7.0.5",
     "pino-pretty": "^7.3.0",
-    "typescript": "^5.0.1-rc"
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
