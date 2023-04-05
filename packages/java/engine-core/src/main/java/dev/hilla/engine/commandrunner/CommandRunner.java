@@ -1,4 +1,7 @@
-package dev.hilla.internal.runner;
+package dev.hilla.engine.commandrunner;
+
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,12 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-
-import com.vaadin.flow.server.frontend.FrontendUtils;
-
 /**
- * A generic command runner which throws a {@link RunnerException}.
+ * A generic command runner which throws a {@link CommandRunnerException}.
  */
 public interface CommandRunner {
     static final boolean IS_WINDOWS = FrontendUtils.isWindows();
@@ -30,10 +29,10 @@ public interface CommandRunner {
     /**
      * Run the command.
      *
-     * @throws RunnerException
+     * @throws CommandRunnerException
      *             if the command fails
      */
-    default void run() throws CommandNotFoundException, RunnerException {
+    default void run() throws CommandNotFoundException, CommandRunnerException {
         var executable = executables().stream()
                 .filter(this::runWithTestArguments).findFirst()
                 .orElseThrow(() -> new CommandNotFoundException(
@@ -44,7 +43,7 @@ public interface CommandRunner {
     private boolean runWithTestArguments(String command) {
         try {
             executeCommand(command, testArguments());
-        } catch (RunnerException e) {
+        } catch (CommandRunnerException e) {
             getLogger().debug("Testing command {} failed", command, e);
             return false;
         }
@@ -53,7 +52,7 @@ public interface CommandRunner {
     }
 
     private void executeCommand(String executable, String[] arguments)
-            throws CommandNotFoundException, RunnerException {
+            throws CommandNotFoundException, CommandRunnerException {
         var args = Stream
                 .concat(Stream.of(executable), Arrays.stream(arguments))
                 .collect(Collectors.toList());
@@ -76,11 +75,11 @@ public interface CommandRunner {
                         "Command not found: " + executable, e);
             }
 
-            throw new RunnerException(
+            throw new CommandRunnerException(
                     "Failed to execute command: " + executable, e);
         }
         if (exitCode != 0) {
-            throw new RunnerException("Command failed with exit code "
+            throw new CommandRunnerException("Command failed with exit code "
                     + exitCode + ": " + executable);
         }
     }

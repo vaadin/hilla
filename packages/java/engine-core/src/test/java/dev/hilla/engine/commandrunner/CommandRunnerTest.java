@@ -1,4 +1,4 @@
-package dev.hilla.internal.runner;
+package dev.hilla.engine.commandrunner;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class CommandRunnerTest {
             }
         };
 
-        var e = assertThrows(RunnerException.class, runner::run);
+        var e = assertThrows(CommandRunnerException.class, runner::run);
         assertNull(e.getCause());
         assertTrue(e.getMessage().contains("exit"));
     }

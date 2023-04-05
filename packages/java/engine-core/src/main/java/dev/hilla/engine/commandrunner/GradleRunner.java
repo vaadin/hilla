@@ -1,4 +1,4 @@
-package dev.hilla.internal.runner;
+package dev.hilla.engine.commandrunner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public class GradleRunner implements CommandRunner {
     }
 
     @Override
-    public void run() throws CommandNotFoundException, RunnerException {
+    public void run() throws CommandNotFoundException, CommandRunnerException {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
 }

@@ -1,4 +1,4 @@
-package dev.hilla.internal.runner;
+package dev.hilla.engine.commandrunner;
 
 import org.junit.jupiter.api.Test;
 

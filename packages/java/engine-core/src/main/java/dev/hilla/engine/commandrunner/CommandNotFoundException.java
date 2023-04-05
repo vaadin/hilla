@@ -1,6 +1,6 @@
-package dev.hilla.internal.runner;
+package dev.hilla.engine.commandrunner;
 
-public class CommandNotFoundException extends RunnerException {
+public class CommandNotFoundException extends CommandRunnerException {
 
     public CommandNotFoundException(String message) {
         super(message);

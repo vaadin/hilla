@@ -3,9 +3,15 @@ package dev.hilla.engine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import dev.hilla.engine.commandrunner.CommandNotFoundException;
+import dev.hilla.engine.commandrunner.CommandRunnerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
+
+    private static final Path TSGEN_PATH = Paths.get("node_modules", "@hilla",
+            "generator-typescript-cli", "bin", "index.js");
     private final Path baseDir;
     private final String nodeCommand;
     private final Path openAPIFile;
@@ -37,15 +46,28 @@ public final class GeneratorProcessor {
     }
 
     public void process() throws GeneratorException {
-        var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand);
-        prepareOutputDir(runner);
-        preparePlugins(runner);
-        prepareVerbose(runner);
+        var arguments = new ArrayList<Object>();
+        arguments.add(TSGEN_PATH);
+        prepareOutputDir(arguments);
+        preparePlugins(arguments);
+        prepareVerbose(arguments);
+
         try {
             var input = Files.readString(openAPIFile);
-            runner.run(input);
-        } catch (IOException | InterruptedException e) {
-            throw new GeneratorException("Unable to generate code", e);
+            arguments.add(input);
+        } catch (IOException e) {
+            throw new GeneratorException("Unable to read OpenAPI file", e);
+        }
+
+        var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
+                arguments.stream().map(Objects::toString)
+                        .toArray(String[]::new));
+        try {
+            runner.run();
+        } catch (CommandNotFoundException e) {
+            throw new GeneratorException("Node command not found", e);
+        } catch (CommandRunnerException e) {
+            throw new GeneratorException("Node execution failed", e);
         }
     }
 
@@ -63,21 +85,25 @@ public final class GeneratorProcessor {
         pluginsProcessor.setConfig(plugins);
     }
 
-    private void prepareOutputDir(GeneratorShellRunner runner) {
+    private void prepareOutputDir(List<Object> arguments) {
         var result = outputDirectory.isAbsolute() ? outputDirectory
                 : baseDir.resolve(outputDirectory);
-        runner.add("-o", result.toString());
+        arguments.add("-o");
+        arguments.add(result);
     }
 
-    private void preparePlugins(GeneratorShellRunner runner) {
+    private void preparePlugins(List<Object> arguments) {
         pluginsProcessor.process().stream()
                 .map(GeneratorConfiguration.Plugin::getPath).distinct()
-                .forEachOrdered(path -> runner.add("-p", path));
+                .forEachOrdered(path -> {
+                    arguments.add("-p");
+                    arguments.add(path);
+                });
     }
 
-    private void prepareVerbose(GeneratorShellRunner runner) {
+    private void prepareVerbose(List<Object> arguments) {
         if (logger.isDebugEnabled()) {
-            runner.add("-v");
+            arguments.add("-v");
         }
     }
 }
