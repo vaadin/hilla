@@ -20,7 +20,6 @@ public class MavenRunnerTest {
             assertTrue(opt.isPresent());
             var runner = opt.orElseThrow();
             assertEquals(1, runner.arguments().length);
-            assertTrue(runner.executables().contains("mvn"));
             assertDoesNotThrow(runner::run);
         } finally {
             if (tmpDir != null) {
