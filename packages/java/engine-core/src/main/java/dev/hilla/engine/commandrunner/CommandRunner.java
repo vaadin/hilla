@@ -32,7 +32,7 @@ public interface CommandRunner {
      * @throws CommandRunnerException
      *             if the command fails
      */
-    default void run() throws CommandNotFoundException, CommandRunnerException {
+    default void run() throws CommandRunnerException {
         var executable = executables().stream()
                 .filter(this::runWithTestArguments).findFirst()
                 .orElseThrow(() -> new CommandNotFoundException(
@@ -42,31 +42,44 @@ public interface CommandRunner {
 
     private boolean runWithTestArguments(String command) {
         try {
-            executeCommand(command, testArguments());
+            var args = testArguments();
+
+            if (getLogger().isTraceEnabled()) {
+                getLogger().trace("Testing command {} with arguments {}",
+                        command, args);
+            }
+
+            executeCommand(command, args);
+
+            return true;
         } catch (CommandRunnerException e) {
             getLogger().debug("Testing command {} failed", command, e);
+
             return false;
         }
-
-        return true;
     }
 
     private void executeCommand(String executable, String[] arguments)
-            throws CommandNotFoundException, CommandRunnerException {
-        var args = Stream
+            throws CommandRunnerException {
+        var commandWithArgs = Stream
                 .concat(Stream.of(executable), Arrays.stream(arguments))
                 .collect(Collectors.toList());
 
         if (IS_WINDOWS)
-            args = List.of("cmd.exe", "/c", args.stream()
+            commandWithArgs = List.of("cmd.exe", "/c", commandWithArgs.stream()
                     .map(arg -> (arg.contains(" ") ? "\"" + arg + "\"" : arg))
                     .collect(Collectors.joining(" ", "\"", "\"")));
+
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Running command: {} in directory {}",
+                    commandWithArgs, currentDirectory());
+        }
 
         var exitCode = 0;
 
         try {
-            var builder = new ProcessBuilder(args).directory(currentDirectory())
-                    .inheritIO();
+            var builder = new ProcessBuilder(commandWithArgs)
+                    .directory(currentDirectory()).inheritIO();
             exitCode = builder.start().waitFor();
         } catch (IOException | InterruptedException e) {
             if (e.getCause() != null && e.getCause().getMessage()

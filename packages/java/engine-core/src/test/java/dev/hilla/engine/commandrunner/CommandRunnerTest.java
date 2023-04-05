@@ -15,8 +15,7 @@ public class CommandRunnerTest {
             .getLogger(CommandRunnerTest.class);
 
     static final String USER_DIR = System.getProperty("user.dir", ".");
-    static final List<String> DIR_LS = List
-            .of(CommandRunner.IS_WINDOWS ? "dir" : "ls");
+    static final String DIR_LS = CommandRunner.IS_WINDOWS ? "dir" : "ls";
 
     abstract static class TestRunner implements CommandRunner {
 
@@ -47,7 +46,7 @@ public class CommandRunnerTest {
 
             @Override
             public List<String> executables() {
-                return DIR_LS;
+                return List.of(DIR_LS);
             }
         };
 
@@ -80,12 +79,24 @@ public class CommandRunnerTest {
 
             @Override
             public List<String> executables() {
-                return DIR_LS;
+                return List.of(DIR_LS);
             }
         };
 
         var e = assertThrows(CommandRunnerException.class, runner::run);
         assertNull(e.getCause());
         assertTrue(e.getMessage().contains("exit"));
+    }
+
+    @Test
+    void shouldChooseTheExecutableThatWorks() {
+        var runner = new TestRunner() {
+            @Override
+            public List<String> executables() {
+                return List.of("fakeCommand", DIR_LS);
+            }
+        };
+
+        assertDoesNotThrow(runner::run);
     }
 }

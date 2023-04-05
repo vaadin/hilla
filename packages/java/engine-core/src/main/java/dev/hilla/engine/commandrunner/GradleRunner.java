@@ -68,7 +68,7 @@ public class GradleRunner implements CommandRunner {
     }
 
     @Override
-    public void run() throws CommandNotFoundException, CommandRunnerException {
+    public void run() throws CommandRunnerException {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
 }
