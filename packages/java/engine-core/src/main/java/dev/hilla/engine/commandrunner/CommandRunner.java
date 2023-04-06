@@ -61,14 +61,17 @@ public interface CommandRunner {
 
     private void executeCommand(String executable, String[] arguments,
             Consumer<OutputStream> stdIn) throws CommandRunnerException {
-        var commandWithArgs = Stream
-                .concat(Stream.of(executable), Arrays.stream(arguments))
-                .collect(Collectors.toList());
+        Stream<String> cmdStream = Stream.concat(Stream.of(executable),
+                Arrays.stream(arguments));
 
-        if (IS_WINDOWS)
-            commandWithArgs = List.of("cmd.exe", "/c", commandWithArgs.stream()
-                    .map(arg -> (arg.contains(" ") ? "\"" + arg + "\"" : arg))
-                    .collect(Collectors.joining(" ", "\"", "\"")));
+        // On Windows, commands are run by cmd.exe and the command line is sent
+        // as a single parameter (note that having quotes inside other quotes is
+        // fine). On UNIX-like systems, command is run as is.
+        var commandWithArgs = IS_WINDOWS
+                ? List.of("cmd.exe", "/c", cmdStream.map(
+                        arg -> (arg.contains(" ") ? "\"" + arg + "\"" : arg))
+                        .collect(Collectors.joining(" ", "\"", "\"")))
+                : cmdStream.collect(Collectors.toList());
 
         if (getLogger().isTraceEnabled()) {
             getLogger().trace("Running command: \"{}\" in directory \"{}\"",
