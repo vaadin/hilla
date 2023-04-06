@@ -64,7 +64,7 @@ jobs:
             | tr '.:' '/' \
             | sed -e 's/^/.m2\/repository\//' \
           )
-          tar rf workspace.tar $(find packages/java -d -name target)
+          find packages/java -type d -name target -print0 | xargs -0 tar rf workspace.tar
           tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
       - uses: actions/upload-artifact@v3
         with:
