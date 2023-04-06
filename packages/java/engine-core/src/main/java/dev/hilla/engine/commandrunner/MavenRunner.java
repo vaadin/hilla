@@ -22,6 +22,8 @@ public class MavenRunner implements CommandRunner {
      *
      * @param projectDir
      *            the project directory
+     * @param args
+     *            the arguments to pass to Maven
      */
     public MavenRunner(File projectDir, String... args) {
         this.projectDir = projectDir;
@@ -33,6 +35,8 @@ public class MavenRunner implements CommandRunner {
      *
      * @param projectDir
      *            the project directory
+     * @param args
+     *            the arguments to pass to Maven
      * @return a Maven runner if the project directory contains a Maven project,
      *         an empty optional otherwise
      */
@@ -67,6 +71,7 @@ public class MavenRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
+        // Prefer the wrapper over a global installation
         return IS_WINDOWS ? List.of(".\\mvnw.cmd", "mvn.cmd")
                 : List.of("./mvnw", "mvn");
     }
