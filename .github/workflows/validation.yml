@@ -20,7 +20,7 @@ jobs:
   init:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - uses: actions-cool/check-user-permission@main
