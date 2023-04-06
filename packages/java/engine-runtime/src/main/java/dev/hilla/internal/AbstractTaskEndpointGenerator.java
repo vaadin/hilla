@@ -92,7 +92,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                                         + "Directory '%s' does not look like a Maven or "
                                         + "Gradle project.", projectDirectory)))
                         // Run the first valid runner
-                        .run();
+                        .run(null);
             } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);

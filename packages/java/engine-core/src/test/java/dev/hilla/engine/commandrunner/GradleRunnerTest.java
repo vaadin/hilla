@@ -20,7 +20,7 @@ public class GradleRunnerTest {
             assertTrue(opt.isPresent());
             var runner = opt.orElseThrow();
             var e = assertThrows(UnsupportedOperationException.class,
-                    runner::run);
+                    () -> runner.run(null));
             assertNull(e.getCause());
             assertEquals("Gradle is not supported yet", e.getMessage());
         } finally {

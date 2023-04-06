@@ -53,21 +53,29 @@ public final class GeneratorProcessor {
         prepareVerbose(arguments);
 
         try {
-            var input = Files.readString(openAPIFile);
-            arguments.add(input);
-        } catch (IOException e) {
-            throw new GeneratorException("Unable to read OpenAPI file", e);
-        }
-
-        var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
-                arguments.stream().map(Objects::toString)
-                        .toArray(String[]::new));
-        try {
-            runner.run();
+            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
+                    arguments.stream().map(Objects::toString)
+                            .toArray(String[]::new));
+            runner.run((stdIn) -> {
+                try {
+                    Files.copy(openAPIFile, stdIn);
+                } catch (IOException e) {
+                    throw new LambdaException(e);
+                }
+            });
+        } catch (LambdaException e) {
+            throw new GeneratorException("Node execution failed", e.getCause());
         } catch (CommandNotFoundException e) {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {
             throw new GeneratorException("Node execution failed", e);
+        }
+    }
+
+    // Used to catch a checked exception in a lambda and handle it after
+    private static class LambdaException extends RuntimeException {
+        public LambdaException(Throwable cause) {
+            super(cause);
         }
     }
 

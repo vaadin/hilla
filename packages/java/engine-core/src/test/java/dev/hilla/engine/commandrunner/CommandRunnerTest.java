@@ -50,7 +50,7 @@ public class CommandRunnerTest {
             }
         };
 
-        assertDoesNotThrow(runner::run);
+        assertDoesNotThrow(() -> runner.run(null));
     }
 
     @Test
@@ -59,11 +59,12 @@ public class CommandRunnerTest {
 
             @Override
             public List<String> executables() {
-                return List.of("unknownCommmand");
+                return List.of("unknownCommand");
             }
         };
 
-        var e = assertThrows(CommandNotFoundException.class, runner::run);
+        var e = assertThrows(CommandNotFoundException.class,
+                () -> runner.run(null));
         assertNull(e.getCause());
         assertFalse(e.getMessage().contains("exit"));
     }
@@ -83,7 +84,8 @@ public class CommandRunnerTest {
             }
         };
 
-        var e = assertThrows(CommandRunnerException.class, runner::run);
+        var e = assertThrows(CommandRunnerException.class,
+                () -> runner.run(null));
         assertNull(e.getCause());
         assertTrue(e.getMessage().contains("exit"));
     }
@@ -97,6 +99,6 @@ public class CommandRunnerTest {
             }
         };
 
-        assertDoesNotThrow(runner::run);
+        assertDoesNotThrow(() -> runner.run(null));
     }
 }

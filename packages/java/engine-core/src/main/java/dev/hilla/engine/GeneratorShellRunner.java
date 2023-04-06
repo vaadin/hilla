@@ -46,6 +46,7 @@ final class GeneratorShellRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
-        return List.of(nodeCommand);
+        return nodeCommand == null ? List.of("node")
+                : List.of(nodeCommand, "node");
     }
 }

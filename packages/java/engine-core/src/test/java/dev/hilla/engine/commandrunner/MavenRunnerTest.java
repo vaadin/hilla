@@ -20,7 +20,7 @@ public class MavenRunnerTest {
             assertTrue(opt.isPresent());
             var runner = opt.orElseThrow();
             assertEquals(1, runner.arguments().length);
-            assertDoesNotThrow(runner::run);
+            assertDoesNotThrow(() -> runner.run(null));
         } finally {
             if (tmpDir != null) {
                 Files.deleteIfExists(tmpDir.resolve("pom.xml"));

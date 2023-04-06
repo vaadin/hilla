@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Runs a Gradle command.
@@ -68,7 +70,8 @@ public class GradleRunner implements CommandRunner {
     }
 
     @Override
-    public void run() throws CommandRunnerException {
+    public void run(Consumer<OutputStream> stdIn)
+            throws CommandRunnerException {
         throw new UnsupportedOperationException("Gradle is not supported yet");
     }
 }
