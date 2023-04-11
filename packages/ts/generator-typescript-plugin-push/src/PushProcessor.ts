@@ -26,23 +26,19 @@ export class PushProcessor {
     this.#subscriptionId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription');
   }
 
-  #removeInitImport = (importStatement: ts.ImportDeclaration) => {
+  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
     const namedImports = importStatement.importClause?.namedBindings;
     if (namedImports && ts.isNamedImports(namedImports)) {
-      const updatedElements = namedImports.elements.filter(
-        (element) => element.name.getText() !== 'EndpointRequestInit',
-      );
+      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
 
       const updatedImportClause = ts.factory.updateImportClause(
         importStatement.importClause,
-        true,
+        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
         undefined,
         ts.factory.createNamedImports(updatedElements),
       );
 
-      // WIP
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const updatedImportStatement = ts.factory.updateImportDeclaration(
+      return ts.factory.updateImportDeclaration(
         importStatement,
         undefined,
         updatedImportClause,
@@ -50,18 +46,33 @@ export class PushProcessor {
         undefined,
       );
     }
+
+    return undefined;
   };
 
   public process(): ts.SourceFile {
-    const importStatements = this.#dependencies.imports.toCode();
+    let importStatements = this.#dependencies.imports.toCode();
 
     if (this.#operations.removeInitImport) {
       const importHillaFrontend = importStatements.find((statement) => {
-        return ts.isImportDeclaration(statement) && statement.moduleSpecifier.getText() === '@hilla/frontend';
+        return (
+          ts.isImportDeclaration(statement) &&
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend'
+        );
       });
 
       if (importHillaFrontend) {
-        this.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
+        const updatedImportStatement = this.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
+
+        if (updatedImportStatement) {
+          importStatements = importStatements.map((statement) => {
+            if (statement === importHillaFrontend) {
+              return updatedImportStatement;
+            }
+
+            return statement;
+          });
+        }
       }
     }
 
