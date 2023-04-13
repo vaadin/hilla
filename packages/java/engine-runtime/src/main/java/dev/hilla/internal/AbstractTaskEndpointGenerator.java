@@ -27,9 +27,9 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
 
 import dev.hilla.engine.ConfigurationException;
 import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.internal.runner.GradleRunner;
-import dev.hilla.internal.runner.MavenRunner;
-import dev.hilla.internal.runner.RunnerException;
+import dev.hilla.engine.commandrunner.GradleRunner;
+import dev.hilla.engine.commandrunner.MavenRunner;
+import dev.hilla.engine.commandrunner.CommandRunnerException;
 
 /**
  * Abstract class for endpoint related generators.
@@ -81,21 +81,19 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             try {
                 // Create a runner for Maven
                 MavenRunner
-                        .forProject(projectDirectory.toPath(), "-q",
-                                "hilla:configure")
+                        .forProject(projectDirectory, "-q", "hilla:configure")
                         // Create a runner for Gradle. Even if Gradle is not
                         // supported yet, this is useful to emit an error
                         // message if pom.xml is not found and build.gradle is
-                        .or(() -> GradleRunner
-                                .forProject(projectDirectory.toPath()))
+                        .or(() -> GradleRunner.forProject(projectDirectory))
                         // If no runner is found, throw an exception.
                         .orElseThrow(() -> new IllegalStateException(String
                                 .format("Failed to determine project directory for dev mode. "
                                         + "Directory '%s' does not look like a Maven or "
                                         + "Gradle project.", projectDirectory)))
                         // Run the first valid runner
-                        .run();
-            } catch (RunnerException e) {
+                        .run(null);
+            } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);
             }
