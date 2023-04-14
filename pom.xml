@@ -65,7 +65,7 @@
     <spring.boot.version>2.7.8</spring.boot.version>
     <spring.data.version>2.7.7</spring.data.version>
     <spring.security.version>5.7.6</spring.security.version>
-    <testbench.version>8.2.0</testbench.version>
+    <testbench.version>8.2.3</testbench.version>
     <javax.validation.version>2.0.1.Final</javax.validation.version>
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
   </properties>
