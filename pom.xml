@@ -66,7 +66,7 @@
     <spring.boot.version>3.0.2</spring.boot.version>
     <spring.data.commons.version>3.0.1</spring.data.commons.version>
     <spring.security.version>6.0.1</spring.security.version>
-    <testbench.version>9.0.1</testbench.version>
+    <testbench.version>9.0.3</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.1</jakarta.activation.api.version>
