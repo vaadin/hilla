@@ -9,8 +9,8 @@ export default class BarrelProcessor {
   public static readonly BARREL_FILE_NAME = 'endpoints.ts';
   public declare ['constructor']: typeof BarrelProcessor;
   readonly #endpoints: readonly SourceFile[];
+  readonly #outputPathManager = new PathManager({ extension: 'ts' });
   readonly #owner: Plugin;
-  readonly #sourcePaths = new PathManager({ extension: 'ts' });
 
   public constructor(endpoints: readonly SourceFile[], owner: Plugin) {
     this.#endpoints = endpoints;
@@ -28,11 +28,11 @@ export default class BarrelProcessor {
       acc.exports.named.add(specifier, false, id);
 
       return acc;
-    }, new DependencyManager(new PathManager()));
+    }, new DependencyManager(new PathManager({ extension: '.js' })));
 
     return createSourceFile(
       [...imports.toCode(), ...exports.toCode()],
-      this.#sourcePaths.createRelativePath('endpoints'),
+      this.#outputPathManager.createRelativePath('endpoints'),
     );
   }
 }

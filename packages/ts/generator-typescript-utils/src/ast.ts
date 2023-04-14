@@ -42,9 +42,9 @@ export function template<T>(
   return selector?.(sourceFile.statements) ?? sourceFile.statements;
 }
 
-export function transform<T extends Node>(transformer: (node: Node) => Node | undefined): TransformerFactory<T> {
+export function transform<T extends Node>(transformer: (node: Node) => Node): TransformerFactory<T> {
   return (context: TransformationContext) => (root: T) => {
-    const visitor = (node: Node): Node | undefined => ts.visitEachChild(transformer(node), visitor, context);
-    return ts.visitNode(root, visitor);
+    const visitor = (node: Node): Node => ts.visitEachChild(transformer(node), visitor, context);
+    return ts.visitEachChild(root, visitor, context);
   };
 }
