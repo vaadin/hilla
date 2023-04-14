@@ -1,7 +1,6 @@
 package dev.hilla.internal;
 
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
-import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +34,6 @@ public class TaskTest {
         var userDir = temporaryDirectory.toAbsolutePath().toString();
         System.setProperty("user.dir", userDir);
         System.clearProperty(PARAM_FRONTEND_DIR);
-        System.clearProperty(PARAM_GENERATED_DIR);
 
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
