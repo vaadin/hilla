@@ -14,7 +14,7 @@
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
     "bootstrap": "lerna bootstrap",
-    "build": "lerna run build --include-dependencies",
+    "build": "lerna run build",
     "lint": "lerna run lint --parallel",
     "postinstall": "npm run bootstrap",
     "test": "lerna run test --parallel",
@@ -47,6 +47,7 @@
     "lerna": "^6.5.1",
     "lint-staged": "^13.2.0",
     "meow": "^11.0.0",
+    "micromatch": "^4.0.5",
     "mocha": "^10.2.0",
     "nx": "^15.8.6",
     "prettier": "^2.8.4",
