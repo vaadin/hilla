@@ -63,6 +63,12 @@
       <groupId>dev.hilla</groupId>
       <artifactId>endpoint</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.javaparser</groupId>
+          <artifactId>javaparser-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
