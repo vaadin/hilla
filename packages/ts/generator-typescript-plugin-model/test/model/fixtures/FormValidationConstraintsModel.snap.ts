@@ -4,37 +4,37 @@ import type FormValidationConstraints_1 from "./FormValidationConstraints";
 class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
     declare static createEmptyValue: () => FormValidationConstraints_1;
     get list(): ArrayModel_1<string, StringModel_1> {
-        return this[_getPropertyModel_1]("list", ArrayModel_1, [true, StringModel_1, [true], new NotEmpty_1()]) as ArrayModel_1<string, StringModel_1>;
+        return this[_getPropertyModel_1]("list", ArrayModel_1, [false, StringModel_1, [true], new NotEmpty_1()]) as ArrayModel_1<string, StringModel_1>;
     }
     get email(): StringModel_1 {
-        return this[_getPropertyModel_1]("email", StringModel_1, [true, new Email_1({ message: "foo" })]) as StringModel_1;
+        return this[_getPropertyModel_1]("email", StringModel_1, [false, new Email_1({ message: "foo" })]) as StringModel_1;
     }
     get isNull(): StringModel_1 {
-        return this[_getPropertyModel_1]("isNull", StringModel_1, [true, new Null_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("isNull", StringModel_1, [false, new Null_1()]) as StringModel_1;
     }
     get notNull(): StringModel_1 {
-        return this[_getPropertyModel_1]("notNull", StringModel_1, [true, new NotNull_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("notNull", StringModel_1, [false, new NotNull_1()]) as StringModel_1;
     }
     get notEmpty(): StringModel_1 {
-        return this[_getPropertyModel_1]("notEmpty", StringModel_1, [true, new NotEmpty_1(), new NotNull_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("notEmpty", StringModel_1, [false, new NotEmpty_1(), new NotNull_1()]) as StringModel_1;
     }
     get notNullEntity(): FormEntityModel_1 {
-        return this[_getPropertyModel_1]("notNullEntity", FormEntityModel_1, [true]) as FormEntityModel_1;
+        return this[_getPropertyModel_1]("notNullEntity", FormEntityModel_1, [false]) as FormEntityModel_1;
     }
     get notBlank(): StringModel_1 {
-        return this[_getPropertyModel_1]("notBlank", StringModel_1, [true, new NotBlank_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("notBlank", StringModel_1, [false, new NotBlank_1()]) as StringModel_1;
     }
     get assertTrue(): StringModel_1 {
-        return this[_getPropertyModel_1]("assertTrue", StringModel_1, [true, new AssertTrue_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("assertTrue", StringModel_1, [false, new AssertTrue_1()]) as StringModel_1;
     }
     get assertFalse(): StringModel_1 {
-        return this[_getPropertyModel_1]("assertFalse", StringModel_1, [true, new AssertFalse_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("assertFalse", StringModel_1, [false, new AssertFalse_1()]) as StringModel_1;
     }
     get min(): NumberModel_1 {
-        return this[_getPropertyModel_1]("min", NumberModel_1, [true, new Min_1({ value: 1, message: "foo" })]) as NumberModel_1;
+        return this[_getPropertyModel_1]("min", NumberModel_1, [false, new Min_1({ value: 1, message: "foo" })]) as NumberModel_1;
     }
     get max(): NumberModel_1 {
-        return this[_getPropertyModel_1]("max", NumberModel_1, [true, new Max_1(2)]) as NumberModel_1;
+        return this[_getPropertyModel_1]("max", NumberModel_1, [false, new Max_1(2)]) as NumberModel_1;
     }
     get decimalMin(): NumberModel_1 {
         return this[_getPropertyModel_1]("decimalMin", NumberModel_1, [false, new DecimalMin_1("0.01")]) as NumberModel_1;
@@ -55,22 +55,22 @@ class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = For
         return this[_getPropertyModel_1]("positiveOrZero", NumberModel_1, [false, new PositiveOrZero_1()]) as NumberModel_1;
     }
     get size(): StringModel_1 {
-        return this[_getPropertyModel_1]("size", StringModel_1, [true, new Size_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("size", StringModel_1, [false, new Size_1()]) as StringModel_1;
     }
     get size1(): StringModel_1 {
-        return this[_getPropertyModel_1]("size1", StringModel_1, [true, new Size_1({ min: 1 })]) as StringModel_1;
+        return this[_getPropertyModel_1]("size1", StringModel_1, [false, new Size_1({ min: 1 })]) as StringModel_1;
     }
     get digits(): StringModel_1 {
-        return this[_getPropertyModel_1]("digits", StringModel_1, [true, new Digits_1({ integer: 5, fraction: 2 })]) as StringModel_1;
+        return this[_getPropertyModel_1]("digits", StringModel_1, [false, new Digits_1({ integer: 5, fraction: 2 })]) as StringModel_1;
     }
     get past(): StringModel_1 {
-        return this[_getPropertyModel_1]("past", StringModel_1, [true, new Past_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("past", StringModel_1, [false, new Past_1()]) as StringModel_1;
     }
     get future(): StringModel_1 {
-        return this[_getPropertyModel_1]("future", StringModel_1, [true, new Future_1()]) as StringModel_1;
+        return this[_getPropertyModel_1]("future", StringModel_1, [false, new Future_1()]) as StringModel_1;
     }
     get pattern(): StringModel_1 {
-        return this[_getPropertyModel_1]("pattern", StringModel_1, [true, new Pattern_1({ regexp: "\\d+\\..+" })]) as StringModel_1;
+        return this[_getPropertyModel_1]("pattern", StringModel_1, [false, new Pattern_1({ regexp: "\\d+\\..+" })]) as StringModel_1;
     }
 }
 export default FormValidationConstraintsModel;

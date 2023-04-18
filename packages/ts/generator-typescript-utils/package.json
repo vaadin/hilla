@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-utils",
-  "version": "1.3.0-rc1",
+  "version": "1.3.11",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -32,6 +32,9 @@
     },
     "./testing/snapshotMatcher.js": {
       "default": "./testing/snapshotMatcher.js"
+    },
+    "./ast.js": {
+      "default": "./ast.js"
     },
     "./createFullyUniqueIdentifier.js": {
       "default": "./createFullyUniqueIdentifier.js"
