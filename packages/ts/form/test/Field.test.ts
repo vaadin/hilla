@@ -492,7 +492,7 @@ describe('form/Field', () => {
       }
 
       public override render() {
-        return html``;
+        return nothing;
       }
     }
 

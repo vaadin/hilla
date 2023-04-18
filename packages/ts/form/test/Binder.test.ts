@@ -76,6 +76,7 @@ describe('form/Binder', () => {
       notes: '',
       priority: 0,
       products: [],
+      total: undefined,
     };
 
     beforeEach(() => {

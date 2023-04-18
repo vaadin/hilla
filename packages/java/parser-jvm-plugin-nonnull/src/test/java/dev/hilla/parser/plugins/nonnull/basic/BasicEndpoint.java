@@ -2,6 +2,7 @@ package dev.hilla.parser.plugins.nonnull.basic;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Endpoint
 public class BasicEndpoint {
@@ -34,6 +35,21 @@ public class BasicEndpoint {
     public List<@Nonnull NonNullableModel> typeWithTypeArgument(
             List<@Nonnull NonNullableModel> list) {
         return list;
+    }
+
+    public <@Nonnull T extends String> List<T> typeParameter(List<T> list) {
+        return list;
+    }
+
+    public List<@Nonnull ? extends String> typeArgumentWildcard(
+            List<@Nonnull ? extends String> list) {
+        return list;
+    }
+
+    @Nonnull
+    public Optional<@Nonnull String> optional(
+            @Nonnull Optional<@Nonnull String> opt) {
+        return opt;
     }
 
     public static class ExtendedNonNullableModel extends NonNullableModel {
