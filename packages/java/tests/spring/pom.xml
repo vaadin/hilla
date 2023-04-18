@@ -157,7 +157,7 @@
       </activation>
       <modules>
         <module>endpoints</module>
-        <module>endpoints-discovery</module>
+        <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
         <module>endpoints-maven-engine</module>
         <module>endpoints-latest-java</module>
@@ -173,7 +173,7 @@
       <id>it-modules-group-1</id>
       <modules>
         <module>endpoints</module>
-        <module>endpoints-discovery</module>
+        <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
         <module>endpoints-maven-engine</module>
         <module>endpoints-latest-java</module>
