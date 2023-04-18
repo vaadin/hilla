@@ -32,6 +32,17 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
       <version>${flow.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>

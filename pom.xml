@@ -56,8 +56,8 @@
     <swagger.core.version>2.2.8</swagger.core.version>
     <swagger.models.version>2.2.8</swagger.models.version>
     <swagger.parser.v3.version>2.1.12</swagger.parser.v3.version>
-    <jackson.version>2.14.1</jackson.version>
-    <jackson.databind.version>2.14.1</jackson.databind.version>
+    <jackson.version>2.14.2</jackson.version>
+    <jackson.databind.version>2.14.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.1-SNAPSHOT</flow.version>
@@ -72,6 +72,8 @@
     <jakarta.activation.api.version>2.1.1</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
+    <micrometer.version>1.10.3</micrometer.version>
+    <github.javaparser.core.version>3.24.10</github.javaparser.core.version>
   </properties>
 
   <organization>
@@ -359,6 +361,47 @@
         <configuration>
           <quiet>true</quiet>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.3.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>de.skuzzle.enforcer</groupId>
+            <artifactId>restrict-imports-enforcer-rule</artifactId>
+            <version>2.1.0</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>check-logging-imports</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <RestrictImports>
+                  <reason>Use SLF4j for logging</reason>
+                  <bannedImport>java.util.logging.**</bannedImport>
+                </RestrictImports>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-cli</id>
+            <configuration>
+              <rules>
+                <dependencyConvergence/>
+              </rules>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
