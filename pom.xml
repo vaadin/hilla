@@ -20,6 +20,7 @@
     <module>packages/java/engine-core</module>
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
+    <module>packages/java/engine-plugins</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>

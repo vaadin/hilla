@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-project</artifactId>
+    <version>2.1-SNAPSHOT</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>engine-plugins</artifactId>
+  <packaging>pom</packaging>
+  <name>Engine Plugins</name>
+  <description>Container for hilla engine plugins</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>engine-core</artifactId>
+      <version>2.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>gradle</id>
+      <activation>
+        <jdk>(,18]</jdk>
+      </activation>
+      <modules>
+        <module>engine-gradle-plugin</module>
+      </modules>
+    </profile>
+  </profiles>
+
+</project>
