@@ -369,14 +369,20 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   private runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
     if (this[_validity] && !this[_validity].valid) {
       // The element's internal validation reported invalid state.
-      // This means the `value` cannot be used and even meaningfully
-      // validated with the validators in the binder, because it is
-      // possibly cannot be parsed due to bad input in the element,
-      // for example, if date is typed with incorrect format.
-      //
-      // Skip running the validators, and instead assume the error
-      // from the validity state.
-      return [this.binder.requestValidation(this.model, this.validityStateValidator)];
+
+      if (this[_validity].badInput) {
+        // Bad input means the `value` cannot be used and even meaningfully
+        // validated with the validators in the binder, because it cannot be
+        // parsed, for example, if a date is entered with incorrect format.
+        //
+        // Skip running the validators, and instead assume the only error
+        // from the validity state.
+        return [this.binder.requestValidation(this.model, this.validityStateValidator)];
+      }
+      // Validate the value, but also raise the error from the validity state.
+      return [...this[_validators], this.validityStateValidator].map((validator) =>
+        this.binder.requestValidation(this.model, validator),
+      );
     }
 
     return this[_validators].map((validator) => this.binder.requestValidation(this.model, validator));
