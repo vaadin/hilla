@@ -17,6 +17,8 @@ package dev.hilla.gradle.plugin
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -29,6 +31,10 @@ import dev.hilla.engine.*
  * or updates `package.json` and `webpack.config.json` files.
  */
 public open class EngineConfigureTask : DefaultTask() {
+
+  private val sourceSets: SourceSetContainer by lazy {
+    project.extensions.getByType(SourceSetContainer::class.java)
+  }
 
   init {
         group = "Hilla"
@@ -47,10 +53,10 @@ public open class EngineConfigureTask : DefaultTask() {
         val projectBuildDir = project.buildDir.toPath()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
-                      .classPath(
-              LinkedHashSet<String>(
-                //project.getRuntimeClasspathElements()
-              )
+            .classPath(
+
+                (sourceSets.getByName("main") as SourceSet).runtimeClasspath
+                  .asFileTree.files.stream().map { it -> it.toPath().toString() }.toList()
             )
             .outputDir(extension.generatedTsFolder.toPath())
             .generator(generator)

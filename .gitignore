@@ -13,6 +13,9 @@
 # VS Code
 .vscode
 
+# gradle
+.gradle
+
 # Java files
 *pom.xml.versionsBackup
 **/target
