@@ -61,10 +61,10 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>23.3-SNAPSHOT</flow.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <spring.version>5.3.25</spring.version>
-    <spring.boot.version>2.7.8</spring.boot.version>
-    <spring.data.version>2.7.7</spring.data.version>
-    <spring.security.version>5.7.6</spring.security.version>
+    <spring.version>5.3.27</spring.version>
+    <spring.boot.version>2.7.11</spring.boot.version>
+    <spring.data.version>2.7.11</spring.data.version>
+    <spring.security.version>5.7.8</spring.security.version>
     <testbench.version>8.2.3</testbench.version>
     <javax.validation.version>2.0.1.Final</javax.validation.version>
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
