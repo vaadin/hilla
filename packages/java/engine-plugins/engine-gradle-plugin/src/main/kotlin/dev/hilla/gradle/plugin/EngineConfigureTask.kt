@@ -24,6 +24,8 @@ import java.nio.file.Path
 import java.util.*
 
 import dev.hilla.engine.*
+import org.gradle.api.file.FileTree
+import java.io.File
 
 /**
  * This task checks that node and npm tools are installed, copies frontend
@@ -50,20 +52,25 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val generator = GeneratorConfiguration()
         val parser = ParserConfiguration()
+
         val projectBuildDir = project.buildDir.toPath()
+        val projectClassesDir = projectBuildDir.resolve("classes")
+        val jarClassPathElements = (sourceSets.getByName("main") as SourceSet)
+          .runtimeClasspath.files.stream()
+          .map { it.toPath().toString() }
+          .filter { it.endsWith("jar") }
+          .toList()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
             .classPath(
-
-                (sourceSets.getByName("main") as SourceSet).runtimeClasspath
-                  .asFileTree.files.stream().map { it -> it.toPath().toString() }.toList()
+              (listOf(projectClassesDir) + jarClassPathElements).stream().map { it.toString() }.toList()
             )
             .outputDir(extension.generatedTsFolder.toPath())
             .generator(generator)
             .parser(parser)
             .buildDir(extension.projectBuildDir)
-            .classesDir(projectBuildDir)
-            .create();
+            .classesDir(projectClassesDir)
+            .create()
 
         // The configuration gathered from the Maven plugin is saved in a
         // file so that further runs can skip running a separate Maven
