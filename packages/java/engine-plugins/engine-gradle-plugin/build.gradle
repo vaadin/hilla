@@ -101,9 +101,9 @@ jar {
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     archiveClassifier = 'sources'
-    include 'com/**/*.groovy'
-    include 'com/**/*.java'
-    include 'com/**/*.kt'
+    include 'dev/**/*.groovy'
+    include 'dev/**/*.java'
+    include 'dev/**/*.kt'
 }
 
 /**
