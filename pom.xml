@@ -61,18 +61,18 @@
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.1-SNAPSHOT</flow.version>
-    <slf4j.version>2.0.4</slf4j.version>
-    <spring.version>6.0.4</spring.version>
-    <spring.boot.version>3.0.2</spring.boot.version>
-    <spring.data.commons.version>3.0.1</spring.data.commons.version>
-    <spring.security.version>6.0.1</spring.security.version>
+    <slf4j.version>2.0.7</slf4j.version>
+    <spring.version>6.0.8</spring.version>
+    <spring.boot.version>3.0.6</spring.boot.version>
+    <spring.data.commons.version>3.0.5</spring.data.commons.version>
+    <spring.security.version>6.0.3</spring.security.version>
     <testbench.version>9.0.3</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.1</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
-    <micrometer.version>1.10.3</micrometer.version>
+    <micrometer.version>1.10.6</micrometer.version>
     <github.javaparser.core.version>3.24.10</github.javaparser.core.version>
   </properties>
 
