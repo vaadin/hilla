@@ -40,7 +40,7 @@ public open class EngineGenerateTask : DefaultTask() {
         description = "Hilla Generate Task"
 
         // we need the flow-build-info.json to be created, which is what the vaadinPrepareFrontend task does
-        dependsOn("engineConfigure")
+        dependsOn("configure")
 
         dependsOn("classes")
 
@@ -48,7 +48,7 @@ public open class EngineGenerateTask : DefaultTask() {
         // webpack bundle will end up packaged in the war/jar archive. The inclusion
         // rule itself is configured in the VaadinPlugin class.
         project.tasks.withType(Jar::class.java) { task: Jar ->
-            task.mustRunAfter("engineGenerate")
+            task.mustRunAfter("generate")
         }
     }
 

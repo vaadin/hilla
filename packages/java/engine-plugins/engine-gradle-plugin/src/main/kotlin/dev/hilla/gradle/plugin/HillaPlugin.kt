@@ -34,8 +34,8 @@ public class HillaPlugin : Plugin<Project> {
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
         project.tasks.apply {
-            register("engineConfigure", EngineConfigureTask::class.java)
-            register("engineGenerate", EngineGenerateTask::class.java)
+            register("configure", EngineConfigureTask::class.java)
+            register("generate", EngineGenerateTask::class.java)
         }
 
         project.afterEvaluate {
@@ -51,7 +51,7 @@ public class HillaPlugin : Plugin<Project> {
             if (extension.productionMode) {
                 // this will also catch the War task since it extends from Jar
                 project.tasks.withType(Jar::class.java) { task: Jar ->
-                    task.dependsOn("engineGenerate")
+                    task.dependsOn("generate")
                 }
             }
         }
