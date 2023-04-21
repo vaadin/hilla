@@ -31,12 +31,12 @@ import dev.hilla.engine.*
  */
 public open class EngineConfigureTask : DefaultTask() {
 
-  private val sourceSets: SourceSetContainer by lazy {
-    project.extensions.getByType(SourceSetContainer::class.java)
-  }
+    private val sourceSets: SourceSetContainer by lazy {
+        project.extensions.getByType(SourceSetContainer::class.java)
+    }
 
-  init {
-        group = "Hilla"
+    init {
+        group = "hilla"
         description = "Hilla Configure Task"
 
         dependsOn("classes")
@@ -52,11 +52,16 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val projectBuildDir = project.buildDir.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")
-        val classPathElements = (sourceSets.getByName("main") as SourceSet)
-            .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
+        val jarClassPathElements = (sourceSets.getByName("main") as SourceSet)
+            .runtimeClasspath.elements.get().stream()
+            .map { it.toString() }
+            .filter { it.endsWith("jar") }
+            .toList()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
-            .classPath(classPathElements)
+            .classPath(
+                (listOf(projectClassesDir) + jarClassPathElements).stream().map { it.toString() }.toList()
+            )
             .outputDir(extension.generatedTsFolder.toPath())
             .generator(generator)
             .parser(parser)

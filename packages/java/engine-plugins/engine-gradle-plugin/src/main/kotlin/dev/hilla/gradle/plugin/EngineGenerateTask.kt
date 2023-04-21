@@ -36,7 +36,7 @@ import org.gradle.api.tasks.bundling.Jar
  */
 public open class EngineGenerateTask : DefaultTask() {
     init {
-        group = "Hilla"
+        group = "hilla"
         description = "Hilla Generate Task"
 
         // we need the flow-build-info.json to be created, which is what the vaadinPrepareFrontend task does
