@@ -644,6 +644,11 @@ describe('form/Field', () => {
         element = renderElement();
         expect(element.invalid).to.be.true;
         expect(element.errorMessage).to.be.equal('any-err-msg');
+
+        // Verify override for built-in 'invalid' change
+        element.invalid = false;
+        element.dispatchEvent(new CustomEvent('validated', { detail: { valid: true } }));
+        expect(element.invalid).to.be.true;
       });
     });
 

@@ -31,17 +31,19 @@ import {
 } from './TestModels';
 
 class NumberOutput extends HTMLElement {
+  inputElement = document.createElement('input');
+
   public get value(): string {
-    return this.checkValidity() ? this.textContent || '' : '';
+    return this.checkValidity() ? this.inputElement.value || '' : '';
   }
 
   public set value(value: string) {
-    this.textContent = value;
+    this.inputElement.value = value;
   }
 
   public checkValidity(): boolean {
-    const numericValue = Number(this.textContent);
-    return !Number.isNaN(numericValue) && numericValue.toString() === this.textContent;
+    const numericValue = Number(this.inputElement.value);
+    return !Number.isNaN(numericValue) && numericValue.toString() === this.inputElement.value;
   }
 }
 customElements.define('number-output', NumberOutput);
@@ -734,13 +736,29 @@ describe('form/Validation', () => {
       errors = await binder.validate();
       expect(errors).to.have.length(0);
 
-      // Simulate bad user input
+      // Simulate built-in validation error
       orderView.total.value = 'not a number';
       await fireEvent(orderView.total, 'change');
 
       errors = await binder.validate();
       expect(errors).to.have.length(1);
       expect(errors[0]).to.have.property('property', 'total');
+
+      // Simulate bad user input
+      orderView.total.value = '';
+      orderView.total.inputElement.value = 'not a number';
+      await fireEvent(orderView.total, 'change');
+
+      errors = await binder.validate();
+      expect(errors).to.have.length(1);
+      expect(errors[0]).to.have.property('property', 'total');
+
+      // Correction
+      orderView.total.value = '2';
+      await fireEvent(orderView.total, 'change');
+
+      errors = await binder.validate();
+      expect(errors).to.have.length(0);
     });
   });
 

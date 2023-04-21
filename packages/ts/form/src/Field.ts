@@ -102,23 +102,60 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
     this._validityFallback = {
       ...defaultValidity,
       valid,
-      customError: !valid,
+      ...(valid ? {} : this._detectValidityError()),
     };
     return valid;
   }
+
+  private _detectValidityError(): Readonly<Partial<ValidityState>> {
+    if (!('inputElement' in this.element)) {
+      // Not a Vaadin component field
+      return { customError: true };
+    }
+
+    const inputElement = this.element.inputElement as FieldElement<string>;
+
+    if (this.element.value === '') {
+      if (inputElement.value === '') {
+        return { valueMissing: true };
+      }
+      // Some value is entered, but not meaningful to the
+      // web component — assume parse error.
+      return { badInput: true };
+    }
+    // Unknown constraint violation
+    return { customError: true };
+  }
 }
 
-export class VaadinFieldStrategy extends AbstractFieldStrategy {
+export class VaadinFieldStrategy<T = any> extends AbstractFieldStrategy<T> {
+  private _invalid = false;
+
+  constructor(element: FieldElement<T>, model?: AbstractModel<T>) {
+    super(element, model);
+
+    // Override built-in changes of the `invalid` flag in Vaadin components
+    // to keep the `invalid` property state of the web component in sync.
+    (element as any).addEventListener('validated', this._overrideVaadinInvalidChange.bind(this));
+  }
+
   public set required(value: boolean) {
     this.element.required = value;
   }
 
   public set invalid(value: boolean) {
+    this._invalid = value;
     this.element.invalid = value;
   }
 
   public override set errorMessage(value: string) {
     this.element.errorMessage = value;
+  }
+
+  private _overrideVaadinInvalidChange(e: CustomEvent<Partial<ValidityState>>) {
+    if (this._invalid !== !e.detail.valid) {
+      this.element.invalid = this._invalid;
+    }
   }
 }
 
@@ -255,7 +292,9 @@ export const field = directive(
         this.fieldState = fieldState;
 
         const updateValueFromElement = () => {
-          if (fieldState.strategy.checkValidity()) {
+          fieldState.strategy.checkValidity();
+          // When bad input is detected, skip reading new value in binder state
+          if (!fieldState.strategy.validity.badInput) {
             fieldState.value = fieldState.strategy.value;
           }
           fieldState.validity = fieldState.strategy.validity;
