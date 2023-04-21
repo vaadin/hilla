@@ -5,14 +5,19 @@ import ts from 'typescript';
 
 const initParameterTypeName = 'EndpointRequestInit';
 
-export default class PushProcessor {
+export type EndpointOperations = {
+  methodsToPatch: string[];
+  removeInitImport: boolean;
+};
+
+export class PushProcessor {
   readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
-  readonly #methods: readonly string[];
+  readonly #operations: EndpointOperations;
   readonly #source: ts.SourceFile;
   readonly #subscriptionId: ts.Identifier;
 
-  constructor(source: ts.SourceFile, methods: readonly string[]) {
-    this.#methods = methods;
+  constructor(source: ts.SourceFile, operations: EndpointOperations) {
+    this.#operations = operations;
     this.#source = source;
 
     const { imports, paths } = this.#dependencies;
@@ -21,8 +26,55 @@ export default class PushProcessor {
     this.#subscriptionId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription');
   }
 
+  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
+    const namedImports = importStatement.importClause?.namedBindings;
+    if (namedImports && ts.isNamedImports(namedImports)) {
+      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
+
+      const updatedImportClause = ts.factory.updateImportClause(
+        importStatement.importClause,
+        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
+        undefined,
+        ts.factory.createNamedImports(updatedElements),
+      );
+
+      return ts.factory.updateImportDeclaration(
+        importStatement,
+        undefined,
+        updatedImportClause,
+        importStatement.moduleSpecifier,
+        undefined,
+      );
+    }
+
+    return undefined;
+  };
+
   public process(): ts.SourceFile {
-    const importStatements = this.#dependencies.imports.toCode();
+    let importStatements = this.#dependencies.imports.toCode();
+
+    if (this.#operations.removeInitImport) {
+      const importHillaFrontend = importStatements.find((statement) => {
+        return (
+          ts.isImportDeclaration(statement) &&
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend'
+        );
+      });
+
+      if (importHillaFrontend) {
+        const updatedImportStatement = this.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
+
+        if (updatedImportStatement) {
+          importStatements = importStatements.map((statement) => {
+            if (statement === importHillaFrontend) {
+              return updatedImportStatement;
+            }
+
+            return statement;
+          });
+        }
+      }
+    }
 
     const updatedStatements: readonly ts.Statement[] = [
       ...importStatements,
@@ -33,7 +85,7 @@ export default class PushProcessor {
             const functionName = statement.name?.text;
 
             // Checks if the method is in the list of methods to patch
-            if (functionName && this.#methods.includes(functionName)) {
+            if (functionName && this.#operations.methodsToPatch.includes(functionName)) {
               return this.#updateFunction(statement);
             }
           }

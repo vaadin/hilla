@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Hilla Application",
+    "title": "Vaadin Application",
     "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:8080/connect",
-      "description": "Hilla Backend"
+      "description": "Vaadin Backend"
     }
   ],
   "tags": [
@@ -15,7 +15,7 @@
       "name": "OtherEndpoint"
     },
     {
-      "name": "PushTypeEndpoint"
+      "name": "PushTypeOnlyEndpoint"
     }
   ],
   "paths": {
@@ -92,10 +92,10 @@
         }
       }
     },
-    "/PushTypeEndpoint/getMessageFlux": {
+    "/PushTypeOnlyEndpoint/getMessageFlux": {
       "post": {
-        "tags": ["PushTypeEndpoint"],
-        "operationId": "PushTypeEndpoint_getMessageFlux_POST",
+        "tags": ["PushTypeOnlyEndpoint"],
+        "operationId": "PushTypeOnlyEndpoint_getMessageFlux_POST",
         "responses": {
           "200": {
             "description": "",
@@ -116,10 +116,10 @@
         }
       }
     },
-    "/PushTypeEndpoint/getNonNullMessageFlux": {
+    "/PushTypeOnlyEndpoint/getNonNullMessageFlux": {
       "post": {
-        "tags": ["PushTypeEndpoint"],
-        "operationId": "PushTypeEndpoint_getMessageFlux_POST",
+        "tags": ["PushTypeOnlyEndpoint"],
+        "operationId": "PushTypeOnlyEndpoint_getMessageFlux_POST",
         "responses": {
           "200": {
             "description": "",
@@ -138,10 +138,10 @@
         }
       }
     },
-    "/PushTypeEndpoint/getSubscription": {
+    "/PushTypeOnlyEndpoint/getSubscription": {
       "post": {
-        "tags": ["PushTypeEndpoint"],
-        "operationId": "PushTypeEndpoint_getSubscription_POST",
+        "tags": ["PushTypeOnlyEndpoint"],
+        "operationId": "PushTypeOnlyEndpoint_getSubscription_POST",
         "responses": {
           "200": {
             "description": "",
@@ -158,31 +158,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/PushTypeEndpoint/notRelatedToPush": {
-      "post": {
-        "tags": ["PushTypeEndpoint"],
-        "operationId": "PushTypeEndpoint_notRelatedToPush_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "arg": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
