@@ -21,7 +21,7 @@ plugins {
 def pom = new XmlSlurper().parse(rootProject.file('pom.xml'))
 defaultTasks('jar', 'test')
 group pom.parent.groupId
-version = project.hasProperty('vaadin.version') ? project.getProperty('vaadin.version') : pom.parent.version
+version = project.hasProperty('hilla.version') ? project.getProperty('hilla.version') : pom.parent.version
 archivesBaseName = pom.artifactId
 sourceCompatibility = 17
 targetCompatibility = 17
@@ -142,7 +142,7 @@ gradlePlugin {
     //testSourceSets sourceSets.functionalTest
     plugins {
         hillaPlugin {
-            id = 'dev.hilla'
+            id = 'dev.hilla.engine'
             implementationClass = 'dev.hilla.gradle.plugin.HillaPlugin'
         }
     }
