@@ -2,7 +2,7 @@ import Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type SharedStorage from '@hilla/generator-typescript-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
-import PushProcessor from './PushProcessor.js';
+import { type EndpointOperations, PushProcessor } from './PushProcessor.js';
 
 type ExtendedMediaTypeSchema = ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> &
   Readonly<{ 'x-class-name': string }>;
@@ -21,19 +21,26 @@ export default class PushPlugin extends Plugin {
       const response = path?.post?.responses[200] as ReadonlyObjectDeep<OpenAPIV3.ResponseObject> | undefined;
       const schema = response?.content?.['application/json']?.schema as ExtendedMediaTypeSchema | undefined;
       const className = schema?.['x-class-name'];
+      const [, endpoint, method] = key.split('/');
 
       if (className && classesToReplace.includes(className)) {
-        const [, endpoint, method] = key.split('/');
-
         if (acc.has(endpoint)) {
-          acc.get(endpoint)!.push(method);
+          acc.get(endpoint)!.methodsToPatch.push(method);
         } else {
-          acc.set(endpoint, [method]);
+          acc.set(endpoint, { methodsToPatch: [method], removeInitImport: true });
+        }
+      } else {
+        // Not all methods will be patched, let's keep the init import
+        // eslint-disable-next-line no-lonely-if
+        if (acc.has(endpoint)) {
+          acc.get(endpoint)!.removeInitImport = false;
+        } else {
+          acc.set(endpoint, { methodsToPatch: [], removeInitImport: false });
         }
       }
 
       return acc;
-    }, new Map<string, string[]>());
+    }, new Map<string, EndpointOperations>());
   }
 
   declare ['constructor']: typeof PushPlugin;
