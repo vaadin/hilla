@@ -104,6 +104,48 @@
         }
       }
     },
+    "/BasicEndpoint/nonNullableFieldModel" : {
+      "post" : {
+        "tags" : [
+          "BasicEndpoint"
+        ],
+        "operationId" : "BasicEndpoint_nonNullableFieldModel_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "nonNullableFieldModel" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableFieldModel"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableFieldModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/BasicEndpoint/nonTypeAnnotation": {
       "post": {
         "tags": ["BasicEndpoint"],
@@ -387,6 +429,17 @@
             }
           }
         ]
+      },
+      "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableFieldModel" : {
+        "type" : "object",
+        "properties" : {
+          "stringList" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
       },
       "dev.hilla.parser.plugins.nonnull.basic.BasicEndpoint$NonNullableModel": {
         "type": "object",

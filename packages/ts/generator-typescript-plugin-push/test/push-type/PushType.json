@@ -161,6 +161,31 @@
           }
         }
       }
+    },
+    "/PushTypeEndpoint/notRelatedToPush": {
+      "post": {
+        "tags": ["PushTypeEndpoint"],
+        "operationId": "PushTypeEndpoint_notRelatedToPush_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arg": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "components": {}

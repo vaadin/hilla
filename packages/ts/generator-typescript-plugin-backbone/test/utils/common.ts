@@ -1,8 +1,7 @@
 import Generator from '@hilla/generator-typescript-core/Generator.js';
 import type { PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
 import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
-import { readFile } from 'fs/promises';
-import { URL } from 'url';
+import { readFile } from 'node:fs/promises';
 
 export const pathBase = 'dev/hilla/parser/plugins/backbone';
 

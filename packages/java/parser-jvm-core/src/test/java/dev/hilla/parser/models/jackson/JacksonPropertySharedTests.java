@@ -13,19 +13,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
-final class JacksonPropertyShared {
+final class JacksonPropertySharedTests {
 
-    static final Map<String, String> stringifiedProps = Map.ofEntries(
-            Map.entry("privatePropertyWithAccessors", "java.lang.Byte"),
+    static final Map<String, List<String>> stringifiedTypes = Map.ofEntries(
+            Map.entry("privatePropertyWithAccessors", List.of(
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$MethodTypeAnnotation() java.lang.Byte",
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$ParameterTypeAnnotation() java.lang.Byte",
+                    "@dev.hilla.parser.models.jackson.JacksonPropertySharedTests$FieldTypeAnnotation() java.lang.Byte")),
             Map.entry("privateProperty",
-                    "java.util.Map<java.lang.String, java.lang.Long>"),
-            Map.entry("renamedPublicProperty", "java.lang.Float"),
+                    List.of("java.util.Map<java.lang.String, java.lang.Long>",
+                            "java.util.Map<java.lang.String, java.lang.Long>")),
+            Map.entry("renamedPublicProperty", List.of("java.lang.Float")),
             Map.entry("renamedPrivateProperty",
-                    "java.util.List<java.lang.Double>"),
-            Map.entry("propertyWithoutAccessor", "java.lang.Short"),
-            Map.entry("publicProperty", "java.util.List<java.lang.Integer>"),
-            Map.entry("propertyGetterOnly", "java.lang.Boolean[]"),
-            Map.entry("propertySetterOnly", "java.lang.Short"));
+                    List.of("java.util.List<java.lang.Double>",
+                            "java.lang.Double")),
+            Map.entry("propertyWithoutAccessor", List.of("java.lang.Short")),
+            Map.entry("publicProperty",
+                    List.of("java.util.List<java.lang.Integer>")),
+            Map.entry("propertyGetterOnly", List.of("java.lang.Boolean[]")),
+            Map.entry("propertySetterOnly", List.of("java.lang.Short")));
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)

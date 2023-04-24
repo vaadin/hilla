@@ -2,11 +2,8 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "experimentalDecorators": true,
-    "importHelpers": true,
-    "outDir": ".",
-    "rootDir": "src",
-    "skipLibCheck": true
+    "target": "es2022"
   },
-  "include": ["src"],
-  "exclude": ["!src/**/*"]
+  "include": ["src", "test"],
+  "exclude": ["test/**/*.snap.ts"]
 }

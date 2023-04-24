@@ -3,6 +3,7 @@ package com.vaadin.flow.connect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
+import jakarta.validation.constraints.NotBlank;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
@@ -20,6 +21,7 @@ public class AnnotatedEndpoint {
      * Bean annotated with Jackson annotations.
      */
     public static class AnnotatedEntity {
+        @NotBlank
         private String defaultName = "value";
 
         @JsonProperty("customName")

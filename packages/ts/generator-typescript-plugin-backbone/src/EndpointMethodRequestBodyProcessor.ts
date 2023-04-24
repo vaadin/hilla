@@ -2,8 +2,8 @@ import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import {
   isEmptyObject,
   isObjectSchema,
-  NonEmptyObjectSchema,
-  Schema,
+  type NonEmptyObjectSchema,
+  type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -48,7 +48,6 @@ export default class EndpointMethodRequestBodyProcessor {
           ts.factory.createParameterDeclaration(
             undefined,
             undefined,
-            undefined,
             EndpointMethodRequestBodyProcessor.#defaultInitParamName,
             ts.factory.createToken(ts.SyntaxKind.QuestionToken),
             ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
@@ -75,14 +74,12 @@ export default class EndpointMethodRequestBodyProcessor {
           return ts.factory.createParameterDeclaration(
             undefined,
             undefined,
-            undefined,
             name,
             undefined,
             ts.factory.createUnionTypeNode(nodes),
           );
         }),
         ts.factory.createParameterDeclaration(
-          undefined,
           undefined,
           undefined,
           initParamName,

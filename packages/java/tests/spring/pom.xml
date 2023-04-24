@@ -18,6 +18,7 @@
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.javadoc.skip>true</maven.javadoc.skip>
     <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
+    <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
   </properties>
 
   <dependencyManagement>
@@ -56,6 +57,12 @@
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme</artifactId>
         <version>${vaadin.component.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>${nimbus-jose-jwt.version}</version>
       </dependency>
 
       <dependency>
@@ -157,11 +164,32 @@
       </activation>
       <modules>
         <module>endpoints</module>
-        <module>endpoints-discovery</module>
+        <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
         <module>endpoints-maven-engine</module>
         <module>endpoints-latest-java</module>
 
+        <module>security</module>
+        <module>security-contextpath</module>
+        <module>security-jwt</module>
+        <module>security-urlmapping</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-1</id>
+      <modules>
+        <module>endpoints</module>
+        <module>endpoints discovery</module>
+        <module>endpoints-custom-client</module>
+        <module>endpoints-maven-engine</module>
+        <module>endpoints-latest-java</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-2</id>
+      <modules>
         <module>security</module>
         <module>security-contextpath</module>
         <module>security-jwt</module>
