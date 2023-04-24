@@ -29,10 +29,22 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dev-server</artifactId>
       <version>${flow.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.javaparser</groupId>
+          <artifactId>javaparser-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.javaparser</groupId>
+      <artifactId>javaparser-core</artifactId>
+      <version>${github.javaparser.core.version}</version>
     </dependency>
   </dependencies>
 

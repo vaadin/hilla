@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vaadin.component.version>24.0.0.alpha4</vaadin.component.version>
+    <vaadin.component.version>24.1.0.alpha2</vaadin.component.version>
     <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
@@ -63,6 +63,12 @@
       <groupId>dev.hilla</groupId>
       <artifactId>endpoint</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.javaparser</groupId>
+          <artifactId>javaparser-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
@@ -248,6 +254,22 @@
       <modules>
         <module>csrf</module>
         <module>csrf-context</module>
+        <module>spring</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-1</id>
+      <modules>
+        <module>csrf</module>
+        <module>csrf-context</module>
+        <module>spring</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>it-modules-group-2</id>
+      <modules>
         <module>spring</module>
       </modules>
     </profile>

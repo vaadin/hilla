@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.connect;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
@@ -60,6 +61,13 @@ public class TypeScriptIT extends ChromeBrowserTest {
         String endpoint = "checkAnnotatedEntityModelType";
         exec(endpoint);
         assertContent("string");
+    }
+
+    @Test
+    public void annotatedEntityModelValidation() {
+        String endpoint = "checkAnnotatedEntityModelValidation";
+        exec(endpoint);
+        assertContent("must not be blank");
     }
 
     private void exec(String id) {

@@ -3,7 +3,6 @@ package dev.hilla.parser.models.jackson;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-
 import dev.hilla.parser.models.AnnotatedAbstractModel;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.Model;

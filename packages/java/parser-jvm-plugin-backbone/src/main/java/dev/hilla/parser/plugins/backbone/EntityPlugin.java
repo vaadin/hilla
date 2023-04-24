@@ -13,8 +13,8 @@ import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.FieldInfoModel;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
-import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
+import dev.hilla.parser.plugins.backbone.nodes.TypedNode;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -49,16 +49,16 @@ public final class EntityPlugin
     @Nonnull
     @Override
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof TypeSignatureNode)) {
+        if (!(nodeDependencies.getNode() instanceof TypedNode)) {
             return nodeDependencies;
         }
 
-        var signatureNode = (TypeSignatureNode) nodeDependencies.getNode();
-        if (!(signatureNode.getSource() instanceof ClassRefSignatureModel)) {
+        var typedNode = (TypedNode) nodeDependencies.getNode();
+        if (!(typedNode.getType() instanceof ClassRefSignatureModel)) {
             return nodeDependencies;
         }
 
-        var ref = (ClassRefSignatureModel) signatureNode.getSource();
+        var ref = (ClassRefSignatureModel) typedNode.getType();
         if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
             return nodeDependencies;
         }

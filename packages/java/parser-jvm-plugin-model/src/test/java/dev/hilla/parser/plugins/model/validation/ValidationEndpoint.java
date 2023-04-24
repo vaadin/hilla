@@ -100,5 +100,30 @@ public class ValidationEndpoint {
 
         @Size(min = 1)
         public String size1;
+
+        private String withConstraintsOnSetter;
+
+        public String getWithConstraintsOnSetter() {
+            return withConstraintsOnSetter;
+        }
+
+        public void setWithConstraintsOnSetter(
+                @NotNull @NotBlank @Email String withConstraintsOnSetter) {
+            this.withConstraintsOnSetter = withConstraintsOnSetter;
+        }
+
+        @NotBlank
+        private String withGetter;
+
+        public String getWithGetter() {
+            return this.withGetter;
+        }
+
+        @NotBlank
+        public String withSetter;
+
+        public void setWithSetter(@Email String withSetter) {
+            this.withSetter = withSetter;
+        }
     }
 }
