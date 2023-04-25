@@ -5,7 +5,7 @@
  **********************************************************************************************************************/
 plugins {
     id 'java-gradle-plugin'
-	  id 'maven-publish'
+    id 'maven-publish'
     id 'idea'
     id 'com.gradle.plugin-publish' version '0.11.0'
     id 'org.jetbrains.kotlin.jvm' version '1.7.20'

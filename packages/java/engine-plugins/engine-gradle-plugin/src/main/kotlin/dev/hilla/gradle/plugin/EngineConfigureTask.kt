@@ -36,7 +36,7 @@ public open class EngineConfigureTask : DefaultTask() {
     }
 
     init {
-        group = "hilla"
+        group = "Hilla"
         description = "Hilla Configure Task"
 
         dependsOn("classes")
@@ -52,16 +52,11 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val projectBuildDir = project.buildDir.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")
-        val jarClassPathElements = (sourceSets.getByName("main") as SourceSet)
-            .runtimeClasspath.elements.get().stream()
-            .map { it.toString() }
-            .filter { it.endsWith("jar") }
-            .toList()
+        val classPathElements = (sourceSets.getByName("main") as SourceSet)
+            .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
-            .classPath(
-                (listOf(projectClassesDir) + jarClassPathElements).stream().map { it.toString() }.toList()
-            )
+            .classPath(classPathElements)
             .outputDir(extension.generatedTsFolder.toPath())
             .generator(generator)
             .parser(parser)

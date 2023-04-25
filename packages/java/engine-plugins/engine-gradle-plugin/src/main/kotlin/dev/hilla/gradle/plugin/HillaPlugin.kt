@@ -17,7 +17,9 @@ package dev.hilla.gradle.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 
@@ -53,6 +55,13 @@ public class HillaPlugin : Plugin<Project> {
                 project.tasks.withType(Jar::class.java) { task: Jar ->
                     task.dependsOn("generate")
                 }
+            }
+        }
+
+        project.tasks.named("processResources") {
+            val copyTask = it as? Copy
+            if (copyTask != null) {
+                copyTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
         }
     }
