@@ -36,7 +36,6 @@ public open class EngineProjectExtension(project: Project) {
      */
     public var frontendDirectory: File = File(project.projectDir, "frontend")
 
-
     /**
      * Application properties file in Spring project.
      */
@@ -85,10 +84,15 @@ public open class EngineProjectExtension(project: Project) {
     public var projectBuildDir: String = project.buildDir.toString()
 
     /**
-     * The name of the SourceSet to scan for Vaadin components - i.e. the classes that are annoated with
+     * The name of the SourceSet to scan for Vaadin components - i.e. the classes that are annotated with
      * Vaadin annotations.
      */
     public var sourceSetName : String = "main"
+
+    /**
+     * The node command to execute
+     */
+    public var nodeCommand : String = "node"
 
 
     public companion object {
@@ -108,5 +112,6 @@ public open class EngineProjectExtension(project: Project) {
             "generatedTsFolder=$generatedTsFolder, " +
             "resourceOutputDirectory=$resourceOutputDirectory, " +
             "sourceSetName=$sourceSetName, " +
+            "nodeCommand=$nodeCommand, " +
             ")"
 }

@@ -52,7 +52,7 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val projectBuildDir = project.buildDir.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")
-        val classPathElements = (sourceSets.getByName("main") as SourceSet)
+        val classPathElements = (sourceSets.getByName(extension.sourceSetName) as SourceSet)
             .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())

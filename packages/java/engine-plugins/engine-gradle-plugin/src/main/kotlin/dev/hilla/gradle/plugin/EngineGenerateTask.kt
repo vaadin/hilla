@@ -16,9 +16,16 @@
 package dev.hilla.gradle.plugin
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import java.io.IOException
+import java.net.URL
+import java.net.URLClassLoader
+import java.nio.file.Path
+import java.util.*
 
+import dev.hilla.engine.*
 /**
  * Task that builds the frontend bundle.
  *
@@ -36,17 +43,16 @@ import org.gradle.api.tasks.bundling.Jar
  */
 public open class EngineGenerateTask : DefaultTask() {
     init {
-        group = "hilla"
+        group = "Hilla"
         description = "Hilla Generate Task"
 
-        // we need the flow-build-info.json to be created, which is what the vaadinPrepareFrontend task does
-        dependsOn("configure")
+        // we need the build/hilla-engine-configuration.json, so we depend on "configure" task:
+        dependsOn("hillaConfigure")
 
-        dependsOn("classes")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
-        // webpack bundle will end up packaged in the war/jar archive. The inclusion
-        // rule itself is configured in the VaadinPlugin class.
+        // vite bundle will end up packaged in the war/jar archive. The inclusion
+        // rule itself is configured in the HillaPlugin class.
         project.tasks.withType(Jar::class.java) { task: Jar ->
             task.mustRunAfter("generate")
         }
@@ -56,5 +62,36 @@ public open class EngineGenerateTask : DefaultTask() {
     public fun engineGenerate() {
         val extension: EngineProjectExtension = EngineProjectExtension.get(project)
         logger.info("Running the engineGenerate task with effective configuration $extension")
+
+        val baseDir: Path = project.projectDir.toPath()
+        val buildDir: Path = baseDir.resolve(extension.projectBuildDir)
+
+        try {
+            val conf: EngineConfiguration = Objects.requireNonNull<EngineConfiguration>(
+                EngineConfiguration.loadDirectory(buildDir))
+
+            val urls = conf.getClassPath()
+                .stream().map<URL> { classPathItem: Path ->
+                    classPathItem.toUri().toURL()
+                }
+                .toList()
+
+            val classLoader = URLClassLoader(
+                urls.toTypedArray(),
+                javaClass.getClassLoader()
+            )
+            val parserProcessor: ParserProcessor = ParserProcessor(conf, classLoader)
+            val generatorProcessor: GeneratorProcessor = GeneratorProcessor(conf, extension.nodeCommand)
+
+            parserProcessor.process()
+            generatorProcessor.process()
+
+        } catch (e: IOException) {
+            throw GradleException("Loading saved configuration failed", e)
+        } catch (e: GeneratorException) {
+            throw GradleException("Execution failed", e)
+        } catch (e: ParserException) {
+            throw GradleException("Execution failed", e)
+        }
     }
 }
