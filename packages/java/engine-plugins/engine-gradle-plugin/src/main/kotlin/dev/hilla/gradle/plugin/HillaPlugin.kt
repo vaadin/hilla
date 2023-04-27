@@ -40,24 +40,6 @@ public class HillaPlugin : Plugin<Project> {
             register("hillaGenerate", EngineGenerateTask::class.java)
         }
 
-        project.afterEvaluate {
-            val extension: EngineProjectExtension = EngineProjectExtension.get(it)
-            //extension.autoconfigure(project)
-
-            // add a new source-set folder for generated stuff, by default `vaadin-generated`
-            val sourceSets: SourceSetContainer = it.properties["sourceSets"] as SourceSetContainer
-            sourceSets.getByName(extension.sourceSetName).resources.srcDirs(extension.resourceOutputDirectory)
-
-            // auto-activate tasks: https://github.com/vaadin/vaadin-gradle-plugin/issues/48
-            //project.tasks.getByPath(extension.processResourcesTaskName!!).dependsOn("hillaPrepareFrontend")
-            if (extension.productionMode) {
-                // this will also catch the War task since it extends from Jar
-                project.tasks.withType(Jar::class.java) { task: Jar ->
-                    task.dependsOn("generate")
-                }
-            }
-        }
-
         project.tasks.named("processResources") {
             val copyTask = it as? Copy
             if (copyTask != null) {

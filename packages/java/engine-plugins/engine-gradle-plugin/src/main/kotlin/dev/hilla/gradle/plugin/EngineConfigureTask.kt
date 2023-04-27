@@ -49,6 +49,9 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val generator = GeneratorConfiguration()
         val parser = ParserConfiguration()
+        if (extension.exposedPackagesToParser.isNotEmpty()) {
+            parser.setPackages(extension.exposedPackagesToParser)
+        }
 
         val projectBuildDir = project.buildDir.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")

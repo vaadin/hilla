@@ -19,42 +19,17 @@ import org.gradle.api.Project
 import java.io.File
 
 public open class EngineProjectExtension(project: Project) {
+
+    /**
+     *
+     */
+    public var exposedPackagesToParser: List<String> = mutableListOf()
+
     /**
      * Whether or not we are running in productionMode. Defaults to false.
      * Responds to the `-Pvaadin.productionMode` property.
      */
     public var productionMode: Boolean = false
-
-    /**
-     * The folder where `package.json` file is located. Default is project root
-     * dir.
-     */
-    public var npmFolder: File = project.projectDir
-
-    /**
-     * A directory with project's frontend source files.
-     */
-    public var frontendDirectory: File = File(project.projectDir, "frontend")
-
-    /**
-     * Application properties file in Spring project.
-     */
-    public var applicationProperties: File = File(project.projectDir, "src/main/resources/application.properties")
-
-    /**
-     * Default generated path of the OpenAPI json.
-     */
-    public var openApiJsonFile: File = File(project.buildDir, "generated-resources/openapi.json")
-
-    /**
-     * Java source folders for connect scanning.
-     */
-    public var javaSourceFolder: File = File(project.projectDir, "src/main/java")
-
-    /**
-     * Java resource folder.
-     */
-    public var javaResourceFolder: File = File(project.projectDir, "src/main/resources")
 
     /**
      * The folder where flow will put TS API files for client projects.
@@ -102,13 +77,8 @@ public open class EngineProjectExtension(project: Project) {
 
 
     override fun toString(): String = "VaadinFlowPluginExtension(" +
+            "exposedPackagesToParser=$exposedPackagesToParser, " +
             "productionMode=$productionMode, " +
-            "npmFolder=$npmFolder, " +
-            "frontendDirectory=$frontendDirectory, " +
-            "applicationProperties=$applicationProperties, " +
-            "openApiJsonFile=$openApiJsonFile, " +
-            "javaSourceFolder=$javaSourceFolder, " +
-            "javaResourceFolder=$javaResourceFolder, " +
             "generatedTsFolder=$generatedTsFolder, " +
             "resourceOutputDirectory=$resourceOutputDirectory, " +
             "sourceSetName=$sourceSetName, " +
