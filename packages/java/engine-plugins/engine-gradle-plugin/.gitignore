@@ -1,8 +1,0 @@
-.gradle
-.idea
-*.iml
-**/build/
-!src/**/build/
-target
-out
-yarn-cache
