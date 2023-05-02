@@ -23,6 +23,14 @@
         <gradle.executable>./gradlew</gradle.executable>
     </properties>
 
+    <dependencies>
+      <dependency>
+        <groupId>dev.hilla</groupId>
+        <artifactId>engine-core</artifactId>
+        <version>${project.parent.version}</version>
+      </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <!-- execute Gradle command -->
