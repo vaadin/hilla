@@ -10,16 +10,16 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-@Mojo(name = "init-react-app", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-public class InitReactAppMojo extends AbstractMojo {
+@Mojo(name = "init-lit-app", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
+public class InitLitAppMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.basedir}")
     private Path projectBaseDir;
 
     @Override
     public void execute() throws MojoFailureException {
-        var skeletonUrl = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.1.zip";
+        var skeletonUrl = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.1.zip";
         var items = List.of("package.json", "package-lock.json",
-                "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
+                "frontend/App.ts", "frontend/index.ts", "frontend/routes.ts",
                 "frontend/views/MainView.tsx",
                 "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
         var extractor = new InitFileExtractor(skeletonUrl, items,
