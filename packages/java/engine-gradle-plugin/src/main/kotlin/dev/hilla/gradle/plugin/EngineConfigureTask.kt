@@ -25,9 +25,8 @@ import java.nio.file.Path
 import dev.hilla.engine.*
 
 /**
- * This task checks that node and npm tools are installed, copies frontend
- * resources available inside `.jar` dependencies to `node_modules`, and creates
- * or updates `package.json` and `webpack.config.json` files.
+ * Task that generates the configuration json which is needed
+ * for next task of generating the endpoints and model classes.
  */
 public open class EngineConfigureTask : DefaultTask() {
 
@@ -38,8 +37,6 @@ public open class EngineConfigureTask : DefaultTask() {
     init {
         group = "Hilla"
         description = "Hilla Configure Task"
-
-        dependsOn("classes")
     }
 
     @TaskAction
@@ -67,13 +64,6 @@ public open class EngineConfigureTask : DefaultTask() {
             .classesDir(projectClassesDir)
             .create()
 
-        // The configuration gathered from the Maven plugin is saved in a
-        // file so that further runs can skip running a separate Maven
-        // project just to get this configuration again
-
-        // The configuration gathered from the Maven plugin is saved in a
-        // file so that further runs can skip running a separate Maven
-        // project just to get this configuration again
         val configDir: Path = project.projectDir.toPath().resolve(projectBuildDir)
         Files.createDirectories(configDir)
         conf.store(

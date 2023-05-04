@@ -39,9 +39,9 @@ sourceSets {
     }
 }
 
-/*configurations {
+configurations {
     functionalTestImplementation.extendsFrom testImplementation
-}*/
+}
 
 task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     classifier = 'javadoc'
@@ -119,7 +119,7 @@ artifacts {
  * Testing & Quality
  *
  ***********************************************************************************************************************/
-/*task functionalTest(type: Test) {
+task functionalTest(type: Test) {
     dependsOn test, jar
     group = 'Verification'
 
@@ -132,14 +132,14 @@ artifacts {
         showStandardStreams = true
     }
 }
-check.dependsOn functionalTest*/
+check.dependsOn functionalTest
 /***********************************************************************************************************************
  *
  * Deployment
  *
  ***********************************************************************************************************************/
 gradlePlugin {
-    //testSourceSets sourceSets.functionalTest
+    testSourceSets sourceSets.functionalTest
     plugins {
         hillaPlugin {
             id = 'dev.hilla.engine'
@@ -151,7 +151,7 @@ gradlePlugin {
 pluginBundle {
     website = 'https://hilla.dev/docs/latest/flow/guide/start/gradle'
     vcsUrl = 'https://github.com/vaadin/hilla'
-    description = 'Build Hilla applications with Gradle. Please follow the link below to learn which Plugin version to use with particular Hilla version. Hilla recommends using the latest Hilla LTS version.'
+    description = 'Build Hilla applications with Gradle.'
     tags = ['hilla']
     plugins {
       hillaPlugin {
@@ -183,17 +183,17 @@ pluginBundle {
  *
  **********************************************************************************************************************/
 wrapper {
-    gradleVersion = '7.5.1'
+    gradleVersion = '7.6.1'
     distributionType = Wrapper.DistributionType.ALL
 }
 
 // Travis kills the build if there's no stdout for 10 minutes: https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
 // This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320
-/*functionalTest {
+functionalTest {
     testLogging {
         info.events "passed", "skipped", "failed"
     }
-}*/
+}
 
 kotlin {
     explicitApi()

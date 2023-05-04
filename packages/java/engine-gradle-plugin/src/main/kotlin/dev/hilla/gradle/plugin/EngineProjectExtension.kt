@@ -21,35 +21,21 @@ import java.io.File
 public open class EngineProjectExtension(project: Project) {
 
     /**
-     *
+     * The packages to scan for classes annotated with @Endpoint and
+     * related model classes. For a single module application, there is
+     * no need for configuring this necessarily, as the classes from the
+     * current project is automatically scanned (unless the endpoints are
+     * located in a dependency).
+     * On the contrary, in a multi-module project if the endpoint classes
+     * are located in the other modules, it is necessary to set the list
+     * packages in the build.gradle file.
      */
     public var exposedPackagesToParser: List<String> = mutableListOf()
-
-    /**
-     * Whether or not we are running in productionMode. Defaults to false.
-     * Responds to the `-Pvaadin.productionMode` property.
-     */
-    public var productionMode: Boolean = false
 
     /**
      * The folder where flow will put TS API files for client projects.
      */
     public var generatedTsFolder: File = File(project.projectDir, "frontend/generated")
-
-
-    /**
-     * Defines the output directory for generated non-served resources, such as
-     * the token file. Defaults to `build/vaadin-generated` folder.
-     *
-     * The plugin will automatically register
-     * this as an additional resource folder, which should then be picked up by the IDE.
-     * That will allow the app to run for example in Intellij with Tomcat.
-     * Generating files into build/resources/main wouldn't work since Intellij+Tomcat
-     * ignores that folder.
-     *
-     * The `flow-build-info.json` file is generated here.
-     */
-    public var resourceOutputDirectory: File = File(project.buildDir, "vaadin-generated")
 
     /**
      * Defines the output folder used by the project.
@@ -76,11 +62,9 @@ public open class EngineProjectExtension(project: Project) {
     }
 
 
-    override fun toString(): String = "VaadinFlowPluginExtension(" +
+    override fun toString(): String = "HillaPluginExtension(" +
             "exposedPackagesToParser=$exposedPackagesToParser, " +
-            "productionMode=$productionMode, " +
             "generatedTsFolder=$generatedTsFolder, " +
-            "resourceOutputDirectory=$resourceOutputDirectory, " +
             "sourceSetName=$sourceSetName, " +
             "nodeCommand=$nodeCommand, " +
             ")"
