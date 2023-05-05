@@ -39,7 +39,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
             extends AbstractTaskEndpointGenerator {
         TestTaskEndpointGenerator(File projectDirectory,
                 String buildDirectoryName, File outputDirectory) {
-            super(projectDirectory, buildDirectoryName, outputDirectory);
+            super(projectDirectory, buildDirectoryName, outputDirectory,
+                    AbstractTaskEndpointGeneratorTest.class.getClassLoader());
         }
 
         @Override

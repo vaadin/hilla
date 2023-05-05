@@ -30,7 +30,7 @@ public class EngineConfiguration {
     private Path outputDir;
     private ParserConfiguration parser;
 
-    private EngineConfiguration() {
+    public EngineConfiguration() {
     }
 
     /**

@@ -31,8 +31,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
 
-    private final ClassLoader classLoader;
-
     /**
      * Create a task for generating OpenAPI spec.
      *
@@ -51,9 +49,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
             File outputDirectory, @Nonnull ClassLoader classLoader) {
-        super(projectDirectory, buildDirectoryName, outputDirectory);
-        this.classLoader = Objects.requireNonNull(classLoader,
-                "ClassLoader should not be null");
+        super(projectDirectory, buildDirectoryName, outputDirectory,
+                classLoader);
     }
 
     /**
