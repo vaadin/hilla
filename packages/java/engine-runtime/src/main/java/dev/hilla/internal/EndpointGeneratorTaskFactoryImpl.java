@@ -62,8 +62,8 @@ public class EndpointGeneratorTaskFactoryImpl
 
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder(), nodeExecutable,
-                options.getClassFinder().getClassLoader());
+                options.getFrontendGeneratedFolder(),
+                options.getClassFinder().getClassLoader(), nodeExecutable);
     }
 
     @Override

@@ -39,8 +39,6 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
 import dev.hilla.engine.ConfigurationException;
 import dev.hilla.engine.EngineConfiguration;
 
-import jakarta.annotation.Nonnull;
-
 /**
  * Abstract class for endpoint related generators.
  */
@@ -52,9 +50,9 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     protected final ClassLoader classLoader;
     private EngineConfiguration engineConfiguration;
 
-    AbstractTaskEndpointGenerator(@Nonnull File projectDirectory,
-            @Nonnull String buildDirectoryName, @Nonnull File outputDirectory,
-            @Nonnull ClassLoader classLoader) {
+    AbstractTaskEndpointGenerator(File projectDirectory,
+            String buildDirectoryName, File outputDirectory,
+            ClassLoader classLoader) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,

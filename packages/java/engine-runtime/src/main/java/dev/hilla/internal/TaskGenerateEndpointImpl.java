@@ -49,7 +49,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      *            executable or PATH-related command
      */
     TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, String nodeCommand, ClassLoader classLoader) {
+            File outputDirectory, ClassLoader classLoader, String nodeCommand) {
         super(projectDirectory, buildDirectoryName, outputDirectory,
                 classLoader);
         this.nodeCommand = nodeCommand;

@@ -27,6 +27,8 @@ public class PrepareFrontendMojo
     @Parameter(readonly = true)
     private final ParserConfiguration parser = new ParserConfiguration();
 
+    // This has been renamed to not hide <code>project</code> from the ancestor
+    // class, otherwise that's not given a value
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject mavenProject;
 
