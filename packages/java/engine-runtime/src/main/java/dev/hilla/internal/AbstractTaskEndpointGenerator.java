@@ -80,11 +80,19 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
             try {
                 // Create a runner for Maven
-                var runner = MavenRunner.forProject(projectDirectory, "-q", "hilla:configure").orElse(null);
-
-                if (runner!=null) {
-                    runner.run(null);
-                }
+                MavenRunner
+                        .forProject(projectDirectory, "-q", "hilla:configure")
+                        // Create a runner for Gradle. Even if Gradle is not
+                        // supported yet, this is useful to emit an error
+                        // message if pom.xml is not found and build.gradle is
+                        .or(() -> GradleRunner.forProject(projectDirectory, "-q", "hillaConfigure"))
+                        // If no runner is found, throw an exception.
+                        .orElseThrow(() -> new IllegalStateException(String
+                                .format("Failed to determine project directory for dev mode. "
+                                        + "Directory '%s' does not look like a Maven or "
+                                        + "Gradle project.", projectDirectory)))
+                        // Run the first valid runner
+                        .run(null);
             } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);

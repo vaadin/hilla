@@ -46,9 +46,5 @@ public class HillaPlugin : Plugin<Project> {
                 copyTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
         }
-
-        project.tasks.named("vaadinPrepareFrontend").configure {
-            it.dependsOn(project.tasks.named("hillaConfigure"))
-        }
     }
 }
