@@ -99,7 +99,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                 var plugins = model.getBuild().getPlugins();
                 config = plugins.stream()
                         .filter(p -> p.getGroupId().equals("dev.hilla") && p
-                                .getArtifactId().equals("engine-maven-plugin"))
+                                .getArtifactId().equals("hilla-maven-plugin"))
                         .findFirst()
                         .map(plugin -> getPluginConfiguration(plugin,
                                 EngineConfiguration.class))

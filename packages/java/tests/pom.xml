@@ -138,7 +138,7 @@
       <plugins>
         <plugin>
           <groupId>dev.hilla</groupId>
-          <artifactId>engine-maven-plugin</artifactId>
+          <artifactId>hilla-maven-plugin</artifactId>
           <version>${project.version}</version>
         </plugin>
 

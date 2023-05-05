@@ -10,7 +10,7 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>engine-maven-plugin</artifactId>
+  <artifactId>hilla-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Plugin for Hilla Engine</name>
 
@@ -93,19 +93,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.8.2</version>
-          <configuration>
-            <goalPrefix>hilla</goalPrefix>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
