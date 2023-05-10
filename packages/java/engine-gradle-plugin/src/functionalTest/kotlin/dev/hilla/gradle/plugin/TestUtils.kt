@@ -21,10 +21,8 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
 import java.io.IOException
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.PathMatcher
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.zip.ZipInputStream
 import kotlin.test.expect
 import kotlin.test.fail
@@ -215,6 +213,8 @@ fun addConfigurationsToSettingsForUsingPluginFromLocalRepo(testProject: TestProj
                   gradlePluginPortal()
               }
            }
+
+           rootProject.name = 'junit-hilla-gradle'
         """.trimIndent()
     )
 }
@@ -257,9 +257,25 @@ class TestProject {
         // don't throw an exception if the folder fails to be deleted. The folder
         // is temporary anyway, and Windows tends to randomly fail with
         // java.nio.file.FileSystemException: C:\Users\RUNNER~1\AppData\Local\Temp\junit-vaadin-gradle-plugin8993583259614232822.tmp\lib\build\libs\lib.jar: The process cannot access the file because it is being used by another process.
-        if (!dir.deleteRecursively()) {
-            println("Failed to delete temp project folder $dir")
-        }
+        deleteDirectory(directory = dir.toPath())
+    }
+
+    private fun deleteDirectory(directory: Path) {
+        Files.walkFileTree(directory, setOf(), Integer.MAX_VALUE, object : SimpleFileVisitor<Path>() {
+            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                Files.delete(file)
+                return FileVisitResult.CONTINUE
+            }
+
+            override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
+                if (exc == null) {
+                    Files.delete(dir)
+                } else {
+                    println("Failed to delete temp project folder $dir, error: ${exc.message}")
+                }
+                return FileVisitResult.CONTINUE
+            }
+        })
     }
 
     /**
