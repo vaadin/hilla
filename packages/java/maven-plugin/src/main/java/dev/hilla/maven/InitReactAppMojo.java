@@ -1,7 +1,7 @@
 package dev.hilla.maven;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -13,7 +13,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "init-react-app", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class InitReactAppMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.basedir}")
-    private Path projectBaseDir;
+    private File projectBaseDir;
 
     @Override
     public void execute() throws MojoFailureException {
@@ -23,7 +23,7 @@ public class InitReactAppMojo extends AbstractMojo {
                 "frontend/views/MainView.tsx",
                 "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
         var extractor = new InitFileExtractor(skeletonUrl, items,
-                projectBaseDir);
+                projectBaseDir.toPath());
 
         try {
             extractor.execute();
