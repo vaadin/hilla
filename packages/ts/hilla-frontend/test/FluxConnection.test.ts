@@ -23,7 +23,7 @@ describe('@hilla/frontend', () => {
       nrSentMessages(): number;
       sentMessage(i: number): AbstractMessage;
       handleMessage(msg: AbstractMessage): unknown;
-      socket: () => any;
+      socket(): any;
     };
 
     beforeEach(() => {
@@ -257,7 +257,7 @@ describe('@hilla/frontend', () => {
       });
 
       class FakeElement {
-        private controllers: ReactiveController[] = [];
+        private readonly controllers: ReactiveController[] = [];
 
         addController(controller: ReactiveController) {
           this.controllers.push(controller);

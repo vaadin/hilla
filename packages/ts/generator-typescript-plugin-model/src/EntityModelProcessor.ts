@@ -1,4 +1,5 @@
 /* eslint-disable symbol-description */
+import { dirname } from 'path/posix';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -19,7 +20,6 @@ import {
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import { dirname } from 'path/posix';
 import type { ClassDeclaration, ClassElement, Identifier, SourceFile, Statement } from 'typescript';
 import ts from 'typescript';
 import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
@@ -38,7 +38,7 @@ const $model = Symbol();
 const $processDeclaration = Symbol();
 
 export abstract class EntityModelProcessor {
-  public static process(name: string, component: Schema, context: Context): SourceFile {
+  static process(name: string, component: Schema, context: Context): SourceFile {
     context.owner.logger.debug(`Processing model for entity: ${name}`);
 
     const schema = isComposedSchema(component) ? decomposeSchema(component)[0] : component;
@@ -77,7 +77,7 @@ export abstract class EntityModelProcessor {
     };
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     const declaration = this[$processDeclaration]();
 
     const { imports, exports } = this[$dependencies];
@@ -99,7 +99,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
   readonly #fullyQualifiedName: string;
   readonly #getPropertyModelSymbol: Identifier;
 
-  public constructor(name: string, component: Schema, context: Context) {
+  constructor(name: string, component: Schema, context: Context) {
     super(name, true);
 
     this.#component = component;
@@ -230,7 +230,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
 }
 
 export class EntityEnumModelProcessor extends EntityModelProcessor {
-  public constructor(name: string) {
+  constructor(name: string) {
     super(name, false);
   }
 

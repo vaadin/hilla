@@ -21,7 +21,7 @@ export default class PushProcessor {
     this.#subscriptionId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription');
   }
 
-  public process(): ts.SourceFile {
+  process(): ts.SourceFile {
     const importStatements = this.#dependencies.imports.toCode();
 
     const updatedStatements: readonly ts.Statement[] = [
@@ -60,9 +60,7 @@ export default class PushProcessor {
    */
   #replacePromiseType(declaration: ts.FunctionDeclaration) {
     const promiseType = (declaration.type as ts.TypeReferenceNode).typeArguments![0];
-    const promiseArray = (
-      ts.isUnionTypeNode(promiseType) ? (promiseType as ts.UnionTypeNode).types[0] : promiseType
-    ) as ts.TypeReferenceNode;
+    const promiseArray = (ts.isUnionTypeNode(promiseType) ? promiseType.types[0] : promiseType) as ts.TypeReferenceNode;
 
     return ts.factory.createTypeReferenceNode(this.#subscriptionId, promiseArray.typeArguments);
   }
@@ -86,7 +84,7 @@ export default class PushProcessor {
   #updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
     const returnStatement = declaration.body!.statements[0] as ts.ReturnStatement;
     const { arguments: args, expression, typeArguments } = returnStatement.expression! as ts.CallExpression;
-    const call = expression! as ts.PropertyAccessExpression;
+    const call = expression as ts.PropertyAccessExpression;
 
     return ts.factory.createBlock([
       ts.factory.createReturnStatement(

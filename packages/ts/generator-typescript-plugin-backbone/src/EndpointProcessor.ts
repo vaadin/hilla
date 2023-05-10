@@ -32,7 +32,7 @@ export default class EndpointProcessor {
     this.#outputDir = outputDir;
   }
 
-  public static async create(
+  static async create(
     name: string,
     owner: Plugin,
     methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
@@ -50,7 +50,7 @@ export default class EndpointProcessor {
     return endpoint;
   }
 
-  public async process(): Promise<SourceFile> {
+  async process(): Promise<SourceFile> {
     this.#owner.logger.debug(`Processing endpoint: ${this.#name}`);
 
     const statements = (
@@ -75,12 +75,12 @@ export default class EndpointProcessor {
       await Promise.all(
         Object.values(OpenAPIV3.HttpMethods)
           .filter((httpMethod) => pathItem[httpMethod])
-          .map((httpMethod) =>
+          .map(async (httpMethod) =>
             EndpointMethodOperationProcessor.createProcessor(
               httpMethod,
               this.#name,
               method,
-              pathItem[httpMethod] as EndpointMethodOperation,
+              pathItem[httpMethod]!,
               this.#dependencies,
               this.#owner,
             )?.process(this.#outputDir),

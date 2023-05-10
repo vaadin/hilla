@@ -1,7 +1,7 @@
-import { expect } from 'chai';
-import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import { chmod, mkdtemp, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
+import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
+import { expect } from 'chai';
 import GeneratorIO from '../src/GeneratorIO.js';
 
 describe('Testing GeneratorIO', () => {

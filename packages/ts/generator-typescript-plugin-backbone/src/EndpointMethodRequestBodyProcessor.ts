@@ -29,7 +29,7 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #requestBody?: EndpointMethodRequestBody;
   readonly #initTypeIdentifier: ts.Identifier;
 
-  public constructor(
+  constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
     owner: Plugin,
@@ -41,7 +41,7 @@ export default class EndpointMethodRequestBodyProcessor {
     this.#initTypeIdentifier = initTypeIdentifier;
   }
 
-  public process(): EndpointMethodRequestBodyProcessingResult {
+  process(): EndpointMethodRequestBodyProcessingResult {
     if (!this.#requestBody) {
       return {
         parameters: [
@@ -58,7 +58,7 @@ export default class EndpointMethodRequestBodyProcessor {
       };
     }
 
-    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
+    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType].schema);
     const parameterNames = parameterData.map(([name]) => name);
     let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
 

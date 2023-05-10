@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import BackbonePlugin from '@hilla/generator-typescript-plugin-backbone/index.js';
+import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
 import PushPlugin from '../../src/index.js';

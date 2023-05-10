@@ -1,3 +1,4 @@
+import { dirname } from 'path/posix';
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import type { EnumSchema, ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
 import {
@@ -19,9 +20,7 @@ import {
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import { dirname } from 'path/posix';
-import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { type TypeElement } from 'typescript';
+import ts, type { Identifier, InterfaceDeclaration, SourceFile, Statement , type TypeElement } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 
 export class EntityProcessor {
@@ -33,7 +32,7 @@ export class EntityProcessor {
   readonly #owner: Plugin;
   readonly #path: string;
 
-  public constructor(name: string, component: Schema, owner: Plugin) {
+  constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
     this.#owner = owner;
     this.#fullyQualifiedName = name;
@@ -50,7 +49,7 @@ export class EntityProcessor {
     return id;
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     this.#owner.logger.debug(`Processing entity: ${this.#name}`);
 
     const declaration = isEnumSchema(this.#component)

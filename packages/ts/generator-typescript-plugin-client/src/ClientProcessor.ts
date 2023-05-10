@@ -10,12 +10,12 @@ export default class ClientProcessor {
   readonly #owner: Plugin;
   readonly #outputPath: string;
 
-  public constructor(fileName: string, owner: Plugin) {
+  constructor(fileName: string, owner: Plugin) {
     this.#outputPath = new PathManager({ extension: 'ts' }).createRelativePath(fileName);
     this.#owner = owner;
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     this.#owner.logger.debug(`Generating ${this.#outputPath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager({ extension: '.js' }));

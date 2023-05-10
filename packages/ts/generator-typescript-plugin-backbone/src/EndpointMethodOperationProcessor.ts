@@ -15,7 +15,7 @@ export const INIT_TYPE_NAME = 'EndpointRequestInit';
 export const HILLA_FRONTEND_NAME = '@hilla/frontend';
 
 export default abstract class EndpointMethodOperationProcessor {
-  public static createProcessor(
+  static createProcessor(
     httpMethod: OpenAPIV3.HttpMethods,
     endpointName: string,
     endpointMethodName: string,
@@ -39,7 +39,7 @@ export default abstract class EndpointMethodOperationProcessor {
     }
   }
 
-  public abstract process(outputDir?: string): Promise<Statement | undefined>;
+  abstract process(outputDir?: string): Promise<Statement | undefined>;
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
@@ -49,7 +49,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   readonly #operation: EndpointMethodOperation;
   readonly #owner: Plugin;
 
-  public constructor(
+  constructor(
     endpointName: string,
     endpointMethodName: string,
     operation: EndpointMethodOperation,
@@ -64,7 +64,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     this.#operation = operation;
   }
 
-  public async process(outputDir?: string): Promise<Statement | undefined> {
+  async process(outputDir?: string): Promise<Statement | undefined> {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
     const initTypeIdentifier = imports.named.getIdentifier(
