@@ -37,7 +37,7 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string) {
     super();
-    this.connectWebsocket(connectPrefix.replace('/connect', ''));
+    this.connectWebsocket(connectPrefix.replace('/connect', '').replace(/connect/, ''));
   }
 
   private connectWebsocket(prefix: string) {
