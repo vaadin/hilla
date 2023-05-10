@@ -166,7 +166,10 @@
         <module>endpoints</module>
         <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
+        <!--
+        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
         <module>endpoints-maven-engine</module>
+        -->
         <module>endpoints-latest-java</module>
 
         <module>security</module>
@@ -182,7 +185,10 @@
         <module>endpoints</module>
         <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
+        <!--
+        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
         <module>endpoints-maven-engine</module>
+        -->
         <module>endpoints-latest-java</module>
       </modules>
     </profile>

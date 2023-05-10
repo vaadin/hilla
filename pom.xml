@@ -53,11 +53,11 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.154</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.core.version>2.2.8</swagger.core.version>
-    <swagger.models.version>2.2.8</swagger.models.version>
+    <swagger.core.version>2.2.9</swagger.core.version>
+    <swagger.models.version>2.2.9</swagger.models.version>
     <swagger.parser.v3.version>2.1.12</swagger.parser.v3.version>
-    <jackson.version>2.14.2</jackson.version>
-    <jackson.databind.version>2.14.2</jackson.databind.version>
+    <jackson.version>2.15.0</jackson.version>
+    <jackson.databind.version>2.15.0</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.1-SNAPSHOT</flow.version>
