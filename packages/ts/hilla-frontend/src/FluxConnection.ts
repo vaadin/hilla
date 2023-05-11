@@ -35,12 +35,12 @@ export class FluxConnection extends EventTarget {
   public state: State = State.INACTIVE;
   private pendingMessages: ServerMessage[] = [];
 
-  constructor() {
+  constructor(connectPrefix: string) {
     super();
-    this.connectWebsocket();
+    this.connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/, ''));
   }
 
-  private connectWebsocket() {
+  private connectWebsocket(prefix: string) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
     const callback = {
       onMessage: (response: any) => {
@@ -73,7 +73,7 @@ export class FluxConnection extends EventTarget {
       },
     };
     this.socket = atmosphere.subscribe!({
-      url: '/HILLA/push',
+      url: `${prefix}/HILLA/push`,
       transport: 'websocket',
       fallbackTransport: 'long-polling',
       contentType: 'application/json; charset=UTF-8',
