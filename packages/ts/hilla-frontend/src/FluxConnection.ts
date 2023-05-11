@@ -35,7 +35,7 @@ export class FluxConnection extends EventTarget {
   public state: State = State.INACTIVE;
   private pendingMessages: ServerMessage[] = [];
 
-  constructor() {
+  constructor(connectPrefix: string) {
     super();
     if (!(window as any).Vaadin?.featureFlags?.hillaPush) {
       // Remove when removing feature flag
@@ -43,10 +43,10 @@ export class FluxConnection extends EventTarget {
         `Push support in Hilla is not enabled. Enable it in the debug window or by adding com.vaadin.experimental.hillaPush=true to vaadin-featureflags.properties`,
       );
     }
-    this.connectWebsocket();
+    this.connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/, ''));
   }
 
-  private connectWebsocket() {
+  private connectWebsocket(prefix: string) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
     const callback = {
       onMessage: (response: any) => {
@@ -79,7 +79,7 @@ export class FluxConnection extends EventTarget {
       },
     };
     this.socket = atmosphere.subscribe!({
-      url: '/HILLA/push',
+      url: `${prefix}/HILLA/push`,
       transport: 'websocket',
       fallbackTransport: 'long-polling',
       contentType: 'application/json; charset=UTF-8',
