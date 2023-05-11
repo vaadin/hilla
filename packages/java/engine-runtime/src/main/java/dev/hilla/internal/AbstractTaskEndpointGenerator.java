@@ -35,6 +35,8 @@ import dev.hilla.engine.commandrunner.CommandRunnerException;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
+    private static boolean firstRun = true;
+
     private final String buildDirectoryName;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final File outputDirectory;
@@ -62,21 +64,10 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
     protected void prepareEngineConfiguration()
             throws ExecutionFailedException {
-        EngineConfiguration config = null;
-
         var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
 
-        try {
-            config = EngineConfiguration.loadDirectory(configDir);
-        } catch (IOException | ConfigurationException e) {
-            logger.warn(
-                    "Hilla engine configuration found, but not read correctly",
-                    e);
-        }
-
-        if (config == null) {
-            logger.info(
-                    "Hilla engine configuration not found: configure using build system plugin");
+        if (firstRun) {
+            logger.info("Configure Hilla engine using build system plugin");
 
             try {
                 // Create a runner for Maven
@@ -93,24 +84,27 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                                         + "Gradle project.", projectDirectory)))
                         // Run the first valid runner
                         .run(null);
+                firstRun = false;
             } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);
             }
+        }
 
-            try {
-                config = EngineConfiguration.loadDirectory(configDir);
-            } catch (IOException e) {
+        try {
+            var config = EngineConfiguration.loadDirectory(configDir);
+
+            if (config == null) {
                 throw new ExecutionFailedException(
-                        "Failed to read Hilla engine configuration", e);
+                        "Engine configuration is missing");
             }
-        }
 
-        if (config != null) {
-            config = new EngineConfiguration.Builder(config)
+            this.engineConfiguration = new EngineConfiguration.Builder(config)
                     .outputDir(outputDirectory.toPath()).create();
+        } catch (IOException | ConfigurationException e) {
+            throw new ExecutionFailedException(
+                    "Failed to read Hilla engine configuration", e);
         }
 
-        this.engineConfiguration = config;
     }
 }
