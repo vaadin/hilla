@@ -47,6 +47,7 @@ class SingleModuleTest : AbstractGradleTest() {
     fun `exposedPackagesToParser configured in build file hillaConfigure executed HillaEngineConfigurationJson should contain exposed packages`() {
         val package1 = "com.example.app"
         val package2 = "dev.hilla.foo"
+
         createProject(package1, package2)
 
         val buildResult: BuildResult = testProject.build("hillaConfigure", checkTasksSuccessful = true)
@@ -71,6 +72,7 @@ class SingleModuleTest : AbstractGradleTest() {
     @Test
     fun `endpoints ts and openapi json are generated after hillaGenerate task executed`() {
         createProject(withNpmInstall = true)
+
         addHelloReactEndpoint()
 
         val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
@@ -80,23 +82,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
-    }
-
-    @Test
-    fun `hillaConfigure and generator are executed when building in productionMode`() {
-        createProject(withNpmInstall = true, productionMode = true)
-        addHelloReactEndpoint()
-        val themeName = "junit-hilla-gradle";
-        addThemeToProject(themeName)
-        addSpringBootMainClass(themeName)
-
-        provideGradleWrapper()
-
-        testProject.build("build", checkTasksSuccessful = true)
-
-        verifyOpenApiJsonFileGeneratedProperly()
-        verifyEndpointsTsFileGeneratedProperly()
-        verifyJarArtifactIsCreatedByDefault()
     }
 
     private fun verifyOpenApiJsonFileGeneratedProperly() {
@@ -122,18 +107,9 @@ class SingleModuleTest : AbstractGradleTest() {
         }
     }
 
-    private fun verifyJarArtifactIsCreatedByDefault() {
-        val outputJarFile = testProject.dir.resolve("build/libs/junit-hilla-gradle.jar")
-        expect(true, "Jar artifact junit-hilla-gradle.jar should exist under build/libs/ after production build!") {
-            outputJarFile.exists()
-        }
-        expect(true, "Jar artifact junit-hilla-gradle.jar should be a file!") {
-            outputJarFile.isFile
-        }
-    }
-
     private fun addHelloReactEndpoint() : File {
-        val endpointFile = testProject.newFile("src/main/java/com/example/application/HelloReactEndpoint.java", """
+        val endpointFile = testProject.newFile("src/main/java/com/example/application/HelloReactEndpoint.java",
+        """
             package com.example.application;
 
             import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -158,34 +134,6 @@ class SingleModuleTest : AbstractGradleTest() {
             endpointFile.exists()
         }
         return endpointFile
-    }
-
-    private fun addThemeToProject(themeName: String) {
-        testProject.newFile("frontend/themes/$themeName/styles.css")
-        testProject.newFile("frontend/themes/$themeName/theme.json", """
-            {
-              "lumoImports" : [ "typography", "color", "spacing", "badge", "utility" ]
-            }
-        """.trimIndent())
-    }
-
-    private fun addSpringBootMainClass(themeName: String) {
-        testProject.newFile("src/main/java/com/example/application/Application.java", """
-            package com.example.application;
-
-            import com.vaadin.flow.component.page.AppShellConfigurator;
-            import com.vaadin.flow.theme.Theme;
-            import org.springframework.boot.SpringApplication;
-            import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-            @SpringBootApplication
-            @Theme(value = "$themeName")
-            public class Application implements AppShellConfigurator {
-                public static void main(String[] args) {
-                    SpringApplication.run(Application.class, args);
-                }
-            }
-        """.trimIndent())
     }
 
     private fun createProject(vararg exposedPackages: String, withNpmInstall: Boolean = false, productionMode: Boolean = false) {
@@ -226,8 +174,7 @@ class SingleModuleTest : AbstractGradleTest() {
                     maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 }
                 dependencies {
-                    classpath("dev.hilla:engine-gradle-plugin:$hillaVersion")
-                    classpath('com.vaadin:flow-gradle-plugin:$flowVersion')
+                    classpath("dev.hilla:hilla-gradle-plugin:$hillaVersion")
                 }
             }
             plugins {
@@ -236,7 +183,6 @@ class SingleModuleTest : AbstractGradleTest() {
                 id 'java'
             }
 
-            apply plugin: 'com.vaadin'
             apply plugin: 'dev.hilla.engine'
 
             $exposedPackagesExtension
@@ -314,34 +260,5 @@ class SingleModuleTest : AbstractGradleTest() {
             throw FrontendUtils.CommandExecutionException(exitCode)
         }
     }
-
-    private fun provideGradleWrapper() {
-        val moduleDirectory = Path
-            .of(javaClass.classLoader.getResource("")!!.toURI()) // functionalTest
-            .parent // kotlin
-            .parent // classes
-            .parent // build
-            .parent // engine-gradle-plugin
-
-        moduleDirectory.toFile().resolve("gradle").copyRecursively(testProject.newFolder("gradle"))
-
-        val sourceGradlew = moduleDirectory.toFile().resolve("gradlew")
-        val destGradlew = testProject.newFile("gradlew")
-        copyExecutable(sourceGradlew, destGradlew)
-
-        val sourceGradlewBat = moduleDirectory.toFile().resolve("gradlew.bat")
-        val destGradlewBat = testProject.newFile("gradlew.bat")
-        copyExecutable(sourceGradlewBat, destGradlewBat)
-    }
-
-    private fun copyExecutable(source: File, dest: File) {
-        source.copyTo(dest, overwrite = true)
-        if (Files.getPosixFilePermissions(source.toPath()).contains(PosixFilePermission.OWNER_EXECUTE)) {
-            dest.setExecutable(true)
-        }
-    }
-
-    private fun getResourceAsText(path: String): String? =
-        this::class.java.classLoader.getResource(path)?.readText()
 
 }

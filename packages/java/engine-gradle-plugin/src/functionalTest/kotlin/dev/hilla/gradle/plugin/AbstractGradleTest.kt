@@ -22,17 +22,14 @@ import org.junit.Before
 /**
  * Prepares a test Gradle project - creates a temp dir for the [testProject] and allow you to run gradle
  * tasks. See [TestProject] for more details.
- * @author mavi
  */
 abstract class AbstractGradleTest {
 
     val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "2.1-SNAPSHOT"
-    val flowVersion = System.getenv("vaadin.version").takeUnless { it.isNullOrEmpty() } ?: "24.1-SNAPSHOT"
-    val slf4jVersion = "2.0.3"
 
     /**
      * The testing Gradle project. Automatically deleted after every test.
-     * Don't use TemporaryFolder JUnit `@Rule` since it will always delete the folder afterwards,
+     * Don't use TemporaryFolder JUnit `@Rule` since it will always delete the folder afterward,
      * making it impossible to investigate the folder in case of failure.
      */
     lateinit var testProject: TestProject

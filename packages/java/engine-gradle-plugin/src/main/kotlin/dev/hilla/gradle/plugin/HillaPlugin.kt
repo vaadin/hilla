@@ -15,23 +15,26 @@
  */
 package dev.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.bundling.Jar
 
 /**
- * The main class of the Vaadin Gradle Plugin.
- * @author mavi@vaadin.com
+ * The main class of the Hilla Gradle Plugin
  */
 public class HillaPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         // we need Java Plugin conventions so that we can ensure the order of tasks
         project.pluginManager.apply(JavaPlugin::class.java)
+
+        // we apply Vaadin (flow) plugin so that the users do not need to add it themselves
+        // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
+        project.pluginManager.apply(VaadinPlugin::class.java)
+
         val extensionName = "hilla"
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
