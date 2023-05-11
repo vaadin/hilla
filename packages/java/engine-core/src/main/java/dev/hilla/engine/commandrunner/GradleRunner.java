@@ -20,7 +20,8 @@ public class GradleRunner implements CommandRunner {
     /**
      * Creates a Gradle runner.
      *
-     * @param projectDir the project directory
+     * @param projectDir
+     *            the project directory
      * @param args
      */
     public GradleRunner(File projectDir, String... args) {
@@ -37,7 +38,7 @@ public class GradleRunner implements CommandRunner {
      *         project, an empty optional otherwise
      */
     public static Optional<CommandRunner> forProject(File projectDir,
-                                                     String... args) {
+            String... args) {
         if (new File(projectDir, "build.gradle").exists()) {
             return Optional.of(new GradleRunner(projectDir, args));
         }
@@ -68,6 +69,6 @@ public class GradleRunner implements CommandRunner {
     @Override
     public List<String> executables() {
         return IS_WINDOWS ? List.of(".\\gradlew.cmd", "gradle.cmd")
-            : List.of("./gradlew", "gradle");
+                : List.of("./gradlew", "gradle");
     }
 }
