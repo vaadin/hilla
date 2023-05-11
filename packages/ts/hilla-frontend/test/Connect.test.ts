@@ -624,7 +624,7 @@ describe('@hilla/frontend', () => {
       });
 
       it('should call FluxConnection', async () => {
-        (client as any)._fluxConnection = new FluxConnection();
+        (client as any)._fluxConnection = new FluxConnection("/connect");
         let called = 0;
         (client as any)._fluxConnection.subscribe = (endpointName: any, methodName: any, params: any) => {
           called += 1;
