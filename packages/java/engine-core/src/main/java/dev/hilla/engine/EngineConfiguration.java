@@ -68,10 +68,6 @@ public class EngineConfiguration {
             return null;
         }
 
-        // The Maven configuration can change, so it is preferable to get a new
-        // one each time the project is run
-        configFile.deleteOnExit();
-
         try {
             return MAPPER.readValue(configFile, EngineConfiguration.class);
         }
