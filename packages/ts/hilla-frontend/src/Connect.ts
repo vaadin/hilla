@@ -480,7 +480,7 @@ export class ConnectClient {
    */
   get fluxConnection(): FluxConnection {
     if (!this._fluxConnection) {
-      this._fluxConnection = new FluxConnection();
+      this._fluxConnection = new FluxConnection(this.prefix);
     }
     return this._fluxConnection;
   }
