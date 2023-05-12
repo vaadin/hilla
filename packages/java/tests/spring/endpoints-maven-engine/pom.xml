@@ -56,7 +56,7 @@
             <version>${project.version}</version>
             <!--
              Overriding engine-runtime to test scope effectively removes its
-             tasks from flow-maven-plugin execution. This is to replace with
+             tasks from hilla-maven-plugin execution. This is to replace with
               -->
             <scope>test</scope>
         </dependency>
@@ -77,14 +77,15 @@
              -->
 
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>default</id>
                         <goals>
                             <goal>prepare-frontend</goal>
                             <goal>build-frontend</goal>
+                            <goal>generate</goal>
                         </goals>
                         <phase>compile</phase>
                         <configuration>
@@ -102,20 +103,6 @@
                             <runNpmInstall>false</runNpmInstall>
                             <productionMode>true</productionMode>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>dev.hilla</groupId>
-                <artifactId>engine-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>
