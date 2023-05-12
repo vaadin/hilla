@@ -28,7 +28,8 @@ public class TaskTest {
     public void setUpTaskApplication() throws IOException, URISyntaxException,
             FrontendUtils.CommandExecutionException, InterruptedException,
             InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException {
+            InstantiationException, IllegalAccessException,
+            NoSuchFieldException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         var userDir = temporaryDirectory.toAbsolutePath().toString();
@@ -52,6 +53,12 @@ public class TaskTest {
 
         Files.delete(configPath);
         config.store(configPath.toFile());
+
+        // Let Hilla know that the file has been generated
+        var field = AbstractTaskEndpointGenerator.class
+                .getDeclaredField("firstRun");
+        field.setAccessible(true);
+        field.set(null, false);
 
         var packagesDirectory = Path
                 .of(getClass().getClassLoader().getResource("").toURI())

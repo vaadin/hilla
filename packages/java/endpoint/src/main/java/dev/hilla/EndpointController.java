@@ -75,8 +75,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
-@NpmPackage(value = "@hilla/frontend", version = "2.1.0-alpha4")
-@NpmPackage(value = "@hilla/form", version = "2.1.0-alpha4")
+@NpmPackage(value = "@hilla/frontend", version = "2.1.0-alpha5")
+@NpmPackage(value = "@hilla/form", version = "2.1.0-alpha5")
 public class EndpointController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointController.class);
@@ -259,7 +259,9 @@ public class EndpointController {
         var resource = getClass().getResource(openApiResourceName);
 
         if (resource == null) {
-            LOGGER.error("Resource '{}' is not available", openApiResourceName);
+            LOGGER.debug(
+                    "Resource '{}' is not available: endpoints cannot be registered yet",
+                    openApiResourceName);
         } else {
             try (var stream = resource.openStream()) {
                 // Read the openapi.json file and extract the tags, which in
@@ -308,14 +310,15 @@ public class EndpointController {
         }
 
         try {
-            return cls.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException ex) {
-            LOGGER.error("Failed to create endpoint instance for class"
-                    + " '{}': if an endpoint is not a Spring bean,"
-                    + " it must have a default constructor", className);
+            var endpoint = cls.getDeclaredConstructor().newInstance();
+            LOGGER.warn("Endpoint '{}' is not a Spring bean and has been "
+                    + "instantiated using default constructor. This is not "
+                    + "guaranteed to be supported in future releases.",
+                    className);
+            return endpoint;
         } catch (ReflectiveOperationException ex) {
-            LOGGER.warn("Failed to create endpoint instance for class '{}'",
-                    className, ex);
+            LOGGER.error("Endpoint '{}' is not a Spring bean and cannot be "
+                    + "instantiated.", className);
         }
 
         return null;

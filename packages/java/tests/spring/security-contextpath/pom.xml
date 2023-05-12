@@ -64,12 +64,7 @@
         <plugins>
             <plugin>
                 <groupId>dev.hilla</groupId>
-                <artifactId>engine-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
+                <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
