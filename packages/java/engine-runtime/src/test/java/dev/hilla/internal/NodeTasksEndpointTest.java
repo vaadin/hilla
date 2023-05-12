@@ -54,7 +54,7 @@ public class NodeTasksEndpointTest extends TaskTest {
 
     @Test
     public void should_GenerateEndpointFilesInDevBuildTask() throws Exception {
-        options = options.withDevBundleBuild(true);
+        options = options.withBundleBuild(true);
 
         new NodeTasks(options).execute();
         assertEndpointFiles(true);
