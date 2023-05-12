@@ -308,14 +308,15 @@ public class EndpointController {
         }
 
         try {
-            return cls.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException ex) {
-            LOGGER.error("Failed to create endpoint instance for class"
-                    + " '{}': if an endpoint is not a Spring bean,"
-                    + " it must have a default constructor", className);
+            var endpoint = cls.getDeclaredConstructor().newInstance();
+            LOGGER.warn("Endpoint '{}' is not a Spring bean and has been "
+                    + "instantiated using default constructor. This is not "
+                    + "guaranteed to be supported in future releases.",
+                    className);
+            return endpoint;
         } catch (ReflectiveOperationException ex) {
-            LOGGER.warn("Failed to create endpoint instance for class '{}'",
-                    className, ex);
+            LOGGER.error("Endpoint '{}' is not a Spring bean and cannot be "
+                    + "instantiated.", className);
         }
 
         return null;
