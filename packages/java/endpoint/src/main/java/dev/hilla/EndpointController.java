@@ -259,7 +259,9 @@ public class EndpointController {
         var resource = getClass().getResource(openApiResourceName);
 
         if (resource == null) {
-            LOGGER.error("Resource '{}' is not available", openApiResourceName);
+            LOGGER.debug(
+                    "Resource '{}' is not available: endpoints cannot be registered yet",
+                    openApiResourceName);
         } else {
             try (var stream = resource.openStream()) {
                 // Read the openapi.json file and extract the tags, which in
