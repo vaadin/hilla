@@ -72,7 +72,7 @@ public interface CommandRunner {
                         "No valid executable found"));
         getLogger().debug("Running command {}", executable);
         // Execute the command with the given arguments
-        executeCommand(executable, arguments(), stdIn);
+        executeCommand(executable, arguments(), stdIn, true);
     }
 
     private boolean executeWithTestArguments(String command) {
@@ -81,7 +81,7 @@ public interface CommandRunner {
             getLogger().debug("Testing command {} with arguments {}", command,
                     args);
             // Execute the command with the test arguments
-            executeCommand(command, args, null);
+            executeCommand(command, args, null, false);
 
             return true;
         } catch (CommandRunnerException e) {
@@ -92,7 +92,8 @@ public interface CommandRunner {
     }
 
     private void executeCommand(String executable, String[] arguments,
-            Consumer<OutputStream> stdIn) throws CommandRunnerException {
+            Consumer<OutputStream> stdIn, boolean stdOut)
+            throws CommandRunnerException {
         Stream<String> cmdStream = Stream.concat(Stream.of(executable),
                 Arrays.stream(arguments));
 
@@ -114,9 +115,13 @@ public interface CommandRunner {
 
         try {
             var builder = new ProcessBuilder(commandWithArgs)
-                    .directory(currentDirectory())
-                    .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                    .redirectError(ProcessBuilder.Redirect.INHERIT);
+                    .directory(currentDirectory());
+
+            if (stdOut) {
+                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                        .redirectError(ProcessBuilder.Redirect.INHERIT);
+            }
+
             var process = builder.start();
 
             if (stdIn != null) {
