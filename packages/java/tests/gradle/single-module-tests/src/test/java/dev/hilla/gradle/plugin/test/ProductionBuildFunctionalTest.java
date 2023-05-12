@@ -28,27 +28,36 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test is working on the output of production mode build of single-module.
  */
 public class ProductionBuildFunctionalTest {
+
+    /**
+     * Building a project in production mode can take a while,
+     * so it is more efficient to check everything in one run.
+     */
     @Test
     public void validateProductionBuildOutput() throws IOException {
         afterProductionBuild_openApiJson_hasCorrectEndpoints();
         afterProductionBuild_endpointsTs_hasCorrectEndpoints();
         afterProductionBuild_jarArchiveIsCreated();
     }
-    public void afterProductionBuild_openApiJson_hasCorrectEndpoints() throws IOException {
+
+    private void afterProductionBuild_openApiJson_hasCorrectEndpoints() throws IOException {
         var openApiJsonPath = getBuildDirPath().resolve("classes/dev/hilla/openapi.json").toFile();
         var openApiJson = Json.mapper().readValue(openApiJsonPath, OpenAPI.class);
         assertTrue(openApiJson.getPaths().containsKey("/HelloReactEndpoint/sayHello"));
     }
-    public void afterProductionBuild_endpointsTs_hasCorrectEndpoints() throws IOException {
+
+    private void afterProductionBuild_endpointsTs_hasCorrectEndpoints() throws IOException {
         var endpointTsPath = getFrontendGeneratedPath()
             .resolve("endpoints.ts");
         var endpointTsContent = String.join("", Files.readAllLines(endpointTsPath));
         assertTrue(endpointTsContent.contains("import * as HelloReactEndpoint"));
     }
-    public void afterProductionBuild_jarArchiveIsCreated() {
+
+    private void afterProductionBuild_jarArchiveIsCreated() {
         var executableJarFile = getBuildDirPath().resolve("libs/single-module.jar").toFile();
         assertTrue(executableJarFile.exists());
     }
+
     @BeforeEach
     public void runProductionBuild() throws CommandRunnerException {
         runGradleCommand("./gradlew -Pvaadin.productionMode=true build");
