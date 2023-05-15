@@ -25,6 +25,8 @@ version = project.hasProperty('hilla.version') ? project.getProperty('hilla.vers
 archivesBaseName = pom.artifactId
 sourceCompatibility = 17
 targetCompatibility = 17
+def rootPom = new XmlSlurper().parse(rootProject.file('../../../pom.xml'))
+def flowVersion = rootPom.properties['flow.version']
 
 /***********************************************************************************************************************
  *
