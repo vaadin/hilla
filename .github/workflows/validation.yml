@@ -20,7 +20,7 @@ jobs:
   init:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - uses: actions-cool/check-user-permission@main
@@ -99,6 +99,8 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
         run: mvn -B -am -P\!it-modules verify
+      - name: Test gradle-plugin's functional tests
+        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
@@ -112,8 +114,6 @@ jobs:
           flags: unittests
           fail_ci_if_error: true
           root_dir: ${{ github.workspace }}
-      - name: Test gradle-plugin's functional tests
-        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
 
   test-typescript:
     needs: init
