@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,19 +45,76 @@ public class InitFileExtractor {
                     var item = entry.getName().split("/", 2)[1];
 
                     if (items.contains(item)) {
-                        LOGGER.info("Extracting {}", item);
-                        var path = projectDirectory.resolve(item);
-                        var parent = path.getParent();
+                        if (item.endsWith("Endpoint.java")) {
+                            var applicationPackage = findSpringBootApplicationPackage();
+                            var applicationPath = applicationPackage
+                                    .replace(".", "/");
+                            // read file to string
+                            var content = new String(
+                                    zip.getInputStream(entry).readAllBytes());
+                            // replace package with application package
+                            content = content.replace("org.vaadin.example",
+                                    applicationPackage);
+                            // adjust path
+                            item = item.replace("org/vaadin/example",
+                                    applicationPath);
+                            // write file
+                            var path = projectDirectory.resolve(item);
+                            var parent = path.getParent();
 
-                        if (parent != null) {
-                            Files.createDirectories(parent);
+                            if (parent != null) {
+                                Files.createDirectories(parent);
+                            }
+
+                            LOGGER.info("Adding endpoint {}", item);
+                            Files.writeString(path, content);
+                        } else {
+                            LOGGER.info("Extracting {}", item);
+                            var path = projectDirectory.resolve(item);
+                            var parent = path.getParent();
+
+                            if (parent != null) {
+                                Files.createDirectories(parent);
+                            }
+
+                            Files.copy(zip.getInputStream(entry), path,
+                                    StandardCopyOption.REPLACE_EXISTING);
                         }
-
-                        Files.copy(zip.getInputStream(entry), path,
-                                StandardCopyOption.REPLACE_EXISTING);
                     }
                 }
             }
+        }
+    }
+
+    private String findSpringBootApplicationPackage() throws IOException {
+        return Files.walk(projectDirectory)
+                .filter(path -> path.toString().endsWith(".java"))
+                .filter(path -> {
+                    try {
+                        var content = Files.readString(path);
+                        return content.contains("@SpringBootApplication");
+                    } catch (IOException e) {
+                        LOGGER.error("Error reading file: {}", path, e);
+                        return false;
+                    }
+                }).map(this::getPackageName).findFirst()
+                .orElseThrow(() -> new IOException(
+                        "Spring Boot application class not found"));
+    }
+
+    private String getPackageName(Path path) {
+        try {
+            var content = Files.readString(path);
+            var matcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;")
+                    .matcher(content);
+            if (matcher.find()) {
+                return matcher.group(1);
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error reading file: {}", path, e);
+            return null;
         }
     }
 }
