@@ -138,14 +138,8 @@
       <plugins>
         <plugin>
           <groupId>dev.hilla</groupId>
-          <artifactId>engine-maven-plugin</artifactId>
+          <artifactId>hilla-maven-plugin</artifactId>
           <version>${project.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>com.vaadin</groupId>
-          <artifactId>flow-maven-plugin</artifactId>
-          <version>${flow.version}</version>
           <executions>
             <execution>
               <goals>
@@ -156,7 +150,6 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.2.0</version>
