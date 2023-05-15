@@ -183,7 +183,7 @@ class SingleModuleTest : AbstractGradleTest() {
                 id 'java'
             }
 
-            apply plugin: 'dev.hilla.engine'
+            apply plugin: 'dev.hilla'
 
             $exposedPackagesExtension
 

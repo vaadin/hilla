@@ -15,7 +15,7 @@ plugins {
 	//id 'dev.hilla'
 }
 
-apply plugin: 'dev.hilla.engine'
+apply plugin: 'dev.hilla'
 
 hilla {
 	exposedPackagesToParser = ["dev.hilla.gradle.plugin.test"]

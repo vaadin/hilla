@@ -142,7 +142,7 @@ gradlePlugin {
     testSourceSets sourceSets.functionalTest
     plugins {
         hillaPlugin {
-            id = 'dev.hilla.engine'
+            id = 'dev.hilla'
             implementationClass = 'dev.hilla.gradle.plugin.HillaPlugin'
         }
     }
