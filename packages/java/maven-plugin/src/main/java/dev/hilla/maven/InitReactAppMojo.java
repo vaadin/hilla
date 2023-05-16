@@ -10,6 +10,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import dev.hilla.plugin.base.InitFileExtractor;
+
 @Mojo(name = "init-react-app", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class InitReactAppMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.basedir}")

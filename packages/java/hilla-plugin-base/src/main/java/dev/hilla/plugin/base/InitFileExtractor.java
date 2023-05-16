@@ -1,4 +1,4 @@
-package dev.hilla.maven;
+package dev.hilla.plugin.base;
 
 import java.io.IOException;
 import java.net.URL;
