@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+		mavenLocal()
+    	mavenCentral()
+	    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+	}
+	dependencies {
+		classpath("dev.hilla:hilla-gradle-plugin:$hillaVersion")
+	}
+}
+plugins {
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'java'
+	//id 'dev.hilla'
+}
+
+apply plugin: 'dev.hilla'
+
+hilla {
+	exposedPackagesToParser = ["dev.hilla.gradle.plugin.test"]
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+	maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+}
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+	implementation 'dev.hilla:hilla-react'
+	implementation 'dev.hilla:hilla-spring-boot-starter'
+	implementation 'org.parttio:line-awesome:1.1.0'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "dev.hilla:hilla-bom:$hillaVersion"
+	}
+}

@@ -20,6 +20,7 @@
     <module>packages/java/engine-core</module>
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
+    <module>packages/java/gradle-plugin</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
@@ -40,6 +41,15 @@
       </activation>
       <modules>
         <module>packages/java/tests</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>gradle</id>
+      <activation>
+        <jdk>(,18]</jdk>
+      </activation>
+      <modules>
+        <module>packages/java/gradle-plugin</module>
       </modules>
     </profile>
   </profiles>
