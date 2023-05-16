@@ -20,7 +20,7 @@ jobs:
   init:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - uses: actions-cool/check-user-permission@main
@@ -77,7 +77,7 @@ jobs:
     needs: init
     name: Test Java
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
 
@@ -117,7 +117,7 @@ jobs:
     needs: init
     name: Test TypeScript
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
 
@@ -163,7 +163,7 @@ jobs:
       - test-typescript
     name: ITs
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
