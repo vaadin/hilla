@@ -13,6 +13,11 @@
 # VS Code
 .vscode
 
+# gradle
+.gradle
+**/build/
+!src/**/build/
+
 # Java files
 *pom.xml.versionsBackup
 **/target

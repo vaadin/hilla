@@ -99,6 +99,8 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
         run: mvn -B -am -P\!it-modules verify
+      - name: Test gradle-plugin's functional tests
+        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
@@ -204,6 +206,8 @@ jobs:
               -Pit-modules-group-${{ matrix.group }} \
               verify
           )
+      - name: Gradle ITs
+        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:

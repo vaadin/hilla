@@ -46,7 +46,7 @@ public final class GeneratorProcessor {
     }
 
     public void process() throws GeneratorException {
-        var arguments = new ArrayList<Object>();
+        var arguments = new ArrayList<>();
         arguments.add(TSGEN_PATH);
         prepareOutputDir(arguments);
         preparePlugins(arguments);

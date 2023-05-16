@@ -1,0 +1,210 @@
+/***********************************************************************************************************************
+ *
+ * Plugins
+ *
+ **********************************************************************************************************************/
+plugins {
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'idea'
+    id 'com.gradle.plugin-publish' version '0.11.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.20'
+    id 'org.jetbrains.dokka' version '1.7.20'
+}
+
+/***********************************************************************************************************************
+ *
+ * Basic properties
+ *
+ **********************************************************************************************************************/
+
+def pom = new XmlSlurper().parse(rootProject.file('pom.xml'))
+defaultTasks('jar', 'test')
+group pom.parent.groupId
+version = project.hasProperty('hilla.version') ? project.getProperty('hilla.version') : pom.parent.version
+archivesBaseName = pom.artifactId
+sourceCompatibility = 17
+targetCompatibility = 17
+def rootPom = new XmlSlurper().parse(rootProject.file('../../../pom.xml'))
+def flowVersion = rootPom.properties['flow.version']
+
+/***********************************************************************************************************************
+ *
+ * Sources
+ *
+ **********************************************************************************************************************/
+
+sourceSets {
+    functionalTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    functionalTestImplementation.extendsFrom testImplementation
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+/***********************************************************************************************************************
+ *
+ * Repositories & Dependencies
+ *
+ **********************************************************************************************************************/
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://plugins.gradle.org/m2/' }
+    maven { url = 'https://maven.vaadin.com/vaadin-prereleases' }
+}
+
+dependencies {
+    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.7.20')
+    implementation("dev.hilla:engine-core:${pom.parent.version}")
+    implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.20")
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+/***********************************************************************************************************************
+ *
+ * Artifacts
+ *
+ **********************************************************************************************************************/
+
+jar {
+    manifest{
+        attributes(
+                'Hilla-Package-Version': 1,
+                'Implementation-Title': 'Hilla Gradle Plugin',
+                'Implementation-Version': archiveVersion,
+                'Implementation-Vendor': 'Vaadin Ltd',
+        )
+    }
+    from 'gradle.properties'
+}
+
+/**
+ * Plugin artifact sources.
+ */
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+    include 'dev/**/*.groovy'
+    include 'dev/**/*.java'
+    include 'dev/**/*.kt'
+}
+
+/**
+ * Artifacts in build
+ */
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+/***********************************************************************************************************************
+ *
+ * Testing & Quality
+ *
+ ***********************************************************************************************************************/
+task functionalTest(type: Test) {
+    dependsOn test, jar
+    group = 'Verification'
+
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    maxParallelForks = 1
+    jvmArgs('-Xms512M', '-Xmx1024M')
+    testLogging {
+        exceptionFormat = 'full'
+        showStandardStreams = true
+    }
+}
+check.dependsOn functionalTest
+/***********************************************************************************************************************
+ *
+ * Deployment
+ *
+ ***********************************************************************************************************************/
+gradlePlugin {
+    testSourceSets sourceSets.functionalTest
+    plugins {
+        hillaPlugin {
+            id = 'dev.hilla'
+            implementationClass = 'dev.hilla.gradle.plugin.HillaPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://hilla.dev/docs/latest/hilla/guide/start/gradle'
+    vcsUrl = 'https://github.com/vaadin/hilla'
+    description = 'Build Hilla applications with Gradle.'
+    tags = ['hilla']
+    plugins {
+        hillaPlugin {
+            id = gradlePlugin.plugins.hillaPlugin.id
+            displayName = 'Hilla Gradle Plugin'
+        }
+    }
+    mavenCoordinates {
+        groupId = project.group
+        artifactId = project.archivesBaseName
+    }
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = project.group
+			artifactId = project.archivesBaseName
+			version = project.version
+
+			from components.java
+		}
+	}
+}
+
+/***********************************************************************************************************************
+ *
+ * Misc.
+ *
+ **********************************************************************************************************************/
+wrapper {
+    gradleVersion = '7.6.1'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+
+// This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320
+// This will come in handy on the CI during long-running tests to prevent the CI killing
+//     the process due to a false indication of inactivity:
+functionalTest {
+    testLogging {
+        info.events "passed", "skipped", "failed"
+    }
+}
+
+kotlin {
+    explicitApi()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}

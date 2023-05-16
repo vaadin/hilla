@@ -4,10 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Runs a Gradle command.
@@ -17,15 +15,18 @@ public class GradleRunner implements CommandRunner {
             .getLogger(GradleRunner.class);
 
     private final File projectDir;
+    private final String[] args;
 
     /**
      * Creates a Gradle runner.
      *
      * @param projectDir
      *            the project directory
+     * @param args
      */
-    public GradleRunner(File projectDir) {
+    public GradleRunner(File projectDir, String... args) {
         this.projectDir = projectDir;
+        this.args = args;
     }
 
     /**
@@ -36,9 +37,10 @@ public class GradleRunner implements CommandRunner {
      * @return a Gradle runner if the project directory contains a Gradle
      *         project, an empty optional otherwise
      */
-    public static Optional<CommandRunner> forProject(File projectDir) {
+    public static Optional<CommandRunner> forProject(File projectDir,
+            String... args) {
         if (new File(projectDir, "build.gradle").exists()) {
-            return Optional.of(new GradleRunner(projectDir));
+            return Optional.of(new GradleRunner(projectDir, args));
         }
 
         return Optional.empty();
@@ -46,12 +48,12 @@ public class GradleRunner implements CommandRunner {
 
     @Override
     public String[] arguments() {
-        throw new UnsupportedOperationException("Gradle is not supported yet");
+        return args;
     }
 
     @Override
     public String[] testArguments() {
-        throw new UnsupportedOperationException("Gradle is not supported yet");
+        return new String[] { "-v" };
     }
 
     @Override
@@ -66,12 +68,7 @@ public class GradleRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
-        throw new UnsupportedOperationException("Gradle is not supported yet");
-    }
-
-    @Override
-    public void run(Consumer<OutputStream> stdIn)
-            throws CommandRunnerException {
-        throw new UnsupportedOperationException("Gradle is not supported yet");
+        return IS_WINDOWS ? List.of(".\\gradlew.cmd", "gradle.cmd")
+                : List.of("./gradlew", "gradle");
     }
 }
