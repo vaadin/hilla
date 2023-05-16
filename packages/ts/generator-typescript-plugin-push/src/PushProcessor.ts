@@ -1,6 +1,7 @@
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
+import memoize from '@hilla/generator-typescript-utils/memoize.js';
 import ts from 'typescript';
 
 const initParameterTypeName = 'EndpointRequestInit';
@@ -14,7 +15,7 @@ export class PushProcessor {
   readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
   readonly #operations: EndpointOperations;
   readonly #source: ts.SourceFile;
-  readonly #subscriptionId: ts.Identifier;
+  readonly #subscriptionId: () => ts.Identifier;
 
   constructor(source: ts.SourceFile, operations: EndpointOperations) {
     this.#operations = operations;
@@ -23,7 +24,9 @@ export class PushProcessor {
     const { imports, paths } = this.#dependencies;
 
     this.#dependencies.imports.fromCode(source);
-    this.#subscriptionId = imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription');
+    this.#subscriptionId = memoize(() =>
+      imports.named.add(paths.createBareModulePath('@hilla/frontend', false), 'Subscription'),
+    );
   }
 
   #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
@@ -51,6 +54,21 @@ export class PushProcessor {
   };
 
   public process(): ts.SourceFile {
+    const otherStatements = this.#source.statements
+      .filter((statement) => !ts.isImportDeclaration(statement))
+      .map((statement) => {
+        if (ts.isFunctionDeclaration(statement)) {
+          const functionName = statement.name?.text;
+
+          // Checks if the method is in the list of methods to patch
+          if (functionName && this.#operations.methodsToPatch.includes(functionName)) {
+            return this.#updateFunction(statement);
+          }
+        }
+
+        return statement;
+      });
+
     let importStatements = this.#dependencies.imports.toCode();
 
     if (this.#operations.removeInitImport) {
@@ -76,23 +94,7 @@ export class PushProcessor {
       }
     }
 
-    const updatedStatements: readonly ts.Statement[] = [
-      ...importStatements,
-      ...this.#source.statements
-        .filter((statement) => !ts.isImportDeclaration(statement))
-        .map((statement) => {
-          if (ts.isFunctionDeclaration(statement)) {
-            const functionName = statement.name?.text;
-
-            // Checks if the method is in the list of methods to patch
-            if (functionName && this.#operations.methodsToPatch.includes(functionName)) {
-              return this.#updateFunction(statement);
-            }
-          }
-
-          return statement;
-        }),
-    ];
+    const updatedStatements: readonly ts.Statement[] = [...importStatements, ...otherStatements];
 
     return createSourceFile(updatedStatements, this.#source.fileName);
   }
@@ -116,7 +118,7 @@ export class PushProcessor {
       ts.isUnionTypeNode(promiseType) ? (promiseType as ts.UnionTypeNode).types[0] : promiseType
     ) as ts.TypeReferenceNode;
 
-    return ts.factory.createTypeReferenceNode(this.#subscriptionId, promiseArray.typeArguments);
+    return ts.factory.createTypeReferenceNode(this.#subscriptionId(), promiseArray.typeArguments);
   }
 
   #updateFunction(declaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
