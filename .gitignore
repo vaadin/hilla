@@ -36,3 +36,6 @@ packages/ts/*/*.js
 packages/ts/*/*.js.map
 packages/ts/*/.coverage
 packages/ts/*/.vite
+
+# npm pack
+packages/ts/*/*.tgz
