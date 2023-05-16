@@ -42,6 +42,9 @@
     "./createSourceFile.js": {
       "default": "./createSourceFile.js"
     },
+    "./memoize.js": {
+      "default": "./memoize.js"
+    },
     "./LoggerFactory.js": {
       "default": "./LoggerFactory.js"
     },
