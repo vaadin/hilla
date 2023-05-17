@@ -66,6 +66,7 @@ repositories {
 dependencies {
     implementation('org.jetbrains.kotlin:kotlin-stdlib:1.7.20')
     implementation("dev.hilla:engine-core:${pom.parent.version}")
+    implementation("dev.hilla:hilla-plugin-base:${pom.parent.version}")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
 
     testImplementation("junit:junit:4.13.2")
