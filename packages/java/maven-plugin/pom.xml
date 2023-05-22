@@ -21,6 +21,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>dev.hilla</groupId>
+      <artifactId>hilla-plugin-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-maven-plugin</artifactId>
       <version>${flow.version}</version>

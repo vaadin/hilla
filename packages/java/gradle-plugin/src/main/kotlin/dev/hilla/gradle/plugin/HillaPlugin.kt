@@ -41,6 +41,7 @@ public class HillaPlugin : Plugin<Project> {
         project.tasks.apply {
             register("hillaConfigure", EngineConfigureTask::class.java)
             register("hillaGenerate", EngineGenerateTask::class.java)
+            register("hillaInitApp", EngineInitAppTask::class.java)
         }
 
         project.tasks.named("processResources") {

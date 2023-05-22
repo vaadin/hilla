@@ -26,6 +26,11 @@
     <dependencies>
       <dependency>
         <groupId>dev.hilla</groupId>
+        <artifactId>hilla-plugin-base</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.hilla</groupId>
         <artifactId>engine-core</artifactId>
         <version>${project.parent.version}</version>
       </dependency>
