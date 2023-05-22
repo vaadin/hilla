@@ -81,7 +81,7 @@ public final class ParserConfiguration {
         this.plugins = plugins;
     }
 
-    void setPackages(List<String> packages) {
+    public void setPackages(List<String> packages) {
         this.packages = packages;
     }
 

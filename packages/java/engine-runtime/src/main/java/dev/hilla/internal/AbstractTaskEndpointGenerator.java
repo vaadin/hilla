@@ -76,7 +76,8 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                         // Create a runner for Gradle. Even if Gradle is not
                         // supported yet, this is useful to emit an error
                         // message if pom.xml is not found and build.gradle is
-                        .or(() -> GradleRunner.forProject(projectDirectory))
+                        .or(() -> GradleRunner.forProject(projectDirectory,
+                                "-q", "hillaConfigure"))
                         // If no runner is found, throw an exception.
                         .orElseThrow(() -> new IllegalStateException(String
                                 .format("Failed to determine project directory for dev mode. "
