@@ -64,17 +64,13 @@ import dev.hilla.exception.EndpointValidationException.ValidationErrorData;
 @Component
 public class EndpointInvoker {
 
-    private final ObjectMapper vaadinEndpointMapper;
-    private final Validator validator = Validation
-            .buildDefaultValidatorFactory().getValidator();
-    private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
+    private static final EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
     private final ApplicationContext applicationContext;
-
-    EndpointRegistry endpointRegistry;
-
-    private static EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
-
-    private ServletContext servletContext;
+    private final ObjectMapper vaadinEndpointMapper;
+    private final EndpointRegistry endpointRegistry;
+    private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
+    private final ServletContext servletContext;
+    private final Validator validator;
 
     /**
      * Creates an instance of this bean.
@@ -108,6 +104,16 @@ public class EndpointInvoker {
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
 
+        Validator validator = null;
+        try {
+            validator = applicationContext.getBean(Validator.class);
+        } catch (Exception e) {
+            getLogger().debug(
+                    "Validator not found in Spring Context, will instantiate directly");
+        }
+        this.validator = validator == null
+                ? Validation.buildDefaultValidatorFactory().getValidator()
+                : validator;
     }
 
     private static Logger getLogger() {
