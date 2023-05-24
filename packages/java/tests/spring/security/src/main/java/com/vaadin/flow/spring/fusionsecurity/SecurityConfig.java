@@ -55,6 +55,9 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
         // Admin only access
         http.authorizeRequests().antMatchers("/admin-only/**")
                 .hasAnyRole(ROLE_ADMIN);
+        http.authorizeHttpRequests()
+                .requestMatchers(new AntPathRequestMatcher("/error/**"))
+                .permitAll();
 
         super.configure(http);
         setLoginView(http, "/login");
