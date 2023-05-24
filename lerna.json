@@ -3,5 +3,5 @@
   "npmClient": "npm",
   "useWorkspaces": true,
   "useNx": true,
-  "version": "2.1.0-alpha6"
+  "version": "2.1.0-beta2"
 }
