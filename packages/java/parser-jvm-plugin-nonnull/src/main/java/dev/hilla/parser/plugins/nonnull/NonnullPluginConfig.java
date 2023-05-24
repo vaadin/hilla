@@ -56,6 +56,7 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("androidx.annotation.Nullable", true, 20),
                 new AnnotationMatcher("org.eclipse.jdt.annotation.Nullable",
                         true, 20),
+                new AnnotationMatcher("dev.hilla.Nullable", true, 20),
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
                 new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
