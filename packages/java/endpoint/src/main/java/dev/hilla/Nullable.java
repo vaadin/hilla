@@ -23,14 +23,15 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to mark either field, method, parameter or type parameter as
- * non-nullable. It is used by Typescript Generator as a source of type
- * nullability information.
+ * nullable. It is used by Typescript Generator as a source of type nullability
+ * information.
  *
  * This annotation exists only for convenience because the traditional
- * `jakarta.annotation.Nonnull` annotation is not applicable to type parameters.
+ * `jakarta.annotation.Nullable` annotation is not applicable to type
+ * parameters.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_USE })
-public @interface Nonnull {
+public @interface Nullable {
 }

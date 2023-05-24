@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
-import jakarta.annotation.Nullable;
+import dev.hilla.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

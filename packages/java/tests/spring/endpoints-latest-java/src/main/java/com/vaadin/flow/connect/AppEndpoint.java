@@ -1,11 +1,10 @@
 package com.vaadin.flow.connect;
 
-import javax.annotation.Nullable;
-
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
+import dev.hilla.Nullable;
 
 /**
  * Simple Vaadin Connect Service definition.
