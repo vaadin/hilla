@@ -16,8 +16,9 @@ public class InitFileExtractor {
             .getLogger(InitFileExtractor.class);
     private static final String REACT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.1.zip";
     private static final List<String> REACT_FILE_LIST = List.of("package.json",
-            "package-lock.json", "frontend/App.tsx", "frontend/index.ts",
-            "frontend/routes.tsx", "frontend/views/MainView.tsx",
+            "package-lock.json", "types.d.ts", "vite.config.ts",
+            "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
+            "frontend/views/MainView.tsx",
             "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
     private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.1.zip";
     private static final List<String> LIT_FILE_LIST = List.of("package.json",
