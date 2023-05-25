@@ -85,7 +85,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
-    fun `productionMode set to true then building the project executes vaadinBuildFrontend`() {
+    fun `when hilla productionMode=true in build file then building the project executes vaadinBuildFrontend`() {
         createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
 
         addHelloReactEndpoint()
@@ -94,6 +94,32 @@ class SingleModuleTest : AbstractGradleTest() {
 
         expect(TaskOutcome.SKIPPED, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
             buildResult.task(":vaadinBuildFrontend")?.outcome
+        }
+    }
+
+    @Test
+    fun `when hilla productionMode not set in build file then building the project with productionMode commandline arg executes vaadinBuildFrontend`() {
+        createProject(withNpmInstall = true, productionMode = false, disableAllTasksToSimulateDryRun = true)
+
+        addHelloReactEndpoint()
+
+        val buildResult: BuildResult = testProject.build("-Philla.productionMode=true", "build", checkTasksSuccessful = false)
+
+        expect(TaskOutcome.SKIPPED, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
+            buildResult.task(":vaadinBuildFrontend")?.outcome
+        }
+    }
+
+    @Test
+    fun `when hilla productionMode=true in build file then building the project with commandline arg productionMode=false does not execute vaadinBuildFrontend`() {
+        createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
+
+        addHelloReactEndpoint()
+
+        val buildResult: BuildResult = testProject.build("-Philla.productionMode=false", "build", checkTasksSuccessful = false)
+
+        expect(null, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
+            buildResult.task(":vaadinBuildFrontend")
         }
     }
 
