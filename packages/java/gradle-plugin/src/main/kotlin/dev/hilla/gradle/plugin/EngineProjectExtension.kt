@@ -15,6 +15,7 @@
  */
 package dev.hilla.gradle.plugin
 
+import com.vaadin.gradle.getBooleanProperty
 import org.gradle.api.Project
 import java.io.File
 
@@ -31,6 +32,12 @@ public open class EngineProjectExtension(project: Project) {
      * packages in the build.gradle file.
      */
     public var exposedPackagesToParser: List<String> = mutableListOf()
+
+    /**
+     * Indicates whether the application should run in production mode, defaults to false.
+     * Responds to the `-Philla.productionMode` property.
+     */
+    public var productionMode: Boolean = false
 
     /**
      * The folder where flow will put TS API files for client projects.
@@ -61,9 +68,16 @@ public open class EngineProjectExtension(project: Project) {
           project.extensions.getByType(EngineProjectExtension::class.java)
     }
 
+    internal fun autoconfigure(project: Project) {
+        val productionModeProperty: Boolean? = project.getBooleanProperty("hilla.productionMode")
+        if (productionModeProperty != null) {
+            productionMode = productionModeProperty
+        }
+    }
 
     override fun toString(): String = "HillaPluginExtension(" +
             "exposedPackagesToParser=$exposedPackagesToParser, " +
+            "productionMode=$productionMode, " +
             "generatedTsFolder=$generatedTsFolder, " +
             "sourceSetName=$sourceSetName, " +
             "nodeCommand=$nodeCommand, " +
