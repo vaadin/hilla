@@ -62,7 +62,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.154</classgraph.version>
+    <classgraph.version>4.8.157</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
     <swagger.core.version>2.2.9</swagger.core.version>
     <swagger.models.version>2.2.9</swagger.models.version>
