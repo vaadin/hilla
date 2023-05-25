@@ -203,6 +203,10 @@ class SingleModuleTest : AbstractGradleTest() {
             """.trimIndent()
         } else ""
 
+        // We don't want to actually run the build in production,
+        // but we just want to make sure of the task dependency.
+        // Running gradle using --dry-run does not create the task, just prints the dependency order.
+        // This is a workaround to simulate a dry run. The tasks are created in order but skipped during the build:
         val disableAllTasks = if (disableAllTasksToSimulateDryRun) {
             """
                 tasks.configureEach {
