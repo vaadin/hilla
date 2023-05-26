@@ -28,7 +28,7 @@ describe('@hilla/frontend', () => {
 
     beforeEach(() => {
       (atmosphere as any).reset();
-      fluxConnection = new FluxConnection();
+      fluxConnection = new FluxConnection('/connect');
       const socket = () => (fluxConnection as any).socket;
       fluxConnectionHelper = {
         socket,
@@ -308,6 +308,16 @@ describe('@hilla/frontend', () => {
       fluxConnectionHelper.socket().fakeEvent('onOpen');
       fluxConnectionHelper.socket().fakeEvent('onClose');
       expect(events).to.equal(1);
+    });
+    it('by default it should use the default url', () => {
+      (atmosphere as any).reset();
+      fluxConnection = new FluxConnection('/connect');
+      expect(atmosphere.url).to.equal('/HILLA/push');
+    });
+    it('should use a custom prefix when connecting', () => {
+      (atmosphere as any).reset();
+      fluxConnection = new FluxConnection('/custom/connect');
+      expect(atmosphere.url).to.equal('/custom/HILLA/push');
     });
   });
 });

@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vaadin.component.version>24.0.0.alpha4</vaadin.component.version>
+    <vaadin.component.version>24.1.0.alpha2</vaadin.component.version>
     <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
@@ -63,6 +63,12 @@
       <groupId>dev.hilla</groupId>
       <artifactId>endpoint</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.javaparser</groupId>
+          <artifactId>javaparser-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
@@ -132,14 +138,8 @@
       <plugins>
         <plugin>
           <groupId>dev.hilla</groupId>
-          <artifactId>engine-maven-plugin</artifactId>
+          <artifactId>hilla-maven-plugin</artifactId>
           <version>${project.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>com.vaadin</groupId>
-          <artifactId>flow-maven-plugin</artifactId>
-          <version>${flow.version}</version>
           <executions>
             <execution>
               <goals>
@@ -150,7 +150,6 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.2.0</version>

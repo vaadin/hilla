@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-utils",
-  "version": "2.1.0-alpha2",
+  "version": "2.1.0-beta2",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -42,6 +42,9 @@
     },
     "./createSourceFile.js": {
       "default": "./createSourceFile.js"
+    },
+    "./memoize.js": {
+      "default": "./memoize.js"
     },
     "./LoggerFactory.js": {
       "default": "./LoggerFactory.js"

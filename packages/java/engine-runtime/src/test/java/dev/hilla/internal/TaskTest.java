@@ -1,7 +1,6 @@
 package dev.hilla.internal;
 
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
-import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_GENERATED_DIR;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -29,13 +28,13 @@ public class TaskTest {
     public void setUpTaskApplication() throws IOException, URISyntaxException,
             FrontendUtils.CommandExecutionException, InterruptedException,
             InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException {
+            InstantiationException, IllegalAccessException,
+            NoSuchFieldException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         var userDir = temporaryDirectory.toAbsolutePath().toString();
         System.setProperty("user.dir", userDir);
         System.clearProperty(PARAM_FRONTEND_DIR);
-        System.clearProperty(PARAM_GENERATED_DIR);
 
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
@@ -54,6 +53,12 @@ public class TaskTest {
 
         Files.delete(configPath);
         config.store(configPath.toFile());
+
+        // Let Hilla know that the file has been generated
+        var field = AbstractTaskEndpointGenerator.class
+                .getDeclaredField("firstRun");
+        field.setAccessible(true);
+        field.set(null, false);
 
         var packagesDirectory = Path
                 .of(getClass().getClassLoader().getResource("").toURI())

@@ -1,72 +1,52 @@
 package dev.hilla.engine;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
+import dev.hilla.engine.commandrunner.CommandRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
-
-final class GeneratorShellRunner {
+final class GeneratorShellRunner implements CommandRunner {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GeneratorShellRunner.class);
-    private static final Path TSGEN_PATH = Paths.get("node_modules", "@hilla",
-            "generator-typescript-cli", "bin", "index.js");
-    private final List<String> arguments = new ArrayList<>();
+
     private final File rootDirectory;
+    private final String nodeCommand;
+    private final String[] arguments;
 
-    public GeneratorShellRunner(File rootDirectory, String nodeCommand) {
+    public GeneratorShellRunner(File rootDirectory, String nodeCommand,
+            String... arguments) {
         this.rootDirectory = rootDirectory;
-        arguments.add(nodeCommand);
-        arguments.add(TSGEN_PATH.toString());
+        this.nodeCommand = nodeCommand;
+        this.arguments = arguments;
     }
 
-    public void add(String... args) {
-        arguments.addAll(List.of(args));
+    @Override
+    public String[] testArguments() {
+        return new String[] { "-v" };
     }
 
-    public void run(String input) throws InterruptedException, IOException {
-        Objects.requireNonNull(input);
-        List<String> args;
+    @Override
+    public String[] arguments() {
+        return arguments;
+    }
 
-        if (FrontendUtils.isWindows()) {
-            args = List.of("cmd.exe", "/c", arguments.stream()
-                    .map(arg -> (arg.contains(" ") ? "\"" + arg + "\"" : arg))
-                    .collect(Collectors.joining(" ", "\"", "\"")));
-        } else {
-            args = arguments;
-        }
+    @Override
+    public Logger getLogger() {
+        return LOGGER;
+    }
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Executing command: {}", String.join(" ", args));
-        }
+    @Override
+    public File currentDirectory() {
+        return rootDirectory;
+    }
 
-        var builder = new ProcessBuilder().directory(rootDirectory)
-                .command(args).redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                .redirectError(ProcessBuilder.Redirect.INHERIT);
-
-        var process = builder.start();
-
-        try (var stdin = process.getOutputStream()) {
-            stdin.write(input.getBytes(StandardCharsets.UTF_8));
-        }
-
-        var exitCode = process.waitFor();
-
-        if (exitCode == 0) {
-            LOGGER.info("The Generator process finished with the exit code {}",
-                    exitCode);
-        } else {
-            throw new GeneratorException(
-                    "Generator execution failed with exit code " + exitCode);
-        }
+    @Override
+    public List<String> executables() {
+        return nodeCommand == null ? List.of("node")
+                : List.of(nodeCommand, "node");
     }
 }

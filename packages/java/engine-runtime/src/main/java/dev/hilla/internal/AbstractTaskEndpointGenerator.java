@@ -27,14 +27,16 @@ import com.vaadin.flow.server.frontend.FallibleCommand;
 
 import dev.hilla.engine.ConfigurationException;
 import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.internal.runner.GradleRunner;
-import dev.hilla.internal.runner.MavenRunner;
-import dev.hilla.internal.runner.RunnerException;
+import dev.hilla.engine.commandrunner.GradleRunner;
+import dev.hilla.engine.commandrunner.MavenRunner;
+import dev.hilla.engine.commandrunner.CommandRunnerException;
 
 /**
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
+    private static boolean firstRun = true;
+
     private final String buildDirectoryName;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final File outputDirectory;
@@ -62,57 +64,48 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
     protected void prepareEngineConfiguration()
             throws ExecutionFailedException {
-        EngineConfiguration config = null;
-
         var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
 
-        try {
-            config = EngineConfiguration.loadDirectory(configDir);
-        } catch (IOException | ConfigurationException e) {
-            logger.warn(
-                    "Hilla engine configuration found, but not read correctly",
-                    e);
-        }
-
-        if (config == null) {
-            logger.info(
-                    "Hilla engine configuration not found: configure using build system plugin");
+        if (firstRun) {
+            logger.info("Configure Hilla engine using build system plugin");
 
             try {
                 // Create a runner for Maven
                 MavenRunner
-                        .forProject(projectDirectory.toPath(), "-q",
-                                "hilla:configure")
+                        .forProject(projectDirectory, "-q", "hilla:configure")
                         // Create a runner for Gradle. Even if Gradle is not
                         // supported yet, this is useful to emit an error
                         // message if pom.xml is not found and build.gradle is
-                        .or(() -> GradleRunner
-                                .forProject(projectDirectory.toPath()))
+                        .or(() -> GradleRunner.forProject(projectDirectory,
+                                "-q", "hillaConfigure"))
                         // If no runner is found, throw an exception.
                         .orElseThrow(() -> new IllegalStateException(String
                                 .format("Failed to determine project directory for dev mode. "
                                         + "Directory '%s' does not look like a Maven or "
                                         + "Gradle project.", projectDirectory)))
                         // Run the first valid runner
-                        .run();
-            } catch (RunnerException e) {
+                        .run(null);
+                firstRun = false;
+            } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);
             }
+        }
 
-            try {
-                config = EngineConfiguration.loadDirectory(configDir);
-            } catch (IOException e) {
+        try {
+            var config = EngineConfiguration.loadDirectory(configDir);
+
+            if (config == null) {
                 throw new ExecutionFailedException(
-                        "Failed to read Hilla engine configuration", e);
+                        "Engine configuration is missing");
             }
-        }
 
-        if (config != null) {
-            config = new EngineConfiguration.Builder(config)
+            this.engineConfiguration = new EngineConfiguration.Builder(config)
                     .outputDir(outputDirectory.toPath()).create();
+        } catch (IOException | ConfigurationException e) {
+            throw new ExecutionFailedException(
+                    "Failed to read Hilla engine configuration", e);
         }
 
-        this.engineConfiguration = config;
     }
 }

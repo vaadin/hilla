@@ -29,10 +29,22 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-dev-server</artifactId>
       <version>${flow.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.javaparser</groupId>
+          <artifactId>javaparser-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.javaparser</groupId>
+      <artifactId>javaparser-core</artifactId>
+      <version>${github.javaparser.core.version}</version>
     </dependency>
   </dependencies>
 
@@ -40,12 +52,7 @@
     <plugins>
       <plugin>
         <groupId>dev.hilla</groupId>
-        <artifactId>engine-maven-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>com.vaadin</groupId>
-        <artifactId>flow-maven-plugin</artifactId>
+        <artifactId>hilla-maven-plugin</artifactId>
       </plugin>
 
       <plugin>
