@@ -1,0 +1,22 @@
+{
+  "workspaceLayout": {
+    "libsDir": "packages/ts"
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"]
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "build:transpile", "build:copy"],
+        "parallel": 3
+      }
+    }
+  }
+}

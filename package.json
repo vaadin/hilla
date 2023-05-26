@@ -12,14 +12,12 @@
     "packages/ts/*"
   ],
   "scripts": {
-    "check": "concurrently npm:lint npm:typecheck",
-    "bootstrap": "lerna bootstrap",
-    "build": "lerna run build --include-dependencies",
-    "lint": "lerna run lint --parallel",
-    "postinstall": "npm run bootstrap",
-    "test": "lerna run test --parallel",
-    "test:coverage": "lerna run test:coverage --parallel",
-    "typecheck": "lerna run typecheck --parallel"
+    "check": "nx run-many -t lint,typecheck --all",
+    "build": "nx run-many -t build --all",
+    "lint": "nx run-many -t lint --all",
+    "test": "nx run-many -t test --all",
+    "test:coverage": "nx run-many -t test:coverage --all",
+    "typecheck": "nx run-many -t typecheck --all"
   },
   "repository": {
     "type": "git",
@@ -46,11 +44,10 @@
     "karma-mocha": "^2.0.1",
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
-    "lerna": "^6.5.1",
     "lint-staged": "^13.2.0",
     "meow": "^11.0.0",
     "mocha": "^10.2.0",
-    "nx": "^15.8.6",
+    "nx": "16.2.2",
     "prettier": "^2.8.4",
     "simple-git-hooks": "^2.8.1",
     "sinon": "^15.0.2",
