@@ -36,7 +36,7 @@
     "@types/validator": "^13.7.14",
     "chai-dom": "^1.11.0",
     "concurrently": "^7.6.0",
-    "eslint": "^8.38.0",
+    "eslint": "^8.41.0",
     "eslint-config-vaadin": "^1.0.0-alpha.12",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",

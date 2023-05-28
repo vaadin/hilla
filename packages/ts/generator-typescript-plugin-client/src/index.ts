@@ -8,22 +8,14 @@ export default class ClientPlugin extends Plugin {
   static readonly CLIENT_FILE_NAME = 'connect-client.default';
   static readonly CUSTOM_CLIENT_FILE_NAME = '../connect-client';
 
-  declare ['constructor']: typeof ClientPlugin;
-
-  override get path(): string {
-    return import.meta.url;
+  static async getClientFileName(path?: string): Promise<string> {
+    return (await ClientPlugin.#checkForCustomClientFile(path))
+      ? ClientPlugin.CUSTOM_CLIENT_FILE_NAME
+      : ClientPlugin.CLIENT_FILE_NAME;
   }
 
-  override async execute({ sources, outputDir }: SharedStorage): Promise<void> {
-    // the client file is created only if a custom client file is not found
-    if (!(outputDir && (await ClientPlugin.checkForCustomClientFile(outputDir)))) {
-      const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this).process();
-      sources.push(clientFile);
-    }
-  }
-
-  private static async checkForCustomClientFile(path?: string): Promise<boolean> {
-    const dir = path && path.startsWith('file:') ? fileURLToPath(path) : path;
+  static async #checkForCustomClientFile(path?: string): Promise<boolean> {
+    const dir = path?.startsWith('file:') ? fileURLToPath(path) : path;
 
     try {
       return !!(dir && (await open(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`, 'r')));
@@ -32,9 +24,17 @@ export default class ClientPlugin extends Plugin {
     }
   }
 
-  static async getClientFileName(path?: string): Promise<string> {
-    return (await ClientPlugin.checkForCustomClientFile(path))
-      ? ClientPlugin.CUSTOM_CLIENT_FILE_NAME
-      : ClientPlugin.CLIENT_FILE_NAME;
+  declare ['constructor']: typeof ClientPlugin;
+
+  override get path(): string {
+    return import.meta.url;
+  }
+
+  override async execute({ sources, outputDir }: SharedStorage): Promise<void> {
+    // the client file is created only if a custom client file is not found
+    if (!(outputDir && (await ClientPlugin.#checkForCustomClientFile(outputDir)))) {
+      const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this).process();
+      sources.push(clientFile);
+    }
   }
 }

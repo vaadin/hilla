@@ -5,5 +5,11 @@
     "vaadin/testing",
     "vaadin/prettier"
   ],
-  "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"]
+  "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"],
+  "rules": {
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "max-params": "off",
+    "max-classes-per-file": "off"
+  }
 }

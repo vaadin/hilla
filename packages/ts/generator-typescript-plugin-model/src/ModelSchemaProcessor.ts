@@ -1,4 +1,3 @@
-/* eslint-disable symbol-description */
 import {
   type ArraySchema,
   type BooleanSchema,

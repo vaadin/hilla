@@ -265,9 +265,8 @@ export const field = directive(
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    render(model: AbstractModel<any>, effect?: (element: Element) => void) {
+    override render(model: AbstractModel<any>, effect?: (element: Element) => void) {
       return nothing;
     }
 

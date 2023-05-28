@@ -43,6 +43,9 @@
     "./createSourceFile.js": {
       "default": "./createSourceFile.js"
     },
+    "./filterEmptyItems.js": {
+      "default": "./filterEmptyItems.js"
+    },
     "./memoize.js": {
       "default": "./memoize.js"
     },

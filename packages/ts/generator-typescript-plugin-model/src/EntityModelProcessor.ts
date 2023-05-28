@@ -44,8 +44,10 @@ export abstract class EntityModelProcessor {
     const schema = isComposedSchema(component) ? decomposeSchema(component)[0] : component;
 
     return isEnumSchema(schema)
-      ? new EntityEnumModelProcessor(name).process() // eslint-disable-line no-use-before-define
-      : new EntityClassModelProcessor(name, component, context).process(); // eslint-disable-line no-use-before-define
+      ? // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        new EntityEnumModelProcessor(name).process() // eslint-disable-line no-use-before-define
+      : // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        new EntityClassModelProcessor(name, component, context).process(); // eslint-disable-line no-use-before-define
   }
 
   protected readonly [$dependencies]: DependencyManager;

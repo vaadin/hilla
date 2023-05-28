@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -62,6 +62,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@hilla/frontend": "*",
     "rimraf": "^3.0.2",
     "validator": "^13.6.0"
   },

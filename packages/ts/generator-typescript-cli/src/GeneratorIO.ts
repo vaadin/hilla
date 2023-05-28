@@ -1,7 +1,7 @@
 import { constants } from 'node:fs';
 import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import type File from '@hilla/generator-typescript-core/File.js';
 import Plugin, { type PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
 import filterEmptyItems from '@hilla/generator-typescript-utils/filterEmptyItems.js';

@@ -21,7 +21,7 @@ describe('Testing GeneratorIO', () => {
   });
 
   afterEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    await rm(tmpDir, { force: true, recursive: true });
   });
 
   describe('Testing GeneratorIO.exists', () => {
@@ -86,8 +86,8 @@ describe('Testing GeneratorIO', () => {
       try {
         await io.cleanOutputDir();
         expect(0).to.be.equal(1); // fail as this shouldn't be reached
-      } catch (e: any) {
-        expect(e.code).to.not.equal('ENOENT');
+      } catch (e: unknown) {
+        expect((e as NodeJS.ErrnoException).code).to.not.equal('ENOENT');
       } finally {
         await chmod(tmpDir, 0o777);
       }

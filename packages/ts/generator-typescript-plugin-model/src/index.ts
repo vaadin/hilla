@@ -37,8 +37,6 @@ export default class ModelPlugin extends Plugin {
       owner: this,
     };
 
-    return schemas
-      ? Object.entries(schemas).map(([name, component]) => EntityModelProcessor.process(name, component, ctx))
-      : [];
+    return Object.entries(schemas).map(([name, component]) => EntityModelProcessor.process(name, component, ctx));
   }
 }

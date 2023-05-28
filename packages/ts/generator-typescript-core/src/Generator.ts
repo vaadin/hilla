@@ -34,9 +34,9 @@ export default class Generator {
     const storage: SharedStorage = {
       api,
       apiRefs: this.#parser.$refs,
+      outputDir: this.#outputDir,
       pluginStorage: new Map(),
       sources: [],
-      outputDir: this.#outputDir,
     };
 
     this.#logger.global.debug('Executing plugins');

@@ -1,3 +1,4 @@
+/* eslint-disable max-params */
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import ClientPlugin from '@hilla/generator-typescript-plugin-client';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
@@ -25,7 +26,7 @@ export default abstract class EndpointMethodOperationProcessor {
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST:
-        // eslint-disable-next-line no-use-before-define
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new EndpointMethodOperationPOSTProcessor(
           endpointName,
           endpointMethodName,

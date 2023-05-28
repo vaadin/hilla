@@ -29,30 +29,6 @@ export class PushProcessor {
     );
   }
 
-  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
-    const namedImports = importStatement.importClause?.namedBindings;
-    if (namedImports && ts.isNamedImports(namedImports)) {
-      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
-
-      const updatedImportClause = ts.factory.updateImportClause(
-        importStatement.importClause,
-        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
-        undefined,
-        ts.factory.createNamedImports(updatedElements),
-      );
-
-      return ts.factory.updateImportDeclaration(
-        importStatement,
-        undefined,
-        updatedImportClause,
-        importStatement.moduleSpecifier,
-        undefined,
-      );
-    }
-
-    return undefined;
-  };
-
   process(): ts.SourceFile {
     const otherStatements = this.#source.statements
       .filter((statement) => !ts.isImportDeclaration(statement))
@@ -72,12 +48,11 @@ export class PushProcessor {
     let importStatements = this.#dependencies.imports.toCode();
 
     if (this.#operations.removeInitImport) {
-      const importHillaFrontend = importStatements.find((statement) => {
-        return (
+      const importHillaFrontend = importStatements.find(
+        (statement) =>
           ts.isImportDeclaration(statement) &&
-          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend'
-        );
-      });
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend',
+      );
 
       if (importHillaFrontend) {
         const updatedImportStatement = this.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
@@ -106,6 +81,30 @@ export class PushProcessor {
 
     return lastTypeName.text === initParameterTypeName;
   }
+
+  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
+    const namedImports = importStatement.importClause?.namedBindings;
+    if (namedImports && ts.isNamedImports(namedImports)) {
+      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
+
+      const updatedImportClause = ts.factory.updateImportClause(
+        importStatement.importClause,
+        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
+        undefined,
+        ts.factory.createNamedImports(updatedElements),
+      );
+
+      return ts.factory.updateImportDeclaration(
+        importStatement,
+        undefined,
+        updatedImportClause,
+        importStatement.moduleSpecifier,
+        undefined,
+      );
+    }
+
+    return undefined;
+  };
 
   /**
    * Replace returned `Promise<Array<T>>` by the `Subscription<T>` type

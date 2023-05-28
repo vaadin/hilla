@@ -84,7 +84,7 @@ class OrderView extends LitElement {
   @query('#total')
   total!: NumberOutput;
 
-  static readonly styles = css`
+  static override readonly styles = css`
     input[invalid] {
       border: 2px solid red;
     }

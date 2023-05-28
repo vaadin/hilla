@@ -7,31 +7,11 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, {
-  type EndpointMethodOperation,
   HILLA_FRONTEND_NAME,
   INIT_TYPE_NAME,
 } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
-  readonly #createdFilePaths = new PathManager({ extension: 'ts' });
-  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
-  readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
-  readonly #name: string;
-  readonly #owner: Plugin;
-  readonly #outputDir: string | undefined;
-
-  private constructor(
-    name: string,
-    owner: Plugin,
-    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
-    outputDir?: string,
-  ) {
-    this.#name = name;
-    this.#owner = owner;
-    this.#methods = methods;
-    this.#outputDir = outputDir;
-  }
-
   static async create(
     name: string,
     owner: Plugin,
@@ -48,6 +28,25 @@ export default class EndpointProcessor {
       INIT_TYPE_NAME,
     );
     return endpoint;
+  }
+
+  readonly #createdFilePaths = new PathManager({ extension: 'ts' });
+  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
+  readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
+  readonly #name: string;
+  readonly #outputDir: string | undefined;
+  readonly #owner: Plugin;
+
+  private constructor(
+    name: string,
+    owner: Plugin,
+    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
+    outputDir?: string,
+  ) {
+    this.#name = name;
+    this.#owner = owner;
+    this.#methods = methods;
+    this.#outputDir = outputDir;
   }
 
   async process(): Promise<SourceFile> {

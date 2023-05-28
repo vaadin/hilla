@@ -10,8 +10,8 @@ export function setupSpringCsrfMetaTags(
   csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE,
   csrfMetaTagName = TEST_SPRING_CSRF_META_TAG_NAME,
 ) {
-  let csrfMetaTag = document.head.querySelector('meta[name="_csrf"]');
-  let csrfHeaderNameMetaTag = document.head.querySelector('meta[name="_csrf_header"]');
+  let csrfMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf"]');
+  let csrfHeaderNameMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf_header"]');
 
   if (!csrfMetaTag) {
     csrfMetaTag = document.createElement('meta');

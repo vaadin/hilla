@@ -44,7 +44,7 @@ export class AnnotationParser {
     this.#importer = importer;
   }
 
-  parse(annotation: Annotation | string) {
+  parse(annotation: Annotation | string): ts.NewExpression {
     if (typeof annotation === 'string') {
       const nameEndIndex = annotation.indexOf('(');
       const simpleName = nameEndIndex >= 0 ? annotation.slice(0, nameEndIndex) : annotation;

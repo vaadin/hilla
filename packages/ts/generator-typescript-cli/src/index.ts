@@ -22,7 +22,6 @@ Options:
   --version              Show the app version
 `,
   {
-    importMeta: import.meta,
     flags: {
       outputDir: {
         alias: 'o',
@@ -40,6 +39,7 @@ Options:
         type: 'boolean',
       },
     },
+    importMeta: import.meta,
   },
 );
 
