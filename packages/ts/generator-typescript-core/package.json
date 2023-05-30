@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-core",
-  "version": "2.1.0-beta2",
+  "version": "2.1.0-beta3",
   "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
@@ -71,7 +71,7 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
-    "@hilla/generator-typescript-utils": "^2.1.0-beta2",
+    "@hilla/generator-typescript-utils": "^2.1.0-beta3",
     "meow": "^10.1.1",
     "openapi-types": "^9.3.0",
     "typescript": "^5.0.1-rc"
