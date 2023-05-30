@@ -20,11 +20,11 @@ public class CleanFrontendMojo
     @Override
     public void execute() throws MojoFailureException {
         getLog().warn(
-            """
-                    The 'clean-frontend' goal is not meant to be used in Hilla projects as it delete 'package-lock.json' and also clearing out the content of 'package.json'.
-                    Note: The 'clean-frontend' goal is deprecated and would be removed in future releases.
-                    """
-                .stripIndent());
+                """
+                        The 'clean-frontend' goal is not meant to be used in Hilla projects as it delete 'package-lock.json' and also clearing out the content of 'package.json'.
+                        Note: The 'clean-frontend' goal is deprecated and would be removed in future releases.
+                        """
+                        .stripIndent());
         super.execute();
     }
 }
