@@ -37,8 +37,8 @@ public class BasicTest {
     @Test
     public void annotationMatcher_shouldHaveDefaultConstructorAndSetter() {
         // to enable maven initialize instances of AnnotationMatcher from
-        // pom.xml configurations,
-        // properly, it should have the default constructor and setter methods:
+        // pom.xml configurations, properly, it should have the default
+        // constructor and setter methods:
         AnnotationMatcher annotationMatcher = new AnnotationMatcher();
         annotationMatcher.setName("name");
         annotationMatcher.setScore(100);
