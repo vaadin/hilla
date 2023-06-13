@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
@@ -31,5 +32,19 @@ public class BasicTest {
                 .addPlugin(new BackbonePlugin()).addPlugin(plugin).execute();
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void annotationMatcher_shouldHaveDefaultConstructorAndSetter() {
+        // to enable maven initialize instances of AnnotationMatcher from
+        // pom.xml configurations, properly, it should have the default
+        // constructor and setter methods:
+        AnnotationMatcher annotationMatcher = new AnnotationMatcher();
+        annotationMatcher.setName("name");
+        annotationMatcher.setScore(100);
+        annotationMatcher.setMakesNullable(true);
+        Assertions.assertEquals("name", annotationMatcher.getName());
+        Assertions.assertEquals(100, annotationMatcher.getScore());
+        Assertions.assertTrue(annotationMatcher.doesMakeNullable());
     }
 }
