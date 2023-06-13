@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import dev.hilla.parser.plugins.nonnull.AnnotationMatcher;
+import dev.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,9 +44,12 @@ public class EngineConfigurationTest {
         parserConfiguration.setEndpointAnnotation("dev.hilla.test.Endpoint");
         parserConfiguration
                 .setEndpointExposedAnnotation("dev.hilla.test.EndpointExposed");
-        parserConfiguration.setPlugins(new ParserConfiguration.Plugins(
-                List.of(new ParserConfiguration.Plugin(
-                        "parser-jvm-plugin-use")),
+        parserConfiguration.setPlugins(new ParserConfiguration.Plugins(List.of(
+                new ParserConfiguration.Plugin("parser-jvm-plugin-use"),
+                new ParserConfiguration.Plugin("parser-jvm-plugin-nonnull",
+                        new NonnullPluginConfig(List.of(new AnnotationMatcher(
+                                "com.example.application.annotations.NeverNull",
+                                false, 50)), List.of()))),
                 List.of(new ParserConfiguration.Plugin(
                         "parser-jvm-plugin-disable")),
                 true));

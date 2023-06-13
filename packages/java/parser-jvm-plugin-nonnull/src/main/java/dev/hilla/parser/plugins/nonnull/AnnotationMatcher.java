@@ -9,14 +9,17 @@ import javax.annotation.Nonnull;
  * and non-nullable: their name, meaning, and score
  */
 public final class AnnotationMatcher {
-    private final boolean makesNullable;
-    private final String name;
-    private final int score;
+    private boolean makesNullable;
+    private String name;
+    private int score;
 
-    public AnnotationMatcher(@Nonnull String name, boolean nullable,
+    public AnnotationMatcher() {
+    }
+
+    public AnnotationMatcher(@Nonnull String name, boolean makesNullable,
             int score) {
         this.name = Objects.requireNonNull(name);
-        this.makesNullable = nullable;
+        this.makesNullable = makesNullable;
         this.score = score;
     }
 
@@ -53,6 +56,18 @@ public final class AnnotationMatcher {
      */
     public int getScore() {
         return score;
+    }
+
+    public void setMakesNullable(boolean makesNullable) {
+        this.makesNullable = makesNullable;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override
