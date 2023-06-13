@@ -97,6 +97,11 @@ public final class ParserConfiguration {
             this.name = name;
         }
 
+        public Plugin(String name, PluginConfiguration configuration) {
+            this(name);
+            this.configuration = configuration;
+        }
+
         @Override
         public boolean equals(Object other) {
             if (this == other) {
