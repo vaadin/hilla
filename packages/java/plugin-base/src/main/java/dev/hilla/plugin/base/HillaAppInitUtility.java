@@ -18,23 +18,22 @@ public class HillaAppInitUtility {
     private static final String REACT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.1.zip";
 
     private static final List<String> REACT_FILE_LIST = List.of("package.json",
-        "package-lock.json", "types.d.ts", "vite.config.ts",
-        "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
-        "frontend/views/MainView.tsx",
-        "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
+            "package-lock.json", "types.d.ts", "vite.config.ts",
+            "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
+            "frontend/views/MainView.tsx",
+            "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
 
     private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.1.zip";
 
     private static final List<String> LIT_FILE_LIST = List.of("package.json",
-        "package-lock.json", "vite.config.ts",
-        "frontend/index.ts", "frontend/routes.ts",
-        "frontend/views/main-view.ts",
-        "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
+            "package-lock.json", "vite.config.ts", "frontend/index.ts",
+            "frontend/routes.ts", "frontend/views/main-view.ts",
+            "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
 
     private enum Framework {
 
-        REACT(REACT_SKELETON, REACT_FILE_LIST),
-        LIT(LIT_SKELETON, LIT_FILE_LIST);
+        REACT(REACT_SKELETON, REACT_FILE_LIST), LIT(LIT_SKELETON,
+                LIT_FILE_LIST);
 
         private final String skeletonUrl;
         private final List<String> items;
@@ -53,7 +52,8 @@ public class HillaAppInitUtility {
         }
     }
 
-    public static void scaffold(Path projectDirectory, List<String> dependencyArtifactIds) throws IOException {
+    public static void scaffold(Path projectDirectory,
+            List<String> dependencyArtifactIds) throws IOException {
         var framework = detectFramework(dependencyArtifactIds);
         var zipFile = Files.createTempFile("hilla-scaffold", ".zip");
         zipFile.toFile().deleteOnExit();
@@ -73,7 +73,8 @@ public class HillaAppInitUtility {
 
                     if (framework.getItems().contains(item)) {
                         if (item.endsWith("Endpoint.java")) {
-                            var applicationPackage = findSpringBootApplicationPackage(projectDirectory);
+                            var applicationPackage = findSpringBootApplicationPackage(
+                                    projectDirectory);
                             var applicationPath = applicationPackage
                                     .replace(".", "/");
                             // read file to string
@@ -113,42 +114,43 @@ public class HillaAppInitUtility {
         }
     }
 
-    private static Framework detectFramework(List<String> dependencyArtifactIds) {
+    private static Framework detectFramework(
+            List<String> dependencyArtifactIds) {
 
         if (dependencyArtifactIds.stream()
-            .anyMatch(artifactId -> artifactId.contains("hilla-react"))) {
+                .anyMatch(artifactId -> artifactId.contains("hilla-react"))) {
             return Framework.REACT;
         }
 
         if (dependencyArtifactIds.stream()
-            .anyMatch(artifactId -> artifactId.contains("hilla"))) {
+                .anyMatch(artifactId -> artifactId.contains("hilla"))) {
             return Framework.LIT;
         }
 
-        throw new RuntimeException("No hilla starter found! " +
-            "To use hilla:init-app maven goal (or hillaInitApp task in gradle), you must either have " +
-            "'hilla-react-spring-boot-starter' or 'hilla-spring-boot-starter' " +
-            "in the list of your dependencies. %nPlease take a look at " +
-            "https://github.com/vaadin/skeleton-starter-hilla-react or " +
-            "https://github.com/vaadin/skeleton-starter-hilla-lit as a reference.");
+        throw new RuntimeException("No hilla starter found! "
+                + "To use hilla:init-app maven goal (or hillaInitApp task in gradle), you must either have "
+                + "'hilla-react-spring-boot-starter' or 'hilla-spring-boot-starter' "
+                + "in the list of your dependencies. %nPlease take a look at "
+                + "https://github.com/vaadin/skeleton-starter-hilla-react or "
+                + "https://github.com/vaadin/skeleton-starter-hilla-lit as a reference.");
     }
 
-    private static String findSpringBootApplicationPackage(Path projectDirectory) throws IOException {
+    private static String findSpringBootApplicationPackage(
+            Path projectDirectory) throws IOException {
         try (var paths = Files.walk(projectDirectory.resolve("src/main"))) {
             return paths
-                .filter(path -> !path.toString().contains("/resources/"))
-                .filter(path -> path.toFile().isFile())
-                .filter(path -> {
-                    try {
-                        var content = Files.readString(path);
-                        return content.contains("@SpringBootApplication");
-                    } catch (IOException e) {
-                        LOGGER.error("Error reading file: {}", path, e);
-                        return false;
-                    }
-                }).map(HillaAppInitUtility::extractPackage).findFirst()
-                .orElseThrow(() -> new RuntimeException(
-                    "No class annotated with @SpringBootApplication found!"));
+                    .filter(path -> !path.toString().contains("/resources/"))
+                    .filter(path -> path.toFile().isFile()).filter(path -> {
+                        try {
+                            var content = Files.readString(path);
+                            return content.contains("@SpringBootApplication");
+                        } catch (IOException e) {
+                            LOGGER.error("Error reading file: {}", path, e);
+                            return false;
+                        }
+                    }).map(HillaAppInitUtility::extractPackage).findFirst()
+                    .orElseThrow(() -> new RuntimeException(
+                            "No class annotated with @SpringBootApplication found!"));
         }
     }
 
@@ -162,9 +164,9 @@ public class HillaAppInitUtility {
             }
             // no package declaration means the class is at the default package:
             throw new RuntimeException(
-                "Having the class annotated with @SpringBootApplication at " +
-                "the default package is not allowed by the Spring Boot as " +
-                "the component scan will fail during startup.");
+                    "Having the class annotated with @SpringBootApplication at "
+                            + "the default package is not allowed by the Spring Boot as "
+                            + "the component scan will fail during startup.");
         } catch (IOException e) {
             var errorMessage = String.format("Error reading file: %s", path);
             LOGGER.error(errorMessage, e);

@@ -25,10 +25,13 @@ public class InitAppMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoFailureException {
         try {
-            List<String> dependencyArtifactIds = project.getDependencies().stream()
-                .filter(dependency -> !dependency.isOptional() && !dependency.getScope().equals("test"))
-                .map(Dependency::getArtifactId).toList();
-            HillaAppInitUtility.scaffold(projectBaseDir.toPath(), dependencyArtifactIds);
+            List<String> dependencyArtifactIds = project.getDependencies()
+                    .stream()
+                    .filter(dependency -> !dependency.isOptional()
+                            && !dependency.getScope().equals("test"))
+                    .map(Dependency::getArtifactId).toList();
+            HillaAppInitUtility.scaffold(projectBaseDir.toPath(),
+                    dependencyArtifactIds);
         } catch (Exception e) {
             throw new MojoFailureException(e);
         }
