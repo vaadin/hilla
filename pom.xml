@@ -21,7 +21,7 @@
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
-    <module>packages/java/hilla-plugin-base</module>
+    <module>packages/java/plugin-base</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
