@@ -140,7 +140,9 @@ public class HillaAppInitUtility {
         try (var paths = Files.walk(projectDirectory.resolve("src/main"))) {
             return paths
                     .filter(path -> !path.toString().contains("/resources/"))
-                    .filter(path -> path.toFile().isFile()).filter(path -> {
+                    .filter(path -> path.toFile().isFile()
+                            && !path.toFile().getName().startsWith("."))
+                    .filter(path -> {
                         try {
                             var content = Files.readString(path);
                             return content.contains("@SpringBootApplication");
