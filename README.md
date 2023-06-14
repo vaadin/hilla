@@ -79,7 +79,7 @@ Learn more at [hilla.dev](https://hilla.dev)
 
 ## Get started
 
-Follow the tutorials at https://hilla.dev/docs/tutorials
+Follow the tutorials at https://hilla.dev/docs
 
 ## Contributing
 
