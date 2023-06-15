@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -161,20 +160,16 @@ public interface CommandRunner {
      * used to run the current running java process. If that is not available,
      * then it looks for the {@code System.getProperty("java.home")} that relies
      * on IDE's functionality for setting the "java.home" system property based
-     * on the settings of the project. If any of the above where available, an
-     * Optional of type String containing "path/to/current/running/java/home" is
-     * returned, otherwise, an empty Optional will be returned.
+     * on the settings of the project.
      *
-     * @return Optional of type String containing "path/to/java/home" of current
-     *         running application or the path returned by
-     *         System.getProperty("java.home") if available, otherwise, an empty
-     *         Optional will be returned.
+     * @return A String "path/to/java/home" of current running application or
+     *         the path returned by System.getProperty("java.home").
      */
-    private Optional<String> getCurrentJavaProcessJavaHome() {
+    private String getCurrentJavaProcessJavaHome() {
         return ProcessHandle.current().info().command()
                 .map(javaExecPath -> javaExecPath.substring(0,
                         javaExecPath.lastIndexOf("/bin/java")))
-                .or(() -> System.getProperty("java.home").describeConstable());
+                .orElse(System.getProperty("java.home"));
     }
 
     /**
@@ -190,8 +185,6 @@ public interface CommandRunner {
      *         command.
      */
     default Map<String, String> environment() {
-        return getCurrentJavaProcessJavaHome()
-                .map(javaHome -> Map.of("JAVA_HOME", javaHome))
-                .orElse(Map.of());
+        return Map.of("JAVA_HOME", getCurrentJavaProcessJavaHome());
     }
 }
