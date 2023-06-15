@@ -1,6 +1,6 @@
 package dev.hilla.gradle.plugin
 
-import dev.hilla.plugin.base.InitFileExtractor
+import dev.hilla.plugin.base.HillaAppInitUtility
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -15,13 +15,12 @@ public open class EngineInitAppTask : DefaultTask() {
 
     @TaskAction
     public fun hillaInitApp() {
-
-        val extractor = InitFileExtractor(
-            project.projectDir.toPath()
-        )
-
         try {
-            extractor.execute()
+
+            val dependencyArtifactIds = project.configurations.getByName("implementation")
+                .dependencies.map { it.name }.stream().toList()
+            HillaAppInitUtility.scaffold(project.projectDir.toPath(), dependencyArtifactIds)
+
         } catch (e: IOException) {
             throw GradleException("Execution failed", e)
         }
