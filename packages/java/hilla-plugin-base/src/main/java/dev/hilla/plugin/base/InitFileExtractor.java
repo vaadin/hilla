@@ -23,7 +23,7 @@ public class InitFileExtractor {
     private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.1.zip";
     private static final List<String> LIT_FILE_LIST = List.of("package.json",
             "package-lock.json", "frontend/App.ts", "frontend/index.ts",
-            "frontend/routes.ts", "frontend/views/MainView.tsx",
+            "frontend/routes.ts", "frontend/views/main-view.ts",
             "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
 
     private final Path projectDirectory;
