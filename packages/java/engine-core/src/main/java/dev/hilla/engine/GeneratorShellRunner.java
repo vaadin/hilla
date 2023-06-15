@@ -1,13 +1,12 @@
 package dev.hilla.engine;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
 import dev.hilla.engine.commandrunner.CommandRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 final class GeneratorShellRunner implements CommandRunner {
     private static final Logger LOGGER = LoggerFactory
@@ -48,5 +47,10 @@ final class GeneratorShellRunner implements CommandRunner {
     public List<String> executables() {
         return nodeCommand == null ? List.of("node")
                 : List.of(nodeCommand, "node");
+    }
+
+    @Override
+    public Map<String, String> environment() {
+        return Map.of();
     }
 }

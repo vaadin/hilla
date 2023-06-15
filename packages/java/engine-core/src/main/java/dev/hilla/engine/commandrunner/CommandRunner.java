@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,7 +57,7 @@ public interface CommandRunner {
 
     /**
      * Run the command.
-     * 
+     *
      * @param stdIn
      *            a Consumer that can be used to write to the command's standard
      *            input, can be {@code null} if there's no need to write to it.
@@ -117,6 +119,8 @@ public interface CommandRunner {
             var builder = new ProcessBuilder(commandWithArgs)
                     .directory(currentDirectory());
 
+            builder.environment().putAll(environment());
+
             if (stdOut) {
                 builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
                         .redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -150,5 +154,44 @@ public interface CommandRunner {
             throw new CommandRunnerException("Command failed with exit code "
                     + exitCode + ": " + executable);
         }
+    }
+
+    /**
+     * First tries to extract JAVA_HOME from the path of java executable that is
+     * used to run the current running java process. If that is not available,
+     * then it looks for the {@code System.getProperty("java.home")} that relies
+     * on IDE's functionality for setting the "java.home" system property based
+     * on the settings of the project. If any of the above where available, an
+     * Optional of type String containing "path/to/current/running/java/home" is
+     * returned, otherwise, an empty Optional will be returned.
+     *
+     * @return Optional of type String containing "path/to/java/home" of current
+     *         running application or the path returned by
+     *         System.getProperty("java.home") if available, otherwise, an empty
+     *         Optional will be returned.
+     */
+    private Optional<String> getCurrentJavaProcessJavaHome() {
+        return ProcessHandle.current().info().command()
+                .map(javaExecPath -> javaExecPath.substring(0,
+                        javaExecPath.lastIndexOf("/bin/java")))
+                .or(() -> System.getProperty("java.home").describeConstable());
+    }
+
+    /**
+     * The custom environment variables needed for running the commands can be
+     * provided using this method.
+     * <p>
+     * NOTE: The provided environment variables by this method is added to the
+     * existing env of the ProcessBuilder, and in case of providing a duplicate
+     * key, it is overwriting the previously existing value.
+     *
+     * @return A java.util.Map containing the environment variables and their
+     *         values that are used by the ProcessBuilder to execute the
+     *         command.
+     */
+    default Map<String, String> environment() {
+        return getCurrentJavaProcessJavaHome()
+                .map(javaHome -> Map.of("JAVA_HOME", javaHome))
+                .orElse(Map.of());
     }
 }
