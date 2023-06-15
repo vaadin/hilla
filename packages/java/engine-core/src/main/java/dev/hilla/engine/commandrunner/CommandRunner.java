@@ -164,7 +164,7 @@ public interface CommandRunner {
      * based on the settings of the project.
      *
      * @return A String "path/to/java/home" of current running application or
-     *         the path returned by System.getProperty("java.home").
+     *         the path returned by {@code System.getProperty("java.home")}
      */
     private String getCurrentJavaProcessJavaHome() {
         return ProcessHandle.current().info().command()
