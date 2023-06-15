@@ -10,7 +10,7 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hilla-plugin-base</artifactId>
+  <artifactId>plugin-base</artifactId>
   <packaging>jar</packaging>
   <name>Shared library for Hilla Plugins</name>
   <description>
@@ -30,6 +30,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-server</artifactId>
+      <version>${flow.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

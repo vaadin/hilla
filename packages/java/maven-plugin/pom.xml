@@ -22,7 +22,7 @@
   <dependencies>
     <dependency>
       <groupId>dev.hilla</groupId>
-      <artifactId>hilla-plugin-base</artifactId>
+      <artifactId>plugin-base</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
