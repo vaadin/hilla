@@ -158,9 +158,10 @@ public interface CommandRunner {
     /**
      * First tries to extract JAVA_HOME from the path of java executable that is
      * used to run the current running java process. If that is not available,
-     * then it looks for the {@code System.getProperty("java.home")} that relies
-     * on IDE's functionality for setting the "java.home" system property based
-     * on the settings of the project.
+     * then it looks for the {@code System.getProperty("java.home")} that always
+     * has a value, but returning the Java path from project's configurations
+     * relies on IDE's functionality for setting the "java.home" system property
+     * based on the settings of the project.
      *
      * @return A String "path/to/java/home" of current running application or
      *         the path returned by System.getProperty("java.home").
