@@ -167,10 +167,11 @@ public interface CommandRunner {
      *         the path returned by {@code System.getProperty("java.home")}
      */
     private String getCurrentJavaProcessJavaHome() {
-        return ProcessHandle.current().info().command()
-                .map(javaExecPath -> javaExecPath.substring(0,
-                        javaExecPath.lastIndexOf("/bin/java")))
-                .orElse(System.getProperty("java.home"));
+        return ProcessHandle.current().info().command().map(javaExecPath -> {
+            String pathToExclude = IS_WINDOWS ? "\\bin\\java" : "/bin/java";
+            return javaExecPath.substring(0,
+                    javaExecPath.lastIndexOf(pathToExclude));
+        }).orElse(System.getProperty("java.home"));
     }
 
     /**
