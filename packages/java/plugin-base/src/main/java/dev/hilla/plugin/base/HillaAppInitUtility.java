@@ -11,29 +11,50 @@ import java.util.zip.ZipFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InitFileExtractor {
+public class HillaAppInitUtility {
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(InitFileExtractor.class);
+            .getLogger(HillaAppInitUtility.class);
+
     private static final String REACT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.1.zip";
+
     private static final List<String> REACT_FILE_LIST = List.of("package.json",
             "package-lock.json", "types.d.ts", "vite.config.ts",
             "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
             "frontend/views/MainView.tsx",
             "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
+
     private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.1.zip";
+
     private static final List<String> LIT_FILE_LIST = List.of("package.json",
-            "package-lock.json", "frontend/App.ts", "frontend/index.ts",
-            "frontend/routes.ts", "frontend/views/MainView.tsx",
+            "package-lock.json", "vite.config.ts", "frontend/index.ts",
+            "frontend/routes.ts", "frontend/views/main-view.ts",
             "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
 
-    private final Path projectDirectory;
+    private enum Framework {
 
-    public InitFileExtractor(Path projectDirectory) {
-        this.projectDirectory = projectDirectory;
+        REACT(REACT_SKELETON, REACT_FILE_LIST), LIT(LIT_SKELETON,
+                LIT_FILE_LIST);
+
+        private final String skeletonUrl;
+        private final List<String> items;
+
+        Framework(String skeletonUrl, List<String> items) {
+            this.skeletonUrl = skeletonUrl;
+            this.items = items;
+        }
+
+        public String getSkeletonUrl() {
+            return skeletonUrl;
+        }
+
+        public List<String> getItems() {
+            return items;
+        }
     }
 
-    public void execute() throws IOException {
-        var framework = detectFramework();
+    public static void scaffold(Path projectDirectory,
+            List<String> dependencyArtifactIds) throws IOException {
+        var framework = detectFramework(dependencyArtifactIds);
         var zipFile = Files.createTempFile("hilla-scaffold", ".zip");
         zipFile.toFile().deleteOnExit();
 
@@ -52,7 +73,8 @@ public class InitFileExtractor {
 
                     if (framework.getItems().contains(item)) {
                         if (item.endsWith("Endpoint.java")) {
-                            var applicationPackage = findSpringBootApplicationPackage();
+                            var applicationPackage = findSpringBootApplicationPackage(
+                                    projectDirectory);
                             var applicationPath = applicationPackage
                                     .replace(".", "/");
                             // read file to string
@@ -92,75 +114,65 @@ public class InitFileExtractor {
         }
     }
 
-    private enum Frameworks {
-        REACT(REACT_SKELETON, REACT_FILE_LIST), LIT(LIT_SKELETON,
-                LIT_FILE_LIST);
+    private static Framework detectFramework(
+            List<String> dependencyArtifactIds) {
 
-        private final String skeletonUrl;
-        private final List<String> items;
-
-        Frameworks(String skeletonUrl, List<String> items) {
-            this.skeletonUrl = skeletonUrl;
-            this.items = items;
+        if (dependencyArtifactIds.stream()
+                .anyMatch(artifactId -> artifactId.contains("hilla-react"))) {
+            return Framework.REACT;
         }
 
-        public String getSkeletonUrl() {
-            return skeletonUrl;
+        if (dependencyArtifactIds.stream()
+                .anyMatch(artifactId -> artifactId.contains("hilla"))) {
+            return Framework.LIT;
         }
 
-        public List<String> getItems() {
-            return items;
+        throw new RuntimeException("No hilla starter found! "
+                + "To use hilla:init-app maven goal (or hillaInitApp task in gradle), you must either have "
+                + "'hilla-react-spring-boot-starter' or 'hilla-spring-boot-starter' "
+                + "in the list of your dependencies. %nPlease take a look at "
+                + "https://github.com/vaadin/skeleton-starter-hilla-react or "
+                + "https://github.com/vaadin/skeleton-starter-hilla-lit as a reference.");
+    }
+
+    private static String findSpringBootApplicationPackage(
+            Path projectDirectory) throws IOException {
+        try (var paths = Files.walk(projectDirectory.resolve("src/main"))) {
+            return paths
+                    .filter(path -> !path.toString().contains("/resources/"))
+                    .filter(path -> path.toFile().isFile()
+                            && !path.toFile().getName().startsWith("."))
+                    .filter(path -> {
+                        try {
+                            var content = Files.readString(path);
+                            return content.contains("@SpringBootApplication");
+                        } catch (IOException e) {
+                            LOGGER.error("Error reading file: {}", path, e);
+                            return false;
+                        }
+                    }).map(HillaAppInitUtility::extractPackage).findFirst()
+                    .orElseThrow(() -> new RuntimeException(
+                            "No class annotated with @SpringBootApplication found!"));
         }
     }
 
-    private Frameworks detectFramework() throws IOException {
-        var buildFiles = List.of("pom.xml", "build.gradle", "build.gradle.kts");
-        var buildFile = buildFiles.stream()
-                .filter(file -> Files.exists(projectDirectory.resolve(file)))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException(
-                        "No build file found"));
-
-        // search `hilla-react-spring-boot-starter` or
-        // `hilla-spring-boot-starter` in build file
-        var content = Files.readString(projectDirectory.resolve(buildFile));
-        if (content.contains("hilla-react-spring-boot-starter")) {
-            return Frameworks.REACT;
-        } else if (content.contains("hilla-spring-boot-starter")) {
-            return Frameworks.LIT;
-        } else {
-            throw new IllegalArgumentException("No hilla starter found");
-        }
-    }
-
-    private String findSpringBootApplicationPackage() throws IOException {
-        return Files.walk(projectDirectory)
-                .filter(path -> path.toString().endsWith(".java"))
-                .filter(path -> {
-                    try {
-                        var content = Files.readString(path);
-                        return content.contains("@SpringBootApplication");
-                    } catch (IOException e) {
-                        LOGGER.error("Error reading file: {}", path, e);
-                        return false;
-                    }
-                }).map(this::getPackageName).findFirst()
-                .orElseThrow(() -> new IOException(
-                        "Spring Boot application class not found"));
-    }
-
-    private String getPackageName(Path path) {
+    private static String extractPackage(Path path) {
         try {
             var content = Files.readString(path);
             var matcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;")
                     .matcher(content);
             if (matcher.find()) {
                 return matcher.group(1);
-            } else {
-                return null;
             }
+            // no package declaration means the class is at the default package:
+            throw new RuntimeException(
+                    "Having the class annotated with @SpringBootApplication at "
+                            + "the default package is not allowed by the Spring Boot as "
+                            + "the component scan will fail during startup.");
         } catch (IOException e) {
-            LOGGER.error("Error reading file: {}", path, e);
-            return null;
+            var errorMessage = String.format("Error reading file: %s", path);
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
         }
     }
 }
