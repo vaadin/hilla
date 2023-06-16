@@ -111,7 +111,7 @@ public class CommandRunnerTest {
         TestRunner runner = new TestRunner() {
 
             static final String JAVA_EXEC_PATH = IS_WINDOWS
-                    ? "c:\\path\\to\\java\\home\\bin\\java"
+                    ? "c:\\path\\to\\java\\home\\bin\\java.exe"
                     : "/path/to/java/home/bin/java";
 
             @Override
