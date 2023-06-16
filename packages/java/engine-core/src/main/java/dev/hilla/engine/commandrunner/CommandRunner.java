@@ -115,17 +115,9 @@ public interface CommandRunner {
         var exitCode = 0;
 
         try {
-            var builder = new ProcessBuilder(commandWithArgs)
-                    .directory(currentDirectory());
+            var processBuilder = createProcessBuilder(commandWithArgs, stdOut);
 
-            builder.environment().putAll(environment());
-
-            if (stdOut) {
-                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                        .redirectError(ProcessBuilder.Redirect.INHERIT);
-            }
-
-            var process = builder.start();
+            var process = processBuilder.start();
 
             if (stdIn != null) {
                 // Allow the caller to write to the command's standard input
@@ -156,6 +148,50 @@ public interface CommandRunner {
     }
 
     /**
+     * Constructs a ProcessBuilder Instance using the passed in commands and
+     * arguments.
+     * <p>
+     * NOTE: This method uses the result of calling
+     * {@link CommandRunner#environment()} to set the environment variables of
+     * the process to be constructed.
+     *
+     * @param commandWithArgs
+     *            the command to be executed and its arguments
+     * @param stdOut
+     *            whether output and errors destination for the sub-process be
+     *            the same as the parent process or not
+     *
+     * @see CommandRunner#environment()
+     *
+     * @return a ProcessBuilder instance to be used for executing the passed in
+     *         commands and arguments.
+     */
+    default ProcessBuilder createProcessBuilder(List<String> commandWithArgs,
+            boolean stdOut) {
+        var builder = new ProcessBuilder(commandWithArgs)
+                .directory(currentDirectory());
+
+        builder.environment().putAll(environment());
+
+        if (stdOut) {
+            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                    .redirectError(ProcessBuilder.Redirect.INHERIT);
+        }
+
+        return builder;
+    }
+
+    /**
+     * Fetches the Java executable path that initiated the current java process
+     *
+     * @return An Optional of type String containing Java executable path or an
+     *         empty Optional if it was not available.
+     */
+    default ProcessHandle.Info getCurrentProcessInfo() {
+        return ProcessHandle.current().info();
+    }
+
+    /**
      * First tries to extract JAVA_HOME from the path of java executable that is
      * used to run the current running java process. If that is not available,
      * then it looks for the {@code System.getProperty("java.home")} that always
@@ -167,7 +203,7 @@ public interface CommandRunner {
      *         the path returned by {@code System.getProperty("java.home")}
      */
     private String getCurrentJavaProcessJavaHome() {
-        return ProcessHandle.current().info().command().map(javaExecPath -> {
+        return getCurrentProcessInfo().command().map(javaExecPath -> {
             String pathToExclude = IS_WINDOWS ? "\\bin\\java" : "/bin/java";
             return javaExecPath.substring(0,
                     javaExecPath.lastIndexOf(pathToExclude));
