@@ -152,8 +152,8 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = 'https://hilla.dev/docs/latest/hilla/guide/start/gradle'
-    vcsUrl = 'https://github.com/vaadin/hilla'
+    website = 'https://hilla.dev/docs/react/start/gradle'
+    vcsUrl = 'https://github.com/vaadin/hilla/tree/main/packages/java/gradle-plugin'
     description = 'Build Hilla applications with Gradle.'
     tags = ['hilla']
     plugins {
