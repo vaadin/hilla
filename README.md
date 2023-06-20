@@ -98,8 +98,8 @@ npm test
 
 You need the following versions of Node.js and npm:
 
-- **Node.js**: `>= 16.14.0` (native support for ES Modules and NodeJS execution of the newest hooks),
-- **npm**: `^7` (`package-lock.json` is of version 2; also, `lerna` is unable to bootstrap this project correctly with lower `npm`)
+- **Node.js**: `>= 18 LTS` (native support for ES Modules and NodeJS execution of the newest hooks),
+- **npm**: `^9` (`package-lock.json` is of version 3)
 
 ---
 
