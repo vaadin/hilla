@@ -193,15 +193,16 @@ public class HillaAppInitUtilityTest {
                 // single line comments might also contain package declarations:
                 // package my.single.line.comment;
 
+                /**
+                 * javadocs may contain package declarations:
+                 * package my.javadoc.package1;
+                 */
+
                 package   my ;
 
                 import org.springframework.boot.SpringApplication;
                 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-                /**
-                 * javadocs may contain package declarations:
-                 * package my.javadoc.package1;
-                 */
                 @SpringBootApplication
                 public class Application {
                     String myPackage = "my.package1.in.string.literal";
