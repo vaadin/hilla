@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 import org.slf4j.Logger;
@@ -159,8 +160,11 @@ public class HillaAppInitUtility {
     private static String extractPackage(Path path) {
         try {
             var content = Files.readString(path);
-            var matcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;")
-                    .matcher(content);
+            var regexToExcludeCommentsAndStringLiterals = "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/";
+            var codeWithoutComments = content.replaceAll(regexToExcludeCommentsAndStringLiterals, "");
+
+            var regexToExtractPackage = "package\\b\\s+([a-zA-Z_][\\w.]*)\\s*;";
+            var matcher = Pattern.compile(regexToExtractPackage).matcher(codeWithoutComments);
             if (matcher.find()) {
                 return matcher.group(1);
             }
