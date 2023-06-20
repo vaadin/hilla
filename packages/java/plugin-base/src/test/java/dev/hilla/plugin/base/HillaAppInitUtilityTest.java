@@ -167,18 +167,18 @@ public class HillaAppInitUtilityTest {
     }
 
     private void assertEndpointIsNotGeneratedForInvalidPackages() {
-        Assertions.assertFalse(projectDirectory
-            .resolve("src/main/java/my/package1/app/endpoints/HelloEndpoint.java")
-            .toFile().exists());
-        Assertions.assertFalse(projectDirectory
-            .resolve("src/main/java/my/single/line/comment/endpoints/HelloEndpoint.java")
-            .toFile().exists());
-        Assertions.assertFalse(projectDirectory
-            .resolve("src/main/java/my/javadoc/package1/endpoints/HelloEndpoint.java")
-            .toFile().exists());
-        Assertions.assertFalse(projectDirectory
-            .resolve("src/main/java/my/package1/in/string/literal/endpoints/HelloEndpoint.java")
-            .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/package1/app/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/single/line/comment/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/javadoc/package1/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/package1/in/string/literal/endpoints/HelloEndpoint.java")
+                .toFile().exists());
     }
 
     private void createSpringBootApplicationClass() throws IOException {

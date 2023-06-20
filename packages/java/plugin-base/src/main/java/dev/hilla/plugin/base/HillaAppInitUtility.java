@@ -161,10 +161,12 @@ public class HillaAppInitUtility {
         try {
             var content = Files.readString(path);
             var regexToExcludeCommentsAndStringLiterals = "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/";
-            var codeWithoutComments = content.replaceAll(regexToExcludeCommentsAndStringLiterals, "");
+            var codeWithoutComments = content
+                    .replaceAll(regexToExcludeCommentsAndStringLiterals, "");
 
             var regexToExtractPackage = "package\\b\\s+([a-zA-Z_][\\w.]*)\\s*;";
-            var matcher = Pattern.compile(regexToExtractPackage).matcher(codeWithoutComments);
+            var matcher = Pattern.compile(regexToExtractPackage)
+                    .matcher(codeWithoutComments);
             if (matcher.find()) {
                 return matcher.group(1);
             }
