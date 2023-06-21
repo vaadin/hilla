@@ -93,6 +93,8 @@ public class HillaAppInitUtilityTest {
                 .toFile().exists());
         Assertions.assertTrue(projectDirectory
                 .resolve("frontend/views/MainView.tsx").toFile().exists());
+
+        assertEndpointIsNotGeneratedForInvalidPackages();
     }
 
     @Test
@@ -127,6 +129,8 @@ public class HillaAppInitUtilityTest {
                 .toFile().exists());
         Assertions.assertTrue(projectDirectory
                 .resolve("frontend/views/MainView.tsx").toFile().exists());
+
+        assertEndpointIsNotGeneratedForInvalidPackages();
     }
 
     @Test
@@ -158,18 +162,56 @@ public class HillaAppInitUtilityTest {
                 .toFile().exists());
         Assertions.assertTrue(projectDirectory
                 .resolve("frontend/views/main-view.ts").toFile().exists());
+
+        assertEndpointIsNotGeneratedForInvalidPackages();
+    }
+
+    private void assertEndpointIsNotGeneratedForInvalidPackages() {
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/package1/app/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/single/line/comment/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/javadoc/package1/endpoints/HelloEndpoint.java")
+                .toFile().exists());
+        Assertions.assertFalse(projectDirectory.resolve(
+                "src/main/java/my/package1/in/string/literal/endpoints/HelloEndpoint.java")
+                .toFile().exists());
     }
 
     private void createSpringBootApplicationClass() throws IOException {
 
         var content = """
-                package my;
+                /*
+                * Some comments that might also contains a package
+                * declaration statement:
+                * package my.package1.app;
+                */
+
+                /*
+                 Some multi-line comments might not have * at the begiining
+                 of each line, especially before package declaration statement:
+                 package my.package1.app;
+                */
+
+                // single line comments might also contain package declarations:
+                // package my.single.line.comment;
+
+                /**
+                 * javadocs may contain package declarations:
+                 * package my.javadoc.package1;
+                 */
+
+                package   my ;
 
                 import org.springframework.boot.SpringApplication;
                 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
                 @SpringBootApplication
                 public class Application {
+                    String myPackage = "my.package1.in.string.literal";
                     public static void main(String[] args) {
                         SpringApplication.run(Application.class, args);
                     }
