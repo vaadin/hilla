@@ -190,6 +190,12 @@ public class HillaAppInitUtilityTest {
                 * package my.package1.app;
                 */
 
+                /*
+                 Some multi-line comments might not have * at the begiining
+                 of each line, especially before package declaration statement:
+                 package my.package1.app;
+                */
+
                 // single line comments might also contain package declarations:
                 // package my.single.line.comment;
 
