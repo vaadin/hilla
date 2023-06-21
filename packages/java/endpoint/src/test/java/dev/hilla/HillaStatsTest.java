@@ -16,6 +16,7 @@
 package dev.hilla;
 
 import com.vaadin.flow.internal.UsageStatistics;
+import com.vaadin.flow.server.Platform;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -43,8 +45,17 @@ public class HillaStatsTest {
     @Before
     public void rememberContextClassLoader() throws Exception {
         oldContextClassLoader = Thread.currentThread().getContextClassLoader();
-        UsageStatistics.resetEntries();
         fakeHilla(false);
+    }
+
+    @Before
+    @After
+    public void cleanupVersions() throws Exception {
+        UsageStatistics.resetEntries();
+        final Field memoizedHillaVersionField = Platform.class
+                .getDeclaredField("hillaVersion");
+        memoizedHillaVersionField.setAccessible(true);
+        memoizedHillaVersionField.set(null, null);
     }
 
     @After
