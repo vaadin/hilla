@@ -95,10 +95,9 @@ public class HillaStatsTest {
     }
 
     private static Map<String, String> getEntries() {
-        final Map<String, String> entries = UsageStatistics.getEntries()
+        return UsageStatistics.getEntries()
                 .collect(Collectors.toMap(UsageStatistics.UsageEntry::getName,
                         UsageStatistics.UsageEntry::getVersion));
-        return entries;
     }
 
     @Test
@@ -109,7 +108,8 @@ public class HillaStatsTest {
         HillaStats.report();
         entries = getEntries();
         assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
-        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla+react"));
+        assertEquals("entries: " + entries, "2.1.1",
+                entries.get("hilla+react"));
         assertNull("entries: " + entries, entries.get("hilla+lit"));
     }
 }
