@@ -85,24 +85,31 @@ public class HillaStatsTest {
 
     @Test
     public void testLitIsReportedByDefault() {
+        Map<String, String> entries = getEntries();
+        assertEquals("entries: " + entries, 1, entries.size());
         HillaStats.report();
+        entries = getEntries();
+        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
+        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla+lit"));
+        assertNull("entries: " + entries, entries.get("hilla+react"));
+    }
+
+    private static Map<String, String> getEntries() {
         final Map<String, String> entries = UsageStatistics.getEntries()
                 .collect(Collectors.toMap(UsageStatistics.UsageEntry::getName,
                         UsageStatistics.UsageEntry::getVersion));
-        assertEquals("2.1.1", entries.get("hilla"));
-        assertEquals("2.1.1", entries.get("hilla+lit"));
-        assertNull(entries.get("hilla+react"));
+        return entries;
     }
 
     @Test
     public void testReactIsReportedProperly() throws Exception {
+        Map<String, String> entries = getEntries();
+        assertEquals("entries: " + entries, 1, entries.size());
         fakeHilla(true);
         HillaStats.report();
-        final Map<String, String> entries = UsageStatistics.getEntries()
-                .collect(Collectors.toMap(UsageStatistics.UsageEntry::getName,
-                        UsageStatistics.UsageEntry::getVersion));
-        assertEquals("2.1.1", entries.get("hilla"));
-        assertEquals("2.1.1", entries.get("hilla+react"));
-        assertNull(entries.get("hilla+lit"));
+        entries = getEntries();
+        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
+        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla+react"));
+        assertNull("entries: " + entries, entries.get("hilla+lit"));
     }
 }
