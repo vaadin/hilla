@@ -159,8 +159,13 @@ public class HillaAppInitUtility {
     private static String extractPackage(Path path) {
         try {
             var content = Files.readString(path);
-            var matcher = Pattern.compile("^\\s*package\\s+([\\w.]+)\\s*;")
-                    .matcher(content);
+            var regexToExcludeCommentsAndStringLiterals = "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/";
+            var codeWithoutComments = content
+                    .replaceAll(regexToExcludeCommentsAndStringLiterals, "");
+
+            var regexToExtractPackage = "package\\b\\s+([a-zA-Z_][\\w.]*)\\s*;";
+            var matcher = Pattern.compile(regexToExtractPackage)
+                    .matcher(codeWithoutComments);
             if (matcher.find()) {
                 return matcher.group(1);
             }
