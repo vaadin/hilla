@@ -4,7 +4,6 @@ import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import type File from '@hilla/generator-typescript-core/File.js';
 import Plugin, { type PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
-import filterEmptyItems from '@hilla/generator-typescript-utils/filterEmptyItems.js';
 import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import GeneratorIOException from './GeneratorIOException.js';
 
@@ -39,32 +38,30 @@ export default class GeneratorIO {
     await mkdir(this.#outputDir, { recursive: true });
     const indexFile = resolve(this.#outputDir, this.constructor.INDEX_FILENAME);
 
-    const indexFileContents = await this.read(indexFile);
-    const filesToDelete = indexFileContents.split('\n').filter((n) => n.length);
+    const deletedFiles = new Set<string>();
 
-    const deletedFiles = filterEmptyItems(
+    try {
+      const indexFileContents = await this.read(indexFile);
+      const filesToDelete = indexFileContents.split('\n').filter((n) => n.length);
+
       await Promise.all(
         filesToDelete.map(async (filename) => {
-          try {
-            this.#logger.global.debug(`Deleting file ${filename}.`);
-            await rm(join(this.#outputDir, filename));
-            return filename;
-          } catch (e) {
-            // non-existing file is OK, all other errors must be rethrown
-            if (!(e instanceof Error && 'code' in e && e.code !== 'ENOENT')) {
-              throw e;
-            }
-
-            return null;
-          }
+          this.#logger.global.debug(`Deleting file ${filename}.`);
+          await rm(join(this.#outputDir, filename));
+          deletedFiles.add(filename);
         }),
-      ),
-    );
+      );
 
-    this.#logger.global.debug(`Deleting index file ${indexFile}.`);
-    await rm(indexFile);
+      this.#logger.global.debug(`Deleting index file ${indexFile}.`);
+      await rm(indexFile);
+    } catch (e) {
+      // non-existing file is OK, all other errors must be rethrown
+      if (!(e instanceof Error && 'code' in e && e.code === 'ENOENT')) {
+        throw e;
+      }
+    }
 
-    return new Set(deletedFiles);
+    return deletedFiles;
   }
 
   async createFileIndex(filenames: string[]): Promise<void> {
