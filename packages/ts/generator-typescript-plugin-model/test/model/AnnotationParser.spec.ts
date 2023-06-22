@@ -70,7 +70,7 @@ describe('AnnotationParser', () => {
       attributes: { message: 'foo', min: 1 },
       simpleName: 'Size',
     },
-    str: 'Size({ min: 1, message: "foo" })',
+    str: 'Size({ message: "foo", min: 1 })',
   };
 
   const decimalMin: AnnotationPack = {
@@ -89,7 +89,7 @@ describe('AnnotationParser', () => {
       },
       simpleName: 'DecimalMax',
     },
-    str: 'DecimalMax({ value: "100", inclusive: false })',
+    str: 'DecimalMax({ inclusive: false, value: "100" })',
   };
 
   const decimalMaxInclusive: AnnotationPack = {
@@ -100,7 +100,7 @@ describe('AnnotationParser', () => {
       },
       simpleName: 'DecimalMax',
     },
-    str: 'DecimalMax({ value: "100", inclusive: true })',
+    str: 'DecimalMax({ inclusive: true, value: "100" })',
   };
 
   const digits: AnnotationPack = {
@@ -108,7 +108,7 @@ describe('AnnotationParser', () => {
       attributes: { fraction: 2, integer: 5 },
       simpleName: 'Digits',
     },
-    str: 'Digits({ integer: 5, fraction: 2 })',
+    str: 'Digits({ fraction: 2, integer: 5 })',
   };
 
   const email: AnnotationPack = {
