@@ -17,6 +17,7 @@ package dev.hilla;
 
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.Platform;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 
+@NotThreadSafe
 public class HillaStatsTest {
     private ClassLoader oldContextClassLoader;
 
