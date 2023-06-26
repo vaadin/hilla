@@ -17,7 +17,7 @@ export default function snapshotMatcher(chai: Chai.ChaiStatic, utils: Chai.ChaiU
   utils.addMethod(
     chai.Assertion.prototype,
     'toMatchSnapshot',
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line prefer-arrow-callback
     async function toMatchSnapshot(this: object, snapshotName: string, importMetaUrl: string): Promise<void> {
       const obj = utils.flag(this, 'object');
       const snapshotURL = new URL(`./fixtures/${snapshotName}.snap.ts`, importMetaUrl);
@@ -30,7 +30,9 @@ export default function snapshotMatcher(chai: Chai.ChaiStatic, utils: Chai.ChaiU
         try {
           snapshot = await readFile(snapshotPath, 'utf8');
         } catch (e) {
-          throw new Error(`Snapshot does not exist yet: ${snapshotURL}.\nConsider running tests with --update flag.`);
+          throw new Error(
+            `Snapshot does not exist yet: ${snapshotURL.toString()}.\nConsider running tests with --update flag.`,
+          );
         }
 
         chai.assert.equal(obj, snapshot);

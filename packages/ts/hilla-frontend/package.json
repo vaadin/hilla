@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9878",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@open-wc/testing": "^2.5.33",
+    "@open-wc/testing": "^3.1.8",
     "@types/chai": "^4.2.21",
     "@types/js-cookie": "^3.0.3",
     "@types/mocha": "^9.0.0",

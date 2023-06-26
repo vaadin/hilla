@@ -28,7 +28,7 @@ function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
 }
 
 const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = body.match(/window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"}};/i);
+  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"}};/i.exec(body);
   return match ? match[1] : undefined;
 };
 
@@ -172,11 +172,11 @@ export type OnInvalidSessionCallback = () => Promise<LoginResult>;
 export class InvalidSessionMiddleware implements MiddlewareClass {
   private readonly onInvalidSessionCallback: OnInvalidSessionCallback;
 
-  public constructor(onInvalidSessionCallback: OnInvalidSessionCallback) {
+  constructor(onInvalidSessionCallback: OnInvalidSessionCallback) {
     this.onInvalidSessionCallback = onInvalidSessionCallback;
   }
 
-  public async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
+  async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
     const clonedContext = { ...context };
     clonedContext.request = context.request.clone();
     const response = await next(context);

@@ -3,6 +3,8 @@ import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import CookieManager from '../src/CookieManager.js';
+import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   ConnectClient,
   InvalidSessionMiddleware,
@@ -11,8 +13,6 @@ import {
   logout,
   type OnInvalidSessionCallback,
 } from '../src/index.js';
-import CookieManager from '../src/CookieManager.js';
-import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   clearSpringCsrfMetaTags,
   setupSpringCsrfMetaTags,
@@ -58,7 +58,7 @@ describe('@hilla/frontend', () => {
       requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
     });
     afterEach(() => {
-      // @ts-ignore
+      // @ts-expect-error
       delete window.Vaadin.TypeScript;
       clearSpringCsrfMetaTags();
     });

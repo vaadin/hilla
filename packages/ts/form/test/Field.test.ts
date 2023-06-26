@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-expressions, no-shadow */
 import { assert, expect, use } from '@esm-bundle/chai';
 import chaiDom from 'chai-dom';
-import sinon from 'sinon';
 import { LitElement, nothing, render } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { customElement, query } from 'lit/decorators.js';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
@@ -18,7 +18,7 @@ import {
   SelectedFieldStrategy,
   VaadinFieldStrategy,
   Required,
-  AbstractModel,
+  type AbstractModel,
   type FieldStrategy,
   AbstractFieldStrategy,
   ComboBoxFieldStrategy,
@@ -35,59 +35,57 @@ describe('@hilla/form', () => {
       @customElement('mock-text-field')
       class MockTextFieldElement extends HTMLElement {
         // pretend it’s a Vaadin component to use VaadinFieldStrategy
-        public static get version() {
-          return '0.0.0';
-        }
+        static readonly version = '0.0.0';
 
-        public __value = '';
+        __value = '';
 
-        public get value() {
+        get value() {
           return this.__value;
         }
 
-        public set value(value) {
+        set value(value) {
           // Native inputs stringify incoming values
           this.__value = String(value);
         }
 
-        public valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-        public __required = false;
+        __required = false;
 
-        public get required() {
+        get required() {
           return this.__required;
         }
 
-        public set required(value) {
+        set required(value) {
           this.__required = value;
         }
 
-        public requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
+        requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
 
-        public setAttributeSpy = sinon.spy(this, 'setAttribute');
+        setAttributeSpy = sinon.spy(this, 'setAttribute');
       }
 
       let orderViewWithTextField: OrderViewWithTextField;
 
       @customElement('order-view-with-text-field')
       class OrderViewWithTextField extends LitElement {
-        public requestUpdateSpy = sinon.spy(this, 'requestUpdate');
+        requestUpdateSpy = sinon.spy(this, 'requestUpdate');
 
-        public binder = new Binder(this, OrderModel);
+        binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        public notesField?: MockTextFieldElement;
+        notesField?: MockTextFieldElement;
 
         @query('#customerFullNameField')
-        public customerFullNameField?: MockTextFieldElement;
+        customerFullNameField?: MockTextFieldElement;
 
         @query('#customerNickNameField')
-        public customerNickNameField?: MockTextFieldElement;
+        customerNickNameField?: MockTextFieldElement;
 
         @query('#priorityField')
-        public priorityField?: MockTextFieldElement;
+        priorityField?: MockTextFieldElement;
 
-        public override render() {
+        override render() {
           return html`
             <mock-text-field id="notesField" ...="${field(this.binder.model.notes)}"></mock-text-field>
 
@@ -328,41 +326,41 @@ describe('@hilla/form', () => {
     describe('field with input', () => {
       @customElement('mock-input')
       class MockInputElement extends HTMLElement {
-        public __value = '';
+        __value = '';
 
-        public get value() {
+        get value() {
           return this.__value;
         }
 
-        public set value(value) {
+        set value(value) {
           // Native inputs stringify incoming values
           this.__value = String(value);
         }
 
-        public valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-        public setAttributeSpy = sinon.spy(this, 'setAttribute');
+        setAttributeSpy = sinon.spy(this, 'setAttribute');
       }
 
       @customElement('order-view-with-input')
       class OrderViewWithInput extends LitElement {
-        public requestUpdateSpy = sinon.spy(this, 'requestUpdate');
+        requestUpdateSpy = sinon.spy(this, 'requestUpdate');
 
-        public binder = new Binder(this, OrderModel);
+        binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        public notesField?: MockInputElement;
+        notesField?: MockInputElement;
 
         @query('#customerFullNameField')
-        public customerFullNameField?: MockInputElement;
+        customerFullNameField?: MockInputElement;
 
         @query('#customerNickNameField')
-        public customerNickNameField?: MockInputElement;
+        customerNickNameField?: MockInputElement;
 
         @query('#priorityField')
-        public priorityField?: MockInputElement;
+        priorityField?: MockInputElement;
 
-        public override render() {
+        override render() {
           return html`
             <mock-input id="notesField" ...="${field(this.binder.model.notes)}"></mock-input>
             <mock-input id="customerFullNameField" ...="${field(this.binder.model.customer.fullName)}"></mock-input>
@@ -479,7 +477,7 @@ describe('@hilla/form', () => {
       const div = document.createElement('div');
       let currentStrategy: FieldStrategy;
       const binder = new (class StrategySpyBinder<T, M extends AbstractModel<T>> extends Binder<T, M> {
-        public override getFieldStrategy(elm: any, model?: AbstractModel<any>): FieldStrategy {
+        override getFieldStrategy(elm: any, model?: AbstractModel<any>): FieldStrategy {
           currentStrategy = super.getFieldStrategy(elm, model);
           return currentStrategy;
         }
@@ -493,11 +491,9 @@ describe('@hilla/form', () => {
       @customElement('any-vaadin-element-tag')
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class AnyVaadinElement extends LitElement {
-        public static get version() {
-          return '1.0';
-        }
+        static readonly version = '1.0';
 
-        public override render() {
+        override render() {
           return nothing;
         }
       }
@@ -876,17 +872,17 @@ describe('@hilla/form', () => {
         const element = document.createElement('div');
 
         class MyStrategy extends AbstractFieldStrategy {
-          public invalid = true;
+          invalid = true;
 
-          public required = true;
+          required = true;
         }
 
         class MyBinder extends Binder<TestEntity, TestModel> {
-          public constructor(elm: Element) {
+          constructor(elm: Element) {
             super(elm, TestModel);
           }
 
-          public override getFieldStrategy(elm: any, model: AbstractModel<any>): FieldStrategy {
+          override getFieldStrategy(elm: any, model: AbstractModel<any>): FieldStrategy {
             currentStrategy = new MyStrategy(elm, model);
             return currentStrategy;
           }

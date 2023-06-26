@@ -3,7 +3,8 @@
 // eslint-disable-next-line import/no-cycle
 import { BinderNode } from './BinderNode.js';
 // eslint-disable-next-line import/no-cycle
-import { _parent, AbstractModel, type ModelConstructor } from './Models.js';
+import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
+import { _parent, type AbstractModel, type ModelConstructor } from './Models.js';
 // eslint-disable-next-line import/no-cycle
 import {
   type InterpolateMessageCallback,
@@ -14,7 +15,6 @@ import {
   type ValueError,
 } from './Validation.js';
 // eslint-disable-next-line import/no-cycle
-import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 
 const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');
@@ -51,10 +51,9 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 
   private [_onSubmit]?: (value: T) => Promise<any>;
 
-  private [_validations]: Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>> =
-    new Map();
+  private [_validations] = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
 
-  public static interpolateMessageCallback?: InterpolateMessageCallback<any>;
+  static interpolateMessageCallback?: InterpolateMessageCallback<any>;
 
   /**
    *
@@ -68,10 +67,10 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  public constructor(public context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
+  constructor(public context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
     super(new Model({ value: undefined }, 'value', false));
     this[_emptyValue] = (this.model[_parent] as { value: T }).value;
-    // @ts-ignore
+    // @ts-expect-error
     this.model[_parent] = this;
 
     if (typeof (context as any).requestUpdate === 'function') {
@@ -85,22 +84,22 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * The initial value of the form, before any fields are edited by the user.
    */
-  public override get defaultValue() {
+  override get defaultValue() {
     return this[_defaultValue];
   }
 
-  public override set defaultValue(newValue) {
+  override set defaultValue(newValue) {
     this[_defaultValue] = newValue;
   }
 
   /**
    * The current value of the form.
    */
-  public override get value() {
+  override get value() {
     return this[_value];
   }
 
-  public override set value(newValue) {
+  override set value(newValue) {
     if (newValue === this[_value]) {
       return;
     }
@@ -117,7 +116,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * @param value Sets the argument as the new default
    * value before resetting, otherwise the previous default is used.
    */
-  public read(value: T) {
+  read(value: T) {
     this.defaultValue = value;
     if (
       // Skip when no value is set yet (e. g., invoked from constructor)
@@ -137,14 +136,14 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * Reset the form to the previous value
    */
-  public reset() {
+  reset() {
     this.read(this[_defaultValue]);
   }
 
   /**
    * Sets the form to empty value, as defined in the Model.
    */
-  public clear() {
+  clear() {
     this.read(this[_emptyValue]);
   }
 
@@ -154,7 +153,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * It's a no-op if the onSubmit callback is undefined.
    */
-  public async submit(): Promise<T | void> {
+  async submit(): Promise<T | void> {
     if (this[_onSubmit] !== undefined) {
       return this.submitTo(this[_onSubmit]!);
     }
@@ -166,7 +165,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * @param endpointMethod the callback function
    */
-  public async submitTo<V>(endpointMethod: (value: T) => Promise<V>): Promise<V> {
+  async submitTo<V>(endpointMethod: (value: T) => Promise<V>): Promise<V> {
     const errors = await this.validate();
     if (errors.length) {
       throw new ValidationError(errors);
@@ -199,7 +198,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     }
   }
 
-  public async requestValidation<NT, NM extends AbstractModel<NT>>(
+  async requestValidation<NT, NM extends AbstractModel<NT>>(
     model: NM,
     validator: Validator<NT>,
   ): Promise<ReadonlyArray<ValueError<NT>>> {
@@ -214,7 +213,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     await this.performValidation();
 
     if (modelValidations.has(validator)) {
-      return modelValidations.get(validator) as Promise<ReadonlyArray<ValueError<NT>>>;
+      return modelValidations.get(validator)!;
     }
 
     const promise = runValidator(model, validator, Binder.interpolateMessageCallback);
@@ -240,7 +239,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * @param elm the bound element
    * @param model the bound model
    */
-  public getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
+  getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
     return getDefaultFieldStrategy(elm, model);
   }
 
@@ -248,7 +247,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * Indicates the submitting status of the form.
    * True if the form was submitted, but the submit promise is not resolved yet.
    */
-  public get submitting() {
+  get submitting() {
     return this[_submitting];
   }
 
@@ -256,7 +255,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * Indicates the validating status of the form.
    * True when there is an ongoing validation.
    */
-  public get validating() {
+  get validating() {
     return this[_validating];
   }
 
@@ -280,6 +279,6 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 }
 
 export interface BinderConfiguration<T> {
-  onChange?: (oldValue?: T) => void;
-  onSubmit?: (value: T) => Promise<T | void>;
+  onChange?(oldValue?: T): void;
+  onSubmit?(value: T): Promise<T | void>;
 }
