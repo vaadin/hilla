@@ -3,11 +3,11 @@ import ImportManager from './ImportManager.js';
 import type PathManager from './PathManager.js';
 
 export default class DependencyManager {
-  public readonly exports: ExportManager;
-  public readonly imports: ImportManager;
-  public readonly paths: PathManager;
+  readonly exports: ExportManager;
+  readonly imports: ImportManager;
+  readonly paths: PathManager;
 
-  public constructor(paths: PathManager, collator: Intl.Collator = new Intl.Collator('en', { sensitivity: 'case' })) {
+  constructor(paths: PathManager, collator: Intl.Collator = new Intl.Collator('en', { sensitivity: 'case' })) {
     this.exports = new ExportManager(collator);
     this.imports = new ImportManager(collator);
     this.paths = paths;

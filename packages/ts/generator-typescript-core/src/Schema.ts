@@ -8,19 +8,19 @@ export type ArraySchema = ReadonlyDeep<OpenAPIV3.ArraySchemaObject>;
 export type NonArraySchema = ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>;
 export type RegularSchema = ArraySchema | NonArraySchema;
 
-export type NullableSchema = RegularSchema & Readonly<Required<Pick<RegularSchema, 'nullable'>>>;
+export type NullableSchema = Readonly<Required<Pick<RegularSchema, 'nullable'>>> & RegularSchema;
 
-export type AnyOfRuleComposedSchema = RegularSchema & Readonly<Required<Pick<RegularSchema, 'anyOf'>>>;
-export type AllOfRuleComposedSchema = RegularSchema & Readonly<Required<Pick<RegularSchema, 'allOf'>>>;
-export type OneOfRuleComposedSchema = RegularSchema & Readonly<Required<Pick<RegularSchema, 'oneOf'>>>;
-export type NotRuleComposedSchema = RegularSchema & Readonly<Required<Pick<RegularSchema, 'not'>>>;
+export type AnyOfRuleComposedSchema = Readonly<Required<Pick<RegularSchema, 'anyOf'>>> & RegularSchema;
+export type AllOfRuleComposedSchema = Readonly<Required<Pick<RegularSchema, 'allOf'>>> & RegularSchema;
+export type OneOfRuleComposedSchema = Readonly<Required<Pick<RegularSchema, 'oneOf'>>> & RegularSchema;
+export type NotRuleComposedSchema = Readonly<Required<Pick<RegularSchema, 'not'>>> & RegularSchema;
 export type ComposedSchema =
-  | AnyOfRuleComposedSchema
   | AllOfRuleComposedSchema
-  | OneOfRuleComposedSchema
-  | NotRuleComposedSchema;
+  | AnyOfRuleComposedSchema
+  | NotRuleComposedSchema
+  | OneOfRuleComposedSchema;
 
-export type NonComposedRegularSchema = RegularSchema & Readonly<Nullified<RegularSchema, 'allOf' | 'anyOf' | 'oneOf'>>;
+export type NonComposedRegularSchema = Readonly<Nullified<RegularSchema, 'allOf' | 'anyOf' | 'oneOf'>> & RegularSchema;
 export type NonComposedSchema = NonComposedRegularSchema | ReferenceSchema;
 
 export type BooleanSchema = NonComposedRegularSchema & Readonly<{ type: 'boolean' }>;
@@ -29,7 +29,7 @@ export type NumberSchema = NonComposedRegularSchema & Readonly<{ type: 'number' 
 export type ObjectSchema = NonComposedRegularSchema & Readonly<{ type: 'object' }>;
 export type StringSchema = NonComposedRegularSchema & Readonly<{ type: 'string' }>;
 
-export type EnumSchema = StringSchema & Readonly<Required<Pick<StringSchema, 'enum'>>>;
+export type EnumSchema = Readonly<Required<Pick<StringSchema, 'enum'>>> & StringSchema;
 export type EmptyObjectSchema = ObjectSchema & Readonly<Nullified<ObjectSchema, 'properties'>>;
 export type NonEmptyObjectSchema = ObjectSchema & Readonly<Required<Pick<ObjectSchema, 'properties'>>>;
 export type MapSchema = EmptyObjectSchema & Readonly<Required<Pick<ObjectSchema, 'additionalProperties'>>>;

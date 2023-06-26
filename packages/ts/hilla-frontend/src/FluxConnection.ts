@@ -1,5 +1,5 @@
-import type { ReactiveElement } from 'lit';
 import { atmosphere } from 'a-atmosphere-javascript';
+import type { ReactiveElement } from 'lit';
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
@@ -26,13 +26,13 @@ type ListenerType<T extends keyof EventMap> =
  */
 export class FluxConnection extends EventTarget {
   private nextId = 0;
-  private endpointInfos = new Map<string, string>();
-  private onNextCallbacks = new Map<string, (value: any) => void>();
-  private onCompleteCallbacks = new Map<string, () => void>();
-  private onErrorCallbacks = new Map<string, () => void>();
+  private readonly endpointInfos = new Map<string, string>();
+  private readonly onNextCallbacks = new Map<string, (value: any) => void>();
+  private readonly onCompleteCallbacks = new Map<string, () => void>();
+  private readonly onErrorCallbacks = new Map<string, () => void>();
 
   private socket: any;
-  public state: State = State.INACTIVE;
+  state: State = State.INACTIVE;
   private pendingMessages: ServerMessage[] = [];
 
   constructor(connectPrefix: string) {
@@ -128,6 +128,7 @@ export class FluxConnection extends EventTarget {
     this.pendingMessages.forEach((msg) => this.send(msg));
     this.pendingMessages = [];
   }
+
   private send(message: ServerMessage) {
     if (this.state === State.INACTIVE) {
       this.pendingMessages.push(message);
@@ -144,7 +145,7 @@ export class FluxConnection extends EventTarget {
    * @param parameters the parameters to use
    * @returns a subscription
    */
-  subscribe(endpointName: string, methodName: string, parameters?: Array<any>): Subscription<any> {
+  subscribe(endpointName: string, methodName: string, parameters?: any[]): Subscription<any> {
     const id: string = this.nextId.toString();
     this.nextId += 1;
     const params = parameters || [];

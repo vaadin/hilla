@@ -50,7 +50,7 @@ function getErrorPropertyName(valueError: ValueError<any>): string {
  * instances.
  */
 export class BinderNode<T, M extends AbstractModel<T>> {
-  public readonly model: M;
+  readonly model: M;
 
   private [_visited] = false;
 
@@ -67,11 +67,11 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * For elements with `validity.valid === false`, the value in the
    * bound element is considered as invalid.
    */
-  public [_validity]?: ValidityState;
+  [_validity]?: ValidityState;
 
   private readonly validityStateValidator: ValidityStateValidator<T>;
 
-  public constructor(model: M) {
+  constructor(model: M) {
     this.model = model;
     model[_binderNode] = this;
     this.validityStateValidator = new ValidityStateValidator<T>();
@@ -83,7 +83,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * The parent node, if this binder node corresponds to a nested model,
    * otherwise undefined for the top-level binder.
    */
-  public get parent(): BinderNode<any, AbstractModel<any>> | undefined {
+  get parent(): BinderNode<any, AbstractModel<any>> | undefined {
     const modelParent = this.model[_parent];
     return modelParent instanceof AbstractModel ? getBinderNode(modelParent) : undefined;
   }
@@ -91,7 +91,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   /**
    * The binder for the top-level model.
    */
-  public get binder(): Binder<any, AbstractModel<any>> {
+  get binder(): Binder<any, AbstractModel<any>> {
     return this.parent ? this.parent.binder : (this as any);
   }
 
@@ -99,12 +99,12 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * The name generated from the model structure, used to set the name
    * attribute on the field components.
    */
-  public get name(): string {
+  get name(): string {
     let model = this.model as AbstractModel<any>;
     const strings = [];
     while (model[_parent] instanceof AbstractModel) {
       strings.unshift(String(model[_key]));
-      model = model[_parent] as AbstractModel<any>;
+      model = model[_parent];
     }
     return strings.join('.');
   }
@@ -112,21 +112,21 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   /**
    * The current value related to the model
    */
-  public get value(): T | undefined {
+  get value(): T | undefined {
     if (this.parent!.value === undefined) {
       this.parent!.initializeValue(true);
     }
     return this.parent!.value[this.model[_key]];
   }
 
-  public set value(value: T | undefined) {
+  set value(value: T | undefined) {
     this.setValueState(value);
   }
 
   /**
    * The default value related to the model
    */
-  public get defaultValue(): T {
+  get defaultValue(): T {
     if (this.parent && this.parent.model instanceof ArrayModel) {
       if (!this.parent.defaultArrayItemValue) {
         this.parent.defaultArrayItemValue = this.parent.model[_ItemModel].createEmptyValue();
@@ -141,7 +141,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   /**
    * True if the current value is different from the defaultValue.
    */
-  public get dirty(): boolean {
+  get dirty(): boolean {
     return this.value !== this.defaultValue;
   }
 
@@ -149,11 +149,11 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * The array of validators for the model. The default value is defined in the
    * model.
    */
-  public get validators(): ReadonlyArray<Validator<T>> {
+  get validators(): ReadonlyArray<Validator<T>> {
     return this[_validators];
   }
 
-  public set validators(validators: ReadonlyArray<Validator<T>>) {
+  set validators(validators: ReadonlyArray<Validator<T>>) {
     this[_validators] = validators;
   }
 
@@ -162,7 +162,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    *
    * @param model The nested model instance
    */
-  public for<NM extends AbstractModel<any>>(model: NM): BinderNode<ReturnType<NM['valueOf']>, NM> {
+  for<NM extends AbstractModel<any>>(model: NM): BinderNode<ReturnType<NM['valueOf']>, NM> {
     const binderNode = getBinderNode(model);
     if (binderNode.binder !== this.binder) {
       throw new Error('Unknown binder');
@@ -176,7 +176,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * or any nested model. Returns the combined array of all
    * errors as in the errors property.
    */
-  public async validate(): Promise<ReadonlyArray<ValueError<any>>> {
+  async validate(): Promise<ReadonlyArray<ValueError<any>>> {
     // TODO: Replace reduce() with flat() when the following issue is solved
     //  https://github.com/vaadin/flow/issues/8658
     const errors = (
@@ -194,18 +194,18 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    *
    * @param validator a validator
    */
-  public addValidator(validator: Validator<T>) {
+  addValidator(validator: Validator<T>) {
     this.validators = [...this[_validators], validator];
   }
 
   /**
    * True if the bound field was ever focused and blurred by the user.
    */
-  public get visited() {
+  get visited() {
     return this[_visited];
   }
 
-  public set visited(v) {
+  set visited(v) {
     if (this[_visited] !== v) {
       this[_visited] = v;
       this.updateValidation();
@@ -216,10 +216,10 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * The combined array of all errors for this node’s model and all its nested
    * models
    */
-  public get errors(): ReadonlyArray<ValueError<any>> {
-    const descendantsErrors = [...this.getChildBinderNodes()].reduce(
+  get errors(): ReadonlyArray<ValueError<any>> {
+    const descendantsErrors = [...this.getChildBinderNodes()].reduce<readonly any[]>(
       (errors, childBinderNode) => [...errors, ...childBinderNode.errors],
-      [] as ReadonlyArray<any>,
+      [],
     );
     return descendantsErrors.concat(this.ownErrors);
   }
@@ -227,21 +227,21 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   /**
    * The array of validation errors directly related with the model.
    */
-  public get ownErrors() {
+  get ownErrors() {
     return this[_ownErrors] ? this[_ownErrors] : [];
   }
 
   /**
    * Indicates if there is any error for the node's model.
    */
-  public get invalid() {
+  get invalid() {
     return this.errors.length > 0;
   }
 
   /**
    * True if the value is required to be non-empty.
    */
-  public get required() {
+  get required() {
     return this[_validators].some((validator) => validator.impliesRequired);
   }
 
@@ -253,7 +253,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * @param itemValue optional new item value, an empty item is
    * appended if the argument is omitted
    */
-  public appendItem<IT extends ModelValue<M extends ArrayModel<any, infer IM> ? IM : never>>(itemValue?: IT) {
+  appendItem<IT extends ModelValue<M extends ArrayModel<any, infer IM> ? IM : never>>(itemValue?: IT) {
     if (!(this.model instanceof ArrayModel)) {
       throw new Error('Model is not an array');
     }
@@ -261,7 +261,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     if (!itemValue) {
       itemValue = this.model[_ItemModel].createEmptyValue();
     }
-    this.value = [...(this.value as unknown as ReadonlyArray<IT>), itemValue] as unknown as T;
+    this.value = [...(this.value as unknown as readonly IT[]), itemValue] as unknown as T;
   }
 
   /**
@@ -272,7 +272,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    * @param itemValue optional new item value, an empty item is prepended if
    * the argument is omitted
    */
-  public prependItem<IT extends ModelValue<M extends ArrayModel<any, infer IM> ? IM : never>>(itemValue?: IT) {
+  prependItem<IT extends ModelValue<M extends ArrayModel<any, infer IM> ? IM : never>>(itemValue?: IT) {
     if (!(this.model instanceof ArrayModel)) {
       throw new Error('Model is not an array');
     }
@@ -280,7 +280,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     if (!itemValue) {
       itemValue = this.model[_ItemModel].createEmptyValue();
     }
-    this.value = [itemValue, ...(this.value as unknown as ReadonlyArray<IT>)] as unknown as T;
+    this.value = [itemValue, ...(this.value as unknown as readonly IT[])] as unknown as T;
   }
 
   /**
@@ -288,12 +288,12 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    *
    * Requires the context model to be an array item reference.
    */
-  public removeSelf() {
+  removeSelf() {
     if (!(this.model[_parent] instanceof ArrayModel)) {
       throw new TypeError('Model is not an array item');
     }
     const itemIndex = this.model[_key] as number;
-    this.parent!.value = (this.parent!.value as ReadonlyArray<T>).filter((_, i) => i !== itemIndex);
+    this.parent!.value = (this.parent!.value as readonly T[]).filter((_, i) => i !== itemIndex);
   }
 
   protected clearValidation(): boolean {
@@ -315,7 +315,9 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     if (this[_visited]) {
       await this.validate();
     } else if (this.dirty || this.invalid) {
-      await Promise.all([...this.getChildBinderNodes()].map((childBinderNode) => childBinderNode.updateValidation()));
+      await Promise.all(
+        [...this.getChildBinderNodes()].map(async (childBinderNode) => childBinderNode.updateValidation()),
+      );
     }
   }
 
@@ -385,17 +387,17 @@ export class BinderNode<T, M extends AbstractModel<T>> {
       );
     }
 
-    return this[_validators].map((validator) => this.binder.requestValidation(this.model, validator));
+    return this[_validators].map(async (validator) => this.binder.requestValidation(this.model, validator));
   }
 
   private requestValidationOfDescendants(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
-    return [...this.getChildBinderNodes()].reduce(
+    return [...this.getChildBinderNodes()].reduce<ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>>>(
       (promises, childBinderNode) => [
         ...promises,
         ...childBinderNode.runOwnValidators(),
         ...childBinderNode.requestValidationOfDescendants(),
       ],
-      [] as ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>>,
+      [],
     );
   }
 
@@ -440,7 +442,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
 
     if (modelParent instanceof ArrayModel) {
       // Value contained in array - replace array in parent
-      const array = (this.parent!.value as ReadonlyArray<T>).slice();
+      const array = (this.parent!.value as readonly T[]).slice();
       array[this.model[_key] as number] = value;
       this.parent!.setValueState(array, keepPristine);
     } else {

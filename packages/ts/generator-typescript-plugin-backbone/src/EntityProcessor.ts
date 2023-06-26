@@ -1,6 +1,9 @@
+import { dirname } from 'path/posix';
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
-import type { EnumSchema, ReferenceSchema, Schema } from '@hilla/generator-typescript-core/Schema.js';
 import {
+  type EnumSchema,
+  type ReferenceSchema,
+  type Schema,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
@@ -19,9 +22,13 @@ import {
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import { dirname } from 'path/posix';
-import type { Identifier, InterfaceDeclaration, SourceFile, Statement } from 'typescript';
-import ts, { type TypeElement } from 'typescript';
+import ts, {
+  type Identifier,
+  type InterfaceDeclaration,
+  type SourceFile,
+  type Statement,
+  type TypeElement,
+} from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 
 export class EntityProcessor {
@@ -33,7 +40,7 @@ export class EntityProcessor {
   readonly #owner: Plugin;
   readonly #path: string;
 
-  public constructor(name: string, component: Schema, owner: Plugin) {
+  constructor(name: string, component: Schema, owner: Plugin) {
     this.#component = component;
     this.#owner = owner;
     this.#fullyQualifiedName = name;
@@ -50,7 +57,7 @@ export class EntityProcessor {
     return id;
   }
 
-  public process(): SourceFile {
+  process(): SourceFile {
     this.#owner.logger.debug(`Processing entity: ${this.#name}`);
 
     const declaration = isEnumSchema(this.#component)
@@ -92,7 +99,7 @@ export class EntityProcessor {
     return ts.factory.createEnumDeclaration(
       undefined,
       this.#id,
-      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))) ?? [],
+      members.map((member) => ts.factory.createEnumMember(member, ts.factory.createStringLiteral(member))),
     );
   }
 
@@ -147,17 +154,15 @@ export class EntityProcessor {
   }
 
   #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
-    return properties
-      ? Object.entries(properties).map(([name, schema]) => {
-          const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
+    return Object.entries(properties).map(([name, schema]) => {
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
-          return ts.factory.createPropertySignature(
-            undefined,
-            name,
-            isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-            type,
-          );
-        })
-      : [];
+      return ts.factory.createPropertySignature(
+        undefined,
+        name,
+        isNullableSchema(schema) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+        type,
+      );
+    });
   }
 }

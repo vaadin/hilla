@@ -143,7 +143,7 @@ describe('@hilla/form', () => {
     describe('array model', () => {
       const strings = ['foo', 'bar'];
 
-      const idEntities: ReadonlyArray<IdEntity> = [
+      const idEntities: readonly IdEntity[] = [
         { ...IdEntityModel.createEmptyValue(), idString: 'id0' },
         { ...IdEntityModel.createEmptyValue(), idString: 'id1' },
       ];
