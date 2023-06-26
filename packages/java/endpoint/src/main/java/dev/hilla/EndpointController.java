@@ -158,6 +158,9 @@ public class EndpointController {
             endpointBeans.forEach((name, endpointBean) -> endpointRegistry
                     .registerEndpoint(endpointBean));
         }
+
+        // Usage statistics
+        HillaStats.report();
     }
 
     /**
