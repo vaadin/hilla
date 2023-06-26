@@ -1,3 +1,4 @@
+/* eslint-disable max-params */
 import type Plugin from '@hilla/generator-typescript-core/Plugin.js';
 import ClientPlugin from '@hilla/generator-typescript-plugin-client';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
@@ -15,7 +16,7 @@ export const INIT_TYPE_NAME = 'EndpointRequestInit';
 export const HILLA_FRONTEND_NAME = '@hilla/frontend';
 
 export default abstract class EndpointMethodOperationProcessor {
-  public static createProcessor(
+  static createProcessor(
     httpMethod: OpenAPIV3.HttpMethods,
     endpointName: string,
     endpointMethodName: string,
@@ -25,7 +26,7 @@ export default abstract class EndpointMethodOperationProcessor {
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST:
-        // eslint-disable-next-line no-use-before-define
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new EndpointMethodOperationPOSTProcessor(
           endpointName,
           endpointMethodName,
@@ -39,7 +40,7 @@ export default abstract class EndpointMethodOperationProcessor {
     }
   }
 
-  public abstract process(outputDir?: string): Promise<Statement | undefined>;
+  abstract process(outputDir?: string): Promise<Statement | undefined>;
 }
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
@@ -49,7 +50,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   readonly #operation: EndpointMethodOperation;
   readonly #owner: Plugin;
 
-  public constructor(
+  constructor(
     endpointName: string,
     endpointMethodName: string,
     operation: EndpointMethodOperation,
@@ -64,7 +65,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     this.#operation = operation;
   }
 
-  public async process(outputDir?: string): Promise<Statement | undefined> {
+  async process(outputDir?: string): Promise<Statement | undefined> {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
     const initTypeIdentifier = imports.named.getIdentifier(

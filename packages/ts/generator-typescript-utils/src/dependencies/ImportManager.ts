@@ -1,5 +1,4 @@
-import type { Identifier, ImportDeclaration, Statement } from 'typescript';
-import ts, { type NamedImports } from 'typescript';
+import ts, { type Identifier, type ImportDeclaration, type Statement } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
@@ -10,12 +9,12 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
 
-  public constructor(collator: Intl.Collator) {
+  constructor(collator: Intl.Collator) {
     super(collator);
     this.#collator = collator;
   }
 
-  public add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
+  add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const record = createDependencyRecord(uniqueId ?? createFullyUniqueIdentifier(specifier), isType);
 
     if (this.#map.has(path)) {
@@ -27,15 +26,15 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
-  public override clear() {
+  override clear(): void {
     this.#map.clear();
   }
 
-  public getIdentifier(path: string, specifier: string): Identifier | undefined {
+  getIdentifier(path: string, specifier: string): Identifier | undefined {
     return this.#map.get(path)?.get(specifier)?.id;
   }
 
-  public *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
+  *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
     for (const [path, specifiers] of this.#map) {
       for (const [specifier, { id, isType }] of specifiers) {
         yield [path, specifier, id, isType];
@@ -43,15 +42,15 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     }
   }
 
-  public isType(path: string, specifier: string): boolean | undefined {
+  isType(path: string, specifier: string): boolean | undefined {
     return this.#map.get(path)?.get(specifier)?.isType;
   }
 
-  public paths(): IterableIterator<string> {
+  paths(): IterableIterator<string> {
     return this.#map.keys();
   }
 
-  public *specifiers(): IterableIterator<readonly [path: string, specifier: string]> {
+  *specifiers(): IterableIterator<readonly [path: string, specifier: string]> {
     for (const [path, specifiers] of this.#map) {
       for (const specifier of specifiers.keys()) {
         yield [path, specifier];
@@ -59,9 +58,10 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     }
   }
 
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+  override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, specifiers] of this.#map) {
       const names = [...specifiers.keys()];
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       names.sort(this.#collator.compare);
 
       yield [
@@ -88,31 +88,31 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Identifier>();
 
-  public add(path: string, name: string, uniqueId?: Identifier): Identifier {
+  add(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, id);
     return id;
   }
 
-  public override clear() {
+  override clear(): void {
     this.#map.clear();
   }
 
-  public getIdentifier(path: string): Identifier | undefined {
+  getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path);
   }
 
-  public *identifiers(): IterableIterator<Identifier> {
+  *identifiers(): IterableIterator<Identifier> {
     for (const id of this.#map.values()) {
       yield id;
     }
   }
 
-  public paths(): IterableIterator<string> {
+  paths(): IterableIterator<string> {
     return this.#map.keys();
   }
 
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+  override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, id] of this.#map) {
       yield [
         path,
@@ -129,35 +129,35 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, DependencyRecord>();
 
-  public add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
+  add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, createDependencyRecord(id, isType));
     return id;
   }
 
-  public getIdentifier(path: string): Identifier | undefined {
+  getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path)?.id;
   }
 
-  public override clear() {
+  override clear(): void {
     this.#map.clear();
   }
 
-  public *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
+  *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
     for (const { id, isType } of this.#map.values()) {
       yield [id, isType];
     }
   }
 
-  public isType(path: string): boolean | undefined {
+  isType(path: string): boolean | undefined {
     return this.#map.get(path)?.isType;
   }
 
-  public paths(): IterableIterator<string> {
+  paths(): IterableIterator<string> {
     return this.#map.keys();
   }
 
-  public override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
+  override *statementRecords(): IterableIterator<StatementRecord<ImportDeclaration>> {
     for (const [path, { id, isType }] of this.#map) {
       yield [
         path,
@@ -172,20 +172,20 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 }
 
 export default class ImportManager implements CodeConvertable<readonly Statement[]> {
-  public readonly default: DefaultImportManager;
-  public readonly named: NamedImportManager;
-  public readonly namespace: NamespaceImportManager;
+  readonly default: DefaultImportManager;
+  readonly named: NamedImportManager;
+  readonly namespace: NamespaceImportManager;
 
   readonly #collator: Intl.Collator;
 
-  public constructor(collator: Intl.Collator) {
+  constructor(collator: Intl.Collator) {
     this.default = new DefaultImportManager(collator);
     this.named = new NamedImportManager(collator);
     this.namespace = new NamespaceImportManager(collator);
     this.#collator = collator;
   }
 
-  public toCode(): readonly Statement[] {
+  toCode(): readonly Statement[] {
     const records = [
       ...this.default.statementRecords(),
       ...this.named.statementRecords(),
@@ -196,7 +196,7 @@ export default class ImportManager implements CodeConvertable<readonly Statement
     return records.map(([, statement]) => statement);
   }
 
-  public fromCode(source: ts.SourceFile) {
+  fromCode(source: ts.SourceFile): void {
     this.default.clear();
     this.named.clear();
     this.namespace.clear();
@@ -218,7 +218,7 @@ export default class ImportManager implements CodeConvertable<readonly Statement
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
         } else {
-          for (const { name: specifier, isTypeOnly } of (namedBindings as NamedImports).elements) {
+          for (const { name: specifier, isTypeOnly } of namedBindings.elements) {
             this.named.add(path, specifier.text, isTypeOnly, specifier);
           }
         }

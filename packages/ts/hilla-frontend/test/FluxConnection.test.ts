@@ -23,7 +23,7 @@ describe('@hilla/frontend', () => {
       nrSentMessages(): number;
       sentMessage(i: number): AbstractMessage;
       handleMessage(msg: AbstractMessage): unknown;
-      socket: () => any;
+      socket(): any;
     };
 
     beforeEach(() => {
@@ -257,7 +257,7 @@ describe('@hilla/frontend', () => {
       });
 
       class FakeElement {
-        private controllers: ReactiveController[] = [];
+        private readonly controllers: ReactiveController[] = [];
 
         addController(controller: ReactiveController) {
           this.controllers.push(controller);
@@ -312,12 +312,12 @@ describe('@hilla/frontend', () => {
     it('by default it should use the default url', () => {
       (atmosphere as any).reset();
       fluxConnection = new FluxConnection('/connect');
-      expect(atmosphere.url).to.equal('/HILLA/push');
+      expect((atmosphere as any).url).to.equal('/HILLA/push');
     });
     it('should use a custom prefix when connecting', () => {
       (atmosphere as any).reset();
       fluxConnection = new FluxConnection('/custom/connect');
-      expect(atmosphere.url).to.equal('/custom/HILLA/push');
+      expect((atmosphere as any).url).to.equal('/custom/HILLA/push');
     });
   });
 });

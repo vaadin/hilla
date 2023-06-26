@@ -29,7 +29,7 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #requestBody?: EndpointMethodRequestBody;
   readonly #initTypeIdentifier: ts.Identifier;
 
-  public constructor(
+  constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
     owner: Plugin,
@@ -41,9 +41,11 @@ export default class EndpointMethodRequestBodyProcessor {
     this.#initTypeIdentifier = initTypeIdentifier;
   }
 
-  public process(): EndpointMethodRequestBodyProcessingResult {
+  process(): EndpointMethodRequestBodyProcessingResult {
     if (!this.#requestBody) {
       return {
+        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
+        packedParameters: ts.factory.createObjectLiteralExpression(),
         parameters: [
           ts.factory.createParameterDeclaration(
             undefined,
@@ -53,12 +55,10 @@ export default class EndpointMethodRequestBodyProcessor {
             ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
           ),
         ],
-        packedParameters: ts.factory.createObjectLiteralExpression(),
-        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
       };
     }
 
-    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType]?.schema);
+    const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType].schema);
     const parameterNames = parameterData.map(([name]) => name);
     let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
 
@@ -67,6 +67,10 @@ export default class EndpointMethodRequestBodyProcessor {
     }
 
     return {
+      initParam: ts.factory.createIdentifier(initParamName),
+      packedParameters: ts.factory.createObjectLiteralExpression(
+        parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
+      ),
       parameters: [
         ...parameterData.map(([name, schema]) => {
           const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
@@ -87,10 +91,6 @@ export default class EndpointMethodRequestBodyProcessor {
           ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
         ),
       ],
-      packedParameters: ts.factory.createObjectLiteralExpression(
-        parameterData.map(([name]) => ts.factory.createShorthandPropertyAssignment(name)),
-      ),
-      initParam: ts.factory.createIdentifier(initParamName),
     };
   }
 

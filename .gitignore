@@ -36,6 +36,7 @@ packages/ts/*/*.js
 packages/ts/*/*.js.map
 packages/ts/*/.coverage
 packages/ts/*/.vite
+!packages/ts/*/.lintstagedrc.js
 
 # npm pack
 packages/ts/*/*.tgz
