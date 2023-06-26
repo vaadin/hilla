@@ -12,9 +12,9 @@ import ts, {
   type VariableStatement,
 } from 'typescript';
 
-export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': ReadonlyArray<string> }>;
+export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': readonly string[] }>;
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
-  Readonly<{ 'x-validation-constraints': ReadonlyArray<Annotation> }>;
+  Readonly<{ 'x-validation-constraints': readonly Annotation[] }>;
 
 export function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
   return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
@@ -44,7 +44,7 @@ export class AnnotationParser {
     this.#importer = importer;
   }
 
-  parse(annotation: string | Annotation) {
+  parse(annotation: Annotation | string): ts.NewExpression {
     if (typeof annotation === 'string') {
       const nameEndIndex = annotation.indexOf('(');
       const simpleName = nameEndIndex >= 0 ? annotation.slice(0, nameEndIndex) : annotation;
