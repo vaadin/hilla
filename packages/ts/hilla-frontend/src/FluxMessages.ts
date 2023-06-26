@@ -14,7 +14,7 @@ export interface ClientUpdateMessage extends AbstractMessage {
   item: any;
 }
 
-export type ClientMessage = ClientUpdateMessage | ClientCompleteMessage | ClientErrorMessage;
+export type ClientMessage = ClientCompleteMessage | ClientErrorMessage | ClientUpdateMessage;
 
 export interface ServerConnectMessage extends AbstractMessage {
   id: string;
@@ -28,4 +28,4 @@ export interface ServerCloseMessage extends AbstractMessage {
   '@type': 'unsubscribe';
 }
 
-export type ServerMessage = ServerConnectMessage | ServerCloseMessage;
+export type ServerMessage = ServerCloseMessage | ServerConnectMessage;
