@@ -1,4 +1,3 @@
-/* eslint-disable symbol-description */
 import {
   type ArraySchema,
   type BooleanSchema,
@@ -88,7 +87,7 @@ export abstract class ModelSchemaPartProcessor<T> {
 
   protected abstract [$processArray](schema: ArraySchema): T;
   protected abstract [$processBoolean](schema: BooleanSchema): T;
-  protected abstract [$processNumber](schema: NumberSchema | IntegerSchema): T;
+  protected abstract [$processNumber](schema: IntegerSchema | NumberSchema): T;
   protected abstract [$processRecord](schema: MapSchema): T;
   protected abstract [$processReference](schema: ReferenceSchema): T;
   protected abstract [$processString](schema: StringSchema): T;
@@ -106,7 +105,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
   }
 
-  protected override [$processNumber](_: NumberSchema | IntegerSchema): TypeNode {
+  protected override [$processNumber](_: IntegerSchema | NumberSchema): TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
   }
 
@@ -149,7 +148,7 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
     return importBuiltInFormModel('BooleanModel', this[$dependencies]);
   }
 
-  override [$processNumber](_: NumberSchema | IntegerSchema): Identifier {
+  override [$processNumber](_: IntegerSchema | NumberSchema): Identifier {
     return importBuiltInFormModel('NumberModel', this[$dependencies]);
   }
 
@@ -194,7 +193,7 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
     return ts.factory.createTypeReferenceNode(this.#id[$processBoolean](schema));
   }
 
-  protected override [$processNumber](schema: NumberSchema | IntegerSchema): TypeReferenceNode {
+  protected override [$processNumber](schema: IntegerSchema | NumberSchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processNumber](schema));
   }
 
@@ -228,7 +227,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     this.#parse = parser.parse.bind(parser);
   }
 
-  public override process(): readonly ts.Expression[] {
+  override process(): readonly ts.Expression[] {
     const schema = this[$schema];
 
     let result = super.process();
@@ -257,7 +256,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return [];
   }
 
-  protected override [$processNumber](_: NumberSchema | IntegerSchema): readonly Expression[] {
+  protected override [$processNumber](_: IntegerSchema | NumberSchema): readonly Expression[] {
     return [];
   }
 

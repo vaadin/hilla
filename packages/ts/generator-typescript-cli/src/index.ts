@@ -22,7 +22,6 @@ Options:
   --version              Show the app version
 `,
   {
-    importMeta: import.meta,
     flags: {
       outputDir: {
         alias: 'o',
@@ -40,6 +39,7 @@ Options:
         type: 'boolean',
       },
     },
+    importMeta: import.meta,
   },
 );
 
@@ -47,10 +47,12 @@ const logger = new LoggerFactory({ verbose });
 
 const io = new GeneratorIO(outputDir, logger);
 
-const resolvedPlugins = await Promise.all(Array.from(new Set(plugins), (pluginPath) => io.loadPlugin(pluginPath)));
+const resolvedPlugins = await Promise.all(
+  Array.from(new Set(plugins), async (pluginPath) => io.loadPlugin(pluginPath)),
+);
 const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
 const files = await generator.process(await processInput(io, input));
 await io.cleanOutputDir();
 await io.createFileIndex(files.map((file) => file.name));
-await Promise.all(files.map((file) => io.write(file)));
+await Promise.all(files.map(async (file) => io.write(file)));

@@ -226,20 +226,14 @@ describe('@hilla/form', () => {
       });
 
       it('should be able to set null to object type property', () => {
-        const myBinder: Binder<TestEntity, TestModel<TestEntity>> = new Binder(
-          document.createElement('div'),
-          TestModel,
-        );
+        const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
         myBinder.for(myBinder.model.fieldAny).value = null;
         myBinder.for(myBinder.model.fieldAny).validate();
         assert.isFalse(myBinder.invalid);
       });
 
       it('should be able to set undefined to object type property', () => {
-        const myBinder: Binder<TestEntity, TestModel<TestEntity>> = new Binder(
-          document.createElement('div'),
-          TestModel,
-        );
+        const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
         myBinder.for(myBinder.model.fieldAny).value = undefined;
         myBinder.for(myBinder.model.fieldAny).validate();
         assert.isFalse(myBinder.invalid);
@@ -247,7 +241,7 @@ describe('@hilla/form', () => {
     });
 
     describe('optional', () => {
-      let binder: Binder<Employee, EmployeeModel<Employee>>;
+      let binder: Binder<Employee, EmployeeModel>;
       const litEmployeeView = document.createElement('lit-employee-view') as LitEmployeeView;
 
       const expectedEmptyEmployee: Employee = {

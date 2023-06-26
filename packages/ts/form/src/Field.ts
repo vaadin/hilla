@@ -1,6 +1,6 @@
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
-import { _fromString, AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import { _fromString, type AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
 import { _validity, defaultValidity } from './Validity.js';
 
 interface FieldBase<T> {
@@ -15,7 +15,7 @@ interface FieldBase<T> {
  */
 type FieldConstraintValidation = Readonly<{
   validity: ValidityState;
-  checkValidity: () => boolean;
+  checkValidity(): boolean;
 }>;
 
 type FieldElement<T> = Element & FieldBase<T> & Partial<FieldConstraintValidation>;
@@ -43,9 +43,9 @@ interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
 export type FieldStrategy<T = any> = Field<T> & FieldConstraintValidation;
 
 export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T> {
-  public abstract required: boolean;
+  abstract required: boolean;
 
-  public abstract invalid: boolean;
+  abstract invalid: boolean;
 
   private _element: FieldElement<T>;
 
@@ -55,11 +55,11 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
    */
   private _validityFallback: ValidityState = defaultValidity;
 
-  public constructor(element: FieldElement<T>, public readonly model?: AbstractModel<T>) {
+  constructor(element: FieldElement<T>, readonly model?: AbstractModel<T>) {
     this._element = element;
   }
 
-  public get element() {
+  get element() {
     return this._element;
   }
 
@@ -67,21 +67,21 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
    * @param element the new element value
    * @deprecated will be read-only in future
    */
-  public set element(element: FieldElement<T>) {
+  set element(element: FieldElement<T>) {
     this._element = element;
   }
 
-  public get value() {
+  get value() {
     return this.element.value;
   }
 
-  public set value(value) {
+  set value(value) {
     this.element.value = value;
   }
 
-  public set errorMessage(_: string) {} // eslint-disable-line @typescript-eslint/no-empty-function
+  set errorMessage(_: string) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  public setAttribute(key: string, val: any) {
+  setAttribute(key: string, val: any) {
     if (val) {
       this.element.setAttribute(key, '');
     } else {
@@ -89,11 +89,11 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
     }
   }
 
-  public get validity() {
+  get validity() {
     return this.element.validity || this._validityFallback;
   }
 
-  public checkValidity() {
+  checkValidity() {
     if (!this.element.checkValidity) {
       return true;
     }
@@ -139,16 +139,16 @@ export class VaadinFieldStrategy<T = any> extends AbstractFieldStrategy<T> {
     (element as any).addEventListener('validated', this._overrideVaadinInvalidChange.bind(this));
   }
 
-  public set required(value: boolean) {
+  set required(value: boolean) {
     this.element.required = value;
   }
 
-  public set invalid(value: boolean) {
+  set invalid(value: boolean) {
     this._invalid = value;
     this.element.invalid = value;
   }
 
-  public override set errorMessage(value: string) {
+  override set errorMessage(value: string) {
     this.element.errorMessage = value;
   }
 
@@ -160,27 +160,27 @@ export class VaadinFieldStrategy<T = any> extends AbstractFieldStrategy<T> {
 }
 
 export class GenericFieldStrategy extends AbstractFieldStrategy {
-  public set required(value: boolean) {
+  set required(value: boolean) {
     this.setAttribute('required', value);
   }
 
-  public set invalid(value: boolean) {
+  set invalid(value: boolean) {
     this.setAttribute('invalid', value);
   }
 }
 
 export class CheckedFieldStrategy extends GenericFieldStrategy {
-  public override set value(val: any) {
+  override set value(val: any) {
     (this.element as any).checked = /^(true|on)$/i.test(String(val));
   }
 
-  public override get value() {
+  override get value() {
     return (this.element as any).checked;
   }
 }
 
 export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
-  public override get value() {
+  override get value() {
     if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
       const { selectedItem } = this.element as any;
       return selectedItem === null ? undefined : selectedItem;
@@ -189,7 +189,7 @@ export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
     return super.value;
   }
 
-  public override set value(val: any) {
+  override set value(val: any) {
     if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
       (this.element as any).selectedItem = val === undefined ? null : val;
     } else {
@@ -199,21 +199,21 @@ export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
 }
 
 export class MultiSelectComboBoxFieldStrategy extends VaadinFieldStrategy {
-  public override get value() {
+  override get value() {
     return (this.element as any).selectedItems;
   }
 
-  public override set value(val: any) {
+  override set value(val: any) {
     (this.element as any).selectedItems = val;
   }
 }
 
 export class SelectedFieldStrategy extends GenericFieldStrategy {
-  public override set value(val: any) {
+  override set value(val: any) {
     (this.element as any).selected = val;
   }
 
-  public override get value() {
+  override get value() {
     return (this.element as any).selected;
   }
 }
@@ -255,9 +255,9 @@ function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValu
  */
 export const field = directive(
   class extends Directive {
-    public fieldState?: FieldState<any>;
+    fieldState?: FieldState<any>;
 
-    public constructor(partInfo: PartInfo) {
+    constructor(partInfo: PartInfo) {
       super(partInfo);
       if (partInfo.type !== PartType.PROPERTY && partInfo.type !== PartType.ELEMENT) {
         throw new Error('Use as "<element {field(...)}" or <element ...={field(...)}"');
@@ -265,14 +265,13 @@ export const field = directive(
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public render(model: AbstractModel<any>, effect?: (element: Element) => void) {
+    override render(model: AbstractModel<any>, effect?: (element: Element) => void) {
       return nothing;
     }
 
-    public override update(part: PropertyPart | ElementPart, [model, effect]: DirectiveParameters<this>) {
-      const element = part.element as HTMLInputElement & FieldElement<any>;
+    override update(part: ElementPart | PropertyPart, [model, effect]: DirectiveParameters<this>) {
+      const element = part.element as FieldElement<any> & HTMLInputElement;
 
       const binderNode = getBinderNode(model);
 

@@ -52,16 +52,16 @@ function unwrapPossiblyNullableSchema(schema: Schema): NonComposedSchema {
 }
 
 export default class TypeSchemaProcessor {
-  public declare ['constructor']: typeof TypeSchemaProcessor;
+  declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
 
-  public constructor(schema: Schema, dependencies: DependencyManager) {
+  constructor(schema: Schema, dependencies: DependencyManager) {
     this.#schema = schema;
     this.#dependencies = dependencies;
   }
 
-  public process(): readonly TypeNode[] {
+  process(): readonly TypeNode[] {
     let node: TypeNode;
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);

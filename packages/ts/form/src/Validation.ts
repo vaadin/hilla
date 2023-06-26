@@ -1,27 +1,27 @@
 // TODO: Fix dependency cycle
 
 // eslint-disable-next-line import/no-cycle
-import { AbstractModel, NumberModel, getBinderNode } from './Models.js';
 
 import type { Binder } from './Binder.js';
 import type { BinderNode } from './BinderNode.js';
+import { type AbstractModel, NumberModel, getBinderNode } from './Models.js';
 // eslint-disable-next-line import/no-cycle
 import { Required } from './Validators.js';
 
 export interface ValueError<T> {
-  property: string | AbstractModel<any>;
+  property: AbstractModel<any> | string;
   message: string;
   value: T;
   validator: Validator<T>;
 }
 
 export interface ValidationResult {
-  property: string | AbstractModel<any>;
+  property: AbstractModel<any> | string;
   message?: string;
 }
 
 export class ValidationError extends Error {
-  public constructor(public errors: ReadonlyArray<ValueError<any>>) {
+  constructor(public errors: ReadonlyArray<ValueError<any>>) {
     super(
       [
         'There are validation errors in the form.',
@@ -36,10 +36,10 @@ export type ValidationCallback<T> = (
   value: T,
   binder: Binder<any, AbstractModel<T>>,
 ) =>
-  | boolean
+  | Promise<ValidationResult | boolean | readonly ValidationResult[]>
   | ValidationResult
-  | ReadonlyArray<ValidationResult>
-  | Promise<boolean | ValidationResult | ReadonlyArray<ValidationResult>>;
+  | boolean
+  | readonly ValidationResult[];
 
 export type InterpolateMessageCallback<T> = (
   message: string,
@@ -54,13 +54,13 @@ export interface Validator<T> {
 }
 
 export class ServerValidator implements Validator<any> {
-  public message: string;
+  message: string;
 
-  public constructor(message: string) {
+  constructor(message: string) {
     this.message = message;
   }
 
-  public validate = () => false;
+  validate = () => false;
 }
 
 // The `property` field of `ValidationResult`s is a path relative to the parent.

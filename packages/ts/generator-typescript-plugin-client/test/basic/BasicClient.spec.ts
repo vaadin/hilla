@@ -1,8 +1,8 @@
+import { readFile } from 'node:fs/promises';
 import Generator from '@hilla/generator-typescript-core/Generator.js';
 import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
-import { readFile } from 'node:fs/promises';
 import sinonChai from 'sinon-chai';
 import ClientPlugin from '../../src/index.js';
 
