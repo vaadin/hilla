@@ -4,8 +4,8 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
 import { type EndpointOperations, PushProcessor } from './PushProcessor.js';
 
-type ExtendedMediaTypeSchema = ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject> &
-  Readonly<{ 'x-class-name': string }>;
+type ExtendedMediaTypeSchema = Readonly<{ 'x-class-name': string }> &
+  ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
 
 const classesToReplace: readonly string[] = [
   'dev.hilla.runtime.transfertypes.Flux',
@@ -49,7 +49,7 @@ export default class PushPlugin extends Plugin {
     return import.meta.url;
   }
 
-  public override async execute(storage: SharedStorage): Promise<void> {
+  override async execute(storage: SharedStorage): Promise<void> {
     const { api, sources } = storage;
     const endpointMethodMap = this.constructor.#collectPatchableMethods(api.paths);
 

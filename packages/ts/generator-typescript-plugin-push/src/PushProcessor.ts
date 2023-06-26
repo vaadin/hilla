@@ -29,31 +29,7 @@ export class PushProcessor {
     );
   }
 
-  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
-    const namedImports = importStatement.importClause?.namedBindings;
-    if (namedImports && ts.isNamedImports(namedImports)) {
-      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
-
-      const updatedImportClause = ts.factory.updateImportClause(
-        importStatement.importClause,
-        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
-        undefined,
-        ts.factory.createNamedImports(updatedElements),
-      );
-
-      return ts.factory.updateImportDeclaration(
-        importStatement,
-        undefined,
-        updatedImportClause,
-        importStatement.moduleSpecifier,
-        undefined,
-      );
-    }
-
-    return undefined;
-  };
-
-  public process(): ts.SourceFile {
+  process(): ts.SourceFile {
     const otherStatements = this.#source.statements
       .filter((statement) => !ts.isImportDeclaration(statement))
       .map((statement) => {
@@ -72,12 +48,11 @@ export class PushProcessor {
     let importStatements = this.#dependencies.imports.toCode();
 
     if (this.#operations.removeInitImport) {
-      const importHillaFrontend = importStatements.find((statement) => {
-        return (
+      const importHillaFrontend = importStatements.find(
+        (statement) =>
           ts.isImportDeclaration(statement) &&
-          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend'
-        );
-      });
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@hilla/frontend',
+      );
 
       if (importHillaFrontend) {
         const updatedImportStatement = this.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
@@ -107,6 +82,30 @@ export class PushProcessor {
     return lastTypeName.text === initParameterTypeName;
   }
 
+  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
+    const namedImports = importStatement.importClause?.namedBindings;
+    if (namedImports && ts.isNamedImports(namedImports)) {
+      const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
+
+      const updatedImportClause = ts.factory.updateImportClause(
+        importStatement.importClause,
+        false, // FIXME: could be true, but it is false for regular endpoint calls, so sticking to that for now
+        undefined,
+        ts.factory.createNamedImports(updatedElements),
+      );
+
+      return ts.factory.updateImportDeclaration(
+        importStatement,
+        undefined,
+        updatedImportClause,
+        importStatement.moduleSpecifier,
+        undefined,
+      );
+    }
+
+    return undefined;
+  };
+
   /**
    * Replace returned `Promise<Array<T>>` by the `Subscription<T>` type
    * @param declaration
@@ -114,9 +113,7 @@ export class PushProcessor {
    */
   #replacePromiseType(declaration: ts.FunctionDeclaration) {
     const promiseType = (declaration.type as ts.TypeReferenceNode).typeArguments![0];
-    const promiseArray = (
-      ts.isUnionTypeNode(promiseType) ? (promiseType as ts.UnionTypeNode).types[0] : promiseType
-    ) as ts.TypeReferenceNode;
+    const promiseArray = (ts.isUnionTypeNode(promiseType) ? promiseType.types[0] : promiseType) as ts.TypeReferenceNode;
 
     return ts.factory.createTypeReferenceNode(this.#subscriptionId(), promiseArray.typeArguments);
   }
@@ -140,7 +137,7 @@ export class PushProcessor {
   #updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
     const returnStatement = declaration.body!.statements[0] as ts.ReturnStatement;
     const { arguments: args, expression, typeArguments } = returnStatement.expression! as ts.CallExpression;
-    const call = expression! as ts.PropertyAccessExpression;
+    const call = expression as ts.PropertyAccessExpression;
 
     return ts.factory.createBlock([
       ts.factory.createReturnStatement(
