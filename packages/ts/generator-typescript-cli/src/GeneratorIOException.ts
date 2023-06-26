@@ -1,5 +1,5 @@
 export default class GeneratorIOException extends Error {
-  public constructor(message: string) {
+  constructor(message: string) {
     super(`[GeneratorIOException]: ${message}`);
   }
 }

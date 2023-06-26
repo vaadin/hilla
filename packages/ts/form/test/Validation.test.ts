@@ -1,12 +1,12 @@
 /* eslint-disable lit/no-template-arrow, no-unused-expressions, no-shadow */
 import { assert, expect, use } from '@esm-bundle/chai';
 import chaiDom from 'chai-dom';
-import sinon from 'sinon';
 import { css, html, LitElement } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 // TODO: remove when the new version of eslint-config-vaadin is released.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { customElement, query } from 'lit/decorators.js';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
 import {
@@ -16,7 +16,7 @@ import {
   NotBlank,
   Required,
   Size,
-  ValidationError,
+  type ValidationError,
   type Validator,
   type ValueError,
 } from '../src/index.js';
@@ -38,15 +38,15 @@ use(chaiDom);
 class NumberOutput extends HTMLElement {
   inputElement = document.createElement('input');
 
-  public get value(): string {
+  get value(): string {
     return this.checkValidity() ? this.inputElement.value || '' : '';
   }
 
-  public set value(value: string) {
+  set value(value: string) {
     this.inputElement.value = value;
   }
 
-  public checkValidity(): boolean {
+  checkValidity(): boolean {
     const numericValue = Number(this.inputElement.value);
     return !Number.isNaN(numericValue) && numericValue.toString() === this.inputElement.value;
   }
@@ -55,44 +55,42 @@ customElements.define('number-output', NumberOutput);
 
 @customElement('order-view')
 class OrderView extends LitElement {
-  public binder = new Binder(this, OrderModel);
+  binder = new Binder(this, OrderModel);
 
   @query('#submitting')
-  public submitting!: HTMLInputElement;
+  submitting!: HTMLInputElement;
 
   @query('#notes')
-  public notes!: HTMLInputElement;
+  notes!: HTMLInputElement;
 
   @query('#fullName')
-  public fullName!: HTMLInputElement;
+  fullName!: HTMLInputElement;
 
   @query('#nickName')
-  public nickName!: HTMLInputElement;
+  nickName!: HTMLInputElement;
 
   @query('#add')
-  public add!: Element;
+  add!: Element;
 
   @query('#description0')
-  public description!: HTMLInputElement;
+  description!: HTMLInputElement;
 
   @query('#price0')
-  public price!: HTMLInputElement;
+  price!: HTMLInputElement;
 
   @query('#priceError0')
-  public priceError!: HTMLOutputElement;
+  priceError!: HTMLOutputElement;
 
   @query('#total')
-  public total!: NumberOutput;
+  total!: NumberOutput;
 
-  public static override get styles() {
-    return css`
-      input[invalid] {
-        border: 2px solid red;
-      }
-    `;
-  }
+  static override readonly styles = css`
+    input[invalid] {
+      border: 2px solid red;
+    }
+  `;
 
-  public override render() {
+  override render() {
     const {
       notes,
       products,
@@ -138,27 +136,25 @@ const fireEvent = async (elm: Element, name: string) => {
 
 describe('@hilla/form', () => {
   describe('Validation', () => {
-    let binder: Binder<Order, OrderModel<Order>>;
+    let binder: Binder<Order, OrderModel>;
     const view = document.createElement('div');
 
     beforeEach(async () => {
       binder = new Binder(view, OrderModel);
     });
 
-    it('should run all validators per model', async () => {
-      return binder
+    it('should run all validators per model', async () =>
+      binder
         .for(binder.model.customer)
         .validate()
         .then((errors) => {
           expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['Required', 'Size']);
-        });
-    });
+        }));
 
-    it('should run all nested validations per model', async () => {
-      return binder.validate().then((errors) => {
+    it('should run all nested validations per model', async () =>
+      binder.validate().then((errors) => {
         expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
-      });
-    });
+      }));
 
     it('should run all validations per array items', async () => {
       binder.for(binder.model.products).appendItem();
@@ -367,7 +363,7 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator', () => {
-      let binder: Binder<IdEntity, IdEntityModel<IdEntity>>;
+      let binder: Binder<IdEntity, IdEntityModel>;
 
       beforeEach(async () => {
         binder = new Binder(view, IdEntityModel);
@@ -398,9 +394,9 @@ describe('@hilla/form', () => {
 
       it('should fail validation after adding an asynchronous validator to the model', async () => {
         class AsyncValidator implements Validator<Order> {
-          public message = 'bar';
+          message = 'bar';
 
-          public async validate() {
+          async validate() {
             await sleep(10);
             return false;
           }
@@ -475,7 +471,7 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator (multiple fields)', () => {
-      let binder: Binder<TestEntity, TestModel<TestEntity>>;
+      let binder: Binder<TestEntity, TestModel>;
 
       beforeEach(async () => {
         binder = new Binder(view, TestModel);
@@ -683,7 +679,7 @@ describe('@hilla/form', () => {
           sinon.assert.calledOnce(requestUpdateSpy);
           await orderView.updateComplete;
           expect(binder.for(binder.model.notes).invalid).to.be.true;
-          expect(binder.for(binder.model.notes).ownErrors![0].message).to.equal('Invalid notes');
+          expect(binder.for(binder.model.notes).ownErrors[0].message).to.equal('Invalid notes');
         }
       });
 
@@ -795,10 +791,9 @@ describe('@hilla/form', () => {
       });
 
       it('should interpolate message', async () => {
-        const callback: InterpolateMessageCallback<any> = (_message, _validator, _binderNode) => {
+        const callback: InterpolateMessageCallback<any> = (_message, _validator, _binderNode) =>
           // Interpolates all error messages as 'custom message'
-          return 'custom message';
-        };
+          'custom message';
         Binder.interpolateMessageCallback = sinon.spy(callback);
 
         const errors = await binder.validate();

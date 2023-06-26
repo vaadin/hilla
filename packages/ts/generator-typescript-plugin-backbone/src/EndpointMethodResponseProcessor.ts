@@ -15,7 +15,7 @@ export default class EndpointMethodResponseProcessor {
   readonly #owner: Plugin;
   readonly #response: EndpointMethodResponse;
 
-  public constructor(
+  constructor(
     code: string,
     response: EndpointMethodResponses[string],
     dependencyManager: DependencyManager,
@@ -27,7 +27,7 @@ export default class EndpointMethodResponseProcessor {
     this.#response = owner.resolver.resolve(response);
   }
 
-  public process(): readonly TypeNode[] {
+  process(): readonly TypeNode[] {
     switch (this.#code) {
       case '200':
         return this.#processOk();

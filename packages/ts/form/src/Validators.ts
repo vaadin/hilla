@@ -32,23 +32,23 @@ interface DecimalAttributes extends ValueNumberAttributes {
 }
 
 abstract class AbstractValidator<T> implements Validator<T> {
-  public message = 'invalid';
+  message = 'invalid';
 
-  public impliesRequired = false;
+  impliesRequired = false;
 
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     if (attrs && attrs.message) {
       this.message = attrs.message;
     }
   }
 
-  public abstract validate(value: T): boolean | Promise<boolean>;
+  abstract validate(value: T): Promise<boolean> | boolean;
 }
 
 export class Required<T> extends AbstractValidator<T> {
-  public override impliesRequired = true;
+  override impliesRequired = true;
 
-  public override validate(value: T) {
+  override validate(value: T) {
     if (typeof value === 'string' || Array.isArray(value)) {
       return value.length > 0;
     }
@@ -59,7 +59,7 @@ export class Required<T> extends AbstractValidator<T> {
   }
 }
 
-function _asValidatorAttributes(attrs: ValueNumberAttributes | number | string | PatternAttributes | RegExp) {
+function _asValidatorAttributes(attrs: PatternAttributes | RegExp | ValueNumberAttributes | number | string) {
   return typeof attrs === 'object' ? attrs : {};
 }
 
@@ -68,26 +68,26 @@ function _value(attrs: ValueNumberAttributes | number | string) {
 }
 
 abstract class NumberValidator<T> extends AbstractValidator<T> {
-  public override validate(value: T) {
+  override validate(value: T) {
     return isNumeric(String(value));
   }
 }
 
 export class IsNumber extends NumberValidator<number | null | undefined> {
-  public optional: boolean;
+  optional: boolean;
 
-  public constructor(optional: boolean, attrs?: ValidatorAttributes) {
+  constructor(optional: boolean, attrs?: ValidatorAttributes) {
     super({ message: 'must be a number', ...attrs });
     this.optional = optional;
   }
 
-  public override validate(value: number | null | undefined) {
+  override validate(value: number | null | undefined) {
     return (this.optional && value == null) || super.validate(value);
   }
 }
 
 abstract class ValueNumberValidator<T> extends NumberValidator<T> {
-  public value: number;
+  value: number;
 
   protected constructor(attrs: ValueNumberAttributes | number | string) {
     super(_asValidatorAttributes(attrs));
@@ -98,65 +98,65 @@ abstract class ValueNumberValidator<T> extends NumberValidator<T> {
 
 // JSR380 equivalent (https://beanvalidation.org/2.0/spec/#builtinconstraints)
 export class Email extends AbstractValidator<string> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be a well-formed email address', ...attrs });
   }
 
-  public override validate(value: string | null | undefined) {
+  override validate(value: string | null | undefined) {
     return !value || isEmail(value);
   }
 }
 export class Null extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be null', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return value == null;
   }
 }
 export class NotNull extends Required<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be null', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return !new Null().validate(value);
   }
 }
 export class NotEmpty extends Required<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be empty', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && new NotNull().validate(value) && value.length > 0;
   }
 }
 export class NotBlank extends Required<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be blank', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && new NotNull().validate(value) && value.trim().length > 0;
   }
 }
 export class AssertTrue extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be true', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return isBoolean(String(value)) && String(value) === 'true';
   }
 }
 export class AssertFalse extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be false', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return !new AssertTrue().validate(value);
   }
 }
@@ -166,38 +166,38 @@ function _asValueNumberAttributes(attrs: ValueNumberAttributes | number | string
 }
 
 export class Min extends ValueNumberValidator<any> {
-  public constructor(attrs: ValueNumberAttributes | number | string) {
+  constructor(attrs: ValueNumberAttributes | number | string) {
     super({
       message: `must be greater than or equal to ${_value(attrs)}`,
       ..._asValueNumberAttributes(attrs),
     });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && isFloat(String(value), { min: this.value });
   }
 }
 export class Max extends ValueNumberValidator<any> {
-  public constructor(attrs: ValueNumberAttributes | number | string) {
+  constructor(attrs: ValueNumberAttributes | number | string) {
     super({
       message: `must be less than or equal to ${_value(attrs)}`,
       ..._asValueNumberAttributes(attrs),
     });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && isFloat(String(value), { max: this.value });
   }
 }
 
-function _inclusive(attrs: DecimalAttributes | string | number) {
+function _inclusive(attrs: DecimalAttributes | number | string) {
   return typeof attrs !== 'object' || attrs.inclusive !== false;
 }
 
 export class DecimalMin extends ValueNumberValidator<any> {
-  public inclusive: boolean;
+  inclusive: boolean;
 
-  public constructor(attrs: DecimalAttributes | string | number) {
+  constructor(attrs: DecimalAttributes | number | string) {
     super({
       message: `must be greater than ${_inclusive(attrs) ? 'or equal to ' : ''}${_value(attrs)}`,
       ..._asValueNumberAttributes(attrs),
@@ -205,14 +205,14 @@ export class DecimalMin extends ValueNumberValidator<any> {
     this.inclusive = _inclusive(attrs);
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && isFloat(String(value), { [this.inclusive ? 'min' : 'gt']: this.value });
   }
 }
 export class DecimalMax extends ValueNumberValidator<any> {
-  public inclusive: boolean;
+  inclusive: boolean;
 
-  public constructor(attrs: DecimalAttributes | string | number) {
+  constructor(attrs: DecimalAttributes | number | string) {
     super({
       message: `must be less than ${_inclusive(attrs) ? 'or equal to ' : ''}${_value(attrs)}`,
       ..._asValueNumberAttributes(attrs),
@@ -220,43 +220,43 @@ export class DecimalMax extends ValueNumberValidator<any> {
     this.inclusive = _inclusive(attrs);
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return super.validate(value) && isFloat(String(value), { [this.inclusive ? 'max' : 'lt']: this.value });
   }
 }
 export class Negative extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be less than 0', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return toFloat(`${value}`) < 0;
   }
 }
 export class NegativeOrZero extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be less than or equal to 0', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return toFloat(`${value}`) <= 0;
   }
 }
 export class Positive extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be greater than 0', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return toFloat(`${value}`) > 0;
   }
 }
 export class PositiveOrZero extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be greater than or equal to 0', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return toFloat(`${value}`) >= 0;
   }
 }
@@ -270,11 +270,11 @@ function _max(attrs: SizeAttributes) {
 }
 
 export class Size extends AbstractValidator<string> {
-  public min: number;
+  min: number;
 
-  public max: number;
+  max: number;
 
-  public constructor(attrs: SizeAttributes = {}) {
+  constructor(attrs: SizeAttributes = {}) {
     super({ message: `size must be between ${_min(attrs)} and ${_max(attrs)}`, ...attrs });
     this.min = _min(attrs);
     this.max = _max(attrs);
@@ -283,7 +283,7 @@ export class Size extends AbstractValidator<string> {
     }
   }
 
-  public override validate(value: string) {
+  override validate(value: string) {
     if (this.min && this.min > 0 && !new Required().validate(value)) {
       return false;
     }
@@ -292,11 +292,11 @@ export class Size extends AbstractValidator<string> {
 }
 
 export class Digits extends AbstractValidator<string> {
-  public integer: number;
+  integer: number;
 
-  public fraction: number;
+  fraction: number;
 
-  public constructor(attrs: DigitAttributes) {
+  constructor(attrs: DigitAttributes) {
     super({
       message: `numeric value out of bounds (<${attrs.integer} digits>.<${attrs.fraction} digits> expected)`,
       ...attrs,
@@ -305,7 +305,7 @@ export class Digits extends AbstractValidator<string> {
     this.fraction = attrs.fraction;
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return (
       String(toFloat(`${value}`)).replace(/(.*)\.\d+/, '$1').length <= this.integer &&
       isDecimal(`${value}`, { decimal_digits: `0,${this.fraction}` })
@@ -314,11 +314,11 @@ export class Digits extends AbstractValidator<string> {
 }
 
 export class Past extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be a past date', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return isBefore(value);
   }
 }
@@ -337,11 +337,11 @@ export class Past extends AbstractValidator<any> {
 //   }
 // }
 export class Future extends AbstractValidator<any> {
-  public constructor(attrs?: ValidatorAttributes) {
+  constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be a future date', ...attrs });
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return isAfter(value);
   }
 }
@@ -359,7 +359,7 @@ export class Future extends AbstractValidator<any> {
 //   validate = () => true;
 // }
 
-function _regexp(attrs: PatternAttributes | string | RegExp) {
+function _regexp(attrs: PatternAttributes | RegExp | string) {
   if (typeof attrs === 'string') {
     return new RegExp(attrs, 'u');
   }
@@ -376,9 +376,9 @@ function _regexp(attrs: PatternAttributes | string | RegExp) {
 }
 
 export class Pattern extends AbstractValidator<string> {
-  public regexp: RegExp;
+  regexp: RegExp;
 
-  public constructor(attrs: PatternAttributes | string | RegExp) {
+  constructor(attrs: PatternAttributes | RegExp | string) {
     super({
       message: `must match the following regular expression: ${_regexp(attrs)}`,
       ..._asValidatorAttributes(attrs),
@@ -386,7 +386,7 @@ export class Pattern extends AbstractValidator<string> {
     this.regexp = _regexp(attrs);
   }
 
-  public override validate(value: any) {
+  override validate(value: any) {
     return matches(value, this.regexp);
   }
 }
@@ -396,14 +396,14 @@ export class Pattern extends AbstractValidator<string> {
  * returns false from `element.checkValidity()` and `element.validity.valid`.
  */
 export class ValidityStateValidator<T> extends AbstractValidator<T> {
-  public override message = '';
+  override message = '';
 
   // eslint-disable-next-line no-useless-constructor
-  public constructor() {
+  constructor() {
     super();
   }
 
-  public override validate(): boolean {
+  override validate(): boolean {
     return false;
   }
 }

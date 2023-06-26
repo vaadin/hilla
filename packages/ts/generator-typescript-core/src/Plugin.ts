@@ -8,18 +8,18 @@ export default abstract class Plugin {
   readonly resolver: ReferenceResolver;
   readonly logger: Logger;
 
-  public constructor(resolver: ReferenceResolver, logger: LoggerFactory) {
+  constructor(resolver: ReferenceResolver, logger: LoggerFactory) {
     this.logger = logger.for(this.constructor.name);
     this.resolver = resolver;
   }
 
-  public get name(): string {
+  get name(): string {
     return this.constructor.name;
   }
 
-  public abstract get path(): string;
+  abstract get path(): string;
 
-  public abstract execute(storage: SharedStorage): Promise<void>;
+  abstract execute(storage: SharedStorage): Promise<void>;
 }
 
 export type PluginConstructor = Constructor<Plugin, ConstructorParameters<typeof Plugin>>;
