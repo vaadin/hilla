@@ -64,8 +64,8 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.160</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <swagger.core.version>2.2.10</swagger.core.version>
-    <swagger.models.version>2.2.10</swagger.models.version>
+    <swagger.core.version>2.2.11</swagger.core.version>
+    <swagger.models.version>2.2.11</swagger.models.version>
     <swagger.parser.v3.version>2.1.12</swagger.parser.v3.version>
     <jackson.version>2.15.2</jackson.version>
     <junit.version>5.8.0</junit.version>
