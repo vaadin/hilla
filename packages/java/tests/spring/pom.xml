@@ -204,6 +204,15 @@
     </profile>
 
     <profile>
+      <id>it-modules-some</id>
+      <modules>
+        <module>endpoints</module>
+        <module>endpoints discovery</module>
+        <module>security</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>validation</id>
       <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
