@@ -1,5 +1,9 @@
 name: Validation
 
+defaults:
+  run:
+    shell: bash
+
 on:
   push:
     branches: [ main, '2.1', '2.0', '1.3' ]
@@ -23,21 +27,6 @@ jobs:
     timeout-minutes: 25
 
     steps:
-      - uses: actions-cool/check-user-permission@main
-        id: checkUser
-        with:
-          username: ${{github.triggering_actor}}
-          require: 'write'
-      - name: Fail on external workflow triggering
-        if: ${{ steps.checkUser.outputs.require-result != 'true' }}
-        run: |
-          echo "🚫 **${{ github.actor }}** is an external contributor, a **${{github.repository}}** team member has to review this changes and re-run this build" \
-            | tee -a $GITHUB_STEP_SUMMARY && exit 1
-      - name: Check secrets
-        run: |
-          [ -z "${{secrets.TB_LICENSE}}" ] \
-            && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
-            | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
@@ -164,12 +153,18 @@ jobs:
       - test-java
       - test-typescript
     name: ITs
-    runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        group: [1, 2]
+        include:
+          - os: ubuntu-latest
+            it-modules: group-1
+          - os: ubuntu-latest
+            it-modules: group-2
+          - os: windows-latest
+            it-modules: some
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout Project Code
@@ -203,10 +198,11 @@ jobs:
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
-              -Pit-modules-group-${{ matrix.group }} \
+              -Pit-modules-${{ matrix.it-modules }} \
               verify
           )
       - name: Gradle ITs
+        if: ${{ matrix.it-modules == 'group-1' || runner.os == 'windows' }}
         run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
