@@ -266,5 +266,13 @@
         <module>spring</module>
       </modules>
     </profile>
+
+    <profile>
+      <id>it-modules-some</id>
+      <modules>
+        <module>spring</module>
+      </modules>
+    </profile>
+
   </profiles>
 </project>
