@@ -2,6 +2,7 @@ import { constants } from 'node:fs';
 import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type File from '@hilla/generator-typescript-core/File.js';
 import Plugin, { type PluginConstructor } from '@hilla/generator-typescript-core/Plugin.js';
 import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
@@ -85,7 +86,7 @@ export default class GeneratorIO {
 
   async loadPlugin(modulePath: string): Promise<PluginConstructor> {
     this.#logger.global.debug(`Loading plugin: ${modulePath}`);
-    const module: PluginConstructorModule = await import(require.resolve(modulePath));
+    const module: PluginConstructorModule = await import(pathToFileURL(require.resolve(modulePath)).toString());
     const ctr: PluginConstructor = module.default;
 
     if (!Object.prototype.isPrototypeOf.call(Plugin, ctr)) {
