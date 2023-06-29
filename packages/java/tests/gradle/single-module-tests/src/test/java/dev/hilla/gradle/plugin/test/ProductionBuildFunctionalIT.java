@@ -1,6 +1,7 @@
 package dev.hilla.gradle.plugin.test;
 
 
+import dev.hilla.engine.commandrunner.GradleRunner;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.FileUtils;
@@ -12,9 +13,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-
-import dev.hilla.engine.commandrunner.CommandNotFoundException;
-import dev.hilla.engine.commandrunner.CommandRunnerException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,47 +59,23 @@ public class ProductionBuildFunctionalIT {
     }
 
     @BeforeEach
-    public void runProductionBuild() throws CommandRunnerException {
+    public void runProductionBuild() {
         try {
             cleanPreviousBuildAndFrontendGeneratedFolders();
         } catch (IOException e) {
             fail(e);
         }
-        runGradleCommand("./gradlew -Philla.productionMode=true build");
+        runGradleCommand("-Philla.productionMode=true build");
     }
 
-    private void runGradleCommand(String executable) throws CommandRunnerException {
-
-        var exitCode = 0;
-        var projectRootDir = getProjectRootPath().toFile();
+    private void runGradleCommand(String executable) {
         try {
-            var builder = new ProcessBuilder(executable.split("\\s+"))
-                .directory(projectRootDir)
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                .redirectError(ProcessBuilder.Redirect.INHERIT);
-            var process = builder.start();
-
-            exitCode = process.waitFor();
-
-            if (exitCode != 0) {
-                throw new RuntimeException(
-                    String.format("Process exit code for executing %s is: %d", executable, exitCode));
-            }
-        } catch (IOException | InterruptedException e) {
-            // Tries to figure out if the command is not found. This is not a
-            // 100% reliable way to do it, but an exception will be thrown
-            // anyway.
-            if (e.getCause() != null && e.getCause().getMessage() != null
-                && e.getCause().getMessage()
-                .contains("No such file or directory")) {
-                throw new CommandNotFoundException(String.format(
-                    "Command or file not found in %s: %s", projectRootDir.getPath(), executable), e);
-            }
-
-            throw new CommandRunnerException(
-                "Failed to execute command: " + executable, e);
-        } catch (RuntimeException e) {
-            fail(e);
+            var projectRootDir = getProjectRootPath().toFile();
+            var gradleRunner = GradleRunner.forProject(projectRootDir, executable.split("\\s+"))
+                .orElseThrow();
+            gradleRunner.run(null);
+        } catch (Throwable t) {
+            fail(t);
         }
     }
 
