@@ -1,0 +1,24 @@
+name: Validation
+
+on:
+  push:
+    branches: [ main, '2.1', '2.0', '1.3' ]
+    paths:
+      - 'hilla-logo.svg'
+      - 'README.md'
+      - '.github/ISSUE_TEMPLATE/*'
+      - 'packages/**/README.md'
+  pull_request_target:
+    paths:
+      - 'hilla-logo.svg'
+      - 'README.md'
+      - '.github/ISSUE_TEMPLATE/*'
+      - 'packages/**/README.md'
+
+jobs:
+  test-all:
+    name: Tests Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - run: 'echo "No build required"'
