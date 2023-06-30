@@ -7,12 +7,12 @@ import type SharedStorage from './SharedStorage.js';
 export default class PluginManager {
   readonly #plugins: Plugin[];
 
-  public constructor(plugins: readonly PluginConstructor[], resolver: ReferenceResolver, logger: LoggerFactory) {
+  constructor(plugins: readonly PluginConstructor[], resolver: ReferenceResolver, logger: LoggerFactory) {
     logger.global.info(`Plugins: ${plugins.map(({ name }) => name).join(', ')}`);
     this.#plugins = plugins.map((PluginClass) => new PluginClass(resolver, logger));
   }
 
-  public async execute(storage: SharedStorage): Promise<void> {
+  async execute(storage: SharedStorage): Promise<void> {
     // We need to run plugins sequentially
     for (const plugin of this.#plugins) {
       const { name, path } = plugin;

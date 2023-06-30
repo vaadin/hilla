@@ -7,32 +7,12 @@ import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor, {
-  type EndpointMethodOperation,
   HILLA_FRONTEND_NAME,
   INIT_TYPE_NAME,
 } from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
-  readonly #createdFilePaths = new PathManager({ extension: 'ts' });
-  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
-  readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
-  readonly #name: string;
-  readonly #owner: Plugin;
-  readonly #outputDir: string | undefined;
-
-  private constructor(
-    name: string,
-    owner: Plugin,
-    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
-    outputDir?: string,
-  ) {
-    this.#name = name;
-    this.#owner = owner;
-    this.#methods = methods;
-    this.#outputDir = outputDir;
-  }
-
-  public static async create(
+  static async create(
     name: string,
     owner: Plugin,
     methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
@@ -50,7 +30,26 @@ export default class EndpointProcessor {
     return endpoint;
   }
 
-  public async process(): Promise<SourceFile> {
+  readonly #createdFilePaths = new PathManager({ extension: 'ts' });
+  readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
+  readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
+  readonly #name: string;
+  readonly #outputDir: string | undefined;
+  readonly #owner: Plugin;
+
+  private constructor(
+    name: string,
+    owner: Plugin,
+    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
+    outputDir?: string,
+  ) {
+    this.#name = name;
+    this.#owner = owner;
+    this.#methods = methods;
+    this.#outputDir = outputDir;
+  }
+
+  async process(): Promise<SourceFile> {
     this.#owner.logger.debug(`Processing endpoint: ${this.#name}`);
 
     const statements = (
@@ -75,12 +74,12 @@ export default class EndpointProcessor {
       await Promise.all(
         Object.values(OpenAPIV3.HttpMethods)
           .filter((httpMethod) => pathItem[httpMethod])
-          .map((httpMethod) =>
+          .map(async (httpMethod) =>
             EndpointMethodOperationProcessor.createProcessor(
               httpMethod,
               this.#name,
               method,
-              pathItem[httpMethod] as EndpointMethodOperation,
+              pathItem[httpMethod]!,
               this.#dependencies,
               this.#owner,
             )?.process(this.#outputDir),
