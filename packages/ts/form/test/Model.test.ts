@@ -151,8 +151,8 @@ describe('@hilla/form', () => {
       beforeEach(() => {
         binder.value = {
           ...binder.value,
-          fieldArrayString: strings.slice(),
           fieldArrayModel: idEntities.slice(),
+          fieldArrayString: strings.slice(),
         };
       });
 
@@ -164,7 +164,9 @@ describe('@hilla/form', () => {
             const iteratorResult = iterator.next();
             expect(iteratorResult.done).to.be.false;
             const binderNode = iteratorResult.value;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             expect(binderNode.model[_key]).to.equal(i);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             expect(binderNode.value).to.equal(values[i]);
           }
 

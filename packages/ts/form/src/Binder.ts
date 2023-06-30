@@ -1,11 +1,10 @@
 // TODO: Fix dependency cycle
 
-// eslint-disable-next-line import/no-cycle
+import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend';
+import type { LitElement } from 'lit';
 import { BinderNode } from './BinderNode.js';
-// eslint-disable-next-line import/no-cycle
 import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import { _parent, type AbstractModel, type ModelConstructor } from './Models.js';
-// eslint-disable-next-line import/no-cycle
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -14,7 +13,6 @@ import {
   type Validator,
   type ValueError,
 } from './Validation.js';
-// eslint-disable-next-line import/no-cycle
 
 const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');
@@ -31,10 +29,14 @@ const _validationRequestSymbol = Symbol('validationRequest');
  * Typically, it is used to get and set the form value,
  * access the form model, validate, reset, and submit the form.
  *
- * @param <T> is the type of the value that binds to a form
- * @param <M> is the type of the model that describes the structure of the value
+ * @typeParam T - Type of the value that binds to a form
+ * @typeParam M - Type of the model that describes the structure of the value
  */
 export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
+  static interpolateMessageCallback?: InterpolateMessageCallback<any>;
+
+  context: Element;
+
   private [_defaultValue]!: T; // Initialized in the `read()` method
 
   private [_value]!: T; // Initialized in the `read()` method
@@ -53,13 +55,11 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
 
   private [_validations] = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
 
-  static interpolateMessageCallback?: InterpolateMessageCallback<any>;
-
   /**
    *
-   * @param context The form view component instance to update.
-   * @param Model The constructor (the class reference) of the form model. The Binder instantiates the top-level model
-   * @param config The options object, which can be used to config the onChange and onSubmit callbacks.
+   * @param context - The form view component instance to update.
+   * @param Model - The constructor (the class reference) of the form model. The Binder instantiates the top-level model
+   * @param config - The options object, which can be used to config the onChange and onSubmit callbacks.
    *
    * ```
    * binder = new Binder(orderView, OrderModel);
@@ -67,39 +67,40 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(public context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
+  constructor(context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
     super(new Model({ value: undefined }, 'value', false));
+    this.context = context;
     this[_emptyValue] = (this.model[_parent] as { value: T }).value;
-    // @ts-expect-error
+    // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
 
-    if (typeof (context as any).requestUpdate === 'function') {
-      this[_onChange] = () => (context as any).requestUpdate();
+    if (typeof (context as LitElement).requestUpdate === 'function') {
+      this[_onChange] = () => (context as LitElement).requestUpdate();
     }
-    this[_onChange] = config?.onChange || this[_onChange];
-    this[_onSubmit] = config?.onSubmit || this[_onSubmit];
+    this[_onChange] = config?.onChange?.bind(context) ?? this[_onChange];
+    this[_onSubmit] = config?.onSubmit?.bind(context) ?? this[_onSubmit];
     this.read(this[_emptyValue]);
   }
 
   /**
    * The initial value of the form, before any fields are edited by the user.
    */
-  override get defaultValue() {
+  override get defaultValue(): T {
     return this[_defaultValue];
   }
 
-  override set defaultValue(newValue) {
+  override set defaultValue(newValue: T) {
     this[_defaultValue] = newValue;
   }
 
   /**
    * The current value of the form.
    */
-  override get value() {
+  override get value(): T {
     return this[_value];
   }
 
-  override set value(newValue) {
+  override set value(newValue: T) {
     if (newValue === this[_value]) {
       return;
     }
@@ -107,19 +108,35 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     const oldValue = this[_value];
     this[_value] = newValue;
     this.update(oldValue);
-    this.updateValidation();
+    this.updateValidation().catch(() => {});
+  }
+
+  /**
+   * Indicates the submitting status of the form.
+   * True if the form was submitted, but the submit promise is not resolved yet.
+   */
+  get submitting(): boolean {
+    return this[_submitting];
+  }
+
+  /**
+   * Indicates the validating status of the form.
+   * True when there is an ongoing validation.
+   */
+  get validating(): boolean {
+    return this[_validating];
   }
 
   /**
    * Read the given value into the form and clear validation errors
    *
-   * @param value Sets the argument as the new default
+   * @param value - Sets the argument as the new default
    * value before resetting, otherwise the previous default is used.
    */
-  read(value: T) {
+  read(value: T): void {
     this.defaultValue = value;
     if (
-      // Skip when no value is set yet (e. g., invoked from constructor)
+      // Skip when no value is set yet (e.g., invoked from constructor)
       this.value &&
       // Clear validation state, then proceed if update is needed
       this.clearValidation() &&
@@ -136,14 +153,14 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * Reset the form to the previous value
    */
-  reset() {
+  reset(): void {
     this.read(this[_defaultValue]);
   }
 
   /**
    * Sets the form to empty value, as defined in the Model.
    */
-  clear() {
+  clear(): void {
     this.read(this[_emptyValue]);
   }
 
@@ -153,7 +170,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    *
    * It's a no-op if the onSubmit callback is undefined.
    */
-  async submit(): Promise<T | void> {
+  async submit(): Promise<T | undefined> {
     if (this[_onSubmit] !== undefined) {
       return this.submitTo(this[_onSubmit]!);
     }
@@ -163,7 +180,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
   /**
    * Submit the current form value to callback
    *
-   * @param endpointMethod the callback function
+   * @param endpointMethod - the callback function
    */
   async submitTo<V>(endpointMethod: (value: T) => Promise<V>): Promise<V> {
     const errors = await this.validate();
@@ -175,16 +192,21 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     this.update(this.value);
     try {
       return await endpointMethod.call(this.context, this.value);
-    } catch (error: any) {
-      if (error.validationErrorData && error.validationErrorData.length) {
+    } catch (error: unknown) {
+      if (error instanceof EndpointValidationError && error.validationErrorData.length) {
         const valueErrors: Array<ValueError<any>> = [];
-        error.validationErrorData.forEach((data: any) => {
+        error.validationErrorData.forEach((data: ValidationErrorData) => {
           const res =
-            /Object of type '(.+)' has invalid property '(.+)' with value '(.+)', validation error: '(.+)'/.exec(
+            /Object of type '(.+)' has invalid property '(.+)' with value '(.+)', validation error: '(.+)'/u.exec(
               data.message,
             );
-          const [property, value, message] = res ? res.splice(2) : [data.parameterName, undefined, data.message];
-          valueErrors.push({ property, value, validator: new ServerValidator(message), message });
+          const [property, value, message] = res ? res.splice(2) : [data.parameterName ?? '', undefined, data.message];
+          valueErrors.push({
+            message,
+            property,
+            validator: new ServerValidator(message),
+            value,
+          });
         });
         this.setErrorsWithDescendants(valueErrors);
         throw new ValidationError(valueErrors);
@@ -236,27 +258,11 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
    * Override to customise the binding strategy for a component.
    * The Binder extends BinderNode, see the inherited properties and methods below.
    *
-   * @param elm the bound element
-   * @param model the bound model
+   * @param elm - the bound element
+   * @param model - the bound model
    */
-  getFieldStrategy<T>(elm: any, model?: AbstractModel<T>): FieldStrategy {
+  getFieldStrategy<TField>(elm: any, model?: AbstractModel<TField>): FieldStrategy {
     return getDefaultFieldStrategy(elm, model);
-  }
-
-  /**
-   * Indicates the submitting status of the form.
-   * True if the form was submitted, but the submit promise is not resolved yet.
-   */
-  get submitting() {
-    return this[_submitting];
-  }
-
-  /**
-   * Indicates the validating status of the form.
-   * True when there is an ongoing validation.
-   */
-  get validating() {
-    return this[_validating];
   }
 
   protected performValidation(): Promise<void> | void {
@@ -269,16 +275,16 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderNode<T, M> {
     return this[_validationRequestSymbol];
   }
 
-  protected completeValidation() {
+  protected completeValidation(): void {
     this[_validating] = false;
   }
 
-  protected override update(oldValue: T) {
+  protected override update(oldValue: T): void {
     this[_onChange]?.call(this.context, oldValue);
   }
 }
 
 export interface BinderConfiguration<T> {
   onChange?(oldValue?: T): void;
-  onSubmit?(value: T): Promise<T | void>;
+  onSubmit?(value: T): Promise<T> | Promise<void>;
 }
