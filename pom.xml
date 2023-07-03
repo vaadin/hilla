@@ -55,15 +55,15 @@
     <swagger.version>2.1.13</swagger.version>
     <swagger.codegen.version>3.0.20</swagger.codegen.version>
     <swagger.codegen.generators.version>1.0.20</swagger.codegen.generators.version>
-    <jackson.version>2.13.4</jackson.version>
-    <jackson.databind.version>2.13.2.2</jackson.databind.version>
+    <jackson.version>2.14.2</jackson.version>
+    <jackson.databind.version>2.14.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>23.3-SNAPSHOT</flow.version>
     <slf4j.version>1.7.36</slf4j.version>
     <spring.version>5.3.27</spring.version>
-    <spring.boot.version>2.7.11</spring.boot.version>
-    <spring.data.version>2.7.11</spring.data.version>
+    <spring.boot.version>2.7.13</spring.boot.version>
+    <spring.data.version>2.7.13</spring.data.version>
     <spring.security.version>5.7.8</spring.security.version>
     <testbench.version>8.2.3</testbench.version>
     <javax.validation.version>2.0.1.Final</javax.validation.version>
