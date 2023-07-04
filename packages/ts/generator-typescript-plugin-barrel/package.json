@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-barrel",
-  "version": "2.2.0-alpha1",
+  "version": "2.2.0-alpha2",
   "description": "A Hilla TypeScript Generator plugin to generate barrel file",
   "main": "index.js",
   "type": "module",
@@ -50,16 +50,16 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^2.2.0-alpha1",
-    "@hilla/generator-typescript-plugin-backbone": "^2.2.0-alpha1"
+    "@hilla/generator-typescript-core": "^2.2.0-alpha2",
+    "@hilla/generator-typescript-plugin-backbone": "^2.2.0-alpha2"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.2.0-alpha1",
+    "@hilla/generator-typescript-utils": "^2.2.0-alpha2",
     "typescript": "^5.0.1-rc"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^2.2.0-alpha1",
-    "@hilla/generator-typescript-plugin-backbone": "^2.2.0-alpha1",
+    "@hilla/generator-typescript-core": "^2.2.0-alpha2",
+    "@hilla/generator-typescript-plugin-backbone": "^2.2.0-alpha2",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.1",
