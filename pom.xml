@@ -46,9 +46,6 @@
     </profile>
     <profile>
       <id>gradle</id>
-      <activation>
-        <jdk>(,18]</jdk>
-      </activation>
       <modules>
         <module>packages/java/gradle-plugin</module>
         <module>packages/java/gradle-plugin/pom-portal.xml</module>
