@@ -8,6 +8,7 @@
   <version>2.2-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
+<!-- -->
 
   <parent>
     <groupId>com.vaadin</groupId>
