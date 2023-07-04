@@ -44,6 +44,20 @@ jobs:
         run: mvn install -B -ntp -DskipTests
       - name: Save Workspace
         run: |
+          mvn -q -DskipTests \
+          -Dexec.executable='echo' \
+          -Dexec.args='${project.groupId}:${project.artifactId}' \
+          -Dexec.skip='${maven.deploy.skip}' \
+          exec:exec 
+
+          mvn -q -DskipTests \
+          -Dexec.executable='echo' \
+          -Dexec.args='${project.groupId}:${project.artifactId}' \
+          -Dexec.skip='${maven.deploy.skip}' \
+          exec:exec \
+            | tr '.:' '/' \
+            | sed -e 's/^/.m2\/repository\//'
+
           tar cf workspace.tar -C ~/ $( \
             mvn -q -DskipTests \
               -Dexec.executable='echo' \
