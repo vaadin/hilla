@@ -50,7 +50,8 @@ jobs:
               -Dexec.args='${project.groupId}:${project.artifactId}' \
               -Dexec.skip='${maven.deploy.skip}' \
               exec:exec \
-            | tr '.:' '/' \
+            | perl -pe 's/\.(?=.*:)/\//g' \
+            | sed -e 's/:/\//' \
             | sed -e 's/^/.m2\/repository\//' \
           )
           find packages/java -type d -name target -print0 | xargs -0 tar rf workspace.tar
