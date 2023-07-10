@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "2.2.0-alpha2",
+  "version": "2.2.0-alpha3",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
