@@ -16,6 +16,7 @@
 
 package dev.hilla.internal.hotswap;
 
+import com.vaadin.flow.internal.BrowserLiveReload;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ final class HotSwapWatchService {
     private final Map<WatchKey, Path> keys;
 
     private boolean trace;
+
+    private BrowserLiveReload browserLiveReload;
 
     private Path classesDir;
 
@@ -98,8 +101,8 @@ final class HotSwapWatchService {
     /**
      * Process all events for keys queued to the watcher
      */
-    void watch(Path classesDir) {
-
+    void watch(Path classesDir, BrowserLiveReload browserLiveReload) {
+        this.browserLiveReload = browserLiveReload;
         this.classesDir = classesDir;
         try {
             registerAll(classesDir);
@@ -200,7 +203,8 @@ final class HotSwapWatchService {
             var hotSwapType = isOpenApiJsonChanged
                     ? HotSwapEvent.Type.OPEN_API_JSON
                     : HotSwapEvent.Type.CLASSES;
-            var hotSwapEvent = new HotSwapEvent(hotSwapType, classesDir);
+            var hotSwapEvent = new HotSwapEvent(hotSwapType, classesDir,
+                    browserLiveReload);
             hotSwapListeners
                     .forEach(listener -> listener.onHotSwapEvent(hotSwapEvent));
         }

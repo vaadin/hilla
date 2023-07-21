@@ -16,9 +16,11 @@
 
 package dev.hilla.internal.hotswap;
 
+import com.vaadin.flow.internal.BrowserLiveReload;
+
 import java.nio.file.Path;
 
-public record HotSwapEvent(Type type, Path classesDir) {
+public record HotSwapEvent(Type type, Path classesDir, BrowserLiveReload browserLiveReload) {
 
     public enum Type {
         CLASSES, OPEN_API_JSON

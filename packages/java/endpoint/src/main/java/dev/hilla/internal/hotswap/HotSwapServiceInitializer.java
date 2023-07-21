@@ -39,7 +39,8 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
                 .ifPresent(browserLiveReload -> {
                     if (BrowserLiveReload.Backend.SPRING_BOOT_DEVTOOLS != browserLiveReload
                             .getBackend() && isHotSwapEnabled(vaadinService)) {
-                        hotSwapWatchService.watch(getClassesDir(vaadinService));
+                        hotSwapWatchService.watch(getClassesDir(vaadinService),
+                                browserLiveReload);
                     }
                 });
     }
