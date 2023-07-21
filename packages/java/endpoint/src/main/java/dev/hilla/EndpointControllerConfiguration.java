@@ -18,7 +18,6 @@ package dev.hilla;
 
 import java.lang.reflect.Method;
 
-import dev.hilla.internal.hotswap.HotSwapConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,7 +25,6 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -43,7 +41,6 @@ import jakarta.servlet.ServletContext;
  * A configuration class for customizing the {@link EndpointController} class.
  */
 @Configuration
-@Import(HotSwapConfiguration.class)
 public class EndpointControllerConfiguration {
     private final EndpointProperties endpointProperties;
 
