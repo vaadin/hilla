@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -61,7 +61,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "^2.0.10",
+    "@hilla/frontend": "^2.0.11",
     "rimraf": "^3.0.2",
     "validator": "^13.6.0"
   },
