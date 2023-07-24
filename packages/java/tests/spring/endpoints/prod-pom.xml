@@ -63,13 +63,16 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
                 <executions>
-                  <execution>
-                    <goals>
-                      <goal>prepare-frontend</goal>
-                      <goal>build-frontend</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <goals>
+                          <goal>build-frontend</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
                 </executions>
+                <configuration>
+                    <productionMode>true</productionMode>
+                </configuration>
             </plugin>
 
             <plugin>
