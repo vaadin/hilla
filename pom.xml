@@ -51,6 +51,7 @@
       </activation>
       <modules>
         <module>packages/java/gradle-plugin</module>
+        <module>packages/java/gradle-plugin/pom-portal.xml</module>
       </modules>
     </profile>
   </profiles>
