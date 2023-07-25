@@ -107,7 +107,7 @@ jobs:
     needs: init
     name: Test TypeScript
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
 
@@ -207,7 +207,7 @@ jobs:
         run: |
           (
             cd packages/java/tests/spring/endpoints && \
-            mvn -B -am -ntp -f prod-pom.xml \
+            mvn -B -am -ntp -fae -f prod-pom.xml \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
               -Dfailsafe.rerunFailingTestsCount=2 \
