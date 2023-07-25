@@ -207,12 +207,13 @@ jobs:
         run: |
           (
             cd packages/java/tests/spring/endpoints && \
-            mvn -f prod-pom.xml \
+            mvn -B -am -ntp -f prod-pom.xml \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
               -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
+              -Dvaadin.hillaEngine=${{ matrix.hillaEngine }} \
               verify
           )
       - uses: actions/upload-artifact@v3
