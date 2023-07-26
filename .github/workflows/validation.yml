@@ -207,7 +207,7 @@ jobs:
         run: |
           (
             cd packages/java/tests/spring/endpoints && \
-            mvn -B -am -ntp -fae -f prod-pom.xml \
+            mvn -B -am -ntp -f prod-pom.xml \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
               -Dfailsafe.rerunFailingTestsCount=2 \
