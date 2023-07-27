@@ -57,7 +57,6 @@ public class PushConfigurer {
                 new TrackMessageSizeInterceptor(),
                 new SuspendTrackerInterceptor());
         AtmosphereFramework fw = atmosphereServlet.framework();
-        fw.setDefaultBroadcasterClassName(SimpleBroadcaster.class.getName());
         fw.addAtmosphereHandler(HILLA_PUSH_PATH, pushEndpoint, interceptors);
 
         // Override the global mapping set by Flow
