@@ -69,7 +69,7 @@ public class GradleRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
-        return IS_WINDOWS ? List.of(".\\gradlew.bat", "gradle.bat")
+        return IS_WINDOWS ? List.of(".\\gradlew.bat", "gradle.bat", "gradle")
                 : List.of("./gradlew", "gradle");
     }
 }
