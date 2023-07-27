@@ -34,97 +34,97 @@ describe('AnnotationParser', () => {
   });
 
   const notBlank: AnnotationPack = {
-    str: 'NotBlank()',
     obj: {
       simpleName: 'NotBlank',
     },
+    str: 'NotBlank()',
   };
 
   const min: AnnotationPack = {
-    str: 'Min(2)',
     obj: {
-      simpleName: 'Min',
       attributes: { value: 2 },
+      simpleName: 'Min',
     },
+    str: 'Min(2)',
   };
 
   const max: AnnotationPack = {
     expected: 'Max(1000)',
-    str: 'Max(1e3)',
     obj: {
-      simpleName: 'Max',
       attributes: { value: 1000 },
+      simpleName: 'Max',
     },
+    str: 'Max(1e3)',
   };
 
   const sizeSimple: AnnotationPack = {
-    str: 'Size({ min: 1 })',
     obj: {
-      simpleName: 'Size',
       attributes: { min: 1 },
+      simpleName: 'Size',
     },
+    str: 'Size({ min: 1 })',
   };
 
   const sizeComplex: AnnotationPack = {
-    str: 'Size({ min: 1, message: "foo" })',
     obj: {
+      attributes: { message: 'foo', min: 1 },
       simpleName: 'Size',
-      attributes: { min: 1, message: 'foo' },
     },
+    str: 'Size({ message: "foo", min: 1 })',
   };
 
   const decimalMin: AnnotationPack = {
-    str: 'DecimalMin("0.01")',
     obj: {
-      simpleName: 'DecimalMin',
       attributes: { value: '0.01' },
+      simpleName: 'DecimalMin',
     },
+    str: 'DecimalMin("0.01")',
   };
 
   const decimalMax: AnnotationPack = {
-    str: 'DecimalMax({ value: "100", inclusive: false })',
     obj: {
-      simpleName: 'DecimalMax',
       attributes: {
-        value: '100',
         inclusive: false,
+        value: '100',
       },
+      simpleName: 'DecimalMax',
     },
+    str: 'DecimalMax({ inclusive: false, value: "100" })',
   };
 
   const decimalMaxInclusive: AnnotationPack = {
-    str: 'DecimalMax({ value: "100", inclusive: true })',
     obj: {
-      simpleName: 'DecimalMax',
       attributes: {
-        value: '100',
         inclusive: true,
+        value: '100',
       },
+      simpleName: 'DecimalMax',
     },
+    str: 'DecimalMax({ inclusive: true, value: "100" })',
   };
 
   const digits: AnnotationPack = {
-    str: 'Digits({ integer: 5, fraction: 2 })',
     obj: {
+      attributes: { fraction: 2, integer: 5 },
       simpleName: 'Digits',
-      attributes: { integer: 5, fraction: 2 },
     },
+    str: 'Digits({ fraction: 2, integer: 5 })',
   };
 
   const email: AnnotationPack = {
-    str: 'Email({ message: "foo" })',
     obj: {
-      simpleName: 'Email',
       attributes: { message: 'foo' },
+      simpleName: 'Email',
     },
+    str: 'Email({ message: "foo" })',
   };
 
   const pattern: AnnotationPack = {
-    str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,
     obj: {
-      simpleName: 'Pattern',
       attributes: { regexp: '\\d+\\..+' },
+      simpleName: 'Pattern',
     },
+    str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,
   };
 
   it('should parse string annotations', () => {

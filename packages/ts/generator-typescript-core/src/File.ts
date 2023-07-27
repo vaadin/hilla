@@ -8,16 +8,14 @@ export type FileOptions = Readonly<
 >;
 
 export default class File extends Blob {
-  readonly #lastModified?: number;
   readonly #name: string;
 
-  public constructor(fileBits: Array<BinaryLike | Blob>, fileName: string, options?: FileOptions) {
+  constructor(fileBits: Array<BinaryLike | Blob>, fileName: string, options?: FileOptions) {
     super(fileBits, options);
     this.#name = fileName;
-    this.#lastModified = options?.lastModified;
   }
 
-  public get name(): string {
+  get name(): string {
     return this.#name;
   }
 }

@@ -20,23 +20,23 @@ export default class Generator {
   readonly #parser: SwaggerParser;
   readonly #outputDir: string | undefined;
 
-  public constructor(plugins: readonly PluginConstructor[], context: GeneratorContext) {
+  constructor(plugins: readonly PluginConstructor[], context: GeneratorContext) {
     this.#parser = new SwaggerParser();
     this.#manager = new PluginManager(plugins, new ReferenceResolver(this.#parser), context.logger);
     this.#logger = context.logger;
     this.#outputDir = context.outputDir;
   }
 
-  public async process(input: string): Promise<readonly File[]> {
+  async process(input: string): Promise<readonly File[]> {
     this.#logger.global.debug('Processing OpenAPI');
     const api = (await this.#parser.bundle(JSON.parse(input))) as ReadonlyDeep<OpenAPIV3.Document>;
 
     const storage: SharedStorage = {
       api,
       apiRefs: this.#parser.$refs,
+      outputDir: this.#outputDir,
       pluginStorage: new Map(),
       sources: [],
-      outputDir: this.#outputDir,
     };
 
     this.#logger.global.debug('Executing plugins');

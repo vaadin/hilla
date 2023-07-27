@@ -15,14 +15,14 @@
   <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
-    <maven.version>3.9.1</maven.version>
+    <maven.version>3.9.2</maven.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>dev.hilla</groupId>
-      <artifactId>hilla-plugin-base</artifactId>
+      <artifactId>plugin-base</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.8.2</version>
+      <version>3.9.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

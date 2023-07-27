@@ -1,5 +1,4 @@
 /* eslint-disable no-new */
-/* tslint:disable: no-unused-expression */
 import { assert, expect } from '@esm-bundle/chai';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { atmosphere } from 'a-atmosphere-javascript';
@@ -152,7 +151,7 @@ describe('@hilla/frontend', () => {
       it('should require 2 arguments', async () => {
         let thrownError;
         try {
-          // @ts-ignore
+          // @ts-expect-error
           await client.call();
         } catch (err) {
           thrownError = err;
@@ -164,7 +163,7 @@ describe('@hilla/frontend', () => {
 
         thrownError = undefined;
         try {
-          // @ts-ignore
+          // @ts-expect-error
           await client.call('FooEndpoint');
         } catch (err) {
           thrownError = err;
@@ -219,7 +218,7 @@ describe('@hilla/frontend', () => {
       });
 
       it('should be able to abort a call', async () => {
-        const getDelayedOk = () => new Promise((res) => setTimeout(() => res(200), 500));
+        const getDelayedOk = async () => new Promise((res) => setTimeout(() => res(200), 500));
         fetchMock.post(`${base}/connect/FooEndpoint/abort`, getDelayedOk());
 
         const controller = new AbortController();
@@ -495,9 +494,7 @@ describe('@hilla/frontend', () => {
 
       describe('middleware invocation', () => {
         it('should not invoke middleware before call', async () => {
-          const spyMiddleware = sinon.spy(async (context: any, next?: any) => {
-            return next(context);
-          });
+          const spyMiddleware = sinon.spy(async (context: any, next?: any) => next(context));
           client.middlewares = [spyMiddleware];
 
           expect(spyMiddleware).to.not.be.called;

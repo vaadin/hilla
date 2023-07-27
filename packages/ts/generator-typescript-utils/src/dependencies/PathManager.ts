@@ -10,7 +10,7 @@ export type PathManagerOptions = Readonly<{
 export default class PathManager {
   readonly #options: SetRequired<PathManagerOptions, 'relativeTo'>;
 
-  public constructor(options?: PathManagerOptions) {
+  constructor(options?: PathManagerOptions) {
     let extension: string | undefined;
 
     if (options?.extension) {
@@ -24,11 +24,11 @@ export default class PathManager {
     };
   }
 
-  public get aliasRoot(): string | undefined {
+  get aliasRoot(): string | undefined {
     return this.#options.aliasRoot;
   }
 
-  public createBareModulePath(path: string, isFile = false) {
+  createBareModulePath(path: string, isFile = false): string {
     const { extension } = this.#options;
 
     if (extension && isFile) {
@@ -38,7 +38,7 @@ export default class PathManager {
     return path;
   }
 
-  public createRelativePath(path: string, relativeTo = this.#options.relativeTo) {
+  createRelativePath(path: string, relativeTo = this.#options.relativeTo): string {
     const { extension } = this.#options;
     let result = path;
 
@@ -50,7 +50,7 @@ export default class PathManager {
     return result.startsWith('.') ? result : `./${result}`;
   }
 
-  public createTSAliasModulePath(path: string, root = this.#options.aliasRoot) {
+  createTSAliasModulePath(path: string, root = this.#options.aliasRoot): string {
     return root ? `${root}/${path}` : path;
   }
 }
