@@ -21,10 +21,19 @@ import com.vaadin.flow.internal.BrowserLiveReloadAccessor;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.file.Path;
 
 class HotSwapServiceInitializer implements VaadinServiceInitListener {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(HotSwapServiceInitializer.class);
+
+    @Value("${hilla.endpoint.hot-reload.enabled:true}")
+    private boolean endpointHotReloadEnabled;
 
     private final HotSwapWatchService hotSwapWatchService;
 
@@ -38,14 +47,24 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
         BrowserLiveReloadAccessor.getLiveReloadFromService(vaadinService)
                 .ifPresent(browserLiveReload -> {
                     if (BrowserLiveReload.Backend.SPRING_BOOT_DEVTOOLS != browserLiveReload
-                            .getBackend() && isHotSwapEnabled(vaadinService)) {
-                        hotSwapWatchService.watch(getClassesDir(vaadinService),
-                                browserLiveReload);
+                            .getBackend()
+                            && isDevModeLiveReloadEnabled(vaadinService)) {
+                        if (isEndpointHotReloadEnabled()) {
+                            hotSwapWatchService.watch(
+                                    getClassesDir(vaadinService),
+                                    browserLiveReload);
+                            info("Hilla Endpoint Hot-Reload service is enabled. "
+                                    + "You can disable it by defining the hilla.endpoint.hot-reload.enabled=false property in application.properties file.");
+                        } else {
+                            info("Hilla Endpoint Hot-Reload service is disabled. "
+                                    + "You can enable it by removing the hilla.endpoint.hot-reload.enabled=true property from your application.properties file, "
+                                    + "or by setting its value to true.");
+                        }
                     }
                 });
     }
 
-    private boolean isHotSwapEnabled(VaadinService vaadinService) {
+    private boolean isDevModeLiveReloadEnabled(VaadinService vaadinService) {
         return vaadinService.getDeploymentConfiguration()
                 .isDevModeLiveReloadEnabled();
     }
@@ -55,5 +74,13 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
         var projectFolder = deploymentConfig.getProjectFolder().toPath();
         return projectFolder.resolve(deploymentConfig.getBuildFolder())
                 .resolve("classes");
+    }
+
+    private boolean isEndpointHotReloadEnabled() {
+        return endpointHotReloadEnabled;
+    }
+
+    private void info(String message) {
+        LOGGER.info(message);
     }
 }

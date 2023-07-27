@@ -20,26 +20,22 @@ import dev.hilla.EndpointController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class HotSwapConfiguration {
 
     @Bean
-    @Scope("singleton")
     HotSwapWatchService hotSwapWatchService() {
         return new HotSwapWatchService();
     }
 
     @Bean
-    @Scope("singleton")
     HotSwapServiceInitializer hotSwapServiceInitializer(
             @Autowired HotSwapWatchService hotSwapWatchService) {
         return new HotSwapServiceInitializer(hotSwapWatchService);
     }
 
     @Bean
-    @Scope("singleton")
     EndpointHotSwapListener endpointHotSwapListener(
             @Autowired HotSwapWatchService hotSwapWatchService,
             @Autowired EndpointController endpointController) {
