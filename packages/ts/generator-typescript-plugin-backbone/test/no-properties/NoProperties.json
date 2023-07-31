@@ -1,0 +1,82 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "NoPropertiesEndpoint"
+    }
+  ],
+  "paths" : {
+    "/NoPropertiesEndpoint/sayHello" : {
+      "post" : {
+        "tags" : [
+          "NoPropertiesEndpoint"
+        ],
+        "operationId" : "NoPropertiesEndpoint_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.example.application.entities.ExampleEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.example.application.entities.ExampleEntity" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.example.application.entities.CoreEntity"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "integer",
+                "format" : "int64",
+                "nullable" : true
+              }
+            }
+          }
+        ]
+      },
+      "com.example.application.entities.CoreEntity" : {
+        "type" : "object"
+      }
+    }
+  }
+}
