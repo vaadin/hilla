@@ -38,6 +38,8 @@
     "concurrently": "^7.6.0",
     "eslint": "^8.41.0",
     "eslint-config-vaadin": "^1.0.0-alpha.12",
+    "eslint-plugin-perfectionist": "^1.5.1",
+    "eslint-plugin-tsdoc": "^0.2.17",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",
     "karma-coverage": "^2.2.0",
@@ -54,7 +56,8 @@
     "simple-git-hooks": "^2.8.1",
     "sinon": "^15.0.2",
     "tsx": "^3.12.5",
-    "typescript": "^5.0.2",
-    "vite": "^4.2.0"
+    "type-fest": "^4.1.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8"
   }
 }

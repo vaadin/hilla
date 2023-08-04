@@ -6,10 +6,18 @@
     "vaadin/prettier"
   ],
   "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"],
+  "plugins": ["perfectionist", "tsdoc"],
   "rules": {
     "class-methods-use-this": "off",
     "import/prefer-default-export": "off",
     "max-params": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "perfectionist/sort-enums": "error",
+    "perfectionist/sort-exports": "error",
+    "perfectionist/sort-jsx-props": "error",
+    "perfectionist/sort-named-exports": "error",
+    "perfectionist/sort-objects": "error",
+    "sort-keys": "off",
+    "tsdoc/syntax": "error"
   }
 }
