@@ -1,8 +1,7 @@
 /* eslint-disable max-classes-per-file */
+import type { ReactiveControllerHost } from '@lit/reactive-element';
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import type { ReactiveElement } from 'lit';
 import type { Jsonifiable } from 'type-fest';
-import type { JsonValue } from 'type-fest/source/basic.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
 
@@ -119,7 +118,7 @@ export interface Subscription<T> {
   /*
    * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
    */
-  context(context: ReactiveElement): Subscription<T>;
+  context(context: ReactiveControllerHost): Subscription<T>;
 
   /** Called when the subscription has completed. No values are made available after calling this. */
   onComplete(callback: () => void): Subscription<T>;

@@ -1,4 +1,5 @@
 export interface AbstractMessage {
+  '@type': string;
   id: string;
 }
 

@@ -1,35 +1,57 @@
 import atmosphere from 'atmosphere.js';
 import sinon from 'sinon';
+import type { TupleToUnion } from 'type-fest';
 
-export type Events =
-  | 'onClientTimeout'
-  | 'onClose'
-  | 'onError'
-  | 'onFailureToReconnect'
-  | 'onLocalMessage'
-  | 'onMessage'
-  | 'onMessagePublished'
-  | 'onOpen'
-  | 'onReconnect'
-  | 'onReopen'
-  | 'onTransportFailure';
+export const subscriptionEventNames = [
+  'onClientTimeout',
+  'onClose',
+  'onError',
+  'onFailureToReconnect',
+  'onLocalMessage',
+  'onMessage',
+  'onMessagePublished',
+  'onOpen',
+  'onReconnect',
+  'onReopen',
+  'onTransportFailure',
+  'push',
+] as const;
 
-export const pushStub = sinon.stub();
+export type SubscriptionEventSpies = Readonly<{
+  [P in TupleToUnion<typeof subscriptionEventNames>]?: sinon.SinonSpy<
+    Parameters<Required<Atmosphere.Request>[P]>,
+    ReturnType<Required<Atmosphere.Request>[P]>
+  >;
+}>;
 
-export const subscribeStub = sinon.stub(atmosphere, 'subscribe').callsFake((request: Atmosphere.Request) => {
-  if (subscribeStub.getCalls().length === 1) {
-    throw new Error('Atmosphere subscribe called while already subscribed');
-  }
+let subscriptionEventSpies: SubscriptionEventSpies | undefined;
 
-  pushStub.resetHistory();
+export function getSubscriptionEventSpies(): SubscriptionEventSpies | undefined {
+  return subscriptionEventSpies;
+}
 
-  const ret = {
-    push: pushStub,
-  };
+export const subscribeStub = sinon
+  .stub(atmosphere as Required<Atmosphere.Atmosphere>, 'subscribe')
+  .callsFake((request: Atmosphere.Request) => {
+    // We already have the call registered when we come here for the first time.
+    // So we have to compare with 1, not 0.
+    if (subscribeStub.callCount > 1) {
+      throw new Error('Atmosphere subscribe called while already subscribed');
+    }
 
-  request.onOpen?.();
+    subscriptionEventSpies = Object.fromEntries(
+      subscriptionEventNames.map((prop) => {
+        if (typeof request[prop] === 'undefined') {
+          request[prop] = sinon.spy();
+          return [prop, request[prop]];
+        }
 
-  return ret;
-});
+        return [prop, sinon.spy(request, prop)];
+      }),
+    );
+    request.onOpen?.();
+
+    return request;
+  });
 
 export default atmosphere;

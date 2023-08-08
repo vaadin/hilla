@@ -1,5 +1,5 @@
+import type { ReactiveControllerHost } from '@lit/reactive-element';
 import atmosphere from 'atmosphere.js';
-import type { ReactiveElement } from 'lit';
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import type { ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
@@ -68,7 +68,7 @@ export class FluxConnection extends EventTarget {
         this.#send(closeMessage);
         this.#removeSubscription(id);
       },
-      context: (context: ReactiveElement): Subscription<any> => {
+      context(context: ReactiveControllerHost): Subscription<any> {
         context.addController({
           hostDisconnected() {
             hillaSubscription.cancel();
@@ -143,7 +143,7 @@ export class FluxConnection extends EventTarget {
   #handleMessage(message: unknown) {
     if (isClientMessage(message)) {
       const { id } = message;
-      const endpointInfo = this.#endpointInfos.get(id) ?? '';
+      const endpointInfo = this.#endpointInfos.get(id) ?? 'unknown';
 
       if (message['@type'] === 'update') {
         const callback = this.#onNextCallbacks.get(id);
