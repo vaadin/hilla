@@ -17,6 +17,7 @@ package dev.hilla;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -84,6 +85,39 @@ public class EndpointRegistry {
      */
     public EndpointRegistry(EndpointNameChecker endpointNameChecker) {
         this.endpointNameChecker = endpointNameChecker;
+
+        // new Thread(() -> {
+        // while (true) {
+        // try {
+        // vaadinEndpoints.values().forEach(vaadinEndpointData -> {
+        // try {
+        // var cls1 = vaadinEndpointData.vaadinEndpointObject
+        // .getClass();
+        // var cls2 = Class.forName(cls1.getName());
+        // System.out.print(cls2.getSimpleName());
+        // System.out.print(" ");
+        // System.out.print(
+        // Arrays.toString(cls1.getDeclaredMethods()));
+        // System.out.print(" ");
+        // System.out.println(
+        // Arrays.toString(cls2.getDeclaredMethods()));
+        // // vaadinEndpointData.methods.values().forEach(method
+        // // -> {
+        // // System.out.print(" ");
+        // // System.out.print(method.getName());
+        // // System.out.print(" ");
+        // // System.out.println(method.hashCode());
+        // // });
+        // } catch (ClassNotFoundException e) {
+        // e.printStackTrace();
+        // }
+        // });
+        // Thread.sleep(1000);
+        // } catch (InterruptedException e) {
+        // Thread.currentThread().interrupt();
+        // }
+        // }
+        // }).start();
     }
 
     private static String getEndpointNameForClass(Class<?> beanType) {
