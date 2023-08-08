@@ -16,6 +16,7 @@ import {
   type MiddlewareFunction,
   UnauthorizedResponseError,
 } from '../src/index.js';
+import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {
   clearSpringCsrfMetaTags,
@@ -35,6 +36,7 @@ describe('@hilla/frontend', () => {
     let myMiddleware: MiddlewareFunction;
 
     beforeEach(() => {
+      subscribeStub.resetHistory();
       myMiddleware = async (ctx, next) => next?.(ctx);
 
       const connectionStateStore = new ConnectionStateStore(ConnectionState.CONNECTED);
@@ -588,7 +590,7 @@ describe('@hilla/frontend', () => {
 
       it('should reuse the fluxConnection', async () => {
         client.subscribe('FooEndpoint', 'fooMethod');
-        const { fluxConnection } = client as any;
+        const { fluxConnection } = client;
         client.subscribe('FooEndpoint', 'barMethod');
         expect(client.fluxConnection).to.equal(fluxConnection);
       });
