@@ -14,7 +14,9 @@
     "Hilla"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9878",
     "test:coverage": "npm run test -- --coverage",

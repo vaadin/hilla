@@ -1,6 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import type { ReactiveControllerHost } from '@lit/reactive-element';
-import type { ReactiveController } from 'lit';
+import type { ReactiveControllerHost, ReactiveController } from '@lit/reactive-element';
 import sinon from 'sinon';
 import { FluxConnection, State } from '../src/FluxConnection.js';
 import type {
