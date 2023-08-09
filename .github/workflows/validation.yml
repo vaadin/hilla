@@ -20,6 +20,10 @@ on:
       - 'packages/**/README.md'
   workflow_dispatch:
 
+env:
+  # https://github.com/nrwl/nx/issues/15452#issuecomment-1461568255
+  NX_NON_NATIVE_HASHER: true
+
 jobs:
   init:
     name: Build
