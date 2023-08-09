@@ -1,15 +1,15 @@
 import type { ConnectionIndicator, ConnectionStateStore } from '@vaadin/common-frontend';
 
-interface VaadinRegistration {
+export interface VaadinRegistration {
   readonly is: string;
   readonly version?: string;
 }
 
-interface VaadinFlow {
+export interface VaadinFlow {
   readonly clients?: Record<string, unknown>;
 }
 
-interface Vaadin {
+export interface Vaadin {
   readonly Flow?: VaadinFlow;
   readonly connectionIndicator?: ConnectionIndicator;
   readonly connectionState?: ConnectionStateStore;

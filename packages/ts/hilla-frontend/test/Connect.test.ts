@@ -4,6 +4,7 @@ import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import chaiAsPromised from 'chai-as-promised';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
+import type { WritableDeep } from 'type-fest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
@@ -16,6 +17,7 @@ import {
   type MiddlewareFunction,
   UnauthorizedResponseError,
 } from '../src/index.js';
+import type { Vaadin, VaadinWindow } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {
@@ -31,6 +33,12 @@ use(chaiAsPromised);
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
 
+interface TestVaadinWindow extends Window {
+  Vaadin?: WritableDeep<Vaadin>;
+}
+
+const $wnd = window as TestVaadinWindow;
+
 describe('@hilla/frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
@@ -40,13 +48,13 @@ describe('@hilla/frontend', () => {
       myMiddleware = async (ctx, next) => next?.(ctx);
 
       const connectionStateStore = new ConnectionStateStore(ConnectionState.CONNECTED);
-      window.Vaadin = { connectionState: connectionStateStore };
+      $wnd.Vaadin = { connectionState: connectionStateStore };
       localStorage.clear();
     });
 
     afterEach(() => {
       document.body.querySelector('vaadin-connection-indicator')?.remove();
-      delete window.Vaadin;
+      delete $wnd.Vaadin;
     });
 
     it('should be exported', () => {
@@ -60,36 +68,36 @@ describe('@hilla/frontend', () => {
 
     it('should add a global connection indicator', () => {
       new ConnectClient();
-      expect(window.Vaadin?.connectionIndicator).is.not.undefined;
+      expect($wnd.Vaadin?.connectionIndicator).is.not.undefined;
     });
 
     it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow.client.TypeScript not loaded', async () => {
       new ConnectClient();
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
       dispatchEvent(new Event('offline'));
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
       dispatchEvent(new Event('online'));
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
     it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow is loaded but Flow.client.TypeScript not loaded', async () => {
       new ConnectClient();
-      window.Vaadin!.Flow = {};
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      $wnd.Vaadin!.Flow = {};
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
       dispatchEvent(new Event('offline'));
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
       dispatchEvent(new Event('online'));
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
     it('should not transition connection state if Flow loaded', async () => {
       new ConnectClient();
-      window.Vaadin!.Flow = {};
-      window.Vaadin!.Flow.clients = {};
-      window.Vaadin!.Flow.clients.TypeScript = {};
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      $wnd.Vaadin!.Flow = {};
+      $wnd.Vaadin!.Flow.clients = {};
+      $wnd.Vaadin!.Flow.clients.TypeScript = {};
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
       dispatchEvent(new Event('offline'));
-      expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
     describe('constructor options', () => {
@@ -180,7 +188,7 @@ describe('@hilla/frontend', () => {
 
       it('should set connection state to LOADING followed by CONNECTED on successful fetch', async () => {
         const stateChangeListener = sinon.fake();
-        window.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
+        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
 
         await client.call('FooEndpoint', 'fooMethod');
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTED);
@@ -188,7 +196,7 @@ describe('@hilla/frontend', () => {
 
       it('should set connection state to CONNECTION_LOST on network failure', async () => {
         const stateChangeListener = sinon.fake();
-        window.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
+        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
         fetchMock.post(`${base}/connect/FooEndpoint/reject`, Promise.reject(new TypeError('Network failure')));
         try {
           await client.call('FooEndpoint', 'reject');
@@ -226,7 +234,7 @@ describe('@hilla/frontend', () => {
         } catch (error) {
           // expected
         } finally {
-          expect(window.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+          expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
         }
       });
 

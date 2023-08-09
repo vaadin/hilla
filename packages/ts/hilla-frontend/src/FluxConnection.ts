@@ -2,8 +2,12 @@ import type { ReactiveControllerHost } from '@lit/reactive-element';
 import atmosphere from 'atmosphere.js';
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
-import type { ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
-import { isClientMessage } from './FluxMessages.js';
+import {
+  isClientMessage,
+  type ServerCloseMessage,
+  type ServerConnectMessage,
+  type ServerMessage,
+} from './FluxMessages.js';
 
 export enum State {
   ACTIVE = 'active',
