@@ -1,23 +1,21 @@
 import type { ConnectionIndicator, ConnectionStateStore } from '@vaadin/common-frontend';
 
-declare global {
-  interface VaadinRegistration {
-    is: string;
-    version?: string;
-  }
+interface VaadinRegistration {
+  readonly is: string;
+  readonly version?: string;
+}
 
-  interface VaadinFlow {
-    clients?: Record<string, unknown>;
-  }
+interface VaadinFlow {
+  readonly clients?: Record<string, unknown>;
+}
 
-  interface Vaadin {
-    Flow?: VaadinFlow;
-    connectionIndicator?: ConnectionIndicator;
-    connectionState?: ConnectionStateStore;
-    registrations?: VaadinRegistration[];
-  }
+interface Vaadin {
+  readonly Flow?: VaadinFlow;
+  readonly connectionIndicator?: ConnectionIndicator;
+  readonly connectionState?: ConnectionStateStore;
+  registrations?: VaadinRegistration[];
+}
 
-  interface Window {
-    Vaadin?: Vaadin;
-  }
+export interface VaadinWindow extends Window {
+  Vaadin?: Vaadin;
 }

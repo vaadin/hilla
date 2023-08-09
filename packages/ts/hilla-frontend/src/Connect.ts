@@ -4,10 +4,13 @@ import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
 import type { Jsonifiable } from 'type-fest';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
+import type { VaadinWindow } from './types.js';
 
-window.Vaadin ??= {};
-window.Vaadin.registrations ??= [];
-window.Vaadin.registrations.push({
+const $wnd = window as VaadinWindow;
+
+$wnd.Vaadin ??= {};
+$wnd.Vaadin.registrations ??= [];
+$wnd.Vaadin.registrations.push({
   is: 'endpoint',
 });
 
@@ -276,7 +279,7 @@ export type MiddlewareFunction = (context: MiddlewareContext, next?: MiddlewareN
 export type Middleware = MiddlewareClass | MiddlewareFunction;
 
 function isFlowLoaded(): boolean {
-  return window.Vaadin?.Flow?.clients?.TypeScript !== undefined;
+  return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
 }
 
 /**
@@ -341,13 +344,13 @@ export class ConnectClient {
     // Listen to browser online/offline events and update the loading indicator accordingly.
     // Note: if Flow.ts is loaded, it instead handles the state transitions.
     addEventListener('online', () => {
-      if (!isFlowLoaded() && window.Vaadin?.connectionState) {
-        window.Vaadin.connectionState.state = ConnectionState.CONNECTED;
+      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
       }
     });
     addEventListener('offline', () => {
-      if (!isFlowLoaded() && window.Vaadin?.connectionState) {
-        window.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
+      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
       }
     });
   }
@@ -422,17 +425,17 @@ export class ConnectClient {
     // chain item for our convenience. Always having an ending of the chain
     // this way makes the folding down below more concise.
     async function fetchNext(context: MiddlewareContext) {
-      window.Vaadin?.connectionState?.loadingStarted();
+      $wnd.Vaadin?.connectionState?.loadingStarted();
       try {
         const response = await fetch(context.request, { signal: init?.signal });
-        window.Vaadin?.connectionState?.loadingFinished();
+        $wnd.Vaadin?.connectionState?.loadingFinished();
         return response;
       } catch (error: unknown) {
         // don't bother about connections aborted by purpose
         if (error instanceof Error && error.name === 'AbortError') {
-          window.Vaadin?.connectionState?.loadingFinished();
+          $wnd.Vaadin?.connectionState?.loadingFinished();
         } else {
-          window.Vaadin?.connectionState?.loadingFailed();
+          $wnd.Vaadin?.connectionState?.loadingFailed();
         }
         return Promise.reject(error);
       }

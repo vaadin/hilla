@@ -1,13 +1,16 @@
+import type { VaadinWindow } from './types.js';
+
 export * from './Authentication.js';
 export * from './Connect.js';
 export { FluxConnection, State } from './FluxConnection.js';
 
 declare const __VERSION__: string;
 
-/* c8 ignore next 2 */
-window.Vaadin ??= {};
-window.Vaadin.registrations ??= [];
-window.Vaadin.registrations.push({
+const $wnd = window as VaadinWindow;
+
+$wnd.Vaadin ??= {};
+$wnd.Vaadin.registrations ??= [];
+$wnd.Vaadin.registrations.push({
   is: '@hilla/frontend',
   version: __VERSION__,
 });
