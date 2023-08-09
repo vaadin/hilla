@@ -94,7 +94,7 @@ export class FluxConnection extends EventTarget {
 
   #connectWebsocket(prefix: string) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
-    const request: Atmosphere.Request = {
+    this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
       fallbackTransport: 'long-polling',
@@ -135,9 +135,7 @@ export class FluxConnection extends EventTarget {
       trackMessageLength: true,
       transport: 'websocket',
       url: `${prefix}/HILLA/push`,
-    };
-
-    this.#socket = atmosphere.subscribe?.(request);
+    } satisfies Atmosphere.Request);
   }
 
   #handleMessage(message: unknown) {
