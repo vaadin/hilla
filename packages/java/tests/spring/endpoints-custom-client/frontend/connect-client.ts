@@ -3,7 +3,7 @@ import { ConnectClient, MiddlewareContext, MiddlewareNext } from '@hilla/fronten
 async function logger(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
   const start = new Date().getTime();
   try {
-    return await next(context);
+    return (await next(context)) as Response;
   } finally {
     const duration = new Date().getTime() - start;
     const message = `[LOG] ${context.endpoint}/${context.method} took ${duration} ms`;
