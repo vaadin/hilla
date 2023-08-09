@@ -16,4 +16,5 @@ const routes = [
 ];
 
 export const router = new Router(document.querySelector('#outlet'));
-await router.setRoutes(routes);
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+router.setRoutes(routes);
