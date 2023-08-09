@@ -3,7 +3,6 @@
     "packages/ts/*"
   ],
   "npmClient": "npm",
-  "useWorkspaces": true,
   "useNx": true,
   "version": "2.2.0-alpha6"
 }
