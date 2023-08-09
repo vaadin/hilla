@@ -234,7 +234,7 @@ export interface EndpointCallMetaInfo {
   /**
    * Optional object with method call arguments.
    */
-  params?: Record<string, Jsonifiable>;
+  params?: Record<string, unknown>;
 }
 
 /**
@@ -380,9 +380,9 @@ export class ConnectClient {
   async call(
     endpoint: string,
     method: string,
-    params?: Record<string, Jsonifiable>,
+    params?: Record<string, unknown>,
     init?: EndpointRequestInit,
-  ): Promise<unknown> {
+  ): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
