@@ -327,7 +327,8 @@
         "type": "object",
         "properties": {
           "defaultField": {
-            "type": "string"
+            "type": "string",
+            "nullable" : true
           }
         }
       }
