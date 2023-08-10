@@ -1,0 +1,140 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-platform-parent</artifactId>
+        <version>2.2-SNAPSHOT</version>
+    </parent>
+    <artifactId>vaadin-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>Vaadin Platform (Bill of Materials)</name>
+    <description>Vaadin Platform (Bill of Materials)</description>
+    <url>https://vaadin.com</url>
+
+    <properties>
+        <flow.cdi.version>15.0.1</flow.cdi.version>
+        <vaadin.classic.components.version>24.1.0</vaadin.classic.components.version>
+        <vaadin.testbench.version>9.0.5</vaadin.testbench.version>
+        <kubernetes.kit.starter.version>2.0.0</kubernetes.kit.starter.version>
+        <observability.kit.starter.version>2.1.1</observability.kit.starter.version>
+        <sso.kit.starter.version>2.1.1</sso.kit.starter.version>
+        <swing.kit.version>2.1.0</swing.kit.version>
+        <vaadin.collaboration.engine.version>6.0.0</vaadin.collaboration.engine.version>
+
+        <slf4j.version>2.0.4</slf4j.version>
+        <jna.version>5.13.0</jna.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases/</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-spring-bom</artifactId>
+                <version>2.2-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-testbench-bom</artifactId>
+                <version>${vaadin.testbench.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-cdi</artifactId>
+                <version>${flow.cdi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-classic-components-flow</artifactId>
+                <version>${vaadin.classic.components.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>collaboration-engine</artifactId>
+                <version>${vaadin.collaboration.engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>kubernetes-kit-starter</artifactId>
+                <version>${kubernetes.kit.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>sso-kit-starter</artifactId>
+                <version>${sso.kit.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>observability-kit-starter</artifactId>
+                <version>${observability.kit.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-swing-kit-flow</artifactId>
+                <version>${swing.kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-swing-kit-client</artifactId>
+                <version>${swing.kit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-swing-kit-client-api</artifactId>
+                <version>${swing.kit.version}</version>
+            </dependency>
+			<!-- SLF4J -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jcl</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <!-- JNA -->
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

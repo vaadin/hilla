@@ -1,0 +1,15 @@
+{
+    "bundles": {
+        "vaadin": {
+            "jsVersion": "24.2.0-alpha9",
+            "npmName": "@vaadin/bundles"
+        }
+    },
+    "react": {
+        "react-components": {
+            "jsVersion": "2.2.0-alpha9",
+            "npmName": "@hilla/react-components"
+        }
+    },
+    "platform": "2.2-SNAPSHOT"
+}

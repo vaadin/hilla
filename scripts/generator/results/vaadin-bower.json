@@ -1,0 +1,33 @@
+{
+  "name": "vaadin",
+  "description": "Bundle containing all web components which are part of the Vaadin platform",
+  "homepage": "https://github.com/vaadin/vaadin",
+  "authors": [
+    "Vaadin Ltd"
+  ],
+  "main": "vaadin.html",
+  "license": [
+    "Apache-2.0",
+    "https://vaadin.com/license/cval-3.0"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "update-core-version.js"
+  ],
+  "dependencies": {
+    "cookieconsent": "cookieconsent#3.1.0",
+    "vaadin-board": "vaadin/vaadin-board#2.2.2",
+    "vaadin-charts": "vaadin/vaadin-charts#6.3.4",
+    "vaadin-confirm-dialog": "vaadin/vaadin-confirm-dialog#1.3.1",
+    "vaadin-cookie-consent": "vaadin/vaadin-cookie-consent#1.2.1",
+    "vaadin-core": "vaadin/vaadin-core#14.11-SNAPSHOT",
+    "vaadin-crud": "vaadin/vaadin-crud#1.4.0",
+    "vaadin-grid-pro": "vaadin/vaadin-grid-pro#2.4.1",
+    "vaadin-license-checker": "vaadin/license-checker#2.1.2",
+    "vaadin-rich-text-editor": "vaadin/vaadin-rich-text-editor#1.4.0"
+  }
+}

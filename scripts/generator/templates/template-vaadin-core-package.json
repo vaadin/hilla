@@ -1,0 +1,21 @@
+{
+  "name": "@vaadin/vaadin-core",
+  "version": "24.2.0",
+  "description": "Vaadin components is an evolving set of free, open sourced custom HTML elements for building mobile and desktop web applications in modern browsers.",
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "main": "vaadin-core.js",
+  "dependencies": {},
+  "files": [
+    "vaadin-core.js"
+  ],
+  "keywords": [
+    "vaadin",
+    "core",
+    "elements",
+    "web",
+    "components",
+    "webcomponents",
+    "web-components"
+  ]
+}

@@ -3,6 +3,8 @@
 *.project
 *.settings
 
+scripts/generator/results
+
 # Mac
 *.DS_Store
 

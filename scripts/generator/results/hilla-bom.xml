@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-platform-parent</artifactId>
+        <version>2.2-SNAPSHOT</version>
+    </parent>
+    <groupId>dev.hilla</groupId>
+    <artifactId>hilla-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>Hilla Platform (Bill of Materials)</name>
+    <description>Hilla Platform (Bill of Materials)</description>
+    <version>${hilla.version}</version>
+    <url>https://hilla.dev</url>
+	
+    <properties>
+                <hilla.version>2.2-SNAPSHOT</hilla.version>
+        <sso.kit.starter.version>2.1.1</sso.kit.starter.version>
+
+        <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases/</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>2.2-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-dev</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>endpoint</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-react</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>sso-kit-starter</artifactId>
+                <version>${sso.kit.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>engine-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-react-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

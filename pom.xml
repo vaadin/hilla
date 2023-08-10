@@ -20,8 +20,13 @@
     <module>packages/java/engine-core</module>
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
-    <module>packages/java/gradle-plugin</module>
     <module>packages/java/plugin-base</module>
+    <module>packages/java/hilla-bom</module>
+    <module>packages/java/hilla</module>
+    <module>packages/java/hilla-dev</module>
+    <module>packages/java/hilla-react</module>
+    <module>packages/java/hilla-spring-boot-starter</module>
+    <module>packages/java/hilla-react-spring-boot-starter</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
@@ -46,9 +51,7 @@
     </profile>
     <profile>
       <id>gradle</id>
-      <activation>
-        <jdk>(,18]</jdk>
-      </activation>
+
       <modules>
         <module>packages/java/gradle-plugin</module>
         <module>packages/java/gradle-plugin/pom-portal.xml</module>
@@ -73,8 +76,9 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.2-SNAPSHOT</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <spring.version>6.0.9</spring.version>
-    <spring.boot.version>3.1.0</spring.boot.version>
+    <jna.version>5.13.0</jna.version>
+    <spring.version>6.0.11</spring.version>
+    <spring.boot.version>3.1.2</spring.boot.version>
     <spring.data.commons.version>3.1.0</spring.data.commons.version>
     <spring.security.version>6.1.0</spring.security.version>
     <testbench.version>9.0.3</testbench.version>
@@ -83,15 +87,15 @@
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
-    <micrometer.version>1.11.0</micrometer.version>
-    <github.javaparser.core.version>3.24.10</github.javaparser.core.version>
+    <micrometer.version>1.10.9</micrometer.version>
+    <github.javaparser.core.version>3.25.4</github.javaparser.core.version>
   </properties>
 
   <organization>
     <name>Vaadin Ltd</name>
     <url>https://vaadin.com</url>
   </organization>
-  <url>https://vaadin.com</url>
+  <url>https://hilla.dev</url>
   <licenses>
     <license>
       <name>Apache License Version 2.0</name>
