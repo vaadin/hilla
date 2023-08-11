@@ -222,26 +222,8 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     }
 
     @Override
-    protected List<PackageInfoModel> prepareAncestors() {
-        var classLoader = origin.getClassLoader();
-
-        return getAllAncestorPackageNames(origin.getPackageName())
-                .map(classLoader::getDefinedPackage).filter(Objects::nonNull)
-                .map(PackageInfoModel::of).collect(Collectors.toList());
-    }
-
-    /**
-     * Returns a stream of all ancestor package names, starting with the package
-     * itself.
-     *
-     * @param packageName
-     *            the package packageName
-     * @return the stream of all ancestor package names
-     */
-    private static Stream<String> getAllAncestorPackageNames(
-            String packageName) {
-        return Stream.iterate(packageName, n -> n.contains("."),
-                n -> n.substring(0, n.lastIndexOf('.')));
+    protected PackageInfoModel preparePackage() {
+        return PackageInfoModel.of(origin.getPackage());
     }
 
     @Override
