@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-duplicates
 import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
-// eslint-disable-next-line import/no-duplicates
 import type { Logger } from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import type { Constructor } from 'type-fest';
 import type ReferenceResolver from './ReferenceResolver.js';

@@ -45,7 +45,7 @@ describe('@hilla/frontend', () => {
 
     beforeEach(() => {
       subscribeStub.resetHistory();
-      myMiddleware = async (ctx, next) => next?.(ctx);
+      myMiddleware = async (ctx, next) => next(ctx);
 
       const connectionStateStore = new ConnectionStateStore(ConnectionState.CONNECTED);
       $wnd.Vaadin = { connectionState: connectionStateStore };
@@ -510,7 +510,7 @@ describe('@hilla/frontend', () => {
               method: 'POST',
             });
 
-            return next?.(context);
+            return next(context);
           };
 
           client.middlewares = [myMiddleware];

@@ -1,7 +1,5 @@
 import type LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
-// eslint-disable-next-line import/no-duplicates
 import type Plugin from './Plugin.js';
-// eslint-disable-next-line import/no-duplicates
 import type { PluginConstructor } from './Plugin.js';
 import type ReferenceResolver from './ReferenceResolver.js';
 import type SharedStorage from './SharedStorage.js';

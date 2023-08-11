@@ -1,7 +1,5 @@
-/* eslint-disable max-classes-per-file */
 import type { ReactiveControllerHost } from '@lit/reactive-element';
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import type { Jsonifiable } from 'type-fest';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
@@ -270,7 +268,7 @@ export interface MiddlewareClass {
  * An async callback function that can intercept the request and response
  * of a call.
  */
-export type MiddlewareFunction = (context: MiddlewareContext, next?: MiddlewareNext) => MaybePromise<unknown>;
+export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => MaybePromise<unknown>;
 
 /**
  * An async callback that can intercept the request and response

@@ -10,6 +10,7 @@
   "plugins": ["tsdoc"],
   "rules": {
     "class-methods-use-this": "off",
+    "import/no-duplicates": "off",
     "import/prefer-default-export": "off",
     "max-params": "off",
     "max-classes-per-file": "off",
