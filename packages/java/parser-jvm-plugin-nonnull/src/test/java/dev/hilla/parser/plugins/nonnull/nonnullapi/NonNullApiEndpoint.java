@@ -32,7 +32,7 @@ public class NonNullApiEndpoint {
         return null;
     }
 
-    static class Dependency {
+    public static class Dependency {
         public String defaultField;
         @NullableField
         public String nullableField;

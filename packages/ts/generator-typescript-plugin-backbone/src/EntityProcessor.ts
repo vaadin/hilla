@@ -13,7 +13,7 @@ import {
   isNullableSchema,
   isObjectSchema,
   isReferenceSchema,
-  type NonEmptyObjectSchema,
+  type ObjectSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -91,7 +91,7 @@ export class EntityProcessor {
       this.#id,
       undefined,
       undefined,
-      this.#processTypeElements(schema as NonEmptyObjectSchema),
+      this.#processTypeElements(schema as ObjectSchema),
     );
   }
 
@@ -153,8 +153,8 @@ export class EntityProcessor {
     return imports.default.add(path, specifier, true);
   }
 
-  #processTypeElements({ properties }: NonEmptyObjectSchema): readonly TypeElement[] {
-    return Object.entries(properties).map(([name, schema]) => {
+  #processTypeElements({ properties }: ObjectSchema): readonly TypeElement[] {
+    return Object.entries(properties ?? {}).map(([name, schema]) => {
       const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
 
       return ts.factory.createPropertySignature(
