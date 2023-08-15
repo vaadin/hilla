@@ -134,14 +134,6 @@ interface ConnectExceptionData {
   validationErrorData?: ValidationErrorData[];
 }
 
-const throwConnectException = (errorJson: ConnectExceptionData) => {
-  if (errorJson.validationErrorData) {
-    throw new EndpointValidationError(errorJson.message, errorJson.validationErrorData, errorJson.type);
-  } else {
-    throw new EndpointError(errorJson.message, errorJson.type, errorJson.detail);
-  }
-};
-
 /**
  * Throws a TypeError if the response is not 200 OK.
  * @param response The response to assert.
@@ -158,21 +150,27 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
       errorJson = null;
     }
 
-    if (errorJson !== null) {
-      throwConnectException(errorJson);
-    } else if (errorText !== null && errorText.length > 0) {
-      throw new EndpointResponseError(errorText, response);
-    } else {
-      const message = `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
+    const message =
+      errorJson?.message ||
+      errorText ||
+      `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
+    const type = errorJson?.type;
 
-      switch (response.status) {
-        case 401:
-          throw new UnauthorizedResponseError(message, response);
-        case 403:
-          throw new ForbiddenResponseError(message, response);
-        default:
-          throw new EndpointResponseError(message, response);
-      }
+    if (errorJson?.validationErrorData) {
+      throw new EndpointValidationError(message, errorJson.validationErrorData, type);
+    }
+
+    if (type) {
+      throw new EndpointError(message, type, errorJson?.detail);
+    }
+
+    switch (response.status) {
+      case 401:
+        throw new UnauthorizedResponseError(message, response);
+      case 403:
+        throw new ForbiddenResponseError(message, response);
+      default:
+        throw new EndpointResponseError(message, response);
     }
   }
 };

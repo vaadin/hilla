@@ -400,7 +400,7 @@ describe('@hilla/frontend', () => {
       });
 
       it('should reject with unauthorized error', async () => {
-        const errorResponse = new Response(null, {
+        const errorResponse = new Response('{"message": "Unauthorized"}', {
           status: 401,
           statusText: 'Unauthorized',
         });
@@ -417,7 +417,7 @@ describe('@hilla/frontend', () => {
       });
 
       it('should reject with forbidden error', async () => {
-        const errorResponse = new Response(null, {
+        const errorResponse = new Response('{"message": "Forbidden"}', {
           status: 403,
           statusText: 'Forbidden',
         });
