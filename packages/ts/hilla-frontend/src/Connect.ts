@@ -261,7 +261,7 @@ export interface MiddlewareClass {
    * @param context - The information about the call and request
    * @param next - Invokes the next in the call chain
    */
-  invoke(context: MiddlewareContext, next?: MiddlewareNext): MaybePromise<unknown>;
+  invoke(context: MiddlewareContext, next: MiddlewareNext): MaybePromise<unknown>;
 }
 
 /**
