@@ -39,6 +39,7 @@ export function getSpringCsrfInfo(doc: Document): Record<string, string> {
   const headers: Record<string, string> = {};
   if (csrf && csrfHeader) {
     headers._csrf = csrf;
+    // eslint-disable-next-line camelcase
     headers._csrf_header = csrfHeader;
   }
   return headers;

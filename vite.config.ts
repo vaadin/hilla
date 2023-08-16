@@ -1,44 +1,62 @@
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { PackageJson, TsConfigJson } from 'type-fest';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
 
 // The current package, one of the packages in the `packages` dir
-const cwd = process.cwd();
+const cwd = pathToFileURL(`${process.cwd()}/`);
 
-async function prepareAliases() {
+async function loadMockConfig() {
   try {
-    const contents = await readFile(resolve(cwd, 'test/mocks.json'), 'utf8');
-    return Object.fromEntries(
-      Object.entries(JSON.parse(contents) as Record<string, string>).map(([key, value]) => [key, resolve(cwd, value)]),
-    );
-  } catch {
+    const content = await readFile(new URL('test/mocks/config.json', cwd), 'utf8');
+    return JSON.parse(content) as Record<string, string>;
+  } catch (e: unknown) {
+    console.error(e);
     return {};
   }
 }
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
-  const [tsconfig, alias] = await Promise.all([
-    readFile(resolve(cwd, 'tsconfig.json'), 'utf8').then((f) => JSON.parse(f)),
-    prepareAliases(),
+  const [tsconfig, mocks, packageJson] = await Promise.all([
+    readFile(new URL('tsconfig.json', cwd), 'utf8').then((f) => JSON.parse(f) as TsConfigJson),
+    loadMockConfig(),
+    readFile(new URL('package.json', cwd), 'utf8').then((f) => JSON.parse(f) as PackageJson),
   ]);
 
   return {
     build: {
       target: 'esnext',
     },
+    define: {
+      __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
+    },
     esbuild: {
       tsconfigRaw: {
         ...tsconfig,
         compilerOptions: {
-          ...tsconfig.compilerOptions,
+          ...(tsconfig.compilerOptions as any),
           useDefineForClassFields: false,
         },
       },
     },
     resolve: {
-      alias,
+      alias: Object.entries(mocks).map(([find, file]) => {
+        const replacement = fileURLToPath(new URL(`test/mocks/${file}`, cwd));
+
+        return {
+          customResolver(_, importer) {
+            if (importer?.includes('/mocks/')) {
+              return false;
+            }
+
+            return replacement;
+          },
+          find,
+          replacement,
+        };
+      }),
     },
-  };
+  } satisfies UserConfig;
 });

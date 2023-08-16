@@ -2,8 +2,7 @@ import ts, { type Identifier, type ImportDeclaration, type Statement } from 'typ
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
-import type { DependencyRecord } from './utils.js';
-import { createDependencyRecord } from './utils.js';
+import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #collator: Intl.Collator;
@@ -218,7 +217,7 @@ export default class ImportManager implements CodeConvertable<readonly Statement
         if (ts.isNamespaceImport(namedBindings)) {
           this.namespace.add(path, namedBindings.name.text, namedBindings.name);
         } else {
-          for (const { name: specifier, isTypeOnly } of namedBindings.elements) {
+          for (const { isTypeOnly, name: specifier } of namedBindings.elements) {
             this.named.add(path, specifier.text, isTypeOnly, specifier);
           }
         }
