@@ -33,7 +33,7 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
             .getLogger(HotSwapServiceInitializer.class);
 
     @Value("${hilla.endpoint.hot-reload.enabled:true}")
-    private boolean endpointHotReloadEnabled;
+    boolean endpointHotReloadEnabled;
 
     private final EndpointHotSwapService endpointHotSwapService;
 
