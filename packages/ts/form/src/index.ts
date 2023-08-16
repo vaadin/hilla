@@ -13,6 +13,6 @@ const $wnd = window as VaadinWindow;
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
-  is: '@hilla/frontend',
+  is: '@hilla/form',
   version: __VERSION__,
 });
