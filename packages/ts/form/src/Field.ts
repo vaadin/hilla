@@ -1,8 +1,15 @@
 /* eslint-disable accessor-pairs,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
-import { BooleanModel } from '../Models';
-import { _fromString, type AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import {
+  _fromString,
+  type AbstractModel,
+  ArrayModel,
+  BooleanModel,
+  ObjectModel,
+  getBinderNode,
+  hasFromString,
+} from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 

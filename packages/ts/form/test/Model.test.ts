@@ -14,7 +14,7 @@ import {
   NumberModel,
   Positive,
   Size,
-} from '../src';
+} from '../src/index.js';
 
 import {
   type IdEntity,
@@ -24,7 +24,7 @@ import {
   WithPossibleCharListModel,
   type TestEntity,
   TestModel,
-} from './TestModels';
+} from './TestModels.js';
 
 describe('@hilla/form', () => {
   describe('Model', () => {
