@@ -18,28 +18,36 @@ package dev.hilla.internal.hotswap;
 
 import dev.hilla.EndpointController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HotSwapConfiguration {
 
+    /**
+     * The interval for polling the changes in seconds.
+     */
+    @Value("${hilla.endpoint.hot-reload.pollInterval:5}")
+    private int endpointHotReloadPollInterval;
+
     @Bean
-    HotSwapWatchService hotSwapWatchService() {
-        return new HotSwapWatchService();
+    EndpointHotSwapService hotSwapWatchService() {
+        return new PollChangedEndpointsHotSwapService(
+                endpointHotReloadPollInterval);
     }
 
     @Bean
     HotSwapServiceInitializer hotSwapServiceInitializer(
-            @Autowired HotSwapWatchService hotSwapWatchService) {
-        return new HotSwapServiceInitializer(hotSwapWatchService);
+            @Autowired EndpointHotSwapService endpointHotSwapService) {
+        return new HotSwapServiceInitializer(endpointHotSwapService);
     }
 
     @Bean
     EndpointHotSwapListener endpointHotSwapListener(
-            @Autowired HotSwapWatchService hotSwapWatchService,
+            @Autowired EndpointHotSwapService endpointHotSwapService,
             @Autowired EndpointController endpointController) {
         return new EndpointHotSwapListener(endpointController,
-                hotSwapWatchService);
+                endpointHotSwapService);
     }
 }

@@ -35,10 +35,11 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
     @Value("${hilla.endpoint.hot-reload.enabled:true}")
     private boolean endpointHotReloadEnabled;
 
-    private final HotSwapWatchService hotSwapWatchService;
+    private final EndpointHotSwapService endpointHotSwapService;
 
-    public HotSwapServiceInitializer(HotSwapWatchService hotSwapWatchService) {
-        this.hotSwapWatchService = hotSwapWatchService;
+    public HotSwapServiceInitializer(
+            EndpointHotSwapService endpointHotSwapService) {
+        this.endpointHotSwapService = endpointHotSwapService;
     }
 
     @Override
@@ -50,7 +51,7 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
                             .getBackend()
                             && isDevModeLiveReloadEnabled(vaadinService)) {
                         if (isEndpointHotReloadEnabled()) {
-                            hotSwapWatchService.watch(
+                            endpointHotSwapService.monitorChanges(
                                     getClassesDir(vaadinService),
                                     browserLiveReload);
                             info("Hilla Endpoint Hot-Reload service is enabled. "
@@ -72,8 +73,7 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
     private Path getClassesDir(VaadinService vaadinService) {
         var deploymentConfig = vaadinService.getDeploymentConfiguration();
         var projectFolder = deploymentConfig.getProjectFolder().toPath();
-        return projectFolder.resolve(deploymentConfig.getBuildFolder())
-                .resolve("classes");
+        return projectFolder.resolve(deploymentConfig.getBuildFolder());
     }
 
     private boolean isEndpointHotReloadEnabled() {
