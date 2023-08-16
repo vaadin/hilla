@@ -4,16 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>dev.hilla</groupId>
+        <artifactId>hilla-project</artifactId>
+        <version>2.2-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
     <groupId>dev.hilla</groupId>
     <artifactId>hilla-spring-boot-starter</artifactId>
     <name>Hilla Spring Boot Starter</name>
     <description>Spring Boot Starter for Hilla applications using Lit.</description>
     <version>2.2-SNAPSHOT</version>
-
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
 
     <dependencies>
         <dependency>
