@@ -22,6 +22,12 @@
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
     <module>packages/java/plugin-base</module>
+    <module>packages/java/hilla</module>
+    <module>packages/java/hilla-bom</module>
+    <module>packages/java/hilla-dev</module>
+    <module>packages/java/hilla-react</module>
+    <module>packages/java/spring-boot-starter</module>
+    <module>packages/java/react-spring-boot-starter</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
