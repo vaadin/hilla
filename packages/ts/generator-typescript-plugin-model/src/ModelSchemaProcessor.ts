@@ -122,7 +122,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
   }
 
   protected override [$processReference](schema: ReferenceSchema): TypeNode {
-    const { paths, imports } = this[$dependencies];
+    const { imports, paths } = this[$dependencies];
     const typeName = convertReferenceSchemaToSpecifier(schema);
     const typePath = paths.createRelativePath(convertReferenceSchemaToPath(schema));
     return ts.factory.createTypeReferenceNode(
@@ -157,7 +157,7 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
   }
 
   override [$processReference](schema: ReferenceSchema): Identifier {
-    const { paths, imports } = this[$dependencies];
+    const { imports, paths } = this[$dependencies];
 
     const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
     const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);

@@ -1,4 +1,5 @@
 export interface AbstractMessage {
+  '@type': string;
   id: string;
 }
 
@@ -15,6 +16,10 @@ export interface ClientUpdateMessage extends AbstractMessage {
 }
 
 export type ClientMessage = ClientCompleteMessage | ClientErrorMessage | ClientUpdateMessage;
+
+export function isClientMessage(value: unknown): value is ClientMessage {
+  return value != null && typeof value === 'object' && '@type' in value;
+}
 
 export interface ServerConnectMessage extends AbstractMessage {
   id: string;

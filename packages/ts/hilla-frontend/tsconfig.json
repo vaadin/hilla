@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "experimentalDecorators": true,
     "target": "es2022"
   },
   "include": ["src", "test"],

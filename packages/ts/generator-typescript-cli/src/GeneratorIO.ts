@@ -32,7 +32,7 @@ export default class GeneratorIO {
   /**
    * Cleans the output directory by removing all files that had been generated last time.
    * A list of those files is found in {@link INDEX_FILENAME}.
-   * @return a set containing deleted filenames
+   * @returns a set containing deleted filenames
    */
   async cleanOutputDir(): Promise<Set<string>> {
     this.#logger.global.debug(`Cleaning ${this.#outputDir} up.`);
@@ -72,7 +72,7 @@ export default class GeneratorIO {
 
   /**
    * Checks that a file exists (is visible)
-   * @param path the file path to check
+   * @param path - the file path to check
    */
   // eslint-disable-next-line class-methods-use-this
   async exists(path: string): Promise<boolean> {
