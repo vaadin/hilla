@@ -199,7 +199,7 @@ describe('@hilla/form', () => {
           },
         });
         const binderSubmitToSpy = sinon.spy(testBinder, 'submitTo');
-        await binder.submit();
+        await testBinder.submit();
         sinon.assert.calledOnce(binderSubmitToSpy);
       });
 
