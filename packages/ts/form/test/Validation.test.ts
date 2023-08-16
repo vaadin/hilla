@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-expressions, no-shadow */
 import { assert, expect, use } from '@esm-bundle/chai';
+import { EndpointValidationError } from '@hilla/frontend';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -14,7 +15,7 @@ import {
   NotBlank,
   Required,
   Size,
-  type ValidationError,
+  ValidationError,
   type Validator,
   type ValueError,
 } from '../src/index.js';
@@ -240,25 +241,20 @@ describe('@hilla/form', () => {
         binder.for(binder.model.notes).value = 'whatever';
         try {
           await binder.submitTo(async () => {
-            // eslint-disable-next-line no-throw-literal, @typescript-eslint/no-throw-literal
-            throw {
-              message: "Validation error in endpoint 'MyEndpoint' method 'saveMyBean'",
-              validationErrorData: [
-                {
-                  message:
-                    "Object of type 'com.example.MyBean' has invalid property 'foo' with value 'baz', validation error: 'custom message'",
-                  parameterName: 'foo',
-                },
-              ],
-            };
+            throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
+              {
+                message:
+                  "Object of type 'com.example.MyBean' has invalid property 'foo' with value 'baz', validation error: 'custom message'",
+                parameterName: 'foo',
+              },
+            ]);
           });
           expect.fail();
-        } catch (error: any) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        } catch (e: any) {
+          expect(e).to.be.instanceof(ValidationError);
+          const error = e as ValidationError;
           expect(error.errors[0].message).to.be.equal('custom message');
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.errors[0].value).to.be.equal('baz');
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.errors[0].property).to.be.equal('foo');
         }
       });
@@ -268,24 +264,19 @@ describe('@hilla/form', () => {
         binder.for(binder.model.notes).value = 'whatever';
         try {
           await binder.submitTo(async () => {
-            // eslint-disable-next-line no-throw-literal, @typescript-eslint/no-throw-literal
-            throw {
-              message: "Validation error in endpoint 'MyEndpoint' method 'saveMyBean'",
-              validationErrorData: [
-                {
-                  message: 'Custom server message',
-                  parameterName: 'bar',
-                },
-              ],
-            };
+            throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
+              {
+                message: 'Custom server message',
+                parameterName: 'bar',
+              },
+            ]);
           });
           expect.fail();
-        } catch (error: any) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        } catch (e: any) {
+          expect(e).to.be.instanceof(ValidationError);
+          const error = e as ValidationError;
           expect(error.errors[0].message).to.be.equal('Custom server message');
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.errors[0].value).to.be.undefined;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.errors[0].property).to.be.equal('bar');
         }
       });
@@ -677,15 +668,12 @@ describe('@hilla/form', () => {
         try {
           await binder.submitTo(async () => {
             requestUpdateSpy.resetHistory();
-            // eslint-disable-next-line no-throw-literal
-            throw Object.assign(new Error('Validation error in endpoint "MyEndpoint" method "saveMyBean"'), {
-              validationErrorData: [
-                {
-                  message: 'Invalid notes',
-                  parameterName: 'notes',
-                },
-              ],
-            });
+            throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
+              {
+                message: 'Invalid notes',
+                parameterName: 'notes',
+              },
+            ]);
           });
           expect.fail();
         } catch (error) {
