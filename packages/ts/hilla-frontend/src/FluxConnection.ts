@@ -1,8 +1,13 @@
-import { atmosphere } from 'a-atmosphere-javascript';
-import type { ReactiveElement } from 'lit';
+import type { ReactiveControllerHost } from '@lit/reactive-element';
+import atmosphere from 'atmosphere.js';
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
-import type { ClientMessage, ServerCloseMessage, ServerConnectMessage, ServerMessage } from './FluxMessages.js';
+import {
+  isClientMessage,
+  type ServerCloseMessage,
+  type ServerConnectMessage,
+  type ServerMessage,
+} from './FluxMessages.js';
 
 export enum State {
   ACTIVE = 'active',
@@ -25,168 +30,164 @@ type ListenerType<T extends keyof EventMap> =
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
 export class FluxConnection extends EventTarget {
-  private nextId = 0;
-  private readonly endpointInfos = new Map<string, string>();
-  private readonly onNextCallbacks = new Map<string, (value: any) => void>();
-  private readonly onCompleteCallbacks = new Map<string, () => void>();
-  private readonly onErrorCallbacks = new Map<string, () => void>();
-
-  private socket: any;
   state: State = State.INACTIVE;
-  private pendingMessages: ServerMessage[] = [];
+  readonly #endpointInfos = new Map<string, string>();
+  #nextId = 0;
+  readonly #onCompleteCallbacks = new Map<string, () => void>();
+  readonly #onErrorCallbacks = new Map<string, () => void>();
+  readonly #onNextCallbacks = new Map<string, (value: any) => void>();
+  #pendingMessages: ServerMessage[] = [];
+  #socket?: Atmosphere.Request;
 
   constructor(connectPrefix: string) {
     super();
-    this.connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/, ''));
+    this.#connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/u, ''));
   }
 
-  private connectWebsocket(prefix: string) {
+  /**
+   * Subscribes to the flux returned by the given endpoint name + method name using the given parameters.
+   *
+   * @param endpointName - the endpoint to connect to
+   * @param methodName - the method in the endpoint to connect to
+   * @param parameters - the parameters to use
+   * @returns a subscription
+   */
+  subscribe(endpointName: string, methodName: string, parameters?: unknown[]): Subscription<any> {
+    const id: string = this.#nextId.toString();
+    this.#nextId += 1;
+    const params = parameters ?? [];
+
+    const msg: ServerConnectMessage = { '@type': 'subscribe', endpointName, id, methodName, params };
+    const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
+    this.#send(msg);
+    this.#endpointInfos.set(id, endpointInfo);
+    const hillaSubscription: Subscription<any> = {
+      cancel: () => {
+        if (!this.#endpointInfos.has(id)) {
+          // Subscription already closed or canceled
+          return;
+        }
+
+        const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
+        this.#send(closeMessage);
+        this.#removeSubscription(id);
+      },
+      context(context: ReactiveControllerHost): Subscription<any> {
+        context.addController({
+          hostDisconnected() {
+            hillaSubscription.cancel();
+          },
+        });
+        return hillaSubscription;
+      },
+      onComplete: (callback: () => void): Subscription<any> => {
+        this.#onCompleteCallbacks.set(id, callback);
+        return hillaSubscription;
+      },
+      onError: (callback: () => void): Subscription<any> => {
+        this.#onErrorCallbacks.set(id, callback);
+        return hillaSubscription;
+      },
+      onNext: (callback: (value: any) => void): Subscription<any> => {
+        this.#onNextCallbacks.set(id, callback);
+        return hillaSubscription;
+      },
+    };
+    return hillaSubscription;
+  }
+
+  #connectWebsocket(prefix: string) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
-    const callback = {
-      onMessage: (response: any) => {
-        this.handleMessage(JSON.parse(response.responseBody));
-      },
-      onOpen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
-          this.state = State.ACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-          this.sendPendingMessages();
-        }
-      },
-      onReopen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
-          this.state = State.ACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-          this.sendPendingMessages();
-        }
-      },
-      onClose: (_response: any) => {
+    this.#socket = atmosphere.subscribe?.({
+      contentType: 'application/json; charset=UTF-8',
+      enableProtocol: true,
+      fallbackTransport: 'long-polling',
+      headers: extraHeaders,
+      maxReconnectOnClose: 10000000,
+      onClose: (_) => {
         // https://socket.io/docs/v4/client-api/#event-disconnect
         if (this.state === State.ACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
         }
       },
-      onError: (response: any) => {
+      onError: (response) => {
         // eslint-disable-next-line no-console
         console.error('error in push communication', response);
       },
-    };
-    this.socket = atmosphere.subscribe!({
-      url: `${prefix}/HILLA/push`,
-      transport: 'websocket',
-      fallbackTransport: 'long-polling',
-      contentType: 'application/json; charset=UTF-8',
+      onMessage: (response) => {
+        if (response.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
+      onOpen: (_response: any) => {
+        if (this.state === State.INACTIVE) {
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.#sendPendingMessages();
+        }
+      },
+      onReopen: (_response: any) => {
+        if (this.state === State.INACTIVE) {
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.#sendPendingMessages();
+        }
+      },
       reconnectInterval: 5000,
       timeout: -1,
-      maxReconnectOnClose: 10000000,
       trackMessageLength: true,
-      enableProtocol: true,
-      headers: extraHeaders,
-      ...callback,
-    });
+      transport: 'websocket',
+      url: `${prefix}/HILLA/push`,
+    } satisfies Atmosphere.Request);
   }
 
-  private handleMessage(message: ClientMessage) {
-    const { id } = message;
-    const endpointInfo = this.endpointInfos.get(id);
+  #handleMessage(message: unknown) {
+    if (isClientMessage(message)) {
+      const { id } = message;
+      const endpointInfo = this.#endpointInfos.get(id) ?? 'unknown';
 
-    if (message['@type'] === 'update') {
-      const callback = this.onNextCallbacks.get(id);
-      if (callback) {
-        callback(message.item);
-      }
-    } else if (message['@type'] === 'complete') {
-      const callback = this.onCompleteCallbacks.get(id);
-      if (callback) {
-        callback();
-      }
-
-      this.removeSubscription(id);
-    } else if (message['@type'] === 'error') {
-      const callback = this.onErrorCallbacks.get(id);
-      if (callback) {
-        callback();
-      }
-      this.removeSubscription(id);
-      if (!callback) {
-        throw new Error(`Error in ${endpointInfo}: ${message.message}`);
-      }
-    } else {
-      throw new Error(`Unknown message from server: ${message}`);
-    }
-  }
-
-  private removeSubscription(id: string) {
-    this.onNextCallbacks.delete(id);
-    this.onCompleteCallbacks.delete(id);
-    this.onErrorCallbacks.delete(id);
-    this.endpointInfos.delete(id);
-  }
-
-  private sendPendingMessages() {
-    this.pendingMessages.forEach((msg) => this.send(msg));
-    this.pendingMessages = [];
-  }
-
-  private send(message: ServerMessage) {
-    if (this.state === State.INACTIVE) {
-      this.pendingMessages.push(message);
-    } else {
-      this.socket.push(JSON.stringify(message));
-    }
-  }
-
-  /**
-   * Subscribes to the flux returned by the given endpoint name + method name using the given parameters.
-   *
-   * @param endpointName the endpoint to connect to
-   * @param methodName the method in the endpoint to connect to
-   * @param parameters the parameters to use
-   * @returns a subscription
-   */
-  subscribe(endpointName: string, methodName: string, parameters?: any[]): Subscription<any> {
-    const id: string = this.nextId.toString();
-    this.nextId += 1;
-    const params = parameters || [];
-
-    const msg: ServerConnectMessage = { '@type': 'subscribe', id, endpointName, methodName, params };
-    const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
-    this.send(msg);
-    this.endpointInfos.set(id, endpointInfo);
-    const hillaSubscription: Subscription<any> = {
-      onNext: (callback: (value: any) => void): Subscription<any> => {
-        this.onNextCallbacks.set(id, callback);
-        return hillaSubscription;
-      },
-      onComplete: (callback: () => void): Subscription<any> => {
-        this.onCompleteCallbacks.set(id, callback);
-        return hillaSubscription;
-      },
-      onError: (callback: () => void): Subscription<any> => {
-        this.onErrorCallbacks.set(id, callback);
-        return hillaSubscription;
-      },
-      cancel: () => {
-        if (!this.endpointInfos.has(id)) {
-          // Subscription already closed or canceled
-          return;
+      if (message['@type'] === 'update') {
+        const callback = this.#onNextCallbacks.get(id);
+        if (callback) {
+          callback(message.item);
         }
+      } else if (message['@type'] === 'complete') {
+        this.#onCompleteCallbacks.get(id)?.();
+        this.#removeSubscription(id);
+      } else {
+        const callback = this.#onErrorCallbacks.get(id);
+        if (callback) {
+          callback();
+        }
+        this.#removeSubscription(id);
+        if (!callback) {
+          throw new Error(`Error in ${endpointInfo}: ${message.message}`);
+        }
+      }
+    } else {
+      throw new Error(`Unknown message from server: ${String(message)}`);
+    }
+  }
 
-        const closeMessage: ServerCloseMessage = { '@type': 'unsubscribe', id };
-        this.send(closeMessage);
-        this.removeSubscription(id);
-      },
-      context: (context: ReactiveElement): Subscription<any> => {
-        context.addController({
-          hostDisconnected: () => {
-            hillaSubscription.cancel();
-          },
-        });
-        return hillaSubscription;
-      },
-    };
-    return hillaSubscription;
+  #removeSubscription(id: string) {
+    this.#onNextCallbacks.delete(id);
+    this.#onCompleteCallbacks.delete(id);
+    this.#onErrorCallbacks.delete(id);
+    this.#endpointInfos.delete(id);
+  }
+
+  #send(message: ServerMessage) {
+    if (this.state === State.INACTIVE) {
+      this.#pendingMessages.push(message);
+    } else {
+      this.#socket?.push?.(JSON.stringify(message));
+    }
+  }
+
+  #sendPendingMessages() {
+    this.#pendingMessages.forEach((msg) => this.#send(msg));
+    this.#pendingMessages = [];
   }
 }
 

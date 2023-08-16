@@ -26,6 +26,7 @@
     "glob": "10.3.3",
     "mkdirp": "1.0.4",
     "rollup-plugin-brotli": "3.1.0",
+    "rollup-plugin-visualizer": "5.9.2",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.1.6",
@@ -39,16 +40,16 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "2.1.0-alpha4",
-      "@hilla/frontend": "2.1.0-alpha4",
-      "@hilla/generator-typescript-cli": "2.1.0-alpha4",
-      "@hilla/generator-typescript-core": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-backbone": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-barrel": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-client": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-model": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-push": "2.1.0-alpha4",
-      "@hilla/generator-typescript-utils": "2.1.0-alpha4",
+      "@hilla/form": "2.2.0-alpha6",
+      "@hilla/frontend": "2.2.0-alpha6",
+      "@hilla/generator-typescript-cli": "2.2.0-alpha6",
+      "@hilla/generator-typescript-core": "2.2.0-alpha6",
+      "@hilla/generator-typescript-plugin-backbone": "2.2.0-alpha6",
+      "@hilla/generator-typescript-plugin-barrel": "2.2.0-alpha6",
+      "@hilla/generator-typescript-plugin-client": "2.2.0-alpha6",
+      "@hilla/generator-typescript-plugin-model": "2.2.0-alpha6",
+      "@hilla/generator-typescript-plugin-push": "2.2.0-alpha6",
+      "@hilla/generator-typescript-utils": "2.2.0-alpha6",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
@@ -62,6 +63,7 @@
       "glob": "10.3.3",
       "mkdirp": "1.0.4",
       "rollup-plugin-brotli": "3.1.0",
+      "rollup-plugin-visualizer": "5.9.2",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.1.6",
@@ -73,7 +75,7 @@
       "rollup-plugin-visualizer": "5.9.2",
       "@vitejs/plugin-react": "4.0.4"
     },
-    "hash": "6edd3d45928bd7f9d03805280d69fec97b93f35b615b4b1269056c1e1a736e28"
+    "hash": "cecfb644a0ca0c7227f7e8814d0452c04da07826e453af38cb3581743d00a954"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

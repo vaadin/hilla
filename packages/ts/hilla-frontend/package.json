@@ -14,8 +14,10 @@
     "Hilla"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "lint": "eslint src test",
     "test": "karma start ../../../karma.config.cjs --port 9878",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -50,7 +52,7 @@
   },
   "dependencies": {
     "@vaadin/common-frontend": "^0.0.12",
-    "a-atmosphere-javascript": "3.1.3-2",
+    "atmosphere.js": "^3.1.3",
     "js-cookie": "^3.0.1",
     "rimraf": "^3.0.2"
   },
@@ -60,12 +62,15 @@
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@open-wc/testing": "^3.1.8",
+    "@types/atmosphere.js": "^2.1.3",
     "@types/chai": "^4.2.21",
+    "@types/chai-as-promised": "^7.1.5",
     "@types/js-cookie": "^3.0.3",
     "@types/mocha": "^9.0.0",
     "@types/sinon": "^10.0.2",
     "@types/sinon-chai": "^3.2.5",
     "@types/validator": "^13.6.3",
+    "chai-as-promised": "^7.1.1",
     "chai-dom": "^1.11.0",
     "fetch-mock": "^9.11.0",
     "sinon": "^11.1.2",

@@ -5,8 +5,8 @@ import GeneratorIO from './GeneratorIO.js';
 import { processInput } from './utils.js';
 
 const {
-  input: [input],
   flags: { outputDir, plugin: plugins, verbose },
+  input: [input],
 } = meow(
   `
 Usage:

@@ -1,16 +1,18 @@
-/* eslint-disable max-classes-per-file */
+import type { ReactiveControllerHost } from '@lit/reactive-element';
 import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import type { ReactiveElement } from 'lit';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import { FluxConnection } from './FluxConnection.js';
+import type { VaadinWindow } from './types.js';
 
-const $wnd = window as any;
-/* c8 ignore next 2 */
-$wnd.Vaadin = $wnd.Vaadin || {};
-$wnd.Vaadin.registrations = $wnd.Vaadin.registrations || [];
+const $wnd = window as VaadinWindow;
+
+$wnd.Vaadin ??= {};
+$wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: 'endpoint',
 });
+
+export type MaybePromise<T> = Promise<T> | T;
 
 /**
  * An exception that gets thrown when the Vaadin backend responds
@@ -18,22 +20,21 @@ $wnd.Vaadin.registrations.push({
  */
 export class EndpointError extends Error {
   /**
+   * The optional detail object, containing additional information sent
+   * from the backend
+   */
+  detail?: unknown;
+  /**
    * The optional name of the exception that was thrown on a backend
    */
   type?: string;
 
   /**
-   * The optional detail object, containing additional information sent
-   * from a backend
+   * @param message - the `message` property value
+   * @param type - the `type` property value
+   * @param detail - the `detail` property value
    */
-  detail?: any;
-
-  /**
-   * @param message the `message` property value
-   * @param type the `type` property value
-   * @param detail the `detail` property value
-   */
-  constructor(message: string, type?: string, detail?: any) {
+  constructor(message: string, type?: string, detail?: unknown) {
     super(message);
     this.type = type;
     this.detail = detail;
@@ -47,19 +48,18 @@ export class EndpointError extends Error {
  */
 export class EndpointValidationError extends EndpointError {
   /**
+   * An array of the validation errors.
+   */
+  validationErrorData: ValidationErrorData[];
+  /**
    * An original validation error message.
    */
   validationErrorMessage: string;
 
   /**
-   * An array of the validation errors.
-   */
-  validationErrorData: ValidationErrorData[];
-
-  /**
-   * @param message the `message` property value
-   * @param validationErrorData the `validationErrorData` property value
-   * @param type the `type` property value
+   * @param message - the `message` property value
+   * @param validationErrorData - the `validationErrorData` property value
+   * @param type - the `type` property value
    */
   constructor(message: string, validationErrorData: ValidationErrorData[], type?: string) {
     super(message, type, validationErrorData);
@@ -79,8 +79,8 @@ export class EndpointResponseError extends EndpointError {
   response: Response;
 
   /**
-   * @param message the `message` property value
-   * @param response the `response` property value
+   * @param message - the `message` property value
+   * @param response - the `response` property value
    */
   constructor(message: string, response: Response) {
     super(message, 'EndpointResponseError', response);
@@ -115,29 +115,32 @@ export class ForbiddenResponseError extends EndpointResponseError {
 export interface Subscription<T> {
   /** Cancels the subscription.  No values are made available after calling this. */
   cancel(): void;
-  /** Called when a new value is available. */
-  onNext(callback: (value: T) => void): Subscription<T>;
-  /** Called when an exception occured in the subscription. */
-  onError(callback: () => void): Subscription<T>;
-  /** Called when the subscription has completed. No values are made available after calling this. */
-  onComplete(callback: () => void): Subscription<T>;
+
   /*
    * Binds to the given context (element) so that when the context is deactivated (element detached), the subscription is closed.
    */
-  context(context: ReactiveElement): Subscription<T>;
+  context(context: ReactiveControllerHost): Subscription<T>;
+
+  /** Called when the subscription has completed. No values are made available after calling this. */
+  onComplete(callback: () => void): Subscription<T>;
+
+  /** Called when an exception occured in the subscription. */
+  onError(callback: () => void): Subscription<T>;
+
+  /** Called when a new value is available. */
+  onNext(callback: (value: T) => void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
+  detail?: any;
   message: string;
   type: string;
-  detail?: any;
   validationErrorData?: ValidationErrorData[];
 }
 
 /**
  * Throws a TypeError if the response is not 200 OK.
- * @param response The response to assert.
- * @ignore
+ * @param response - The response to assert.
  */
 const assertResponseIsOk = async (response: Response): Promise<void> => {
   if (!response.ok) {
@@ -151,9 +154,9 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
     }
 
     const message =
-      errorJson?.message ||
-      errorText ||
-      `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
+      errorJson?.message ?? errorText.length > 0
+        ? errorText
+        : `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
     const type = errorJson?.type;
 
     if (errorJson?.validationErrorData) {
@@ -190,8 +193,8 @@ export class ValidationErrorData {
   parameterName?: string;
 
   /**
-   * @param message the `message` property value
-   * @param parameterName the `parameterName` property value
+   * @param message - The `message` property value
+   * @param parameterName - The `parameterName` property value
    */
   constructor(message: string, parameterName?: string) {
     this.message = message;
@@ -204,14 +207,13 @@ export class ValidationErrorData {
  */
 export interface ConnectClientOptions {
   /**
-   * The `prefix` property value.
-   */
-  prefix?: string;
-
-  /**
    * The `middlewares` property value.
    */
   middlewares?: Middleware[];
+  /**
+   * The `prefix` property value.
+   */
+  prefix?: string;
 }
 
 export interface EndpointCallMetaInfo {
@@ -228,7 +230,7 @@ export interface EndpointCallMetaInfo {
   /**
    * Optional object with method call arguments.
    */
-  params?: any;
+  params?: Record<string, unknown>;
 }
 
 /**
@@ -245,26 +247,26 @@ export interface MiddlewareContext extends EndpointCallMetaInfo {
 /**
  * An async middleware callback that invokes the next middleware in the chain
  * or makes the actual request.
- * @param context The information about the call and request
+ * @param context - The information about the call and request
  */
-export type MiddlewareNext = (context: MiddlewareContext) => Promise<Response> | Response;
+export type MiddlewareNext = (context: MiddlewareContext) => MaybePromise<unknown>;
 
 /**
  * An interface that allows defining a middleware as a class.
  */
 export interface MiddlewareClass {
   /**
-   * @param context The information about the call and request
-   * @param next Invokes the next in the call chain
+   * @param context - The information about the call and request
+   * @param next - Invokes the next in the call chain
    */
-  invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> | Response;
+  invoke(context: MiddlewareContext, next: MiddlewareNext): MaybePromise<unknown>;
 }
 
 /**
  * An async callback function that can intercept the request and response
  * of a call.
  */
-type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => Promise<Response> | Response;
+export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => MaybePromise<unknown>;
 
 /**
  * An async callback that can intercept the request and response
@@ -273,7 +275,7 @@ type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => 
 export type Middleware = MiddlewareClass | MiddlewareFunction;
 
 function isFlowLoaded(): boolean {
-  return $wnd.Vaadin.Flow?.clients?.TypeScript !== undefined;
+  return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
 }
 
 /**
@@ -310,19 +312,18 @@ export interface EndpointRequestInit {
  */
 export class ConnectClient {
   /**
+   * The array of middlewares that are invoked during a call.
+   */
+  middlewares: Middleware[] = [];
+  /**
    * The Hilla endpoint prefix
    */
   prefix = '/connect';
 
-  /**
-   * The array of middlewares that are invoked during a call.
-   */
-  middlewares: Middleware[] = [];
-
-  private _fluxConnection: FluxConnection | undefined = undefined;
+  #fluxConnection?: FluxConnection;
 
   /**
-   * @param options Constructor options.
+   * @param options - Constructor options.
    */
   constructor(options: ConnectClientOptions = {}) {
     if (options.prefix) {
@@ -338,16 +339,27 @@ export class ConnectClient {
 
     // Listen to browser online/offline events and update the loading indicator accordingly.
     // Note: if Flow.ts is loaded, it instead handles the state transitions.
-    $wnd.addEventListener('online', () => {
-      if (!isFlowLoaded()) {
+    addEventListener('online', () => {
+      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
         $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
       }
     });
-    $wnd.addEventListener('offline', () => {
-      if (!isFlowLoaded()) {
+    addEventListener('offline', () => {
+      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
         $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
       }
     });
+  }
+
+  /**
+   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint
+   * methods.
+   */
+  get fluxConnection(): FluxConnection {
+    if (!this.#fluxConnection) {
+      this.#fluxConnection = new FluxConnection(this.prefix);
+    }
+    return this.#fluxConnection;
   }
 
   /**
@@ -355,13 +367,18 @@ export class ConnectClient {
    * parameters with the parameters given as params.
    * Asynchronously returns the parsed JSON response data.
    *
-   * @param endpoint Endpoint name.
-   * @param method Method name to call in the endpoint class.
-   * @param params Optional parameters to pass to the method.
-   * @param __init Optional parameters for the request
-   * @returns {} Decoded JSON response data.
+   * @param endpoint - Endpoint name.
+   * @param method - Method name to call in the endpoint class.
+   * @param params - Optional parameters to pass to the method.
+   * @param init - Optional parameters for the request
+   * @returns Decoded JSON response data.
    */
-  async call(endpoint: string, method: string, params?: any, __init?: EndpointRequestInit): Promise<any> {
+  async call(
+    endpoint: string,
+    method: string,
+    params?: Record<string, unknown>,
+    init?: EndpointRequestInit,
+  ): Promise<any> {
     if (arguments.length < 2) {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
@@ -373,20 +390,11 @@ export class ConnectClient {
       ...csrfHeaders,
     };
 
-    // helper to keep the undefined value in object after JSON.stringify
-    const nullForUndefined = (obj: Record<string, unknown>): Record<string, unknown> =>
-      Object.keys(obj).reduce((_obj, property) => {
-        if (_obj[property] === undefined) {
-          _obj[property] = null;
-        }
-
-        return _obj;
-      }, obj);
-
     const request = new Request(`${this.prefix}/${endpoint}/${method}`, {
-      method: 'POST',
+      body:
+        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined,
       headers,
-      body: params !== undefined ? JSON.stringify(nullForUndefined(params)) : undefined,
+      method: 'POST',
     });
 
     // The middleware `context`, includes the call arguments and the request
@@ -402,53 +410,49 @@ export class ConnectClient {
     // response handling should come last after the other middlewares are done
     // with processing the response. That is why this middleware is first
     // in the final middlewares array.
-    const responseHandlerMiddleware: Middleware = async (
-      context: MiddlewareContext,
-      next: MiddlewareNext,
-    ): Promise<Response> => {
-      const response = await next(context);
+    async function responseHandlerMiddleware(context: MiddlewareContext, next: MiddlewareNext): Promise<unknown> {
+      const response = (await next(context)) as Response;
       await assertResponseIsOk(response);
       const text = await response.text();
       return JSON.parse(text, (_, value: any) => (value === null ? undefined : value));
-    };
+    }
 
     // The actual fetch call itself is expressed as a middleware
     // chain item for our convenience. Always having an ending of the chain
     // this way makes the folding down below more concise.
-    const fetchNext: MiddlewareNext = async (context: MiddlewareContext): Promise<Response> => {
-      $wnd.Vaadin.connectionState.loadingStarted();
-      return fetch(context.request, { signal: __init?.signal })
-        .then((response) => {
-          $wnd.Vaadin.connectionState.loadingFinished();
-          return response;
-        })
-        .catch(async (error) => {
-          // don't bother about connections aborted by purpose
-          if (error.name === 'AbortError') {
-            $wnd.Vaadin.connectionState.loadingFinished();
-          } else {
-            $wnd.Vaadin.connectionState.loadingFailed();
-          }
-          return Promise.reject(error);
-        });
-    };
+    async function fetchNext(context: MiddlewareContext) {
+      $wnd.Vaadin?.connectionState?.loadingStarted();
+      try {
+        const response = await fetch(context.request, { signal: init?.signal });
+        $wnd.Vaadin?.connectionState?.loadingFinished();
+        return response;
+      } catch (error: unknown) {
+        // don't bother about connections aborted by purpose
+        if (error instanceof Error && error.name === 'AbortError') {
+          $wnd.Vaadin?.connectionState?.loadingFinished();
+        } else {
+          $wnd.Vaadin?.connectionState?.loadingFailed();
+        }
+        return Promise.reject(error);
+      }
+    }
 
     // Assemble the final middlewares array from internal
     // and external middlewares
-    const middlewares = [responseHandlerMiddleware as Middleware].concat(this.middlewares);
+    const middlewares = [responseHandlerMiddleware as Middleware, ...this.middlewares];
 
     // Fold the final middlewares array into a single function
     const chain = middlewares.reduceRight(
-      (next: MiddlewareNext, middleware: Middleware) =>
+      (next: MiddlewareNext, middleware) =>
         // Compose and return the new chain step, that takes the context and
         // invokes the current middleware with the context and the further chain
         // as the next argument
-        (async (context) => {
+        async (context) => {
           if (typeof middleware === 'function') {
             return middleware(context, next);
           }
           return middleware.invoke(context, next);
-        }) as MiddlewareNext,
+        },
       // Initialize reduceRight the accumulator with `fetchNext`
       fetchNext,
     );
@@ -463,22 +467,12 @@ export class ConnectClient {
    * compatible type such as a Flux.
    * Returns a subscription that is used to fetch values as they become available.
    *
-   * @param endpoint Endpoint name.
-   * @param method Method name to call in the endpoint class.
-   * @param params Optional parameters to pass to the method.
-   * @returns {} A subscription used to handles values as they become available.
+   * @param endpoint - Endpoint name.
+   * @param method - Method name to call in the endpoint class.
+   * @param params - Optional parameters to pass to the method.
+   * @returns A subscription used to handles values as they become available.
    */
   subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
-  }
-
-  /**
-   * Gets a representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
-   */
-  get fluxConnection(): FluxConnection {
-    if (!this._fluxConnection) {
-      this._fluxConnection = new FluxConnection(this.prefix);
-    }
-    return this._fluxConnection;
   }
 }
