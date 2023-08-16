@@ -108,8 +108,7 @@ export class PushProcessor {
 
   /**
    * Replace returned `Promise<Array<T>>` by the `Subscription<T>` type
-   * @param declaration
-   * @private
+   * @param declaration -
    */
   #replacePromiseType(declaration: ts.FunctionDeclaration) {
     const promiseType = (declaration.type as ts.TypeReferenceNode).typeArguments![0];

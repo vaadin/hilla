@@ -56,7 +56,7 @@ export default class EndpointProcessor {
       await Promise.all(Array.from(this.#methods, async ([method, pathItem]) => this.#processMethod(method, pathItem)))
     ).flatMap((item) => item);
 
-    const { imports, exports } = this.#dependencies;
+    const { exports, imports } = this.#dependencies;
 
     return createSourceFile(
       [...imports.toCode(), ...statements, ...exports.toCode()],

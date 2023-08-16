@@ -9,7 +9,7 @@ const TEST_SPRING_CSRF_META_TAG_NAME = '_csrf';
 export function setupSpringCsrfMetaTags(
   csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE,
   csrfMetaTagName = TEST_SPRING_CSRF_META_TAG_NAME,
-) {
+): void {
   let csrfMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf"]');
   let csrfHeaderNameMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf_header"]');
 
@@ -28,13 +28,13 @@ export function setupSpringCsrfMetaTags(
   csrfHeaderNameMetaTag.content = TEST_SPRING_CSRF_HEADER_NAME;
 }
 
-export function clearSpringCsrfMetaTags() {
+export function clearSpringCsrfMetaTags(): void {
   Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
     el.remove(),
   );
 }
 
-export function verifySpringCsrfTokenIsCleared() {
+export function verifySpringCsrfTokenIsCleared(): void {
   expect(document.head.querySelector('meta[name="_csrf"]')).to.be.null;
   expect(document.head.querySelector('meta[name="_csrf_header"]')).to.be.null;
 }

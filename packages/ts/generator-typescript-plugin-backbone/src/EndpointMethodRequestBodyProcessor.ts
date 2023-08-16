@@ -8,8 +8,7 @@ import {
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { ObjectLiteralExpression, ParameterDeclaration } from 'typescript';
-import ts from 'typescript';
+import ts, { type ObjectLiteralExpression, type ParameterDeclaration } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { defaultMediaType } from './utils.js';
 
@@ -101,7 +100,7 @@ export default class EndpointMethodRequestBodyProcessor {
       return [];
     }
 
-    const { resolver, logger } = this.#owner;
+    const { logger, resolver } = this.#owner;
 
     const resolvedSchema = resolver.resolve(basicSchema);
 

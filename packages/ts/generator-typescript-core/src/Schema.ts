@@ -1,7 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { Nullified } from './utils.js';
-import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName } from './utils.js';
+import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName, type Nullified } from './utils.js';
 
 export type ReferenceSchema = ReadonlyDeep<OpenAPIV3.ReferenceObject>;
 export type ArraySchema = ReadonlyDeep<OpenAPIV3.ArraySchemaObject>;
