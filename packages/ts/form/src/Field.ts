@@ -408,7 +408,8 @@ export const field = directive(
       }
 
       const firstError: ValueError<any> | undefined = binderNode.ownErrors[0];
-      const errorMessage = firstError.message || '';
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      const errorMessage = firstError?.message || '';
       if (errorMessage !== fieldState.errorMessage) {
         fieldState.errorMessage = errorMessage;
         fieldState.strategy.errorMessage = errorMessage;
