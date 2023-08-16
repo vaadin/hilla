@@ -56,6 +56,8 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
                                     browserLiveReload);
                             info("Hilla Endpoint Hot-Reload service is enabled. "
                                     + "You can disable it by defining the hilla.endpoint.hot-reload.enabled=false property in application.properties file.");
+                            info("The default polling interval for Hilla Endpoint Hot-Reload is 5 seconds. "
+                                    + "You can change the interval by defining a positive value for the hilla.endpoint.hot-reload.pollInterval property in application.properties file.");
                         } else {
                             info("Hilla Endpoint Hot-Reload service is disabled. "
                                     + "You can enable it by removing the hilla.endpoint.hot-reload.enabled=true property from your application.properties file, "
