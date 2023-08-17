@@ -29,8 +29,7 @@ import java.nio.file.Path;
 
 class HotSwapServiceInitializer implements VaadinServiceInitListener {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(HotSwapServiceInitializer.class);
+    private final Logger LOGGER;
 
     @Value("${hilla.endpoint.hot-reload.enabled:true}")
     boolean endpointHotReloadEnabled;
@@ -40,6 +39,8 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
     public HotSwapServiceInitializer(
             EndpointHotSwapService endpointHotSwapService) {
         this.endpointHotSwapService = endpointHotSwapService;
+        LOGGER = LoggerFactory
+            .getLogger(this.getClass());
     }
 
     @Override

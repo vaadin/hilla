@@ -208,7 +208,6 @@ public class HotSwapServiceInitializerTest {
                     .when(() -> BrowserLiveReloadAccessor
                             .getLiveReloadFromService(vaadinService))
                     .thenReturn(Optional.of(mockedBrowserLiveReload));
-
             loggerFactoryMockedStatic
                     .when(() -> LoggerFactory
                             .getLogger(hotSwapServiceInitializer.getClass()))
@@ -246,7 +245,6 @@ public class HotSwapServiceInitializerTest {
                     .when(() -> BrowserLiveReloadAccessor
                             .getLiveReloadFromService(vaadinService))
                     .thenReturn(Optional.of(mockedBrowserLiveReload));
-
             loggerFactoryMockedStatic
                     .when(() -> LoggerFactory
                             .getLogger(hotSwapServiceInitializer.getClass()))
