@@ -19,11 +19,6 @@
     <version>2.2-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
-    <properties>
-        <slf4j.version>2.0.4</slf4j.version>
-        <jna.version>5.13.0</jna.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
