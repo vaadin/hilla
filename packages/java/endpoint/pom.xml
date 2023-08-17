@@ -14,7 +14,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <javaparser.version>3.24.2</javaparser.version>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>
     </properties>
 
@@ -72,65 +71,25 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>${spring.boot.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <exclusions>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-core</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-beans</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-aop</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-core</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-expression</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-context</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>org.springframework</groupId>
-                  <artifactId>spring-beans</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>io.micrometer</groupId>
-                  <artifactId>micrometer-observation</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -181,71 +140,34 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring.security.version}</version>
-            <exclusions>
-              <exclusion>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-expression</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-observation</artifactId>
-              </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-          <groupId>io.micrometer</groupId>
-          <artifactId>micrometer-observation</artifactId>
-          <version>${micrometer.version}</version>
         </dependency>
 
         <!-- vaadin-fusion generator-->
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>${javaparser.version}</version>
+            <version>${github.javaparser.core.version}</version>
         </dependency>
 
         <!-- Fusion Testing dependencies -->
@@ -292,13 +214,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test-autoconfigure</artifactId>
-            <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
