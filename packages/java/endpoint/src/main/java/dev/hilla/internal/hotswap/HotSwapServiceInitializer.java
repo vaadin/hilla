@@ -39,8 +39,7 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
     public HotSwapServiceInitializer(
             EndpointHotSwapService endpointHotSwapService) {
         this.endpointHotSwapService = endpointHotSwapService;
-        LOGGER = LoggerFactory
-            .getLogger(this.getClass());
+        LOGGER = LoggerFactory.getLogger(this.getClass());
     }
 
     @Override
