@@ -67,9 +67,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
 
-    this[_onChange] = config?.onChange?.bind(context) ?? this[_onChange];
-    this[_onSubmit] = config?.onSubmit?.bind(context) ?? this[_onSubmit];
-    this.read(this[_emptyValue]);
+    this[_onSubmit] = config?.onSubmit?.bind(this) ?? this[_onSubmit];
   }
 
   /**
@@ -122,7 +120,11 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   }
 
   protected set changeCallback(callback: (oldValue?: T) => void) {
-    this[_onChange] ??= callback;
+    this[_onChange] = callback;
+  }
+
+  readValue(): void {
+    this.read(this[_emptyValue]);
   }
 
   /**

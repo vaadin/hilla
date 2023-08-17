@@ -32,6 +32,12 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderRoot<T, M> {
     if (typeof (context as LitElement).requestUpdate === 'function') {
       this.changeCallback = () => (context as LitElement).requestUpdate();
     }
+
+    if (config?.onChange) {
+      this.changeCallback = config.onChange.bind(this);
+    }
+
+    this.readValue();
   }
 
   protected override getCallbackContext(): Element {
