@@ -35,6 +35,9 @@
     "./BinderNode.js": {
       "default": "./BinderNode.js"
     },
+    "./BinderRoot.js": {
+      "default": "./BinderRoot.js"
+    },
     "./Field.js": {
       "default": "./Field.js"
     },
