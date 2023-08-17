@@ -1,13 +1,23 @@
+/* eslint-disable accessor-pairs,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
-import { _fromString, type AbstractModel, ArrayModel, ObjectModel, getBinderNode, hasFromString } from './Models.js';
+import {
+  _fromString,
+  type AbstractModel,
+  ArrayModel,
+  BooleanModel,
+  ObjectModel,
+  getBinderNode,
+  hasFromString,
+} from './Models.js';
+import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
 interface FieldBase<T> {
   required: boolean;
   invalid: boolean;
   errorMessage: string;
-  value: T;
+  value: T | undefined;
 }
 
 /**
@@ -24,7 +34,7 @@ interface FieldElementHolder<T> {
   get element(): FieldElement<T>;
 
   /**
-   * @param element the new element value
+   * @param element - the new element value
    * @deprecated will be read-only in future
    */
   set element(element: FieldElement<T>);
@@ -42,58 +52,55 @@ interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
 
 export type FieldStrategy<T = any> = Field<T> & FieldConstraintValidation;
 
-export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T> {
+export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> = FieldElement<T>>
+  implements FieldStrategy<T>
+{
   abstract required: boolean;
 
   abstract invalid: boolean;
 
-  private _element: FieldElement<T>;
+  readonly model?: AbstractModel<T>;
+
+  private _element: E;
 
   /**
+   * @privateRemarks
    * Fallback for missing .validity property API in Vaadin components.
-   * @private
    */
   private _validityFallback: ValidityState = defaultValidity;
 
-  constructor(element: FieldElement<T>, readonly model?: AbstractModel<T>) {
+  constructor(element: E, model?: AbstractModel<T>) {
     this._element = element;
+    this.model = model;
   }
 
-  get element() {
+  get element(): E {
     return this._element;
   }
 
   /**
-   * @param element the new element value
+   * @param element - the new element value
    * @deprecated will be read-only in future
    */
-  set element(element: FieldElement<T>) {
+  set element(element: E) {
     this._element = element;
   }
 
-  get value() {
+  get value(): T | undefined {
     return this.element.value;
   }
 
-  set value(value) {
+  set value(value: T | undefined) {
     this.element.value = value;
   }
 
   set errorMessage(_: string) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
-  setAttribute(key: string, val: any) {
-    if (val) {
-      this.element.setAttribute(key, '');
-    } else {
-      this.element.removeAttribute(key);
-    }
+  get validity(): ValidityState {
+    return this.element.validity ?? this._validityFallback;
   }
 
-  get validity() {
-    return this.element.validity || this._validityFallback;
-  }
-
-  checkValidity() {
+  checkValidity(): boolean {
     if (!this.element.checkValidity) {
       return true;
     }
@@ -105,6 +112,14 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
       ...(valid ? {} : this._detectValidityError()),
     };
     return valid;
+  }
+
+  setAttribute(key: string, val: any): void {
+    if (val) {
+      this.element.setAttribute(key, '');
+    } else {
+      this.element.removeAttribute(key);
+    }
   }
 
   private _detectValidityError(): Readonly<Partial<ValidityState>> {
@@ -128,15 +143,18 @@ export abstract class AbstractFieldStrategy<T = any> implements FieldStrategy<T>
   }
 }
 
-export class VaadinFieldStrategy<T = any> extends AbstractFieldStrategy<T> {
+export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldElement<T>> extends AbstractFieldStrategy<
+  T,
+  E
+> {
   private _invalid = false;
 
-  constructor(element: FieldElement<T>, model?: AbstractModel<T>) {
+  constructor(element: E, model?: AbstractModel<T>) {
     super(element, model);
 
     // Override built-in changes of the `invalid` flag in Vaadin components
     // to keep the `invalid` property state of the web component in sync.
-    (element as any).addEventListener('validated', this._overrideVaadinInvalidChange.bind(this));
+    (element as EventTarget).addEventListener('validated', this._overrideVaadinInvalidChange.bind(this));
   }
 
   set required(value: boolean) {
@@ -152,14 +170,22 @@ export class VaadinFieldStrategy<T = any> extends AbstractFieldStrategy<T> {
     this.element.errorMessage = value;
   }
 
-  private _overrideVaadinInvalidChange(e: CustomEvent<Partial<ValidityState>>) {
-    if (this._invalid !== !e.detail.valid) {
+  private _overrideVaadinInvalidChange(e: Event): void {
+    if (!(e instanceof CustomEvent) || typeof e.detail !== 'object') {
+      return;
+    }
+
+    const invalid = !(e.detail satisfies Partial<ValidityState> as Partial<ValidityState>).valid;
+    if (this._invalid !== invalid) {
       this.element.invalid = this._invalid;
     }
   }
 }
 
-export class GenericFieldStrategy extends AbstractFieldStrategy {
+export class GenericFieldStrategy<T = any, E extends FieldElement<T> = FieldElement<T>> extends AbstractFieldStrategy<
+  T,
+  E
+> {
   set required(value: boolean) {
     this.setAttribute('required', value);
   }
@@ -169,73 +195,114 @@ export class GenericFieldStrategy extends AbstractFieldStrategy {
   }
 }
 
-export class CheckedFieldStrategy extends GenericFieldStrategy {
-  override set value(val: any) {
-    (this.element as any).checked = /^(true|on)$/i.test(String(val));
+type CheckedFieldElement<T> = FieldElement<T> & {
+  checked: boolean;
+};
+
+export class CheckedFieldStrategy<
+  T = any,
+  E extends CheckedFieldElement<T> = CheckedFieldElement<T>,
+> extends GenericFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    if (this.model instanceof BooleanModel) {
+      return this.element.checked as T;
+    }
+
+    return this.element.checked ? this.element.value : undefined;
   }
 
-  override get value() {
-    return (this.element as any).checked;
+  override set value(val: T | undefined) {
+    (this.element as { checked: boolean }).checked = /^(true|on)$/iu.test(String(val));
   }
 }
 
-export class ComboBoxFieldStrategy extends VaadinFieldStrategy {
-  override get value() {
+type ComboBoxFieldElement<T> = FieldElement<T> & {
+  value: string;
+  selectedItem: T | null;
+};
+
+export class ComboBoxFieldStrategy<
+  T,
+  E extends ComboBoxFieldElement<T> = ComboBoxFieldElement<T>,
+> extends VaadinFieldStrategy<T, E> {
+  override get value(): T | undefined {
     if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
-      const { selectedItem } = this.element as any;
-      return selectedItem === null ? undefined : selectedItem;
+      const { selectedItem } = this.element;
+      return (selectedItem === null ? undefined : selectedItem) as T;
     }
 
     return super.value;
   }
 
-  override set value(val: any) {
+  override set value(val: T | undefined) {
     if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
-      (this.element as any).selectedItem = val === undefined ? null : val;
+      this.element.selectedItem = val === undefined ? null : val;
     } else {
       super.value = val;
     }
   }
 }
 
-export class MultiSelectComboBoxFieldStrategy extends VaadinFieldStrategy {
-  override get value() {
-    return (this.element as any).selectedItems;
+type MultiSelectComboBoxFieldElement<T> = FieldElement<T> & {
+  value: never;
+  selectedItems: T;
+};
+
+export class MultiSelectComboBoxFieldStrategy<
+  T,
+  E extends MultiSelectComboBoxFieldElement<T> = MultiSelectComboBoxFieldElement<T>,
+> extends VaadinFieldStrategy<T, E> {
+  override get value(): T {
+    return this.element.selectedItems;
   }
 
   override set value(val: any) {
-    (this.element as any).selectedItems = val;
+    this.element.selectedItems = val;
   }
 }
 
-export class SelectedFieldStrategy extends GenericFieldStrategy {
-  override set value(val: any) {
-    (this.element as any).selected = val;
+type SelectedFieldElement<T> = FieldElement<T> & {
+  value: never;
+  selected: T;
+};
+
+export class SelectedFieldStrategy<
+  T,
+  E extends SelectedFieldElement<T> = SelectedFieldElement<T>,
+> extends GenericFieldStrategy<T, E> {
+  override get value(): T {
+    return this.element.selected;
   }
 
-  override get value() {
-    return (this.element as any).selected;
+  override set value(val: T) {
+    this.element.selected = val;
   }
 }
 
-export function getDefaultFieldStrategy<T>(elm: any, model?: AbstractModel<T>): AbstractFieldStrategy<T> {
+type MaybeVaadinElementConstructor = {
+  readonly version?: string;
+};
+
+export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: AbstractModel<T>): AbstractFieldStrategy<T> {
   switch (elm.localName) {
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
-      return new CheckedFieldStrategy(elm, model);
+      return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
     case 'vaadin-combo-box':
-      return new ComboBoxFieldStrategy(elm, model);
+      return new ComboBoxFieldStrategy(elm as ComboBoxFieldElement<T>, model);
     case 'vaadin-list-box':
-      return new SelectedFieldStrategy(elm, model);
+      return new SelectedFieldStrategy(elm as SelectedFieldElement<T>, model);
     case 'vaadin-multi-select-combo-box':
-      return new MultiSelectComboBoxFieldStrategy(elm, model);
+      return new MultiSelectComboBoxFieldStrategy(elm as MultiSelectComboBoxFieldElement<T>, model);
     case 'vaadin-rich-text-editor':
       return new GenericFieldStrategy(elm, model);
     default:
-      if (elm.localName === 'input' && /^(checkbox|radio)$/.test(elm.type)) {
-        return new CheckedFieldStrategy(elm, model);
+      if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
+        return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
       }
-      return elm.constructor.version ? new VaadinFieldStrategy(elm, model) : new GenericFieldStrategy(elm, model);
+      return (elm.constructor as unknown as MaybeVaadinElementConstructor).version
+        ? new VaadinFieldStrategy(elm, model)
+        : new GenericFieldStrategy(elm, model);
   }
 }
 
@@ -266,7 +333,7 @@ export const field = directive(
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    override render(model: AbstractModel<any>, effect?: (element: Element) => void) {
+    override render(_model: AbstractModel<any>, _effect?: (element: Element) => void) {
       return nothing;
     }
 
@@ -277,11 +344,11 @@ export const field = directive(
 
       if (!this.fieldState) {
         const fieldState = {
+          errorMessage: '',
           name: '',
           value: '',
           required: false,
           invalid: false,
-          errorMessage: '',
           model,
           validity: defaultValidity,
           element,
@@ -340,8 +407,9 @@ export const field = directive(
         fieldState.strategy.required = required;
       }
 
-      const firstError = binderNode.ownErrors ? binderNode.ownErrors[0] : undefined;
-      const errorMessage = (firstError && firstError.message) || '';
+      const firstError: ValueError<any> | undefined = binderNode.ownErrors[0];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      const errorMessage = firstError?.message || '';
       if (errorMessage !== fieldState.errorMessage) {
         fieldState.errorMessage = errorMessage;
         fieldState.strategy.errorMessage = errorMessage;
