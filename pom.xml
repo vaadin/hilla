@@ -73,18 +73,14 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.2-SNAPSHOT</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <spring.version>6.0.9</spring.version>
-    <spring.boot.version>3.1.0</spring.boot.version>
-    <spring.data.commons.version>3.1.0</spring.data.commons.version>
-    <spring.security.version>6.1.0</spring.security.version>
-    <testbench.version>9.0.3</testbench.version>
+    <spring.boot.version>3.1.2</spring.boot.version>
+    <testbench.version>9.0.7</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
-    <micrometer.version>1.11.0</micrometer.version>
-    <github.javaparser.core.version>3.24.10</github.javaparser.core.version>
+    <github.javaparser.core.version>3.25.4</github.javaparser.core.version>
   </properties>
 
   <organization>
@@ -154,6 +150,31 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-bom</artifactId>
+        <version>${flow.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-spring</artifactId>
+        <version>${flow.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>${classgraph.version}</version>
@@ -179,11 +200,6 @@
         <version>${junit.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.data</groupId>
-        <artifactId>spring-data-commons</artifactId>
-        <version>${spring.data.commons.version}</version>
       </dependency>
       <dependency>
         <groupId>jakarta.validation</groupId>
