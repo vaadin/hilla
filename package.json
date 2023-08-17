@@ -13,10 +13,8 @@
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
-    "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "lint": "lerna run lint --parallel",
-    "postinstall": "npm run bootstrap",
     "test": "lerna run test --parallel",
     "test:coverage": "lerna run test:coverage --parallel",
     "typecheck": "lerna run typecheck --parallel"
@@ -27,6 +25,9 @@
   },
   "author": "Vaadin Ltd",
   "license": "Apache-2.0",
+  "overrides": {
+    "esbuild": "$esbuild"
+  },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@types/karma": "^6.3.3",
@@ -36,25 +37,30 @@
     "@types/validator": "^13.7.14",
     "chai-dom": "^1.11.0",
     "concurrently": "^7.6.0",
+    "esbuild": "^0.18.20",
     "eslint": "^8.41.0",
-    "eslint-config-vaadin": "^1.0.0-alpha.12",
+    "eslint-config-vaadin": "^1.0.0-alpha.14",
+    "eslint-plugin-perfectionist": "^1.5.1",
+    "eslint-plugin-tsdoc": "^0.2.17",
+    "glob": "^10.3.3",
     "karma": "^6.4.1",
     "karma-chrome-launcher": "^3.1.1",
     "karma-coverage": "^2.2.0",
     "karma-mocha": "^2.0.1",
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
-    "lerna": "^6.5.1",
+    "lerna": "^7.1.4",
     "lint-staged": "^13.2.0",
     "meow": "^11.0.0",
     "micromatch": "^4.0.5",
     "mocha": "^10.2.0",
-    "nx": "^15.8.6",
+    "nx": "^16.6.0",
     "prettier": "^2.8.4",
     "simple-git-hooks": "^2.8.1",
     "sinon": "^15.0.2",
     "tsx": "^3.12.5",
-    "typescript": "^5.0.2",
-    "vite": "^4.2.0"
+    "type-fest": "^4.1.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8"
   }
 }

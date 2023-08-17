@@ -28,7 +28,7 @@ function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
 }
 
 const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"}};/i.exec(body);
+  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"\}\};/iu.exec(body);
   return match ? match[1] : undefined;
 };
 
@@ -42,7 +42,7 @@ async function updateCsrfTokensBasedOnResponse(response: Response): Promise<stri
 }
 
 async function doLogout(logoutUrl: string, headers: Record<string, string>) {
-  const response = await fetch(logoutUrl, { method: 'POST', headers });
+  const response = await fetch(logoutUrl, { headers, method: 'POST' });
   if (!response.ok) {
     throw new Error(`failed to logout with response ${response.status}`);
   }
@@ -69,9 +69,9 @@ export interface LogoutOptions {
 
 /**
  * A helper method for Spring Security based form login.
- * @param username
- * @param password
- * @param options defines additional options, e.g, the loginProcessingUrl etc.
+ * @param username - username
+ * @param password - password
+ * @param options - defines additional options, e.g, the loginProcessingUrl etc.
  */
 export async function login(username: string, password: string, options?: LoginOptions): Promise<LoginResult> {
   try {
@@ -79,63 +79,68 @@ export async function login(username: string, password: string, options?: LoginO
     data.append('username', username);
     data.append('password', password);
 
-    const loginProcessingUrl = options && options.loginProcessingUrl ? options.loginProcessingUrl : 'login';
+    const loginProcessingUrl = options?.loginProcessingUrl ?? 'login';
     const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     headers.source = 'typescript';
     const response = await fetch(loginProcessingUrl, {
-      method: 'POST',
       body: data,
       headers,
+      method: 'POST',
     });
 
     // This code assumes that a VaadinSavedRequestAwareAuthenticationSuccessHandler is used on the server side,
     // setting these header values based on the "source=typescript" header set above
 
     const result = response.headers.get('Result');
-    const savedUrl = response.headers.get('Saved-url') || undefined;
-    const defaultUrl = response.headers.get('Default-url') || undefined;
+    const savedUrl = response.headers.get('Saved-url') ?? undefined;
+    const defaultUrl = response.headers.get('Default-url') ?? undefined;
     const loginSuccessful = response.ok && result === 'success';
 
     if (loginSuccessful) {
-      const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') || undefined;
+      const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') ?? undefined;
 
-      const springCsrfHeader = response.headers.get('Spring-CSRF-header') || undefined;
-      const springCsrfToken = response.headers.get('Spring-CSRF-token') || undefined;
+      const springCsrfHeader = response.headers.get('Spring-CSRF-header') ?? undefined;
+      const springCsrfToken = response.headers.get('Spring-CSRF-token') ?? undefined;
       if (springCsrfHeader && springCsrfToken) {
         const springCsrfTokenInfo: Record<string, string> = {};
         springCsrfTokenInfo._csrf = springCsrfToken;
+        // eslint-disable-next-line camelcase
         springCsrfTokenInfo._csrf_header = springCsrfHeader;
         updateSpringCsrfMetaTags(springCsrfTokenInfo);
       }
 
       return {
-        error: false,
-        token: vaadinCsrfToken,
-        redirectUrl: savedUrl,
         defaultUrl,
+        error: false,
+        redirectUrl: savedUrl,
+        token: vaadinCsrfToken,
       };
     }
     return {
       error: true,
-      errorTitle: 'Incorrect username or password.',
       errorMessage: 'Check that you have entered the correct username and password and try again.',
+      errorTitle: 'Incorrect username or password.',
     };
-  } catch (e: any) {
-    return {
-      error: true,
-      errorTitle: e.name,
-      errorMessage: e.message,
-    };
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      return {
+        error: true,
+        errorMessage: e.message,
+        errorTitle: e.name,
+      };
+    }
+
+    throw e;
   }
 }
 
 /**
  * A helper method for Spring Security based form logout
- * @param options defines additional options, e.g, the logoutUrl.
+ * @param options - defines additional options, e.g, the logoutUrl.
  */
-export async function logout(options?: LogoutOptions) {
+export async function logout(options?: LogoutOptions): Promise<void> {
   // this assumes the default Spring Security logout configuration (handler URL)
-  const logoutUrl = options && options.logoutUrl ? options.logoutUrl : 'logout';
+  const logoutUrl = options?.logoutUrl ?? 'logout';
   try {
     const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
     await doLogout(logoutUrl, headers);
@@ -179,12 +184,12 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
   async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
     const clonedContext = { ...context };
     clonedContext.request = context.request.clone();
-    const response = await next(context);
+    const response = (await next(context)) as Response;
     if (response.status === 401) {
       const loginResult = await this.onInvalidSessionCallback();
       if (loginResult.token) {
         clonedContext.request.headers.set(VAADIN_CSRF_HEADER, loginResult.token);
-        return next(clonedContext);
+        return next(clonedContext) as Promise<Response>;
       }
     }
     return response;

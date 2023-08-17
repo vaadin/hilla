@@ -5,8 +5,7 @@ import type DependencyManager from '@hilla/generator-typescript-utils/dependenci
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import type { Expression, Statement, TypeNode } from 'typescript';
-import ts from 'typescript';
+import ts, { type Expression, type Statement, type TypeNode } from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
 
@@ -73,7 +72,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
       INIT_TYPE_NAME,
     )!;
 
-    const { parameters, packedParameters, initParam } = new EndpointMethodRequestBodyProcessor(
+    const { initParam, packedParameters, parameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
       this.#owner,

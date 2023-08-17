@@ -38,11 +38,11 @@ describe('@hilla/frontend', () => {
     const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TEST_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
     const happyCaseLoginResponseText = '';
     const happyCaseResponseHeaders = {
-      'Vaadin-CSRF': vaadinCsrfToken,
-      Result: 'success',
       'Default-url': '/',
+      Result: 'success',
       'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
       'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
+      'Vaadin-CSRF': vaadinCsrfToken,
     };
 
     function verifySpringCsrfToken(token: string) {
@@ -58,8 +58,7 @@ describe('@hilla/frontend', () => {
       requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
     });
     afterEach(() => {
-      // @ts-expect-error
-      delete window.Vaadin.TypeScript;
+      // delete window.Vaadin.TypeScript;
       clearSpringCsrfMetaTags();
     });
 
@@ -73,8 +72,8 @@ describe('@hilla/frontend', () => {
         const result = await login('invalid-username', 'invalid-password');
         const expectedResult: LoginResult = {
           error: true,
-          errorTitle: 'Incorrect username or password.',
           errorMessage: 'Check that you have entered the correct username and password and try again.',
+          errorTitle: 'Incorrect username or password.',
         };
 
         expect(fetchMock.calls()).to.have.lengthOf(1);
@@ -92,10 +91,10 @@ describe('@hilla/frontend', () => {
         );
         const result = await login('valid-username', 'valid-password');
         const expectedResult: LoginResult = {
-          error: false,
-          token: vaadinCsrfToken,
           defaultUrl: '/',
+          error: false,
           redirectUrl: undefined,
+          token: vaadinCsrfToken,
         };
 
         expect(fetchMock.calls()).to.have.lengthOf(1);
@@ -109,9 +108,9 @@ describe('@hilla/frontend', () => {
             body: happyCaseLoginResponseText,
             headers: {
               ...happyCaseResponseHeaders,
-              'Vaadin-CSRF': 'some-new-token',
               'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
               'Spring-CSRF-token': 'some-new-spring-token',
+              'Vaadin-CSRF': 'some-new-token',
             },
           },
           { headers: requestHeaders },
@@ -136,10 +135,10 @@ describe('@hilla/frontend', () => {
         );
         const result = await login('valid-username', 'valid-password');
         const expectedResult: LoginResult = {
-          error: false,
-          token: vaadinCsrfToken,
           defaultUrl: '/',
+          error: false,
           redirectUrl: '/protected-view',
+          token: vaadinCsrfToken,
         };
 
         expect(fetchMock.calls()).to.have.lengthOf(1);

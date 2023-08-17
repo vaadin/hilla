@@ -20,11 +20,15 @@ import {
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import type { ClassDeclaration, ClassElement, Identifier, SourceFile, Statement } from 'typescript';
-import ts from 'typescript';
+import ts, {
+  type ClassDeclaration,
+  type ClassElement,
+  type Identifier,
+  type SourceFile,
+  type Statement,
+} from 'typescript';
 import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
-import type { Context } from './utils.js';
-import { importBuiltInFormModel } from './utils.js';
+import { importBuiltInFormModel, type Context } from './utils.js';
 
 export type DependencyData = Readonly<{
   id: Identifier;
@@ -82,7 +86,7 @@ export abstract class EntityModelProcessor {
   process(): SourceFile {
     const declaration = this[$processDeclaration]();
 
-    const { imports, exports } = this[$dependencies];
+    const { exports, imports } = this[$dependencies];
     const importStatements = imports.toCode();
     const exportStatement = exports.toCode();
 

@@ -2,8 +2,7 @@ import ts, { type ExportAssignment, type ExportDeclaration, type Identifier, typ
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
-import type { DependencyRecord } from './utils.js';
-import { createDependencyRecord } from './utils.js';
+import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedExportManager implements CodeConvertable<ExportDeclaration | undefined> {
   readonly #collator: Intl.Collator;
