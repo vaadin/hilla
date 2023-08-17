@@ -51,7 +51,6 @@ public class HotSwapServiceInitializerTest {
 
         hotSwapServiceInitializer = new HotSwapServiceInitializer(
                 spyEndpointHotSwapService, true);
-        //hotSwapServiceInitializer.endpointHotReloadEnabled = true;
     }
 
     @Test

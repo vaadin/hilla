@@ -32,7 +32,8 @@ public class HotSwapConfiguration {
     }
 
     @Bean
-    EndpointHotSwapService hotSwapWatchService(@Autowired HotSwapConfigurationProperties configurationProperties) {
+    EndpointHotSwapService hotSwapWatchService(
+            @Autowired HotSwapConfigurationProperties configurationProperties) {
         return new PollChangedEndpointsHotSwapService(
                 configurationProperties.getPollInterval());
     }
