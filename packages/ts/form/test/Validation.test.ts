@@ -1,11 +1,10 @@
-/* eslint-disable lit/no-template-arrow, no-unused-expressions, no-shadow */
+/* eslint-disable no-unused-expressions, no-shadow */
 import { assert, expect, use } from '@esm-bundle/chai';
+import { EndpointValidationError } from '@hilla/frontend';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-// TODO: remove when the new version of eslint-config-vaadin is released.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
@@ -16,7 +15,7 @@ import {
   NotBlank,
   Required,
   Size,
-  type ValidationError,
+  ValidationError,
   type Validator,
   type ValueError,
 } from '../src/index.js';
@@ -55,6 +54,12 @@ customElements.define('number-output', NumberOutput);
 
 @customElement('order-view')
 class OrderView extends LitElement {
+  static override readonly styles = css`
+    input[invalid] {
+      border: 2px solid red;
+    }
+  `;
+
   binder = new Binder(this, OrderModel);
 
   @query('#submitting')
@@ -83,12 +88,6 @@ class OrderView extends LitElement {
 
   @query('#total')
   total!: NumberOutput;
-
-  static override readonly styles = css`
-    input[invalid] {
-      border: 2px solid red;
-    }
-  `;
 
   override render() {
     const {
@@ -128,7 +127,11 @@ declare global {
   }
 }
 
-const sleep = async (t: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), t));
+const sleep = async (t: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), t);
+  });
+
 const fireEvent = async (elm: Element, name: string) => {
   elm.dispatchEvent(new CustomEvent(name));
   return sleep(0);
@@ -148,6 +151,7 @@ describe('@hilla/form', () => {
         .for(binder.model.customer)
         .validate()
         .then((errors) => {
+          // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
           expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['Required', 'Size']);
         }));
 
@@ -179,6 +183,7 @@ describe('@hilla/form', () => {
           expect(binder.invalid).to.be.true;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.true;
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           (binder as any)[methodName]();
 
           expect(binder.invalid).to.be.false;
@@ -189,20 +194,20 @@ describe('@hilla/form', () => {
 
     describe('submitTo', () => {
       it('should be able to call submit() if onSubmit is pre configured', async () => {
-        const binder = new Binder(view, TestModel, {
+        const testBinder = new Binder(view, TestModel, {
           onSubmit: async () => {
             // do nothing
           },
         });
-        const binderSubmitToSpy = sinon.spy(binder, 'submitTo');
-        await binder.submit();
+        const binderSubmitToSpy = sinon.spy(testBinder, 'submitTo');
+        await testBinder.submit();
         sinon.assert.calledOnce(binderSubmitToSpy);
       });
 
       it('should return the result of the endpoint call when calling submit()', async () => {
-        const binder = new Binder(view, TestModel, { onSubmit: async (testEntity) => testEntity });
-        const result = await binder.submit();
-        assert.deepEqual(result, binder.value);
+        const testBinder = new Binder(view, TestModel, { onSubmit: async (testEntity) => testEntity });
+        const result = await testBinder.submit();
+        assert.deepEqual(result, testBinder.value);
       });
 
       it('should throw on validation failure', async () => {
@@ -212,6 +217,7 @@ describe('@hilla/form', () => {
           });
           expect.fail();
         } catch (error: any) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.errors.length).to.gt(0);
         }
       });
@@ -225,6 +231,7 @@ describe('@hilla/form', () => {
           });
           expect.fail();
         } catch (error: any) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           expect(error.message).to.be.equal('whatever');
         }
       });
@@ -234,20 +241,18 @@ describe('@hilla/form', () => {
         binder.for(binder.model.notes).value = 'whatever';
         try {
           await binder.submitTo(async () => {
-            // eslint-disable-next-line no-throw-literal
-            throw {
-              message: "Validation error in endpoint 'MyEndpoint' method 'saveMyBean'",
-              validationErrorData: [
-                {
-                  message:
-                    "Object of type 'com.example.MyBean' has invalid property 'foo' with value 'baz', validation error: 'custom message'",
-                  parameterName: 'foo',
-                },
-              ],
-            };
+            throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
+              {
+                message:
+                  "Object of type 'com.example.MyBean' has invalid property 'foo' with value 'baz', validation error: 'custom message'",
+                parameterName: 'foo',
+              },
+            ]);
           });
           expect.fail();
-        } catch (error: any) {
+        } catch (e: any) {
+          expect(e).to.be.instanceof(ValidationError);
+          const error = e as ValidationError;
           expect(error.errors[0].message).to.be.equal('custom message');
           expect(error.errors[0].value).to.be.equal('baz');
           expect(error.errors[0].property).to.be.equal('foo');
@@ -259,19 +264,17 @@ describe('@hilla/form', () => {
         binder.for(binder.model.notes).value = 'whatever';
         try {
           await binder.submitTo(async () => {
-            // eslint-disable-next-line no-throw-literal
-            throw {
-              message: "Validation error in endpoint 'MyEndpoint' method 'saveMyBean'",
-              validationErrorData: [
-                {
-                  message: 'Custom server message',
-                  parameterName: 'bar',
-                },
-              ],
-            };
+            throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
+              {
+                message: 'Custom server message',
+                parameterName: 'bar',
+              },
+            ]);
           });
           expect.fail();
-        } catch (error: any) {
+        } catch (e: any) {
+          expect(e).to.be.instanceof(ValidationError);
+          const error = e as ValidationError;
           expect(error.errors[0].message).to.be.equal('Custom server message');
           expect(error.errors[0].value).to.be.undefined;
           expect(error.errors[0].property).to.be.equal('bar');
@@ -285,6 +288,7 @@ describe('@hilla/form', () => {
         };
 
         const recordValidator = {
+          message: 'cannot be the same',
           validate(value: Order) {
             if (value.customer.fullName === value.customer.nickName) {
               return { property: binder.model.customer.nickName };
@@ -292,7 +296,6 @@ describe('@hilla/form', () => {
 
             return true;
           },
-          message: 'cannot be the same',
         };
         binder.addValidator(recordValidator);
 
@@ -317,6 +320,7 @@ describe('@hilla/form', () => {
         };
 
         const recordValidator = {
+          message: 'cannot be the same',
           validate(value: Order) {
             if (value.customer.fullName === value.customer.nickName) {
               return { property: 'customer.nickName' };
@@ -324,7 +328,6 @@ describe('@hilla/form', () => {
 
             return true;
           },
-          message: 'cannot be the same',
         };
         binder.addValidator(recordValidator);
 
@@ -342,6 +345,7 @@ describe('@hilla/form', () => {
         });
 
         const customerValidator = {
+          message: 'cannot be anagram of full name',
           validate(value: Customer) {
             if (Array.from(value.fullName).reverse().join('') === value.nickName) {
               return { property: 'nickName' };
@@ -349,7 +353,6 @@ describe('@hilla/form', () => {
 
             return true;
           },
-          message: 'cannot be anagram of full name',
         };
         binder.for(binder.model.customer).addValidator(customerValidator);
 
@@ -363,29 +366,29 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator', () => {
-      let binder: Binder<IdEntity, IdEntityModel>;
+      let idBinder: Binder<IdEntity, IdEntityModel>;
 
       beforeEach(async () => {
-        binder = new Binder(view, IdEntityModel);
+        idBinder = new Binder(view, IdEntityModel);
       });
 
       it('should not have validation errors for a model without validators', async () => {
-        assert.isEmpty(await binder.validate());
+        assert.isEmpty(await idBinder.validate());
       });
 
       it('should not have validation errors for a validator that returns true', async () => {
-        binder.addValidator({ message: 'foo', validate: () => true });
-        assert.isEmpty(await binder.validate());
+        idBinder.addValidator({ message: 'foo', validate: () => true });
+        assert.isEmpty(await idBinder.validate());
       });
 
       it('should not have validation errors for a validator that returns an empty array', async () => {
-        binder.addValidator({ message: 'foo', validate: () => [] });
-        assert.isEmpty(await binder.validate());
+        idBinder.addValidator({ message: 'foo', validate: () => [] });
+        assert.isEmpty(await idBinder.validate());
       });
 
       it('should fail validation after adding a synchronous validator to the model', async () => {
-        binder.addValidator({ message: 'foo', validate: () => false });
-        return binder.validate().then((errors) => {
+        idBinder.addValidator({ message: 'foo', validate: () => false });
+        return idBinder.validate().then((errors) => {
           expect(errors[0].message).to.equal('foo');
           expect(errors[0].property).to.equal('');
           expect(errors[0].value).to.eql({ idString: '' });
@@ -402,98 +405,99 @@ describe('@hilla/form', () => {
           }
         }
 
-        binder.addValidator(new AsyncValidator());
-        return binder.validate().then((errors) => {
+        idBinder.addValidator(new AsyncValidator());
+        return idBinder.validate().then((errors) => {
           expect(errors[0].message).to.equal('bar');
         });
       });
 
       it('should not have validations errors after adding validators to properties if property is not required', async () => {
-        binder.for(binder.model.idString).addValidator({ message: 'foo', validate: () => false });
-        const errors = await binder.validate();
+        idBinder.for(idBinder.model.idString).addValidator({ message: 'foo', validate: () => false });
+        const errors = await idBinder.validate();
         assert.isEmpty(errors);
       });
 
       it('should fail after adding validators to properties if property is not required but it has a value', async () => {
-        binder.for(binder.model.idString).value = 'bar';
-        binder.for(binder.model.idString).addValidator({ message: 'foo', validate: () => false });
-        const errors = await binder.validate();
+        idBinder.for(idBinder.model.idString).value = 'bar';
+        idBinder.for(idBinder.model.idString).addValidator({ message: 'foo', validate: () => false });
+        const errors = await idBinder.validate();
         expect(errors[0].message).to.equal('foo');
         expect(errors[0].property).to.equal('idString');
         expect(errors[0].value).to.eql('bar');
       });
 
       it('should fail after adding validators to properties if required and not value', async () => {
-        binder.for(binder.model.idString).addValidator({ message: 'foo', validate: () => false });
-        binder.for(binder.model.idString).addValidator(new Required());
-        const errors = await binder.validate();
+        idBinder.for(idBinder.model.idString).addValidator({ message: 'foo', validate: () => false });
+        idBinder.for(idBinder.model.idString).addValidator(new Required());
+        const errors = await idBinder.validate();
         expect(errors.length).to.equal(2);
       });
 
       it('should fail when validator returns a single ValidationResult', async () => {
-        binder.addValidator({ message: 'foo', validate: () => ({ property: binder.model.idString }) });
-        return binder.validate().then((errors) => {
+        idBinder.addValidator({ message: 'foo', validate: () => ({ property: idBinder.model.idString }) });
+        return idBinder.validate().then((errors) => {
           expect(errors[0].message).to.equal('foo');
-          expect(errors[0].property).to.equal(binder.model.idString);
+          expect(errors[0].property).to.equal(idBinder.model.idString);
           expect(errors[0].value).to.eql({ idString: '' });
         });
       });
 
       it('should fail when validator returns an array of ValidationResult objects', async () => {
-        binder.addValidator({ message: 'foo', validate: () => [{ property: binder.model.idString }] });
-        return binder.validate().then((errors) => {
+        idBinder.addValidator({ message: 'foo', validate: () => [{ property: idBinder.model.idString }] });
+        return idBinder.validate().then((errors) => {
           expect(errors[0].message).to.equal('foo');
-          expect(errors[0].property).to.equal(binder.model.idString);
+          expect(errors[0].property).to.equal(idBinder.model.idString);
           expect(errors[0].value).to.eql({ idString: '' });
         });
       });
 
       it('should not cause required by default', async () => {
-        binder.for(binder.model.idString).addValidator({
+        idBinder.for(idBinder.model.idString).addValidator({
           message: 'foo',
           validate: () => false,
         });
-        expect(binder.for(binder.model.idString).required).to.be.false;
+        expect(idBinder.for(idBinder.model.idString).required).to.be.false;
       });
 
       it('should cause required when having impliesRequired: true', async () => {
-        binder.for(binder.model.idString).addValidator({
+        idBinder.for(idBinder.model.idString).addValidator({
           message: 'foo',
           validate: () => false,
         });
-        binder.for(binder.model.idString).addValidator({
-          message: 'foo',
-          validate: () => false,
+        idBinder.for(idBinder.model.idString).addValidator({
           impliesRequired: true,
+          message: 'foo',
+          validate: () => false,
         });
-        expect(binder.for(binder.model.idString).required).to.be.true;
+        expect(idBinder.for(idBinder.model.idString).required).to.be.true;
       });
     });
 
     describe('model add validator (multiple fields)', () => {
-      let binder: Binder<TestEntity, TestModel>;
+      let testBinder: Binder<TestEntity, TestModel>;
 
       beforeEach(async () => {
-        binder = new Binder(view, TestModel);
+        testBinder = new Binder(view, TestModel);
       });
 
       it('should fail when validator returns an array of ValidationResult objects', async () => {
-        binder.addValidator({
+        testBinder.addValidator({
           message: 'foo',
           validate: () => [
-            { property: binder.model.fieldString },
-            { property: binder.model.fieldNumber },
-            { property: binder.model.fieldBoolean, message: 'bar' },
+            { property: testBinder.model.fieldString },
+            { property: testBinder.model.fieldNumber },
+            // eslint-disable-next-line sort-keys
+            { property: testBinder.model.fieldBoolean, message: 'bar' },
           ],
         });
-        return binder.validate().then((errors) => {
+        return testBinder.validate().then((errors) => {
           expect(errors).has.lengthOf(3);
           expect(errors[0].message).to.equal('foo');
           expect(errors[0].value).to.eql(TestModel.createEmptyValue());
 
-          expect(errors[0].property).to.equal(binder.model.fieldString);
-          expect(errors[1].property).to.equal(binder.model.fieldNumber);
-          expect(errors[2].property).to.equal(binder.model.fieldBoolean);
+          expect(errors[0].property).to.equal(testBinder.model.fieldString);
+          expect(errors[1].property).to.equal(testBinder.model.fieldNumber);
+          expect(errors[2].property).to.equal(testBinder.model.fieldBoolean);
           expect(errors[2].message).to.equal('bar');
         });
       });
@@ -504,6 +508,7 @@ describe('@hilla/form', () => {
 
       beforeEach(async () => {
         orderView = new OrderView();
+        // eslint-disable-next-line prefer-destructuring
         binder = orderView.binder;
         document.body.append(orderView);
         await orderView.updateComplete;
@@ -648,7 +653,7 @@ describe('@hilla/form', () => {
         orderView.price.value = '10';
         await fireEvent(orderView.price, 'change');
 
-        const item = await orderView.binder.submitTo(async (item) => item);
+        const item = await orderView.binder.submitTo(async (order) => order);
         expect(item).not.to.be.undefined;
         expect(item.products[0].description).to.be.equal('bread');
         expect(item.products[0].price).to.be.equal(10);
@@ -663,16 +668,12 @@ describe('@hilla/form', () => {
         try {
           await binder.submitTo(async () => {
             requestUpdateSpy.resetHistory();
-            // eslint-disable-next-line no-throw-literal
-            throw {
-              message: 'Validation error in endpoint "MyEndpoint" method "saveMyBean"',
-              validationErrorData: [
-                {
-                  message: 'Invalid notes',
-                  parameterName: 'notes',
-                },
-              ],
-            };
+            throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
+              {
+                message: 'Invalid notes',
+                parameterName: 'notes',
+              },
+            ]);
           });
           expect.fail();
         } catch (error) {
@@ -780,10 +781,10 @@ describe('@hilla/form', () => {
     });
 
     describe('message interpolation', () => {
-      let binder: Binder<TestMessageInterpolationEntity, TestMessageInterpolationModel>;
+      let testMessageBinder: Binder<TestMessageInterpolationEntity, TestMessageInterpolationModel>;
 
       beforeEach(async () => {
-        binder = new Binder(view, TestMessageInterpolationModel);
+        testMessageBinder = new Binder(view, TestMessageInterpolationModel);
       });
 
       afterEach(async () => {
@@ -796,7 +797,7 @@ describe('@hilla/form', () => {
           'custom message';
         Binder.interpolateMessageCallback = sinon.spy(callback);
 
-        const errors = await binder.validate();
+        const errors = await testMessageBinder.validate();
         expect(Binder.interpolateMessageCallback).to.be.called;
         expect(errors).to.have.lengthOf.at.least(1);
         for (const [i, error] of errors.entries()) {
@@ -815,24 +816,24 @@ describe('@hilla/form', () => {
         };
         Binder.interpolateMessageCallback = sinon.spy(callback);
 
-        const errors = await binder.validate();
+        const errors = await testMessageBinder.validate();
         expect(Binder.interpolateMessageCallback).to.be.called;
         const error = errors.find((e) => e.validator instanceof NotBlank);
         expect(error?.message).to.equal('must *NOT BE* blank');
       });
 
       it('should have access to BinderNode', async () => {
-        binder.read({ stringMinSize: '123', stringNotBlank: 'not blank' });
+        testMessageBinder.read({ stringMinSize: '123', stringNotBlank: 'not blank' });
         const callback: InterpolateMessageCallback<any> = (message, _validator, binderNode) => {
           expect(binderNode).to.have.property('model');
-          return `[value: ${binderNode.value}] ${message}`;
+          return `[value: ${String(binderNode.value)}] ${message}`;
         };
         Binder.interpolateMessageCallback = sinon.spy(callback);
 
-        const errors = await binder.validate();
+        const errors = await testMessageBinder.validate();
         expect(Binder.interpolateMessageCallback).to.be.called;
         const error = errors.find((e) => e.validator instanceof Size);
-        expect(error?.message || '').to.include('[value: 123]');
+        expect(error?.message ?? '').to.include('[value: 123]');
       });
     });
   });

@@ -30,11 +30,13 @@ describe('@hilla/form', () => {
   describe('Validators', () => {
     it('custom error message', () => {
       assert.equal(
+        // eslint-disable-next-line sort-keys
         new Size({ min: 1, max: 2 }).message,
         'size must be between 1 and 2',
         'when no custom error message is provided, the default error message should be used',
       );
       assert.equal(
+        // eslint-disable-next-line sort-keys
         new Size({ min: 1, max: 2, message: 'Please enter something with the size between 1 and 2' }).message,
         'Please enter something with the size between 1 and 2',
         'when a custom error message is provided, it should be used instead of the default one',
@@ -170,6 +172,7 @@ describe('@hilla/form', () => {
       assert.isTrue(validator.validate(30.1));
       assert.isTrue(validator.validate(30.2));
       assert.isTrue(validator.validate('30.2'));
+      // eslint-disable-next-line sort-keys
       validator = new DecimalMin({ value: '30.1', inclusive: false });
       assert.isFalse(validator.validate(30.1));
     });
@@ -180,6 +183,7 @@ describe('@hilla/form', () => {
       assert.isTrue(validator.validate(30));
       assert.isTrue(validator.validate(30.1));
       assert.isFalse(validator.validate(30.2));
+      // eslint-disable-next-line sort-keys
       validator = new DecimalMin({ value: '30.1', inclusive: false });
       assert.isFalse(validator.validate(30.1));
     });
@@ -221,6 +225,7 @@ describe('@hilla/form', () => {
     });
 
     it('Size', () => {
+      // eslint-disable-next-line sort-keys
       const validator = new Size({ min: 2, max: 4 });
       assert.isTrue(validator.impliesRequired);
       assert.isFalse(validator.validate(''));
@@ -229,6 +234,7 @@ describe('@hilla/form', () => {
       assert.isTrue(validator.validate('aaa'));
       const noMinValidator = new Size({ max: 3 });
       assert.isNotTrue(noMinValidator.impliesRequired);
+      // eslint-disable-next-line sort-keys
       const minZeroValidator = new Size({ min: 0, max: 3 });
       assert.isNotTrue(minZeroValidator.impliesRequired);
       const noValueSizeValidator = new Size({});
@@ -242,6 +248,7 @@ describe('@hilla/form', () => {
     });
 
     it('Digits', () => {
+      // eslint-disable-next-line sort-keys
       const validator = new Digits({ integer: 2, fraction: 3 });
       assert.isNotTrue(validator.impliesRequired);
       assert.isTrue(validator.validate('11.111'));
@@ -285,7 +292,7 @@ describe('@hilla/form', () => {
     // });
 
     it('Pattern', () => {
-      let validator = new Pattern(/^(\+\d+)?([ -]?\d+){4,14}$/);
+      let validator = new Pattern(/^(\+\d+)?([ -]?\d+){4,14}$/u);
       assert.isNotTrue(validator.impliesRequired);
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate('123'));
@@ -299,7 +306,7 @@ describe('@hilla/form', () => {
       validator = new Pattern({ regexp: '\\w+\\\\' });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
-      validator = new Pattern({ regexp: /\w+\\/ });
+      validator = new Pattern({ regexp: /\w+\\/u });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
       validator = new Pattern({ regexp: "^[\\p{L}\\s\\.,']+$" });
