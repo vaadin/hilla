@@ -23,7 +23,6 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.file.Path;
 
@@ -31,14 +30,15 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
 
     private final Logger LOGGER;
 
-    @Value("${hilla.endpoint.hot-reload.enabled:true}")
     boolean endpointHotReloadEnabled;
 
     private final EndpointHotSwapService endpointHotSwapService;
 
     public HotSwapServiceInitializer(
-            EndpointHotSwapService endpointHotSwapService) {
+            EndpointHotSwapService endpointHotSwapService,
+            boolean endpointHotReloadEnabled) {
         this.endpointHotSwapService = endpointHotSwapService;
+        this.endpointHotReloadEnabled = endpointHotReloadEnabled;
         LOGGER = LoggerFactory.getLogger(this.getClass());
     }
 

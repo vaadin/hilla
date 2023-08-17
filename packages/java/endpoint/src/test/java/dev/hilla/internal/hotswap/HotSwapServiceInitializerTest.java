@@ -50,8 +50,8 @@ public class HotSwapServiceInitializerTest {
         mockedBrowserLiveReload = Mockito.mock(BrowserLiveReload.class);
 
         hotSwapServiceInitializer = new HotSwapServiceInitializer(
-                spyEndpointHotSwapService);
-        hotSwapServiceInitializer.endpointHotReloadEnabled = true;
+                spyEndpointHotSwapService, true);
+        //hotSwapServiceInitializer.endpointHotReloadEnabled = true;
     }
 
     @Test
@@ -167,7 +167,6 @@ public class HotSwapServiceInitializerTest {
             Mockito.when(deploymentConfiguration.isDevModeLiveReloadEnabled())
                     .thenReturn(Boolean.TRUE);
 
-            hotSwapServiceInitializer.endpointHotReloadEnabled = true;
             hotSwapServiceInitializer.serviceInit(serviceInitEvent);
 
             Mockito.verify(spyEndpointHotSwapService, Mockito.never())
@@ -220,8 +219,7 @@ public class HotSwapServiceInitializerTest {
             // for the sake of logger factory being mocked static,
             // hotSwapServiceInitializer should be created in the try block:
             hotSwapServiceInitializer = new HotSwapServiceInitializer(
-                    spyEndpointHotSwapService);
-            hotSwapServiceInitializer.endpointHotReloadEnabled = true;
+                    spyEndpointHotSwapService, true);
             hotSwapServiceInitializer.serviceInit(serviceInitEvent);
 
             Mockito.verify(mockedLogger, Mockito.times(2)).info(Mockito.any());
@@ -257,8 +255,7 @@ public class HotSwapServiceInitializerTest {
             // for the sake of logger factory being mocked static,
             // hotSwapServiceInitializer should be created in the try block:
             hotSwapServiceInitializer = new HotSwapServiceInitializer(
-                    spyEndpointHotSwapService);
-            hotSwapServiceInitializer.endpointHotReloadEnabled = false;
+                    spyEndpointHotSwapService, false);
             hotSwapServiceInitializer.serviceInit(serviceInitEvent);
 
             Mockito.verify(spyEndpointHotSwapService, Mockito.never())
