@@ -306,7 +306,7 @@ describe('@hilla/form', () => {
       validator = new Pattern({ regexp: '\\w+\\\\' });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
-      validator = new Pattern({ regexp: /\w+\\[\w\s]*/u });
+      validator = new Pattern({ regexp: /\w+\\[^\\]*/u });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
       validator = new Pattern({ regexp: "^[\\p{L}\\s\\.,']+$" });
