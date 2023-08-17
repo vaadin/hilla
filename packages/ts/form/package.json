@@ -15,8 +15,10 @@
     "Form"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
