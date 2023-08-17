@@ -1,5 +1,5 @@
 import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend';
-import { BinderNode } from './BinderNode.js';
+import { BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import { _parent, type AbstractModel, type ModelConstructor } from './Models.js';
 import {
@@ -10,6 +10,8 @@ import {
   type Validator,
   type ValueError,
 } from './Validation.js';
+
+export { CHANGED };
 
 const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');
@@ -78,6 +80,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
   override set defaultValue(newValue: T) {
     this[_defaultValue] = newValue;
+    this.dispatchEvent(CHANGED);
   }
 
   /**
@@ -95,7 +98,10 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     const oldValue = this[_value];
     this[_value] = newValue;
     this.update(oldValue);
-    this.updateValidation().catch(() => {});
+    this.updateValidation()
+      .then(() => this.dispatchEvent(CHANGED))
+      .catch(() => {});
+    this.dispatchEvent(CHANGED);
   }
 
   /**
@@ -195,6 +201,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
     this[_submitting] = true;
     this.update(this.value);
+    this.dispatchEvent(CHANGED);
     try {
       return await endpointMethod.call(this.getCallbackContext(), this.value);
     } catch (error: unknown) {
@@ -222,6 +229,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
       this[_submitting] = false;
       this.defaultValue = this.value;
       this.update(this.value);
+      this.dispatchEvent(CHANGED);
     }
   }
 
@@ -273,6 +281,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   protected performValidation(): Promise<void> | void {
     if (!this[_validationRequestSymbol]) {
       this[_validating] = true;
+      this.dispatchEvent(CHANGED);
       this[_validationRequestSymbol] = Promise.resolve().then(() => {
         this[_validationRequestSymbol] = undefined;
       });
@@ -282,6 +291,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
   protected completeValidation(): void {
     this[_validating] = false;
+    this.dispatchEvent(CHANGED);
   }
 
   protected override update(oldValue: T): void {

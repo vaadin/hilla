@@ -2,28 +2,37 @@ import {
   _fromString,
   type AbstractFieldStrategy,
   type AbstractModel,
-  Binder,
   type BinderConfiguration,
+  BinderRoot,
+  CHANGED,
   getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
+  isFieldElement,
   type ModelConstructor,
 } from '@hilla/form';
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useReducer } from 'react';
 
-const dummyElement = document.createElement('a');
+const strategyRegistry = new WeakMap<Element, AbstractFieldStrategy>();
 
-const strategyRegistry = new WeakMap<HTMLElement, AbstractFieldStrategy>();
+function getStrategy<T, M extends AbstractModel<T>>(fld: HTMLElement, model: M): AbstractFieldStrategy<T> {
+  if (!isFieldElement<T>(fld)) {
+    throw new TypeError(`Element '${fld.localName}' is not a form element`);
+  }
 
-function getStrategy<T, M extends AbstractModel<T>>(field: HTMLElement, model: M): AbstractFieldStrategy<T> {
-  let strategy = strategyRegistry.get(field);
+  let strategy = strategyRegistry.get(fld);
 
   if (!strategy || strategy.model !== model) {
-    strategy = getDefaultFieldStrategy(field, model);
-    strategyRegistry.set(field, strategy);
+    strategy = getDefaultFieldStrategy(fld, model);
+    strategyRegistry.set(fld, strategy);
   }
 
   return strategy;
+}
+
+function useUpdate() {
+  const [_, update] = useReducer((x) => !x, true);
+  return update;
 }
 
 export type FieldDirectiveResult = Readonly<{
@@ -34,65 +43,43 @@ export type FieldDirectiveResult = Readonly<{
   ref(element: HTMLElement | null): void;
 }>;
 
-export type FieldDirective = <M extends AbstractModel<unknown>>(model: M) => FieldDirectiveResult;
+export function field(model: AbstractModel<unknown>): FieldDirectiveResult {
+  const node = getBinderNode(model);
 
-export type UseBinderResult<T, M extends AbstractModel<T>> = Readonly<{
-  binder: Binder<T, M>;
-  field: FieldDirective;
-}>;
+  let fld: HTMLElement | null;
+
+  const updateValueEvent = () => {
+    if (fld) {
+      const elementValue = getStrategy(fld, model).value;
+      node.value =
+        typeof elementValue === 'string' && hasFromString(model) ? model[_fromString](elementValue) : elementValue;
+    }
+  };
+
+  return {
+    name: node.name,
+    onBlur() {
+      updateValueEvent();
+      node.visited = true;
+    },
+    onChange: updateValueEvent,
+    onInput: updateValueEvent,
+    ref(element: HTMLElement | null) {
+      fld = element;
+    },
+  };
+}
 
 export function useBinder<T, M extends AbstractModel<T>>(
   Model: ModelConstructor<T, M>,
   config?: BinderConfiguration<T>,
-): UseBinderResult<T, M> {
-  const [binder, setBinder] = useState(() => new Binder(dummyElement, Model, config));
-  const ref = useRef<HTMLElement | null>();
+): M {
+  const update = useUpdate();
+  const binder = useMemo(() => {
+    const b = new BinderRoot(Model, config);
+    b.addEventListener(CHANGED.type, update);
+    return b;
+  }, [Model, config]);
 
-  useEffect(() => {
-    setBinder(binder);
-  }, [
-    binder.value,
-    binder.defaultValue,
-    binder.submitting,
-    binder.validating,
-    binder.visited,
-    binder.ownErrors,
-    binder.validators,
-  ]);
-
-  useEffect(() => {
-    if (ref.current) {
-      binder.context = ref.current;
-    }
-  }, [ref.current, binder]);
-
-  return {
-    binder,
-    field(model: AbstractModel<unknown>) {
-      const node = getBinderNode(model);
-
-      let field: HTMLElement | null;
-
-      const updateValueEvent = () => {
-        if (field) {
-          const elementValue = getStrategy(field, model).value;
-          node.value =
-            typeof elementValue === 'string' && hasFromString(model) ? model[_fromString](elementValue) : elementValue;
-        }
-      };
-
-      return {
-        name: node.name,
-        onBlur() {
-          updateValueEvent();
-          node.visited = true;
-        },
-        onChange: updateValueEvent,
-        onInput: updateValueEvent,
-        ref(element: HTMLElement | null) {
-          field = element;
-        },
-      };
-    },
-  };
+  return binder.model;
 }
