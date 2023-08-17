@@ -17,23 +17,25 @@
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.6.1"
+    "lit": "2.8.0"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.2",
     "@rollup/pluginutils": "5.0.2",
-    "async": "3.2.2",
-    "glob": "7.2.3",
+    "async": "3.2.4",
+    "glob": "10.3.3",
     "mkdirp": "1.0.4",
     "rollup-plugin-brotli": "3.1.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.0.4",
-    "vite": "4.3.5",
-    "vite-plugin-checker": "0.5.5",
-    "workbox-build": "6.5.4",
-    "workbox-core": "6.5.4",
-    "workbox-precaching": "6.5.4"
+    "typescript": "5.1.6",
+    "vite": "4.4.9",
+    "vite-plugin-checker": "0.6.1",
+    "workbox-build": "7.0.0",
+    "workbox-core": "7.0.0",
+    "workbox-precaching": "7.0.0",
+    "rollup-plugin-visualizer": "5.9.2",
+    "@vitejs/plugin-react": "4.0.4"
   },
   "vaadin": {
     "dependencies": {
@@ -51,23 +53,25 @@
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.6.1"
+      "lit": "2.8.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.2",
       "@rollup/pluginutils": "5.0.2",
-      "async": "3.2.2",
-      "glob": "7.2.3",
+      "async": "3.2.4",
+      "glob": "10.3.3",
       "mkdirp": "1.0.4",
       "rollup-plugin-brotli": "3.1.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.0.4",
-      "vite": "4.3.5",
-      "vite-plugin-checker": "0.5.5",
-      "workbox-build": "6.5.4",
-      "workbox-core": "6.5.4",
-      "workbox-precaching": "6.5.4"
+      "typescript": "5.1.6",
+      "vite": "4.4.9",
+      "vite-plugin-checker": "0.6.1",
+      "workbox-build": "7.0.0",
+      "workbox-core": "7.0.0",
+      "workbox-precaching": "7.0.0",
+      "rollup-plugin-visualizer": "5.9.2",
+      "@vitejs/plugin-react": "4.0.4"
     },
     "hash": "ac17dd8095c55e7eb214cc189b2957b6ae3a5f2ae36ae3f1ef7a29d94dd51007"
   },
