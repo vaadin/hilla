@@ -22,9 +22,8 @@ const _validating = Symbol('validating');
 const _validationRequestSymbol = Symbol('validationRequest');
 
 /**
- * A Binder controls all aspects of a single form.
- * Typically, it is used to get and set the form value,
- * access the form model, validate, reset, and submit the form.
+ * A simplified Binder that does not require a context.
+ * It can be used as root when there is no Element to use as context.
  *
  * @typeParam T - Type of the value that binds to a form
  * @typeParam M - Type of the model that describes the structure of the value
@@ -56,9 +55,9 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
    * @param config - The options object, which can be used to config the onChange and onSubmit callbacks.
    *
    * ```
-   * binder = new Binder(orderView, OrderModel);
+   * binder = new BinderRoot(OrderModel);
    * or
-   * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
+   * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
   constructor(Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
@@ -115,6 +114,9 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     return this[_validating];
   }
 
+  /**
+   * Accessor for the onChange callback.
+   */
   protected get changeCallback(): (oldValue?: T) => void {
     return this[_onChange] ?? (() => {});
   }
@@ -123,6 +125,9 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     this[_onChange] = callback;
   }
 
+  /**
+   * To be called in the subclass constructor to initialize the form value.
+   */
   readValue(): void {
     this.read(this[_emptyValue]);
   }
