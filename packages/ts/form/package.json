@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "2.2.0-alpha6",
+  "version": "2.2.0-alpha7",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -34,6 +34,9 @@
     },
     "./BinderNode.js": {
       "default": "./BinderNode.js"
+    },
+    "./BinderRoot.js": {
+      "default": "./BinderRoot.js"
     },
     "./Field.js": {
       "default": "./Field.js"
