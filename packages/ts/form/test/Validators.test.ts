@@ -303,10 +303,10 @@ describe('@hilla/form', () => {
       validator = new Pattern('\\d+');
       assert.isTrue(validator.validate('1'));
       assert.isFalse(validator.validate('a'));
-      validator = new Pattern({ regexp: '\\w+\\\\' });
+      validator = new Pattern({ regexp: '\\w{1,10}\\\\' });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
-      validator = new Pattern({ regexp: /\w+\\[^\\]*/u });
+      validator = new Pattern({ regexp: /\w{1,10}\\/u });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
       validator = new Pattern({ regexp: "^[\\p{L}\\s\\.,']+$" });
