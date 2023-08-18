@@ -135,7 +135,7 @@ export function useBinder<T, M extends AbstractModel<T>>(
     const b = new BinderRoot(Model, config);
     b.addEventListener(CHANGED.type, update);
     return b;
-  }, [Model, config]);
+  }, [ Model, /* FIXME: add config */]);
 
   return {
     ...getBinderNodeControls(binder),
