@@ -295,5 +295,5 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
 export interface BinderConfiguration<T> {
   onChange?(oldValue?: T): void;
-  onSubmit?(value: T): Promise<T> | Promise<void>;
+  onSubmit?(value: T): Promise<T | undefined> | Promise<void>;
 }
