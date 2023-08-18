@@ -211,6 +211,14 @@ describe('@hilla/form', () => {
         assert.deepEqual(result, testBinder.value);
       });
 
+      it('should support nullable onSubmit endpoint result', async () => {
+        const testEndpoint: (entity: TestEntity) => Promise<TestEntity | undefined> = async (_) =>
+          Promise.resolve(undefined);
+        const testBinder = new Binder(view, TestModel, { onSubmit: testEndpoint });
+        const result = await testBinder.submit();
+        expect(result).to.be.undefined;
+      });
+
       it('should throw on validation failure', async () => {
         try {
           await binder.submitTo(async () => {
