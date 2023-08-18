@@ -310,7 +310,7 @@ export class Digits<T> extends AbstractValidator<T> {
 
   override validate(value: T): boolean {
     return (
-      String(toFloat(String(value))).indexOf('.') <= this.integer &&
+      String(Math.floor(Math.abs(toFloat(String(value))))).length <= this.integer &&
       // eslint-disable-next-line camelcase
       isDecimal(String(value), { decimal_digits: `0,${this.fraction}` })
     );
