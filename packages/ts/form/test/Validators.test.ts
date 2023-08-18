@@ -256,12 +256,14 @@ describe('@hilla/form', () => {
       assert.isTrue(validator.validate('1'), 'Less digits and no fraction');
       assert.isFalse(validator.validate('1.1111'), 'More fractional digits');
       assert.isFalse(validator.validate('111.111'), 'More integer digits');
+      assert.isFalse(validator.validate('111'), 'More integer digits and no fraction');
       assert.isFalse(validator.validate('111.1111'), 'More integer and fractional digits');
       assert.isTrue(validator.validate('-11.111'), 'Exact number of digits, negative number');
       assert.isTrue(validator.validate('-1.1'), 'Less digits, negative number');
       assert.isTrue(validator.validate('-1'), 'Less digits and no fraction, negative number');
       assert.isFalse(validator.validate('-1.1111'), 'More fractional digits, negative number');
       assert.isFalse(validator.validate('-111.111'), 'More integer digits, negative number');
+      assert.isFalse(validator.validate('-111'), 'More integer digits and no fraction, negative number');
       assert.isFalse(validator.validate('-111.1111'), 'More integer and fractional digits, negative number');
     });
 
