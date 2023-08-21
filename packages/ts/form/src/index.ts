@@ -6,6 +6,7 @@ export * from './Field.js';
 export * from './Models.js';
 export * from './Validation.js';
 export * from './Validators.js';
+export * from './Validity.js';
 
 declare const __VERSION__: string;
 
