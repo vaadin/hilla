@@ -136,7 +136,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
         const firstError: ValueError<any> | undefined = n.ownErrors[0];
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        const errorMessage = firstError?.message || '';
+        const errorMessage = firstError?.message ?? '';
         if (fieldState.errorMessage !== errorMessage) {
           fieldState.errorMessage = errorMessage;
           fieldState.strategy.errorMessage = errorMessage;
