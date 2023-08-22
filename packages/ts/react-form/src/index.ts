@@ -108,15 +108,13 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
     return ((model: AbstractModel<any>) => {
       const n = getBinderNode(model);
 
-      const fieldState: FieldState<unknown> = registry.has(model)
-        ? registry.get(model)!
-        : {
-          value: undefined,
-          required: false,
-          invalid: false,
-          errorMessage: '',
-          strategy: undefined,
-        };
+      const fieldState: FieldState<unknown> = registry.get(model) ?? {
+        value: undefined,
+        required: false,
+        invalid: false,
+        errorMessage: '',
+        strategy: undefined,
+      };
 
       if (!registry.has(model)) {
         registry.set(model, fieldState);
@@ -134,7 +132,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
           fieldState.strategy.required = n.required;
         }
 
-        const firstError: ValueError<any> | undefined = n.ownErrors[0];
+        const firstError = n.ownErrors.at(0);
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const errorMessage = firstError?.message ?? '';
         if (fieldState.errorMessage !== errorMessage) {
