@@ -189,7 +189,7 @@ export function useBinder<T, M extends AbstractModel<T>>(
   config?: BinderConfiguration<T>,
 ): BinderControls<T, M> {
   const update = useUpdate();
-  const binder = useMemo(() => new BinderRoot(Model, config), [Model, config]);
+  const binder = useMemo(() => new BinderRoot(Model, config), [Model]);
   const field = useFields(binder);
 
   useEffect(() => {
