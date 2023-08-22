@@ -28,7 +28,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <!-- Flow -->
             <dependency>
                 <groupId>com.vaadin</groupId>
