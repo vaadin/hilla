@@ -1,10 +1,11 @@
 import {
   _fromString,
-  type AbstractFieldStrategy,
-  type AbstractModel,
+  _validity,
+  AbstractModel,
   type BinderConfiguration,
   BinderRoot,
   CHANGED,
+  defaultValidity,
   getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
@@ -12,6 +13,8 @@ import {
   type ModelConstructor,
   type Validator,
   type ValueError,
+  type ModelValue,
+  type FieldStrategy,
 } from '@hilla/form';
 import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
@@ -55,7 +58,20 @@ export type BinderControls<T, M extends AbstractModel<T>> = BinderNodeControls<T
     submit(): Promise<T | undefined>;
     reset(): void;
     clear(): void;
+    read(value: T): void;
   }>;
+
+type FieldState<T> = {
+  value?: T;
+  required: boolean;
+  invalid: boolean;
+  errorMessage: string;
+  strategy?: FieldStrategy<T>;
+};
+
+function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+  return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
+}
 
 function getBinderNodeControls<T, M extends AbstractModel<T>>(
   node: BinderNode<T, M>,
@@ -85,47 +101,85 @@ function getBinderNodeControls<T, M extends AbstractModel<T>>(
   };
 }
 
-function useFields(): FieldDirective {
-  const registry = useRef(new WeakMap<HTMLElement, AbstractFieldStrategy>());
+function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): FieldDirective {
+  return useMemo(() => {
+    const registry = new WeakMap<AbstractModel<any>, FieldState<any>>();
 
-  return (model) => {
-    const n = getBinderNode(model);
+    return ((model: AbstractModel<any>) => {
+      const n = getBinderNode(model);
 
-    let fld: HTMLElement | null;
+      const fieldState: FieldState<unknown> = registry.get(model) ?? {
+        value: undefined,
+        required: false,
+        invalid: false,
+        errorMessage: '',
+        strategy: undefined,
+      };
 
-    const updateValueEvent = () => {
-      if (fld) {
-        if (!isFieldElement(fld)) {
-          throw new TypeError(`Element '${fld.localName}' is not a form element`);
-        }
-
-        let strategy = registry.current.get(fld);
-
-        if (!strategy || strategy.model !== model) {
-          strategy = getDefaultFieldStrategy(fld, model);
-          registry.current.set(fld, strategy);
-        }
-
-        const elementValue = strategy.value;
-
-        n.value =
-          typeof elementValue === 'string' && hasFromString(model) ? model[_fromString](elementValue) : elementValue;
+      if (!registry.has(model)) {
+        registry.set(model, fieldState);
       }
-    };
 
-    return {
-      name: n.name,
-      onBlur() {
-        updateValueEvent();
-        n.visited = true;
-      },
-      onChange: updateValueEvent,
-      onInput: updateValueEvent,
-      ref(element: HTMLElement | null) {
-        fld = element;
-      },
-    };
-  };
+      if (fieldState.strategy) {
+        const valueFromField = convertFieldValue(model, fieldState.value);
+        if (valueFromField !== n.value && !(Number.isNaN(n.value) && Number.isNaN(valueFromField))) {
+          fieldState.value = n.value;
+          fieldState.strategy.value = n.value;
+        }
+
+        if (fieldState.required !== n.required) {
+          fieldState.required = n.required;
+          fieldState.strategy.required = n.required;
+        }
+
+        const firstError = n.ownErrors.at(0);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const errorMessage = firstError?.message ?? '';
+        if (fieldState.errorMessage !== errorMessage) {
+          fieldState.errorMessage = errorMessage;
+          fieldState.strategy.errorMessage = errorMessage;
+        }
+
+        if (fieldState.invalid !== n.invalid) {
+          fieldState.invalid = n.invalid;
+          fieldState.strategy.invalid = n.invalid;
+        }
+      }
+
+      const updateValueEvent = () => {
+        if (fieldState.strategy) {
+          // When bad input is detected, skip reading new value in binder state
+          fieldState.strategy.checkValidity();
+          if (!fieldState.strategy.validity.badInput) {
+            fieldState.value = fieldState.strategy.value;
+          }
+          n[_validity] = fieldState.strategy.validity;
+          n.value = convertFieldValue(model, fieldState.value);
+        }
+      };
+
+      return {
+        name: n.name,
+        onBlur() {
+          updateValueEvent();
+          n.visited = true;
+        },
+        onChange: updateValueEvent,
+        onInput: updateValueEvent,
+        ref(element: HTMLElement | null) {
+          if (!element) {
+            return;
+          }
+
+          if (!isFieldElement(element)) {
+            throw new TypeError(`Element '${element.localName}' is not a form element`);
+          }
+
+          fieldState.strategy = getDefaultFieldStrategy(element, model);
+        },
+      };
+    }) as FieldDirective;
+  }, [node]);
 }
 
 export function useBinder<T, M extends AbstractModel<T>>(
@@ -133,8 +187,8 @@ export function useBinder<T, M extends AbstractModel<T>>(
   config?: BinderConfiguration<T>,
 ): BinderControls<T, M> {
   const update = useUpdate();
-  const field = useFields();
-  const binder = useMemo(() => new BinderRoot(Model, config), [Model, config]);
+  const binder = useMemo(() => new BinderRoot(Model, config), [Model]);
+  const field = useFields(binder);
 
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
@@ -144,15 +198,17 @@ export function useBinder<T, M extends AbstractModel<T>>(
     ...getBinderNodeControls(binder),
     clear: binder.clear.bind(binder),
     field,
+    read: binder.read.bind(binder),
     reset: binder.reset.bind(binder),
     submit: binder.submit.bind(binder),
   };
 }
 
 export function useBinderNode<T, M extends AbstractModel<T>>(model: M): BinderNodeControls<T, M> {
-  const field = useFields();
+  const binderNode = getBinderNode(model) as BinderNode<T, M>;
+  const field = useFields(binderNode);
   return {
-    ...getBinderNodeControls(getBinderNode(model) as BinderNode<T, M>),
+    ...getBinderNodeControls(binderNode),
     field,
   };
 }
