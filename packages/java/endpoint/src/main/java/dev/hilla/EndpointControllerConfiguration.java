@@ -29,6 +29,8 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
 
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 
 import dev.hilla.auth.CsrfChecker;
@@ -144,6 +146,22 @@ public class EndpointControllerConfiguration {
     @Bean
     EndpointRegistry endpointRegistry(EndpointNameChecker endpointNameChecker) {
         return new EndpointRegistry(endpointNameChecker);
+    }
+
+    /**
+     * Can re-generate the TypeScipt code.
+     * 
+     * @param context
+     *
+     * @param endpointNameChecker
+     *            the name checker to use
+     * @return the endpoint registry
+     */
+    @Bean
+    EndpointCodeGenerator endpointCodeGenerator(ServletContext servletContext,
+            EndpointController endpointController) {
+        return new EndpointCodeGenerator(
+                new VaadinServletContext(servletContext), endpointController);
     }
 
     /**
