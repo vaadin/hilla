@@ -251,12 +251,20 @@ describe('@hilla/form', () => {
       // eslint-disable-next-line sort-keys
       const validator = new Digits({ integer: 2, fraction: 3 });
       assert.isNotTrue(validator.impliesRequired);
-      assert.isTrue(validator.validate('11.111'));
-      assert.isTrue(validator.validate('1.1'));
-      assert.isTrue(validator.validate('1'));
-      assert.isFalse(validator.validate('1.1111'));
-      assert.isFalse(validator.validate('111.111'));
-      assert.isFalse(validator.validate('111.1111'));
+      assert.isTrue(validator.validate('11.111'), 'Exact number of digits');
+      assert.isTrue(validator.validate('1.1'), 'Less digits');
+      assert.isTrue(validator.validate('1'), 'Less digits and no fraction');
+      assert.isFalse(validator.validate('1.1111'), 'More fractional digits');
+      assert.isFalse(validator.validate('111.111'), 'More integer digits');
+      assert.isFalse(validator.validate('111'), 'More integer digits and no fraction');
+      assert.isFalse(validator.validate('111.1111'), 'More integer and fractional digits');
+      assert.isTrue(validator.validate('-11.111'), 'Exact number of digits, negative number');
+      assert.isTrue(validator.validate('-1.1'), 'Less digits, negative number');
+      assert.isTrue(validator.validate('-1'), 'Less digits and no fraction, negative number');
+      assert.isFalse(validator.validate('-1.1111'), 'More fractional digits, negative number');
+      assert.isFalse(validator.validate('-111.111'), 'More integer digits, negative number');
+      assert.isFalse(validator.validate('-111'), 'More integer digits and no fraction, negative number');
+      assert.isFalse(validator.validate('-111.1111'), 'More integer and fractional digits, negative number');
     });
 
     it('Past', () => {
@@ -292,7 +300,7 @@ describe('@hilla/form', () => {
     // });
 
     it('Pattern', () => {
-      let validator = new Pattern(/^(\+\d+)?([ -]?\d+){4,14}$/u);
+      let validator = new Pattern(/^\+?\d(?:[ -]?\d){3,13}$/u);
       assert.isNotTrue(validator.impliesRequired);
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate('123'));
@@ -303,10 +311,10 @@ describe('@hilla/form', () => {
       validator = new Pattern('\\d+');
       assert.isTrue(validator.validate('1'));
       assert.isFalse(validator.validate('a'));
-      validator = new Pattern({ regexp: '\\w+\\\\' });
+      validator = new Pattern({ regexp: '\\w{1,10}\\\\' });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
-      validator = new Pattern({ regexp: /\w+\\/u });
+      validator = new Pattern({ regexp: /\w{1,10}\\/u });
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('a\\'));
       validator = new Pattern({ regexp: "^[\\p{L}\\s\\.,']+$" });
