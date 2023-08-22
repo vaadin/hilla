@@ -8,8 +8,12 @@ snapshot=$1
 # install npm deps needed for the generator node script
 [ ! -d scripts/generator/node_modules ] && (cd scripts/generator && npm install)
 
+# download version.json file from vaadin/platform
+curl -l -s "https://raw.githubusercontent.com/vaadin/platform/main/versions.json" > ./scripts/generator/results/versions.json
+sed -i '/{{version}}/d' ./scripts/generator/results/versions.json
+
 # run the generator
-cmd="node scripts/generator/generate.js --platform=$version --versions=versions.json $snapshot"
+cmd="node scripts/generator/generate.js --platform=$version --versions=scripts/generator/results/versions.json $snapshot"
 echo Running: "$cmd" >&2
 $cmd || exit 1
 
