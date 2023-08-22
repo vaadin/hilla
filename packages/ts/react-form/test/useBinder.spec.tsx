@@ -3,13 +3,15 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder, useBinderNode } from '../src/index.js';
+import { useBinder, useBinderNode, type BinderControls } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
 
 describe('@hilla/react-form', () => {
-  let onSubmit: sinon.SinonStub<[Login], Promise<Login> | Promise<void>>;
+  let onSubmit: (value: Login) => Promise<Login>;
+  
+  let binder: BinderControls<Login, LoginModel<Login>>;
 
   type UserFormProps = Readonly<{
     model: UserModel;
@@ -27,7 +29,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, submit } = useBinder(LoginModel, { onSubmit: sinon.stub() });
+    const { field, model, submit } = useBinder(LoginModel, { onSubmit });
 
     return (
       <>
@@ -66,6 +68,26 @@ describe('@hilla/react-form', () => {
           password: 'john123456',
         },
       });
+    });
+
+    it('does not call onSubmit if the form is invalid', async () => {
+      const user = userEvent.setup();
+      const { getByTestId } = render(<LoginForm />);
+
+      await user.click(getByTestId('user.name'));
+      await user.keyboard('johndoe');
+      await user.click(getByTestId('submit'));
+
+      expect(onSubmit).to.not.have.been.called;
+    });
+
+    it('does not call onSubmit if the form has not been touched', async () => {
+      const user = userEvent.setup();
+      const { getByTestId } = render(<LoginForm />);
+
+      await user.click(getByTestId('submit'));
+
+      expect(onSubmit).to.not.have.been.called;
     });
   });
 });
