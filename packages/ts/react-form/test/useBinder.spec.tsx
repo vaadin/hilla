@@ -3,25 +3,20 @@ import {render} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder, useBinderNode } from '../src/index.js';
+import { useBinder as _useBinder, useBinderNode } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
 
 async function sleep(timeout: number): Promise<void> {
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, timeout);
-  });
+  return new Promise<void>((resolve) => setTimeout(resolve, timeout));
 }
 
 describe('@hilla/react-form', () => {
+  type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
+  const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
+
   let onSubmit: (value: Login) => Promise<Login>;
-
-  let _model: LoginModel;
-
-  let _read: (value: Login) => void;
 
   type UserFormProps = Readonly<{
     model: UserModel;
@@ -40,8 +35,6 @@ describe('@hilla/react-form', () => {
 
   function LoginForm() {
     const { field, model, read, submit } = useBinder(LoginModel, { onSubmit });
-    _model = model;
-    _read = read;
 
     return (
       <>
@@ -59,6 +52,7 @@ describe('@hilla/react-form', () => {
 
   beforeEach(() => {
     onSubmit = sinon.stub();
+    (useBinder as UseBinderSpy).resetHistory();
   });
 
   describe('useBinder', () => {
@@ -114,7 +108,9 @@ describe('@hilla/react-form', () => {
       const { getByTestId } = render(<LoginForm />);
 
       await sleep(0); // endpoint roundtrip
-      _read({
+      const { read } = (useBinder as UseBinderSpy).returnValues[0];
+
+      read({
         rememberMe: true,
         user: {
           id: 1,
@@ -124,6 +120,8 @@ describe('@hilla/react-form', () => {
       });
 
       await sleep(0); // react batched updates
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
       expect(getByTestId('user.password')).to.have.property('value', 'john123456');
