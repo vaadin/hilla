@@ -142,24 +142,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includeDependencySources>false</includeDependencySources>
-                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
-                    <quiet>true</quiet>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
