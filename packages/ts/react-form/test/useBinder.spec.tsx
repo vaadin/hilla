@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -7,6 +7,14 @@ import { useBinder, useBinderNode } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
+
+async function sleep(timeout: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, timeout);
+  });
+}
 
 describe('@hilla/react-form', () => {
   let onSubmit: (value: Login) => Promise<Login>;
@@ -104,6 +112,8 @@ describe('@hilla/react-form', () => {
 
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
+
+      await sleep(0); // endpoint roundtrip
       _read({
         rememberMe: true,
         user: {
@@ -112,6 +122,8 @@ describe('@hilla/react-form', () => {
           password: 'john123456',
         },
       });
+
+      await sleep(0); // react batched updates
 
       expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
       expect(getByTestId('user.password')).to.have.property('value', 'john123456');
