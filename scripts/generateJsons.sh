@@ -9,6 +9,7 @@ snapshot=$1
 [ ! -d scripts/generator/node_modules ] && (cd scripts/generator && npm install)
 
 # download version.json file from vaadin/platform
+mkdir -p ./scripts/generator/results/
 curl -l -s "https://raw.githubusercontent.com/vaadin/platform/main/versions.json" > ./scripts/generator/results/versions.json
 sed -i '/{{version}}/d' ./scripts/generator/results/versions.json
 
