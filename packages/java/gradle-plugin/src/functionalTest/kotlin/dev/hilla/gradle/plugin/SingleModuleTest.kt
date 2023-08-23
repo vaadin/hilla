@@ -310,7 +310,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
         val npmCmd = Stream.of(
             "npm", "--no-update-notifier", "--no-audit",
-            "install", "--no-save", "--install-links"
+            "install", "--no-save", "--install-strategy", "shallow"
         )
 
         val generatedFiles = Files

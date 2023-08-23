@@ -72,7 +72,7 @@ public class TaskTest {
                 : Stream.<String> empty();
 
         var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
-                "install", "--no-save", "--install-links");
+                "install", "--no-save", "--install-strategy", "shallow");
 
         var generatedFiles = Files
                 .list(packagesDirectory).filter(dirName -> dirName.getFileName()
