@@ -55,6 +55,9 @@ export type BinderNodeControls<T, M extends AbstractModel<T>> = Readonly<{
 
 export type BinderControls<T, M extends AbstractModel<T>> = BinderNodeControls<T, M> &
   Readonly<{
+    value: T;
+    setDefaultValue(value: T): void;
+    setValue(value: T): void;
     submit(): Promise<T | undefined>;
     reset(): void;
     clear(): void;
@@ -196,6 +199,13 @@ export function useBinder<T, M extends AbstractModel<T>>(
 
   return {
     ...getBinderNodeControls(binder),
+    setDefaultValue: (defaultValue: T) => {
+      binder.defaultValue = defaultValue;
+    },
+    value: binder.value,
+    setValue: (value: T) => {
+      binder.value = value;
+    },
     clear: binder.clear.bind(binder),
     field,
     read: binder.read.bind(binder),
