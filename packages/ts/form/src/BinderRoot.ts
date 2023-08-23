@@ -1,7 +1,7 @@
 import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend';
 import { BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { _parent, type AbstractModel, type ModelConstructor } from './Models.js';
+import { _parent, type AbstractModel, type HasValue, type ModelConstructor } from './Models.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -22,6 +22,16 @@ const _onSubmit = Symbol('onSubmit');
 const _validations = Symbol('validations');
 const _validating = Symbol('validating');
 const _validationRequestSymbol = Symbol('validationRequest');
+
+export type BinderConfiguration<T> = Readonly<{
+  onChange?(oldValue?: T): void;
+  onSubmit?(value: T): Promise<T | undefined> | Promise<void>;
+}>;
+
+export type BinderRootConfiguration<T> = BinderConfiguration<T> &
+  Readonly<{
+    context?: any;
+  }>;
 
 /**
  * A simplified Binder that does not require a context.
@@ -51,6 +61,8 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
   private [_validations] = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
 
+  #context: any = this;
+
   /**
    *
    * @param Model - The constructor (the class reference) of the form model. The Binder instantiates the top-level model
@@ -62,13 +74,16 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
-    super(new Model({ value: undefined }, 'value', false));
-    this[_emptyValue] = (this.model[_parent] as { value: T }).value;
+  constructor(Model: ModelConstructor<T, M>, config?: BinderRootConfiguration<T>) {
+    const valueContainer: HasValue<T> = { value: undefined };
+    super(new Model(valueContainer, 'value', false));
+    this[_emptyValue] = valueContainer.value!;
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
-
-    this[_onSubmit] = config?.onSubmit?.bind(this) ?? this[_onSubmit];
+    this.#context = config?.context ?? this;
+    this[_onChange] = config?.onChange ?? (() => {});
+    this.read(this[_emptyValue]);
+    this[_onSubmit] = config?.onSubmit ?? this[_onSubmit];
   }
 
   /**
@@ -118,24 +133,6 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
    */
   get validating(): boolean {
     return this[_validating];
-  }
-
-  /**
-   * Accessor for the onChange callback.
-   */
-  protected get changeCallback(): (oldValue?: T) => void {
-    return this[_onChange] ?? (() => {});
-  }
-
-  protected set changeCallback(callback: (oldValue?: T) => void) {
-    this[_onChange] = callback;
-  }
-
-  /**
-   * To be called in the subclass constructor to initialize the form value.
-   */
-  readValue(): void {
-    this.read(this[_emptyValue]);
   }
 
   /**
@@ -203,7 +200,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     this.update(this.value);
     this.dispatchEvent(CHANGED);
     try {
-      return await endpointMethod.call(this.getCallbackContext(), this.value);
+      return await endpointMethod.call(this.#context, this.value);
     } catch (error: unknown) {
       if (error instanceof EndpointValidationError && error.validationErrorData.length) {
         const valueErrors: Array<ValueError<any>> = [];
@@ -295,15 +292,6 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   }
 
   protected override update(oldValue: T): void {
-    this[_onChange]?.call(this.getCallbackContext(), oldValue);
+    this[_onChange]?.call(this.#context, oldValue);
   }
-
-  protected getCallbackContext(): any {
-    return this;
-  }
-}
-
-export interface BinderConfiguration<T> {
-  onChange?(oldValue?: T): void;
-  onSubmit?(value: T): Promise<T | undefined> | Promise<void>;
 }
