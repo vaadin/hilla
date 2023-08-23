@@ -26,16 +26,24 @@
   },
   "exports": {
     ".": {
-      "default": "./index.js"
+      "default": "./index.js",
+      "_types": "./index.d.ts"
     },
     "./Authentication.js": {
-      "default": "./Authentication.js"
+      "default": "./Authentication.js",
+      "_types": "./Authentication.d.ts"
     },
     "./Connect.js": {
-      "default": "./Connect.js"
+      "default": "./Connect.js",
+      "_types": "./Connect.d.ts"
+    },
+    "./EndpointErrors.js": {
+      "default": "./EndpointErrors.js",
+      "_types": "./EndpointErrors.d.ts"
     },
     "./index.js": {
-      "default": "./index.js"
+      "default": "./index.js",
+      "_types": "./index.d.ts"
     }
   },
   "author": "Vaadin Ltd",
