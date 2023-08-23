@@ -3,15 +3,17 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder, useBinderNode, type BinderControls } from '../src/index.js';
+import { useBinder, useBinderNode } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
 
 describe('@hilla/react-form', () => {
   let onSubmit: (value: Login) => Promise<Login>;
-  
-  let binder: BinderControls<Login, LoginModel<Login>>;
+
+  let _model: LoginModel;
+
+  let _read: (value: Login) => void;
 
   type UserFormProps = Readonly<{
     model: UserModel;
@@ -29,7 +31,9 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, submit } = useBinder(LoginModel, { onSubmit });
+    const { field, model, read, submit } = useBinder(LoginModel, { onSubmit });
+    _model = model;
+    _read = read;
 
     return (
       <>
@@ -88,6 +92,30 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('submit'));
 
       expect(onSubmit).to.not.have.been.called;
+    });
+
+    it('shows empty values by default', async () => {
+      const { getByTestId } = render(<LoginForm />);
+
+      expect(getByTestId('user.name')).to.have.property('value', '');
+      expect(getByTestId('user.password')).to.have.property('value', '');
+      expect(getByTestId('rememberMe')).to.have.property('checked', false);
+    });
+
+    it('shows read values', async () => {
+      const { getByTestId } = render(<LoginForm />);
+      _read({
+        rememberMe: true,
+        user: {
+          id: 1,
+          name: 'johndoe',
+          password: 'john123456',
+        },
+      });
+
+      expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
+      expect(getByTestId('user.password')).to.have.property('value', 'john123456');
+      expect(getByTestId('rememberMe')).to.have.property('checked', true);
     });
   });
 });
