@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define */
+/* eslint-disable no-use-before-define, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unnecessary-type-assertion */
 // API to test
 import {
   _enum,
@@ -126,7 +126,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
     return this[_getPropertyModel]('fieldBoolean', BooleanModel, [false]);
   }
 
-  get fieldObject() {
+  get fieldObject(): ObjectModel<Record<string, unknown>> {
     return this[_getPropertyModel]('fieldObject', ObjectModel, [false]) as ObjectModel<Record<string, unknown>>;
   }
 
@@ -153,6 +153,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
   }
 
   get fieldEnum() {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return this[_getPropertyModel]('fieldEnum', RecordStatusModel, [false]);
   }
 

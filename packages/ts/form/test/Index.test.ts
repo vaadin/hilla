@@ -14,15 +14,16 @@
  * the License.
  */
 import { assert } from '@esm-bundle/chai';
+import type { VaadinWindow } from '../src/types.js';
 
 describe('@hilla/form', () => {
   describe('Index', () => {
-    const $wnd = window as any;
+    const $wnd = window as VaadinWindow;
 
     it('should add registration', async () => {
       assert.isDefined($wnd.Vaadin);
-      assert.isArray($wnd.Vaadin.registrations);
-      const formRegistrations = $wnd.Vaadin.registrations.filter((r: any) => r.is === '@hilla/form');
+      assert.isArray($wnd.Vaadin!.registrations);
+      const formRegistrations = $wnd.Vaadin!.registrations!.filter((r) => r.is === '@hilla/form');
       assert.lengthOf(formRegistrations, 1);
     });
   });
