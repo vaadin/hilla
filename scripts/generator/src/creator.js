@@ -121,14 +121,9 @@ function createReleaseNotes(versions, releaseNoteTemplate) {
     }
 
     const changed = getChangedSincePrevious(versions);
-    //console.log(versions.platform);
+    //console.log(versions);
     let releaseNoteData;
-    if(!versions.platform.includes("SNAPSHOT")){
-        const componentNote = getComponentReleaseNote(versions.platform);
-        releaseNoteData = Object.assign(versions, { components: componentVersions }, { changesSincePrevious: changed }, { componentNote: componentNote });
-    } else {
-        releaseNoteData = Object.assign(versions, { components: componentVersions }, { changesSincePrevious: changed });
-    }
+    releaseNoteData = Object.assign(versions, { components: componentVersions }, { changesSincePrevious: changed });
 
     return render(releaseNoteTemplate, releaseNoteData);
 }
