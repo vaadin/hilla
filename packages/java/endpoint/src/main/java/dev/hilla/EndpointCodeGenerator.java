@@ -64,8 +64,6 @@ public class EndpointCodeGenerator {
 
     /**
      * Gets the singleton instance.
-     * 
-     * @throws IOException
      */
     public static EndpointCodeGenerator getInstance() {
         return instance;
