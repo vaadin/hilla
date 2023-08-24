@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import {render} from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -9,13 +9,16 @@ import { type Login, LoginModel, type User, type UserModel } from './models.js';
 use(sinonChai);
 
 async function sleep(timeout: number): Promise<void> {
-  return new Promise<void>((resolve) => setTimeout(resolve, timeout));
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, timeout);
+  });
 }
 
 describe('@hilla/react-form', () => {
   type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
   const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
 
+  let user: ReturnType<(typeof userEvent)['setup']>;
   let onSubmit: (value: Login) => Promise<Login>;
 
   type UserFormProps = Readonly<{
@@ -38,7 +41,7 @@ describe('@hilla/react-form', () => {
 
     return (
       <>
-        <section>
+        <section data-testid="login-form.main">
           <UserForm model={model.user} />
           <input data-testid="rememberMe" type="checkbox" {...field(model.rememberMe)} />
         </section>
@@ -51,13 +54,13 @@ describe('@hilla/react-form', () => {
   }
 
   beforeEach(() => {
+    user = userEvent.setup();
     onSubmit = sinon.stub();
     (useBinder as UseBinderSpy).resetHistory();
   });
 
   describe('useBinder', () => {
     it('collects info from a form', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('user.name'));
@@ -77,7 +80,6 @@ describe('@hilla/react-form', () => {
     });
 
     it('does not call onSubmit if the form is invalid', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('user.name'));
@@ -88,7 +90,6 @@ describe('@hilla/react-form', () => {
     });
 
     it('does not call onSubmit if the form has not been touched', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('submit'));
@@ -107,7 +108,8 @@ describe('@hilla/react-form', () => {
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await sleep(0); // endpoint roundtrip
+      await sleep(1);
+
       const { read } = (useBinder as UseBinderSpy).returnValues[0];
 
       read({
@@ -119,13 +121,11 @@ describe('@hilla/react-form', () => {
         },
       });
 
-      await sleep(0); // react batched updates
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
-      expect(getByTestId('user.password')).to.have.property('value', 'john123456');
-      expect(getByTestId('rememberMe')).to.have.property('checked', true);
+      await waitFor(() => {
+        expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
+        expect(getByTestId('user.password')).to.have.property('value', 'john123456');
+        expect(getByTestId('rememberMe')).to.have.property('checked', true);
+      });
     });
   });
 });
