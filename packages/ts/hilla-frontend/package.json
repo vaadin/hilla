@@ -26,15 +26,23 @@
   },
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "default": "./index.js"
     },
     "./Authentication.js": {
+      "types": "./Authentication.d.ts",
       "default": "./Authentication.js"
     },
     "./Connect.js": {
+      "types": "./Connect.d.ts",
       "default": "./Connect.js"
     },
+    "./EndpointErrors.js": {
+      "types": "./EndpointErrors.d.ts",
+      "default": "./EndpointErrors.js"
+    },
     "./index.js": {
+      "types": "./index.d.ts",
       "default": "./index.js"
     }
   },
