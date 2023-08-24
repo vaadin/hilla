@@ -1,26 +1,25 @@
 {
-  "name": "@hilla/form",
-  "version": "2.2.0-alpha7",
-  "description": "Hilla form utils",
+  "name": "@hilla/react-form",
+  "version": "2.2.0-alpha6",
+  "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/vaadin/hilla.git",
-    "directory": "packages/ts/form"
+    "directory": "packages/ts/react-form"
   },
   "keywords": [
     "Hilla",
-    "Form"
+    "Form",
+    "React"
   ],
   "scripts": {
-    "build": "concurrently npm:build:*",
-    "build:esbuild": "tsx ../../../scripts/build.ts",
-    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "build": "tsc --isolatedModules -p tsconfig.build.json",
+    "lint": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9877",
-    "test:coverage": "npm run test -- --coverage",
+    "test:coverage": "echo \"Skipping\"",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit",
     "version": "node ../../../scripts/bump/package-update.js"
@@ -28,30 +27,6 @@
   "exports": {
     ".": {
       "default": "./index.js"
-    },
-    "./Binder.js": {
-      "default": "./Binder.js"
-    },
-    "./BinderNode.js": {
-      "default": "./BinderNode.js"
-    },
-    "./BinderRoot.js": {
-      "default": "./BinderRoot.js"
-    },
-    "./Field.js": {
-      "default": "./Field.js"
-    },
-    "./index.js": {
-      "default": "./index.js"
-    },
-    "./Models.js": {
-      "default": "./Models.js"
-    },
-    "./Validation.js": {
-      "default": "./Validation.js"
-    },
-    "./Validators.js": {
-      "default": "./Validators.js"
     }
   },
   "author": "Vaadin Ltd",
@@ -67,15 +42,16 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "*",
-    "rimraf": "^5.0.1",
-    "validator": "^13.11.0"
+    "@hilla/form": "*",
+    "@types/react": "^18.2.20"
   },
   "peerDependencies": {
-    "lit": "^2.3.0"
+    "react": "^18"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/chai": "^4.3.5",
     "@types/chai-dom": "^1.11.0",
     "@types/mocha": "^10.0.1",
