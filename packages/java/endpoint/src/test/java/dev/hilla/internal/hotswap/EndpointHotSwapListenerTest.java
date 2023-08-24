@@ -39,7 +39,7 @@ public class EndpointHotSwapListenerTest {
     private EndpointCodeGenerator endpointCodeGenerator;
 
     @Test
-    public void endpointChangedIsCalled_endpointControllerRegisterEndpointsIsCalled()
+    public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled()
             throws IOException {
         try (var engineConfigurationMockedStatic = Mockito
                 .mockStatic(EngineConfiguration.class);
