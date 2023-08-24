@@ -2,6 +2,7 @@ import type { VaadinWindow } from './types.js';
 
 export * from './Authentication.js';
 export * from './Connect.js';
+export * from './EndpointErrors.js';
 export { FluxConnection, State } from './FluxConnection.js';
 
 declare const __VERSION__: string;
