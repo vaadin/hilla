@@ -1,3 +1,4 @@
+Hilla {{version}}
 [Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/tutorials/quickstart) · [Documentation](https://hilla.dev/docs/)
 
 *This is a pre-release for the next minor version of Hilla. We appreciate it if you give it a try and [report any issues](https://github.com/vaadin/hilla/issues/new) you notice.*

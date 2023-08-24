@@ -1,3 +1,4 @@
+Hilla {{version}}
 [Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/tutorials/quickstart) · [Documentation](https://hilla.dev/docs/)
 
 ## Versions
