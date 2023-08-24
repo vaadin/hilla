@@ -31,6 +31,7 @@ module.exports = (config) => {
   config.set({
     plugins: [karmaMocha, karmaChromeLauncher, karmaVite, karmaCoverage, karmaSpecReporter],
 
+    browserDisconnectTolerance: 3,
     browserNoActivityTimeout : isCI ? 30000 : 0,
 
     browsers: ['ChromeHeadlessNoSandbox'],
