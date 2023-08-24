@@ -16,7 +16,6 @@
 
 package dev.hilla.internal.hotswap;
 
-import dev.hilla.EndpointController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -48,9 +47,7 @@ public class HotSwapConfiguration {
 
     @Bean
     EndpointHotSwapListener endpointHotSwapListener(
-            @Autowired EndpointHotSwapService endpointHotSwapService,
-            @Autowired EndpointController endpointController) {
-        return new EndpointHotSwapListener(endpointController,
-                endpointHotSwapService);
+            @Autowired EndpointHotSwapService endpointHotSwapService) {
+        return new EndpointHotSwapListener(endpointHotSwapService);
     }
 }

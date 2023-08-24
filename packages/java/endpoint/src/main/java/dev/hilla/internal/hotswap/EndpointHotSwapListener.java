@@ -16,32 +16,26 @@
 
 package dev.hilla.internal.hotswap;
 
-import com.vaadin.flow.internal.BrowserLiveReload;
-import dev.hilla.EndpointController;
-import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.engine.GeneratorProcessor;
-import dev.hilla.engine.ParserProcessor;
 import jakarta.annotation.PostConstruct;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import dev.hilla.EndpointCodeGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Optional;
+import com.vaadin.flow.internal.BrowserLiveReload;
 
 class EndpointHotSwapListener implements HotSwapListener {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointHotSwapListener.class);
 
-    private final EndpointController endpointController;
-
     private final EndpointHotSwapService endpointHotSwapService;
 
-    public EndpointHotSwapListener(EndpointController endpointController,
+    public EndpointHotSwapListener(
             EndpointHotSwapService endpointHotSwapService) {
-        this.endpointController = endpointController;
         this.endpointHotSwapService = endpointHotSwapService;
     }
 
@@ -52,21 +46,12 @@ class EndpointHotSwapListener implements HotSwapListener {
 
     @Override
     public void endpointChanged(EndpointChangedEvent event) {
-        EngineConfiguration engineConfiguration;
         try {
-            engineConfiguration = EngineConfiguration
-                    .loadDirectory(event.buildDir());
+            EndpointCodeGenerator.getInstance().update();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                this.getClass().getClassLoader());
-        parser.process();
-        GeneratorProcessor generator = new GeneratorProcessor(
-                engineConfiguration, "node");
-        generator.process();
 
-        this.endpointController.registerEndpoints();
         reload(event.browserLiveReload());
     }
 
