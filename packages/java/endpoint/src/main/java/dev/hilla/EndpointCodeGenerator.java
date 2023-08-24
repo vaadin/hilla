@@ -33,10 +33,11 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 @Component
 public class EndpointCodeGenerator {
 
-    private final Path buildDirectory;
     private final EndpointController endpointController;
-    private final ApplicationConfiguration configuration;
-    private final String nodeExecutable;
+    private final VaadinContext context;
+    private Path buildDirectory;
+    private ApplicationConfiguration configuration;
+    private String nodeExecutable;
 
     /**
      * Creates the singleton.
@@ -49,14 +50,7 @@ public class EndpointCodeGenerator {
     public EndpointCodeGenerator(VaadinContext context,
             EndpointController endpointController) {
         this.endpointController = endpointController;
-        configuration = ApplicationConfiguration.get(context);
-
-        Path projectFolder = configuration.getProjectFolder().toPath();
-        buildDirectory = projectFolder.resolve(configuration.getBuildFolder());
-
-        FrontendTools tools = new FrontendTools(configuration,
-                configuration.getProjectFolder());
-        this.nodeExecutable = tools.getNodeBinary();
+        this.context = context;
     }
 
     /**
@@ -67,6 +61,7 @@ public class EndpointCodeGenerator {
      *             if something went wrong
      */
     public void update() throws IOException {
+        initIfNeeded();
         if (configuration.isProductionMode()) {
             throw new IllegalStateException(
                     "This method is not available in production mode");
@@ -82,6 +77,20 @@ public class EndpointCodeGenerator {
         generator.process();
 
         this.endpointController.registerEndpoints();
+    }
+
+    private void initIfNeeded() {
+        if (configuration == null) {
+            configuration = ApplicationConfiguration.get(context);
+
+            Path projectFolder = configuration.getProjectFolder().toPath();
+            buildDirectory = projectFolder
+                    .resolve(configuration.getBuildFolder());
+
+            FrontendTools tools = new FrontendTools(configuration,
+                    configuration.getProjectFolder());
+            nodeExecutable = tools.getNodeBinary();
+        }
     }
 
 }
