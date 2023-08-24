@@ -79,7 +79,7 @@ describe('Testing GeneratorIO', () => {
 
     it('should fail when IO error happens', async () => {
       await chmod(tmpDir, 0o666);
-      await expect(io.cleanOutputDir()).to.be.rejectedWith(Error).which.does.not.have.property('code', 'ENOENT');
+      await expect(io.cleanOutputDir()).to.be.rejectedWith(Error, /^(?!ENOENT).*/u);
       await chmod(tmpDir, 0o777);
     });
   });
