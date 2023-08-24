@@ -38,8 +38,6 @@ public class EndpointCodeGenerator {
     private final ApplicationConfiguration configuration;
     private final String nodeExecutable;
 
-    private static EndpointCodeGenerator instance;
-
     /**
      * Creates the singleton.
      * 
@@ -59,14 +57,6 @@ public class EndpointCodeGenerator {
         FrontendTools tools = new FrontendTools(configuration,
                 configuration.getProjectFolder());
         this.nodeExecutable = tools.getNodeBinary();
-        instance = this;
-    }
-
-    /**
-     * Gets the singleton instance.
-     */
-    public static EndpointCodeGenerator getInstance() {
-        return instance;
     }
 
     /**
