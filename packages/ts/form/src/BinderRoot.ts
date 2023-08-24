@@ -1,4 +1,4 @@
-import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend';
+import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend/EndpointErrors.js';
 import { BinderNode } from './BinderNode.js';
 import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import { _parent, type AbstractModel, type ModelConstructor } from './Models.js';
