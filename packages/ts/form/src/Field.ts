@@ -13,7 +13,7 @@ import {
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
-interface FieldBase<T> {
+export interface FieldBase<T> {
   required: boolean;
   invalid: boolean;
   errorMessage: string;
@@ -23,12 +23,17 @@ interface FieldBase<T> {
 /**
  * Subset of the HTML constraint validation API with the `checkValidity()` method.
  */
-type FieldConstraintValidation = Readonly<{
+export type FieldConstraintValidation = Readonly<{
   validity: ValidityState;
   checkValidity(): boolean;
 }>;
 
-type FieldElement<T> = Element & FieldBase<T> & Partial<FieldConstraintValidation>;
+export type FieldElement<T> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
+
+const props = ['required', 'invalid', 'errorMessage', 'value', 'validity', 'checkValidity'];
+export function isFieldElement<T>(element: HTMLElement): element is FieldElement<T> {
+  return props.some((prop) => prop in element);
+}
 
 interface FieldElementHolder<T> {
   get element(): FieldElement<T>;

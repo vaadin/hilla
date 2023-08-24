@@ -6,6 +6,7 @@ export * from './Field.js';
 export * from './Models.js';
 export * from './Validation.js';
 export * from './Validators.js';
+export * from './Validity.js';
 
 declare const __VERSION__: string;
 
@@ -15,5 +16,5 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/form',
-  version: /* updated-by-script */ '2.2.0-alpha7',
+  version: __VERSION__,
 });

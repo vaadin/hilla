@@ -51,6 +51,18 @@ module.exports = (config) => {
         watched: false,
         served: false,
       },
+      {
+        pattern: resolve(cwd, 'test/**/*.spec.ts'),
+        type: 'module',
+        watched: false,
+        served: false,
+      },
+      {
+        pattern: resolve(cwd, 'test/**/*.spec.tsx'),
+        type: 'module',
+        watched: false,
+        served: false,
+      },
     ],
 
     reporters: ['spec', !!coverage && 'coverage'].filter(Boolean),

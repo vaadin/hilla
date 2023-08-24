@@ -56,6 +56,8 @@ const getDefaultArrayItem = <TItem>(arrayNode: ArrayBinderNode<TItem>): TItem =>
   return defaultArrayItem;
 };
 
+export const CHANGED = new Event('binder-node-changed');
+
 /**
  * The BinderNode\<T, M\> class provides the form binding related APIs
  * with respect to a particular model instance.
@@ -64,7 +66,7 @@ const getDefaultArrayItem = <TItem>(arrayNode: ArrayBinderNode<TItem>): TItem =>
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<T, M extends AbstractModel<T>> {
+export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   readonly model: M;
 
   /**
@@ -85,6 +87,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   private readonly validityStateValidator: ValidityStateValidator<T>;
 
   constructor(model: M) {
+    super();
     this.model = model;
     model[_binderNode] = this;
     this.validityStateValidator = new ValidityStateValidator<T>();
@@ -167,6 +170,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
 
   set validators(validators: ReadonlyArray<Validator<T>>) {
     this[_validators] = validators;
+    this.dispatchEvent(CHANGED);
   }
 
   /**
@@ -180,6 +184,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     if (this[_visited] !== v) {
       this[_visited] = v;
       this.updateValidation().catch(() => {});
+      this.dispatchEvent(CHANGED);
     }
   }
 
@@ -251,6 +256,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
    */
   addValidator(validator: Validator<T>): void {
     this.validators = [...this[_validators], validator];
+    this.dispatchEvent(CHANGED);
   }
 
   /**
@@ -302,11 +308,13 @@ export class BinderNode<T, M extends AbstractModel<T>> {
   protected clearValidation(): boolean {
     if (this[_visited]) {
       this[_visited] = false;
+      this.dispatchEvent(CHANGED);
     }
     let needsUpdate = false;
     if (this[_ownErrors]) {
       this[_ownErrors] = undefined;
       needsUpdate = true;
+      this.dispatchEvent(CHANGED);
     }
     if ([...this.getChildBinderNodes()].filter((childBinderNode) => childBinderNode.clearValidation()).length > 0) {
       needsUpdate = true;
@@ -340,6 +348,7 @@ export class BinderNode<T, M extends AbstractModel<T>> {
     for (const childBinderNode of this.getChildBinderNodes()) {
       childBinderNode.setErrorsWithDescendants(relatedErrors);
     }
+    this.dispatchEvent(CHANGED);
   }
 
   private *getChildBinderNodes(): Generator<BinderNode<unknown, AbstractModel<unknown>>> {

@@ -26,21 +26,17 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderRoot<T, M> {
    * ```
    */
   constructor(context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
-    super(Model, config);
+    const changeCallback =
+      config?.onChange ??
+      (typeof (context as LitElement).requestUpdate === 'function'
+        ? () => (context as LitElement).requestUpdate()
+        : undefined);
+
+    super(Model, {
+      ...(config ?? {}),
+      onChange: changeCallback,
+      context,
+    });
     this.context = context;
-
-    if (typeof (context as LitElement).requestUpdate === 'function') {
-      this.changeCallback = () => (context as LitElement).requestUpdate();
-    }
-
-    if (config?.onChange) {
-      this.changeCallback = config.onChange.bind(this);
-    }
-
-    this.readValue();
-  }
-
-  protected override getCallbackContext(): Element {
-    return this.context;
   }
 }
