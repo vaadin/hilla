@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import {render} from '@testing-library/react';
+import {act, render} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -7,10 +7,6 @@ import { useBinder as _useBinder, useBinderNode } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
-
-async function sleep(timeout: number): Promise<void> {
-  return new Promise<void>((resolve) => setTimeout(resolve, timeout));
-}
 
 describe('@hilla/react-form', () => {
   type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
@@ -34,7 +30,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit } = useBinder(LoginModel, { onSubmit });
+    const { field, model, read, submit, value } = useBinder(LoginModel, { onSubmit });
 
     return (
       <>
@@ -42,6 +38,8 @@ describe('@hilla/react-form', () => {
           <UserForm model={model.user} />
           <input data-testid="rememberMe" type="checkbox" {...field(model.rememberMe)} />
         </section>
+        <output data-testid="output.user.name">{value.user.name}</output>
+        <output data-testid="output.rememberMe">{String(value.rememberMe)}</output>
         {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
         <button data-testid="submit" onClick={submit}>
           Submit
@@ -107,25 +105,40 @@ describe('@hilla/react-form', () => {
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await sleep(0); // endpoint roundtrip
-      const { read } = (useBinder as UseBinderSpy).returnValues[0];
-
-      read({
-        rememberMe: true,
-        user: {
-          id: 1,
-          name: 'johndoe',
-          password: 'john123456',
-        },
+      await act(() => {
+        const { read } = (useBinder as UseBinderSpy).returnValues[0];
+        read({
+          rememberMe: true,
+          user: {
+            id: 1,
+            name: 'johndoe',
+            password: 'john123456',
+          },
+        });
       });
-
-      await sleep(0); // react batched updates
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
       expect(getByTestId('user.password')).to.have.property('value', 'john123456');
       expect(getByTestId('rememberMe')).to.have.property('checked', true);
+    });
+
+    it('dispays default value', async () => {
+      const { getByTestId } = render(<LoginForm />);
+
+      expect(getByTestId('output.user.name')).to.have.property('textContent', '')
+      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
+    });
+
+    it('updates displayed value', async () => {
+      const user = userEvent.setup();
+      const { getByTestId } = render(<LoginForm />);
+
+      await user.click(getByTestId('user.name'));
+      await user.keyboard('johndoe');
+      await user.click(getByTestId('rememberMe'));
+      
+      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe')
+      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
     });
   });
 });
