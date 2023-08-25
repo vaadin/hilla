@@ -113,10 +113,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     const oldValue = this[_value];
     this[_value] = newValue;
     this.update(oldValue);
-    this.updateValidation()
-      .then(() => this.dispatchEvent(CHANGED))
-      .catch(() => {});
-    this.dispatchEvent(CHANGED);
+    this.updateValidation().catch(() => {});
   }
 
   /**
@@ -226,7 +223,6 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
       this[_submitting] = false;
       this.defaultValue = this.value;
       this.update(this.value);
-      this.dispatchEvent(CHANGED);
     }
   }
 
@@ -293,5 +289,6 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
   protected override update(oldValue: T): void {
     this[_onChange]?.call(this.#context, oldValue);
+    this.dispatchEvent(CHANGED);
   }
 }
