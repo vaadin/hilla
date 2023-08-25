@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -135,7 +136,8 @@ public class EngineConfiguration {
         MAPPER.writeValue(file, this);
     }
 
-    Path getOpenAPIFile() {
+    @JsonIgnore
+    public Path getOpenAPIFile() {
         return classesDir.resolve(OPEN_API_PATH);
     }
 
