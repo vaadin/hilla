@@ -13,14 +13,13 @@ import {
   type ModelConstructor,
   type Validator,
   type ValueError,
-  type ModelValue,
   type FieldStrategy,
 } from '@hilla/form';
 import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 
 function useUpdate() {
-  const [_, update] = useReducer((x) => !x, true);
+  const [_, update] = useReducer((x) => ++x, 0);
   return update;
 }
 
@@ -47,6 +46,7 @@ export type BinderNodeControls<T, M extends AbstractModel<T>> = Readonly<{
   validators: ReadonlyArray<Validator<T>>;
   value?: T;
   visited: boolean;
+  addValidator(validator: Validator<T>): void;
   setValidators(validators: ReadonlyArray<Validator<T>>): void;
   setValue(value: T | undefined): void;
   setVisited(visited: boolean): void;
@@ -70,6 +70,8 @@ type FieldState<T> = {
   invalid: boolean;
   errorMessage: string;
   strategy?: FieldStrategy<T>;
+  element?: HTMLElement;
+  updateValue: () => void;
 };
 
 function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
@@ -80,6 +82,7 @@ function getBinderNodeControls<T, M extends AbstractModel<T>>(
   node: BinderNode<T, M>,
 ): Omit<BinderNodeControls<T, M>, 'field'> {
   return {
+    addValidator: node.addValidator.bind(node),
     defaultValue: node.defaultValue,
     dirty: node.dirty,
     errors: node.errors,
@@ -116,7 +119,19 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         required: false,
         invalid: false,
         errorMessage: '',
+        element: undefined,
         strategy: undefined,
+        updateValue: () => {
+          if (fieldState.strategy) {
+            // When bad input is detected, skip reading new value in binder state
+            fieldState.strategy.checkValidity();
+            if (!fieldState.strategy.validity.badInput) {
+              fieldState.value = fieldState.strategy.value;
+            }
+            n[_validity] = fieldState.strategy.validity;
+            n.value = convertFieldValue(model, fieldState.value);
+          }
+        },
       };
 
       if (!registry.has(model)) {
@@ -149,28 +164,15 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         }
       }
 
-      const updateValueEvent = () => {
-        if (fieldState.strategy) {
-          // When bad input is detected, skip reading new value in binder state
-          fieldState.strategy.checkValidity();
-          if (!fieldState.strategy.validity.badInput) {
-            fieldState.value = fieldState.strategy.value;
-          }
-          n[_validity] = fieldState.strategy.validity;
-          n.value = convertFieldValue(model, fieldState.value);
-        }
-      };
-
       return {
         name: n.name,
         onBlur() {
-          updateValueEvent();
           n.visited = true;
         },
-        onChange: updateValueEvent,
-        onInput: updateValueEvent,
         ref(element: HTMLElement | null) {
           if (!element) {
+            fieldState.element?.removeEventListener('change', fieldState.updateValue);
+            fieldState.element?.removeEventListener('input', fieldState.updateValue);
             return;
           }
 
@@ -179,6 +181,9 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
           }
 
           fieldState.strategy = getDefaultFieldStrategy(element, model);
+          fieldState.element = element;
+          fieldState.element.addEventListener('change', fieldState.updateValue);
+          fieldState.element.addEventListener('input', fieldState.updateValue);
         },
       };
     }) as FieldDirective;
