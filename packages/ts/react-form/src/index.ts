@@ -72,6 +72,8 @@ type FieldState<T> = {
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
   updateValue: () => void;
+  markVisited: () => void;
+  ref: (element: HTMLElement | null) => void;
 };
 
 function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
@@ -123,6 +125,9 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         strategy: undefined,
         updateValue: () => {
           if (fieldState.strategy) {
+            // Remove invalid flag, so that .checkValidity() in Vaadin Components
+            // does not interfere with errors from Hilla.
+            fieldState.strategy.invalid = false;
             // When bad input is detected, skip reading new value in binder state
             fieldState.strategy.checkValidity();
             if (!fieldState.strategy.validity.badInput) {
@@ -130,6 +135,32 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
             }
             n[_validity] = fieldState.strategy.validity;
             n.value = convertFieldValue(model, fieldState.value);
+          }
+        },
+        markVisited: () => {
+          n.visited = true;
+        },
+        ref(element: HTMLElement | null) {
+          if (!element) {
+            fieldState.element?.removeEventListener('change', fieldState.updateValue);
+            fieldState.element?.removeEventListener('input', fieldState.updateValue);
+            fieldState.element?.removeEventListener('blur', fieldState.markVisited);
+            fieldState.strategy?.removeEventListeners();
+            fieldState.element = undefined;
+            fieldState.strategy = undefined;
+            return;
+          }
+
+          if (!isFieldElement(element)) {
+            throw new TypeError(`Element '${element.localName}' is not a form element`);
+          }
+
+          if (fieldState.element !== element) {
+            fieldState.element = element;
+            fieldState.element.addEventListener('change', fieldState.updateValue);
+            fieldState.element.addEventListener('input', fieldState.updateValue);
+            fieldState.element.addEventListener('blur', fieldState.markVisited);
+            fieldState.strategy = getDefaultFieldStrategy(element, model);
           }
         },
       };
@@ -158,33 +189,14 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
           fieldState.strategy.errorMessage = errorMessage;
         }
 
-        if (fieldState.invalid !== n.invalid) {
-          fieldState.invalid = n.invalid;
-          fieldState.strategy.invalid = n.invalid;
-        }
+        // Make sure invalid state is always in sync
+        fieldState.invalid = n.invalid;
+        fieldState.strategy.invalid = n.invalid;
       }
 
       return {
         name: n.name,
-        onBlur() {
-          n.visited = true;
-        },
-        ref(element: HTMLElement | null) {
-          if (!element) {
-            fieldState.element?.removeEventListener('change', fieldState.updateValue);
-            fieldState.element?.removeEventListener('input', fieldState.updateValue);
-            return;
-          }
-
-          if (!isFieldElement(element)) {
-            throw new TypeError(`Element '${element.localName}' is not a form element`);
-          }
-
-          fieldState.strategy = getDefaultFieldStrategy(element, model);
-          fieldState.element = element;
-          fieldState.element.addEventListener('change', fieldState.updateValue);
-          fieldState.element.addEventListener('input', fieldState.updateValue);
-        },
+        ref: fieldState.ref,
       };
     }) as FieldDirective;
   }, [node]);
@@ -219,8 +231,8 @@ export function useBinder<T, M extends AbstractModel<T>>(
   };
 }
 
-export function useBinderNode<T, M extends AbstractModel<T>>(model: M): BinderNodeControls<T, M> {
-  const binderNode = getBinderNode(model) as BinderNode<T, M>;
+export function useBinderNode<M extends AbstractModel<any>>(model: M): BinderNodeControls<ReturnType<M['valueOf']>, M> {
+  const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
   return {
     ...getBinderNodeControls(binderNode),
