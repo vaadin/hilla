@@ -46,6 +46,7 @@ export type BinderNodeControls<T, M extends AbstractModel<T>> = Readonly<{
   validators: ReadonlyArray<Validator<T>>;
   value?: T;
   visited: boolean;
+  addValidator(validator: Validator<T>): void;
   setValidators(validators: ReadonlyArray<Validator<T>>): void;
   setValue(value: T | undefined): void;
   setVisited(visited: boolean): void;
@@ -81,6 +82,7 @@ function getBinderNodeControls<T, M extends AbstractModel<T>>(
   node: BinderNode<T, M>,
 ): Omit<BinderNodeControls<T, M>, 'field'> {
   return {
+    addValidator: node.addValidator.bind(node),
     defaultValue: node.defaultValue,
     dirty: node.dirty,
     errors: node.errors,
@@ -129,7 +131,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
             n[_validity] = fieldState.strategy.validity;
             n.value = convertFieldValue(model, fieldState.value);
           }
-        }
+        },
       };
 
       if (!registry.has(model)) {
