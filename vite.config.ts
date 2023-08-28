@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { basename } from 'path';
 import type { PackageJson, TsConfigJson } from 'type-fest';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig, type UserConfig } from 'vite';
@@ -12,7 +13,8 @@ async function loadMockConfig() {
     const content = await readFile(new URL('test/mocks/config.json', cwd), 'utf8');
     return JSON.parse(content) as Record<string, string>;
   } catch (e: unknown) {
-    console.error(e);
+    // eslint-disable-next-line no-console
+    console.log(`No mocks detected for ${basename(fileURLToPath(cwd.toString()))}. Skipping...`);
     return {};
   }
 }

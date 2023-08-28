@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
-  AbstractModel,
+  type AbstractModel,
   type BinderConfiguration,
   BinderRoot,
   CHANGED,
-  defaultValidity,
   getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
@@ -19,7 +19,7 @@ import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 
 function useUpdate() {
-  const [_, update] = useReducer((x) => ++x, 0);
+  const [_, update] = useReducer((x: number) => x + 1, 0);
   return update;
 }
 
@@ -71,9 +71,9 @@ type FieldState<T> = {
   errorMessage: string;
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
-  updateValue: () => void;
-  markVisited: () => void;
-  ref: (element: HTMLElement | null) => void;
+  updateValue(): void;
+  markVisited(): void;
+  ref(element: HTMLElement | null): void;
 };
 
 function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
@@ -123,7 +123,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         errorMessage: '',
         element: undefined,
         strategy: undefined,
-        updateValue: () => {
+        updateValue() {
           if (fieldState.strategy) {
             // Remove invalid flag, so that .checkValidity() in Vaadin Components
             // does not interfere with errors from Hilla.
@@ -137,7 +137,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
             n.value = convertFieldValue(model, fieldState.value);
           }
         },
-        markVisited: () => {
+        markVisited() {
           n.visited = true;
         },
         ref(element: HTMLElement | null) {

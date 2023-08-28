@@ -1,16 +1,4 @@
-import {
-  _getPropertyModel,
-  ArrayModel,
-  BooleanModel,
-  NumberModel,
-  type ModelConstructor,
-  ObjectModel,
-  Pattern,
-  Positive,
-  Required,
-  Size,
-  StringModel,
-} from '@hilla/form';
+import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, Required, Size, StringModel } from '@hilla/form';
 
 export interface User {
   id: number;
@@ -48,5 +36,17 @@ export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
 
   get rememberMe(): BooleanModel {
     return this[_getPropertyModel]('rememberMe', BooleanModel, [true]);
+  }
+}
+
+export interface Valued {
+  value?: string;
+}
+
+export class ValuedModel<T extends Valued = Valued> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Valued;
+
+  get value(): StringModel {
+    return this[_getPropertyModel]('value', StringModel, [true]);
   }
 }

@@ -1,176 +1,222 @@
 import { expect, use } from '@esm-bundle/chai';
-import {act, render} from '@testing-library/react';
+import { getBinderNode } from '@hilla/form';
+import { act, render, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import chaiDom from 'chai-dom';
+import chaiThings from 'chai-things';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder as _useBinder, useBinderNode } from '../src/index.js';
-import { type Login, LoginModel, type User, type UserModel } from './models.js';
+import { useBinder as _useBinder, useBinderNode as _useBinderNode } from '../src/index.js';
+import { type Login, LoginModel, type UserModel } from './models.js';
 
 use(sinonChai);
+use(chaiDom);
+use(chaiThings);
 
 describe('@hilla/react-form', () => {
-  type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
-  const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
-
-  let onSubmit: (value: Login) => Promise<Login>;
-
-  type UserFormProps = Readonly<{
-    model: UserModel;
-  }>;
-
-  function UserForm({ model: m }: UserFormProps) {
-    const { field, model } = useBinderNode(m);
-    const name = useBinderNode(m.name);
-
-    return (
-      <fieldset>
-        <input data-testid="user.name" type="text" {...field(model.name)} />
-        <output data-testid="validation.user.name">{name.invalid ? name.ownErrors.map(e => e.message).join(', ') : 'OK'}</output>
-        <input data-testid="user.password" type="text" {...field(model.password)} />
-      </fieldset>
-    );
-  }
-
-  function LoginForm() {
-    const { field, model, read, submit, value } = useBinder(LoginModel, { onSubmit });
-
-    return (
-      <>
-        <section>
-          <UserForm model={model.user} />
-          <input data-testid="rememberMe" type="checkbox" {...field(model.rememberMe)} />
-        </section>
-        <output data-testid="output.user.name">{value.user.name}</output>
-        <output data-testid="output.rememberMe">{String(value.rememberMe)}</output>
-        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <button data-testid="submit" onClick={submit}>
-          Submit
-        </button>
-      </>
-    );
-  }
-
-  beforeEach(() => {
-    onSubmit = sinon.stub();
-    (useBinder as UseBinderSpy).resetHistory();
-  });
-
   describe('useBinder', () => {
-    it('collects info from a form', async () => {
-      const user = userEvent.setup();
-      const { getByTestId } = render(<LoginForm />);
+    const useBinder = sinon.spy<typeof _useBinder<Login, LoginModel>>(_useBinder);
+    const useBinderNode = sinon.spy<typeof _useBinderNode<UserModel>>(_useBinderNode);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
-      await user.click(getByTestId('user.password'));
-      await user.keyboard('john123456');
-      await user.click(getByTestId('rememberMe'));
-      await user.click(getByTestId('submit'));
+    let user: ReturnType<(typeof userEvent)['setup']>;
+    let onSubmit: (value: Login) => Promise<Login>;
+    let result: RenderResult;
 
-      expect(onSubmit).to.have.been.calledWithMatch({
-        rememberMe: true,
-        user: {
-          name: 'johndoe',
-          password: 'john123456',
-        },
-      });
+    type UserFormProps = Readonly<{
+      model: UserModel;
+    }>;
+
+    function UserForm({ model: m }: UserFormProps) {
+      const { field, model } = useBinderNode(m);
+
+      return (
+        <fieldset>
+          <input data-testid="user.name" type="text" {...field(model.name)} />
+          <input data-testid="user.password" type="text" {...field(model.password)} />
+        </fieldset>
+      );
+    }
+
+    function LoginForm() {
+      const { field, model, submit, value } = useBinder(LoginModel, { onSubmit });
+
+      return (
+        <>
+          <section>
+            <UserForm model={model.user} />
+            <input data-testid="rememberMe" type="checkbox" {...field(model.rememberMe)} />
+          </section>
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+          <button data-testid="submit" onClick={submit}>
+            Submit
+          </button>
+        </>
+      );
+    }
+
+    beforeEach(() => {
+      user = userEvent.setup();
+      onSubmit = sinon.stub();
+      useBinder.resetHistory();
+      result = render(<LoginForm />);
     });
 
-    it('does not call onSubmit if the form is invalid', async () => {
-      const user = userEvent.setup();
-      const { getByTestId } = render(<LoginForm />);
+    describe('HTML interaction', () => {
+      it('collects info from a form', async () => {
+        const { getByTestId } = result;
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
-      await user.click(getByTestId('submit'));
+        await user.click(getByTestId('user.name'));
+        await user.keyboard('johndoe');
+        await user.click(getByTestId('user.password'));
+        await user.keyboard('john123456');
+        await user.click(getByTestId('rememberMe'));
+        await user.click(getByTestId('submit'));
 
-      expect(onSubmit).to.not.have.been.called;
-    });
-
-    it('does not call onSubmit if the form has not been touched', async () => {
-      const user = userEvent.setup();
-      const { getByTestId } = render(<LoginForm />);
-
-      await user.click(getByTestId('submit'));
-
-      expect(onSubmit).to.not.have.been.called;
-    });
-
-    it('shows empty values by default', async () => {
-      const { getByTestId } = render(<LoginForm />);
-
-      expect(getByTestId('user.name')).to.have.property('value', '');
-      expect(getByTestId('user.password')).to.have.property('value', '');
-      expect(getByTestId('rememberMe')).to.have.property('checked', false);
-    });
-
-    it('shows read values', async () => {
-      const { getByTestId } = render(<LoginForm />);
-
-      await act(() => {
-        const { read } = (useBinder as UseBinderSpy).returnValues[0];
-        read({
+        expect(onSubmit).to.have.been.calledWithMatch({
           rememberMe: true,
           user: {
-            id: 1,
             name: 'johndoe',
             password: 'john123456',
           },
         });
       });
 
-      expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
-      expect(getByTestId('user.password')).to.have.property('value', 'john123456');
-      expect(getByTestId('rememberMe')).to.have.property('checked', true);
+      it('shows empty values by default', async () => {
+        const { getByTestId } = result;
+
+        expect(getByTestId('user.name')).to.have.value('');
+        expect(getByTestId('user.password')).to.have.value('');
+        expect(getByTestId('rememberMe')).to.have.not.been.checked;
+      });
+
+      it('displays default value', async () => {
+        const { value } = useBinder.returnValues[0];
+
+        expect(value.user.name).to.equal('');
+        expect(value.rememberMe).to.be.undefined;
+      });
+
+      it('updates displayed value', async () => {
+        const { getByTestId } = result;
+
+        await user.click(getByTestId('user.name'));
+        await user.keyboard('johndoe');
+        await user.click(getByTestId('rememberMe'));
+
+        // Select returned value for the last call
+        const { value } = useBinder.returnValues.at(-1)!;
+
+        expect(value.user.name).to.equal('johndoe');
+        expect(value.rememberMe).to.be.true;
+      });
+
+      describe('validation', () => {
+        it('does not call onSubmit if the form is invalid', async () => {
+          const { getByTestId } = result;
+
+          await user.click(getByTestId('user.name'));
+          await user.keyboard('johndoe');
+          await user.click(getByTestId('submit'));
+
+          expect(onSubmit).to.have.not.been.called;
+        });
+
+        it('does not call onSubmit if the form has not been touched', async () => {
+          const { getByTestId } = result;
+
+          await user.click(getByTestId('submit'));
+
+          expect(onSubmit).to.have.not.been.called;
+        });
+
+        it('shows validation errors', async () => {
+          function getNameFieldErrors() {
+            const { model } = useBinderNode.returnValues.at(-1)!;
+            const { ownErrors, invalid } = getBinderNode(model.name);
+            return invalid ? ownErrors.map((e) => e.message) : null;
+          }
+
+          const { getByTestId } = result;
+
+          await user.click(getByTestId('user.name'));
+          await user.keyboard('Very lengthy name');
+          await user.click(getByTestId('user.password'));
+
+          expect(getNameFieldErrors()).to.contain.something.that.have.string('size');
+
+          // clicking around should not hide the message
+          await user.click(getByTestId('user.name'));
+          await user.click(getByTestId('user.password'));
+
+          expect(getNameFieldErrors()).to.contain.something.that.have.string('size');
+
+          // clearing should show a required validator message
+          await user.click(getByTestId('user.name'));
+          await user.clear(getByTestId('user.name'));
+          await user.click(getByTestId('user.password'));
+
+          expect(getNameFieldErrors()).to.contain.something.that.have.string('invalid');
+
+          // fix
+          await user.click(getByTestId('user.name'));
+          await user.keyboard('jane');
+
+          expect(getNameFieldErrors()).to.be.null;
+        });
+      });
     });
 
-    it('dispays default value', async () => {
-      const { getByTestId } = render(<LoginForm />);
+    describe('API', () => {
+      it('shows read values', async () => {
+        const { getByTestId } = result;
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', '')
-      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
-    });
+        await act(async () => {
+          const { read } = useBinder.returnValues[0];
+          read({
+            rememberMe: true,
+            user: {
+              id: 1,
+              name: 'johndoe',
+              password: 'john123456',
+            },
+          });
+        });
 
-    it('updates displayed value', async () => {
-      const user = userEvent.setup();
-      const { getByTestId } = render(<LoginForm />);
+        expect(getByTestId('user.name')).to.have.value('johndoe');
+        expect(getByTestId('user.password')).to.have.value('john123456');
+        expect(getByTestId('rememberMe')).to.have.been.checked;
+      });
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
-      await user.click(getByTestId('rememberMe'));
-      
-      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe')
-      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
-    });
+      it('sets the value programmatically', async () => {
+        const { getByTestId } = result;
 
-    it('shows validation errors', async () => {
-      const user = userEvent.setup();
-      const { getByTestId } = render(<LoginForm />);
+        await act(async () => {
+          const { setValue } = useBinder.returnValues[0];
+          setValue({
+            rememberMe: true,
+            user: {
+              id: 1,
+              name: 'johndoe',
+              password: 'john123456',
+            },
+          });
+        });
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('Very lengthy name');
-      await user.click(getByTestId('user.password'))
+        expect(getByTestId('user.name')).to.have.value('johndoe');
+        expect(getByTestId('user.password')).to.have.value('john123456');
+        expect(getByTestId('rememberMe')).to.have.been.checked;
+      });
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('size');
+      it('sets the "visited" flag programmatically', async () => {
+        const { getByTestId } = result;
 
-      // clicking around should not hide the message
-      await user.click(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
+        await act(async () => {
+          const { setVisited } = useBinder.returnValues[0];
+          setVisited(true);
+        });
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('size');
-
-      // clearing should show a required validator message
-      await user.click(getByTestId('user.name'));
-      await user.clear(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
-
-      expect(getByTestId('validation.user.name').textContent).to.have.string('invalid');
-
-      // fix
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('jane');
-
-      expect(getByTestId('validation.user.name').textContent).to.have.string('OK');
+        expect(getByTestId('validation.user.name')).to.contain.text('invalid');
+      });
     });
   });
 });
