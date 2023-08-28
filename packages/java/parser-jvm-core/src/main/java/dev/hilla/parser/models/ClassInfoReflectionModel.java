@@ -197,7 +197,6 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return Arrays.stream(origin.getDeclaredFields()).map(FieldInfoModel::of)
-                .sorted(FieldInfoModel.FIELD_ORDER)
                 .collect(Collectors.toList());
     }
 

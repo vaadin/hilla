@@ -27,8 +27,6 @@ import jakarta.annotation.Nonnull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private static final Comparator<JacksonPropertyModel> sorter = Comparator
-            .comparing(JacksonPropertyModel::getName);
     private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
             .build().getSerializationConfig();
 
@@ -87,7 +85,7 @@ public final class PropertyPlugin
                 .introspect(serializationConfig.constructType((Class<?>) cls));
 
         var processor = new PropertyProcessor(description);
-        return processor.stream().sorted(sorter);
+        return processor.stream();
     }
 
     private JacksonObjectMapperFactory loadJacksonObjectMapperFactory() {
