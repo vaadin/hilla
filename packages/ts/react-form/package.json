@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-form",
-  "version": "2.2.0-alpha6",
+  "version": "2.2.0-alpha8",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",

@@ -39,18 +39,20 @@ export default class GeneratorIO {
     await mkdir(this.#outputDir, { recursive: true });
     const indexFile = resolve(this.#outputDir, this.constructor.INDEX_FILENAME);
 
-    const deletedFiles = new Set<string>();
+    let deletedFiles: Set<string> | undefined;
 
     try {
       const indexFileContents = await this.read(indexFile);
       const filesToDelete = indexFileContents.split('\n').filter((n) => n.length);
 
-      await Promise.all(
-        filesToDelete.map(async (filename) => {
-          this.#logger.global.debug(`Deleting file ${filename}.`);
-          await rm(join(this.#outputDir, filename));
-          deletedFiles.add(filename);
-        }),
+      deletedFiles = new Set(
+        await Promise.all(
+          filesToDelete.map(async (filename) => {
+            this.#logger.global.debug(`Deleting file ${filename}.`);
+            await rm(join(this.#outputDir, filename));
+            return filename;
+          }),
+        ),
       );
 
       this.#logger.global.debug(`Deleting index file ${indexFile}.`);
@@ -62,7 +64,7 @@ export default class GeneratorIO {
       }
     }
 
-    return deletedFiles;
+    return deletedFiles ?? new Set();
   }
 
   async createFileIndex(filenames: string[]): Promise<void> {
