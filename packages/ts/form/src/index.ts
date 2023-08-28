@@ -16,5 +16,5 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/form',
-  version: /* updated-by-script */ '2.2.0-alpha8',
+  version: /* updated-by-script */ '2.2.0-alpha9',
 });
