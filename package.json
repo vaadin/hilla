@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
-    "build": "lerna run build",
+    "build": "sh ./scripts/prepare.sh && lerna run build",
     "lint": "lerna run lint --parallel",
     "test": "lerna run test --parallel",
     "test:coverage": "lerna run test:coverage --parallel",
@@ -61,6 +61,8 @@
     "tsx": "^3.12.5",
     "type-fest": "^4.1.0",
     "typescript": "^5.1.6",
-    "vite": "^4.4.8"
+    "vite": "^4.4.8",
+    "compare-versions": "^3.4.0",
+    "sync-request": "^6.0.0"
   }
 }
