@@ -4,7 +4,7 @@
 version=`mvn -N help:evaluate -Dexpression=project.version -q -DforceStdout | grep "^[0-9]"`
 
 # download needed files from vaadin/platform
-url=https://raw.githubusercontent.com/vaadin/platform/main/
+url=https://raw.githubusercontent.com/vaadin/platform/24.1/
 results=./scripts/generator/results/
 src=./scripts/generator/src/
 mkdir -p $results
@@ -29,8 +29,8 @@ cp scripts/generator/results/hilla-react-versions.json packages/java/hilla-react
 
 echo "Copied the theme file from flow-components to hilla and hilla-react"
 # download the file from flow-components
-lumoFile="https://raw.githubusercontent.com/vaadin/flow-components/main/vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java"
-materialFile="https://raw.githubusercontent.com/vaadin/flow-components/main/vaadin-material-theme-flow-parent/vaadin-material-theme-flow/src/main/java/com/vaadin/flow/theme/material/Material.java"
+lumoFile="https://raw.githubusercontent.com/vaadin/flow-components/24.1/vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java"
+materialFile="https://raw.githubusercontent.com/vaadin/flow-components/24.1/vaadin-material-theme-flow-parent/vaadin-material-theme-flow/src/main/java/com/vaadin/flow/theme/material/Material.java"
 curl -l -s $lumoFile > ./scripts/generator/results/Lumo.java
 curl -l -s $materialFile > ./scripts/generator/results/Material.java
 
