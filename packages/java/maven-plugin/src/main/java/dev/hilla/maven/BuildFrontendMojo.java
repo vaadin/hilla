@@ -9,10 +9,4 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Execute(goal = "configure")
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
-
-    @Override
-    protected boolean cleanFrontendFiles() {
-        return false;
-    }
-
 }
