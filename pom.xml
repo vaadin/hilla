@@ -22,6 +22,12 @@
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
     <module>packages/java/plugin-base</module>
+    <module>packages/java/hilla</module>
+    <module>packages/java/hilla-bom</module>
+    <module>packages/java/hilla-dev</module>
+    <module>packages/java/hilla-react</module>
+    <module>packages/java/hilla-spring-boot-starter</module>
+    <module>packages/java/hilla-react-spring-boot-starter</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
@@ -65,6 +71,7 @@
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.161</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
+    <jna.version>5.13.0</jna.version>
     <swagger.core.version>2.2.15</swagger.core.version>
     <swagger.models.version>2.2.15</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
