@@ -41,11 +41,22 @@ if (!fs.existsSync(resultsDir)) {
     fs.mkdirSync(resultsDir);
 }
 
+const releaseNotesTemplateFileName = getTemplateFilePath('template-release-note.md');
+const releaseNotesResultFileName = getResultsFilePath('release-note.md');
+const releaseNotesMaintenanceTemplateFileName = getTemplateFilePath('template-release-note-maintenance.md');
+const releaseNotesMaintenanceResultFileName = getResultsFilePath('release-note-maintenance.md');
+const releaseNotesPrereleaseTemplateFileName = getTemplateFilePath('template-release-note-prerelease.md');
+const releaseNotesPrereleaseResultFileName = getResultsFilePath('release-note-prerelease.md');
+
 writer.writeSeparateJson(versions.bundles, hillaJsonTemplateFileName, hillaJsonResultFileName, "bundles");
 writer.writeSeparateJson(versions.core, hillaJsonTemplateFileName, hillaJsonResultFileName, "core");
 writer.writeSeparateJson(versions.vaadin, hillaJsonTemplateFileName, hillaJsonResultFileName, "vaadin");
 writer.writeSeparateJson(versions.bundles, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, "bundles");
 writer.writeSeparateJson(versions.react, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, "react");
+
+writer.writeReleaseNotes(versions, releaseNotesTemplateFileName, releaseNotesResultFileName);
+writer.writeReleaseNotes(versions, releaseNotesMaintenanceTemplateFileName, releaseNotesMaintenanceResultFileName);
+writer.writeReleaseNotes(versions, releaseNotesPrereleaseTemplateFileName, releaseNotesPrereleaseResultFileName);
 
 const hilla = process.env.HILLA || platform.replace(/^24/, 2);
 versions.core.hilla = {javaVersion: hilla};
