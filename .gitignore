@@ -45,3 +45,6 @@ packages/java/hilla-react/src
 
 # npm pack
 packages/ts/*/*.tgz
+
+# temporary scripts from platform for preparations
+scripts/generator/src/
