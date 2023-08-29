@@ -13,8 +13,7 @@
   ],
   "scripts": {
     "check": "concurrently npm:lint npm:typecheck",
-    "prepare": "sh ./scripts/prepare.sh",
-    "build": "lerna run build",
+    "build": "sh ./scripts/prepare.sh && lerna run build",
     "lint": "lerna run lint --parallel",
     "test": "lerna run test --parallel",
     "test:coverage": "lerna run test:coverage --parallel",
