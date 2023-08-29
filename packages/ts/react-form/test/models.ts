@@ -26,7 +26,7 @@ export class UserModel<T extends User = User> extends ObjectModel<T> {
   }
 
   get name(): StringModel {
-    return this[_getPropertyModel]('name', StringModel, [false, new Required(), new Size({ min: 4 })]);
+    return this[_getPropertyModel]('name', StringModel, [false, new Required(), new Size({ max: 10 })]);
   }
 
   get password(): StringModel {

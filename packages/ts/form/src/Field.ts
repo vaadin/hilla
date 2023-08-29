@@ -55,7 +55,10 @@ interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
   strategy: FieldStrategy<T>;
 }
 
-export type FieldStrategy<T = any> = Field<T> & FieldConstraintValidation;
+export type FieldStrategy<T = any> = Field<T> &
+  FieldConstraintValidation & {
+    removeEventListeners(): void;
+  };
 
 export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> = FieldElement<T>>
   implements FieldStrategy<T>
@@ -127,6 +130,8 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
     }
   }
 
+  removeEventListeners(): void {}
+
   private _detectValidityError(): Readonly<Partial<ValidityState>> {
     if (!('inputElement' in this.element)) {
       // Not a Vaadin component field
@@ -153,13 +158,12 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   E
 > {
   private _invalid = false;
+  private readonly _boundOnValidated = this._onValidated.bind(this);
 
   constructor(element: E, model?: AbstractModel<T>) {
     super(element, model);
 
-    // Override built-in changes of the `invalid` flag in Vaadin components
-    // to keep the `invalid` property state of the web component in sync.
-    (element as EventTarget).addEventListener('validated', this._overrideVaadinInvalidChange.bind(this));
+    (element as EventTarget).addEventListener('validated', this._boundOnValidated);
   }
 
   set required(value: boolean) {
@@ -175,11 +179,17 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
     this.element.errorMessage = value;
   }
 
-  private _overrideVaadinInvalidChange(e: Event): void {
+  override removeEventListeners(): void {
+    this.element.removeEventListener('validated', this._boundOnValidated);
+  }
+
+  private _onValidated(e: Event): void {
     if (!(e instanceof CustomEvent) || typeof e.detail !== 'object') {
       return;
     }
 
+    // Override built-in changes of the `invalid` flag in Vaadin components
+    // to keep the `invalid` property state of the web component in sync.
     const invalid = !(e.detail satisfies Partial<ValidityState> as Partial<ValidityState>).valid;
     if (this._invalid !== invalid) {
       this.element.invalid = this._invalid;

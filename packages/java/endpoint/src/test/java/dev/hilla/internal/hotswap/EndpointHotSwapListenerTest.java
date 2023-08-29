@@ -1,72 +1,46 @@
 package dev.hilla.internal.hotswap;
 
-import com.vaadin.flow.di.Lookup;
-import dev.hilla.*;
-import dev.hilla.auth.CsrfChecker;
+import java.io.IOException;
+import java.nio.file.Path;
+
+import dev.hilla.EndpointCodeGenerator;
+import dev.hilla.EndpointController;
+import dev.hilla.EndpointControllerConfiguration;
+import dev.hilla.EndpointProperties;
+import dev.hilla.ServletContextTestSetup;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
 import dev.hilla.engine.ParserProcessor;
-import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
-import jakarta.servlet.ServletContext;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.nio.file.Path;
-
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { ServletContextTestSetup.class,
+        EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
+        JacksonProperties.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+        EndpointController.class })
 public class EndpointHotSwapListenerTest {
 
-    private EndpointHotSwapService spyEndpointHotSwapService;
-
-    private EndpointController spyEndpointController;
-
-    @Before
-    public void init() {
-
-        spyEndpointHotSwapService = Mockito.spy(EndpointHotSwapService.class);
-
-        spyEndpointController = createVaadinController();
-    }
-
-    private <T> EndpointController createVaadinController() {
-        ServletContext servletContext = Mockito.mock(ServletContext.class);
-        Lookup lookup = Mockito.mock(Lookup.class);
-        Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
-                .thenReturn(lookup);
-
-        JacksonObjectMapperFactory endpointMapperFactory = new JacksonObjectMapperFactory.Json();
-
-        CsrfChecker csrfChecker = new CsrfChecker(servletContext);
-
-        EndpointNameChecker endpointNameChecker = mock(
-                EndpointNameChecker.class);
-
-        ExplicitNullableTypeChecker explicitNullableTypeChecker = mock(
-                ExplicitNullableTypeChecker.class);
-
-        ApplicationContext mockApplicationContext = mock(
-                ApplicationContext.class);
-        EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
-
-        EndpointInvoker invoker = Mockito
-                .spy(new EndpointInvoker(mockApplicationContext,
-                        endpointMapperFactory, explicitNullableTypeChecker,
-                        mock(ServletContext.class), registry));
-
-        EndpointController connectController = Mockito
-                .spy(new EndpointController(mockApplicationContext, registry,
-                        invoker, csrfChecker));
-        connectController.registerEndpoints();
-        return connectController;
-    }
+    @MockBean
+    private EndpointHotSwapService endpointHotSwapService;
+    @MockBean
+    private EndpointCodeGenerator endpointCodeGenerator;
 
     @Test
-    public void endpointChangedIsCalled_endpointControllerRegisterEndpointsIsCalled() {
-
+    public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled()
+            throws IOException {
         try (var engineConfigurationMockedStatic = Mockito
                 .mockStatic(EngineConfiguration.class);
                 var processorMockedConstruction = mockConstruction(
@@ -78,14 +52,15 @@ public class EndpointHotSwapListenerTest {
                     () -> EngineConfiguration.loadDirectory(Mockito.any()))
                     .thenReturn(engineConfiguration);
 
-            var listener = new EndpointHotSwapListener(spyEndpointController,
-                    spyEndpointHotSwapService);
+            var listener = new EndpointHotSwapListener(endpointHotSwapService,
+                    endpointCodeGenerator);
 
+            Mockito.clearInvocations(endpointCodeGenerator);
             listener.endpointChanged(new HotSwapListener.EndpointChangedEvent(
                     Path.of("test-project/target"), null));
 
-            Mockito.verify(spyEndpointController, Mockito.atLeastOnce())
-                    .registerEndpoints();
+            Mockito.verify(endpointCodeGenerator, Mockito.atLeastOnce())
+                    .update();
         }
     }
 

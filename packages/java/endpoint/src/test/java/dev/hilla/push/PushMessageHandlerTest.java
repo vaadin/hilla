@@ -10,26 +10,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import jakarta.servlet.ServletContext;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.server.VaadinServletContext;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -47,12 +29,27 @@ import dev.hilla.push.messages.toclient.ClientMessageComplete;
 import dev.hilla.push.messages.toclient.ClientMessageError;
 import dev.hilla.push.messages.toclient.ClientMessageUpdate;
 import net.jcip.annotations.NotThreadSafe;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class })
+        PushMessageHandler.class, ObjectMapper.class,
+        EndpointController.class })
 @ContextConfiguration(classes = EndpointControllerConfiguration.class)
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "dev.hilla.FeatureFlagCondition.alwaysEnable=true")
@@ -72,9 +69,6 @@ public class PushMessageHandlerTest {
 
     @MockBean
     private EndpointInvoker endpointInvoker;
-
-    @Autowired
-    private ServletContext servletContext;
 
     @Autowired
     private ObjectMapper objectMapper;

@@ -37,6 +37,14 @@ packages/ts/*/*.js.map
 packages/ts/*/.coverage
 packages/ts/*/.vite
 !packages/ts/*/.lintstagedrc.js
+scripts/generator/results/
+packages/java/hilla/*.json
+packages/java/hilla-react/*.json
+packages/java/hilla/src/
+packages/java/hilla-react/src
 
 # npm pack
 packages/ts/*/*.tgz
+
+# temporary scripts from platform for preparations
+scripts/generator/src/
