@@ -3,15 +3,20 @@
 # use platform version  from the root pom.xml
 version=`mvn -N help:evaluate -Dexpression=project.version -q -DforceStdout | grep "^[0-9]"`
 
-snapshot=$1
-
-# install npm deps needed for the generator node script
-[ ! -d node_modules ] && npm install
-
-# download version.json file from vaadin/platform
-mkdir -p ./scripts/generator/results/
-curl -l -s "https://raw.githubusercontent.com/vaadin/platform/main/versions.json" > ./scripts/generator/results/versions.json
-perl -pi -e 's/.*{{version}}.*\n//g' ./scripts/generator/results/versions.json
+# download needed files from vaadin/platform
+url=https://raw.githubusercontent.com/vaadin/platform/main/
+results=./scripts/generator/results/
+src=./scripts/generator/src/
+mkdir -p $results
+mkdir -p $src
+# Take versions.json
+curl -L -s "${url}/versions.json" > ${results}/versions.json
+perl -pi -e 's/.*{{version}}.*\n//g' ${results}/versions.json
+# Take scripts (this allows us not maintain the same scripts twice)
+for i in creator replacer transformer writer
+do
+ [ ! -f "${src}/${i}.js" ] && curl -L -s "${url}/${src}/${i}.js" > ${src}/${i}.js
+done
 
 # run the generator
 cmd="node scripts/generator/generate.js $version scripts/generator/results/versions.json"

@@ -25,6 +25,7 @@ const hillaReactJsonTemplateFileName = getTemplateFilePath('template-hilla-react
 const hillaReactJsonResultFileName = getResultsFilePath('hilla-react-versions.json');
 
 const versions = transformer.transformVersions(inputVersions, hillaVersion, false);
+versions.platform = hillaVersion;
 
 if (!fs.existsSync(resultsDir)) {
     fs.mkdirSync(resultsDir);
