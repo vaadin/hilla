@@ -56,8 +56,6 @@ public final class ParserProcessor {
 
         var openAPI = parser.execute();
 
-        logger.debug("Saving OpenAPI file to " + openAPIFile);
-
         return new JsonPrinter().pretty().writeAsString(openAPI);
     }
 
