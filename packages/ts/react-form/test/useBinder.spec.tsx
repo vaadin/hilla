@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { getBinderNode } from '@hilla/form';
+import { Pattern, getBinderNode, type Validator, type ValidationCallback } from '@hilla/form';
 import { act, render, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
@@ -28,11 +28,21 @@ describe('@hilla/react-form', () => {
 
     function UserForm({ model: m }: UserFormProps) {
       const { field, model } = useBinderNode(m);
+      const name = useBinderNode(model.name);
+      const password = useBinderNode(model.password);
 
       return (
         <fieldset>
           <input data-testid="user.name" type="text" {...field(model.name)} />
+          {name.invalid && (
+            <output data-testid="user.name.validation">{name.ownErrors.map((e) => e.message).join(', ')}</output>
+          )}
           <input data-testid="user.password" type="text" {...field(model.password)} />
+          {password.invalid && (
+            <output data-testid="user.password.validation">
+              {password.ownErrors.map((e) => e.message).join(', ')}
+            </output>
+          )}
         </fieldset>
       );
     }
@@ -216,6 +226,29 @@ describe('@hilla/react-form', () => {
         });
 
         expect(getByTestId('validation.user.name')).to.contain.text('invalid');
+      });
+
+      it('adds a new validator', async () => {
+        class LoginValidator implements Validator<Login> {
+          message = 'invalid';
+          #nested = new Pattern(/(?!12345)/u);
+
+          validate({ user: { password } }: Login): boolean {
+            return this.#nested.validate(password);
+          }
+        }
+
+        const { getByTestId } = result;
+
+        await act(async () => {
+          const { addValidator } = useBinder.returnValues[0];
+          addValidator(new LoginValidator());
+        });
+
+        await user.click(getByTestId('user.password'));
+        await user.keyboard('12345');
+
+        expect().to.contain.text('invalid');
       });
     });
   });

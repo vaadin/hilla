@@ -38,15 +38,3 @@ export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
     return this[_getPropertyModel]('rememberMe', BooleanModel, [true]);
   }
 }
-
-export interface Valued {
-  value?: string;
-}
-
-export class ValuedModel<T extends Valued = Valued> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Valued;
-
-  get value(): StringModel {
-    return this[_getPropertyModel]('value', StringModel, [true]);
-  }
-}
