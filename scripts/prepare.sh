@@ -6,7 +6,7 @@ version=`mvn -N help:evaluate -Dexpression=project.version -q -DforceStdout | gr
 branch=24.1
 
 # download needed files from vaadin/platform
-url=https://raw.githubusercontent.com/vaadin/
+url=https://raw.githubusercontent.com/vaadin
 results=./scripts/generator/results/
 src=./scripts/generator/src/
 mkdir -p $results
