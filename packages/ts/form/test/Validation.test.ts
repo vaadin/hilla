@@ -845,5 +845,44 @@ describe('@hilla/form', () => {
         expect(error?.message ?? '').to.include('[value: 123]');
       });
     });
+
+    describe('with faulty validator', () => {
+      let errorSpy: sinon.SinonSpy;
+      beforeEach(() => {
+        errorSpy = sinon.spy(console, 'error');
+      });
+      afterEach(() => {
+        errorSpy.restore();
+      });
+
+      class BrokenValidator implements Validator<string> {
+        message = 'Broken validator implementation';
+
+        validate(): boolean {
+          throw new Error('Broken validator implementation');
+        }
+      }
+
+      it('should complete validation if a validator unexpectedly throws an error', async () => {
+        binder.addValidator(new BrokenValidator());
+        const errors = await binder.validate();
+        expect(errors).to.have.lengthOf.at.least(1);
+      });
+
+      it('should not report thrown exception as validation error', async () => {
+        let errors = await binder.validate();
+        const expectedErrors = errors.length;
+
+        binder.addValidator(new BrokenValidator());
+        errors = await binder.validate();
+        expect(errors).to.have.lengthOf(expectedErrors);
+      });
+
+      it('should log error if a validator unexpectedly throws an error', async () => {
+        binder.for(binder.model.notes).addValidator(new BrokenValidator());
+        await binder.validate();
+        expect(errorSpy).to.be.calledOnceWith('notes - Validator BrokenValidator threw an error:');
+      });
+    });
   });
 });
