@@ -182,7 +182,6 @@ describe('@hilla/react-form', () => {
     describe('configuration update', () => {
       it('should use updated onSubmit reference', async () => {
         // Initial render
-        const user = userEvent.setup();
         const { getByTestId, rerender } = render(<LoginForm />);
 
         // Update onSubmit reference, rerender, fill form and submit
