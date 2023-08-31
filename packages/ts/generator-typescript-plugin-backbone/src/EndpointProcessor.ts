@@ -68,7 +68,7 @@ export default class EndpointProcessor {
     method: string,
     pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>,
   ): Promise<readonly Statement[]> {
-    this.#owner.logger.debug(`Processing endpoint method: ${this.#name}.${method}`);
+    this.#owner.logger.info(`Processing endpoint method: ${this.#name}.${method}`);
 
     return (
       await Promise.all(
