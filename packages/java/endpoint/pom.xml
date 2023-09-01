@@ -5,11 +5,11 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.2.0.beta1</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <artifactId>endpoint</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2.0.beta1</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 

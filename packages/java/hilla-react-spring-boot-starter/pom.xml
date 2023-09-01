@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.2.0.beta1</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <artifactId>hilla-react-spring-boot-starter</artifactId>
     <name>Hilla React Spring Boot Starter</name>
     <description>Spring Boot Starter for Hilla applications using React.</description>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2.0.beta1</version>
 
     <properties>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>
