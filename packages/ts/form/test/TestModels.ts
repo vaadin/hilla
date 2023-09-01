@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-shadow */
 // API to test
 import {
   _enum,
@@ -6,7 +6,6 @@ import {
   ArrayModel,
   BooleanModel,
   EnumModel,
-  type ModelConstructor,
   NotBlank,
   NumberModel,
   ObjectModel,
@@ -24,7 +23,7 @@ export class IdEntityModel<T extends IdEntity = IdEntity> extends ObjectModel<T>
   declare static createEmptyValue: () => IdEntity;
 
   get idString(): StringModel {
-    return this[_getPropertyModel]('idString', StringModel, [false]);
+    return this[_getPropertyModel]('idString', (parent, key) => new StringModel(parent, key, false));
   }
 }
 
@@ -36,16 +35,16 @@ export interface Product extends IdEntity {
 export class ProductModel<T extends Product = Product> extends IdEntityModel<T> {
   declare static createEmptyValue: () => Product;
 
-  get description() {
-    return this[_getPropertyModel]('description', StringModel, [false, new Required()]);
+  get description(): StringModel {
+    return this[_getPropertyModel]('description', (parent, key) => new StringModel(parent, key, false, new Required()));
   }
 
-  get price() {
-    return this[_getPropertyModel]('price', NumberModel, [false, new Positive()]);
+  get price(): NumberModel {
+    return this[_getPropertyModel]('price', (parent, key) => new NumberModel(parent, key, false, new Positive()));
   }
 
-  get isInStock() {
-    return this[_getPropertyModel]('isInStock', BooleanModel, [false]);
+  get isInStock(): BooleanModel {
+    return this[_getPropertyModel]('isInStock', (parent, key) => new BooleanModel(parent, key, false));
   }
 }
 
@@ -56,12 +55,18 @@ export interface Customer extends IdEntity {
 export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<T> {
   declare static createEmptyValue: () => Customer;
 
-  get fullName() {
-    return this[_getPropertyModel]('fullName', StringModel, [false, new Size({ min: 4 }), new Required()]);
+  get fullName(): StringModel {
+    return this[_getPropertyModel](
+      'fullName',
+      (parent, key) => new StringModel(parent, key, false, new Size({ min: 4 }), new Required()),
+    );
   }
 
-  get nickName() {
-    return this[_getPropertyModel]('nickName', StringModel, [false, new Pattern('....*')]);
+  get nickName(): StringModel {
+    return this[_getPropertyModel](
+      'nickName',
+      (parent, key) => new StringModel(parent, key, false, new Pattern('....*')),
+    );
   }
 }
 
@@ -76,27 +81,33 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
   declare static createEmptyValue: () => Order;
 
   get customer(): CustomerModel {
-    return this[_getPropertyModel]('customer', CustomerModel, [false, new Required()]);
+    return this[_getPropertyModel]('customer', (parent, key) => new CustomerModel(parent, key, false, new Required()));
   }
 
   get notes(): StringModel {
-    return this[_getPropertyModel]('notes', StringModel, [false, new Required()]);
+    return this[_getPropertyModel]('notes', (parent, key) => new StringModel(parent, key, false, new Required()));
   }
 
   get priority(): NumberModel {
-    return this[_getPropertyModel]('priority', NumberModel, [false]);
+    return this[_getPropertyModel]('priority', (parent, key) => new NumberModel(parent, key, false));
   }
 
-  get products(): ArrayModel<Product, ProductModel> {
+  get products(): ArrayModel<ProductModel> {
     return this[_getPropertyModel](
       'products',
-      ArrayModel as ModelConstructor<readonly Product[], ArrayModel<Product, ProductModel>>,
-      [false, ProductModel, [false]],
+      (parent, key) =>
+        new ArrayModel(
+          parent,
+          key,
+          false,
+          (p, index) => new ProductModel(p, index, false),
+          ProductModel.createEmptyValue,
+        ),
     );
   }
 
   get total(): NumberModel {
-    return this[_getPropertyModel]('total', NumberModel, [true]);
+    return this[_getPropertyModel]('total', (parent, key) => new NumberModel(parent, key, true));
   }
 }
 
@@ -105,81 +116,117 @@ export interface TestEntity {
   fieldNumber: number;
   fieldBoolean: boolean;
   fieldObject: Record<string, unknown>;
-  fieldArrayString: string[];
-  fieldArrayModel: IdEntity[];
-  fieldMatrixNumber: number[][];
+  fieldArrayString: readonly string[];
+  fieldArrayModel: readonly IdEntity[];
+  fieldMatrixNumber: ReadonlyArray<readonly number[]>;
   fieldEnum: RecordStatus;
   fieldAny: any;
 }
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
   declare static createEmptyValue: () => TestEntity;
 
-  get fieldString() {
-    return this[_getPropertyModel]('fieldString', StringModel, [false]);
+  get fieldString(): StringModel {
+    return this[_getPropertyModel]('fieldString', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get fieldNumber() {
-    return this[_getPropertyModel]('fieldNumber', NumberModel, [false]);
+  get fieldNumber(): NumberModel {
+    return this[_getPropertyModel]('fieldNumber', (parent, key) => new NumberModel(parent, key, false));
   }
 
-  get fieldBoolean() {
-    return this[_getPropertyModel]('fieldBoolean', BooleanModel, [false]);
+  get fieldBoolean(): BooleanModel {
+    return this[_getPropertyModel]('fieldBoolean', (parent, key) => new BooleanModel(parent, key, false));
   }
 
   get fieldObject(): ObjectModel<Record<string, unknown>> {
-    return this[_getPropertyModel]('fieldObject', ObjectModel, [false]) as ObjectModel<Record<string, unknown>>;
+    return this[_getPropertyModel]('fieldObject', (parent, key) => new ObjectModel(parent, key, false));
   }
 
-  get fieldArrayString() {
-    return this[_getPropertyModel]('fieldArrayString', ArrayModel, [false, StringModel, [false]]) as ArrayModel<
-      string,
-      StringModel
-    >;
+  get fieldArrayString(): ArrayModel<StringModel> {
+    return this[_getPropertyModel](
+      'fieldArrayString',
+      (parent, key) =>
+        new ArrayModel(
+          parent,
+          key,
+          false,
+          (parent, index) => new StringModel(parent, index, false),
+          StringModel.createEmptyValue,
+        ),
+    );
   }
 
-  get fieldArrayModel() {
-    return this[_getPropertyModel]('fieldArrayModel', ArrayModel, [false, IdEntityModel, [false]]) as ArrayModel<
-      IdEntity,
-      IdEntityModel
-    >;
+  get fieldArrayModel(): ArrayModel<IdEntityModel> {
+    return this[_getPropertyModel](
+      'fieldArrayModel',
+      (parent, key) =>
+        new ArrayModel(
+          parent,
+          key,
+          false,
+          (parent, index) => new IdEntityModel(parent, index, false),
+          IdEntityModel.createEmptyValue,
+        ),
+    );
   }
 
-  get fieldMatrixNumber() {
-    return this[_getPropertyModel]('fieldMatrixNumber', ArrayModel, [
-      false,
-      ArrayModel,
-      [false, NumberModel, [false, new Positive()]],
-    ]) as ArrayModel<readonly number[], ArrayModel<number, NumberModel>>;
+  get fieldMatrixNumber(): ArrayModel<ArrayModel<NumberModel>> {
+    return this[_getPropertyModel](
+      'fieldMatrixNumber',
+      (parent, key) =>
+        new ArrayModel(
+          parent,
+          key,
+          false,
+          (parent, index) =>
+            new ArrayModel(
+              parent,
+              index,
+              false,
+              (parent, index) => new NumberModel(parent, index, false, new Positive()),
+              NumberModel.createEmptyValue,
+            ),
+          ArrayModel.createEmptyValue,
+        ),
+    );
   }
 
-  get fieldEnum() {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    return this[_getPropertyModel]('fieldEnum', RecordStatusModel, [false]);
+  get fieldEnum(): RecordStatusModel {
+    return this[_getPropertyModel]('fieldEnum', (parent, key) => new RecordStatusModel(parent, key, false));
   }
 
-  get fieldAny() {
-    return this[_getPropertyModel]('fieldAny', ObjectModel, [false]) as ObjectModel<any>;
+  get fieldAny(): ObjectModel {
+    return this[_getPropertyModel]('fieldAny', (parent, key) => new ObjectModel(parent, key, false));
   }
 }
 
 export interface Employee extends IdEntity {
   fullName: string;
   supervisor?: Employee;
-  colleagues?: Employee[];
+  colleagues?: readonly Employee[];
 }
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
   declare static createEmptyValue: () => Employee;
 
-  get fullName() {
-    return this[_getPropertyModel]('fullName', StringModel, [false]);
+  get fullName(): StringModel {
+    return this[_getPropertyModel]('fullName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get supervisor(): EmployeeModel {
-    return this[_getPropertyModel]('supervisor', EmployeeModel, [true]);
+    return this[_getPropertyModel]('supervisor', (parent, key) => new EmployeeModel(parent, key, true));
   }
 
-  get colleagues() {
-    return this[_getPropertyModel]('colleagues', ArrayModel, [true, EmployeeModel, [false]]);
+  get colleagues(): ArrayModel<EmployeeModel> {
+    return this[_getPropertyModel](
+      'colleagues',
+      (parent, key) =>
+        new ArrayModel(
+          parent,
+          key,
+          true,
+          (parent, index) => new EmployeeModel(parent, index, false),
+          EmployeeModel.createEmptyValue,
+        ),
+    );
   }
 }
 
@@ -192,12 +239,18 @@ export class TestMessageInterpolationModel<
 > extends ObjectModel<T> {
   declare static createEmptyValue: () => TestMessageInterpolationEntity;
 
-  get stringMinSize() {
-    return this[_getPropertyModel]('stringMinSize', StringModel, [false, new Size({ min: 4 }), new Required()]);
+  get stringMinSize(): StringModel {
+    return this[_getPropertyModel](
+      'stringMinSize',
+      (parent, key) => new StringModel(parent, key, false, new Size({ min: 4 }), new Required()),
+    );
   }
 
-  get stringNotBlank() {
-    return this[_getPropertyModel]('stringNotBlank', StringModel, [false, new NotBlank(), new Required()]);
+  get stringNotBlank(): StringModel {
+    return this[_getPropertyModel](
+      'stringNotBlank',
+      (parent, key) => new StringModel(parent, key, false, new NotBlank(), new Required()),
+    );
   }
 }
 
@@ -218,7 +271,7 @@ export interface WithPossibleCharList {
 export class WithPossibleCharListModel extends ObjectModel<WithPossibleCharList> {
   declare static createEmptyValue: () => WithPossibleCharList;
 
-  get charList() {
-    return this[_getPropertyModel]('charList', StringModel, [true]);
+  get charList(): StringModel {
+    return this[_getPropertyModel]('charList', (parent, key) => new StringModel(parent, key, true));
   }
 }

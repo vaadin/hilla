@@ -1,15 +1,8 @@
 /* eslint-disable accessor-pairs,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
-import {
-  _fromString,
-  type AbstractModel,
-  ArrayModel,
-  BooleanModel,
-  ObjectModel,
-  getBinderNode,
-  hasFromString,
-} from './Models.js';
+import { getBinderNode } from './BinderNode.js';
+import { _fromString, type AbstractModel, ArrayModel, BooleanModel, ObjectModel, hasFromString } from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -28,7 +21,7 @@ export type FieldConstraintValidation = Readonly<{
   checkValidity(): boolean;
 }>;
 
-export type FieldElement<T> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
+export type FieldElement<T = unknown> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
 
 const props = ['required', 'invalid', 'errorMessage', 'value', 'validity', 'checkValidity'];
 export function isFieldElement<T>(element: HTMLElement): element is FieldElement<T> {
@@ -321,7 +314,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
   }
 }
 
-function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
@@ -353,7 +346,7 @@ export const field = directive(
     }
 
     override update(part: ElementPart | PropertyPart, [model, effect]: DirectiveParameters<this>) {
-      const element = part.element as FieldElement<any> & HTMLInputElement;
+      const element = part.element as FieldElement & HTMLInputElement;
 
       const binderNode = getBinderNode(model);
 

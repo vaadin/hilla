@@ -1,11 +1,7 @@
-// TODO: Fix dependency cycle
-
-// eslint-disable-next-line import/no-cycle
-
-import type { Binder } from './Binder.js';
 import type { BinderNode } from './BinderNode.js';
-import { type AbstractModel, NumberModel, getBinderNode } from './Models.js';
-// eslint-disable-next-line import/no-cycle
+import { getBinderNode } from './BinderNode.js';
+import type { BinderRoot } from './BinderRoot.js';
+import { type AbstractModel, NumberModel, type Value } from './Models.js';
 import { Required } from './Validators.js';
 
 export interface ValueError<T> {
@@ -37,25 +33,23 @@ export class ValidationError extends Error {
   }
 }
 
-export type ValidationCallback<T> = (
-  value: T,
-  binder: Binder<unknown, AbstractModel<unknown>>,
-) =>
-  | Promise<ValidationResult | boolean | readonly ValidationResult[]>
-  | ValidationResult
-  | boolean
-  | readonly ValidationResult[];
-
-export type InterpolateMessageCallback<T> = (
+export type InterpolateMessageCallback<M extends AbstractModel> = (
   message: string,
-  validator: Validator<T>,
-  binderNode: BinderNode<T, AbstractModel<T>>,
+  validator: Validator<Value<M>>,
+  binderNode: BinderNode<M>,
 ) => string;
 
 export interface Validator<T> {
-  validate: ValidationCallback<T>;
   message: string;
   impliesRequired?: boolean;
+  validate(
+    value: T,
+    binder: BinderRoot,
+  ):
+    | Promise<ValidationResult | boolean | readonly ValidationResult[]>
+    | ValidationResult
+    | boolean
+    | readonly ValidationResult[];
 }
 
 export class ServerValidator implements Validator<any> {
@@ -76,13 +70,13 @@ function setPropertyAbsolutePath(binderNodeName: string, result: ValidationResul
   return result;
 }
 
-export async function runValidator<T>(
-  model: AbstractModel<T>,
-  validator: Validator<T>,
-  interpolateMessageCallback?: InterpolateMessageCallback<T>,
-): Promise<ReadonlyArray<ValueError<T>>> {
+export async function runValidator<M extends AbstractModel>(
+  model: M,
+  validator: Validator<Value<M>>,
+  interpolateMessageCallback?: InterpolateMessageCallback<M>,
+): Promise<ReadonlyArray<ValueError<Value<M>>>> {
   const binderNode = getBinderNode(model);
-  const value = binderNode.value!;
+  const value = binderNode.value as Value<M>;
 
   const interpolateMessage = (message: string) => {
     if (!interpolateMessageCallback) {
@@ -97,28 +91,32 @@ export async function runValidator<T>(
   if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
     return [];
   }
-  return (async () => validator.validate(value, binderNode.binder))().then((result) => {
-    if (result === false) {
-      return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
-    }
-    if (result === true || (Array.isArray(result) && result.length === 0)) {
-      return [];
-    }
-    if (Array.isArray(result)) {
-      return result.map((result2) => ({
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result2),
-        validator,
-        value,
-      }));
-    }
-    return [
-      {
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
-        validator,
-        value,
-      },
-    ];
-  });
+
+  const result = await validator.validate(value, binderNode.binder);
+
+  if (result === false) {
+    return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+  }
+
+  if (result === true || (Array.isArray(result) && result.length === 0)) {
+    return [];
+  }
+
+  if (Array.isArray(result)) {
+    return result.map((result2) => ({
+      message: interpolateMessage(validator.message),
+      ...setPropertyAbsolutePath(binderNode.name, result2),
+      validator,
+      value,
+    }));
+  }
+
+  return [
+    {
+      message: interpolateMessage(validator.message),
+      ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
+      validator,
+      value,
+    },
+  ];
 }

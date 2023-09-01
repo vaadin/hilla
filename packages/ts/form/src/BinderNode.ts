@@ -16,47 +16,62 @@
 // TODO: Fix dependency cycle
 
 import type { Binder } from './Binder.js';
+import type { BinderRoot } from './BinderRoot.js';
 // eslint-disable-next-line import/no-cycle
 import {
-  _binderNode,
-  _ItemModel,
+  _createDefaultValue,
   _key,
   _parent,
   _validators,
   AbstractModel,
+  type ArrayItemModel,
   ArrayModel,
-  getBinderNode,
   ObjectModel,
+  type Value,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';
 import { ValidityStateValidator } from './Validators.js';
 import { _validity } from './Validity.js';
 
-const _ownErrors = Symbol('ownErrorsSymbol');
-const _visited = Symbol('visited');
+const nodes = new WeakMap<AbstractModel, BinderNode>();
+
+export function getBinderNode<M extends AbstractModel>(model: M): BinderNode<M> {
+  let node = nodes.get(model);
+
+  if (!node) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    node = new BinderNode(model);
+    nodes.set(model, node);
+  }
+
+  return node as BinderNode<M>;
+}
 
 function getErrorPropertyName(valueError: ValueError<any>): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
 }
 
-type ArrayBinderNode<TItem> = BinderNode<readonly TItem[], ArrayModel<TItem, AbstractModel<TItem>>>;
-
-type ArrayItemBinderNode<T, M extends AbstractModel<T>> = Omit<BinderNode<T, M>, 'parent'> & {
-  parent: ArrayBinderNode<T>;
-};
-
-const defaultArrayItemCache = new WeakMap<object, unknown>();
-const getDefaultArrayItem = <TItem>(arrayNode: ArrayBinderNode<TItem>): TItem => {
-  const cache = defaultArrayItemCache as WeakMap<typeof arrayNode, TItem>;
-  if (cache.has(arrayNode)) {
-    return defaultArrayItemCache.get(arrayNode) as TItem;
-  }
-  const defaultArrayItem = arrayNode.model[_ItemModel].createEmptyValue();
-  cache.set(arrayNode, defaultArrayItem);
-  return defaultArrayItem;
-};
-
 export const CHANGED = new Event('binder-node-changed');
+
+class NotArrayModelError extends Error {
+  constructor() {
+    super('The model does not represent array');
+  }
+}
+
+class NotArrayItemModelError extends Error {
+  constructor() {
+    super('The model does not represent array item');
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-use-before-define
+declare class ArrayItemBinderNode<M extends AbstractModel> extends BinderNode<M> {
+  // @ts-expect-error: re-defining the parent getter.
+  declare parent: BinderNode<ArrayModel<M>>;
+}
+
+const defaultArrayItemCache = new WeakMap<BinderNode<ArrayModel>, unknown>();
 
 /**
  * The BinderNode\<T, M\> class provides the form binding related APIs
@@ -66,7 +81,7 @@ export const CHANGED = new Event('binder-node-changed');
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
+export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
   readonly model: M;
 
   /**
@@ -78,28 +93,25 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    */
   [_validity]?: ValidityState;
 
-  private [_visited] = false;
-
-  private [_validators]: ReadonlyArray<Validator<T>>;
-
-  private [_ownErrors]?: ReadonlyArray<ValueError<T>>;
-
-  private readonly validityStateValidator: ValidityStateValidator<T>;
+  #visited = false;
+  #validators: ReadonlyArray<Validator<Value<M>>>;
+  #ownErrors?: ReadonlyArray<ValueError<Value<M>>>;
+  readonly #validityStateValidator: ValidityStateValidator<Value<M>>;
 
   constructor(model: M) {
     super();
     this.model = model;
-    model[_binderNode] = this;
-    this.validityStateValidator = new ValidityStateValidator<T>();
-    this.initializeValue();
-    this[_validators] = model[_validators];
+    nodes.set(model, this);
+    this.#validityStateValidator = new ValidityStateValidator<Value<M>>();
+    this.#initializeValue();
+    this.#validators = model[_validators];
   }
 
   /**
    * The parent node, if this binder node corresponds to a nested model,
    * otherwise undefined for the top-level binder.
    */
-  get parent(): BinderNode<unknown, AbstractModel<unknown>> | undefined {
+  get parent(): BinderNode | undefined {
     const modelParent = this.model[_parent];
     return modelParent instanceof AbstractModel ? getBinderNode(modelParent) : undefined;
   }
@@ -107,8 +119,14 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   /**
    * The binder for the top-level model.
    */
-  get binder(): Binder<unknown, AbstractModel<unknown>> {
-    return this.parent ? this.parent.binder : (this as any);
+  get binder(): BinderRoot {
+    const binder = this.parent?.binder;
+
+    if (!binder) {
+      throw new TypeError('BinderNode is detached');
+    }
+
+    return binder;
   }
 
   /**
@@ -116,41 +134,59 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * attribute on the field components.
    */
   get name(): string {
-    let model = this.model as AbstractModel<any>;
-    const strings = [];
+    let { model }: { model: AbstractModel } = this;
+    let name = String(model[_key]);
+
     while (model[_parent] instanceof AbstractModel) {
-      strings.unshift(String(model[_key]));
       model = model[_parent];
+      name = `${String(model[_key])}.${name}`;
     }
-    return strings.join('.');
+    return name;
   }
 
   /**
    * The current value related to the model
    */
-  get value(): T | undefined {
-    if (this.parent!.value === undefined) {
-      this.parent!.initializeValue(true);
+  get value(): Value<M> | undefined {
+    if (!this.parent) {
+      return undefined;
     }
+
+    let { value } = this.parent;
+
+    if (value === undefined) {
+      this.parent.#initializeValue(true);
+      ({ value } = this.parent);
+    }
+
     const key = this.model[_key];
-    return (this.parent!.value as { readonly [key in typeof key]: T })[key];
+
+    // The value of parent in unknown, so we need to cast it.
+    type ParentValue = { readonly [K in typeof key]: Value<M> };
+    return (value as ParentValue)[key];
   }
 
-  set value(value: T | undefined) {
-    this.setValueState(value);
+  set value(value: Value<M> | undefined) {
+    this.#setValueState(value);
   }
 
   /**
    * The default value related to the model
    */
-  get defaultValue(): T {
-    if (this.isArrayItem()) {
-      const arrayNode = this.parent.asArray<T>();
-      return getDefaultArrayItem(arrayNode);
+  get defaultValue(): Value<M> {
+    if (this.#isArrayItem()) {
+      let value = defaultArrayItemCache.get(this.parent);
+
+      if (!value) {
+        value = this.model.constructor.createEmptyValue();
+        defaultArrayItemCache.set(this.parent, value);
+      }
+
+      return value as Value<M>;
     }
 
     const key = this.model[_key];
-    return (this.parent!.defaultValue as { readonly [key in typeof key]: T })[key];
+    return (this.parent!.defaultValue as { readonly [key in typeof key]: Value<M> })[key];
   }
 
   /**
@@ -164,12 +200,12 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * The array of validators for the model. The default value is defined in the
    * model.
    */
-  get validators(): ReadonlyArray<Validator<T>> {
-    return this[_validators];
+  get validators(): ReadonlyArray<Validator<Value<M>>> {
+    return this.#validators;
   }
 
-  set validators(validators: ReadonlyArray<Validator<T>>) {
-    this[_validators] = validators;
+  set validators(validators: ReadonlyArray<Validator<Value<M>>>) {
+    this.#validators = validators;
     this.dispatchEvent(CHANGED);
   }
 
@@ -177,12 +213,12 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * True if the bound field was ever focused and blurred by the user.
    */
   get visited(): boolean {
-    return this[_visited];
+    return this.#visited;
   }
 
   set visited(v: boolean) {
-    if (this[_visited] !== v) {
-      this[_visited] = v;
+    if (this.#visited !== v) {
+      this.#visited = v;
       this.updateValidation().catch(() => {});
       this.dispatchEvent(CHANGED);
     }
@@ -192,19 +228,15 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * The combined array of all errors for this node’s model and all its nested
    * models
    */
-  get errors(): ReadonlyArray<ValueError<any>> {
-    const descendantsErrors = [...this.getChildBinderNodes()].reduce<readonly any[]>(
-      (errors, childBinderNode) => [...errors, ...childBinderNode.errors],
-      [],
-    );
-    return descendantsErrors.concat(this.ownErrors);
+  get errors(): ReadonlyArray<ValueError<unknown>> {
+    return [...Array.from(this.#getChildBinderNodes(), (node) => node.errors).flat(), ...this.ownErrors];
   }
 
   /**
    * The array of validation errors directly related with the model.
    */
-  get ownErrors(): ReadonlyArray<ValueError<T>> {
-    return this[_ownErrors] ? this[_ownErrors] : [];
+  get ownErrors(): ReadonlyArray<ValueError<Value<M>>> {
+    return this.#ownErrors ? this.#ownErrors : [];
   }
 
   /**
@@ -218,7 +250,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * True if the value is required to be non-empty.
    */
   get required(): boolean {
-    return this[_validators].some((validator) => validator.impliesRequired);
+    return this.#validators.some((validator) => validator.impliesRequired);
   }
 
   /**
@@ -226,7 +258,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    *
    * @param model - The nested model instance
    */
-  for<NM extends AbstractModel<any>>(model: NM): BinderNode<ReturnType<NM['valueOf']>, NM> {
+  for<N extends AbstractModel>(model: N): BinderNode<N> {
     const binderNode = getBinderNode(model);
     if (binderNode.binder !== this.binder) {
       throw new Error('Unknown binder');
@@ -240,9 +272,9 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    * or any nested model. Returns the combined array of all
    * errors as in the errors property.
    */
-  async validate(): Promise<ReadonlyArray<ValueError<any>>> {
+  async validate(): Promise<ReadonlyArray<ValueError<unknown>>> {
     const errors = (
-      await Promise.all([...this.requestValidationOfDescendants(), ...this.requestValidationWithAncestors()])
+      await Promise.all([...this.#requestValidationOfDescendants(), ...this.#requestValidationWithAncestors()])
     ).flat();
     this.setErrorsWithDescendants(errors.length ? errors : undefined);
     this.update();
@@ -254,8 +286,8 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    *
    * @param validator - a validator
    */
-  addValidator(validator: Validator<T>): void {
-    this.validators = [...this[_validators], validator];
+  addValidator(validator: Validator<Value<M>>): void {
+    this.validators = [...this.#validators, validator];
     this.dispatchEvent(CHANGED);
   }
 
@@ -264,75 +296,63 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    *
    * Requires the context model to be an array reference.
    *
-   * @param itemValue - optional new item value, an empty item is
+   * @param item - optional new item value, an empty item is
    * appended if the argument is omitted
    */
-  appendItem<TItem extends M extends ArrayModel<infer TArrayItem, AbstractModel<any>> ? TArrayItem : never>(
-    itemValue?: TItem,
-  ): void {
-    const arrayNode = this.asArray<TItem>();
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const itemValueOrEmptyValue = itemValue ?? arrayNode.model[_ItemModel].createEmptyValue();
-    arrayNode.value = [...(arrayNode.value ?? []), itemValueOrEmptyValue];
+  appendItem(item?: Value<ArrayItemModel<M>>): void {
+    if (this.#isArray()) {
+      const itemValueOrEmptyValue = item ?? this.model[_createDefaultValue].createEmptyValue();
+      (this as BinderNode<ArrayModel>).value = [...(this.value ?? []), itemValueOrEmptyValue];
+    } else {
+      throw new NotArrayModelError();
+    }
   }
 
-  /**
-   * Prepend an item to the array value.
-   *
-   * Requires the context model to be an array reference.
-   *
-   * @param itemValue - optional new item value, an empty item is prepended if
-   * the argument is omitted
-   */
-  prependItem<TItem extends M extends ArrayModel<infer TArrayItem, AbstractModel<any>> ? TArrayItem : never>(
-    itemValue?: TItem,
-  ): void {
-    const arrayNode = this.asArray<TItem>();
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const itemValueOrEmptyValue = itemValue ?? arrayNode.model[_ItemModel].createEmptyValue();
-    arrayNode.value = [itemValueOrEmptyValue, ...(arrayNode.value ?? [])];
+  prependItem(item?: Value<ArrayItemModel<M>>): void {
+    if (this.#isArray()) {
+      const itemValueOrEmptyValue = item ?? this.model[_createDefaultValue].createEmptyValue();
+      (this as BinderNode<ArrayModel>).value = [itemValueOrEmptyValue, ...(this.value ?? [])];
+    } else {
+      throw new NotArrayModelError();
+    }
   }
 
-  /**
-   * Remove itself from the parent array value.
-   *
-   * Requires the context model to be an array item reference.
-   */
   removeSelf(): void {
-    const arrayItemNode = this.asArrayItem();
-    const itemIndex = this.model[_key];
-    const arrayNode = arrayItemNode.parent;
-    arrayNode.value = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
+    if (this.#isArrayItem()) {
+      this.parent.value = (this.parent.value ?? []).filter((_, i) => i !== this.model[_key]) as Value<ArrayModel<M>>;
+    } else {
+      throw new NotArrayItemModelError();
+    }
   }
 
   protected clearValidation(): boolean {
-    if (this[_visited]) {
-      this[_visited] = false;
+    if (this.#visited) {
+      this.#visited = false;
       this.dispatchEvent(CHANGED);
     }
     let needsUpdate = false;
-    if (this[_ownErrors]) {
-      this[_ownErrors] = undefined;
+    if (this.#ownErrors) {
+      this.#ownErrors = undefined;
       needsUpdate = true;
       this.dispatchEvent(CHANGED);
     }
-    if ([...this.getChildBinderNodes()].filter((childBinderNode) => childBinderNode.clearValidation()).length > 0) {
+    if ([...this.#getChildBinderNodes()].filter((childBinderNode) => childBinderNode.clearValidation()).length > 0) {
       needsUpdate = true;
     }
     return needsUpdate;
   }
 
   protected async updateValidation(): Promise<void> {
-    if (this[_visited]) {
+    if (this.#visited) {
       await this.validate();
     } else if (this.dirty || this.invalid) {
       await Promise.all(
-        [...this.getChildBinderNodes()].map(async (childBinderNode) => childBinderNode.updateValidation()),
+        [...this.#getChildBinderNodes()].map(async (childBinderNode) => childBinderNode.updateValidation()),
       );
     }
   }
 
-  protected update(_?: T): void {
+  protected update(_?: Value<M>): void {
     if (this.parent) {
       this.parent.update();
     }
@@ -344,20 +364,15 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     const relatedErrors = errors
       ? errors.filter((valueError) => getErrorPropertyName(valueError).startsWith(name))
       : undefined;
-    this[_ownErrors] = ownErrors;
-    for (const childBinderNode of this.getChildBinderNodes()) {
+    this.#ownErrors = ownErrors;
+    for (const childBinderNode of this.#getChildBinderNodes()) {
       childBinderNode.setErrorsWithDescendants(relatedErrors);
     }
     this.dispatchEvent(CHANGED);
   }
 
-  private *getChildBinderNodes(): Generator<BinderNode<unknown, AbstractModel<unknown>>> {
-    if (this.value === undefined) {
-      // Undefined value cannot have child properties and items.
-      return;
-    }
-
-    if (this.model instanceof ObjectModel) {
+  *#getChildBinderNodes(): Generator<BinderNode> {
+    if (this.#isObject()) {
       // We need to skip all non-initialised optional fields here in order to
       // prevent infinite recursion for circular references in the model.
       // Here we rely on presence of keys in `defaultValue` to detect all
@@ -365,22 +380,25 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       // non-optional fields plus those optional fields whose values were set
       // from initial `binder.read()` or `binder.clear()` or by using a
       // binder node (e.g., form binding) for a nested field.
-      if (this.defaultValue) {
-        for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
-          const childModel = getter.call(this.model);
-          if (childModel instanceof AbstractModel) {
-            yield getBinderNode(childModel);
-          }
-        }
-      }
-    } else if (this.model instanceof ArrayModel) {
-      for (const childBinderNode of this.model) {
-        yield childBinderNode;
+      for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
+        yield getBinderNode(getter.call(this.model));
       }
     }
   }
 
-  private runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
+  #isArray(): this is BinderNode<ArrayModel> {
+    return this.model instanceof ArrayModel;
+  }
+
+  #isArrayItem(): this is ArrayItemBinderNode<M> {
+    return this.model[_parent] instanceof ArrayModel;
+  }
+
+  #isObject(): this is BinderNode<ObjectModel> {
+    return this.model instanceof ObjectModel;
+  }
+
+  #runOwnValidators(): ReadonlyArray<Promise<ReadonlyArray<ValueError<unknown>>>> {
     if (this[_validity] && !this[_validity].valid) {
       // The element's internal validation reported invalid state.
 
@@ -391,110 +409,182 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
         //
         // Skip running the validators, and instead assume the only error
         // from the validity state.
-        return [this.binder.requestValidation(this.model, this.validityStateValidator)];
+        return [this.binder.requestValidation(this.model, this.#validityStateValidator)];
       }
       // Validate the value, but also raise the error from the validity state.
-      return [...this[_validators], this.validityStateValidator].map(async (validator) =>
+      return [...this.#validators, this.#validityStateValidator].map(async (validator) =>
         this.binder.requestValidation(this.model, validator),
       );
     }
 
-    return this[_validators].map(async (validator) => this.binder.requestValidation(this.model, validator));
+    return this.#validators.map(async (validator) => this.binder.requestValidation(this.model, validator));
   }
 
-  private requestValidationOfDescendants(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
-    return [...this.getChildBinderNodes()].reduce<ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>>>(
+  #requestValidationOfDescendants(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
+    return [...this.#getChildBinderNodes()].reduce<ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>>>(
       (promises, childBinderNode) => [
         ...promises,
-        ...childBinderNode.runOwnValidators(),
-        ...childBinderNode.requestValidationOfDescendants(),
+        ...childBinderNode.#runOwnValidators(),
+        ...childBinderNode.#requestValidationOfDescendants(),
       ],
       [],
     );
   }
 
-  private requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
-    return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
+  #requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<unknown>>>> {
+    return [...this.#runOwnValidators(), ...(this.parent ? this.parent.#requestValidationWithAncestors() : [])];
   }
 
-  private initializeValue(requiredByChildNode = false): void {
+  #initializeValue(requiredByChildNode = false): void {
     // First, make sure parents have value initialized
-    if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
-      this.parent.initializeValue(true);
+    if (
+      this.parent &&
+      (this.parent.value === undefined || (this.parent.defaultValue as Value<M> | undefined) === undefined)
+    ) {
+      this.parent.#initializeValue(true);
     }
 
     const key = this.model[_key];
-    let value: T | undefined = this.parent
-      ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
+    let value: Value<M> | undefined = this.parent
+      ? (this.parent.value as { readonly [key in typeof key]: Value<M> })[this.model[_key]]
       : undefined;
 
     if (value === undefined) {
       // Initialize value if a child node is accessed or for the root-level node
       if (requiredByChildNode || !this.parent) {
-        value = this.model.constructor.createEmptyValue() as T;
-        this.setValueState(value, this.defaultValue === undefined);
+        value = this.model.constructor.createEmptyValue() as Value<M>;
+        this.#setValueState(value, this.defaultValue === undefined);
       } else if (
         this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
+        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: Value<M> }))
       ) {
-        this.setValueState(undefined, this.defaultValue === undefined);
+        this.#setValueState(undefined, this.defaultValue === undefined);
       }
     }
   }
 
-  private setValueState(value: T | undefined, keepPristine = false): void {
-    const modelParent = this.model[_parent];
+  #setValueState(value: Value<M> | undefined, keepPristine = false): void {
+    const { parent } = this;
     const key = this.model[_key];
-    if (modelParent instanceof ObjectModel) {
-      // Value contained in object - replace object in parent
-      const object: { readonly [key in typeof key]?: T } = {
-        ...(this.parent!.value as { readonly [key in typeof key]?: T }),
-        [key]: value,
-      };
-      this.parent!.setValueState(object, keepPristine);
-      return;
+
+    if (parent) {
+      if (parent.#isObject()) {
+        // Value contained in object - replace object in parent
+        parent.#setValueState({ ...parent.value, [key]: value }, keepPristine);
+
+        return;
+      }
     }
 
     if (value === undefined) {
       throw new TypeError('Unexpected undefined value');
     }
 
-    if (this.isArrayItem()) {
+    if (this.#isArrayItem()) {
       // Value contained in array - replace array in parent
       const array = (this.parent.value ?? []).slice();
       array[key as number] = value;
-      this.parent.setValueState(array, keepPristine);
+      this.parent.#setValueState(array, keepPristine);
     } else {
       // Value contained elsewhere, probably binder - use value property setter
-      const binder = modelParent as Binder<T, M>;
+      const binder = this.model[_parent] as Binder<M>;
+
       if (keepPristine && !binder.dirty) {
         binder.defaultValue = value;
       }
       binder.value = value!;
     }
   }
-
-  private isArray<TItem>(): this is ArrayBinderNode<TItem> {
-    return this.model instanceof ArrayModel;
-  }
-
-  private asArray<TItem>(): ArrayBinderNode<TItem> {
-    if (!this.isArray()) {
-      throw new TypeError('Model is not array');
-    }
-
-    return this as ArrayBinderNode<TItem>;
-  }
-
-  private isArrayItem(): this is ArrayItemBinderNode<T, M> {
-    return this.parent?.model instanceof ArrayModel;
-  }
-
-  private asArrayItem(): ArrayItemBinderNode<T, M> {
-    if (!this.isArrayItem()) {
-      throw new TypeError('Model is not an array item');
-    }
-
-    return this as ArrayItemBinderNode<T, M>;
-  }
 }
+
+// class ArrayBinderNodeHelper<MItem extends AbstractModel, M extends ArrayModel<MItem>> {
+//   /**
+//    //    * Append an item to the array value.
+//    //    *
+//    //    * Requires the context model to be an array reference.
+//    //    *
+//    //    * @param itemValue - optional new item value, an empty item is
+//    //    * appended if the argument is omitted
+//    //    */
+//   appendItem(itemValue?: Value<MItem>): void {
+//     const itemValueOrEmptyValue = itemValue ?? (this.model[_itemModel].createEmptyValue() as Value<MItem>);
+//     this.value = [...(this.value ?? []), itemValueOrEmptyValue] as Value<M>;
+//   }
+// }
+
+//
+// class ArrayBinderNode<M extends ArrayModel<MItem>, MItem extends AbstractModel = AbstractModel> extends BinderNode<M> {
+//   /**
+//    * Append an item to the array value.
+//    *
+//    * Requires the context model to be an array reference.
+//    *
+//    * @param itemValue - optional new item value, an empty item is
+//    * appended if the argument is omitted
+//    */
+//   override appendItem(itemValue?: Value<MItem>): void {
+//     const itemValueOrEmptyValue = itemValue ?? (this.model[_itemModel].createEmptyValue() as Value<MItem>);
+//     this.value = [...(this.value ?? []), itemValueOrEmptyValue] as Value<M>;
+//   }
+//
+//   /**
+//    * Prepend an item to the array value.
+//    *
+//    * Requires the context model to be an array reference.
+//    *
+//    * @param itemValue - optional new item value, an empty item is prepended if
+//    * the argument is omitted
+//    */
+//   override prependItem(itemValue?: Value<MItem>): void {
+//     const itemValueOrEmptyValue = itemValue ?? (this.model[_itemModel].createEmptyValue() as Value<MItem>);
+//     this.value = [itemValueOrEmptyValue, ...(this.value ?? [])] as Value<M>;
+//   }
+//
+//   protected override *.#getChildBinderNodes() {
+//     for (const childBinderNode of this.model) {
+//       yield childBinderNode;
+//     }
+//   }
+// }
+//
+// class ArrayItemBinderNode<M extends AbstractModel, P extends ArrayModel<M>> extends BinderNode<M> {
+//   // @ts-expect-error: overriding parent getter declaration to make it more type-wise
+//   declare parent: ArrayBinderNode<P>;
+//
+//   override get defaultValue(): Value<M> {
+//     let value = defaultArrayItemCache.get(this.parent);
+//
+//     if (!value) {
+//       value = this.model.constructor.createEmptyValue();
+//       defaultArrayItemCache.set(this.parent, value);
+//     }
+//
+//     return value as Value<M>;
+//   }
+//
+//   /**
+//    * Remove itself from the parent array value.
+//    *
+//    * Requires the context model to be an array item reference.
+//    */
+//   override removeSelf(): void {
+//     this.parent.value = (this.parent.value ?? []).filter((_, i) => i !== this.model[_key]) as Value<P>;
+//   }
+// }
+
+// class ObjectBinderNode<M extends ObjectModel> extends BinderNode<M> {
+//   protected override *.#getChildBinderNodes() {
+//     // We need to skip all non-initialised optional fields here in order to
+//     // prevent infinite recursion for circular references in the model.
+//     // Here we rely on presence of keys in `defaultValue` to detect all
+//     // initialised fields. The keys in `defaultValue` are defined for all
+//     // non-optional fields plus those optional fields whose values were set
+//     // from initial `binder.read()` or `binder.clear()` or by using a
+//     // binder node (e.g., form binding) for a nested field.
+//     if (this.defaultValue) {
+//       for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
+//         yield getBinderNode(getter.call(this.model));
+//       }
+//     }
+//   }
+// }

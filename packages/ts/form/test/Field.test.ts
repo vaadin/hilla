@@ -254,7 +254,7 @@ describe('@hilla/form', () => {
       describe('number model', () => {
         let view: OrderViewWithTextField;
         let priorityField: MockTextFieldElement;
-        let binder: Binder<Order, OrderModel>;
+        let binder: Binder<OrderModel>;
 
         beforeEach(async () => {
           view = orderViewWithTextField;

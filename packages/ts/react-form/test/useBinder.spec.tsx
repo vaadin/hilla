@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import {act, render} from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -18,14 +18,16 @@ describe('@hilla/react-form', () => {
     model: UserModel;
   }>;
 
-  function UserForm({ model: m }: UserFormProps) {
-    const { field, model } = useBinderNode(m);
-    const name = useBinderNode(m.name);
+  function UserForm({ model: user }: UserFormProps) {
+    const { field, model } = useBinderNode(user);
+    const name = useBinderNode(user.name);
 
     return (
       <fieldset>
         <input data-testid="user.name" type="text" {...field(model.name)} />
-        <output data-testid="validation.user.name">{name.invalid ? name.ownErrors.map(e => e.message).join(', ') : 'OK'}</output>
+        <output data-testid="validation.user.name">
+          {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
         <input data-testid="user.password" type="text" {...field(model.password)} />
       </fieldset>
     );
@@ -127,7 +129,7 @@ describe('@hilla/react-form', () => {
     it('dispays default value', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', '')
+      expect(getByTestId('output.user.name')).to.have.property('textContent', '');
       expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
     });
 
@@ -138,8 +140,8 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('user.name'));
       await user.keyboard('johndoe');
       await user.click(getByTestId('rememberMe'));
-      
-      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe')
+
+      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe');
       expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
     });
 
@@ -149,20 +151,20 @@ describe('@hilla/react-form', () => {
 
       await user.click(getByTestId('user.name'));
       await user.keyboard('Very lengthy name');
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('size');
 
       // clicking around should not hide the message
       await user.click(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('size');
 
       // clearing should show a required validator message
       await user.click(getByTestId('user.name'));
       await user.clear(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('invalid');
 

@@ -1,30 +1,21 @@
 // TODO: Fix dependency cycle
-
 import isNumeric from 'validator/es/lib/isNumeric.js';
 // eslint-disable-next-line import/no-cycle
-import { BinderNode } from './BinderNode.js';
+import { type BinderNode, getBinderNode } from './BinderNode.js';
+import type { BinderRoot } from './BinderRoot.js';
 import type { Validator } from './Validation.js';
 import { IsNumber } from './Validators.js';
 
-export const _ItemModel = Symbol('ItemModel');
+export const _createDefaultValue = Symbol('itemModel');
 export const _parent = Symbol('parent');
 export const _key = Symbol('key');
 export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
-export const _binderNode = Symbol('binderNode');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
 
 const _properties = Symbol('properties');
 const _optional = Symbol('optional');
-
-export function getBinderNode<M extends AbstractModel<any>, T extends ModelValue<M>>(model: M): BinderNode<T, M> {
-  if (!model[_binderNode]) {
-    model[_binderNode] = new BinderNode(model);
-  }
-
-  return model[_binderNode]!;
-}
 
 export interface HasFromString<T> {
   [_fromString](value: string): T;
@@ -38,53 +29,34 @@ export interface HasValue<T> {
   value?: T;
 }
 
-export type ModelParent<T> = AbstractModel<any> | HasValue<T>;
-export type ModelValue<M extends AbstractModel<unknown>> = ReturnType<M['valueOf']>;
+export type Value<M> = M extends AbstractModel<infer T> ? T : never;
 
-export interface ModelConstructor<T, M extends AbstractModel<T>> {
-  new (parent: ModelParent<T>, key: keyof any, optional: boolean, ...args: any[]): M;
-  createEmptyValue(): T;
+export interface ModelConstructor<M extends AbstractModel> {
+  new (parent: AbstractModel | undefined, key: keyof any, optional: boolean, ...args: any[]): M;
+  createEmptyValue(): Value<M>;
 }
 
-type ModelVariableArguments<C> = C extends new (
-  parent: ModelParent<any>,
-  key: keyof any,
-  ...args: infer R extends [boolean, ...any]
-) => AbstractModel<any>
-  ? R
-  : never;
-
-type ModelCtor = {
-  new (parent: ModelParent<any>, key: keyof any, ...args: any[]): any;
-  createEmptyValue(): unknown;
-};
-
-export type ModelInstance<C extends ModelCtor, MArgs extends ModelVariableArguments<C>> = C extends new (
-  parent: ModelParent<any>,
-  key: keyof any,
-  ...args: MArgs
-) => infer M
-  ? M
-  : never;
-
-export abstract class AbstractModel<T> {
+export abstract class AbstractModel<T = unknown> {
   static createEmptyValue(): unknown {
     return undefined;
   }
 
   declare readonly ['constructor']: typeof AbstractModel;
 
-  readonly [_parent]: ModelParent<T>;
+  readonly [_parent]?: AbstractModel | BinderRoot;
 
   readonly [_validators]: ReadonlyArray<Validator<T>>;
 
   readonly [_optional]: boolean;
 
-  [_binderNode]?: BinderNode<T, this>;
-
   [_key]: keyof any;
 
-  constructor(parent: ModelParent<T>, key: keyof any, optional: boolean, ...validators: ReadonlyArray<Validator<T>>) {
+  constructor(
+    parent: AbstractModel | BinderRoot | undefined,
+    key: keyof any,
+    optional: boolean,
+    ...validators: ReadonlyArray<Validator<T>>
+  ) {
     this[_parent] = parent;
     this[_key] = key;
     this[_optional] = optional;
@@ -97,9 +69,11 @@ export abstract class AbstractModel<T> {
 
   valueOf(): T {
     const { value } = getBinderNode(this);
-    if (value === undefined) {
+
+    if (!value) {
       throw new TypeError('Value is undefined');
     }
+
     return value;
   }
 }
@@ -120,7 +94,7 @@ export class NumberModel extends PrimitiveModel<number> implements HasFromString
   static override createEmptyValue = Number;
 
   constructor(
-    parent: ModelParent<number>,
+    parent: AbstractModel,
     key: keyof any,
     optional: boolean,
     ...validators: ReadonlyArray<Validator<number>>
@@ -156,7 +130,7 @@ export abstract class EnumModel<E extends typeof Enum>
 
     // @ts-expect-error: the instantiation of the abstract class is handled above.
     // Now only the children instantiation could happen.
-    const { [_enum]: enumObject } = new this({ value: undefined }, 'value', false);
+    const { [_enum]: enumObject } = new this(undefined, 'value', false);
 
     return Object.values(enumObject)[0];
   }
@@ -168,10 +142,10 @@ export abstract class EnumModel<E extends typeof Enum>
   }
 }
 
-export class ObjectModel<T> extends AbstractModel<T> {
+export class ObjectModel<T extends Record<never, never> = Record<never, never>> extends AbstractModel<T> {
   static *getOwnAndParentGetters<M extends ObjectModel<any>>(
     model: M,
-  ): Generator<readonly [key: string, getter: () => unknown]> {
+  ): Generator<readonly [key: string, getter: () => AbstractModel]> {
     for (
       let proto = Object.getPrototypeOf(model);
       proto !== ObjectModel.prototype;
@@ -187,83 +161,80 @@ export class ObjectModel<T> extends AbstractModel<T> {
   }
 
   static override createEmptyValue(): { readonly [key in never]: unknown } {
-    const model = new this({ value: undefined as any }, 'value' as keyof any, false);
+    const model = new this(undefined, 'value', false);
     const obj: Record<string, unknown> = {};
 
     // Iterate the model class hierarchy up to the ObjectModel, and extract
     // the property getter names from every prototypes
     for (const [key, getter] of this.getOwnAndParentGetters(model)) {
-      const propertyModel = getter.call(model) as AbstractModel<any>;
+      const propertyModel = getter.call(model);
       obj[key] = propertyModel[_optional] ? undefined : propertyModel.constructor.createEmptyValue();
     }
 
     return obj;
   }
 
-  private [_properties]: { [name in keyof T]?: AbstractModel<any> } = {};
+  private [_properties]: { [K in keyof T]?: AbstractModel<T[K]> } = {};
 
-  protected [_getPropertyModel]<
-    KChild extends keyof T,
-    C extends ModelCtor,
-    MArgs extends ModelVariableArguments<C>,
-    M extends ModelInstance<C, MArgs>,
-  >(key: KChild, ValueModel: C, valueModelArgs: MArgs): M {
-    if (this[_properties][key] === undefined) {
-      this[_properties][key] = new ValueModel(this, key, ...valueModelArgs);
+  protected [_getPropertyModel]<K extends keyof T, M extends AbstractModel<T[K]>>(
+    key: K,
+    init: (parent: this, key: keyof any) => M,
+  ): M {
+    if (!this[_properties][key]) {
+      this[_properties][key] = init(this, key);
     }
 
-    return this[_properties][key]! as M;
+    return this[_properties][key] as M;
   }
 }
 
-export class ArrayModel<
-  T extends ModelValue<M>,
-  M extends ModelInstance<C, MArgs>,
-  C extends ModelCtor = ModelConstructor<T, M>,
-  MArgs extends ModelVariableArguments<C> = ModelVariableArguments<C>,
-> extends AbstractModel<readonly T[]> {
+export type ArrayItemModel<M> = M extends ArrayModel<infer MItem> ? MItem : never;
+
+export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends AbstractModel<
+  ReadonlyArray<Value<MItem>>
+> {
   static override createEmptyValue(): [] {
     return [];
   }
 
-  private readonly [_ItemModel]: C;
+  [_createDefaultValue]: () => Value<MItem>;
 
-  private readonly itemModelArgs: MArgs;
+  readonly #init: (parent: this, index: number) => MItem;
 
-  private readonly itemModels: M[] = [];
+  #items: Array<MItem | undefined> = [];
 
   constructor(
-    parent: ModelParent<readonly T[]>,
+    parent: AbstractModel,
     key: keyof any,
     optional: boolean,
-    ItemModel: C,
-    itemModelArgs: MArgs,
-    ...validators: ReadonlyArray<Validator<readonly T[]>>
+    init: (parent: ArrayModel<MItem>, index: number) => MItem,
+    createDefaultValue: () => Value<MItem>,
+    ...validators: ReadonlyArray<Validator<ReadonlyArray<Value<MItem>>>>
   ) {
     super(parent, key, optional, ...validators);
-    this[_ItemModel] = ItemModel;
-    this.itemModelArgs = itemModelArgs;
+    this.#init = init;
+    this[_createDefaultValue] = createDefaultValue;
   }
 
   /**
    * Iterates the current array value and yields a binder node for every item.
    */
-  *[Symbol.iterator](): IterableIterator<BinderNode<T, M>> {
+  *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
     const array = this.valueOf();
-    const ItemModel = this[_ItemModel];
-    if (array.length !== this.itemModels.length) {
-      this.itemModels.length = array.length;
+
+    if (array.length !== this.#items.length) {
+      this.#items.length = array.length;
     }
-    for (const i of array.keys()) {
-      let itemModel: M | undefined = this.itemModels[i];
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (itemModel === undefined) {
-        // const [optional, ...rest] = this.itemModelArgs;
-        itemModel = new ItemModel(this, i, ...this.itemModelArgs);
-        // @ts-expect-error M always matches the expected type
-        this.itemModels[i] = itemModel;
+
+    for (let i = 0; i < array.length; i++) {
+      let item: MItem | undefined = this.#items[i];
+
+      if (!item) {
+        item = this.#init(this, i);
+        this.#items[i] = item;
       }
-      yield getBinderNode(itemModel!) as unknown as BinderNode<T, M>;
+
+      yield getBinderNode(item);
     }
   }
 }
