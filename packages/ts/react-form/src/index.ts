@@ -1,7 +1,7 @@
 import {
   _fromString,
   _validity,
-  AbstractModel,
+  type AbstractModel,
   type BinderConfiguration,
   BinderRoot,
   CHANGED,
@@ -33,7 +33,7 @@ export type FieldDirectiveResult = Readonly<{
 
 export type FieldDirective = (model: AbstractModel<any>) => FieldDirectiveResult;
 
-export type BinderNodeControls<T, M extends AbstractModel<T>> = Readonly<{
+export type UseFormPartResult<T, M extends AbstractModel<T>> = Readonly<{
   defaultValue: T;
   dirty: boolean;
   errors: ReadonlyArray<ValueError<unknown>>;
@@ -53,16 +53,16 @@ export type BinderNodeControls<T, M extends AbstractModel<T>> = Readonly<{
   validate(): Promise<ReadonlyArray<ValueError<unknown>>>;
 }>;
 
-export type BinderControls<T, M extends AbstractModel<T>> = BinderNodeControls<T, M> &
-  Readonly<{
-    value: T;
-    setDefaultValue(value: T): void;
-    setValue(value: T): void;
-    submit(): Promise<T | undefined>;
-    reset(): void;
-    clear(): void;
-    read(value: T): void;
-  }>;
+export type UseFormResult<T, M extends AbstractModel<T>> = Readonly<{
+  value: T;
+  setDefaultValue(value: T): void;
+  setValue(value: T): void;
+  submit(): Promise<T | undefined>;
+  reset(): void;
+  clear(): void;
+  read(value: T): void;
+}> &
+  UseFormPartResult<T, M>;
 
 type FieldState<T> = {
   value?: T;
@@ -71,18 +71,16 @@ type FieldState<T> = {
   errorMessage: string;
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
-  updateValue: () => void;
-  markVisited: () => void;
-  ref: (element: HTMLElement | null) => void;
+  updateValue(): void;
+  markVisited(): void;
+  ref(element: HTMLElement | null): void;
 };
 
 function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
-function getBinderNodeControls<T, M extends AbstractModel<T>>(
-  node: BinderNode<T, M>,
-): Omit<BinderNodeControls<T, M>, 'field'> {
+function getFormPart<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Omit<UseFormPartResult<T, M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
     defaultValue: node.defaultValue,
@@ -117,26 +115,9 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
       const n = getBinderNode(model);
 
       const fieldState: FieldState<unknown> = registry.get(model) ?? {
-        value: undefined,
-        required: false,
-        invalid: false,
-        errorMessage: '',
         element: undefined,
-        strategy: undefined,
-        updateValue: () => {
-          if (fieldState.strategy) {
-            // Remove invalid flag, so that .checkValidity() in Vaadin Components
-            // does not interfere with errors from Hilla.
-            fieldState.strategy.invalid = false;
-            // When bad input is detected, skip reading new value in binder state
-            fieldState.strategy.checkValidity();
-            if (!fieldState.strategy.validity.badInput) {
-              fieldState.value = fieldState.strategy.value;
-            }
-            n[_validity] = fieldState.strategy.validity;
-            n.value = convertFieldValue(model, fieldState.value);
-          }
-        },
+        errorMessage: '',
+        invalid: false,
         markVisited: () => {
           n.visited = true;
         },
@@ -163,6 +144,23 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
             fieldState.strategy = getDefaultFieldStrategy(element, model);
           }
         },
+        required: false,
+        strategy: undefined,
+        updateValue: () => {
+          if (fieldState.strategy) {
+            // Remove invalid flag, so that .checkValidity() in Vaadin Components
+            // does not interfere with errors from Hilla.
+            fieldState.strategy.invalid = false;
+            // When bad input is detected, skip reading new value in binder state
+            fieldState.strategy.checkValidity();
+            if (!fieldState.strategy.validity.badInput) {
+              fieldState.value = fieldState.strategy.value;
+            }
+            n[_validity] = fieldState.strategy.validity;
+            n.value = convertFieldValue(model, fieldState.value);
+          }
+        },
+        value: undefined,
       };
 
       if (!registry.has(model)) {
@@ -206,10 +204,10 @@ type MutableBinderConfiguration<T> = {
   -readonly [K in keyof BinderConfiguration<T>]: BinderConfiguration<T>[K];
 };
 
-export function useBinder<T, M extends AbstractModel<T>>(
+export function useForm<T, M extends AbstractModel<T>>(
   Model: ModelConstructor<T, M>,
   config?: BinderConfiguration<T>,
-): BinderControls<T, M> {
+): UseFormResult<T, M> {
   const configRef = useRef<MutableBinderConfiguration<T>>({});
   configRef.current.onSubmit = config?.onSubmit;
   configRef.current.onChange = config?.onChange;
@@ -222,27 +220,27 @@ export function useBinder<T, M extends AbstractModel<T>>(
   }, [binder]);
 
   return {
-    ...getBinderNodeControls(binder),
-    setDefaultValue: (defaultValue: T) => {
-      binder.defaultValue = defaultValue;
-    },
-    value: binder.value,
-    setValue: (value: T) => {
-      binder.value = value;
-    },
+    ...getFormPart(binder),
     clear: binder.clear.bind(binder),
     field,
     read: binder.read.bind(binder),
     reset: binder.reset.bind(binder),
+    setDefaultValue: (defaultValue: T) => {
+      binder.defaultValue = defaultValue;
+    },
+    setValue: (value: T) => {
+      binder.value = value;
+    },
     submit: binder.submit.bind(binder),
+    value: binder.value,
   };
 }
 
-export function useBinderNode<M extends AbstractModel<any>>(model: M): BinderNodeControls<ReturnType<M['valueOf']>, M> {
+export function useFormPart<M extends AbstractModel<any>>(model: M): UseFormPartResult<ReturnType<M['valueOf']>, M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
   return {
-    ...getBinderNodeControls(binderNode),
+    ...getFormPart(binderNode),
     field,
   };
 }

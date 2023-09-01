@@ -3,14 +3,14 @@ import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder as _useBinder, useBinderNode } from '../src/index.js';
+import { useForm as _useForm, useFormPart } from '../src/index.js';
 import { type Login, LoginModel, type User, type UserModel } from './models.js';
 
 use(sinonChai);
 
 describe('@hilla/react-form', () => {
-  type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
-  const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
+  type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
+  const useForm = sinon.spy(_useForm) as typeof _useForm;
 
   let onSubmit: (value: Login) => Promise<Login>;
   let onChange: (value: Login) => void;
@@ -20,8 +20,8 @@ describe('@hilla/react-form', () => {
   }>;
 
   function UserForm({ model: m }: UserFormProps) {
-    const { field, model } = useBinderNode(m);
-    const name = useBinderNode(m.name);
+    const { field, model } = useFormPart(m);
+    const name = useFormPart(m.name);
 
     return (
       <fieldset>
@@ -33,7 +33,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit, value } = useBinder(LoginModel, { onChange, onSubmit });
+    const { field, model, read, submit, value } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -64,10 +64,10 @@ describe('@hilla/react-form', () => {
   beforeEach(() => {
     onSubmit = sinon.stub();
     onChange = sinon.stub();
-    (useBinder as UseBinderSpy).resetHistory();
+    (useForm as UseFormSpy).resetHistory();
   });
 
-  describe('useBinder', () => {
+  describe('useForm', () => {
     it('collects info from a form', async () => {
       const { getByTestId } = render(<LoginForm />);
 
@@ -114,7 +114,7 @@ describe('@hilla/react-form', () => {
       const { getByTestId } = render(<LoginForm />);
 
       await act(() => {
-        const { read } = (useBinder as UseBinderSpy).returnValues[0];
+        const { read } = (useForm as UseFormSpy).returnValues[0];
         read({
           rememberMe: true,
           user: {
