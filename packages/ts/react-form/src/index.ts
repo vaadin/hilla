@@ -202,12 +202,19 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
   }, [node]);
 }
 
+type MutableBinderConfiguration<T> = {
+  -readonly [K in keyof BinderConfiguration<T>]: BinderConfiguration<T>[K];
+};
+
 export function useBinder<T, M extends AbstractModel<T>>(
   Model: ModelConstructor<T, M>,
   config?: BinderConfiguration<T>,
 ): BinderControls<T, M> {
+  const configRef = useRef<MutableBinderConfiguration<T>>({});
+  configRef.current.onSubmit = config?.onSubmit;
+  configRef.current.onChange = config?.onChange;
   const update = useUpdate();
-  const binder = useMemo(() => new BinderRoot(Model, config), [Model]);
+  const binder = useMemo(() => new BinderRoot(Model, configRef.current), [Model]);
   const field = useFields(binder);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import {act, render} from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -13,6 +13,7 @@ describe('@hilla/react-form', () => {
   const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
 
   let onSubmit: (value: Login) => Promise<Login>;
+  let onChange: (value: Login) => void;
 
   type UserFormProps = Readonly<{
     model: UserModel;
@@ -32,7 +33,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit, value } = useBinder(LoginModel, { onSubmit });
+    const { field, model, read, submit, value } = useBinder(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -50,22 +51,27 @@ describe('@hilla/react-form', () => {
     );
   }
 
+  async function fillAndSubmitLoginForm(getByTestId: (id: string) => HTMLElement) {
+    const user = userEvent.setup();
+    await user.click(getByTestId('user.name'));
+    await user.keyboard('johndoe');
+    await user.click(getByTestId('user.password'));
+    await user.keyboard('john123456');
+    await user.click(getByTestId('rememberMe'));
+    await user.click(getByTestId('submit'));
+  }
+
   beforeEach(() => {
     onSubmit = sinon.stub();
+    onChange = sinon.stub();
     (useBinder as UseBinderSpy).resetHistory();
   });
 
   describe('useBinder', () => {
     it('collects info from a form', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
-      await user.click(getByTestId('user.password'));
-      await user.keyboard('john123456');
-      await user.click(getByTestId('rememberMe'));
-      await user.click(getByTestId('submit'));
+      await fillAndSubmitLoginForm(getByTestId);
 
       expect(onSubmit).to.have.been.calledWithMatch({
         rememberMe: true,
@@ -138,7 +144,7 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('user.name'));
       await user.keyboard('johndoe');
       await user.click(getByTestId('rememberMe'));
-      
+
       expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe')
       expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
     });
@@ -171,6 +177,34 @@ describe('@hilla/react-form', () => {
       await user.keyboard('jane');
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('OK');
+    });
+
+    describe('configuration update', () => {
+      it('should use updated onSubmit reference', async () => {
+        // Initial render
+        const { getByTestId, rerender } = render(<LoginForm />);
+
+        // Update onSubmit reference, rerender, fill form and submit
+        onSubmit = sinon.spy();
+        rerender(<LoginForm />);
+        await fillAndSubmitLoginForm(getByTestId);
+
+        expect(onSubmit).to.have.been.calledOnce;
+      });
+
+      it('should use updated onChange reference', async () => {
+        // Initial render
+        const user = userEvent.setup();
+        const { getByTestId, rerender } = render(<LoginForm />);
+
+        // Update onChange reference, rerender, type a character
+        onChange = sinon.spy();
+        rerender(<LoginForm />);
+        await user.click(getByTestId('user.name'));
+        await user.keyboard('a');
+
+        expect(onChange).to.have.been.calledOnce;
+      });
     });
   });
 });
