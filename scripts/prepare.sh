@@ -40,9 +40,9 @@ curl -l -s $materialFile > ./scripts/generator/results/Material.java
 perl -pi -e 's/.*(JsModule|NpmPackage).*\n//g' ./scripts/generator/results/Lumo.java ./scripts/generator/results/Material.java
 
 # copy the theme files to hilla and hilla-react
-mkdir -p ./packages/java/hilla-react/src/main/java/dev/hilla/
-mkdir -p ./packages/java/hilla/src/main/java/dev/hilla
-cp scripts/generator/results/Lumo.java packages/java/hilla-react/src/main/java/dev/hilla/Lumo.java
-cp scripts/generator/results/Lumo.java packages/java/hilla/src/main/java/dev/hilla/Lumo.java
-cp scripts/generator/results/Material.java packages/java/hilla-react/src/main/java/dev/hilla/Material.java
-cp scripts/generator/results/Material.java packages/java/hilla/src/main/java/dev/hilla/Material.java
+mkdir -p ./packages/java/hilla-react/src/main/java/dev/hilla/theme
+mkdir -p ./packages/java/hilla/src/main/java/dev/hilla/theme
+cp scripts/generator/results/Lumo.java packages/java/hilla-react/src/main/java/dev/hilla/theme/Lumo.java
+cp scripts/generator/results/Lumo.java packages/java/hilla/src/main/java/dev/hilla/theme/Lumo.java
+cp scripts/generator/results/Material.java packages/java/hilla-react/src/main/java/dev/hilla/theme/Material.java
+cp scripts/generator/results/Material.java packages/java/hilla/src/main/java/dev/hilla/theme/Material.java
