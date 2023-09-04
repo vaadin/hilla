@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# use platform version  from the root pom.xml
-version=`mvn -N help:evaluate -Dexpression=project.version -q -DforceStdout | grep "^[0-9]"`
+# use hilla version from the root hilla npm modules package json
+# cannot use maven project.version here, as file generation happens before building maven
+version=`jq .version packages/ts/generator-typescript-core/package.json | cut -d '"' -f 2`
 # TODO: compute this number when we maintain multiple hilla branches
 branch=24.1
 
