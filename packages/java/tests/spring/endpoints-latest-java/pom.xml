@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>2.2.0.beta1</version>
+        <version>2.2-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-endpoints-latest-java</artifactId>
     <name>ITs for Endpoints / latest Java</name>
