@@ -75,8 +75,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
-@NpmPackage(value = "@hilla/frontend", version = "2.1.7")
-@NpmPackage(value = "@hilla/form", version = "2.1.7")
+@NpmPackage(value = "@hilla/frontend", version = "2.1.8")
+@NpmPackage(value = "@hilla/form", version = "2.1.8")
 public class EndpointController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointController.class);
