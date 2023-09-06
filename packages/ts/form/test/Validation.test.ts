@@ -869,13 +869,16 @@ describe('@hilla/form', () => {
         expect(errors).to.have.lengthOf.at.least(1);
       });
 
-      it('should not report thrown exception as validation error', async () => {
+      it('should report thrown exception as validation error', async () => {
         let errors = await binder.validate();
-        const expectedErrors = errors.length;
+        const initialErrors = errors.length;
 
         binder.addValidator(new BrokenValidator());
         errors = await binder.validate();
-        expect(errors).to.have.lengthOf(expectedErrors);
+        expect(errors).to.have.lengthOf(initialErrors + 1);
+
+        const error = errors.find((e) => e.validator instanceof BrokenValidator);
+        expect(error?.message ?? '').to.include('Validator threw an error');
       });
 
       it('should log error if a validator unexpectedly throws an error', async () => {

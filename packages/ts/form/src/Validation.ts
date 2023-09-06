@@ -100,7 +100,7 @@ export async function runValidator<T>(
   return (async () => validator.validate(value, binderNode.binder))()
     .catch((error) => {
       console.error(`${binderNode.name} - Validator ${validator.constructor.name} threw an error:`, error);
-      return true;
+      return [{ message: 'Validator threw an error', property: binderNode.name, validator, value }];
     })
     .then((result) => {
       if (result === false) {
