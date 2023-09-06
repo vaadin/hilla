@@ -97,28 +97,33 @@ export async function runValidator<T>(
   if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
     return [];
   }
-  return (async () => validator.validate(value, binderNode.binder))().then((result) => {
-    if (result === false) {
-      return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
-    }
-    if (result === true || (Array.isArray(result) && result.length === 0)) {
-      return [];
-    }
-    if (Array.isArray(result)) {
-      return result.map((result2) => ({
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result2),
-        validator,
-        value,
-      }));
-    }
-    return [
-      {
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
-        validator,
-        value,
-      },
-    ];
-  });
+  return (async () => validator.validate(value, binderNode.binder))()
+    .catch((error) => {
+      console.error(`${binderNode.name} - Validator ${validator.constructor.name} threw an error:`, error);
+      return [{ message: 'Validator threw an error', property: binderNode.name, validator, value }];
+    })
+    .then((result) => {
+      if (result === false) {
+        return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+      }
+      if (result === true || (Array.isArray(result) && result.length === 0)) {
+        return [];
+      }
+      if (Array.isArray(result)) {
+        return result.map((result2) => ({
+          message: interpolateMessage(validator.message),
+          ...setPropertyAbsolutePath(binderNode.name, result2),
+          validator,
+          value,
+        }));
+      }
+      return [
+        {
+          message: interpolateMessage(validator.message),
+          ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
+          validator,
+          value,
+        },
+      ];
+    });
 }
