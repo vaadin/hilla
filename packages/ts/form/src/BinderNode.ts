@@ -34,6 +34,7 @@ import { _validity } from './Validity.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
 const _visited = Symbol('visited');
+export const _initializeValue = Symbol('initializeValue');
 
 function getErrorPropertyName(valueError: ValueError<any>): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
@@ -91,7 +92,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     this.model = model;
     model[_binderNode] = this;
     this.validityStateValidator = new ValidityStateValidator<T>();
-    this.initializeValue();
+    this[_initializeValue]();
     this[_validators] = model[_validators];
   }
 
@@ -130,7 +131,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    */
   get value(): T | undefined {
     if (this.parent!.value === undefined) {
-      this.parent!.initializeValue(true);
+      this.parent![_initializeValue](true);
     }
     const key = this.model[_key];
     return (this.parent!.value as { readonly [key in typeof key]: T })[key];
@@ -305,6 +306,31 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     arrayNode.value = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
   }
 
+  [_initializeValue](forceInitialize = false): void {
+    // First, make sure parents have value initialized
+    if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
+      this.parent[_initializeValue](true);
+    }
+
+    const key = this.model[_key];
+    let value: T | undefined = this.parent
+      ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
+      : undefined;
+
+    if (value === undefined) {
+      // Initialize value if this is the root level node, or it is enforced
+      if (forceInitialize || !this.parent) {
+        value = this.model.constructor.createEmptyValue() as T;
+        this.setValueState(value, this.defaultValue === undefined);
+      } else if (
+        this.parent.model instanceof ObjectModel &&
+        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
+      ) {
+        this.setValueState(undefined, this.defaultValue === undefined);
+      }
+    }
+  }
+
   protected clearValidation(): boolean {
     if (this[_visited]) {
       this[_visited] = false;
@@ -415,31 +441,6 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
 
   private requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
     return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
-  }
-
-  private initializeValue(requiredByChildNode = false): void {
-    // First, make sure parents have value initialized
-    if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
-      this.parent.initializeValue(true);
-    }
-
-    const key = this.model[_key];
-    let value: T | undefined = this.parent
-      ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
-      : undefined;
-
-    if (value === undefined) {
-      // Initialize value if a child node is accessed or for the root-level node
-      if (requiredByChildNode || !this.parent) {
-        value = this.model.constructor.createEmptyValue() as T;
-        this.setValueState(value, this.defaultValue === undefined);
-      } else if (
-        this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
-      ) {
-        this.setValueState(undefined, this.defaultValue === undefined);
-      }
-    }
   }
 
   private setValueState(value: T | undefined, keepPristine = false): void {

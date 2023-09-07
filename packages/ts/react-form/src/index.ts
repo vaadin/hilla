@@ -16,6 +16,7 @@ import {
   type FieldStrategy,
 } from '@hilla/form';
 import type { BinderNode } from '@hilla/form/BinderNode.js';
+import { _initializeValue } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 
 function useUpdate() {
@@ -113,6 +114,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
     return ((model: AbstractModel<any>) => {
       const n = getBinderNode(model);
+      n[_initializeValue](true);
 
       const fieldState: FieldState<unknown> = registry.get(model) ?? {
         element: undefined,

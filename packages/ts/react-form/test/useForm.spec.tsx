@@ -1,10 +1,10 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render } from '@testing-library/react';
+import { act, render, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Login, LoginModel, type User, type UserModel } from './models.js';
+import { type Login, LoginModel, UserModel } from './models.js';
 
 use(sinonChai);
 
@@ -204,6 +204,20 @@ describe('@hilla/react-form', () => {
         await user.keyboard('a');
 
         expect(onChange).to.have.been.calledOnce;
+      });
+    });
+
+    describe('model initialization', () => {
+      it('should initialize optional string model when it is bound to a field', () => {
+        const { rerender, result } = renderHook(() => useForm(UserModel));
+
+        expect(result.current.value.passwordHint).to.be.undefined;
+
+        // Call field directive to simulate binding the model to a field
+        result.current.field(result.current.model.passwordHint);
+        rerender();
+
+        expect(result.current.value.passwordHint).to.equal('');
       });
     });
   });
