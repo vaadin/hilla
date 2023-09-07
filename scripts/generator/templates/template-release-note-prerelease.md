@@ -5,14 +5,6 @@ Hilla {{version}}
 
 ## Versions
 
-**Included dependencies:**
-
-- Hilla Endpoint
-- Hilla Engine
-- Vaadin Dev Server ({{core.flow.javaVersion}})
-
-**Official add-ons and plugins:**
-
 - Hilla Maven Plugin
 - Hilla Gradle Plugin
 - Hilla Spring Boot Starter
