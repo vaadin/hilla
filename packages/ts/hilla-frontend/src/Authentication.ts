@@ -184,7 +184,7 @@ export class InvalidSessionMiddleware implements MiddlewareClass {
   async invoke(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
     const clonedContext = { ...context };
     clonedContext.request = context.request.clone();
-    const response = (await next(context)) as Response;
+    const response = await next(context);
     if (response.status === 401) {
       const loginResult = await this.onInvalidSessionCallback();
       if (loginResult.token) {
