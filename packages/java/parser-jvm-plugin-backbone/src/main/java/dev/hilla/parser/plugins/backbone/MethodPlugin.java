@@ -77,6 +77,7 @@ public final class MethodPlugin
             var endpointCls = (ClassInfoModel) node.getSource();
             var methodNodes = endpointCls.getMethods().stream()
                     .filter(MethodInfoModel::isPublic)
+                    .filter(method -> !method.isSynthetic())
                     .<Node<?, ?>> map(MethodNode::of);
             return nodeDependencies.appendChildNodes(methodNodes);
         }
