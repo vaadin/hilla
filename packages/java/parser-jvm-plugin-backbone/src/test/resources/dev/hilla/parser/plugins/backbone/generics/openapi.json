@@ -26,6 +26,10 @@
     {
       "name": "GenericsRefEndpoint",
       "x-class-name": "dev.hilla.parser.plugins.backbone.generics.GenericsRefEndpoint"
+    },
+    {
+      "name": "ImplementInterfaceEndpoint",
+      "x-class-name": "dev.hilla.parser.plugins.backbone.generics.ImplementInterfaceEndpoint"
     }
   ],
   "paths": {
@@ -300,6 +304,132 @@
           }
         }
       }
+    },
+    "/ImplementInterfaceEndpoint/dealWithConcreteType": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithConcreteType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImplementInterfaceEndpoint/dealWithGenericType": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithGenericType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImplementInterfaceEndpoint/dealWithItAgain": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithItAgain_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -324,6 +454,9 @@
             ]
           }
         }
+      },
+      "dev.hilla.parser.plugins.backbone.generics.ConcreteType" : {
+        "type": "object"
       }
     }
   }
