@@ -1,19 +1,11 @@
 Hilla {{version}}
-[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/tutorials/quickstart) · [Documentation](https://hilla.dev/docs/)
+[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/react/start/quick) · [Documentation](https://hilla.dev/docs/)
 
 ## New and Noteworthy since Previous Hilla Update
 
 ## Known Issues
 
 ## Versions
-
-**Included dependencies:**
-
-- Hilla Endpoint
-- Hilla Engine 
-- Vaadin Dev Server ({{core.flow.javaVersion}})
-
-**Official add-ons and plugins:**
 
 - Hilla Maven Plugin
 - Hilla Gradle Plugin
@@ -26,6 +18,11 @@ Hilla {{version}}
 ## Supported technologies
 
 <table>
+<tr>
+  <th>Spring Boot</th>
+  <td>Version 3.1 or newer
+  </td>
+</tr>
 <tr>
   <th>Desktop browser</th>
   <td>
@@ -75,30 +72,10 @@ Vaadin Designer supports the following IDEs:
 </tr>
 <tr>
   <th>Gradle</th>
-  <td>Version 7.3 or newer</td>
-</tr>
-<tr>
-  <th>Application server</th>
-  <td>
-
-Vaadin Flow requires Java Servlet API 6 and Java 17 or newer. It is tested on:
-
-- Apache Tomcat 10.1
-- Open Liberty 23.0.0.1-beta
-- RedHat JBoss EAP 8.0 beta
-- WildFly 27
-- Jetty 12 beta
-- Payara Server 6
-- Payara Micro 6
-  </td>
+  <td>Version 7.6 or newer</td>
 </tr>
 <tr>
   <th>Node.js</th>
   <td>Version 18 or newer</td>
-</tr>
-<tr>
-  <th>Spring Boot</th>
-  <td>Version 3.0 or newer
-  </td>
 </tr>
 </table>
