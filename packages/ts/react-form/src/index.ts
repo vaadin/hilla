@@ -113,6 +113,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
     return ((model: AbstractModel<any>) => {
       const n = getBinderNode(model);
+      n.initializeValue(true);
 
       const fieldState: FieldState<unknown> = registry.get(model) ?? {
         element: undefined,

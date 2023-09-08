@@ -417,7 +417,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
   }
 
-  private initializeValue(requiredByChildNode = false): void {
+  initializeValue(forceInitialize = false): void {
     // First, make sure parents have value initialized
     if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
       this.parent.initializeValue(true);
@@ -429,8 +429,8 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       : undefined;
 
     if (value === undefined) {
-      // Initialize value if a child node is accessed or for the root-level node
-      if (requiredByChildNode || !this.parent) {
+      // Initialize value if this is the root level node, or it is enforced
+      if (forceInitialize || !this.parent) {
         value = this.model.constructor.createEmptyValue() as T;
         this.setValueState(value, this.defaultValue === undefined);
       } else if (
