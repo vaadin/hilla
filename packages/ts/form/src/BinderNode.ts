@@ -34,7 +34,6 @@ import { _validity } from './Validity.js';
 
 const _ownErrors = Symbol('ownErrorsSymbol');
 const _visited = Symbol('visited');
-export const _initializeValue = Symbol('initializeValue');
 
 function getErrorPropertyName(valueError: ValueError<any>): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
@@ -92,7 +91,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     this.model = model;
     model[_binderNode] = this;
     this.validityStateValidator = new ValidityStateValidator<T>();
-    this[_initializeValue]();
+    this.initializeValue();
     this[_validators] = model[_validators];
   }
 
@@ -131,7 +130,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
    */
   get value(): T | undefined {
     if (this.parent!.value === undefined) {
-      this.parent![_initializeValue](true);
+      this.parent!.initializeValue(true);
     }
     const key = this.model[_key];
     return (this.parent!.value as { readonly [key in typeof key]: T })[key];
@@ -418,10 +417,10 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
   }
 
-  [_initializeValue](forceInitialize = false): void {
+  initializeValue(forceInitialize = false): void {
     // First, make sure parents have value initialized
     if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
-      this.parent[_initializeValue](true);
+      this.parent.initializeValue(true);
     }
 
     const key = this.model[_key];
