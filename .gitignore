@@ -40,7 +40,7 @@ packages/ts/*/.vite
 scripts/generator/results/
 packages/java/hilla/*.json
 packages/java/hilla-react/*.json
-packages/java/hilla/src/main/java/dev/hilla/theme
+packages/java/hilla/src/main/java/dev/hilla/theme/
 packages/java/hilla-react/src/main/java/dev/hilla/theme/
 
 # npm pack
