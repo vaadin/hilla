@@ -144,7 +144,8 @@ public class EndpointController {
         var endpointBeans = new TreeMap<String, Object>(
                 String.CASE_INSENSITIVE_ORDER);
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
-        endpointBeans.putAll(context.getBeansWithAnnotation(BrowserCallable.class));
+        endpointBeans
+                .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
 
         // By default, only register those endpoints included in the Hilla
         // OpenAPI definition file
