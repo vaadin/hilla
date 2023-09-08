@@ -11,6 +11,7 @@ import dev.hilla.parser.core.NodePath;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
+import dev.hilla.parser.models.MethodInfoModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.models.TypeArgumentModel;
 import dev.hilla.parser.models.TypeParameterModel;
@@ -19,6 +20,7 @@ import dev.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointNonExposedNode;
 import dev.hilla.parser.plugins.backbone.nodes.EndpointSignatureNode;
+import dev.hilla.parser.plugins.backbone.nodes.MethodNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 
 public final class EndpointExposedPlugin
@@ -35,6 +37,10 @@ public final class EndpointExposedPlugin
     @Override
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
             @Nonnull NodePath<?> parentPath) {
+        if (node instanceof MethodNode
+                && parentPath.getNode() instanceof EndpointExposedNode) {
+            return MethodNode.of(((MethodNode) node).getSource());
+        }
         if (!(node instanceof TypeSignatureNode)) {
             return node;
         }
