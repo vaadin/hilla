@@ -20,13 +20,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Annotation marks the class itself should not be treated as an
- * {@link Endpoint} but inheritable methods will be added to the
- * decsendant Endpoints.
+ * Makes the methods of the annotated class available to the browser.
+ * <p>
+ * For each class, a corresponding TypeScript class is generated in
+ * {@code frontend/generated} with TypeScript methods for invoking the methods
+ * in this class.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EndpointExposed {
-
+@Component
+public @interface BrowserCallable {
 }
