@@ -38,6 +38,10 @@ public final class MethodPlugin
 
         var endpointNode = (EndpointNode) endpointParent.get();
 
+        if (methodNode.getTarget().getPost() != null) {
+            throw new IllegalStateException("Post for method " + methodNode
+                    + " in endpoint " + endpointNode + " is already set");
+        }
         methodNode.getTarget().post(createOperation(endpointNode, methodNode));
     }
 

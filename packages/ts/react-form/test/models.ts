@@ -16,6 +16,7 @@ export interface User {
   id: number;
   name: string;
   password: string;
+  passwordHint?: string;
 }
 
 export class UserModel<T extends User = User> extends ObjectModel<T> {
@@ -31,6 +32,10 @@ export class UserModel<T extends User = User> extends ObjectModel<T> {
 
   get password(): StringModel {
     return this[_getPropertyModel]('password', StringModel, [false, new Required(), new Size({ min: 6 })]);
+  }
+
+  get passwordHint(): StringModel {
+    return this[_getPropertyModel]('passwordHint', StringModel, [true /* should be optional */]);
   }
 }
 

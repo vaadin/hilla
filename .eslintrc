@@ -2,13 +2,13 @@
   "extends": [
     "vaadin/typescript-requiring-type-checking",
     "vaadin/imports-typescript",
-    "vaadin/sort",
     "vaadin/testing",
     "vaadin/prettier"
   ],
   "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"],
   "plugins": ["tsdoc"],
   "rules": {
+    "@typescript-eslint/member-ordering": "off",
     "class-methods-use-this": "off",
     "import/no-duplicates": "off",
     "import/prefer-default-export": "off",
