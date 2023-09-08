@@ -1,5 +1,5 @@
 Hilla {{version}}
-[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/react/start/basics) · [Documentation](https://hilla.dev/docs/)
+[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/react/start/quick) · [Documentation](https://hilla.dev/docs/)
 
 ## New and Noteworthy since Previous Hilla Update
 
