@@ -17,8 +17,7 @@ const _submitting = Symbol('submitting');
 const _defaultValue = Symbol('defaultValue');
 const _value = Symbol('value');
 const _emptyValue = Symbol('emptyValue');
-const _onChange = Symbol('onChange');
-const _onSubmit = Symbol('onSubmit');
+const _config = Symbol('config');
 const _validations = Symbol('validations');
 const _validating = Symbol('validating');
 const _validationRequestSymbol = Symbol('validationRequest');
@@ -55,9 +54,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
 
   private [_validationRequestSymbol]?: Promise<void>;
 
-  private [_onChange]?: (oldValue?: T) => void;
-
-  private [_onSubmit]?: (value: T) => Promise<any>;
+  private [_config]?: BinderRootConfiguration<T>;
 
   private [_validations] = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
 
@@ -81,9 +78,8 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;
-    this[_onChange] = config?.onChange ?? (() => {});
+    this[_config] = config;
     this.read(this[_emptyValue]);
-    this[_onSubmit] = config?.onSubmit ?? this[_onSubmit];
   }
 
   /**
@@ -176,8 +172,9 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
    * It's a no-op if the onSubmit callback is undefined.
    */
   async submit(): Promise<T | undefined> {
-    if (this[_onSubmit] !== undefined) {
-      return this.submitTo(this[_onSubmit]!);
+    const onSubmit = this[_config]?.onSubmit;
+    if (onSubmit) {
+      return this.submitTo(onSubmit as (value: T) => Promise<any>);
     }
     return undefined;
   }
@@ -288,7 +285,10 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   }
 
   protected override update(oldValue: T): void {
-    this[_onChange]?.call(this.#context, oldValue);
+    const onChange = this[_config]?.onChange;
+    if (onChange) {
+      onChange.call(this.#context, oldValue);
+    }
     this.dispatchEvent(CHANGED);
   }
 }

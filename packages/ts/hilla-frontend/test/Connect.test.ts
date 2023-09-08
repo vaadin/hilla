@@ -478,19 +478,19 @@ describe('@hilla/frontend', () => {
 
       describe('middleware invocation', () => {
         it('should not invoke middleware before call', async () => {
-          const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next?: MiddlewareNext) => next?.(context));
+          const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => next(context));
           client.middlewares = [spyMiddleware];
 
           expect(spyMiddleware).to.not.be.called;
         });
 
         it('should invoke middleware during call', async () => {
-          const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next?: MiddlewareNext) => {
+          const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => {
             expect(context.endpoint).to.equal('FooEndpoint');
             expect(context.method).to.equal('fooMethod');
             expect(context.params).to.deep.equal({ fooParam: 'foo' });
             expect(context.request).to.be.instanceOf(Request);
-            return next?.(context);
+            return next(context);
           });
           client.middlewares = [spyMiddleware];
 
@@ -532,18 +532,18 @@ describe('@hilla/frontend', () => {
         });
 
         it('should invoke middlewares in order', async () => {
-          const firstMiddleware = sinon.spy(async (context: MiddlewareContext, next?: MiddlewareNext) => {
+          const firstMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => {
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             expect(secondMiddleware).to.not.be.called;
-            const response = await next?.(context);
+            const response = await next(context);
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             expect(secondMiddleware).to.be.calledOnce;
             return response;
           });
 
-          const secondMiddleware = sinon.spy(async (context: MiddlewareContext, next?: MiddlewareNext) => {
+          const secondMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => {
             expect(firstMiddleware).to.be.calledOnce;
-            return next?.(context);
+            return next(context);
           });
 
           client.middlewares = [firstMiddleware, secondMiddleware];
@@ -563,15 +563,15 @@ describe('@hilla/frontend', () => {
           const myResponse = new Response('{}');
           const myContext = { endpoint: 'Bar', foo: 'bar', method: 'bar', request: myRequest };
 
-          const firstMiddleware = async (_: MiddlewareContext, next?: MiddlewareNext) => {
+          const firstMiddleware = async (_: MiddlewareContext, next: MiddlewareNext) => {
             // Pass modified context
-            const response = await next?.(myContext);
+            const response = await next(myContext);
             // Expect modified response
             expect(response).to.equal(myResponse);
             return response;
           };
 
-          const secondMiddleware = async (context: MiddlewareContext, _?: MiddlewareNext) => {
+          const secondMiddleware = async (context: MiddlewareContext, _: MiddlewareNext) => {
             // Expect modified context
             expect(context).to.equal(myContext);
             // Pass modified response

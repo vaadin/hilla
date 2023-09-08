@@ -1,15 +1,7 @@
 Hilla {{version}}
-[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/tutorials/quickstart) · [Documentation](https://hilla.dev/docs/)
+[Website](https://hilla.dev) · [Getting Started](https://hilla.dev/docs/react/start/quick) · [Documentation](https://hilla.dev/docs/)
 
 ## Versions
-
-**Included dependencies:**
-
-- Hilla Endpoint
-- Hilla Engine
-- Vaadin Dev Server ({{core.flow.javaVersion}})
-
-**Official add-ons and plugins:**
 
 - Hilla Maven Plugin
 - Hilla Gradle Plugin

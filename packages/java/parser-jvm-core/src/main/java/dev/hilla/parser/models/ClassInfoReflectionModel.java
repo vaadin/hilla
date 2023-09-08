@@ -217,6 +217,7 @@ final class ClassInfoReflectionModel extends ClassInfoModel
     @Override
     protected List<MethodInfoModel> prepareMethods() {
         return Arrays.stream(origin.getDeclaredMethods())
+                .filter(method -> !method.isSynthetic())
                 .map(MethodInfoModel::of).sorted(MethodInfoModel.METHOD_ORDER)
                 .collect(Collectors.toList());
     }
