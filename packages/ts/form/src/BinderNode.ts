@@ -414,6 +414,10 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     );
   }
 
+  private requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
+    return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
+  }
+
   [_initializeValue](forceInitialize = false): void {
     // First, make sure parents have value initialized
     if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
@@ -437,10 +441,6 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
         this.setValueState(undefined, this.defaultValue === undefined);
       }
     }
-  }
-
-  private requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
-    return [...this.runOwnValidators(), ...(this.parent ? this.parent.requestValidationWithAncestors() : [])];
   }
 
   private setValueState(value: T | undefined, keepPristine = false): void {
