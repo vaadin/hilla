@@ -306,31 +306,6 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     arrayNode.value = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
   }
 
-  [_initializeValue](forceInitialize = false): void {
-    // First, make sure parents have value initialized
-    if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
-      this.parent[_initializeValue](true);
-    }
-
-    const key = this.model[_key];
-    let value: T | undefined = this.parent
-      ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
-      : undefined;
-
-    if (value === undefined) {
-      // Initialize value if this is the root level node, or it is enforced
-      if (forceInitialize || !this.parent) {
-        value = this.model.constructor.createEmptyValue() as T;
-        this.setValueState(value, this.defaultValue === undefined);
-      } else if (
-        this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
-      ) {
-        this.setValueState(undefined, this.defaultValue === undefined);
-      }
-    }
-  }
-
   protected clearValidation(): boolean {
     if (this[_visited]) {
       this[_visited] = false;
@@ -437,6 +412,31 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       ],
       [],
     );
+  }
+
+  [_initializeValue](forceInitialize = false): void {
+    // First, make sure parents have value initialized
+    if (this.parent && (this.parent.value === undefined || (this.parent.defaultValue as T | undefined) === undefined)) {
+      this.parent[_initializeValue](true);
+    }
+
+    const key = this.model[_key];
+    let value: T | undefined = this.parent
+      ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
+      : undefined;
+
+    if (value === undefined) {
+      // Initialize value if this is the root level node, or it is enforced
+      if (forceInitialize || !this.parent) {
+        value = this.model.constructor.createEmptyValue() as T;
+        this.setValueState(value, this.defaultValue === undefined);
+      } else if (
+        this.parent.model instanceof ObjectModel &&
+        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
+      ) {
+        this.setValueState(undefined, this.defaultValue === undefined);
+      }
+    }
   }
 
   private requestValidationWithAncestors(): ReadonlyArray<Promise<ReadonlyArray<ValueError<any>>>> {
