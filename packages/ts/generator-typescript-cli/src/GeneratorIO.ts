@@ -78,7 +78,7 @@ export default class GeneratorIO {
   }
 
   async createFileIndex(filenames: string[]): Promise<void> {
-    await writeFile(this.resolveGeneratedFile(this.constructor.INDEX_FILENAME), filenames.join('\n'), 'utf-8');
+    await this.write(this.constructor.INDEX_FILENAME, filenames.join('\n'));
   }
 
   async writeGeneratedFiles(files: readonly File[]): Promise<string[]> {
@@ -97,7 +97,7 @@ export default class GeneratorIO {
 
         if (newFileContent !== oldFileContent) {
           this.#logger.global.debug(`writing file ${file.name}`);
-          await this.write(file);
+          await this.write(file.name, await file.text());
         } else {
           this.#logger.global.debug(`File ${file.name} stayed the same`);
         }
@@ -141,11 +141,11 @@ export default class GeneratorIO {
     return readFile(path, 'utf8');
   }
 
-  async write(file: File): Promise<void> {
-    const filePath = join(this.#outputDir, file.name);
+  async write(filename: string, content: string): Promise<void> {
+    const filePath = join(this.#outputDir, filename);
     this.#logger.global.debug(`Writing file ${filePath}.`);
     const dir = dirname(filePath);
     await mkdir(dir, { recursive: true });
-    return writeFile(filePath, new Uint8Array(await file.arrayBuffer()));
+    return writeFile(filePath, content, 'utf-8');
   }
 }
