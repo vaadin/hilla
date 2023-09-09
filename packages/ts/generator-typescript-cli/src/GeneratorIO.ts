@@ -61,9 +61,7 @@ export default class GeneratorIO {
       filesToDelete.delete(filename);
     });
 
-    let deletedFiles: Set<string> | undefined;
-
-    deletedFiles = new Set(
+    const deletedFiles = new Set(
       await Promise.all(
         [...filesToDelete].map(async (filename) => {
           const resolved = this.getGeneratedFile(filename);
@@ -76,14 +74,14 @@ export default class GeneratorIO {
       ),
     );
 
-    return deletedFiles ?? new Set();
+    return deletedFiles;
   }
 
   async createFileIndex(filenames: string[]): Promise<void> {
     await writeFile(this.getGeneratedFile(this.constructor.INDEX_FILENAME), filenames.join('\n'), 'utf-8');
   }
 
-  async writeChangedFiles(files: readonly File[]) {
+  async writeChangedFiles(files: readonly File[]): Promise<string[]> {
     await this.createFileIndex(files.map((file) => file.name));
 
     return Promise.all(
