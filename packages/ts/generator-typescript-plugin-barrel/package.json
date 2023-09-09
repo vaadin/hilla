@@ -13,6 +13,7 @@
     "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:update": "npm test -- --update",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
