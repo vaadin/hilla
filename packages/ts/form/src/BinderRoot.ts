@@ -133,7 +133,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
    *
    * @param value - The value to read, or undefined to clear.
    */
-  read(value: T | undefined | null): void {
+  read(value: T | null | undefined): void {
     if (value === undefined || value === null) {
       this.clear();
       return;
