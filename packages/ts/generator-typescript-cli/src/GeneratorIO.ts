@@ -35,7 +35,7 @@ export default class GeneratorIO {
    */
   async getGeneratedFiles(): Promise<Set<string>> {
     try {
-      const indexFileContents = await this.read(this.getGeneratedFile(this.constructor.INDEX_FILENAME));
+      const indexFileContents = await this.read(this.resolveGeneratedFile(this.constructor.INDEX_FILENAME));
       const fileNames = indexFileContents.split('\n').filter((n) => n.length);
       return new Set(fileNames);
     } catch (e) {
@@ -64,7 +64,7 @@ export default class GeneratorIO {
     const deletedFiles = new Set(
       await Promise.all(
         [...filesToDelete].map(async (filename) => {
-          const resolved = this.getGeneratedFile(filename);
+          const resolved = this.resolveGeneratedFile(filename);
           if (await this.exists(resolved)) {
             this.#logger.global.debug(`Deleting file ${filename}.`);
             await rm(resolved);
@@ -78,18 +78,19 @@ export default class GeneratorIO {
   }
 
   async createFileIndex(filenames: string[]): Promise<void> {
-    await writeFile(this.getGeneratedFile(this.constructor.INDEX_FILENAME), filenames.join('\n'), 'utf-8');
+    await writeFile(this.resolveGeneratedFile(this.constructor.INDEX_FILENAME), filenames.join('\n'), 'utf-8');
   }
 
-  async writeChangedFiles(files: readonly File[]): Promise<string[]> {
+  async writeGeneratedFiles(files: readonly File[]): Promise<string[]> {
     await this.createFileIndex(files.map((file) => file.name));
+    this.#logger.global.debug(`created index`);
 
     return Promise.all(
       files.map(async (file) => {
         const newFileContent = await file.text();
         let oldFileContent;
         try {
-          oldFileContent = await this.read(this.getGeneratedFile(file.name));
+          oldFileContent = await this.read(this.resolveGeneratedFile(file.name));
         } catch (_e) {
           oldFileContent = undefined;
         }
@@ -131,7 +132,7 @@ export default class GeneratorIO {
     return ctr;
   }
 
-  getGeneratedFile(filename: string): string {
+  resolveGeneratedFile(filename: string): string {
     return resolve(this.#outputDir, filename);
   }
 

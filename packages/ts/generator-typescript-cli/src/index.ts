@@ -54,6 +54,6 @@ const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
 const files = await generator.process(await processInput(io, input));
 const filesToDelete = await io.getGeneratedFiles();
-const generatedFiles = await io.writeChangedFiles(files);
+const generatedFiles = await io.writeGeneratedFiles(files);
 
 await io.cleanOutputDir(generatedFiles, filesToDelete);
