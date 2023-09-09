@@ -1,11 +1,11 @@
-import File from '@hilla/generator-typescript-core/File.js';
-import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import { statSync } from 'node:fs';
 import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import File from '@hilla/generator-typescript-core/File.js';
+import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
+import { expect, use } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import GeneratorIO from '../src/GeneratorIO.js';
 
 use(chaiAsPromised);
