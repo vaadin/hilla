@@ -191,6 +191,25 @@ describe('@hilla/form', () => {
         assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
         expect(requestUpdateStub).to.be.calledOnce;
       });
+      it('should clear value when setting an undefined value', () => {
+        binder.read({
+          ...expectedEmptyOrder,
+          notes: 'bar',
+          customer: {
+            ...expectedEmptyOrder.customer,
+            fullName: 'bar',
+          },
+        });
+        requestUpdateStub.reset();
+        assert.notDeepEqual(binder.value, expectedEmptyOrder);
+        assert.notDeepEqual(binder.defaultValue, expectedEmptyOrder);
+
+        binder.read(undefined);
+
+        assert.deepEqual(binder.value, expectedEmptyOrder);
+        assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
+        expect(requestUpdateStub).to.be.calledOnce;
+      });
 
       it('should update when clearing validation', async () => {
         binder.clear();
