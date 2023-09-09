@@ -1,12 +1,12 @@
-import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import File from '@hilla/generator-typescript-core/File.js';
 import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { statSync } from 'node:fs';
+import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import GeneratorIO from '../src/GeneratorIO.js';
-import File from '@hilla/generator-typescript-core/File.js';
-import { fstatSync, statSync } from 'node:fs';
 
 use(chaiAsPromised);
 
@@ -114,7 +114,7 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
 
     it('should not write unchanged files', async () => {
       const f: File = new File(['dummy content'], 'file1.ts');
-      const mtime = statSync(io.resolveGeneratedFile(f.name)).mtime;
+      const { mtime } = statSync(io.resolveGeneratedFile(f.name));
       expect(await io.writeGeneratedFiles([f])).to.eql([f.name]);
       const mtime2 = statSync(io.resolveGeneratedFile(f.name)).mtime;
       expect(mtime).to.eql(mtime2);
