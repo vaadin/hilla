@@ -66,7 +66,19 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         }),
       );
     });
+    it('should return the file index', async () => {
+      await io.createFileIndex(generatedFilenames);
 
+      expect(await io.getGeneratedFiles()).to.eql(new Set(['file1.ts', 'file2.ts', 'file3.ts']));
+    });
+    xit('should fail when IO error happens', async () => {
+      await io.createFileIndex(generatedFilenames);
+      await chmod(tmpDir, 0o666);
+      await expect(io.getGeneratedFiles()).to.eventually.be.rejectedWith(Error, /^(?!ENOENT).*/u);
+      await chmod(tmpDir, 0o777);
+    });
+  });
+  describe('Testing GeneratorIO.cleanOutputDir', () => {
     it('should delete all given files and report them', async () => {
       await io.createFileIndex(generatedFilenames);
       await expect(
@@ -95,13 +107,6 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         generatedFilenames.length,
       );
       await expect(io.exists(join(tmpDir, name))).to.eventually.be.true;
-    });
-
-    xit('should fail when IO error happens', async () => {
-      await io.createFileIndex(generatedFilenames);
-      await chmod(tmpDir, 0o666);
-      await expect(io.getGeneratedFiles()).to.eventually.be.rejectedWith(Error, /^(?!ENOENT).*/u);
-      await chmod(tmpDir, 0o777);
     });
   });
   describe('Testing GeneratorIO.writeChangedFiles', () => {

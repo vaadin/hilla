@@ -94,9 +94,7 @@ export default class GeneratorIO {
         let oldFileContent;
         try {
           oldFileContent = await this.read(this.resolveGeneratedFile(file.name));
-        } catch (_e) {
-          oldFileContent = undefined;
-        }
+        } catch (_e) {}
 
         if (newFileContent !== oldFileContent) {
           this.#logger.global.debug(`writing file ${file.name}`);
