@@ -3,7 +3,7 @@ Hilla {{version}}
 
 ## New and Noteworthy since Previous Hilla Update
 
-Hilla 2.2 introduces an innovative form hook for React with server-side validation, and improved hot reloading for faster development.
+Hilla 2.2 introduces a form hook for React with server-side validation, and improved hot reloading for faster development.
 
 ### New React form support
 
