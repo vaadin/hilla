@@ -21,8 +21,8 @@ import {
   IdEntityModel,
   RecordStatus,
   RecordStatusModel,
-  WithPossibleCharListModel,
   TestModel,
+  WithPossibleCharListModel,
 } from './TestModels.js';
 
 describe('@hilla/form', () => {
@@ -364,8 +364,8 @@ describe('@hilla/form', () => {
         expect(binder.model.fieldEnum.valueOf()).to.equal(RecordStatus.REMOVED);
       });
 
-      it('should fail if the EnumModel.createEmptyValue() is used', () => {
-        expect(() => EnumModel.createEmptyValue()).to.throw('Cannot create an instance of an abstract class');
+      it('should be undefined if the EnumModel.createEmptyValue() is used', () => {
+        expect(EnumModel.createEmptyValue()).to.be.undefined;
       });
 
       it('should extract value from string', () => {

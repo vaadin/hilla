@@ -22,8 +22,6 @@ import {
 
 export { CHANGED };
 
-export const _root = '$root$';
-
 export type BinderConfiguration<T> = Readonly<{
   onChange?(oldValue?: T): void;
   onSubmit?(value: T): Promise<T | undefined> | Promise<void>;
@@ -75,8 +73,11 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(Model: Constructor<M>, config?: BinderRootConfiguration<Value<M>>) {
-    super(new Model(undefined, _root, false));
+  constructor(
+    Model: Constructor<M, ConstructorParameters<typeof AbstractModel>>,
+    config?: BinderRootConfiguration<Value<M>>,
+  ) {
+    super(new Model(undefined, undefined, false));
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;

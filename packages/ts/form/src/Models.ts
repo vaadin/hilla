@@ -1,3 +1,4 @@
+import type { Constructor } from 'type-fest';
 import isNumeric from 'validator/es/lib/isNumeric.js';
 import { type BinderNode, getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
@@ -12,7 +13,9 @@ export const _validators = Symbol('validators');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
 
-const _optional = Symbol('optional');
+export const defaultKey = '$value$';
+
+const _optional = Symbol();
 
 export interface HasFromString<T> {
   [_fromString](value: string): T;
@@ -41,12 +44,12 @@ export abstract class AbstractModel<T = unknown> {
 
   constructor(
     parent: AbstractModel | BinderRoot | undefined,
-    key: keyof any,
+    key: keyof any | undefined,
     optional: boolean,
     ...validators: ReadonlyArray<Validator<T>>
   ) {
     this[_parent] = parent;
-    this[_key] = key;
+    this[_key] = key ?? defaultKey;
     this[_optional] = optional;
     this[_validators] = validators;
   }
@@ -79,9 +82,7 @@ export class BooleanModel extends PrimitiveModel<boolean> implements HasFromStri
 }
 
 export class NumberModel extends PrimitiveModel<number> implements HasFromString<number | undefined> {
-  static override createEmptyValue(): number {
-    return Number();
-  }
+  static override createEmptyValue = Number;
 
   constructor(
     parent: AbstractModel,
@@ -108,22 +109,19 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 
 declare enum Enum {}
 
-export abstract class EnumModel<E extends typeof Enum>
+export function makeEnumEmptyValueCreator<M extends EnumModel>(
+  type: Constructor<M, ConstructorParameters<typeof EnumModel>>,
+): () => Value<M> {
+  const { [_enum]: enumObject } = new type(undefined, undefined, false);
+  const defaultValue = Object.values(enumObject)[0] as Value<M>;
+
+  return () => defaultValue;
+}
+
+export abstract class EnumModel<E extends typeof Enum = typeof Enum>
   extends AbstractModel<E[keyof E]>
   implements HasFromString<E[keyof E] | undefined>
 {
-  static override createEmptyValue(): unknown {
-    if (this === EnumModel) {
-      throw new Error('Cannot create an instance of an abstract class');
-    }
-
-    // @ts-expect-error: the instantiation of the abstract class is handled above.
-    // Now only the children instantiation could happen.
-    const { [_enum]: enumObject } = new this(undefined, 'value', false);
-
-    return Object.values(enumObject)[0];
-  }
-
   abstract readonly [_enum]: E;
 
   [_fromString](value: string): E[keyof E] | undefined {
@@ -131,37 +129,47 @@ export abstract class EnumModel<E extends typeof Enum>
   }
 }
 
-export class ObjectModel<T extends Record<never, never> = Record<never, never>> extends AbstractModel<T> {
-  static override createEmptyValue(): Record<never, never> {
-    const model = new this(undefined, 'value', false);
-    const obj: Record<string, unknown> = {};
-
-    // Iterate the model class hierarchy up to the ObjectModel, and extract
-    // the property getter names from every prototypes
-    for (const [key, getter] of this.getOwnAndParentGetters(model)) {
-      const propertyModel = getter.call(model);
-      obj[key] = propertyModel[_optional] ? undefined : propertyModel.constructor.createEmptyValue();
-    }
-
-    return obj;
-  }
-
-  static *getOwnAndParentGetters<M extends ObjectModel>(
-    model: M,
-  ): Generator<readonly [key: string, getter: () => AbstractModel]> {
-    for (
-      let proto = Object.getPrototypeOf(model);
-      proto !== ObjectModel.prototype;
-      proto = Object.getPrototypeOf(proto)
-    ) {
-      const descriptors = Object.getOwnPropertyDescriptors(proto);
-      for (const [name, { get }] of Object.entries(descriptors)) {
-        if (get) {
-          yield [name, get];
-        }
+export function* getObjectModelOwnAndParentGetters<M extends ObjectModel>(
+  model: M,
+): Generator<readonly [key: keyof Value<M>, getter: () => AbstractModel]> {
+  for (
+    let proto = Object.getPrototypeOf(model);
+    proto !== ObjectModel.prototype;
+    proto = Object.getPrototypeOf(proto)
+  ) {
+    const descriptors = Object.getOwnPropertyDescriptors(proto);
+    for (const [name, { get }] of Object.entries(descriptors)) {
+      if (get) {
+        yield [name as keyof Value<M>, get];
       }
     }
   }
+}
+
+export function makeObjectEmptyValueCreator<M extends ObjectModel>(
+  type: Constructor<M, ConstructorParameters<typeof ObjectModel>>,
+): () => Value<M> {
+  const model = new type(undefined, undefined, false);
+
+  return () => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const obj: Partial<Value<M>> = {};
+
+    // Iterate the model class hierarchy up to the ObjectModel, and extract
+    // the property getter names from every prototypes
+    for (const [key, getter] of getObjectModelOwnAndParentGetters(model)) {
+      const propertyModel = getter.call(model);
+      obj[key] = (
+        propertyModel[_optional] ? undefined : propertyModel.constructor.createEmptyValue()
+      ) as Value<M>[keyof Value<M>];
+    }
+
+    return obj as Value<M>;
+  };
+}
+
+export class ObjectModel<T extends Record<never, never> = Record<never, never>> extends AbstractModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(ObjectModel);
 
   #properties: { [K in keyof T]?: AbstractModel<T[K]> } = {};
 

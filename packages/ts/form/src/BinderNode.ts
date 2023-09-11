@@ -16,7 +16,6 @@
 // TODO: Fix dependency cycle
 
 import type { BinderRoot } from './BinderRoot.js';
-import { _root } from './BinderRoot.js';
 import {
   _createEmptyItemValue,
   _key,
@@ -25,6 +24,7 @@ import {
   AbstractModel,
   type ArrayItemModel,
   ArrayModel,
+  getObjectModelOwnAndParentGetters,
   ObjectModel,
   type Value,
 } from './Models.js';
@@ -44,7 +44,6 @@ export function getBinderNode<M extends AbstractModel>(model: M): BinderNode<M> 
   let node = nodes.get(model);
 
   if (!node) {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     node = new BinderNode(model);
     nodes.set(model, node);
   }
@@ -52,7 +51,7 @@ export function getBinderNode<M extends AbstractModel>(model: M): BinderNode<M> 
   return node as BinderNode<M>;
 }
 
-function getErrorPropertyName(valueError: ValueError<any>): string {
+function getErrorPropertyName(valueError: ValueError): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
 }
 
@@ -70,7 +69,6 @@ class NotArrayItemModelError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-use-before-define
 declare class ArrayItemBinderNode<M extends AbstractModel> extends BinderNode<M> {
   // @ts-expect-error: re-defining the parent getter.
   declare parent: BinderNode<ArrayModel<M>>;
@@ -79,7 +77,7 @@ declare class ArrayItemBinderNode<M extends AbstractModel> extends BinderNode<M>
 const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
 
 /**
- * The BinderNode\<T, M\> class provides the form binding related APIs
+ * The BinderNode\<M\> class provides the form binding related APIs
  * with respect to a particular model instance.
  *
  * Structurally, model instances form a tree, in which the object
@@ -175,25 +173,15 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    */
   get name(): string {
     let { model }: { model: AbstractModel } = this;
-    let name = String(model[_key]);
+    let name = '';
 
-    while (model[_parent] instanceof AbstractModel && model[_parent][_key] !== _root) {
+    while (model[_parent] instanceof AbstractModel) {
+      name = `${String(model[_key])}${name ? `.${name}` : ''}`;
       model = model[_parent];
-      name = `${String(model[_key])}.${name}`;
     }
 
     return name;
   }
-
-  /*
-  let model = this.model as AbstractModel<any>;
-    const strings = [];
-    while (model[_parent] instanceof AbstractModel) {
-      strings.unshift(String(model[_key]));
-      model = model[_parent];
-    }
-    return strings.join('.');
-   */
 
   /**
    * The array of validation errors directly related with the model.
@@ -336,9 +324,10 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    * errors as in the errors property.
    */
   async validate(): Promise<readonly ValueError[]> {
-    const errors = (
-      await Promise.all([...this.#requestValidationOfDescendants(), ...this.#requestValidationWithAncestors()])
-    ).flat();
+    const errors = await Promise.all([
+      ...this.#requestValidationOfDescendants(),
+      ...this.#requestValidationWithAncestors(),
+    ]).then((arr) => arr.flat());
     this[_setErrorsWithDescendants](errors.length ? errors : undefined);
     this[_update]();
     return errors;
@@ -422,7 +411,12 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     }
   }
 
-  *#getChildBinderNodes(): Generator<BinderNode> {
+  *#getChildBinderNodes(): Generator<BinderNode, void, void> {
+    if (this.value === undefined) {
+      // Undefined value cannot have child properties and items.
+      return;
+    }
+
     if (this.#isObject()) {
       // We need to skip all non-initialised optional fields here in order to
       // prevent infinite recursion for circular references in the model.
@@ -432,9 +426,13 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       // from initial `binder.read()` or `binder.clear()` or by using a
       // binder node (e.g., form binding) for a nested field.
       if (this.defaultValue !== undefined) {
-        for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
+        for (const [, getter] of getObjectModelOwnAndParentGetters(this.model)) {
           yield getBinderNode(getter.call(this.model));
         }
+      }
+    } else if (this.#isArray()) {
+      for (const childBinderNode of this.model) {
+        yield childBinderNode;
       }
     }
   }
@@ -451,41 +449,34 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     return this.model instanceof ObjectModel;
   }
 
-  #requestValidationOfDescendants(): ReadonlyArray<Promise<readonly ValueError[]>> {
-    return [...this.#getChildBinderNodes()].reduce<ReadonlyArray<Promise<readonly ValueError[]>>>(
-      (promises, childBinderNode) => [
-        ...promises,
-        ...childBinderNode.#runOwnValidators(),
-        ...childBinderNode.#requestValidationOfDescendants(),
-      ],
-      [],
-    );
+  *#requestValidationOfDescendants(): Generator<Promise<readonly ValueError[]>, void, void> {
+    for (const node of this.#getChildBinderNodes()) {
+      yield* node.#runOwnValidators();
+      yield* node.#requestValidationOfDescendants();
+    }
   }
 
-  #requestValidationWithAncestors(): ReadonlyArray<Promise<readonly ValueError[]>> {
-    return [...this.#runOwnValidators(), ...(this.parent ? this.parent.#requestValidationWithAncestors() : [])];
+  *#requestValidationWithAncestors(): Generator<Promise<readonly ValueError[]>, void, void> {
+    yield* this.#runOwnValidators();
+
+    if (this.parent) {
+      yield* this.parent.#requestValidationWithAncestors();
+    }
   }
 
-  #runOwnValidators(): ReadonlyArray<Promise<readonly ValueError[]>> {
-    if (this[_validity] && !this[_validity].valid) {
-      // The element's internal validation reported invalid state.
+  *#runOwnValidators(): Generator<Promise<readonly ValueError[]>, void, void> {
+    const hasInvalidState = this[_validity] && !this[_validity].valid;
+    const hasBadInput = !!this[_validity]?.badInput;
 
-      if (this[_validity].badInput) {
-        // Bad input means the `value` cannot be used and even meaningfully
-        // validated with the validators in the binder, because it cannot be
-        // parsed, for example, if a date is entered with incorrect format.
-        //
-        // Skip running the validators, and instead assume the only error
-        // from the validity state.
-        return [this.binder.requestValidation(this.model, this.#validityStateValidator)];
+    if ((hasInvalidState && !hasBadInput) || !hasInvalidState) {
+      for (const validator of this.#validators) {
+        yield this.binder.requestValidation(this.model, validator);
       }
-      // Validate the value, but also raise the error from the validity state.
-      return [...this.#validators, this.#validityStateValidator].map(async (validator) =>
-        this.binder.requestValidation(this.model, validator),
-      );
     }
 
-    return this.#validators.map(async (validator) => this.binder.requestValidation(this.model, validator));
+    if (hasInvalidState) {
+      yield this.binder.requestValidation(this.model, this.#validityStateValidator);
+    }
   }
 
   #setValueState(value: Value<M> | undefined, keepPristine = false): void {

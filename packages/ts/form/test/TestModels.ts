@@ -6,6 +6,8 @@ import {
   ArrayModel,
   BooleanModel,
   EnumModel,
+  makeEnumEmptyValueCreator,
+  makeObjectEmptyValueCreator,
   NotBlank,
   NumberModel,
   ObjectModel,
@@ -20,7 +22,7 @@ export interface IdEntity {
   idString: string;
 }
 export class IdEntityModel<T extends IdEntity = IdEntity> extends ObjectModel<T> {
-  declare static createEmptyValue: () => IdEntity;
+  static override createEmptyValue = makeObjectEmptyValueCreator(IdEntityModel);
 
   get idString(): StringModel {
     return this[_getPropertyModel]('idString', (parent, key) => new StringModel(parent, key, false));
@@ -33,7 +35,7 @@ export interface Product extends IdEntity {
   isInStock: boolean;
 }
 export class ProductModel<T extends Product = Product> extends IdEntityModel<T> {
-  declare static createEmptyValue: () => Product;
+  static override createEmptyValue = makeObjectEmptyValueCreator(ProductModel);
 
   get description(): StringModel {
     return this[_getPropertyModel]('description', (parent, key) => new StringModel(parent, key, false, new Required()));
@@ -53,7 +55,7 @@ export interface Customer extends IdEntity {
   nickName: string;
 }
 export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<T> {
-  declare static createEmptyValue: () => Customer;
+  static override createEmptyValue = makeObjectEmptyValueCreator(CustomerModel);
 
   get fullName(): StringModel {
     return this[_getPropertyModel](
@@ -78,7 +80,7 @@ export interface Order extends IdEntity {
   total?: number;
 }
 export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
-  declare static createEmptyValue: () => Order;
+  static override createEmptyValue = makeObjectEmptyValueCreator(OrderModel);
 
   get customer(): CustomerModel {
     return this[_getPropertyModel]('customer', (parent, key) => new CustomerModel(parent, key, false, new Required()));
@@ -124,7 +126,7 @@ export interface TestEntity {
 }
 
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
-  declare static createEmptyValue: () => TestEntity;
+  static override createEmptyValue = makeObjectEmptyValueCreator(TestModel);
 
   get fieldString(): StringModel {
     return this[_getPropertyModel]('fieldString', (parent, key) => new StringModel(parent, key, false));
@@ -206,7 +208,7 @@ export interface Employee extends IdEntity {
   colleagues?: readonly Employee[];
 }
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
-  declare static createEmptyValue: () => Employee;
+  static override createEmptyValue = makeObjectEmptyValueCreator(EmployeeModel);
 
   get fullName(): StringModel {
     return this[_getPropertyModel]('fullName', (parent, key) => new StringModel(parent, key, false));
@@ -238,6 +240,8 @@ export interface TestMessageInterpolationEntity {
 export class TestMessageInterpolationModel<
   T extends TestMessageInterpolationEntity = TestMessageInterpolationEntity,
 > extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(TestMessageInterpolationModel);
+
   get stringMinSize(): StringModel {
     return this[_getPropertyModel](
       'stringMinSize',
@@ -260,9 +264,7 @@ export enum RecordStatus {
 }
 
 export class RecordStatusModel extends EnumModel<typeof RecordStatus> {
-  static override createEmptyValue(): RecordStatus {
-    return RecordStatus.CREATED;
-  }
+  static override createEmptyValue = makeEnumEmptyValueCreator(RecordStatusModel);
 
   readonly [_enum] = RecordStatus;
 }
@@ -272,7 +274,7 @@ export interface WithPossibleCharList {
 }
 
 export class WithPossibleCharListModel extends ObjectModel<WithPossibleCharList> {
-  declare static createEmptyValue: () => WithPossibleCharList;
+  static override createEmptyValue = makeObjectEmptyValueCreator(WithPossibleCharListModel);
 
   get charList(): StringModel {
     return this[_getPropertyModel]('charList', (parent, key) => new StringModel(parent, key, true));
