@@ -82,6 +82,26 @@ describe('@hilla/form', () => {
         total: undefined,
       };
 
+      function testClear(doClear: () => void) {
+        binder.read({
+          ...expectedEmptyOrder,
+          notes: 'bar',
+          customer: {
+            ...expectedEmptyOrder.customer,
+            fullName: 'bar',
+          },
+        });
+        requestUpdateStub.reset();
+        assert.notDeepEqual(binder.value, expectedEmptyOrder);
+        assert.notDeepEqual(binder.defaultValue, expectedEmptyOrder);
+
+        doClear();
+
+        assert.deepEqual(binder.value, expectedEmptyOrder);
+        assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
+        expect(requestUpdateStub).to.be.calledOnce;
+      }
+
       beforeEach(() => {
         binder = new Binder(litOrderView, OrderModel);
         requestUpdateStub.reset();
@@ -173,23 +193,13 @@ describe('@hilla/form', () => {
       });
 
       it('should clear value and default value', () => {
-        binder.read({
-          ...expectedEmptyOrder,
-          notes: 'bar',
-          customer: {
-            ...expectedEmptyOrder.customer,
-            fullName: 'bar',
-          },
-        });
-        requestUpdateStub.reset();
-        assert.notDeepEqual(binder.value, expectedEmptyOrder);
-        assert.notDeepEqual(binder.defaultValue, expectedEmptyOrder);
-
-        binder.clear();
-
-        assert.deepEqual(binder.value, expectedEmptyOrder);
-        assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
-        expect(requestUpdateStub).to.be.calledOnce;
+        testClear(() => binder.clear());
+      });
+      it('should clear value when setting an undefined value', () => {
+        testClear(() => binder.read(undefined));
+      });
+      it('should clear value when setting a null value', () => {
+        testClear(() => binder.read(null));
       });
 
       it('should update when clearing validation', async () => {

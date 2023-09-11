@@ -129,12 +129,15 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   }
 
   /**
-   * Read the given value into the form and clear validation errors
+   * Read the given value into the form and clear validation errors. Clears the form if the value is undefined.
    *
-   * @param value - Sets the argument as the new default
-   * value before resetting, otherwise the previous default is used.
+   * @param value - The value to read, or undefined to clear.
    */
-  read(value: T): void {
+  read(value: T | null | undefined): void {
+    if (value === undefined || value === null) {
+      this.clear();
+      return;
+    }
     this.defaultValue = value;
     if (
       // Skip when no value is set yet (e.g., invoked from constructor)

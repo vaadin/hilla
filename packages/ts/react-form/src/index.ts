@@ -60,7 +60,7 @@ export type UseFormResult<T, M extends AbstractModel<T>> = Readonly<{
   submit(): Promise<T | undefined>;
   reset(): void;
   clear(): void;
-  read(value: T): void;
+  read(value: T | undefined | null): void;
 }> &
   UseFormPartResult<T, M>;
 
