@@ -148,6 +148,7 @@
       </activation>
       <modules>
         <module>endpoints</module>
+        <module>endpoints-contextpath</module>
         <module>endpoints discovery</module>
         <module>endpoints-custom-client</module>
         <!--
