@@ -70,8 +70,7 @@ public final class EndpointPlugin
             var endpoints = rootNode.getSource()
                     .getClassesWithAnnotation(endpointAnnotationName,
                             "dev.hilla.BrowserCallable")
-                    .stream().map(ClassInfoModel::of)
-                    .toList();
+                    .stream().map(ClassInfoModel::of).toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return nodeDependencies.appendChildNodes(
                     endpoints.stream().filter(ClassInfoModel::isNonJDKClass)
