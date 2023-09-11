@@ -10,21 +10,23 @@ export type AccessProps = Readonly<{
   rolesAllowed?: readonly string[];
 }>;
 
-export type ViewMeta = Readonly<{ handle?: AccessProps & MenuProps }>;
+export type RouteMetadata = AccessProps & MenuProps;
+
+type HandleWithMetadata = { handle?: RouteMetadata };
 
 type Override<T, E> = E & Omit<T, keyof E>;
 
-export type IndexHillaRouteObject = Override<IndexRouteObject, ViewMeta>;
-export type NonIndexHillaRouteObject = Override<
-  Override<NonIndexRouteObject, ViewMeta>,
+export type IndexRouteObjectWithMetadata = Override<IndexRouteObject, HandleWithMetadata>;
+export type NonIndexRouteObjectWithMetadata = Override<
+  Override<NonIndexRouteObject, HandleWithMetadata>,
   {
-    children?: HillaRouteObject[];
+    children?: RouteObjectWithMetadata[];
   }
 >;
-export type HillaRouteObject = IndexHillaRouteObject | NonIndexHillaRouteObject;
+export type RouteObjectWithMetadata = IndexRouteObjectWithMetadata | NonIndexRouteObjectWithMetadata;
 
-type RouteMatch = ReturnType<typeof useMatches> extends Array<infer T> ? T : never;
-
-export type HillaRouteMatch = Readonly<Override<RouteMatch, ViewMeta>>;
-
-export const useHillaMatches = useMatches as () => readonly HillaRouteMatch[];
+export function useRouteMetadata(): RouteMetadata | undefined {
+  const matches = useMatches();
+  const match = [...matches].reverse().find((m) => m.handle);
+  return match?.handle as RouteMetadata | undefined;
+}
