@@ -1,7 +1,16 @@
 import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend/EndpointErrors.js';
-import { BinderNode, CHANGED } from './BinderNode.js';
+import type { Constructor } from 'type-fest';
+import {
+  _clearValidation,
+  _initializeValue,
+  _setErrorsWithDescendants,
+  _update,
+  _updateValidation,
+  BinderNode,
+  CHANGED,
+} from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { _parent, type AbstractModel, type ModelConstructor, type Value } from './Models.js';
+import { _parent, type AbstractModel, type Value } from './Models.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -12,6 +21,8 @@ import {
 } from './Validation.js';
 
 export { CHANGED };
+
+export const _root = '$root$';
 
 export type BinderConfiguration<T> = Readonly<{
   onChange?(oldValue?: T): void;
@@ -43,13 +54,13 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   #validating = false;
 
-  #validationRequestSymbol?: Promise<void>;
+  #validationRequest?: Promise<void>;
 
   #onChange?: (oldValue?: Value<M>) => void;
 
   readonly #onSubmit?: (value: Value<M>) => Promise<any>;
 
-  #validations = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
+  #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
 
   readonly #context: unknown = this;
 
@@ -64,15 +75,17 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(Model: ModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
-    super(new Model(undefined, 'value', false));
-    this.#emptyValue = this.value;
+  constructor(Model: Constructor<M>, config?: BinderRootConfiguration<Value<M>>) {
+    super(new Model(undefined, _root, false));
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;
     this.#onChange = config?.onChange ?? (() => {});
-    this.read(this.#emptyValue);
     this.#onSubmit = config?.onSubmit ?? this.#onSubmit;
+    // Initialize value instead of the parent.
+    this[_initializeValue]();
+    this.#emptyValue = this.value;
+    this.read(this.#emptyValue);
   }
 
   /**
@@ -87,8 +100,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     this.dispatchEvent(CHANGED);
   }
 
-  override get binder(): this {
-    return this;
+  override get binder(): BinderRoot {
+    return this as BinderRoot;
   }
 
   /**
@@ -105,8 +118,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
     const oldValue = this.#value;
     this.#value = newValue;
-    this.update(oldValue);
-    this.updateValidation().catch(() => {});
+    this[_update](oldValue);
+    this[_updateValidation]().catch(() => {});
   }
 
   /**
@@ -137,12 +150,12 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
       // Skip when no value is set yet (e.g., invoked from constructor)
       this.value &&
       // Clear validation state, then proceed if update is needed
-      this.clearValidation() &&
+      this[_clearValidation]() &&
       // When value is dirty, another update is coming from invoking the value
       // setter below, so we skip this one to prevent duplicate updates
       this.value === value
     ) {
-      this.update(this.value);
+      this[_update](this.value);
     }
 
     this.value = this.defaultValue;
@@ -172,6 +185,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     if (this.#onSubmit) {
       return this.submitTo(this.#onSubmit);
     }
+
     return undefined;
   }
 
@@ -187,7 +201,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     }
 
     this.#submitting = true;
-    this.update(this.value);
+    this[_update](this.value);
     this.dispatchEvent(CHANGED);
     try {
       return await endpointMethod.call(this.#context, this.value);
@@ -207,7 +221,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
             value,
           });
         });
-        this.setErrorsWithDescendants(valueErrors);
+        this[_setErrorsWithDescendants](valueErrors);
         throw new ValidationError(valueErrors);
       }
 
@@ -215,7 +229,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     } finally {
       this.#submitting = false;
       this.defaultValue = this.value;
-      this.update(this.value);
+      this[_update](this.value);
     }
   }
 
@@ -223,13 +237,12 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     model: NM,
     validator: Validator<Value<NM>>,
   ): Promise<ReadonlyArray<ValueError<Value<NM>>>> {
-    type ModelValue = Value<NM>;
+    let modelValidations: Map<Validator<Value<NM>>, Promise<ReadonlyArray<ValueError<Value<NM>>>>>;
 
-    let modelValidations: Map<Validator<ModelValue>, Promise<ReadonlyArray<ValueError<ModelValue>>>>;
     if (this.#validations.has(model)) {
       modelValidations = this.#validations.get(model) as Map<
-        Validator<ModelValue>,
-        Promise<ReadonlyArray<ValueError<ModelValue>>>
+        Validator<Value<NM>>,
+        Promise<ReadonlyArray<ValueError<Value<NM>>>>
       >;
     } else {
       modelValidations = new Map();
@@ -270,14 +283,14 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
   }
 
   protected performValidation(): Promise<void> | void {
-    if (!this.#validationRequestSymbol) {
+    if (!this.#validationRequest) {
       this.#validating = true;
       this.dispatchEvent(CHANGED);
-      this.#validationRequestSymbol = Promise.resolve().then(() => {
-        this.#validationRequestSymbol = undefined;
+      this.#validationRequest = Promise.resolve().then(() => {
+        this.#validationRequest = undefined;
       });
     }
-    return this.#validationRequestSymbol;
+    return this.#validationRequest;
   }
 
   protected completeValidation(): void {
@@ -285,7 +298,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     this.dispatchEvent(CHANGED);
   }
 
-  protected override update(oldValue: Value<M>): void {
+  protected override [_update](oldValue: Value<M>): void {
     this.#onChange?.call(this.#context, oldValue);
     this.dispatchEvent(CHANGED);
   }

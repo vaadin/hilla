@@ -100,7 +100,7 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
           parent,
           key,
           false,
-          (p, index) => new ProductModel(p, index, false),
+          (parent, key) => new ProductModel(parent, key, false),
           ProductModel.createEmptyValue,
         ),
     );
@@ -122,6 +122,7 @@ export interface TestEntity {
   fieldEnum: RecordStatus;
   fieldAny: any;
 }
+
 export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T> {
   declare static createEmptyValue: () => TestEntity;
 
@@ -149,7 +150,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
           parent,
           key,
           false,
-          (parent, index) => new StringModel(parent, index, false),
+          (parent, key) => new StringModel(parent, key, false),
           StringModel.createEmptyValue,
         ),
     );
@@ -163,7 +164,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
           parent,
           key,
           false,
-          (parent, index) => new IdEntityModel(parent, index, false),
+          (parent, key) => new IdEntityModel(parent, key, false),
           IdEntityModel.createEmptyValue,
         ),
     );
@@ -177,12 +178,12 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
           parent,
           key,
           false,
-          (parent, index) =>
+          (parent, key) =>
             new ArrayModel(
               parent,
-              index,
+              key,
               false,
-              (parent, index) => new NumberModel(parent, index, false, new Positive()),
+              (parent, key) => new NumberModel(parent, key, false, new Positive()),
               NumberModel.createEmptyValue,
             ),
           ArrayModel.createEmptyValue,
@@ -223,7 +224,7 @@ export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<
           parent,
           key,
           true,
-          (parent, index) => new EmployeeModel(parent, index, false),
+          (parent, key) => new EmployeeModel(parent, key, false),
           EmployeeModel.createEmptyValue,
         ),
     );
@@ -237,8 +238,6 @@ export interface TestMessageInterpolationEntity {
 export class TestMessageInterpolationModel<
   T extends TestMessageInterpolationEntity = TestMessageInterpolationEntity,
 > extends ObjectModel<T> {
-  declare static createEmptyValue: () => TestMessageInterpolationEntity;
-
   get stringMinSize(): StringModel {
     return this[_getPropertyModel](
       'stringMinSize',
@@ -261,6 +260,10 @@ export enum RecordStatus {
 }
 
 export class RecordStatusModel extends EnumModel<typeof RecordStatus> {
+  static override createEmptyValue(): RecordStatus {
+    return RecordStatus.CREATED;
+  }
+
   readonly [_enum] = RecordStatus;
 }
 

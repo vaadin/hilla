@@ -22,13 +22,12 @@ import {
   RecordStatus,
   RecordStatusModel,
   WithPossibleCharListModel,
-  type TestEntity,
   TestModel,
 } from './TestModels.js';
 
 describe('@hilla/form', () => {
   describe('Model', () => {
-    let binder: Binder<TestEntity, TestModel>;
+    let binder: Binder<TestModel>;
 
     beforeEach(() => {
       binder = new Binder(document.createElement('div'), TestModel);

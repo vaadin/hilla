@@ -4,22 +4,22 @@ import type { BinderRoot } from './BinderRoot.js';
 import { type AbstractModel, NumberModel, type Value } from './Models.js';
 import { Required } from './Validators.js';
 
-export interface ValueError<T> {
-  property: AbstractModel<any> | string;
+export interface ValueError<T = unknown> {
+  property: AbstractModel | string;
   message: string;
   value: T;
   validator: Validator<T>;
 }
 
 export interface ValidationResult {
-  property: AbstractModel<any> | string;
+  property: AbstractModel | string;
   message?: string;
 }
 
 export class ValidationError extends Error {
-  errors: ReadonlyArray<ValueError<any>>;
+  errors: readonly ValueError[];
 
-  constructor(errors: ReadonlyArray<ValueError<any>>) {
+  constructor(errors: readonly ValueError[]) {
     super(
       [
         'There are validation errors in the form.',
@@ -39,7 +39,7 @@ export type InterpolateMessageCallback<M extends AbstractModel> = (
   binderNode: BinderNode<M>,
 ) => string;
 
-export interface Validator<T> {
+export interface Validator<T = unknown> {
   message: string;
   impliesRequired?: boolean;
   validate(
@@ -52,7 +52,7 @@ export interface Validator<T> {
     | readonly ValidationResult[];
 }
 
-export class ServerValidator implements Validator<any> {
+export class ServerValidator implements Validator {
   message: string;
 
   constructor(message: string) {
