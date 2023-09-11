@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,13 +20,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Annotation marks the class itself should not be treated as an
- * {@link Endpoint}, but inheritable methods will be added to the descendant
- * Endpoints.
+ * Makes the methods of the annotated class available to the browser.
+ * <p>
+ * For each class, a corresponding TypeScript class is generated in
+ * {@code frontend/generated} with TypeScript methods for invoking the methods
+ * in this class.
+ * <p>
+ * This is an alias for {@link Endpoint}.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EndpointExposed {
-
+@Component
+public @interface BrowserCallable {
 }
