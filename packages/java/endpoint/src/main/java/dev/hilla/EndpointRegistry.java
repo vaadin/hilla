@@ -122,7 +122,7 @@ public class EndpointRegistry {
 
         vaadinEndpoints.put(endpointName.toLowerCase(Locale.ENGLISH),
                 new VaadinEndpointData(endpointBean, endpointPublicMethods));
-        LOGGER.info("Registered endpoint '{}' with class '{}'", endpointName,
+        LOGGER.debug("Registered endpoint '{}' with class '{}'", endpointName,
                 beanType);
     }
 

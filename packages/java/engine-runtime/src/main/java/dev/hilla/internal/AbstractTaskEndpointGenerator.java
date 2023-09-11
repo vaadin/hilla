@@ -67,7 +67,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
 
         if (firstRun) {
-            logger.info("Configure Hilla engine using build system plugin");
+            logger.debug("Configure Hilla engine using build system plugin");
 
             try {
                 // Create a runner for Maven

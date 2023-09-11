@@ -26,7 +26,7 @@ export default class GeneratorIO {
     this.#outputDir = isAbsolute(outputDir) ? outputDir : resolve(this.cwd, outputDir);
     this.#logger = logger;
 
-    logger.global.info(`Output directory: ${this.#outputDir}`);
+    logger.global.debug(`Output directory: ${this.#outputDir}`);
   }
 
   /**

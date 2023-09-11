@@ -281,7 +281,7 @@ public final class Parser {
         Objects.requireNonNull(config.endpointAnnotationName,
                 "[JVM Parser] endpointAnnotationName is not provided.");
 
-        logger.info("JVM Parser started");
+        logger.debug("JVM Parser started");
 
         var storage = new SharedStorage(config);
 
@@ -318,7 +318,7 @@ public final class Parser {
             pluginExecutor.execute();
         }
 
-        logger.info("JVM Parser finished successfully");
+        logger.debug("JVM Parser finished successfully");
 
         return storage.getOpenAPI();
     }
