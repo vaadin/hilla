@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation marks the class itself should not be treated as an
- * {@link Endpoint} but inheritable methods will be added to the descendant
+ * {@link Endpoint}, but inheritable methods will be added to the descendant
  * Endpoints.
  */
 @Target(ElementType.TYPE)
