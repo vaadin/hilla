@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
  * For each class, a corresponding TypeScript class is generated in
  * {@code frontend/generated} with TypeScript methods for invoking the methods
  * in this class.
+ * <p>
+ * This is an alias for {@link Endpoint}.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
