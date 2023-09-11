@@ -71,7 +71,7 @@ public final class EndpointPlugin
                     .getClassesWithAnnotation(endpointAnnotationName,
                             "dev.hilla.BrowserCallable")
                     .stream().map(ClassInfoModel::of)
-                    .collect(Collectors.toList());
+                    .toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return nodeDependencies.appendChildNodes(
                     endpoints.stream().filter(ClassInfoModel::isNonJDKClass)

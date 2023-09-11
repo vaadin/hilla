@@ -22,6 +22,6 @@ public class ScanResult {
         Stream<ClassInfo> c = Stream.of(annotations)
                 .flatMap(annotation -> result
                         .getClassesWithAnnotation(annotation).stream());
-        return c.map(ClassInfo::loadClass).collect(Collectors.toList());
+        return c.map(ClassInfo::loadClass).toList();
     }
 }
