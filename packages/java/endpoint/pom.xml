@@ -180,14 +180,40 @@
             <artifactId>spring-beans</artifactId>
         </dependency>
 
-        <!-- vaadin-fusion generator-->
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-symbol-solver-core</artifactId>
             <version>${github.javaparser.core.version}</version>
         </dependency>
 
-        <!-- Fusion Testing dependencies -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>aspectjrt</artifactId>
+                    <groupId>org.aspectj</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>parser-jvm-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>runtime-plugin-transfertypes</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Testing dependencies -->
 
         <!-- TODO: re-enable tests mocking final classes in the connect
           package by using the org.mockito.plugins.MockMaker plugin with
@@ -238,16 +264,7 @@
             <artifactId>spring-boot-test-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>parser-jvm-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>runtime-plugin-transfertypes</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
     </dependencies>
 
 </project>
