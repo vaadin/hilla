@@ -31,7 +31,7 @@ import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * A util class related to published classes.
+ * A util class related to classes available to the browser.
  */
 @Component
 public class EndpointUtil implements EndpointRequestUtil {
