@@ -18,6 +18,7 @@
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "echo \"Skipping\"",
+    "lint:fix": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "echo \"Skipping\"",
     "test:watch": "npm run test -- --watch",
