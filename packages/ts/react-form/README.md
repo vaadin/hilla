@@ -1,22 +1,20 @@
-# Hilla Form
+# Hilla React Form
 
-[API documentation ↗](https://hilla.dev/docs/data-binding/reference)
+[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/react-form.svg)](https://www.npmjs.com/package/@hilla/react-form)
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/form.svg)](https://www.npmjs.com/package/@hilla/form)
-
-A set of utilities for building forms with TypeScript and [Lit](https://lit.dev/), including data binding, validation, code generation, backend integration, Lit directives, and more.
+A set of utilities for building forms with TypeScript and React.
 
 A part of the Hilla project.
 
 ## Installation
 
 ```bash
-$ npm install @hilla/form
+$ npm install @hilla/react-form
 ```
 
 ## Contribution
 
-Read the [contributing guide](https://vaadin.com/docs/latest/contributing-docs/overview) to learn about our development process, how to propose bugfixes and improvements, and how to test your changes to Vaadin components.
+Read the [contributing guide](https://vaadin.com/docs/latest/contributing-docs/overview) to learn about our development process, how to propose bugfixes and improvements, and how to test your changes.
 
 ## License
 
