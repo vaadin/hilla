@@ -3,6 +3,25 @@ Hilla {{version}}
 
 ## New and Noteworthy since Previous Hilla Update
 
+Hilla 2.2 introduces an innovative form hook for React with server-side validation, and improved hot reloading for faster development.
+
+### New React form support
+
+This release includes a new feature that simplifies the process of building React forms:
+
+1. You define validation rules on your Java object
+2. Hilla generates a TypeScript model description that includes the validation logic
+3. Use the generated model description to create a form in React
+4. The user sees validation errors as soon as they type
+5. When the user submits the form, Hilla re-validates the data on the server
+
+Read more about bunding data to forms in the [docs](https://hilla.dev/docs/react/guides/forms/binder).
+
+### Faster development with hot reloading
+
+This release also includes a new feature that addresses an enhancement requested by community members working on large projects: [improved support for hot reloading in development mode](https://github.com/vaadin/hilla/pull/1146).
+Now, Hilla endpoints are re-generated without a server restart if you use JRebel or HotSwapAgent, so you can stay in the flow while developing your app.
+
 ## Known Issues
 
 ## Versions
