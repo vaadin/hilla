@@ -32,15 +32,9 @@ async function sleep(ms: number) {
   );
 }
 describe('@hilla/react-grid', () => {
-  //   type UseAutoGridSpy = sinon.SinonSpy<Parameters<typeof _useAutoGrid>, ReturnType<typeof _useAutoGrid>>;
-  //   const useAutoGrid = sinon.spy(_useAutoGrid) as typeof _useAutoGrid;
-
-  beforeEach(() => {
-    // (useAutoGrid as UseAutoGridSpy).resetHistory();
-  });
+  beforeEach(() => {});
 
   function TestAutoGrid() {
-    // const autoGrid = useAutoGrid(fakeEndpoint, PersonModel);
     return <AutoGrid service={fakeService} model={PersonModel}></AutoGrid>;
   }
   describe('useAutoGrid', () => {
@@ -68,6 +62,12 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
+    });
+    it('does not pass its own parameters to the underlying grid', async () => {
+      const result = render(<TestAutoGrid />);
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      expect(grid.getAttribute("model")).to.be.null;
+      expect(grid.getAttribute("service")).to.be.null;
     });
   });
 });
