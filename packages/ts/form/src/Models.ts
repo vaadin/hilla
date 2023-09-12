@@ -204,12 +204,11 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     key: keyof any,
     optional: boolean,
     createItem: (parent: ArrayModel<MItem>, key: number) => MItem,
-    createEmptyItemValue: () => Value<MItem>,
     ...validators: ReadonlyArray<Validator<ReadonlyArray<Value<MItem>>>>
   ) {
     super(parent, key, optional, ...validators);
     this.#createItem = createItem;
-    this[_createEmptyItemValue] = createEmptyItemValue;
+    this[_createEmptyItemValue] = createItem(this, 0).constructor.createEmptyValue as () => Value<MItem>;
   }
 
   /**

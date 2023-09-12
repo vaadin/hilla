@@ -97,14 +97,7 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
   get products(): ArrayModel<ProductModel> {
     return this[_getPropertyModel](
       'products',
-      (parent, key) =>
-        new ArrayModel(
-          parent,
-          key,
-          false,
-          (parent, key) => new ProductModel(parent, key, false),
-          ProductModel.createEmptyValue,
-        ),
+      (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new ProductModel(parent, key, false)),
     );
   }
 
@@ -147,28 +140,14 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
   get fieldArrayString(): ArrayModel<StringModel> {
     return this[_getPropertyModel](
       'fieldArrayString',
-      (parent, key) =>
-        new ArrayModel(
-          parent,
-          key,
-          false,
-          (parent, key) => new StringModel(parent, key, false),
-          StringModel.createEmptyValue,
-        ),
+      (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new StringModel(parent, key, false)),
     );
   }
 
   get fieldArrayModel(): ArrayModel<IdEntityModel> {
     return this[_getPropertyModel](
       'fieldArrayModel',
-      (parent, key) =>
-        new ArrayModel(
-          parent,
-          key,
-          false,
-          (parent, key) => new IdEntityModel(parent, key, false),
-          IdEntityModel.createEmptyValue,
-        ),
+      (parent, key) => new ArrayModel(parent, key, false, (parent, key) => new IdEntityModel(parent, key, false)),
     );
   }
 
@@ -181,14 +160,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
           key,
           false,
           (parent, key) =>
-            new ArrayModel(
-              parent,
-              key,
-              false,
-              (parent, key) => new NumberModel(parent, key, false, new Positive()),
-              NumberModel.createEmptyValue,
-            ),
-          ArrayModel.createEmptyValue,
+            new ArrayModel(parent, key, false, (parent, key) => new NumberModel(parent, key, false, new Positive())),
         ),
     );
   }
@@ -221,14 +193,7 @@ export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<
   get colleagues(): ArrayModel<EmployeeModel> {
     return this[_getPropertyModel](
       'colleagues',
-      (parent, key) =>
-        new ArrayModel(
-          parent,
-          key,
-          true,
-          (parent, key) => new EmployeeModel(parent, key, false),
-          EmployeeModel.createEmptyValue,
-        ),
+      (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new EmployeeModel(parent, key, false)),
     );
   }
 }
