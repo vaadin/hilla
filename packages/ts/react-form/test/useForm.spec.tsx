@@ -35,7 +35,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit, value } = useForm(LoginModel, { onChange, onSubmit });
+    const { field, model, submit, value } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -115,7 +115,7 @@ describe('@hilla/react-form', () => {
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await act(() => {
+      await act(async () => {
         const { read } = (useForm as UseFormSpy).returnValues[0];
         read({
           rememberMe: true,
