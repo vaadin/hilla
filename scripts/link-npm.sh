@@ -15,4 +15,4 @@ do
   pkgs+=" "@hilla/`basename $tsPkg`@$tsPkg
 done
 
-npm i $pkgs
+npm i $pkgs --offline
