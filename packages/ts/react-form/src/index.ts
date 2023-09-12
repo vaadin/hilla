@@ -18,14 +18,13 @@ import {
 import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 
-
 const $wnd = window as any;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.2.0-beta1',
+  version: /* updated-by-script */ '2.2.0',
 });
 
 function useUpdate() {
