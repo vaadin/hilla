@@ -2,6 +2,7 @@ import type { VaadinWindow } from './types.js';
 
 export * from './Binder.js';
 export * from './BinderRoot.js';
+export * from './BinderNode.js';
 export * from './Field.js';
 export * from './Models.js';
 export * from './Validation.js';

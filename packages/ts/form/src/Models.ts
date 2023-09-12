@@ -15,7 +15,7 @@ export const _enum = Symbol('enum');
 
 export const defaultKey = '$value$';
 
-const _optional = Symbol();
+const _optional = Symbol('optional');
 
 export interface HasFromString<T> {
   [_fromString](value: string): T;

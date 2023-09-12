@@ -32,11 +32,10 @@ import type { Validator, ValueError } from './Validation.js';
 import { ValidityStateValidator } from './Validators.js';
 import { _validity } from './Validity.js';
 
-export const _initializeValue = Symbol();
-export const _updateValidation = Symbol();
-export const _update = Symbol();
-export const _setErrorsWithDescendants = Symbol();
-export const _clearValidation = Symbol();
+export const _updateValidation = Symbol('updateValidation');
+export const _update = Symbol('update');
+export const _setErrorsWithDescendants = Symbol('setErrorsWithDescendants');
+export const _clearValidation = Symbol('clearValidation');
 
 const nodes = new WeakMap<AbstractModel, BinderNode>();
 

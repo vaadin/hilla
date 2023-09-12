@@ -19,8 +19,6 @@ import {
   type ValueError,
 } from './Validation.js';
 
-export { CHANGED };
-
 export type BinderConfiguration<T> = Readonly<{
   onChange?(oldValue?: T): void;
   onSubmit?(value: T): Promise<T | undefined | void>;
@@ -28,7 +26,7 @@ export type BinderConfiguration<T> = Readonly<{
 
 export type BinderRootConfiguration<T> = BinderConfiguration<T> &
   Readonly<{
-    context?: any;
+    context?: unknown;
   }>;
 
 /**
