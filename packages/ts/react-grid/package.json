@@ -42,6 +42,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@hilla/form": "*",
     "@hilla/react-components": "^2.1.7"
   },
   "peerDependencies": {
