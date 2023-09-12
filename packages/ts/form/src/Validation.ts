@@ -92,31 +92,36 @@ export async function runValidator<M extends AbstractModel>(
     return [];
   }
 
-  const result = await validator.validate(value, binderNode.binder);
+  try {
+    const result = await validator.validate(value, binderNode.binder);
 
-  if (result === false) {
-    return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+    if (result === false) {
+      return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+    }
+
+    if (result === true || (Array.isArray(result) && result.length === 0)) {
+      return [];
+    }
+
+    if (Array.isArray(result)) {
+      return result.map((result2) => ({
+        message: interpolateMessage(validator.message),
+        ...setPropertyAbsolutePath(binderNode.name, result2),
+        validator,
+        value,
+      }));
+    }
+
+    return [
+      {
+        message: interpolateMessage(validator.message),
+        ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
+        validator,
+        value,
+      },
+    ];
+  } catch (error: unknown) {
+    console.error(`${binderNode.name} - Validator ${validator.constructor.name} threw an error:`, error);
+    return [{ message: 'Validator threw an error', property: binderNode.name, validator, value }];
   }
-
-  if (result === true || (Array.isArray(result) && result.length === 0)) {
-    return [];
-  }
-
-  if (Array.isArray(result)) {
-    return result.map((result2) => ({
-      message: interpolateMessage(validator.message),
-      ...setPropertyAbsolutePath(binderNode.name, result2),
-      validator,
-      value,
-    }));
-  }
-
-  return [
-    {
-      message: interpolateMessage(validator.message),
-      ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
-      validator,
-      value,
-    },
-  ];
 }

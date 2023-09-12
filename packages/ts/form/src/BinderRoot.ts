@@ -2,7 +2,6 @@ import { EndpointValidationError, type ValidationErrorData } from '@hilla/fronte
 import type { Constructor } from 'type-fest';
 import {
   _clearValidation,
-  _initializeValue,
   _setErrorsWithDescendants,
   _update,
   _updateValidation,
@@ -24,7 +23,7 @@ export { CHANGED };
 
 export type BinderConfiguration<T> = Readonly<{
   onChange?(oldValue?: T): void;
-  onSubmit?(value: T): Promise<T | undefined> | Promise<void>;
+  onSubmit?(value: T): Promise<T | undefined | void>;
 }>;
 
 export type BinderRootConfiguration<T> = BinderConfiguration<T> &
@@ -54,9 +53,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   #validationRequest?: Promise<void>;
 
-  #onChange?: (oldValue?: Value<M>) => void;
-
-  readonly #onSubmit?: (value: Value<M>) => Promise<any>;
+  #config?: BinderRootConfiguration<Value<M>>;
 
   #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
 
@@ -81,10 +78,9 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;
-    this.#onChange = config?.onChange ?? (() => {});
-    this.#onSubmit = config?.onSubmit ?? this.#onSubmit;
+    this.#config = config;
     // Initialize value instead of the parent.
-    this[_initializeValue]();
+    this.initializeValue();
     this.#emptyValue = this.value;
     this.read(this.#emptyValue);
   }
@@ -140,12 +136,15 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
   }
 
   /**
-   * Read the given value into the form and clear validation errors
+   * Read the given value into the form and clear validation errors. Clears the form if the value is undefined.
    *
-   * @param value - Sets the argument as the new default
-   * value before resetting, otherwise the previous default is used.
+   * @param value - The value to read, or undefined to clear.
    */
-  read(value: Value<M>): void {
+  read(value: Value<M> | null | undefined): void {
+    if (value === undefined || value === null) {
+      this.clear();
+      return;
+    }
     this.defaultValue = value;
     if (
       // Skip when no value is set yet (e.g., invoked from constructor)
@@ -182,9 +181,10 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    *
    * It's a no-op if the onSubmit callback is undefined.
    */
-  async submit(): Promise<Value<M> | undefined> {
-    if (this.#onSubmit) {
-      return this.submitTo(this.#onSubmit);
+  async submit(): Promise<Value<M> | undefined | void> {
+    const onSubmit = this.#config?.onSubmit;
+    if (onSubmit) {
+      return this.submitTo(onSubmit);
     }
 
     return undefined;
@@ -300,7 +300,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
   }
 
   protected override [_update](oldValue: Value<M>): void {
-    this.#onChange?.call(this.#context, oldValue);
+    this.#config?.onChange?.call(this.#context, oldValue);
     this.dispatchEvent(CHANGED);
   }
 }

@@ -1,26 +1,27 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render } from '@testing-library/react';
+import { act, render, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useBinder as _useBinder, useBinderNode } from '../src/index.js';
-import { type Login, LoginModel, type User, type UserModel } from './models.js';
+import { useForm as _useForm, useFormPart } from '../src/index.js';
+import { type Login, LoginModel, UserModel } from './models.js';
 
 use(sinonChai);
 
 describe('@hilla/react-form', () => {
-  type UseBinderSpy = sinon.SinonSpy<Parameters<typeof _useBinder>, ReturnType<typeof _useBinder>>;
-  const useBinder = sinon.spy(_useBinder) as typeof _useBinder;
+  type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
+  const useForm = sinon.spy(_useForm) as typeof _useForm;
 
   let onSubmit: (value: Login) => Promise<Login>;
+  let onChange: (value: Login) => void;
 
   type UserFormProps = Readonly<{
     model: UserModel;
   }>;
 
   function UserForm({ model: user }: UserFormProps) {
-    const { field, model } = useBinderNode(user);
-    const name = useBinderNode(user.name);
+    const { field, model } = useFormPart(user);
+    const name = useFormPart(user.name);
 
     return (
       <fieldset>
@@ -34,7 +35,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit, value } = useBinder(LoginModel, { onSubmit });
+    const { field, model, read, submit, value } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -52,22 +53,27 @@ describe('@hilla/react-form', () => {
     );
   }
 
+  async function fillAndSubmitLoginForm(getByTestId: (id: string) => HTMLElement) {
+    const user = userEvent.setup();
+    await user.click(getByTestId('user.name'));
+    await user.keyboard('johndoe');
+    await user.click(getByTestId('user.password'));
+    await user.keyboard('john123456');
+    await user.click(getByTestId('rememberMe'));
+    await user.click(getByTestId('submit'));
+  }
+
   beforeEach(() => {
     onSubmit = sinon.stub();
-    (useBinder as UseBinderSpy).resetHistory();
+    onChange = sinon.stub();
+    (useForm as UseFormSpy).resetHistory();
   });
 
-  describe('useBinder', () => {
+  describe('useForm', () => {
     it('collects info from a form', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
-      await user.click(getByTestId('user.password'));
-      await user.keyboard('john123456');
-      await user.click(getByTestId('rememberMe'));
-      await user.click(getByTestId('submit'));
+      await fillAndSubmitLoginForm(getByTestId);
 
       expect(onSubmit).to.have.been.calledWithMatch({
         rememberMe: true,
@@ -110,7 +116,7 @@ describe('@hilla/react-form', () => {
       const { getByTestId } = render(<LoginForm />);
 
       await act(() => {
-        const { read } = (useBinder as UseBinderSpy).returnValues[0];
+        const { read } = (useForm as UseFormSpy).returnValues[0];
         read({
           rememberMe: true,
           user: {
@@ -173,6 +179,48 @@ describe('@hilla/react-form', () => {
       await user.keyboard('jane');
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('OK');
+    });
+
+    describe('configuration update', () => {
+      it('should use updated onSubmit reference', async () => {
+        // Initial render
+        const { getByTestId, rerender } = render(<LoginForm />);
+
+        // Update onSubmit reference, rerender, fill form and submit
+        onSubmit = sinon.spy();
+        rerender(<LoginForm />);
+        await fillAndSubmitLoginForm(getByTestId);
+
+        expect(onSubmit).to.have.been.calledOnce;
+      });
+
+      it('should use updated onChange reference', async () => {
+        // Initial render
+        const user = userEvent.setup();
+        const { getByTestId, rerender } = render(<LoginForm />);
+
+        // Update onChange reference, rerender, type a character
+        onChange = sinon.spy();
+        rerender(<LoginForm />);
+        await user.click(getByTestId('user.name'));
+        await user.keyboard('a');
+
+        expect(onChange).to.have.been.calledOnce;
+      });
+    });
+
+    describe('model initialization', () => {
+      it('should initialize optional string model when it is bound to a field', () => {
+        const { rerender, result } = renderHook(() => useForm(UserModel));
+
+        expect(result.current.value.passwordHint).to.be.undefined;
+
+        // Call field directive to simulate binding the model to a field
+        result.current.field(result.current.model.passwordHint);
+        rerender();
+
+        expect(result.current.value.passwordHint).to.equal('');
+      });
     });
   });
 });

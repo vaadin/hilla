@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "2.2.0-alpha10",
+  "version": "2.2.0-beta1",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -19,6 +19,7 @@
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts test/**/*.ts --fix",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -68,7 +69,6 @@
   },
   "dependencies": {
     "@hilla/frontend": "*",
-    "rimraf": "^5.0.1",
     "validator": "^13.11.0"
   },
   "peerDependencies": {

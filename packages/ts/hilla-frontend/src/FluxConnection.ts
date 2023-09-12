@@ -138,7 +138,7 @@ export class FluxConnection extends EventTarget {
       timeout: -1,
       trackMessageLength: true,
       transport: 'websocket',
-      url: `${prefix}/HILLA/push`,
+      url: prefix ? `${prefix}/HILLA/push` : 'HILLA/push',
     } satisfies Atmosphere.Request);
   }
 

@@ -109,7 +109,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
     // Workaround for children initialization with private props
     if (this.constructor === BinderNode) {
-      this[_initializeValue]();
+      this.initializeValue();
     }
   }
 
@@ -230,7 +230,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     let { value } = this.parent;
 
     if (value === undefined) {
-      this.parent[_initializeValue](true);
+      this.parent.initializeValue(true);
       ({ value } = this.parent);
     }
 
@@ -383,34 +383,6 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     }
   }
 
-  protected [_initializeValue](requiredByChildNode = false): void {
-    // First, make sure parents have value initialized
-    if (
-      this.parent &&
-      (this.parent.value === undefined || (this.parent.defaultValue as Value<M> | undefined) === undefined)
-    ) {
-      this.parent[_initializeValue](true);
-    }
-
-    const key = this.model[_key];
-    let value: Value<M> | undefined = this.parent
-      ? (this.parent.value as { readonly [key in typeof key]: Value<M> })[this.model[_key]]
-      : undefined;
-
-    if (value === undefined) {
-      // Initialize value if a child node is accessed or for the root-level node
-      if (requiredByChildNode || !this.parent) {
-        value = this.model.constructor.createEmptyValue() as Value<M>;
-        this.#setValueState(value, this.defaultValue === undefined);
-      } else if (
-        this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: Value<M> }))
-      ) {
-        this.#setValueState(undefined, this.defaultValue === undefined);
-      }
-    }
-  }
-
   *#getChildBinderNodes(): Generator<BinderNode, void, void> {
     if (this.value === undefined) {
       // Undefined value cannot have child properties and items.
@@ -476,6 +448,34 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
     if (hasInvalidState) {
       yield this.binder.requestValidation(this.model, this.#validityStateValidator);
+    }
+  }
+
+  initializeValue(forceInitialize = false): void {
+    // First, make sure parents have value initialized
+    if (
+      this.parent &&
+      (this.parent.value === undefined || (this.parent.defaultValue as Value<M> | undefined) === undefined)
+    ) {
+      this.parent.initializeValue(true);
+    }
+
+    const key = this.model[_key];
+    let value: Value<M> | undefined = this.parent
+      ? (this.parent.value as { [key in typeof key]: Value<M> })[this.model[_key]]
+      : undefined;
+
+    if (value === undefined) {
+      // Initialize value if this is the root level node, or it is enforced
+      if (forceInitialize || !this.parent) {
+        value = this.model.constructor.createEmptyValue() as Value<M>;
+        this.#setValueState(value, this.defaultValue === undefined);
+      } else if (
+        this.parent.model instanceof ObjectModel &&
+        !(key in ((this.parent.value || {}) as { [key in typeof key]?: Value<M> }))
+      ) {
+        this.#setValueState(undefined, this.defaultValue === undefined);
+      }
     }
   }
 

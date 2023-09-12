@@ -1,17 +1,14 @@
 package dev.hilla.parser.models;
 
-import java.lang.reflect.Field;
-import java.util.Comparator;
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
+
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 import io.github.classgraph.FieldInfo;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
         implements ClassMemberModel {
-    static final Comparator<FieldInfoModel> FIELD_ORDER = Comparator
-            .comparing(FieldInfoModel::getName);
     private ClassInfoModel owner;
     private SignatureModel type;
 

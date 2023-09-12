@@ -3,6 +3,7 @@ package dev.hilla.parser.plugins.backbone;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -67,8 +68,9 @@ public final class EndpointPlugin
             var endpointAnnotationName = getStorage().getParserConfig()
                     .getEndpointAnnotationName();
             var endpoints = rootNode.getSource()
-                    .getClassesWithAnnotation(endpointAnnotationName).stream()
-                    .map(ClassInfoModel::of).collect(Collectors.toList());
+                    .getClassesWithAnnotation(endpointAnnotationName,
+                            "dev.hilla.BrowserCallable")
+                    .stream().map(ClassInfoModel::of).toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return nodeDependencies.appendChildNodes(
                     endpoints.stream().filter(ClassInfoModel::isNonJDKClass)

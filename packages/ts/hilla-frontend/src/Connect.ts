@@ -138,7 +138,7 @@ export interface MiddlewareContext extends EndpointCallMetaInfo {
  * or makes the actual request.
  * @param context - The information about the call and request
  */
-export type MiddlewareNext = (context: MiddlewareContext) => MaybePromise<unknown>;
+export type MiddlewareNext = (context: MiddlewareContext) => MaybePromise<Response>;
 
 /**
  * An interface that allows defining a middleware as a class.
@@ -148,14 +148,14 @@ export interface MiddlewareClass {
    * @param context - The information about the call and request
    * @param next - Invokes the next in the call chain
    */
-  invoke(context: MiddlewareContext, next: MiddlewareNext): MaybePromise<unknown>;
+  invoke(context: MiddlewareContext, next: MiddlewareNext): MaybePromise<Response>;
 }
 
 /**
  * An async callback function that can intercept the request and response
  * of a call.
  */
-export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => MaybePromise<unknown>;
+export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNext) => MaybePromise<Response>;
 
 /**
  * An async callback that can intercept the request and response
@@ -299,8 +299,8 @@ export class ConnectClient {
     // response handling should come last after the other middlewares are done
     // with processing the response. That is why this middleware is first
     // in the final middlewares array.
-    async function responseHandlerMiddleware(context: MiddlewareContext, next: MiddlewareNext): Promise<unknown> {
-      const response = (await next(context)) as Response;
+    async function responseHandlerMiddleware(context: MiddlewareContext, next: MiddlewareNext): Promise<Response> {
+      const response = await next(context);
       await assertResponseIsOk(response);
       const text = await response.text();
       return JSON.parse(text, (_, value: any) => (value === null ? undefined : value));

@@ -74,8 +74,7 @@ public class EndpointInvoker {
      * Creates an instance of this bean.
      *
      * @param applicationContext
-     *            Spring context to extract beans annotated with
-     *            {@link Endpoint} from
+     *            The Spring application context
      * @param endpointMapperFactory
      *            optional factory bean to override the default
      *            {@link JacksonObjectMapperFactory} that is used for

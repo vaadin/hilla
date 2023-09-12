@@ -5,14 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.3-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-parent</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
   </parent>
 
   <modules>
@@ -69,7 +69,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.161</classgraph.version>
+    <classgraph.version>4.8.162</classgraph.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.13.0</jna.version>
     <swagger.core.version>2.2.15</swagger.core.version>
@@ -78,7 +78,7 @@
     <jackson.version>2.15.2</jackson.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.1.8</flow.version>
+    <flow.version>24.1.11</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
     <spring.boot.version>3.1.2</spring.boot.version>
     <testbench.version>9.0.7</testbench.version>

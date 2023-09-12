@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.3-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -16,7 +16,7 @@
     <packaging>jar</packaging>
     <name>Hilla Platform</name>
     <description>Hilla Platform</description>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.3-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
     <properties>
@@ -115,24 +115,6 @@
                                  later we should consider to split this file for core and pro components. -->
                             <destinationFile>${basedir}/target/classes/vaadin-core-versions.json</destinationFile>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <tasks>
-                                <replace token= "{{version}}" value="${project.parent.version}" dir="target/classes">
-                                    <include name="vaadin-core-versions.json"/>
-                                </replace>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

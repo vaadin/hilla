@@ -8,7 +8,11 @@ export default class PluginManager {
   readonly #plugins: Plugin[];
 
   constructor(plugins: readonly PluginConstructor[], resolver: ReferenceResolver, logger: LoggerFactory) {
-    logger.global.info(`Plugins: ${plugins.map(({ name }) => name).join(', ')}`);
+    const standardPlugins = ['BackbonePlugin', 'ClientPlugin', 'BarrelPlugin', 'ModelPlugin', 'PushPlugin'];
+    const customPlugins = plugins.filter((p) => !standardPlugins.includes(p.name));
+    if (customPlugins.length > 0) {
+      logger.global.info(`Plugins: ${plugins.map(({ name }) => name).join(', ')}`);
+    }
     this.#plugins = plugins.map((PluginClass) => new PluginClass(resolver, logger));
   }
 
