@@ -82,6 +82,11 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-grid-testbench</artifactId>
+      <version>${vaadin.component.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-notification-testbench</artifactId>
       <version>${vaadin.component.version}</version>
     </dependency>
