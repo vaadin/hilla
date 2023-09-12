@@ -82,14 +82,16 @@ const createColumns = (model: ModelConstructor<any, any>) => {
 };
 
 export function AutoGrid<TItem>(props: AutoGridProps<TItem>) {
+  const { service, model, ...gridProps } = props;
+
   const ref = useRef(null);
 
   useEffect(() => {
     const grid = ref.current as any as GridElement<TItem>;
-    grid.dataProvider = createDataProvider(grid, props.service);
+    grid.dataProvider = createDataProvider(grid, service);
   }, []);
 
-  const children = createColumns(props.model);
+  const children = createColumns(model);
 
-  return <Grid {...props} ref={ref} children={children}></Grid>;
+  return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }
