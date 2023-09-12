@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
@@ -5,30 +6,33 @@ import {
   type BinderConfiguration,
   BinderRoot,
   CHANGED,
-  defaultValidity,
-  getBinderNode,
+  type FieldStrategy,
   getDefaultFieldStrategy,
   hasFromString,
   isFieldElement,
-  type ModelConstructor,
+  getBinderNode,
+  type BinderNode,
   type Validator,
   type ValueError,
-  type FieldStrategy,
+  type Value,
 } from '@hilla/form';
-import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
+import type { Constructor, Writable } from 'type-fest';
+import type { VaadinWindow } from './types.js';
 
-const $wnd = window as any;
+declare const __VERSION__: string;
+
+const $wnd = window as VaadinWindow;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.2.0-beta1',
+  version: __VERSION__,
 });
 
 function useUpdate() {
-  const [_, update] = useReducer((x) => ++x, 0);
+  const [_, update] = useReducer((x: number) => x + 1, 0);
   return update;
 }
 
@@ -40,40 +44,40 @@ export type FieldDirectiveResult = Readonly<{
   ref(element: HTMLElement | null): void;
 }>;
 
-export type FieldDirective = (model: AbstractModel<any>) => FieldDirectiveResult;
+export type FieldDirective = (model: AbstractModel) => FieldDirectiveResult;
 
-export type UseFormPartResult<T, M extends AbstractModel<T>> = Readonly<{
-  defaultValue: T;
+export type UseFormPartResult<M extends AbstractModel> = Readonly<{
+  defaultValue?: Value<M>;
   dirty: boolean;
-  errors: ReadonlyArray<ValueError<unknown>>;
+  errors: readonly ValueError[];
   invalid: boolean;
   model: M;
   name: string;
   field: FieldDirective;
-  ownErrors: ReadonlyArray<ValueError<T>>;
+  ownErrors: ReadonlyArray<ValueError<Value<M>>>;
   required: boolean;
-  validators: ReadonlyArray<Validator<T>>;
-  value?: T;
+  validators: ReadonlyArray<Validator<Value<M>>>;
+  value?: Value<M>;
   visited: boolean;
-  addValidator(validator: Validator<T>): void;
-  setValidators(validators: ReadonlyArray<Validator<T>>): void;
-  setValue(value: T | undefined): void;
+  addValidator(validator: Validator<Value<M>>): void;
+  setValidators(validators: ReadonlyArray<Validator<Value<M>>>): void;
+  setValue(value: Value<M> | undefined): void;
   setVisited(visited: boolean): void;
-  validate(): Promise<ReadonlyArray<ValueError<unknown>>>;
+  validate(): Promise<readonly ValueError[]>;
 }>;
 
-export type UseFormResult<T, M extends AbstractModel<T>> = Readonly<{
-  value: T;
-  setDefaultValue(value: T): void;
-  setValue(value: T): void;
-  submit(): Promise<T | undefined>;
-  reset(): void;
-  clear(): void;
-  read(value: T | undefined | null): void;
-}> &
-  UseFormPartResult<T, M>;
+export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
+  Readonly<{
+    value: Value<M>;
+    setDefaultValue(value: Value<M>): void;
+    setValue(value: Value<M>): void;
+    submit(): Promise<Value<M> | undefined | void>;
+    reset(): void;
+    clear(): void;
+    read(value: Value<M> | null | undefined): void;
+  }>;
 
-type FieldState<T> = {
+type FieldState<T = unknown> = {
   value?: T;
   required: boolean;
   invalid: boolean;
@@ -85,11 +89,11 @@ type FieldState<T> = {
   ref(element: HTMLElement | null): void;
 };
 
-function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
-function getFormPart<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Omit<UseFormPartResult<T, M>, 'field'> {
+function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
     defaultValue: node.defaultValue,
@@ -116,15 +120,15 @@ function getFormPart<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Omi
   };
 }
 
-function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): FieldDirective {
+function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
   return useMemo(() => {
-    const registry = new WeakMap<AbstractModel<any>, FieldState<any>>();
+    const registry = new WeakMap<AbstractModel, FieldState>();
 
-    return ((model: AbstractModel<any>) => {
+    return ((model: AbstractModel) => {
       const n = getBinderNode(model);
       n.initializeValue(true);
 
-      const fieldState: FieldState<unknown> = registry.get(model) ?? {
+      const fieldState: FieldState = registry.get(model) ?? {
         element: undefined,
         errorMessage: '',
         invalid: false,
@@ -210,15 +214,11 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
   }, [node]);
 }
 
-type MutableBinderConfiguration<T> = {
-  -readonly [K in keyof BinderConfiguration<T>]: BinderConfiguration<T>[K];
-};
-
-export function useForm<T, M extends AbstractModel<T>>(
-  Model: ModelConstructor<T, M>,
-  config?: BinderConfiguration<T>,
-): UseFormResult<T, M> {
-  const configRef = useRef<MutableBinderConfiguration<T>>({});
+export function useForm<M extends AbstractModel>(
+  Model: Constructor<M>,
+  config?: BinderConfiguration<Value<M>>,
+): UseFormResult<M> {
+  const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});
   configRef.current.onSubmit = config?.onSubmit;
   configRef.current.onChange = config?.onChange;
   const update = useUpdate();
@@ -235,10 +235,10 @@ export function useForm<T, M extends AbstractModel<T>>(
     field,
     read: binder.read.bind(binder),
     reset: binder.reset.bind(binder),
-    setDefaultValue: (defaultValue: T) => {
+    setDefaultValue(defaultValue) {
       binder.defaultValue = defaultValue;
     },
-    setValue: (value: T) => {
+    setValue(value) {
       binder.value = value;
     },
     submit: binder.submit.bind(binder),
@@ -246,7 +246,7 @@ export function useForm<T, M extends AbstractModel<T>>(
   };
 }
 
-export function useFormPart<M extends AbstractModel<any>>(model: M): UseFormPartResult<ReturnType<M['valueOf']>, M> {
+export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
   return {

@@ -1,4 +1,13 @@
-import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, Required, Size, StringModel } from '@hilla/form';
+import {
+  _getPropertyModel,
+  BooleanModel,
+  makeObjectEmptyValueCreator,
+  NumberModel,
+  ObjectModel,
+  Required,
+  Size,
+  StringModel,
+} from '@hilla/form';
 
 export interface User {
   id: number;
@@ -8,7 +17,7 @@ export interface User {
 }
 
 export class UserModel<T extends User = User> extends ObjectModel<T> {
-  declare static createEmptyValue: () => User;
+  static override createEmptyValue = makeObjectEmptyValueCreator(UserModel);
 
   get id(): NumberModel {
     return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
@@ -42,7 +51,7 @@ export interface Login {
 }
 
 export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Login;
+  static override createEmptyValue = makeObjectEmptyValueCreator(LoginModel);
 
   get user(): UserModel {
     return this[_getPropertyModel]('user', (parent, key) => new UserModel(parent, key, false));
