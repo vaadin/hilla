@@ -1,17 +1,16 @@
 import { expect, use } from '@esm-bundle/chai';
-import { Grid, GridElement } from '@hilla/react-components/Grid.js';
+import { GridElement } from '@hilla/react-components/Grid.js';
 import { render } from '@testing-library/react';
-import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useAutoGrid as _useAutoGrid } from '../src/autogrid.js';
-import type { CrudEndpoint } from '../src/crud.js';
+import { AutoGrid } from '../src/autogrid.js';
+import type { CrudService } from '../src/crud.js';
 import Pageable from '../src/types/Pageable.js';
 import { Person, PersonModel } from './TestModels.js';
 //@ts-ignore
-import { getRowBodyCells, getBodyCellContent, getRows, getCellContent } from './grid-test-utils.js';
+import { getBodyCellContent } from './grid-test-utils.js';
 use(sinonChai);
 
-const fakeEndpoint: CrudEndpoint<Person> = {
+const fakeService: CrudService<Person> = {
   list: async (request: Pageable): Promise<Person[]> => {
     const data: Person[] = [
       { firstName: 'John', lastName: 'Dove' },
@@ -33,20 +32,20 @@ async function sleep(ms: number) {
   );
 }
 describe('@hilla/react-grid', () => {
-  type UseAutoGridSpy = sinon.SinonSpy<Parameters<typeof _useAutoGrid>, ReturnType<typeof _useAutoGrid>>;
-  const useAutoGrid = sinon.spy(_useAutoGrid) as typeof _useAutoGrid;
+  //   type UseAutoGridSpy = sinon.SinonSpy<Parameters<typeof _useAutoGrid>, ReturnType<typeof _useAutoGrid>>;
+  //   const useAutoGrid = sinon.spy(_useAutoGrid) as typeof _useAutoGrid;
 
   beforeEach(() => {
-    (useAutoGrid as UseAutoGridSpy).resetHistory();
+    // (useAutoGrid as UseAutoGridSpy).resetHistory();
   });
 
-  function AutoGrid() {
-    const autoGrid = useAutoGrid(fakeEndpoint, PersonModel);
-    return <Grid {...autoGrid}></Grid>;
+  function TestAutoGrid() {
+    // const autoGrid = useAutoGrid(fakeEndpoint, PersonModel);
+    return <AutoGrid service={fakeService} model={PersonModel}></AutoGrid>;
   }
   describe('useAutoGrid', () => {
     it('creates columns based on model', async () => {
-      const result = render(<AutoGrid />);
+      const result = render(<TestAutoGrid />);
       const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
       expect(columns.length).to.equal(2);
       expect(columns[0].path).to.equal('firstName');
@@ -55,12 +54,12 @@ describe('@hilla/react-grid', () => {
       expect(columns[1].header).to.equal('Last name');
     });
     it('sets a data provider', async () => {
-      const result = render(<AutoGrid />);
+      const result = render(<TestAutoGrid />);
       const grid = result.container.querySelector('vaadin-grid');
       expect(grid?.dataProvider).to.not.be.undefined;
     });
     it('data provider provides data', async () => {
-      const result = render(<AutoGrid />);
+      const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       grid.requestContentUpdate();
       await sleep(1);
@@ -72,6 +71,3 @@ describe('@hilla/react-grid', () => {
     });
   });
 });
-function getBodyCellText(grid: GridElement, row: number, col: number): any {
-  return getCellContent(getRowBodyCells(getRows(grid.shadowRoot)[row])[col]).innerText;
-}

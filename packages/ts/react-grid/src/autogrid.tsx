@@ -1,8 +1,14 @@
 import type { ModelConstructor } from '@hilla/form';
-import type { GridDataProviderCallback, GridDataProviderParams, GridElement } from '@hilla/react-components/Grid.js';
+import {
+  Grid,
+  GridProps,
+  type GridDataProviderCallback,
+  type GridDataProviderParams,
+  type GridElement,
+} from '@hilla/react-components/Grid.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
 import { useEffect, useRef } from 'react';
-import type { CrudEndpoint } from './crud';
+import type { CrudService } from './crud';
 import { getProperties } from './modelutil.js';
 
 // import Sort from "Frontend/generated/dev/hilla/mappedtypes/Sort";
@@ -13,54 +19,57 @@ enum Direction {
   DESC = 'DESC',
 }
 
-export const useAutoGrid = <T,>(endpoint: CrudEndpoint<T>, itemType: ModelConstructor<T, any>) => {
-  const listMethod = endpoint.list;
-  const ref = useRef(null);
+export type _AutoGridProps<TItem> = {
+  service: CrudService<TItem>;
+  model: ModelConstructor<TItem, any>;
+};
+export type AutoGridProps<TItem> = GridProps<TItem> & _AutoGridProps<TItem>;
 
-  useEffect(() => {
-    const grid = ref.current as any as GridElement<T>;
+const createDataProvider = <TItem,>(grid: GridElement<TItem>, service: CrudService<TItem>) => {
+  const listMethod = service.list;
+  let first = true;
 
-    let first = true;
-
-    grid.dataProvider = async (params: GridDataProviderParams<T>, callback: GridDataProviderCallback<T>) => {
-      const sort: Sort = {
-        orders: params.sortOrders.map((order) => ({
-          property: order.path,
-          direction: order.direction == 'asc' ? Direction.ASC : Direction.DESC,
-          ignoreCase: false,
-        })),
-      };
-
-      const pageNumber = params.page;
-      const pageSize = params.pageSize;
-      const req = {
-        pageNumber,
-        pageSize,
-        sort,
-      };
-
-      const items = await listMethod(req);
-      let size;
-      if (items.length === pageSize) {
-        size = (pageNumber + 1) * pageSize + 1;
-        if (size < (grid as any)._cache.size) {
-          // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-          size = undefined;
-        }
-      } else {
-        size = pageNumber * pageSize + items.length;
-      }
-      callback(items, size);
-      if (first) {
-        // Workaround for https://github.com/vaadin/react-components/issues/129
-        first = false;
-        setTimeout(() => grid.recalculateColumnWidths(), 0);
-      }
+  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
+    const sort: Sort = {
+      orders: params.sortOrders.map((order) => ({
+        property: order.path,
+        direction: order.direction == 'asc' ? Direction.ASC : Direction.DESC,
+        ignoreCase: false,
+      })),
     };
-  }, []);
 
-  const properties = getProperties(itemType);
-  const children = properties.map((p) => {
+    const pageNumber = params.page;
+    const pageSize = params.pageSize;
+    const req = {
+      pageNumber,
+      pageSize,
+      sort,
+    };
+
+    const items = await listMethod(req);
+    let size;
+    if (items.length === pageSize) {
+      size = (pageNumber + 1) * pageSize + 1;
+      if (size < (grid as any)._cache.size) {
+        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+        size = undefined;
+      }
+    } else {
+      size = pageNumber * pageSize + items.length;
+    }
+    callback(items, size);
+    if (first) {
+      // Workaround for https://github.com/vaadin/react-components/issues/129
+      first = false;
+      setTimeout(() => grid.recalculateColumnWidths(), 0);
+    }
+  };
+};
+
+const createColumns = (model: ModelConstructor<any, any>) => {
+  const properties = getProperties(model);
+
+  const columns = properties.map((p) => {
     let customProps: any = { autoWidth: true };
 
     let column = (
@@ -69,9 +78,18 @@ export const useAutoGrid = <T,>(endpoint: CrudEndpoint<T>, itemType: ModelConstr
 
     return column;
   });
-
-  return {
-    ref,
-    children: [...children],
-  };
+  return columns;
 };
+
+export function AutoGrid<TItem>(props: AutoGridProps<TItem>) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const grid = ref.current as any as GridElement<TItem>;
+    grid.dataProvider = createDataProvider(grid, props.service);
+  }, []);
+
+  const children = createColumns(props.model);
+
+  return <Grid {...props} ref={ref} children={children}></Grid>;
+}
