@@ -30,7 +30,7 @@ public class Hotswapper {
      */
     public static void onHotswap(Boolean redefined, String[] changedClasses) {
         try {
-            if (isOnlyJdkClasses(changedClasses)) {
+            if (isIgnoredClasses(changedClasses)) {
                 return;
             }
             if (affectsEndpoints(changedClasses)) {
@@ -39,6 +39,42 @@ public class Hotswapper {
         } catch (IOException e) {
             getLogger().error("Failed to re-generated TypeScript code");
         }
+    }
+
+    private static boolean isIgnoredClasses(String[] changedClasses) {
+        for (String changedClass : changedClasses) {
+            if (!isIgnoredClass(changedClass)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isIgnoredClass(String changedClass) {
+        return changedClass.startsWith("java.")
+                || changedClass.startsWith("javax.")
+                || changedClass.startsWith("sun.")
+                || changedClass.startsWith("com.sun.")
+                || changedClass.startsWith("dev.hilla.parser.")
+                || changedClass.startsWith("dev.hilla.engine.")
+                || changedClass.startsWith("com.vaadin.flow.")
+                || changedClass.startsWith("com.vaadin.base.")
+                || changedClass.startsWith("org.jsoup.")
+                || changedClass.startsWith("io.github.classgraph.")
+                || changedClass.startsWith("io.swagger.")
+                || changedClass.startsWith("com.fasterxml.jackson.")
+                || changedClass.startsWith("elemental.json.")
+                || changedClass.startsWith("org.springframework.")
+                || changedClass.startsWith("org.atmosphere.")
+                || changedClass.startsWith("org.apache.commons.")
+                || changedClass.startsWith("org.apache.coyote.")
+                || changedClass.startsWith("org.apache.catalina.")
+                || changedClass.startsWith("org.apache.tomcat.")
+                || changedClass.startsWith("org.hotswap.")
+                || changedClass.startsWith("jakarta.")
+                || changedClass.startsWith("nonapi.io.github.classgraph.")
+                || changedClass.startsWith("jdk.") || changedClass.equals(
+                        "com.vaadin.base.devserver.viteproxy.ViteWebsocketProxy");
     }
 
     /**
