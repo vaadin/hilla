@@ -7,7 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * A browser-callable service that delegates crud operations to a JPA repository.
+ * A browser-callable service that delegates crud operations to a JPA
+ * repository.
  */
 @EndpointExposed
 public class CrudRepositoryService<T, ID> implements CrudService<T> {
