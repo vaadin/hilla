@@ -56,12 +56,17 @@ public class EndpointCodeGenerator {
             EndpointController endpointController) {
         this.endpointController = endpointController;
         this.context = context;
+        if (instance != null) {
+            throw new IllegalStateException("Only one instance of "
+                    + getClass().getName() + " should ever be created");
+        }
+        instance = this;
     }
 
     /**
      * Gets the singleton instance.
      */
-    static EndpointCodeGenerator getInstance() {
+    public static EndpointCodeGenerator getInstance() {
         return instance;
     }
 
