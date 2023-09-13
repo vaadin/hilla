@@ -9,7 +9,7 @@ inputs:
   java-version:
     description: Java version
     required: true
-    default: '17'
+    default: '21'
 
 runs:
   using: composite
