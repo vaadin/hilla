@@ -59,10 +59,11 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
- * Each class that is annotated with {@link Endpoint} gets its public methods
- * exposed so that those can be triggered by a correct POST request, including
- * the methods inherited from the other classes, excluding {@link Object} class
- * ones. Other methods (non-public) are not considered by the controller.
+ * Each class that is annotated with {@link Endpoint} or {@link BrowserCallable}
+ * gets its public methods exposed so that those can be triggered by a correct
+ * POST request, including the methods inherited from the other classes,
+ * excluding {@link Object} class ones. Other methods (non-public) are not
+ * considered by the controller.
  * <p>
  * For example, if a class with name {@code TestClass} that has the only public
  * method {@code testMethod} was annotated with the annotation, it can be called
@@ -102,8 +103,7 @@ public class EndpointController {
      * A constructor used to initialize the controller.
      *
      * @param context
-     *            Spring context to extract beans annotated with
-     *            {@link Endpoint} from
+     *            The Spring application context
      * @param endpointRegistry
      *            the registry used to store endpoint information
      * @param endpointInvoker
@@ -143,8 +143,9 @@ public class EndpointController {
         // ease searching
         var endpointBeans = new TreeMap<String, Object>(
                 String.CASE_INSENSITIVE_ORDER);
-        // TODO: the annotation should be configurable
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
+        endpointBeans
+                .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
 
         // By default, only register those endpoints included in the Hilla
         // OpenAPI definition file

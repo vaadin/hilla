@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
+
+import dev.hilla.BrowserCallable;
 import dev.hilla.Endpoint;
 
 /**
@@ -34,7 +36,7 @@ import dev.hilla.Endpoint;
  *
  * @since 3.0
  */
-@HandlesTypes({ Endpoint.class })
+@HandlesTypes({ Endpoint.class, BrowserCallable.class })
 public class EndpointsValidator
         implements ClassLoaderAwareServletContainerInitializer, Serializable {
 
@@ -56,6 +58,7 @@ public class EndpointsValidator
 
         ClassFinder finder = new DefaultClassFinder(classSet);
         Set<Class<?>> endpoints = finder.getAnnotatedClasses(Endpoint.class);
+        endpoints.addAll(finder.getAnnotatedClasses(BrowserCallable.class));
         if (!endpoints.isEmpty()) {
             try {
                 finder.loadClass(classToCheck);

@@ -32,6 +32,8 @@ import org.springframework.stereotype.Component;
  * executed via the post call with the correct parameters sent in a request JSON
  * body. The methods' return values will be returned back as a response to the
  * calls. Refer to {@link EndpointController} for more details.
+ * <p>
+ * This is an alias for {@link BrowserCallable}.
  *
  * @see EndpointController
  * @see Component

@@ -97,8 +97,7 @@ public class EndpointControllerConfiguration {
      * Registers the endpoint invoker.
      *
      * @param applicationContext
-     *            Spring context to extract beans annotated with
-     *            {@link Endpoint} from
+     *            The Spring application context
      * @param endpointMapperFactory
      *            optional bean to override the default
      *            {@link JacksonObjectMapperFactory} that is used for
