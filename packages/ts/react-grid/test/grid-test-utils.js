@@ -1,27 +1,19 @@
 // From https://github.com/vaadin/web-components/blob/4c8a3f9402d5c0d4b93eb1b73b2f898bbfb904be/packages/grid/test/helpers.js
-export const getCell = (grid, index) => {
-  return grid.$.items.querySelectorAll('[part~="cell"]')[index];
-};
+export const getCell = (grid, index) => grid.$.items.querySelectorAll('[part~="cell"]')[index];
 
-export const getFirstCell = (grid) => {
-  return getCell(grid, 0);
-};
+export const getFirstCell = (grid) => getCell(grid, 0);
 
 export const infiniteDataProvider = (params, callback) => {
   callback(
-    Array.from({ length: params.pageSize }, (_, index) => {
-      return {
-        value: `foo${params.page * params.pageSize + index}`,
-      };
-    }),
+    Array.from({ length: params.pageSize }, (_, index) => ({
+      value: `foo${params.page * params.pageSize + index}`,
+    })),
   );
 };
 
-export const buildItem = (index) => {
-  return {
-    index,
-  };
-};
+export const buildItem = (index) => ({
+  index,
+});
 
 export const wheel = (target, deltaX, deltaY, ctrlKey) => {
   const e = new CustomEvent('wheel', { bubbles: true, cancelable: true });
@@ -61,11 +53,10 @@ const isVisible = (item, grid) => {
   );
 };
 
-export const getPhysicalItems = (grid) => {
-  return Array.from(grid.shadowRoot.querySelector('tbody').children)
+export const getPhysicalItems = (grid) =>
+  Array.from(grid.shadowRoot.querySelector('tbody').children)
     .filter((item) => !item.hidden)
     .sort((a, b) => a.index - b.index);
-};
 
 export const getPhysicalAverage = (grid) => {
   const physicalItems = getPhysicalItems(grid);
@@ -81,13 +72,9 @@ export const getVisibleItems = (grid) => {
   return getPhysicalItems(grid).filter((item) => isVisible(item, grid));
 };
 
-export const getFirstVisibleItem = (grid) => {
-  return getVisibleItems(grid)[0] || null;
-};
+export const getFirstVisibleItem = (grid) => getVisibleItems(grid)[0] || null;
 
-export const getLastVisibleItem = (grid) => {
-  return getVisibleItems(grid).pop() || null;
-};
+export const getLastVisibleItem = (grid) => getVisibleItems(grid).pop() || null;
 
 export const isWithinParentConstraints = (el, parent) => {
   const elRect = el.getBoundingClientRect();
@@ -100,21 +87,13 @@ export const isWithinParentConstraints = (el, parent) => {
   );
 };
 
-export const getRows = (container) => {
-  return container.querySelectorAll('tr');
-};
+export const getRows = (container) => container.querySelectorAll('tr');
 
-export const getRowCells = (row) => {
-  return Array.from(row.querySelectorAll('[part~="cell"]'));
-};
+export const getRowCells = (row) => Array.from(row.querySelectorAll('[part~="cell"]'));
 
-export const getRowBodyCells = (row) => {
-  return Array.from(row.querySelectorAll('[part~="cell"]:not([part~="details-cell"]'));
-};
+export const getRowBodyCells = (row) => Array.from(row.querySelectorAll('[part~="cell"]:not([part~="details-cell"]'));
 
-export const getCellContent = (cell) => {
-  return cell ? cell.querySelector('slot').assignedNodes()[0] : null;
-};
+export const getCellContent = (cell) => (cell ? cell.querySelector('slot').assignedNodes()[0] : null);
 
 export const getContainerCell = (container, row, col) => {
   const rows = getRows(container);
@@ -122,21 +101,13 @@ export const getContainerCell = (container, row, col) => {
   return cells[col];
 };
 
-export const getContainerCellContent = (container, row, col) => {
-  return getCellContent(getContainerCell(container, row, col));
-};
+export const getContainerCellContent = (container, row, col) => getCellContent(getContainerCell(container, row, col));
 
 export const getHeaderCellContent = (grid, row, col) => {
   const container = grid.$.header;
   return getContainerCellContent(container, row, col);
 };
 
-export const getBodyCellContent = (grid, row, col) => {
-  const physicalItems = getPhysicalItems(grid);
-  const physicalRow = physicalItems.find((item) => item.index === row);
-  const cells = getRowCells(physicalRow);
-  return getCellContent(cells[col]);
-};
 
 export const flushGrid = (grid) => {
   grid._observer.flush();

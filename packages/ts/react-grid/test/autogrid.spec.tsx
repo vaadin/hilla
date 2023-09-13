@@ -1,13 +1,13 @@
 import { expect, use } from '@esm-bundle/chai';
-import { GridElement } from '@hilla/react-components/Grid.js';
+import type { GridElement } from '@hilla/react-components/Grid.js';
 import { render } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { AutoGrid } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
-import Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
-import { Person, PersonModel } from './TestModels.js';
-//@ts-ignore
-import { getBodyCellContent, flushGrid } from './grid-test-utils.js';
+import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
+import { getBodyCellContent } from './grid-test-helpers.js';
+import { type Person, PersonModel } from './TestModels.js';
+
 use(sinonChai);
 
 const fakeService: CrudService<Person> = {
@@ -24,7 +24,7 @@ const fakeService: CrudService<Person> = {
   },
 };
 
-export async function nextFrame() {
+export async function nextFrame(): Promise<void> {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       resolve(undefined);
@@ -57,6 +57,7 @@ describe('@hilla/react-grid', () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
+      // eslint-disable-next-line
       expect((grid as any)._cache.size).to.equal(2);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
