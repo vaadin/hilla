@@ -1,7 +1,9 @@
 package dev.hilla.parser.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.github.classgraph.ClassInfo;
 
@@ -16,9 +18,10 @@ public class ScanResult {
         return result;
     }
 
-    public List<? extends Class<?>> getClassesWithAnnotation(
-            String annotation) {
-        return result.getClassesWithAnnotation(annotation).stream()
-                .map(ClassInfo::loadClass).collect(Collectors.toList());
+    public List<Class<?>> getClassesWithAnnotation(String... annotations) {
+        Stream<ClassInfo> c = Stream.of(annotations)
+                .flatMap(annotation -> result
+                        .getClassesWithAnnotation(annotation).stream());
+        return c.map(ClassInfo::loadClass).toList();
     }
 }

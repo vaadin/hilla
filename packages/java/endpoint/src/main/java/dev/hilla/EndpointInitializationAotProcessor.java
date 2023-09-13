@@ -18,10 +18,15 @@ class EndpointInitializationAotProcessor
             ConfigurableListableBeanFactory beanFactory) {
         String[] endpoints = beanFactory
                 .getBeanNamesForAnnotation(Endpoint.class);
+        String[] browserCallables = beanFactory
+                .getBeanNamesForAnnotation(BrowserCallable.class);
         Set<Class<?>> endpointClasses = new HashSet<>();
 
         for (String endpoint : endpoints) {
             endpointClasses.add(beanFactory.getType(endpoint));
+        }
+        for (String browserCallable : browserCallables) {
+            endpointClasses.add(beanFactory.getType(browserCallable));
         }
 
         return new BeanFactoryInitializationAotContribution() {

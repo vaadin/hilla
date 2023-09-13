@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +29,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
 
+import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 
 import dev.hilla.auth.CsrfChecker;
@@ -96,8 +97,7 @@ public class EndpointControllerConfiguration {
      * Registers the endpoint invoker.
      *
      * @param applicationContext
-     *            Spring context to extract beans annotated with
-     *            {@link Endpoint} from
+     *            The Spring application context
      * @param endpointMapperFactory
      *            optional bean to override the default
      *            {@link JacksonObjectMapperFactory} that is used for
@@ -235,4 +235,21 @@ public class EndpointControllerConfiguration {
         }
         return prefixMappingBuilder.build().combine(mapping);
     }
+
+    /**
+     * Can re-generate the TypeScipt code.
+     * 
+     * @param context
+     *            the servlet context
+     * @param endpointController
+     *            the endpoint controller
+     * @return the endpoint code generator
+     */
+    @Bean
+    EndpointCodeGenerator endpointCodeGenerator(ServletContext servletContext,
+            EndpointController endpointController) {
+        return new EndpointCodeGenerator(
+                new VaadinServletContext(servletContext), endpointController);
+    }
+
 }

@@ -195,7 +195,6 @@ final class ClassInfoSourceModel extends ClassInfoModel implements SourceModel {
     @Override
     protected List<FieldInfoModel> prepareFields() {
         return origin.getDeclaredFieldInfo().stream().map(FieldInfoModel::of)
-                .sorted(FieldInfoModel.FIELD_ORDER)
                 .collect(Collectors.toList());
     }
 

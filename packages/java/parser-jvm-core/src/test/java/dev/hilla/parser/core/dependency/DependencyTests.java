@@ -1,17 +1,18 @@
 package dev.hilla.parser.core.dependency;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import java.util.Set;
 
 import dev.hilla.parser.core.Parser;
 import dev.hilla.parser.testutils.ResourceLoader;
-
 import io.swagger.v3.oas.models.OpenAPI;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DependencyTests {
     private static final List<String> classPath;
@@ -61,12 +62,12 @@ public class DependencyTests {
 
     @Test
     public void should_ResolveDependencyMembersCorrectly() {
-        var expected = List.of("bar", "dependencyEntityThree", "foo", "foo2",
+        var expected = Set.of("bar", "dependencyEntityThree", "foo", "foo2",
                 "foo3");
 
-        var actual = openApi.getExtensions()
+        Collection<String> actual = (Collection<String>) openApi.getExtensions()
                 .get(DependencyPlugin.DEPS_MEMBERS_STORAGE_KEY);
 
-        assertEquals(expected, actual);
+        assertEquals(expected, new HashSet<>(actual));
     }
 }

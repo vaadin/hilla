@@ -1,4 +1,5 @@
-import { css, html, LitElement } from 'lit';
+/* eslint-disable @typescript-eslint/unbound-method */
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import * as appEndpoint from './generated/AppEndpoint';
@@ -9,7 +10,7 @@ export class MainView extends LitElement {
   @property()
   private content?: string;
 
-  render() {
+  render(): TemplateResult {
     return html`
       <button id="helloAnonymous" @click="${this.helloAnonymous}">endpoint helloAnonymous</button><br />
       <button id="helloAnonymousWrapper" @click="${this.helloAnonymousWrapper}">
@@ -23,7 +24,7 @@ export class MainView extends LitElement {
     try {
       this.content = await appEndpoint.helloAnonymous();
     } catch (error) {
-      this.content = 'Error:' + error;
+      this.content = `Error:${error}`;
     }
   }
 
@@ -31,7 +32,7 @@ export class MainView extends LitElement {
     try {
       this.content = await AppEndpoint.helloAnonymous();
     } catch (error) {
-      this.content = 'Error:' + error;
+      this.content = `Error:${error}`;
     }
   }
 

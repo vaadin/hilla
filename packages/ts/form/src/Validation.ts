@@ -21,20 +21,25 @@ export interface ValidationResult {
 }
 
 export class ValidationError extends Error {
-  constructor(public errors: ReadonlyArray<ValueError<any>>) {
+  errors: ReadonlyArray<ValueError<any>>;
+
+  constructor(errors: ReadonlyArray<ValueError<any>>) {
     super(
       [
         'There are validation errors in the form.',
-        ...errors.map((e) => `${e.property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`),
+        ...errors.map(
+          (e) => `${e.property.toString()} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`,
+        ),
       ].join('\n - '),
     );
+    this.errors = errors;
     this.name = this.constructor.name;
   }
 }
 
 export type ValidationCallback<T> = (
   value: T,
-  binder: Binder<any, AbstractModel<T>>,
+  binder: Binder<unknown, AbstractModel<unknown>>,
 ) =>
   | Promise<ValidationResult | boolean | readonly ValidationResult[]>
   | ValidationResult
@@ -60,11 +65,11 @@ export class ServerValidator implements Validator<any> {
     this.message = message;
   }
 
-  validate = () => false;
+  validate = (): boolean => false;
 }
 
 // The `property` field of `ValidationResult`s is a path relative to the parent.
-function setPropertyAbsolutePath<T>(binderNodeName: string, result: ValidationResult): ValidationResult {
+function setPropertyAbsolutePath(binderNodeName: string, result: ValidationResult): ValidationResult {
   if (typeof result.property === 'string' && binderNodeName.length > 0) {
     result.property = `${binderNodeName}.${result.property}`;
   }
@@ -92,28 +97,33 @@ export async function runValidator<T>(
   if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
     return [];
   }
-  return (async () => validator.validate(value, binderNode.binder))().then((result) => {
-    if (result === false) {
-      return [{ property: binderNode.name, value, validator, message: interpolateMessage(validator.message) }];
-    }
-    if (result === true || (Array.isArray(result) && result.length === 0)) {
-      return [];
-    }
-    if (Array.isArray(result)) {
-      return result.map((result2) => ({
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result2),
-        value,
-        validator,
-      }));
-    }
-    return [
-      {
-        message: interpolateMessage(validator.message),
-        ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
-        value,
-        validator,
-      },
-    ];
-  });
+  return (async () => validator.validate(value, binderNode.binder))()
+    .catch((error) => {
+      console.error(`${binderNode.name} - Validator ${validator.constructor.name} threw an error:`, error);
+      return [{ message: 'Validator threw an error', property: binderNode.name, validator, value }];
+    })
+    .then((result) => {
+      if (result === false) {
+        return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+      }
+      if (result === true || (Array.isArray(result) && result.length === 0)) {
+        return [];
+      }
+      if (Array.isArray(result)) {
+        return result.map((result2) => ({
+          message: interpolateMessage(validator.message),
+          ...setPropertyAbsolutePath(binderNode.name, result2),
+          validator,
+          value,
+        }));
+      }
+      return [
+        {
+          message: interpolateMessage(validator.message),
+          ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
+          validator,
+          value,
+        },
+      ];
+    });
 }

@@ -2,6 +2,10 @@ package dev.hilla;
 
 import jakarta.servlet.ServletContext;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
@@ -26,6 +30,24 @@ public class ServletContextTestSetup implements ServletContextAware {
                 applicationConfiguration);
         Mockito.when(featureFlagCondition.matches(Mockito.any(), Mockito.any()))
                 .thenReturn(true);
+
+        try {
+            Path tmpDir = Files.createTempDirectory("test");
+            Path target = tmpDir.resolve("target");
+            target.toFile().mkdir();
+            Mockito.when(applicationConfiguration.getProjectFolder())
+                    .thenReturn(tmpDir.toFile());
+
+            Mockito.when(applicationConfiguration.getBuildFolder())
+                    .thenReturn(target.getFileName().toString());
+            Mockito.when(applicationConfiguration
+                    .getStringProperty(Mockito.anyString(), Mockito.any()))
+                    .thenAnswer(q -> {
+                        return q.getArgument(1); // The default value
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

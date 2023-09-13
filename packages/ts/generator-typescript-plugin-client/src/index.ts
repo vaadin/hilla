@@ -30,7 +30,7 @@ export default class ClientPlugin extends Plugin {
     return import.meta.url;
   }
 
-  override async execute({ sources, outputDir }: SharedStorage): Promise<void> {
+  override async execute({ outputDir, sources }: SharedStorage): Promise<void> {
     // the client file is created only if a custom client file is not found
     if (!(outputDir && (await ClientPlugin.#checkForCustomClientFile(outputDir)))) {
       const clientFile = new ClientProcessor(this.constructor.CLIENT_FILE_NAME, this).process();

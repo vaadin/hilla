@@ -18,8 +18,7 @@ import {
   type Schema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
-import type { TypeNode } from 'typescript';
-import ts from 'typescript';
+import ts, { type TypeNode } from 'typescript';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);

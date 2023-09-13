@@ -31,6 +31,8 @@ module.exports = (config) => {
   config.set({
     plugins: [karmaMocha, karmaChromeLauncher, karmaVite, karmaCoverage, karmaSpecReporter],
 
+    browserNoActivityTimeout : isCI ? 30000 : 0,
+
     browsers: ['ChromeHeadlessNoSandbox'],
 
     customLaunchers: {
@@ -45,6 +47,18 @@ module.exports = (config) => {
     files: [
       {
         pattern: resolve(cwd, 'test/**/*.test.ts'),
+        type: 'module',
+        watched: false,
+        served: false,
+      },
+      {
+        pattern: resolve(cwd, 'test/**/*.spec.ts'),
+        type: 'module',
+        watched: false,
+        served: false,
+      },
+      {
+        pattern: resolve(cwd, 'test/**/*.spec.tsx'),
         type: 'module',
         watched: false,
         served: false,

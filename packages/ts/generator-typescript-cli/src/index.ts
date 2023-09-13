@@ -5,8 +5,8 @@ import GeneratorIO from './GeneratorIO.js';
 import { processInput } from './utils.js';
 
 const {
-  input: [input],
   flags: { outputDir, plugin: plugins, verbose },
+  input: [input],
 } = meow(
   `
 Usage:
@@ -24,18 +24,18 @@ Options:
   {
     flags: {
       outputDir: {
-        alias: 'o',
         default: 'frontend/generated',
+        shortFlag: 'o',
         type: 'string',
       },
       plugin: {
-        alias: 'p',
         default: [],
         isMultiple: true,
+        shortFlag: 'p',
         type: 'string',
       },
       verbose: {
-        alias: 'v',
+        shortFlag: 'v',
         type: 'boolean',
       },
     },
@@ -53,6 +53,7 @@ const resolvedPlugins = await Promise.all(
 const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
 const files = await generator.process(await processInput(io, input));
-await io.cleanOutputDir();
-await io.createFileIndex(files.map((file) => file.name));
-await Promise.all(files.map(async (file) => io.write(file)));
+const filesToDelete = await io.getGeneratedFiles();
+const generatedFiles = await io.writeGeneratedFiles(files);
+
+await io.cleanOutputDir(generatedFiles, filesToDelete);

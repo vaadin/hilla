@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { AppEndpoint } from './generated/endpoints';
 
@@ -7,19 +7,20 @@ export class TestComponent extends LitElement {
   @state()
   response: string = '';
 
-  protected createRenderRoot(): Element | ShadowRoot {
-    return this;
+  async callendpoint(): Promise<void> {
+    const name = this.renderRoot.querySelector<HTMLInputElement>('#name')!.value;
+    this.response = await AppEndpoint.hello(name);
   }
-  render() {
+
+  render(): TemplateResult {
     return html`
       <input type="text" id="name" />
-      <button id="button" @click="${() => this.callendpoint()}">call endpoint</button>
+      <button id="button" @click="${async () => this.callendpoint()}">call endpoint</button>
       <div id="response">${this.response}</div>
     `;
   }
 
-  async callendpoint() {
-    const name = (this.renderRoot.querySelector('#name')! as any).value;
-    this.response = await AppEndpoint.hello(name);
+  protected createRenderRoot(): Element | ShadowRoot {
+    return this;
   }
 }

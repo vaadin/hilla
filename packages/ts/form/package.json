@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "2.2.0-alpha6",
+  "version": "2.2.0-beta1",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -15,8 +15,11 @@
     "Form"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts test/**/*.ts --fix",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -32,6 +35,9 @@
     },
     "./BinderNode.js": {
       "default": "./BinderNode.js"
+    },
+    "./BinderRoot.js": {
+      "default": "./BinderRoot.js"
     },
     "./Field.js": {
       "default": "./Field.js"
@@ -63,23 +69,22 @@
   },
   "dependencies": {
     "@hilla/frontend": "*",
-    "rimraf": "^3.0.2",
-    "validator": "^13.6.0"
+    "validator": "^13.11.0"
   },
   "peerDependencies": {
     "lit": "^2.3.0"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@types/chai": "^4.2.21",
+    "@types/chai": "^4.3.5",
     "@types/chai-dom": "^1.11.0",
-    "@types/mocha": "^9.0.0",
-    "@types/sinon": "^10.0.2",
-    "@types/sinon-chai": "^3.2.5",
-    "@types/validator": "^13.6.0",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
+    "@types/validator": "^13.11.1",
     "chai-dom": "^1.11.0",
-    "sinon": "^11.1.2",
+    "sinon": "^15.2.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "^5.0.1-rc"
+    "typescript": "^5.1.6"
   }
 }
