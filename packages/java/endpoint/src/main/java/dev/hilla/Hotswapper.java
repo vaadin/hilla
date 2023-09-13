@@ -22,11 +22,17 @@ public class Hotswapper {
      * The hot swap solution should not pre-filter the classes but pass
      * everything to this method.
      * 
+     * @param redefined
+     *            {@code true} if the class was redefined, {@code false} if it
+     *            was loaded for the first time
      * @param changedClasses
      *            the classes that have been added or modified
      */
-    public static void onHotswap(String[] changedClasses) {
+    public static void onHotswap(Boolean redefined, String[] changedClasses) {
         try {
+            if (isOnlyJdkClasses(changedClasses)) {
+                return;
+            }
             if (affectsEndpoints(changedClasses)) {
                 EndpointCodeGenerator.getInstance().update();
             }
