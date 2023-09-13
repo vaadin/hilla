@@ -112,9 +112,9 @@ public class EndpointCodeGenerator {
 
     public Set<String> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
+            initIfNeeded();
             classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
                     OpenAPIUtil.getCurrentOpenAPI(buildDirectory));
-            classesUsedInOpenApi.remove(null);
         }
         return classesUsedInOpenApi;
     }
