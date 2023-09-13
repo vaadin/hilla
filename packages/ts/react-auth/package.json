@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-auth",
-  "version": "2.2.0-rc1",
+  "version": "2.2.0-beta1",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
