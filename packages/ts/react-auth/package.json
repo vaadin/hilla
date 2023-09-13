@@ -42,7 +42,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@types/react": "^18.2.20",
     "react-router-dom": "^6.15.0",
     "@hilla/frontend": "*"
   },
@@ -56,6 +55,7 @@
     "@types/chai": "^4.3.5",
     "@types/chai-dom": "^1.11.0",
     "@types/mocha": "^10.0.1",
+    "@types/react": "^18.2.20",
     "@types/sinon": "^10.0.16",
     "@types/sinon-chai": "^3.2.9",
     "@types/validator": "^13.11.1",

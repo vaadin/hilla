@@ -1,5 +1,5 @@
 import { login as _login, logout as _logout, type LoginResult } from '@hilla/frontend';
-import { createContext, type Dispatch, useEffect, useReducer, useContext } from 'react';
+import { createContext, type Dispatch, useEffect, useReducer } from 'react';
 
 export type AuthenticateThunk = () => Promise<void>;
 export type UnauthenticateThunk = () => void;
