@@ -17,7 +17,8 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "echo \"Skipping\"",
     "test:watch": "npm run test -- --watch",
@@ -42,6 +43,8 @@
     "access": "public"
   },
   "dependencies": {
+    "@hilla/form": "*",
+    "@hilla/react-components": "^2.1.7"
   },
   "peerDependencies": {
     "react": "^18"

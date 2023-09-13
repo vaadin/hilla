@@ -1,5 +1,11 @@
 {
+  "extends": ["../../../.eslintrc"],
+  "rules": {
+    "perfectionist/sort-enums": "off",
+    "perfectionist/sort-objects": "off"
+  },
   "parserOptions": {
     "project": "./tsconfig.json"
-  }
+  },
+  "ignorePatterns": ["src/types/**", "test/grid-test-utils.js"]
 }
