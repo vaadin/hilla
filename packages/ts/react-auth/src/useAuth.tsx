@@ -9,22 +9,37 @@ const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 const LOGIN_FAILURE = 'LOGIN_FAILURE';
 const LOGOUT = 'LOGOUT';
 
+/**
+ * The user object returned from the authentication provider.
+ * The properties are the same as the ones returned from the
+ * {@link https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims | OpenID Connect Standard Claims}
+ * specification, with the addition of the `roles` property.
+ */
 export type AuthUser = Readonly<{
-  birthdate?: string;
-  email?: string;
-  familyName?: string;
-  fullName?: string;
-  gender?: string;
+  sub: string;
+  name?: string;
   givenName?: string;
-  locale?: string;
+  familyName?: string;
   middleName?: string;
   nickName?: string;
-  phoneNumber?: string;
-  picture?: string;
   preferredUsername?: string;
+  profile?: string;
+  picture?: string;
+  website?: string;
+  email?: string;
+  emailVerified?: boolean;
+  gender?: string;
+  birthdate?: string;
+  zoneinfo?: string;
+  locale?: string;
+  phoneNumber?: string;
+  phoneNumberVerified?: boolean;
   roles?: string[];
 }>;
 
+/**
+ * The type of the function that is used to get the authenticated user.
+ */
 export type AuthFunctionType = () => Promise<Partial<AuthUser> | undefined>;
 
 type AuthState = Readonly<{
@@ -114,11 +129,18 @@ function reducer(state: AuthState, action: LoginActions | LogoutAction) {
   }
 }
 
+/**
+ * The properties that can be used to control access to a route.
+ * They can be added to the route type as properties.
+ */
 export type AccessProps = Readonly<{
   requiresLogin?: boolean;
   rolesAllowed?: readonly string[];
 }>;
 
+/**
+ * The type of the authentication hook.
+ */
 export type Authentication = Readonly<{
   state: AuthState;
   authenticate: AuthenticateThunk;
@@ -126,6 +148,11 @@ export type Authentication = Readonly<{
   hasAccess({ handle }: { handle?: AccessProps }): boolean;
 }>;
 
+/**
+ * The hook that can be used to authenticate the user.
+ * It returns the state of the authentication and the functions
+ * to authenticate and unauthenticate the user.
+ */
 export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication {
   const [state, dispatch] = useReducer(reducer, initialState);
   const authenticate = createAuthenticateThunk(
@@ -163,6 +190,10 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
   };
 }
 
+/**
+ * The hook that can be used to get the authentication state.
+ * It returns the state of the authentication.
+ */
 export const AuthContext = createContext<Authentication>({
   state: initialState,
   async authenticate() {},
@@ -172,6 +203,9 @@ export const AuthContext = createContext<Authentication>({
   },
 });
 
+/**
+ * A wrapper for the generic Hilla login function, used to allow passing the AuthenticateThunk.
+ */
 export async function login(username: string, password: string, authenticate: AuthenticateThunk): Promise<LoginResult> {
   const result = await _login(username, password);
 
@@ -182,6 +216,9 @@ export async function login(username: string, password: string, authenticate: Au
   return result;
 }
 
+/**
+ * A wrapper for the generic Hilla logout function, used to allow passing the UnauthenticateThunk.
+ */
 export async function logout(unauthenticate: UnauthenticateThunk): Promise<void> {
   await _logout();
   unauthenticate();

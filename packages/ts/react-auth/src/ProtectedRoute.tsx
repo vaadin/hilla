@@ -19,7 +19,6 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ redirectPath, route }: ProtectedRouteProps): JSX.Element | null {
   const {
-    hasAccess,
     state: { initializing, user },
   } = useAuth();
   const location = useLocation();
@@ -56,19 +55,18 @@ const protectRoute = <T,>(route: T, redirectPath: string): void => {
 
 /**
  * Adds protection to routes that require authentication.
- * These routes should contain the {@link AccessProps.requireAuthentication}
- * property with value true.
+ * These routes should contain the {@link AccessProps.requiresLogin} and/or
+ * {@link AccessProps.rolesAllowed} properties.
  *
  * @param routes - the routes to check if any of them needs to be protected
- * @param redirectPath - (Optional) the path to redirect to if the route is
- * protected and the user is not authenticated. The default value is the
- * "/ssologin" path which redirects the user to the providers login page
+ * @param redirectPath - the path to redirect to if the route is
+ * protected and the user is not authenticated.
  * @returns the routes extended with protection if needed
  */
 export const protectRoutes = <T,>(routes: T[], redirectPath: string): T[] => {
   const allRoutes: T[] = collectRoutes(routes);
   allRoutes.forEach((route) => {
-    if ((route as AccessProps).requiresLogin) {
+    if ((route as AccessProps).requiresLogin ?? (route as AccessProps).rolesAllowed) {
       protectRoute(route, redirectPath);
     }
   });
