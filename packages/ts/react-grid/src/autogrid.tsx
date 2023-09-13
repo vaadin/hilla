@@ -1,4 +1,4 @@
-import type { ModelConstructor } from '@hilla/form';
+import type { AbstractModel, ModelConstructor } from '@hilla/form';
 import {
   Grid,
   GridProps,
@@ -15,7 +15,7 @@ import Direction from './types/org/springframework/data/domain/Sort/Direction';
 
 type _AutoGridProps<TItem> = {
   service: CrudService<TItem>;
-  model: ModelConstructor<TItem, any>;
+  model: ModelConstructor<TItem, AbstractModel<TItem>>;
 };
 export type AutoGridProps<TItem> = GridProps<TItem> & _AutoGridProps<TItem>;
 
