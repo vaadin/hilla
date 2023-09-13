@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 /**
- * A browser service that can create, read and update a given type of object.
+ * A browser-callable service that can create, read and update a given type of object.
  * <p>
  * Note! Not yet fully implemented but limited to read operations
  */
