@@ -1,4 +1,4 @@
-package dev.hilla.springnative;
+package dev.hilla;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class HillaHintsRegistrarTest {
+public class OpenAPIUtilTest {
 
     @Test
     public void emptySchemaReturnsNoComponents() throws IOException {
@@ -19,14 +19,16 @@ public class HillaHintsRegistrarTest {
 
     @Test
     public void singleType() throws IOException {
-        Assert.assertEquals(Set
-                .of("com.example.application.endpoints.helloreact.MyOtherType"),
+        Assert.assertEquals(Set.of(
+                "com.example.application.endpoints.helloreact.HelloReactEndpoint",
+                "com.example.application.endpoints.helloreact.MyOtherType"),
                 parse("openapi-customtype.json"));
     }
 
     @Test
     public void referringTypes() throws IOException {
         Assert.assertEquals(Set.of(
+                "com.example.application.endpoints.helloreact.HelloReactEndpoint",
                 "com.example.application.endpoints.helloreact.MyType",
                 "com.example.application.endpoints.helloreact.MyOtherType"),
                 parse("openapi-referring-customtypes.json"));
@@ -35,6 +37,7 @@ public class HillaHintsRegistrarTest {
     @Test
     public void nestedType() throws IOException {
         Assert.assertEquals(Set.of(
+                "com.example.application.endpoints.helloreact.HelloReactEndpoint",
                 "com.example.application.endpoints.helloreact.HelloReactEndpoint$MyInnerType"),
                 parse("openapi-innertype.json"));
     }
@@ -43,7 +46,7 @@ public class HillaHintsRegistrarTest {
         String openApi = IOUtils.toString(
                 getClass().getResourceAsStream(openapiFilename),
                 StandardCharsets.UTF_8);
-        return HillaHintsRegistrar.parseOpenApi(openApi);
+        return OpenAPIUtil.findOpenApiClasses(openApi);
     }
 
 }
