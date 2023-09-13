@@ -19,6 +19,7 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ redirectPath, route }: ProtectedRouteProps): JSX.Element | null {
   const {
+    hasAccess,
     state: { initializing, user },
   } = useAuth();
   const location = useLocation();
@@ -46,7 +47,7 @@ const collectRoutes = <T,>(routes: T[]): T[] => {
 };
 
 const protectRoute = <T,>(route: T, redirectPath: string): void => {
-  if ((route as AccessProps).requiresLogin) {
+  if ((route as AccessProps).requiresLogin ?? (route as AccessProps).rolesAllowed) {
     (route as RouteObject).element = (
       <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />
     );
@@ -70,13 +71,6 @@ export const protectRoutes = <T,>(routes: T[], redirectPath: string): T[] => {
     if ((route as AccessProps).requiresLogin) {
       protectRoute(route, redirectPath);
     }
-  });
-
-  (routes as RouteObject[]).push({
-    Component: () => {
-      window.location.href = redirectPath;
-      return null;
-    },
   });
 
   return routes;
