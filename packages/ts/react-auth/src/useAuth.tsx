@@ -16,7 +16,7 @@ const LOGOUT = 'LOGOUT';
  * specification, with the addition of the `roles` property.
  */
 export type AuthUser = Readonly<{
-  sub: string;
+  sub?: string;
   name?: string;
   givenName?: string;
   familyName?: string;
