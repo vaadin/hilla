@@ -14,6 +14,8 @@ const LOGOUT = 'LOGOUT';
  * The properties are the same as the ones returned from the
  * {@link https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims | OpenID Connect Standard Claims}
  * specification, with the addition of the `roles` property.
+ *
+ * The user is not required to comply with this format. This is just for convenience.
  */
 export type AuthUser = Readonly<{
   sub?: string;
