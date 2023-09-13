@@ -24,13 +24,14 @@ const fakeService: CrudService<Person> = {
   },
 };
 
-async function sleep(ms: number) {
-  return new Promise((resolve) =>
-    setTimeout(() => {
+export async function nextFrame() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
       resolve(undefined);
-    }, 1),
-  );
+    });
+  });
 }
+
 describe('@hilla/react-grid', () => {
   beforeEach(() => {});
 
@@ -55,7 +56,7 @@ describe('@hilla/react-grid', () => {
     it('data provider provides data', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await flushGrid(grid);
+      await nextFrame();
       expect((grid as any)._cache.size).to.equal(2);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
