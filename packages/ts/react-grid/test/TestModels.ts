@@ -11,6 +11,7 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   get firstName(): StringModel {
     return this[_getPropertyModel]('firstName', StringModel, [false]);
   }
+
   get lastName(): StringModel {
     return this[_getPropertyModel]('firstName', StringModel, [false]);
   }

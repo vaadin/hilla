@@ -17,7 +17,8 @@
   ],
   "scripts": {
     "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts test/**/*.ts --fix",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "echo \"Skipping\"",
     "test:watch": "npm run test -- --watch",
