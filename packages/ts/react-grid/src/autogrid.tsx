@@ -1,27 +1,37 @@
 import type { AbstractModel, ModelConstructor } from '@hilla/form';
 import {
   Grid,
-  type GridProps,
+  type GridDataProvider,
   type GridDataProviderCallback,
   type GridDataProviderParams,
+  type GridDefaultItem,
   type GridElement,
+  type GridProps,
 } from '@hilla/react-components/Grid.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
-import { useEffect, useRef } from 'react';
+import { type JSX, useEffect, useRef } from 'react';
 import type { CrudService } from './crud';
-import { getProperties } from './modelutil.js';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
+import { getProperties } from './utils.js';
 
-type _AutoGridProps<TItem> = {
-  service: CrudService<TItem>;
-  model: ModelConstructor<TItem, AbstractModel<TItem>>;
-};
-export type AutoGridProps<TItem> = _AutoGridProps<TItem> & GridProps<TItem>;
+export type AutoGridProps<TItem> = GridProps<TItem> &
+  Readonly<{
+    service: CrudService<TItem>;
+    model: ModelConstructor<TItem, AbstractModel<TItem>>;
+  }>;
 
-const createDataProvider = <TItem,>(grid: GridElement<TItem>, service: CrudService<TItem>) => {
+type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
+  Readonly<{
+    _cache: {
+      size?: number;
+    };
+  }>;
+
+function createDataProvider<TItem>(grid: GridElement<TItem>, service: CrudService<TItem>): GridDataProvider<TItem> {
   let first = true;
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
       orders: params.sortOrders.map((order) => ({
@@ -43,8 +53,9 @@ const createDataProvider = <TItem,>(grid: GridElement<TItem>, service: CrudServi
     let size;
     if (items.length === pageSize) {
       size = (pageNumber + 1) * pageSize + 1;
-      // eslint-disable-next-line
-      if (size < (grid as any)._cache.size) {
+
+      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
+      if (cacheSize !== undefined && size < cacheSize) {
         // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
         size = undefined;
       }
@@ -58,35 +69,25 @@ const createDataProvider = <TItem,>(grid: GridElement<TItem>, service: CrudServi
       setTimeout(() => grid.recalculateColumnWidths(), 0);
     }
   };
-};
+}
 
-const createColumns = (model: ModelConstructor<any, any>) => {
-  const properties = getProperties(model);
+function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>) {
+  return getProperties(model).map((p) => (
+    <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>
+  ));
+}
 
-  const columns = properties.map((p) => {
-    const customProps: any = { autoWidth: true };
+export function AutoGrid<TItem>({ service, model, ...gridProps }: AutoGridProps<TItem>): JSX.Element {
+  // This cast should go away with #1252
+  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>);
 
-    const column = (
-      <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} {...customProps}></GridSortColumn>
-    );
-
-    return column;
-  });
-  return columns;
-};
-
-export function AutoGrid<TItem>(props: AutoGridProps<TItem>): JSX.Element {
-  const { service, model, ...gridProps } = props;
-
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const grid = ref.current as any as GridElement<TItem>;
-    // eslint-disable-next-line
-    grid.dataProvider = createDataProvider(grid, service);
-  }, []);
-
-  const children = createColumns(model);
-
-  return <Grid {...gridProps} ref={ref} children={children}></Grid>;
+  return (
+    <Grid
+      {...gridProps}
+      ref={(grid) => {
+        grid!.dataProvider = createDataProvider(grid!, service);
+      }}
+      children={children}
+    ></Grid>
+  );
 }
