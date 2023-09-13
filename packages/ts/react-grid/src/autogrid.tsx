@@ -10,16 +10,10 @@ import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
 import { useEffect, useRef } from 'react';
 import type { CrudService } from './crud';
 import { getProperties } from './modelutil.js';
+import Sort from './types/dev/hilla/mappedtypes/Sort';
+import Direction from './types/org/springframework/data/domain/Sort/Direction';
 
-// import Sort from "Frontend/generated/dev/hilla/mappedtypes/Sort";
-// import Direction from "Frontend/generated/org/springframework/data/domain/Sort/Direction";
-type Sort = any;
-enum Direction {
-  ASC = 'ASC',
-  DESC = 'DESC',
-}
-
-export type _AutoGridProps<TItem> = {
+type _AutoGridProps<TItem> = {
   service: CrudService<TItem>;
   model: ModelConstructor<TItem, any>;
 };

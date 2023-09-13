@@ -1,4 +1,4 @@
-import Pageable from './types/Pageable';
+import Pageable from './types/dev/hilla/mappedtypes/Pageable';
 
 export interface CrudService<T> {
   list: {

@@ -36,6 +36,7 @@ packages/ts/*/*.js
 packages/ts/*/*.js.map
 packages/ts/*/.coverage
 packages/ts/*/.vite
+packages/ts/*/types/**
 !packages/ts/*/.lintstagedrc.js
 scripts/generator/results/
 packages/java/hilla/*.json

@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { AutoGrid } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
-import Pageable from '../src/types/Pageable.js';
+import Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
 import { Person, PersonModel } from './TestModels.js';
 //@ts-ignore
 import { getBodyCellContent } from './grid-test-utils.js';
@@ -55,7 +55,6 @@ describe('@hilla/react-grid', () => {
     it('data provider provides data', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      grid.requestContentUpdate();
       await sleep(1);
       expect((grid as any)._cache.size).to.equal(2);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
@@ -66,8 +65,8 @@ describe('@hilla/react-grid', () => {
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      expect(grid.getAttribute("model")).to.be.null;
-      expect(grid.getAttribute("service")).to.be.null;
+      expect(grid.getAttribute('model')).to.be.null;
+      expect(grid.getAttribute('service')).to.be.null;
     });
   });
 });
