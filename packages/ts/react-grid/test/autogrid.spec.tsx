@@ -21,7 +21,7 @@ const fakeService: CrudService<Person> = {
     ];
     if (request.pageNumber === 0) {
       /* eslint-disable */
-      if (filter && (filter as any).t === 'p') {
+      if (filter && (filter as any).t === 'propertyString') {
         const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
         return data.filter((person) => {
           const propertyValue = (person as any)[propertyFilter.propertyId];
