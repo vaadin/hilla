@@ -19,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -27,9 +29,11 @@ import static org.mockito.Mockito.mockConstruction;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
+        JacksonProperties.class })
 @ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
         EndpointControllerConfiguration.class })
+// Ensure an old EndpointController is not used for EndpointCodeGenerator
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 public class EndpointHotSwapListenerTest {
 
     @SpyBean
