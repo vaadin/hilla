@@ -1,6 +1,4 @@
-# Hilla Auth
-
-[API documentation ↗](https://hilla.dev/docs/data-binding/reference)
+# Hilla React Auth
 
 [![Latest Stable Version](https://img.shields.io/npm/v/@hilla/auth.svg)](https://www.npmjs.com/package/@hilla/auth)
 
