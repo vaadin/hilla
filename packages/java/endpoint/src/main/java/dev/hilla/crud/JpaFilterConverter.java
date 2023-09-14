@@ -39,8 +39,7 @@ public class JpaFilterConverter {
             Class<?> javaType = em.getMetamodel().entity(entity)
                     .getAttribute(filter.getPropertyId()).getJavaType();
 
-            return new PropertyStringFilterSpecification<>(filter, entity,
-                    javaType);
+            return new PropertyStringFilterSpecification<>(filter, javaType);
 
         } else {
             if (rawFilter != null) {
