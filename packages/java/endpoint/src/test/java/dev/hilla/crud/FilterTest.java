@@ -1,8 +1,8 @@
 package dev.hilla.crud;
 
-import java.time.LocalDate;
 import java.util.List;
 
+import dev.hilla.crud.filter.AndFilter;
 import dev.hilla.crud.filter.Filter;
 import dev.hilla.crud.filter.OrFilter;
 import dev.hilla.crud.filter.PropertyStringFilter;
@@ -64,11 +64,13 @@ public class FilterTest {
     @Test
     public void basicAndFilter() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
-        PropertyStringFilter filter1 = createNameFilter(Matcher.CONTAINS, "Ja");
-        PropertyStringFilter filter2 = createNameFilter(Matcher.CONTAINS, "ck");
-        OrFilter filter = new OrFilter();
+        PropertyStringFilter filter1 = createNameFilter(Matcher.CONTAINS,
+                "Joh");
+        PropertyStringFilter filter2 = createNameFilter(Matcher.CONTAINS,
+                "nny");
+        AndFilter filter = new AndFilter();
         filter.setChildren(List.of(filter1, filter2));
-        assertFilterResult(filter, "Jack");
+        assertFilterResult(filter, "Johnny");
     }
 
     private void assertFilterResult(Filter filter, String... expectedNames) {

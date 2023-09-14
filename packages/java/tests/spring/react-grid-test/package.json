@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@hilla/form": "file:../../../../ts/form",
-    "@hilla/frontend": "2.2.0-beta1",
+    "@hilla/frontend": "file:../../../../ts/frontend",
     "@hilla/generator-typescript-cli": "file:../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "file:../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "file:../../../../ts/generator-typescript-plugin-backbone",
@@ -82,7 +82,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "1421902e14d934a264fb64295f6b022c52964845be6c538f6aa29687df5e1552"
+    "hash": "7f85992b371b0029ddda175ca883c5f04f3060483376b52d1a46498b49451fa7"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
