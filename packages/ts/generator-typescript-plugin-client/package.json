@@ -54,7 +54,7 @@
     "@hilla/generator-typescript-core": "^2.3.0-alpha1"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.3.0-alpha1",
+    "@hilla/generator-typescript-utils": "file:../generator-typescript-utils",
     "typescript": "^5.1.6"
   },
   "devDependencies": {

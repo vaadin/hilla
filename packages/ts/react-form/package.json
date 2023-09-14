@@ -47,7 +47,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "*"
+    "@hilla/form": "file:../form"
   },
   "peerDependencies": {
     "react": "^18"
