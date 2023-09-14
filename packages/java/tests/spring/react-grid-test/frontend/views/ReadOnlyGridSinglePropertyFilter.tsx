@@ -14,7 +14,7 @@ export function ReadOnlyGridSinglePropertyFilter() {
         label="Search for first name"
         onValueChanged={(e) => {
           const propertyFilter: any = {
-            t: 'p',
+            t: 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
             filterValue: e.detail.value,

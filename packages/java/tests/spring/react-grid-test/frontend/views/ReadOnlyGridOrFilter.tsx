@@ -16,18 +16,18 @@ export function ReadOnlyGridOrFilter() {
         label="Search for first or last name"
         onValueChanged={(e) => {
           const firstNameFilter: any = {
-            t: 'p',
+            t: 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
             filterValue: e.detail.value,
           };
           const lasttNameFilter: any = {
-            t: 'p',
+            t: 'propertyString',
             propertyId: 'lastName',
             matcher: 'CONTAINS',
             filterValue: e.detail.value,
           };
-          setFilter({ t: 'o', children: [firstNameFilter, lasttNameFilter] });
+          setFilter({ t: 'or', children: [firstNameFilter, lasttNameFilter] });
         }}
       ></TextField>
       <AutoGrid pageSize={10} service={PersonService} model={PersonModel} filter={filter} />
