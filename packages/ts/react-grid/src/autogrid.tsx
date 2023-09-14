@@ -90,7 +90,13 @@ function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>,
   ));
 }
 
-export function AutoGrid<TItem>({ service, model, filter, visibleColumns, ...gridProps }: AutoGridProps<TItem>): JSX.Element {
+export function AutoGrid<TItem>({
+  service,
+  model,
+  filter,
+  visibleColumns,
+  ...gridProps
+}: AutoGridProps<TItem>): JSX.Element {
   // This cast should go away with #1252
   const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns);
 
@@ -105,9 +111,11 @@ export function AutoGrid<TItem>({ service, model, filter, visibleColumns, ...gri
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = ref.current!;
-    dataProviderFilter.current = filter;
-    grid.clearCache();
+    const grid = ref.current;
+    if (grid) {
+      dataProviderFilter.current = filter;
+      grid.clearCache();
+    }
   }, [filter]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;

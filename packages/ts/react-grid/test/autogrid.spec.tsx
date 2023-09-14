@@ -51,9 +51,6 @@ describe('@hilla/react-grid', () => {
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
     return <AutoGrid service={fakeService} model={PersonModel} {...customProps}></AutoGrid>;
   }
-  function TestAutoGridWithFilter(props: { filter: Filter }) {
-    return <AutoGrid service={fakeService} model={PersonModel} filter={props.filter}></AutoGrid>;
-  }
   describe('useAutoGrid', () => {
     it('creates columns based on model', async () => {
       const result = render(<TestAutoGrid />);
@@ -96,7 +93,7 @@ describe('@hilla/react-grid', () => {
       // eslint-disable-next-line
       (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
-      const result = render(<TestAutoGridWithFilter filter={filter} />);
+      const result = render(<TestAutoGrid filter={filter} />);
       await nextFrame();
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       expect(getVisibleRowCount(grid)).to.equal(1);
