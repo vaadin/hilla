@@ -66,10 +66,14 @@ describe('@hilla/react-grid', () => {
       expect(columns[1].path).to.equal('lastName');
       expect(columns[1].header).to.equal('Last name');
     });
-    it('sets a data provider', async () => {
+    it('sets a data provider, but only once', async () => {
       const result = render(<TestAutoGrid />);
-      const grid = result.container.querySelector('vaadin-grid');
-      expect(grid?.dataProvider).to.not.be.undefined;
+      const grid = result.container.querySelector('vaadin-grid')!;
+      const dp = grid.dataProvider;
+      expect(dp).to.not.be.undefined;
+      result.rerender(<TestAutoGrid />);
+      const grid2 = result.container.querySelector('vaadin-grid')!;
+      expect(dp).to.equal(grid2.dataProvider);
     });
     it('data provider provides data', async () => {
       const result = render(<TestAutoGrid />);
