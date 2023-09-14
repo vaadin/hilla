@@ -3,17 +3,16 @@ package dev.hilla.internal.hotswap;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import dev.hilla.EndpointCodeGenerator;
 import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointProperties;
+import dev.hilla.ResetEndpointCodeGeneratorInstance;
 import dev.hilla.ServletContextTestSetup;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
 import dev.hilla.engine.ParserProcessor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,15 +27,16 @@ import static org.mockito.Mockito.mockConstruction;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
-        EndpointController.class })
+        JacksonProperties.class, EndpointController.class })
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class })
 public class EndpointHotSwapListenerTest {
+
+    @SpyBean
+    private EndpointController endpointController;
 
     @MockBean
     private EndpointHotSwapService endpointHotSwapService;
-    @MockBean
-    private EndpointCodeGenerator endpointCodeGenerator;
 
     @Test
     public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled()
@@ -52,15 +52,14 @@ public class EndpointHotSwapListenerTest {
                     () -> EngineConfiguration.loadDirectory(Mockito.any()))
                     .thenReturn(engineConfiguration);
 
-            var listener = new EndpointHotSwapListener(endpointHotSwapService,
-                    endpointCodeGenerator);
+            var listener = new EndpointHotSwapListener(endpointHotSwapService);
 
-            Mockito.clearInvocations(endpointCodeGenerator);
+            Mockito.clearInvocations(endpointController);
             listener.endpointChanged(new HotSwapListener.EndpointChangedEvent(
                     Path.of("test-project/target"), null));
 
-            Mockito.verify(endpointCodeGenerator, Mockito.atLeastOnce())
-                    .update();
+            Mockito.verify(endpointController, Mockito.atLeastOnce())
+                    .registerEndpoints();
         }
     }
 

@@ -34,6 +34,7 @@ import com.vaadin.flow.server.HandlerHelper.RequestType;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.flow.spring.ResetEndpointCodeGeneratorInstance;
 import com.vaadin.flow.spring.SpringBootAutoConfiguration;
 import com.vaadin.flow.spring.SpringSecurityAutoConfiguration;
 import com.vaadin.flow.spring.SpringServlet;
@@ -42,7 +43,8 @@ import com.vaadin.flow.spring.VaadinConfigurationProperties;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EndpointProperties.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class,
         SpringBootAutoConfiguration.class,
         SpringSecurityAutoConfiguration.class, ObjectMapper.class,
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,

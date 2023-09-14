@@ -17,6 +17,7 @@ package dev.hilla;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Set;
 
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
@@ -36,8 +37,12 @@ public class EndpointCodeGenerator {
     private final EndpointController endpointController;
     private final VaadinContext context;
     private Path buildDirectory;
+
     private ApplicationConfiguration configuration;
     private String nodeExecutable;
+    private Set<String> classesUsedInOpenApi = null;
+
+    private static EndpointCodeGenerator instance = null;
 
     /**
      * Creates the singleton.
@@ -51,6 +56,18 @@ public class EndpointCodeGenerator {
             EndpointController endpointController) {
         this.endpointController = endpointController;
         this.context = context;
+        if (instance != null) {
+            throw new IllegalStateException("Only one instance of "
+                    + getClass().getName() + " should ever be created");
+        }
+        instance = this;
+    }
+
+    /**
+     * Gets the singleton instance.
+     */
+    public static EndpointCodeGenerator getInstance() {
+        return instance;
     }
 
     /**
@@ -91,6 +108,15 @@ public class EndpointCodeGenerator {
                     configuration.getProjectFolder());
             nodeExecutable = tools.getNodeBinary();
         }
+    }
+
+    public Set<String> getClassesUsedInOpenApi() throws IOException {
+        if (classesUsedInOpenApi == null) {
+            initIfNeeded();
+            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
+                    OpenAPIUtil.getCurrentOpenAPI(buildDirectory));
+        }
+        return classesUsedInOpenApi;
     }
 
 }

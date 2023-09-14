@@ -15,7 +15,8 @@ import dev.hilla.auth.EndpointAccessChecker;
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
         JacksonProperties.class, EndpointController.class })
-@ContextConfiguration(classes = EndpointControllerConfiguration.class)
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointControllerConfigurationTest {
 

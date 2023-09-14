@@ -20,6 +20,7 @@ import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
 import dev.hilla.EndpointInvoker;
 import dev.hilla.EndpointProperties;
 import dev.hilla.EndpointSubscription;
+import dev.hilla.ResetEndpointCodeGeneratorInstance;
 import dev.hilla.ServletContextTestSetup;
 import dev.hilla.push.PushMessageHandler.SubscriptionInfo;
 import dev.hilla.push.messages.fromclient.SubscribeMessage;
@@ -50,7 +51,8 @@ import reactor.core.publisher.Flux;
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
         PushMessageHandler.class, ObjectMapper.class,
         EndpointController.class })
-@ContextConfiguration(classes = EndpointControllerConfiguration.class)
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "dev.hilla.FeatureFlagCondition.alwaysEnable=true")
 @NotThreadSafe
