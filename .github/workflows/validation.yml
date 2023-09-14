@@ -242,3 +242,4 @@ jobs:
       - name: Fail if test jobs did not succeed
         if: ${{ needs.test-it.result != 'success' }}
         run: exit 1
+
