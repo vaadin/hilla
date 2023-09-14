@@ -7,10 +7,10 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import type { ReactNode } from 'react';
+import { useContext, type ReactNode } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth, type AccessProps } from './useAuth.js';
+import { type AccessProps, AuthContext } from './useAuth.js';
 
 interface ProtectedRouteProps {
   redirectPath: string;
@@ -20,7 +20,8 @@ interface ProtectedRouteProps {
 function ProtectedRoute({ redirectPath, route }: ProtectedRouteProps): JSX.Element | null {
   const {
     state: { initializing, user },
-  } = useAuth();
+  } = useContext(AuthContext);
+
   const location = useLocation();
 
   if (initializing) {
@@ -45,12 +46,8 @@ const collectRoutes = <T,>(routes: T[]): T[] => {
   return allRoutes;
 };
 
-const protectRoute = <T,>(route: T, redirectPath: string): void => {
-  if ((route as AccessProps).requiresLogin ?? (route as AccessProps).rolesAllowed) {
-    (route as RouteObject).element = (
-      <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />
-    );
-  }
+export type RouteObjectWithAuth = RouteObject & {
+  handle?: AccessProps;
 };
 
 /**
@@ -63,11 +60,19 @@ const protectRoute = <T,>(route: T, redirectPath: string): void => {
  * protected and the user is not authenticated.
  * @returns the routes extended with protection if needed
  */
-export const protectRoutes = <T,>(routes: T[], redirectPath: string): T[] => {
-  const allRoutes: T[] = collectRoutes(routes);
+export const protectRoutes = (
+  routes: RouteObjectWithAuth[],
+  redirectPath: string = '/login',
+): RouteObjectWithAuth[] => {
+  const allRoutes: RouteObjectWithAuth[] = collectRoutes(routes);
+
   allRoutes.forEach((route) => {
-    if ((route as AccessProps).requiresLogin ?? (route as AccessProps).rolesAllowed) {
-      protectRoute(route, redirectPath);
+    const handle = route.handle as AccessProps;
+
+    if (handle.requiresLogin ?? handle.rolesAllowed) {
+      (route as RouteObject).element = (
+        <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />
+      );
     }
   });
 
