@@ -43,9 +43,7 @@ public class CrudRepositoryService<T, ID> implements CrudService<T> {
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
         Specification<T> spec = jpaFilterConverter.toSpec(filter, entityClass);
-        return ((JpaSpecificationExecutor<T>) repository)
-                .findAll(spec, pageable).getContent();
-
+        return repository.findAll(spec, pageable).getContent();
     }
 
 }

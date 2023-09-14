@@ -90,7 +90,7 @@ describe('@hilla/react-grid', () => {
     it('passes filter to the data provider', async () => {
       const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
       // eslint-disable-next-line
-      (filter as any).t = 'p'; // Workaround for https://github.com/vaadin/hilla/issues/438
+      (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
       const result = render(<TestAutoGridWithFilter filter={filter} />);
       await nextFrame();
