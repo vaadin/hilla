@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -37,6 +36,9 @@ public class EndpointHotSwapListenerTest {
 
     @MockBean
     private EndpointHotSwapService endpointHotSwapService;
+
+    @MockBean
+    private EndpointController endpointController;
 
     @Test
     public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled()
@@ -59,7 +61,7 @@ public class EndpointHotSwapListenerTest {
                     Path.of("test-project/target"), null));
 
             Mockito.verify(endpointController, Mockito.atLeastOnce())
-                    .registerEndpoints();
+                    .onApplicationEvent(Mockito.any());
         }
     }
 

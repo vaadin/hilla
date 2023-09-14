@@ -22,6 +22,8 @@ import java.util.Set;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
 import dev.hilla.engine.ParserProcessor;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.server.VaadinContext;
@@ -34,13 +36,21 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 @Component
 public class EndpointCodeGenerator {
 
-    private final EndpointController endpointController;
+    public static class OpenApiGeneratedEvent extends ApplicationEvent {
+
+        public OpenApiGeneratedEvent(EndpointCodeGenerator source) {
+            super(source);
+        }
+
+    }
+
     private final VaadinContext context;
     private Path buildDirectory;
 
     private ApplicationConfiguration configuration;
     private String nodeExecutable;
     private Set<String> classesUsedInOpenApi = null;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private static EndpointCodeGenerator instance = null;
 
@@ -49,13 +59,11 @@ public class EndpointCodeGenerator {
      * 
      * @param context
      *            the context the application is running in
-     * @param endpointController
-     *            a reference to the endpoint controller
      */
     public EndpointCodeGenerator(VaadinContext context,
-            EndpointController endpointController) {
-        this.endpointController = endpointController;
+            ApplicationEventPublisher applicationEventPublisher) {
         this.context = context;
+        this.applicationEventPublisher = applicationEventPublisher;
         if (instance != null) {
             throw new IllegalStateException("Only one instance of "
                     + getClass().getName() + " should ever be created");
@@ -93,7 +101,7 @@ public class EndpointCodeGenerator {
                 engineConfiguration, nodeExecutable);
         generator.process();
 
-        this.endpointController.registerEndpoints();
+        applicationEventPublisher.publishEvent(new OpenApiGeneratedEvent(this));
     }
 
     private void initIfNeeded() {
