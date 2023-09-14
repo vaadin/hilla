@@ -1,6 +1,8 @@
+import { statSync } from 'node:fs';
 import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import File from '@hilla/generator-typescript-core/File.js';
 import LoggerFactory from '@hilla/generator-typescript-utils/LoggerFactory.js';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -53,9 +55,9 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
     });
   });
 
-  describe('Testing GeneratorIO.cleanOutputDir', () => {
+  describe('Testing GeneratorIO.getGeneratedFiles', () => {
     it("should do nothing when there's no file index", async () => {
-      await expect(io.cleanOutputDir()).to.eventually.be.empty;
+      await expect(io.getGeneratedFiles()).to.eventually.be.empty;
 
       await Promise.all(
         generatedFilenames.map(async (name) => {
@@ -64,10 +66,34 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         }),
       );
     });
-
-    it('should delete all generated files and report them', async () => {
+    it('should return the file index', async () => {
       await io.createFileIndex(generatedFilenames);
-      await expect(io.cleanOutputDir()).to.eventually.have.property('size', generatedFilenames.length);
+
+      expect(await io.getGeneratedFiles()).to.eql(new Set(['file1.ts', 'file2.ts', 'file3.ts']));
+    });
+    xit('should fail when IO error happens', async () => {
+      await io.createFileIndex(generatedFilenames);
+      await chmod(tmpDir, 0o666);
+      await expect(io.getGeneratedFiles()).to.eventually.be.rejectedWith(Error, /^(?!ENOENT).*/u);
+      await chmod(tmpDir, 0o777);
+    });
+  });
+  describe('Testing GeneratorIO.cleanOutputDir', () => {
+    it('should delete all given files and report them', async () => {
+      await io.createFileIndex(generatedFilenames);
+      await expect(
+        io.cleanOutputDir([generatedFilenames[0], generatedFilenames[1]], new Set(generatedFilenames)),
+      ).to.eventually.have.property('size', generatedFilenames.length - 2);
+      const existenceResults = await Promise.all(generatedFilenames.map(async (name) => io.exists(join(tmpDir, name))));
+      expect(existenceResults).to.be.deep.equal([true, true, false]);
+    });
+
+    it('should not delete newly generated files and report them', async () => {
+      await io.createFileIndex(generatedFilenames);
+      await expect(io.cleanOutputDir([], new Set(generatedFilenames))).to.eventually.have.property(
+        'size',
+        generatedFilenames.length,
+      );
       const existenceResults = await Promise.all(generatedFilenames.map(async (name) => io.exists(join(tmpDir, name))));
       expect(existenceResults).to.be.deep.equal([false, false, false]);
     });
@@ -76,15 +102,27 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
       await io.createFileIndex(generatedFilenames);
       const name = 'other-file.ts';
       await writeFile(join(tmpDir, name), 'dummy content');
-      await expect(io.cleanOutputDir()).to.eventually.have.property('size', generatedFilenames.length);
+      await expect(io.cleanOutputDir([], new Set(generatedFilenames))).to.eventually.have.property(
+        'size',
+        generatedFilenames.length,
+      );
       await expect(io.exists(join(tmpDir, name))).to.eventually.be.true;
     });
+  });
+  describe('Testing GeneratorIO.writeChangedFiles', () => {
+    it('should write changed file and sync file index', async () => {
+      const f: File = new File([''], 'file1.ts');
+      expect(await io.writeGeneratedFiles([f])).to.eql([f.name]);
+      const content = await io.read(io.resolveGeneratedFile(f.name));
+      expect(content).to.equal('');
+    });
 
-    xit('should fail when IO error happens', async () => {
-      await io.createFileIndex(generatedFilenames);
-      await chmod(tmpDir, 0o666);
-      await expect(io.cleanOutputDir()).to.be.rejectedWith(Error, /^(?!ENOENT).*/u);
-      await chmod(tmpDir, 0o777);
+    it('should not write unchanged files', async () => {
+      const f: File = new File(['dummy content'], 'file1.ts');
+      const { mtime } = statSync(io.resolveGeneratedFile(f.name));
+      expect(await io.writeGeneratedFiles([f])).to.eql([f.name]);
+      const mtime2 = statSync(io.resolveGeneratedFile(f.name)).mtime;
+      expect(mtime).to.eql(mtime2);
     });
   });
 });
