@@ -3,7 +3,7 @@ package dev.hilla.crud.filter;
 import java.util.List;
 
 /**
- * A filter that requires at least on of its children to pass.
+ * A filter that requires at least one of its children to pass.
  */
 public class OrFilter implements Filter {
 
