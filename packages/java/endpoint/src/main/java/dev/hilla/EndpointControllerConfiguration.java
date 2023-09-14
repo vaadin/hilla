@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -241,15 +242,16 @@ public class EndpointControllerConfiguration {
      * 
      * @param context
      *            the servlet context
-     * @param endpointController
-     *            the endpoint controller
+     * @param applicationEventPublisher
+     *            event publisher
      * @return the endpoint code generator
      */
     @Bean
     EndpointCodeGenerator endpointCodeGenerator(ServletContext servletContext,
-            EndpointController endpointController) {
+            ApplicationEventPublisher applicationEventPublisher) {
         return new EndpointCodeGenerator(
-                new VaadinServletContext(servletContext), endpointController);
+                new VaadinServletContext(servletContext),
+                applicationEventPublisher);
     }
 
 }

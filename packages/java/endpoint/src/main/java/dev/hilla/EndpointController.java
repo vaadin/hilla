@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -45,6 +46,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinServletService;
 
+import dev.hilla.EndpointCodeGenerator.OpenApiGeneratedEvent;
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
@@ -77,7 +79,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @Import({ EndpointControllerConfiguration.class, EndpointProperties.class })
 @NpmPackage(value = "@hilla/frontend", version = "2.2.0-beta1")
-public class EndpointController {
+public class EndpointController
+        implements ApplicationListener<OpenApiGeneratedEvent> {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointController.class);
 
@@ -325,5 +328,10 @@ public class EndpointController {
         }
 
         return null;
+    }
+
+    @Override
+    public void onApplicationEvent(OpenApiGeneratedEvent event) {
+        registerEndpoints();
     }
 }
