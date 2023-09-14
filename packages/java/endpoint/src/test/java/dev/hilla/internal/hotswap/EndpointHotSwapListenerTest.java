@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointProperties;
+import dev.hilla.ResetEndpointCodeGeneratorInstance;
 import dev.hilla.ServletContextTestSetup;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.mockConstruction;
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
         JacksonProperties.class, EndpointController.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class })
 public class EndpointHotSwapListenerTest {
 
     @SpyBean
