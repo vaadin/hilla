@@ -199,12 +199,31 @@ jobs:
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
+              -pl !tests-spring-endpoints-latest-java -am \
               -Pit-modules-${{ matrix.it-modules }} \
               verify
           )
       - name: Gradle ITs
         if: ${{ matrix.it-modules == 'group-1' || runner.os == 'windows' }}
         run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
+      - name: Setup java 20
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '20'
+      - name: Verify Spring Endpoints with Latest Java
+        if: ${{ matrix.it-modules == 'group-2' || runner.os == 'ubuntu-latest' }}
+        run: |
+          (
+            cd packages/java/tests/spring/endpoints-latest-java && \
+            mvn -B -am -ntp -fae \
+              -Dfailsafe.forkCount=4 \
+              -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
+              -Dfailsafe.rerunFailingTestsCount=2 \
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
+              -Dmaven.wagon.http.retryHandler.count=3 \
+              verify
+          )
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:
