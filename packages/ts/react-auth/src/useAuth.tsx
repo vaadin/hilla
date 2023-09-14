@@ -133,11 +133,13 @@ function reducer(state: AuthState, action: LoginActions | LogoutAction) {
 
 /**
  * The properties that can be used to control access to a route.
- * They can be added to the route type as properties.
+ * They can be added to the route type handler as properties.
  */
 export type AccessProps = Readonly<{
-  requiresLogin?: boolean;
-  rolesAllowed?: readonly string[];
+  handle?: {
+    requiresLogin?: boolean;
+    rolesAllowed?: readonly string[];
+  };
 }>;
 
 /**
@@ -147,7 +149,7 @@ export type Authentication = Readonly<{
   state: AuthState;
   authenticate: AuthenticateThunk;
   unauthenticate: UnauthenticateThunk;
-  hasAccess({ handle }: { handle?: AccessProps }): boolean;
+  hasAccess({ handle }: AccessProps): boolean;
 }>;
 
 /**
@@ -173,7 +175,7 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
     state,
     authenticate,
     unauthenticate,
-    hasAccess({ handle }: { handle?: AccessProps }): boolean {
+    hasAccess({ handle }: AccessProps): boolean {
       const requiresAuth = handle?.requiresLogin ?? handle?.rolesAllowed;
       if (!requiresAuth) {
         return true;
@@ -200,7 +202,7 @@ export const AuthContext = createContext<Authentication>({
   state: initialState,
   async authenticate() {},
   unauthenticate() {},
-  hasAccess({ handle }: { handle?: AccessProps }): boolean {
+  hasAccess({ handle }: AccessProps): boolean {
     return !handle?.requiresLogin && !handle?.rolesAllowed;
   },
 });

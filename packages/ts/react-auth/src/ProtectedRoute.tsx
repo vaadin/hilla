@@ -67,12 +67,10 @@ export const protectRoutes = (
   const allRoutes: RouteObjectWithAuth[] = collectRoutes(routes);
 
   allRoutes.forEach((route) => {
-    const handle = route.handle as AccessProps;
+    const { handle } = route as AccessProps;
 
-    if (handle.requiresLogin ?? handle.rolesAllowed) {
-      (route as RouteObject).element = (
-        <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />
-      );
+    if (handle?.requiresLogin ?? handle?.rolesAllowed) {
+      route.element = <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />;
     }
   });
 
