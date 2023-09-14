@@ -42,6 +42,14 @@ public class FilterTest {
         assertFilterResult(filter, "John");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void filterNonExistingStringProperty() {
+        setupNames("Jack", "John", "Johnny", "Polly", "Josh");
+        PropertyStringFilter filter = createNameFilter(Matcher.EQUALS, "John");
+        filter.setPropertyId("foo");
+        assertFilterResult(filter, "John");
+    }
+
     @Test
     public void basicOrFilter() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
