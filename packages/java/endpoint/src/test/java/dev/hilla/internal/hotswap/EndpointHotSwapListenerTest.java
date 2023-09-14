@@ -1,6 +1,5 @@
 package dev.hilla.internal.hotswap;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import dev.hilla.EndpointController;
@@ -39,8 +38,7 @@ public class EndpointHotSwapListenerTest {
     private EndpointHotSwapService endpointHotSwapService;
 
     @Test
-    public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled()
-            throws IOException {
+    public void endpointChangedIsCalled_endpointCodeGeneratorUpdateIsCalled() {
         try (var engineConfigurationMockedStatic = Mockito
                 .mockStatic(EngineConfiguration.class);
                 var processorMockedConstruction = mockConstruction(
@@ -62,5 +60,4 @@ public class EndpointHotSwapListenerTest {
                     .registerEndpoints();
         }
     }
-
 }
