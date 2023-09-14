@@ -1,3 +1,4 @@
+/* eslint-disable sort-keys */
 import { assert, expect, use } from '@esm-bundle/chai';
 import { LitElement } from 'lit';
 // TODO: remove when the new version of eslint-config-vaadin is released.
@@ -80,6 +81,26 @@ describe('@hilla/form', () => {
         products: [],
         total: undefined,
       };
+
+      function testClear(doClear: () => void) {
+        binder.read({
+          ...expectedEmptyOrder,
+          notes: 'bar',
+          customer: {
+            ...expectedEmptyOrder.customer,
+            fullName: 'bar',
+          },
+        });
+        requestUpdateStub.reset();
+        assert.notDeepEqual(binder.value, expectedEmptyOrder);
+        assert.notDeepEqual(binder.defaultValue, expectedEmptyOrder);
+
+        doClear();
+
+        assert.deepEqual(binder.value, expectedEmptyOrder);
+        assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
+        expect(requestUpdateStub).to.be.calledOnce;
+      }
 
       beforeEach(() => {
         binder = new Binder(litOrderView, OrderModel);
@@ -172,23 +193,13 @@ describe('@hilla/form', () => {
       });
 
       it('should clear value and default value', () => {
-        binder.read({
-          ...expectedEmptyOrder,
-          notes: 'bar',
-          customer: {
-            ...expectedEmptyOrder.customer,
-            fullName: 'bar',
-          },
-        });
-        requestUpdateStub.reset();
-        assert.notDeepEqual(binder.value, expectedEmptyOrder);
-        assert.notDeepEqual(binder.defaultValue, expectedEmptyOrder);
-
-        binder.clear();
-
-        assert.deepEqual(binder.value, expectedEmptyOrder);
-        assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
-        expect(requestUpdateStub).to.be.calledOnce;
+        testClear(() => binder.clear());
+      });
+      it('should clear value when setting an undefined value', () => {
+        testClear(() => binder.read(undefined));
+      });
+      it('should clear value when setting a null value', () => {
+        testClear(() => binder.read(null));
       });
 
       it('should update when clearing validation', async () => {
@@ -228,14 +239,24 @@ describe('@hilla/form', () => {
       it('should be able to set null to object type property', () => {
         const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
         myBinder.for(myBinder.model.fieldAny).value = null;
-        myBinder.for(myBinder.model.fieldAny).validate();
+        myBinder
+          .for(myBinder.model.fieldAny)
+          .validate()
+          .catch(() => {
+            /* ignore */
+          });
         assert.isFalse(myBinder.invalid);
       });
 
       it('should be able to set undefined to object type property', () => {
         const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
         myBinder.for(myBinder.model.fieldAny).value = undefined;
-        myBinder.for(myBinder.model.fieldAny).validate();
+        myBinder
+          .for(myBinder.model.fieldAny)
+          .validate()
+          .catch(() => {
+            /* ignore */
+          });
         assert.isFalse(myBinder.invalid);
       });
     });

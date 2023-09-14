@@ -3,8 +3,7 @@ import createFullyUniqueIdentifier from '@hilla/generator-typescript-utils/creat
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
 import DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
-import type { SourceFile } from 'typescript';
-import ts from 'typescript';
+import ts, { type SourceFile } from 'typescript';
 
 export default class ClientProcessor {
   readonly #owner: Plugin;

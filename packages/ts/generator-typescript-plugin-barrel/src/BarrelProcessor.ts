@@ -18,7 +18,7 @@ export default class BarrelProcessor {
   }
 
   process(): SourceFile {
-    this.#owner.logger.info(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
+    this.#owner.logger.debug(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
 
     const { exports, imports } = this.#endpoints.reduce((acc, { fileName }) => {
       const specifier = basename(fileName, '.ts');

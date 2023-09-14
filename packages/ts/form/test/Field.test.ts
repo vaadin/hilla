@@ -1,11 +1,9 @@
-/* eslint-disable no-unused-expressions, no-shadow */
+/* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
 import { assert, expect, use } from '@esm-bundle/chai';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
-// TODO: remove when the new version of eslint-config-vaadin is released.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { BinderNode } from '../src/BinderNode.js';
@@ -39,6 +37,14 @@ describe('@hilla/form', () => {
 
         __value = '';
 
+        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+
+        __required = false;
+
+        requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
+
+        setAttributeSpy = sinon.spy(this, 'setAttribute');
+
         get value() {
           return this.__value;
         }
@@ -48,10 +54,6 @@ describe('@hilla/form', () => {
           this.__value = String(value);
         }
 
-        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
-
-        __required = false;
-
         get required() {
           return this.__required;
         }
@@ -59,10 +61,6 @@ describe('@hilla/form', () => {
         set required(value) {
           this.__required = value;
         }
-
-        requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
-
-        setAttributeSpy = sinon.spy(this, 'setAttribute');
       }
 
       let orderViewWithTextField: OrderViewWithTextField;
@@ -151,11 +149,11 @@ describe('@hilla/form', () => {
         const emptyOrder = OrderModel.createEmptyValue();
         orderViewWithTextField.binder.read({
           ...emptyOrder,
-          notes: 'foo',
           customer: {
             ...emptyOrder.customer,
             fullName: 'bar',
           },
+          notes: 'foo',
         });
         await orderViewWithTextField.updateComplete;
 
@@ -167,11 +165,11 @@ describe('@hilla/form', () => {
         const emptyOrder = OrderModel.createEmptyValue();
         orderViewWithTextField.binder.read({
           ...emptyOrder,
-          notes: 'foo',
           customer: {
             ...emptyOrder.customer,
             fullName: 'bar',
           },
+          notes: 'foo',
         });
         await orderViewWithTextField.updateComplete;
         orderViewWithTextField.notesField!.valueSpy.set.resetHistory();
@@ -208,7 +206,7 @@ describe('@hilla/form', () => {
         orderViewWithTextField.requestUpdateSpy.resetHistory();
         orderViewWithTextField.notesField!.value = 'foo';
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }),
+          new CustomEvent('input', { bubbles: true, cancelable: false, composed: true }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -220,7 +218,7 @@ describe('@hilla/form', () => {
         orderViewWithTextField.requestUpdateSpy.resetHistory();
         orderViewWithTextField.notesField!.value = 'foo';
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('change', { bubbles: true, composed: true, cancelable: false }),
+          new CustomEvent('change', { bubbles: true, cancelable: false, composed: true }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -232,7 +230,7 @@ describe('@hilla/form', () => {
         orderViewWithTextField.requestUpdateSpy.resetHistory();
         orderViewWithTextField.notesField!.value = 'foo';
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false }),
+          new CustomEvent('blur', { bubbles: true, cancelable: false, composed: true }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -246,7 +244,7 @@ describe('@hilla/form', () => {
         expect(binderNode.visited).to.be.false;
 
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('blur', { bubbles: true, composed: true, cancelable: false }),
+          new CustomEvent('blur', { bubbles: true, cancelable: false, composed: true }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -260,6 +258,7 @@ describe('@hilla/form', () => {
 
         beforeEach(async () => {
           view = orderViewWithTextField;
+          // eslint-disable-next-line prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -300,7 +299,7 @@ describe('@hilla/form', () => {
               priorityField.valueSpy.get.resetHistory();
               priorityField.valueSpy.set.resetHistory();
               priorityField.dispatchEvent(
-                new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false }),
+                new CustomEvent(eventName, { bubbles: true, cancelable: false, composed: true }),
               );
               await view.updateComplete; // eslint-disable-line no-await-in-loop
 
@@ -328,6 +327,10 @@ describe('@hilla/form', () => {
       class MockInputElement extends HTMLElement {
         __value = '';
 
+        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
+
+        setAttributeSpy = sinon.spy(this, 'setAttribute');
+
         get value() {
           return this.__value;
         }
@@ -336,10 +339,6 @@ describe('@hilla/form', () => {
           // Native inputs stringify incoming values
           this.__value = String(value);
         }
-
-        valueSpy = sinon.spy(this, 'value', ['get', 'set']);
-
-        setAttributeSpy = sinon.spy(this, 'setAttribute');
       }
 
       @customElement('order-view-with-input')
@@ -411,6 +410,7 @@ describe('@hilla/form', () => {
 
         beforeEach(async () => {
           view = orderViewWithInput;
+          // eslint-disable-next-line prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -450,7 +450,7 @@ describe('@hilla/form', () => {
               priorityField.valueSpy.get.resetHistory();
               priorityField.valueSpy.set.resetHistory();
               priorityField.dispatchEvent(
-                new CustomEvent(eventName, { bubbles: true, composed: true, cancelable: false }),
+                new CustomEvent(eventName, { bubbles: true, cancelable: false, composed: true }),
               );
               await view.updateComplete; // eslint-disable-line no-await-in-loop
 
@@ -504,7 +504,6 @@ describe('@hilla/form', () => {
 
       ['div', 'input', 'vaadin-rich-text-editor'].forEach((tag) => {
         it(`GenericFieldStrategy ${tag}`, async () => {
-          /* eslint-disable lit/binding-positions, lit/no-invalid-html */
           const tagName = unsafeStatic(tag);
 
           const model = binder.model.fieldString;
@@ -620,7 +619,7 @@ describe('@hilla/form', () => {
         { model: binder.model.fieldObject as AbstractModel<any>, value: { foo: true } },
         { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
         { model: binder.model.fieldArrayModel as AbstractModel<any>, value: [{ idString: 'id' }] },
-      ].forEach(async ({ model, value }, idx) => {
+      ].forEach(({ model, value }, idx) => {
         it(`VaadinFieldStrategy ${model.constructor.name} ${idx}`, async () => {
           let element;
           const renderElement = () => {
@@ -670,7 +669,7 @@ describe('@hilla/form', () => {
         { model: binder.model.fieldString as AbstractModel<any>, value: 'a-string-value' },
         { model: binder.model.fieldBoolean as AbstractModel<any>, value: true },
         { model: binder.model.fieldNumber as AbstractModel<any>, value: 10 },
-      ].forEach(async ({ model, value }) => {
+      ].forEach(({ model, value }) => {
         it(`ComboBoxFieldStrategy value for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
@@ -708,7 +707,7 @@ describe('@hilla/form', () => {
 
           element.selectedItem = element.value;
           element.value = '';
-          element.dispatchEvent(new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }));
+          element.dispatchEvent(new CustomEvent('input', { bubbles: true, cancelable: false, composed: true }));
           expect(currentStrategy.value).to.equal('');
           expect(binderNode.value).to.not.equal(value);
         });
@@ -717,7 +716,7 @@ describe('@hilla/form', () => {
       [
         { model: binder.model.fieldObject as AbstractModel<any>, value: { foo: true } },
         { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
-      ].forEach(async ({ model, value }) => {
+      ].forEach(({ model, value }) => {
         it(`ComboBoxFieldStrategy selectedItem for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
@@ -755,7 +754,7 @@ describe('@hilla/form', () => {
 
           element.value = element.selectedItem;
           element.selectedItem = null;
-          element.dispatchEvent(new CustomEvent('input', { bubbles: true, composed: true, cancelable: false }));
+          element.dispatchEvent(new CustomEvent('input', { bubbles: true, cancelable: false, composed: true }));
           expect(currentStrategy.value).to.equal(undefined);
           expect(binderNode.value).to.not.equal(value);
         });
@@ -764,7 +763,7 @@ describe('@hilla/form', () => {
       [
         { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
         { model: binder.model.fieldArrayModel as AbstractModel<any>, value: [{ idString: 'id' }] },
-      ].forEach(async ({ model, value }) => {
+      ].forEach(({ model, value }) => {
         it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
@@ -801,7 +800,7 @@ describe('@hilla/form', () => {
           // Simulate user clearing the selection, by clearing the property and dispatching the change event that
           // the component would fire when the selection is modified by the user
           element.selectedItems = [];
-          element.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, cancelable: false }));
+          element.dispatchEvent(new CustomEvent('change', { bubbles: true, cancelable: false, composed: true }));
           expect(currentStrategy.value).to.eql([]);
           expect(binderNode.value).to.eql([]);
         });
@@ -815,12 +814,11 @@ describe('@hilla/form', () => {
         await resetBinderNodeValidation(binderNode);
 
         let element;
-        const renderElement = (tag: string, model: AbstractModel<any>) => {
-          /* eslint-disable lit/binding-positions, lit/no-invalid-html */
+        const renderElement = (tag: string, renderModel: AbstractModel<any>) => {
           const tagName = unsafeStatic(tag);
           render(
             html`
-            <${tagName} ${field(model)}></${tagName}>`,
+            <${tagName} ${field(renderModel)}></${tagName}>`,
             div,
           );
           return div.firstElementChild as HTMLInputElement & {
@@ -854,6 +852,7 @@ describe('@hilla/form', () => {
         expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
         const comboBoxFieldStrategy = currentStrategy;
         expect(element.value).to.equal(stringValue);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((element as any).selectedItem).to.be.undefined;
 
         model = binder.model.fieldObject;
@@ -865,6 +864,7 @@ describe('@hilla/form', () => {
         expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
         expect(currentStrategy).to.not.equal(comboBoxFieldStrategy);
         expect(element.value).to.equal(stringValue);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect((element as any).selectedItem).to.equal(binderNode.value);
       });
 
@@ -888,8 +888,8 @@ describe('@hilla/form', () => {
           }
         }
 
-        const binder = new MyBinder(element);
-        const { model } = binder;
+        const myBinder = new MyBinder(element);
+        const { model } = myBinder;
 
         render(html` <div ${field(model)}></div>`, element);
         expect(currentStrategy instanceof MyStrategy).to.be.true;

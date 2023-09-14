@@ -1,7 +1,8 @@
-import { RouterLocation } from '@vaadin/router';
-import UserInfo from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/data/UserInfo';
+import type { RouterLocation } from '@vaadin/router';
+import type UserInfo from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/data/UserInfo';
 import { UserInfoEndpoint } from 'Frontend/generated/endpoints';
 import { makeAutoObservable } from 'mobx';
+
 export class AppStore {
   applicationName = 'Bank of Vaadin';
 
@@ -16,7 +17,7 @@ export class AppStore {
     makeAutoObservable(this);
   }
 
-  setLocation(location: RouterLocation) {
+  setLocation(location: RouterLocation): void {
     if (location.route) {
       this.location = location.route.path;
     } else if (location.pathname.startsWith(location.baseUrl)) {
@@ -24,21 +25,23 @@ export class AppStore {
     } else {
       this.location = location.pathname;
     }
-    const route = location?.route as any;
+    const route = location.route as any;
 
     this.currentViewTitle = route?.title || '';
   }
 
-  async fetchUserInfo() {
+  async fetchUserInfo(): Promise<void> {
     this.user = await UserInfoEndpoint.getUserInfo();
   }
-  clearUserInfo() {
+
+  clearUserInfo(): void {
     this.user = undefined;
   }
 
   get loggedIn() {
     return !!this.user;
   }
+
   isUserInRole(role: string) {
     return this.user?.roles?.includes(role);
   }

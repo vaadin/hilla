@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring;
 
+import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 @SpringBootTest(classes = { EndpointProperties.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class,
         SpringBootAutoConfiguration.class,
         SpringSecurityAutoConfiguration.class,
-        Jackson2ObjectMapperBuilder.class, JacksonProperties.class })
+        Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
+        EndpointController.class })
 public abstract class AbstractDevModeBrowserLauncherTest {
 
     @Autowired

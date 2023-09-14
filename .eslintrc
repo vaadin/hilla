@@ -6,10 +6,14 @@
     "vaadin/prettier"
   ],
   "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"],
+  "plugins": ["tsdoc"],
   "rules": {
+    "@typescript-eslint/member-ordering": "off",
     "class-methods-use-this": "off",
+    "import/no-duplicates": "off",
     "import/prefer-default-export": "off",
     "max-params": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "tsdoc/syntax": "error"
   }
 }

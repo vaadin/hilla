@@ -66,7 +66,7 @@ export class EntityProcessor {
 
     const statements = declaration ? [declaration] : [];
 
-    const { imports, exports } = this.#dependencies;
+    const { exports, imports } = this.#dependencies;
 
     return createSourceFile(
       [...imports.toCode(), ...statements, ...exports.toCode()],

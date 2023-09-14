@@ -51,6 +51,10 @@
           {
             "type": "object",
             "properties": {
+              "publicProp": {
+                "type": "string",
+                "nullable": true
+              },
               "privateProp": {
                 "type": "string",
                 "nullable": true
@@ -63,23 +67,19 @@
                 "type": "string",
                 "nullable": true
               },
-              "propertySetterOnly": {
-                "type": "string",
-                "nullable": true
-              },
               "propertyWithDifferentField": {
                 "type": "string",
                 "nullable": true
               },
-              "publicProp": {
-                "type": "string",
-                "nullable": true
-              },
-              "renamedPrivateProp0": {
+              "propertySetterOnly": {
                 "type": "string",
                 "nullable": true
               },
               "renamedPublicProp0": {
+                "type": "string",
+                "nullable": true
+              },
+              "renamedPrivateProp0": {
                 "type": "string",
                 "nullable": true
               }
@@ -90,11 +90,11 @@
       "dev.hilla.parser.plugins.backbone.jackson.JacksonEndpoint$SampleParent": {
         "type": "object",
         "properties": {
-          "privateParentProperty": {
+          "publicParentProperty": {
             "type": "string",
             "nullable": true
           },
-          "publicParentProperty": {
+          "privateParentProperty": {
             "type": "string",
             "nullable": true
           }

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,10 +48,11 @@ public class JacksonPropertyModelTests {
     @ArgumentsSource(ModelProvider.class)
     public void should_HaveCorrectType(JacksonPropertyModel model,
             String name) {
-        var expectedTypes = JacksonPropertySharedTests.stringifiedTypes
-                .get(name);
-        assertEquals(expectedTypes, model.getAssociatedTypes().stream()
-                .map(Model::get).map(Object::toString).toList());
+        var expectedTypes = new HashSet<>(
+                JacksonPropertySharedTests.stringifiedTypes.get(name));
+        assertEquals(expectedTypes,
+                model.getAssociatedTypes().stream().map(Model::get)
+                        .map(Object::toString).collect(Collectors.toSet()));
     }
 
     @DisplayName("It should pass equality check")
@@ -172,8 +174,9 @@ public class JacksonPropertyModelTests {
         var expected = switch (name) {
         case "propertyGetterOnly", "propertySetterOnly" -> new Expected(false,
                 Optional.empty());
-        default -> new Expected(true, Optional.of(FieldInfoModel
-                .of(getDeclaredField(JacksonPropertySharedTests.Sample.class, name))));
+        default -> new Expected(true,
+                Optional.of(FieldInfoModel.of(getDeclaredField(
+                        JacksonPropertySharedTests.Sample.class, name))));
         };
 
         assertEquals(expected.hasField(), model.hasField());
@@ -193,7 +196,8 @@ public class JacksonPropertyModelTests {
                 false, Optional.empty());
         default -> new Expected(true,
                 Optional.of(MethodInfoModel.of(getDeclaredMethod(
-                        JacksonPropertySharedTests.Sample.class, toGetterName(name)))));
+                        JacksonPropertySharedTests.Sample.class,
+                        toGetterName(name)))));
         };
 
         assertEquals(expected.hasGetter(), model.hasGetter());
@@ -210,7 +214,8 @@ public class JacksonPropertyModelTests {
 
         var expected = switch (name) {
         case "privatePropertyWithAccessors", "propertySetterOnly" -> new Expected(
-                true, getAnyDeclaredMethod(JacksonPropertySharedTests.Sample.class,
+                true,
+                getAnyDeclaredMethod(JacksonPropertySharedTests.Sample.class,
                         toSetterName(name)).map(MethodInfoModel::of));
         default -> new Expected(false, Optional.empty());
         };

@@ -10,11 +10,26 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import jakarta.servlet.ServletContext;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.server.VaadinServletContext;
-
+import dev.hilla.EndpointController;
+import dev.hilla.EndpointControllerConfiguration;
+import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
+import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
+import dev.hilla.EndpointInvocationException.EndpointInternalException;
+import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
+import dev.hilla.EndpointInvoker;
+import dev.hilla.EndpointProperties;
+import dev.hilla.EndpointSubscription;
+import dev.hilla.ResetEndpointCodeGeneratorInstance;
+import dev.hilla.ServletContextTestSetup;
+import dev.hilla.push.PushMessageHandler.SubscriptionInfo;
+import dev.hilla.push.messages.fromclient.SubscribeMessage;
+import dev.hilla.push.messages.fromclient.UnsubscribeMessage;
+import dev.hilla.push.messages.toclient.AbstractClientMessage;
+import dev.hilla.push.messages.toclient.ClientMessageComplete;
+import dev.hilla.push.messages.toclient.ClientMessageError;
+import dev.hilla.push.messages.toclient.ClientMessageUpdate;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,31 +44,15 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import dev.hilla.EndpointControllerConfiguration;
-import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
-import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
-import dev.hilla.EndpointInvocationException.EndpointInternalException;
-import dev.hilla.EndpointInvocationException.EndpointNotFoundException;
-import dev.hilla.EndpointInvoker;
-import dev.hilla.EndpointProperties;
-import dev.hilla.EndpointSubscription;
-import dev.hilla.ServletContextTestSetup;
-import dev.hilla.push.PushMessageHandler.SubscriptionInfo;
-import dev.hilla.push.messages.fromclient.SubscribeMessage;
-import dev.hilla.push.messages.fromclient.UnsubscribeMessage;
-import dev.hilla.push.messages.toclient.AbstractClientMessage;
-import dev.hilla.push.messages.toclient.ClientMessageComplete;
-import dev.hilla.push.messages.toclient.ClientMessageError;
-import dev.hilla.push.messages.toclient.ClientMessageUpdate;
-import net.jcip.annotations.NotThreadSafe;
 import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class })
-@ContextConfiguration(classes = EndpointControllerConfiguration.class)
+        PushMessageHandler.class, ObjectMapper.class,
+        EndpointController.class })
+@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
+        EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "dev.hilla.FeatureFlagCondition.alwaysEnable=true")
 @NotThreadSafe
@@ -72,9 +71,6 @@ public class PushMessageHandlerTest {
 
     @MockBean
     private EndpointInvoker endpointInvoker;
-
-    @Autowired
-    private ServletContext servletContext;
 
     @Autowired
     private ObjectMapper objectMapper;
