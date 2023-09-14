@@ -91,11 +91,13 @@ export function AutoGrid<TItem>({ service, model, filter, ...gridProps }: AutoGr
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
 
   useEffect(() => {
+    // Sets the data provider, should be done only once
     const grid = ref.current!;
     grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
   }, []);
 
   useEffect(() => {
+    // Update the filtering, whenever the filter changes
     const grid = ref.current!;
     dataProviderFilter.current = filter;
     grid.clearCache();
