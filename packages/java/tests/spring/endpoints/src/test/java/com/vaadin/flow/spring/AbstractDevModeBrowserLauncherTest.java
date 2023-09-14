@@ -26,8 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 @SpringBootTest(classes = { EndpointProperties.class })
-@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
-        EndpointControllerConfiguration.class,
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
         SpringBootAutoConfiguration.class,
         SpringSecurityAutoConfiguration.class,
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
