@@ -1,26 +1,12 @@
 package dev.hilla.test.reactgrid;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.ChromeBrowserTest;
+public class ReadOnlyGridIT extends AbstractGridTest {
 
-public class ReadOnlyGridIT extends ChromeBrowserTest {
-
-    private GridElement grid;
-
-    @Override
-    @Before
-    public void setup() throws Exception {
-        super.setup();
-        getDriver().get(getRootURL() + "/readonly-grid");
-        grid = $(GridElement.class).first();
-        waitUntil(driver -> {
-            Object prop = grid.getProperty("_lastVisibleIndex");
-            return prop != null;
-        });
+    protected String getTestPath() {
+        return getRootURL() + "/readonly-grid";
     }
 
     @Test
@@ -52,20 +38,4 @@ public class ReadOnlyGridIT extends ChromeBrowserTest {
         assertName(19, "Tina", "Phillips");
     }
 
-    private void assertName(int row, String firstName, String lastName) {
-        assertFirstName(row, firstName);
-        assertLastName(row, lastName);
-    }
-
-    private void assertFirstName(int row, String firstName) {
-        Assert.assertEquals(firstName, grid.getCell(row, 2).getText());
-    }
-
-    private void assertLastName(int row, String lastName) {
-        Assert.assertEquals(lastName, grid.getCell(row, 3).getText());
-    }
-
-    private void sortByColumn(int i) {
-        grid.getHeaderCell(i).$("vaadin-grid-sorter").first().click();
-    }
 }

@@ -9,8 +9,9 @@ import {
   type GridProps,
 } from '@hilla/react-components/Grid.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
-import { type JSX, useEffect, useRef } from 'react';
+import { useEffect, useRef, type JSX } from 'react';
 import type { CrudService } from './crud';
+import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties } from './utils.js';
@@ -19,6 +20,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
     model: ModelConstructor<TItem, AbstractModel<TItem>>;
+    filter?: Filter;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -28,7 +30,11 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
-function createDataProvider<TItem>(grid: GridElement<TItem>, service: CrudService<TItem>): GridDataProvider<TItem> {
+function createDataProvider<TItem>(
+  grid: GridElement<TItem>,
+  service: CrudService<TItem>,
+  filter: React.MutableRefObject<Filter | undefined>,
+): GridDataProvider<TItem> {
   let first = true;
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -49,7 +55,7 @@ function createDataProvider<TItem>(grid: GridElement<TItem>, service: CrudServic
       sort,
     };
 
-    const items = await service.list(req);
+    const items = await service.list(req, filter.current);
     let size;
     if (items.length === pageSize) {
       size = (pageNumber + 1) * pageSize + 1;
@@ -77,17 +83,25 @@ function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>)
   ));
 }
 
-export function AutoGrid<TItem>({ service, model, ...gridProps }: AutoGridProps<TItem>): JSX.Element {
+export function AutoGrid<TItem>({ service, model, filter, ...gridProps }: AutoGridProps<TItem>): JSX.Element {
   // This cast should go away with #1252
   const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>);
 
-  return (
-    <Grid
-      {...gridProps}
-      ref={(grid) => {
-        grid!.dataProvider = createDataProvider(grid!, service);
-      }}
-      children={children}
-    ></Grid>
-  );
+  const ref = useRef<GridElement<TItem>>(null);
+  const dataProviderFilter = useRef<Filter | undefined>(undefined);
+
+  useEffect(() => {
+    // Sets the data provider, should be done only once
+    const grid = ref.current!;
+    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+  }, []);
+
+  useEffect(() => {
+    // Update the filtering, whenever the filter changes
+    const grid = ref.current!;
+    dataProviderFilter.current = filter;
+    grid.clearCache();
+  }, [filter]);
+
+  return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }
