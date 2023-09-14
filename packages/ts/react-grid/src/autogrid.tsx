@@ -93,7 +93,7 @@ export function AutoGrid<TItem>({ service, model, filter, ...gridProps }: AutoGr
   useEffect(() => {
     const grid = ref.current!;
     grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
-  });
+  }, []);
 
   useEffect(() => {
     const grid = ref.current!;
