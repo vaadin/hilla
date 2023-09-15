@@ -292,10 +292,10 @@ public final class Parser {
         if (packages != null && !packages.isEmpty()) {
 
             // always include the root package of current module/project:
-            var rootPackageOfThisProject = findRootPackage(buildDirectories);
-            if (rootPackageOfThisProject.isPresent()) {
+            var rootPackage = findRootPackage(buildDirectories);
+            if (rootPackage.isPresent()) {
                 packages = new LinkedHashSet<>(packages);
-                packages.add(rootPackageOfThisProject.get());
+                packages.add(rootPackage.get());
             }
 
             logger.info("Search for endpoints in packages {}", packages);
