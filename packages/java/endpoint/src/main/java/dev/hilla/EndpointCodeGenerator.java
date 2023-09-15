@@ -42,8 +42,6 @@ public class EndpointCodeGenerator {
     private String nodeExecutable;
     private Set<String> classesUsedInOpenApi = null;
 
-    private static EndpointCodeGenerator instance = null;
-
     /**
      * Creates the singleton.
      * 
@@ -56,18 +54,14 @@ public class EndpointCodeGenerator {
             EndpointController endpointController) {
         this.endpointController = endpointController;
         this.context = context;
-        if (instance != null) {
-            throw new IllegalStateException("Only one instance of "
-                    + getClass().getName() + " should ever be created");
-        }
-        instance = this;
     }
 
     /**
      * Gets the singleton instance.
      */
     public static EndpointCodeGenerator getInstance() {
-        return instance;
+        return ApplicationContextProvider.getApplicationContext()
+                .getBean(EndpointCodeGenerator.class);
     }
 
     /**
@@ -118,5 +112,4 @@ public class EndpointCodeGenerator {
         }
         return classesUsedInOpenApi;
     }
-
 }
