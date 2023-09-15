@@ -43,11 +43,11 @@
     "access": "public"
   },
   "dependencies": {
-    "react-router-dom": "^6.15.0",
     "@hilla/frontend": "*"
   },
   "peerDependencies": {
-    "react": "^18"
+    "react": "^18",
+    "react-router-dom": "^6"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
