@@ -2,10 +2,10 @@ package dev.hilla.internal.hotswap;
 
 import java.nio.file.Path;
 
+import dev.hilla.ApplicationContextProvider;
 import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointProperties;
-import dev.hilla.ResetEndpointCodeGeneratorInstance;
 import dev.hilla.ServletContextTestSetup;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
@@ -26,9 +26,9 @@ import static org.mockito.Mockito.mockConstruction;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
-@ContextConfiguration(classes = { ResetEndpointCodeGeneratorInstance.class,
-        EndpointControllerConfiguration.class })
+        JacksonProperties.class, EndpointController.class,
+        ApplicationContextProvider.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 public class EndpointHotSwapListenerTest {
 
     @SpyBean

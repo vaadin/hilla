@@ -9,3 +9,7 @@ export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): 
   const cells = getRowCells(physicalRow);
   return getCellContent(cells[col]);
 };
+export const getVisibleRowCount = <T>(grid: Grid<T>): number =>
+  // eslint-disable-next-line
+   (grid as any)._cache.size
+;
