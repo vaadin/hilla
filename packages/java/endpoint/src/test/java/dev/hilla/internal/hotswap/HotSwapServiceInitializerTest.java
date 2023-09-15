@@ -134,15 +134,34 @@ public class HotSwapServiceInitializerTest {
     }
 
     @Test
-    public void liveReloadBackendIsNull_monitorChangesFromHotSwapServiceDoesNotGetCalled() {
+    public void liveReloadIsNull_monitorChangesFromHotSwapServiceDoesNotGetCalled() {
         try (var browserLiveReloadAccessorMockedStatic = Mockito
                 .mockStatic(BrowserLiveReloadAccessor.class)) {
             browserLiveReloadAccessorMockedStatic
                     .when(() -> BrowserLiveReloadAccessor
                             .getLiveReloadFromService(vaadinService))
                     .thenReturn(Optional.empty());
-            Mockito.when(mockedBrowserLiveReload.getBackend())
-                    .thenReturn(BrowserLiveReload.Backend.HOTSWAP_AGENT);
+
+            Mockito.when(deploymentConfiguration.isDevModeLiveReloadEnabled())
+                    .thenReturn(Boolean.TRUE);
+
+            hotSwapServiceInitializer.serviceInit(serviceInitEvent);
+
+            Mockito.verify(spyEndpointHotSwapService, Mockito.never())
+                    .monitorChanges(Mockito.any(), Mockito.any());
+        }
+    }
+
+    @Test
+    public void liveReloadBackendIsNull_monitorChangesFromHotSwapServiceDoesNotGetCalled() {
+        try (var browserLiveReloadAccessorMockedStatic = Mockito
+                .mockStatic(BrowserLiveReloadAccessor.class)) {
+            browserLiveReloadAccessorMockedStatic
+                    .when(() -> BrowserLiveReloadAccessor
+                            .getLiveReloadFromService(vaadinService))
+                    .thenReturn(Optional.of(mockedBrowserLiveReload));
+
+            Mockito.when(mockedBrowserLiveReload.getBackend()).thenReturn(null);
             Mockito.when(deploymentConfiguration.isDevModeLiveReloadEnabled())
                     .thenReturn(Boolean.TRUE);
 
