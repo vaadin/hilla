@@ -2,6 +2,8 @@ package dev.hilla.crud;
 
 import java.util.List;
 
+import dev.hilla.Nullable;
+import dev.hilla.crud.filter.Filter;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -18,8 +20,10 @@ public interface CrudService<T> {
      * 
      * @param pageable
      *            contains information about paging and sorting
+     * @param filter
+     *            the filter to apply or {@code null} to not filter
      * @return a list of objects or an empty list if no objects were found
      */
-    List<T> list(Pageable pageable);
+    List<T> list(Pageable pageable, @Nullable Filter filter);
 
 }

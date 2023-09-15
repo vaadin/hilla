@@ -50,7 +50,7 @@ import reactor.core.publisher.Flux;
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
         PushMessageHandler.class, ObjectMapper.class,
         EndpointController.class })
-@ContextConfiguration(classes = EndpointControllerConfiguration.class)
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "dev.hilla.FeatureFlagCondition.alwaysEnable=true")
 @NotThreadSafe

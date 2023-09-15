@@ -48,9 +48,7 @@ public class HotSwapConfiguration {
 
     @Bean
     EndpointHotSwapListener endpointHotSwapListener(
-            @Autowired EndpointHotSwapService endpointHotSwapService,
-            EndpointCodeGenerator endpointCodeGenerator) {
-        return new EndpointHotSwapListener(endpointHotSwapService,
-                endpointCodeGenerator);
+            @Autowired EndpointHotSwapService endpointHotSwapService) {
+        return new EndpointHotSwapListener(endpointHotSwapService);
     }
 }

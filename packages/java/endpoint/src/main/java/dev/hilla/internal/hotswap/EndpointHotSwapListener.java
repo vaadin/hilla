@@ -34,13 +34,9 @@ class EndpointHotSwapListener implements HotSwapListener {
 
     private final EndpointHotSwapService endpointHotSwapService;
 
-    private EndpointCodeGenerator endpointCodeGenerator;
-
     public EndpointHotSwapListener(
-            EndpointHotSwapService endpointHotSwapService,
-            EndpointCodeGenerator endpointCodeGenerator) {
+            EndpointHotSwapService endpointHotSwapService) {
         this.endpointHotSwapService = endpointHotSwapService;
-        this.endpointCodeGenerator = endpointCodeGenerator;
     }
 
     @PostConstruct
@@ -51,7 +47,7 @@ class EndpointHotSwapListener implements HotSwapListener {
     @Override
     public void endpointChanged(EndpointChangedEvent event) {
         try {
-            endpointCodeGenerator.update();
+            EndpointCodeGenerator.getInstance().update();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
