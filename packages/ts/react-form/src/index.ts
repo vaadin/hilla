@@ -5,7 +5,7 @@ import {
   type BinderConfiguration,
   BinderRoot,
   CHANGED,
-  defaultValidity,
+  type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
@@ -13,23 +13,24 @@ import {
   type ModelConstructor,
   type Validator,
   type ValueError,
-  type FieldStrategy,
 } from '@hilla/form';
 import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
+import type { VaadinWindow } from './types.js';
 
+declare const __VERSION__: string;
 
-const $wnd = window as any;
+const $wnd = window as VaadinWindow;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.2.0-beta1',
+  version: __VERSION__,
 });
 
 function useUpdate() {
-  const [_, update] = useReducer((x) => ++x, 0);
+  const [_, update] = useReducer((x: number) => x + 1, 0);
   return update;
 }
 
@@ -63,16 +64,16 @@ export type UseFormPartResult<T, M extends AbstractModel<T>> = Readonly<{
   validate(): Promise<ReadonlyArray<ValueError<unknown>>>;
 }>;
 
-export type UseFormResult<T, M extends AbstractModel<T>> = Readonly<{
-  value: T;
-  setDefaultValue(value: T): void;
-  setValue(value: T): void;
-  submit(): Promise<T | undefined>;
-  reset(): void;
-  clear(): void;
-  read(value: T | undefined | null): void;
-}> &
-  UseFormPartResult<T, M>;
+export type UseFormResult<T, M extends AbstractModel<T>> = Omit<UseFormPartResult<T, M>, 'setValue' | 'value'> &
+  Readonly<{
+    value: T;
+    setDefaultValue(value: T): void;
+    setValue(value: T): void;
+    submit(): Promise<T | undefined>;
+    reset(): void;
+    clear(): void;
+    read(value: T | null | undefined): void;
+  }>;
 
 type FieldState<T> = {
   value?: T;
@@ -134,8 +135,11 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         },
         ref(element: HTMLElement | null) {
           if (!element) {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('change', fieldState.updateValue);
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('input', fieldState.updateValue);
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('blur', fieldState.markVisited);
             fieldState.strategy?.removeEventListeners();
             fieldState.element = undefined;
@@ -149,8 +153,11 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
           if (fieldState.element !== element) {
             fieldState.element = element;
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('change', fieldState.updateValue);
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('input', fieldState.updateValue);
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('blur', fieldState.markVisited);
             fieldState.strategy = getDefaultFieldStrategy(element, model);
           }
@@ -205,6 +212,7 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
       return {
         name: n.name,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         ref: fieldState.ref,
       };
     }) as FieldDirective;
@@ -236,10 +244,10 @@ export function useForm<T, M extends AbstractModel<T>>(
     field,
     read: binder.read.bind(binder),
     reset: binder.reset.bind(binder),
-    setDefaultValue: (defaultValue: T) => {
+    setDefaultValue(defaultValue) {
       binder.defaultValue = defaultValue;
     },
-    setValue: (value: T) => {
+    setValue(value) {
       binder.value = value;
     },
     submit: binder.submit.bind(binder),

@@ -26,7 +26,9 @@ describe('@hilla/react-form', () => {
     return (
       <fieldset>
         <input data-testid="user.name" type="text" {...field(model.name)} />
-        <output data-testid="validation.user.name">{name.invalid ? name.ownErrors.map(e => e.message).join(', ') : 'OK'}</output>
+        <output data-testid="validation.user.name">
+          {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
         <input data-testid="user.password" type="text" {...field(model.password)} />
       </fieldset>
     );
@@ -113,7 +115,7 @@ describe('@hilla/react-form', () => {
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await act(() => {
+      await act(async () => {
         const { read } = (useForm as UseFormSpy).returnValues[0];
         read({
           rememberMe: true,
@@ -133,7 +135,7 @@ describe('@hilla/react-form', () => {
     it('dispays default value', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', '')
+      expect(getByTestId('output.user.name')).to.have.property('textContent', '');
       expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
     });
 
@@ -145,7 +147,7 @@ describe('@hilla/react-form', () => {
       await user.keyboard('johndoe');
       await user.click(getByTestId('rememberMe'));
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe')
+      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe');
       expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
     });
 
@@ -155,20 +157,20 @@ describe('@hilla/react-form', () => {
 
       await user.click(getByTestId('user.name'));
       await user.keyboard('Very lengthy name');
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('size');
 
       // clicking around should not hide the message
       await user.click(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('size');
 
       // clearing should show a required validator message
       await user.click(getByTestId('user.name'));
       await user.clear(getByTestId('user.name'));
-      await user.click(getByTestId('user.password'))
+      await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('invalid');
 
