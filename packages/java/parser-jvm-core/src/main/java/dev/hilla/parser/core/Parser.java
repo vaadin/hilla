@@ -21,6 +21,9 @@ public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     private final Config config;
 
+    private final SpringBootAppRootPackageFinder rootPackageFinder;
+    private final ClassGraph classGraph;
+
     public Parser() {
         try {
             var basicOpenAPIString = new String(Objects
@@ -30,6 +33,10 @@ public final class Parser {
             var openAPI = parseOpenAPIFile(basicOpenAPIString,
                     OpenAPIFileType.JSON, null);
             this.config = new Config(openAPI);
+            this.rootPackageFinder = new SpringBootAppRootPackageFinder();
+            classGraph = new ClassGraph().enableAnnotationInfo()
+                .ignoreClassVisibility()
+                .overrideClassLoaders(config.getClassLoader());
         } catch (IOException e) {
             throw new ParserException("Failed to parse openAPI specification",
                     e);
@@ -282,17 +289,13 @@ public final class Parser {
         var buildDirectories = config.getClassPathElements().stream()
                 .filter(e -> !e.endsWith(".jar")).toList();
 
-        var classGraph = new ClassGraph().enableAnnotationInfo()
-                .ignoreClassVisibility()
-                .overrideClassLoaders(config.getClassLoader());
-
-        Collection<String> packages = config.exposedPackages;
+        Collection<String> packages = getConfig().getExposedPackages();
 
         // Packages explicitly defined in pom.xml have priority
         if (packages != null && !packages.isEmpty()) {
 
             // always include the root package of current module/project:
-            var rootPackage = findRootPackage(buildDirectories);
+            var rootPackage = rootPackageFinder.findRootPackage(buildDirectories);
             if (rootPackage.isPresent()) {
                 packages = new LinkedHashSet<>(packages);
                 packages.add(rootPackage.get());
@@ -323,26 +326,6 @@ public final class Parser {
         logger.debug("JVM Parser finished successfully");
 
         return storage.getOpenAPI();
-    }
-
-    private Optional<String> findRootPackage(List<String> buildDirectories) {
-
-        var currentModuleClassGraph = new ClassGraph().enableAnnotationInfo()
-                .ignoreClassVisibility()
-                .overrideClassLoaders(ClassLoader.getSystemClassLoader())
-                .overrideClasspath(buildDirectories);
-
-        String springBootApplicationAnnotation = "org.springframework.boot.autoconfigure.SpringBootApplication";
-
-        try (var scanResult = currentModuleClassGraph.scan()) {
-            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(
-                    springBootApplicationAnnotation)) {
-                return Optional
-                        .of(classInfo.loadClass().getPackage().getName());
-            }
-        }
-
-        return Optional.empty();
     }
 
     /**
@@ -503,5 +486,28 @@ public final class Parser {
             return plugins;
         }
 
+    }
+
+    public static class SpringBootAppRootPackageFinder {
+
+        public Optional<String> findRootPackage(List<String> buildDirectories) {
+
+            var currentModuleClassGraph = new ClassGraph().enableAnnotationInfo()
+                .ignoreClassVisibility()
+                .overrideClassLoaders(ClassLoader.getSystemClassLoader())
+                .overrideClasspath(buildDirectories);
+
+            String springBootApplicationAnnotation = "org.springframework.boot.autoconfigure.SpringBootApplication";
+
+            try (var scanResult = currentModuleClassGraph.scan()) {
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(
+                    springBootApplicationAnnotation)) {
+                    return Optional
+                        .of(classInfo.loadClass().getPackage().getName());
+                }
+            }
+
+            return Optional.empty();
+        }
     }
 }
