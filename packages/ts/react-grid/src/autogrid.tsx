@@ -14,13 +14,14 @@ import type { CrudService } from './crud';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties } from './utils.js';
+import { getProperties, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
     model: ModelConstructor<TItem, AbstractModel<TItem>>;
     filter?: Filter;
+    visibleColumns?: string[];
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -77,15 +78,27 @@ function createDataProvider<TItem>(
   };
 }
 
-function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>) {
-  return getProperties(model).map((p) => (
+function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns?: string[]) {
+  const properties = getProperties(model);
+  const effectiveColumns = visibleColumns ?? properties.map((p) => p.name);
+  const effectiveProperties = effectiveColumns
+    .map((name) => properties.find((prop) => prop.name === name))
+    .filter(Boolean) as PropertyInfo[];
+
+  return effectiveProperties.map((p) => (
     <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>
   ));
 }
 
-export function AutoGrid<TItem>({ service, model, filter, ...gridProps }: AutoGridProps<TItem>): JSX.Element {
+export function AutoGrid<TItem>({
+  service,
+  model,
+  filter,
+  visibleColumns,
+  ...gridProps
+}: AutoGridProps<TItem>): JSX.Element {
   // This cast should go away with #1252
-  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>);
+  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns);
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
@@ -98,9 +111,11 @@ export function AutoGrid<TItem>({ service, model, filter, ...gridProps }: AutoGr
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = ref.current!;
-    dataProviderFilter.current = filter;
-    grid.clearCache();
+    const grid = ref.current;
+    if (grid) {
+      dataProviderFilter.current = filter;
+      grid.clearCache();
+    }
   }, [filter]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
