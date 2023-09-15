@@ -4,5 +4,5 @@
   ],
   "npmClient": "npm",
   "useNx": true,
-  "version": "2.2.0-beta1"
+  "version": "2.3.0-alpha1"
 }
