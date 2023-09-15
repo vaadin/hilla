@@ -35,13 +35,13 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
   const {
-    state: { initializing, user },
+    state: { initializing, loading, user },
     hasAccess,
   } = useContext(AuthContext);
 
   const location = useLocation();
 
-  if (initializing) {
+  if (initializing || loading) {
     return <div></div>;
   }
 
