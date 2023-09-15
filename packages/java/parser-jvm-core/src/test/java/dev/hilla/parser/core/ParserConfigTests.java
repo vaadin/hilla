@@ -180,25 +180,34 @@ public class ParserConfigTests {
     }
 
     @Test
-    public void exposedPackagesAreNotEmpty_rootPackage_shouldAlsoBeIncludedInClassGraphScan() throws IllegalAccessException {
+    public void exposedPackagesAreNotEmpty_rootPackage_shouldAlsoBeIncludedInClassGraphScan()
+            throws IllegalAccessException {
 
-        var parserWithRootPackageFinder = new Parser().classLoader(getClass().getClassLoader())
-            .classPath(defaultClassPathElements)
-            .endpointAnnotation(defaultEndpointAnnotationName)
-            .endpointExposedAnnotation(
-                defaultEndpointExposedAnnotationName)
-            .exposedPackages(List.of("test.sample.app"));
+        var parserWithRootPackageFinder = new Parser()
+                .classLoader(getClass().getClassLoader())
+                .classPath(defaultClassPathElements)
+                .endpointAnnotation(defaultEndpointAnnotationName)
+                .endpointExposedAnnotation(defaultEndpointExposedAnnotationName)
+                .exposedPackages(List.of("test.sample.app"));
 
-        var rootPackageFinder = mock(Parser.SpringBootAppRootPackageFinder.class);
-        when(rootPackageFinder.findRootPackage(Mockito.anyList())).thenReturn(Optional.of("com.example.app"));
+        var rootPackageFinder = mock(
+                Parser.SpringBootAppRootPackageFinder.class);
+        when(rootPackageFinder.findRootPackage(Mockito.anyList()))
+                .thenReturn(Optional.of("com.example.app"));
 
-        Field rootPackageFinderField = ReflectionUtils.findFields(Parser.class, f -> f.getName().equals("rootPackageFinder"), ReflectionUtils.HierarchyTraversalMode.TOP_DOWN).get(0);
+        Field rootPackageFinderField = ReflectionUtils.findFields(Parser.class,
+                f -> f.getName().equals("rootPackageFinder"),
+                ReflectionUtils.HierarchyTraversalMode.TOP_DOWN).get(0);
         rootPackageFinderField.setAccessible(true);
-        rootPackageFinderField.set(parserWithRootPackageFinder, rootPackageFinder);
+        rootPackageFinderField.set(parserWithRootPackageFinder,
+                rootPackageFinder);
 
         var classGraph = mock(ClassGraph.class);
 
-        Field classGraphField = ReflectionUtils.findFields(Parser.class, f -> f.getName().equals("classGraph"), ReflectionUtils.HierarchyTraversalMode.TOP_DOWN).get(0);
+        Field classGraphField = ReflectionUtils
+                .findFields(Parser.class, f -> f.getName().equals("classGraph"),
+                        ReflectionUtils.HierarchyTraversalMode.TOP_DOWN)
+                .get(0);
         classGraphField.setAccessible(true);
         classGraphField.set(parserWithRootPackageFinder, classGraph);
 

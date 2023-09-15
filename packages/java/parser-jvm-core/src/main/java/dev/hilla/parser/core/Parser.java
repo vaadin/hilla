@@ -35,8 +35,8 @@ public final class Parser {
             this.config = new Config(openAPI);
             this.rootPackageFinder = new SpringBootAppRootPackageFinder();
             classGraph = new ClassGraph().enableAnnotationInfo()
-                .ignoreClassVisibility()
-                .overrideClassLoaders(config.getClassLoader());
+                    .ignoreClassVisibility()
+                    .overrideClassLoaders(config.getClassLoader());
         } catch (IOException e) {
             throw new ParserException("Failed to parse openAPI specification",
                     e);
@@ -295,7 +295,8 @@ public final class Parser {
         if (packages != null && !packages.isEmpty()) {
 
             // always include the root package of current module/project:
-            var rootPackage = rootPackageFinder.findRootPackage(buildDirectories);
+            var rootPackage = rootPackageFinder
+                    .findRootPackage(buildDirectories);
             if (rootPackage.isPresent()) {
                 packages = new LinkedHashSet<>(packages);
                 packages.add(rootPackage.get());
@@ -492,18 +493,18 @@ public final class Parser {
 
         public Optional<String> findRootPackage(List<String> buildDirectories) {
 
-            var currentModuleClassGraph = new ClassGraph().enableAnnotationInfo()
-                .ignoreClassVisibility()
-                .overrideClassLoaders(ClassLoader.getSystemClassLoader())
-                .overrideClasspath(buildDirectories);
+            var currentModuleClassGraph = new ClassGraph()
+                    .enableAnnotationInfo().ignoreClassVisibility()
+                    .overrideClassLoaders(ClassLoader.getSystemClassLoader())
+                    .overrideClasspath(buildDirectories);
 
             String springBootApplicationAnnotation = "org.springframework.boot.autoconfigure.SpringBootApplication";
 
             try (var scanResult = currentModuleClassGraph.scan()) {
                 for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(
-                    springBootApplicationAnnotation)) {
+                        springBootApplicationAnnotation)) {
                     return Optional
-                        .of(classInfo.loadClass().getPackage().getName());
+                            .of(classInfo.loadClass().getPackage().getName());
                 }
             }
 
