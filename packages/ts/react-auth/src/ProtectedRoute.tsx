@@ -7,19 +7,36 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import { useContext, type ReactNode } from 'react';
+import { useContext } from 'react';
 import type { RouteObject } from 'react-router-dom';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { type IndexRouteObject, Navigate, type NonIndexRouteObject, useLocation } from 'react-router-dom';
 import { type AccessProps, AuthContext } from './useAuth.js';
+
+type CustomMetadata = Record<string, any>;
+
+type HandleWithAuth = Readonly<{ handle?: AccessProps & CustomMetadata }>;
+
+type Override<T, E> = E & Omit<T, keyof E>;
+
+type IndexRouteObjectWithAuth = Override<IndexRouteObject, HandleWithAuth>;
+type NonIndexRouteObjectWithAuth = Override<
+  Override<NonIndexRouteObject, HandleWithAuth>,
+  {
+    children?: RouteObjectWithAuth[];
+  }
+>;
+export type RouteObjectWithAuth = IndexRouteObjectWithAuth | NonIndexRouteObjectWithAuth;
 
 interface ProtectedRouteProps {
   redirectPath: string;
-  route: ReactNode;
+  access: AccessProps;
+  element: JSX.Element;
 }
 
-function ProtectedRoute({ redirectPath, route }: ProtectedRouteProps): JSX.Element | null {
+function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
   const {
     state: { initializing, user },
+    hasAccess,
   } = useContext(AuthContext);
 
   const location = useLocation();
@@ -28,11 +45,11 @@ function ProtectedRoute({ redirectPath, route }: ProtectedRouteProps): JSX.Eleme
     return <div></div>;
   }
 
-  if (!user) {
+  if (!hasAccess(access)) {
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
-  return route ? (route as JSX.Element) : <Outlet />;
+  return element;
 }
 
 const collectRoutes = <T,>(routes: T[]): T[] => {
@@ -44,10 +61,6 @@ const collectRoutes = <T,>(routes: T[]): T[] => {
     }
   });
   return allRoutes;
-};
-
-export type RouteObjectWithAuth = RouteObject & {
-  handle?: AccessProps;
 };
 
 /**
@@ -67,10 +80,17 @@ export const protectRoutes = (
   const allRoutes: RouteObjectWithAuth[] = collectRoutes(routes);
 
   allRoutes.forEach((route) => {
-    const { handle } = route as AccessProps;
+    const { handle } = route;
+    const requiresAuth = handle?.requiresLogin || (handle?.rolesAllowed && handle.rolesAllowed.length > 0);
 
-    if (handle?.requiresLogin ?? handle?.rolesAllowed) {
-      route.element = <ProtectedRoute redirectPath={redirectPath} route={(route as RouteObject).element} />;
+    if (requiresAuth) {
+      route.element = (
+        <ProtectedRoute
+          redirectPath={redirectPath}
+          access={route.handle as AccessProps}
+          element={route.element as JSX.Element}
+        />
+      );
     }
   });
 
