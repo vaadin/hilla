@@ -1,8 +1,8 @@
 import { login as _login, logout as _logout, type LoginResult } from '@hilla/frontend';
 import { createContext, type Dispatch, useEffect, useReducer } from 'react';
 
-export type AuthenticateThunk = () => Promise<void>;
-export type UnauthenticateThunk = () => void;
+type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
+type LogoutFunction = () => Promise<void>;
 
 const LOGIN_FETCH = 'LOGIN_FETCH';
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
@@ -145,8 +145,8 @@ export type AccessProps = Readonly<{
  */
 export type Authentication = Readonly<{
   state: AuthState;
-  authenticate: AuthenticateThunk;
-  unauthenticate: UnauthenticateThunk;
+  login: LoginFunction;
+  logout: LogoutFunction;
   hasAccess(accessProps: AccessProps): boolean;
 }>;
 
@@ -163,6 +163,21 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
   );
   const unauthenticate = createUnauthenticateThunk(dispatch);
 
+  async function login(username: string, password: string): Promise<LoginResult> {
+    const result = await _login(username, password);
+
+    if (!result.error) {
+      await authenticate();
+    }
+
+    return result;
+  }
+
+  async function logout(): Promise<void> {
+    await _logout();
+    unauthenticate();
+  }
+
   useEffect(() => {
     authenticate().catch(() => {
       // Do nothing
@@ -171,8 +186,8 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
 
   return {
     state,
-    authenticate,
-    unauthenticate,
+    login,
+    logout,
     hasAccess(accessProps: AccessProps): boolean {
       const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
       if (!requiresAuth) {
@@ -198,30 +213,13 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
  */
 export const AuthContext = createContext<Authentication>({
   state: initialState,
-  async authenticate() {},
-  unauthenticate() {},
+  async login() {
+    throw new Error('AuthContext not initialized');
+  },
+  async logout() {
+    throw new Error('AuthContext not initialized');
+  },
   hasAccess(): boolean {
-    return true;
+    throw new Error('AuthContext not initialized');
   },
 });
-
-/**
- * A wrapper for the generic Hilla login function, used to allow passing the AuthenticateThunk.
- */
-export async function login(username: string, password: string, authenticate: AuthenticateThunk): Promise<LoginResult> {
-  const result = await _login(username, password);
-
-  if (!result.error) {
-    await authenticate();
-  }
-
-  return result;
-}
-
-/**
- * A wrapper for the generic Hilla logout function, used to allow passing the UnauthenticateThunk.
- */
-export async function logout(unauthenticate: UnauthenticateThunk): Promise<void> {
-  await _logout();
-  unauthenticate();
-}
