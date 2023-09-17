@@ -1,17 +1,22 @@
 import type { AbstractModel, ModelConstructor } from '@hilla/form';
 import {
-  Grid,
-  type GridDataProvider,
-  type GridDataProviderCallback,
-  type GridDataProviderParams,
-  type GridDefaultItem,
-  type GridElement,
-  type GridProps,
+    Grid,
+    type GridDataProvider,
+    type GridDataProviderCallback,
+    type GridDataProviderParams,
+    type GridDefaultItem,
+    type GridElement,
+    type GridProps,
 } from '@hilla/react-components/Grid.js';
+import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
-import { useEffect, useRef, type JSX } from 'react';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
+import { createFilterField } from './field-factory';
+import AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
+import PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
+import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
@@ -22,6 +27,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     model: ModelConstructor<TItem, AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
+    headerFilters?: boolean;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -78,16 +84,47 @@ function createDataProvider<TItem>(
   };
 }
 
-function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns?: string[]) {
+function createColumns(
+  model: ModelConstructor<unknown, AbstractModel<unknown>>,
+  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+  options: { visibleColumns?: string[]; headerFilters?: boolean },
+) {
   const properties = getProperties(model);
-  const effectiveColumns = visibleColumns ?? properties.map((p) => p.name);
+  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
-  return effectiveProperties.map((p) => (
-    <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>
-  ));
+  return effectiveProperties.map((p) => {
+    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
+    if (options.headerFilters) {
+      const headerRenderer = useCallback(() => {
+        return createFilterField(p, {
+          onInput: (e: any) => {
+            const fieldValue = (e.target as any).value;
+            const filterValue = fieldValue;
+
+            const filter = {
+              propertyId: p.name,
+              filterValue,
+              matcher: Matcher.CONTAINS,
+            };
+
+            (filter as any).t = 'propertyString';
+            setPropertyFilter(filter);
+          },
+        });
+      }, []);
+
+      return (
+        <GridColumnGroup key={'group' + p.name} headerRenderer={headerRenderer}>
+          {column}
+        </GridColumnGroup>
+      );
+    } else {
+      return column;
+    }
+  });
 }
 
 export function AutoGrid<TItem>({
@@ -95,10 +132,35 @@ export function AutoGrid<TItem>({
   model,
   filter,
   visibleColumns,
+  headerFilters,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
+  const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
+
+  const setHeaderPropertyFilter = (filter: PropertyStringFilter) => {
+    const filterIndex = internalFilter.children.findIndex(
+      (f) => (f as PropertyStringFilter).propertyId === filter.propertyId,
+    );
+    if (filter.filterValue === '') {
+      // Delete empty filter
+      if (filterIndex >= 0) {
+        internalFilter.children.splice(filterIndex, 1);
+      }
+    } else {
+      if (filterIndex >= 0) {
+        internalFilter.children[filterIndex] = filter;
+      } else {
+        internalFilter.children.push(filter);
+      }
+    }
+    setInternalFilter({ ...internalFilter });
+  };
+
   // This cast should go away with #1252
-  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns);
+  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
+    visibleColumns,
+    headerFilters,
+  });
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
@@ -113,10 +175,10 @@ export function AutoGrid<TItem>({
     // Update the filtering, whenever the filter changes
     const grid = ref.current;
     if (grid) {
-      dataProviderFilter.current = filter;
+      dataProviderFilter.current = filter ?? internalFilter;
       grid.clearCache();
     }
-  }, [filter]);
+  }, [filter, internalFilter]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }

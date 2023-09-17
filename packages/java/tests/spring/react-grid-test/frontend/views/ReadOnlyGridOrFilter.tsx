@@ -14,7 +14,7 @@ export function ReadOnlyGridOrFilter() {
         id="filter"
         style={{ width: '20em' }}
         label="Search for first or last name"
-        onValueChanged={(e) => {
+        onValueChanged={(e: any) => {
           const firstNameFilter: any = {
             t: 'propertyString',
             propertyId: 'firstName',

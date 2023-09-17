@@ -103,10 +103,6 @@ export const getContainerCell = (container, row, col) => {
 
 export const getContainerCellContent = (container, row, col) => getCellContent(getContainerCell(container, row, col));
 
-export const getHeaderCellContent = (grid, row, col) => {
-  const container = grid.$.header;
-  return getContainerCellContent(container, row, col);
-};
 
 
 export const flushGrid = (grid) => {
