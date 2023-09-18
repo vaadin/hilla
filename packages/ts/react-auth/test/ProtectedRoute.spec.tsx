@@ -57,8 +57,6 @@ const testRoutes: RouteObjectWithAuth[] = [
 
 function TestApp({ user, initialRoute }: { user?: AuthUser; initialRoute: string }) {
   const auth = useAuth(async () => Promise.resolve(user));
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  (auth.state as any).user = user;
   const protectedRoutes = protectRoutes(testRoutes);
   const router = createMemoryRouter(protectedRoutes, {
     initialEntries: [initialRoute],
