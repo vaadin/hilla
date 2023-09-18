@@ -16,6 +16,8 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
+import dev.hilla.parser.models.BaseSignatureModel;
+import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.backbone.nodes.AnnotatedNode;
@@ -27,6 +29,7 @@ import io.swagger.v3.oas.models.media.Schema;
 public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_KEY = "x-validation-constraints";
     private static final String ANNOTATIONS_KEY = "x-annotations";
+    private static final String JAVA_TYPE_KEY = "x-java-type";
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
     // Include-list of annotations that should be added to the schema
@@ -97,6 +100,12 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             var propertyModel = propertyNode.getSource();
             addAnnotationsToSchema(propertyModel, schema);
         }
+        if (signature instanceof BaseSignatureModel) {
+            schema.addExtension(JAVA_TYPE_KEY, ((BaseSignatureModel) signature).getType().getName());
+        } else if (signature instanceof ClassRefSignatureModel) {
+            schema.addExtension(JAVA_TYPE_KEY, ((ClassRefSignatureModel) signature).getName());
+        }
+        addConstraintsToSchema((AnnotatedNode) typedNode, schema);
     }
 
     @Override
