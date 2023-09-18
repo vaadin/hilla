@@ -8,14 +8,15 @@ import type Filter from '../src/types/dev/hilla/crud/filter/Filter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
-import { getBodyCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
+import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
 import { PersonModel, type Person } from './TestModels.js';
 
 use(sinonChai);
 
 const fakeService: CrudService<Person> = {
   list: async (request: Pageable, filter: Filter | undefined): Promise<Person[]> => {
-    const data: Person[] = [
+    let data: Person[] = [
       { firstName: 'John', lastName: 'Dove', email: 'john@example.com' },
       { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com' },
     ];
@@ -23,7 +24,7 @@ const fakeService: CrudService<Person> = {
       /* eslint-disable */
       if (filter && (filter as any).t === 'propertyString') {
         const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
-        return data.filter((person) => {
+        data = data.filter((person) => {
           const propertyValue = (person as any)[propertyFilter.propertyId];
           if (propertyFilter.matcher === 'CONTAINS') {
             return propertyValue.includes(propertyFilter.filterValue);
@@ -32,10 +33,19 @@ const fakeService: CrudService<Person> = {
         });
       }
       /* eslint-enable */
-      return data;
+    } else {
+      data = [];
     }
 
-    return [];
+    if (request.sort.orders.length === 1) {
+      const sortPropertyId = request.sort.orders[0]!.property;
+      const directionMod = request.sort.orders[0]!.direction === Direction.ASC ? 1 : -1;
+      data.sort((a, b) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (a as any)[sortPropertyId] > (b as any)[sortPropertyId] ? Number(directionMod) : -1 * directionMod,
+      );
+    }
+    return data;
   },
 };
 
@@ -51,7 +61,7 @@ describe('@hilla/react-grid', () => {
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
     return <AutoGrid service={fakeService} model={PersonModel} {...customProps}></AutoGrid>;
   }
-  describe('useAutoGrid', () => {
+  describe('Auto grid', () => {
     it('creates columns based on model', async () => {
       const result = render(<TestAutoGrid />);
       const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
@@ -62,6 +72,21 @@ describe('@hilla/react-grid', () => {
       expect(columns[1].header).to.equal('Last name');
       expect(columns[2].path).to.equal('email');
       expect(columns[2].header).to.equal('Email');
+    });
+    it('creates sortable columns', async () => {
+      const result = render(<TestAutoGrid />);
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
+      await nextFrame();
+      const firstNameSorter = getHeaderCellContent(grid, 0, 0).firstElementChild as HTMLElement;
+      firstNameSorter.click();
+      await nextFrame();
+      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
+      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
+      firstNameSorter.click();
+      await nextFrame();
+      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
+      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
     });
     it('sets a data provider, but only once', async () => {
       const result = render(<TestAutoGrid />);
