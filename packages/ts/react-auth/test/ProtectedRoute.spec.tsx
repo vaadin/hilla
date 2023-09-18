@@ -39,6 +39,20 @@ const testRoutes: RouteObjectWithAuth[] = [
       rolesAllowed: ['admin'],
     },
   },
+  {
+    path: '/protected/roleonly/user',
+    element: <TestView route="/protected/roleonly/user" />,
+    handle: {
+      rolesAllowed: ['user'],
+    },
+  },
+  {
+    path: '/protected/roleonly/admin',
+    element: <TestView route="/protected/roleonly/admin" />,
+    handle: {
+      rolesAllowed: ['admin'],
+    },
+  },
 ];
 
 function TestApp({ user, initialRoute }: { user?: AuthUser; initialRoute: string }) {
@@ -71,6 +85,8 @@ describe('@hilla/react-auth', () => {
       await testRoute('/protected/login', undefined, false);
       await testRoute('/protected/role/user', undefined, false);
       await testRoute('/protected/role/admin', undefined, false);
+      await testRoute('/protected/roleonly/user', undefined, false);
+      await testRoute('/protected/roleonly/admin', undefined, false);
     });
 
     it('should protect routes when user without roles is authenticated', async () => {
@@ -79,6 +95,8 @@ describe('@hilla/react-auth', () => {
       await testRoute('/protected/login', user, true);
       await testRoute('/protected/role/user', user, false);
       await testRoute('/protected/role/admin', user, false);
+      await testRoute('/protected/roleonly/user', user, false);
+      await testRoute('/protected/roleonly/admin', user, false);
     });
 
     it('should protect routes when user with user role is authenticated', async () => {
@@ -87,6 +105,8 @@ describe('@hilla/react-auth', () => {
       await testRoute('/protected/login', user, true);
       await testRoute('/protected/role/user', user, true);
       await testRoute('/protected/role/admin', user, false);
+      await testRoute('/protected/roleonly/user', user, true);
+      await testRoute('/protected/roleonly/admin', user, false);
     });
 
     it('should protect routes when user with all roles is authenticated', async () => {
@@ -95,6 +115,8 @@ describe('@hilla/react-auth', () => {
       await testRoute('/protected/login', user, true);
       await testRoute('/protected/role/user', user, true);
       await testRoute('/protected/role/admin', user, true);
+      await testRoute('/protected/roleonly/user', user, true);
+      await testRoute('/protected/roleonly/admin', user, true);
     });
   });
 });

@@ -81,7 +81,7 @@ export const protectRoutes = (
 
   allRoutes.forEach((route) => {
     const { handle } = route;
-    const requiresAuth = handle?.requiresLogin || (handle?.rolesAllowed && handle.rolesAllowed.length > 0);
+    const requiresAuth = handle?.requiresLogin ?? handle?.rolesAllowed?.length;
 
     if (requiresAuth) {
       route.element = (
