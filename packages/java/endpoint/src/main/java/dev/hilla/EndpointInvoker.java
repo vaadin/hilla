@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package dev.hilla;
 
 import java.io.IOException;
@@ -5,19 +20,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -368,8 +380,26 @@ public class EndpointInvoker {
             throws EndpointAccessDeniedException, EndpointBadRequestException,
             EndpointInternalException {
         EndpointAccessChecker accessChecker = getAccessChecker();
-        String checkError = accessChecker.check(methodToInvoke, principal,
-                rolesChecker);
+
+        var methodWrappingClass = methodToInvoke.getDeclaringClass();
+        var concreteEndpointClass = vaadinEndpointData.getEndpointObject()
+                .getClass();
+
+        var accessAnnotations = Set.of(AnonymousAllowed.class, PermitAll.class,
+                RolesAllowed.class, DenyAll.class);
+        boolean isMethodExplicitlyAnnotated = Arrays
+                .stream(methodToInvoke.getDeclaredAnnotations())
+                .anyMatch(annotation -> accessAnnotations
+                        .contains(annotation.annotationType()));
+        String checkError;
+        if (methodWrappingClass.equals(concreteEndpointClass)
+                || isMethodExplicitlyAnnotated) {
+            checkError = accessChecker.check(methodToInvoke, principal,
+                    rolesChecker);
+        } else {
+            checkError = accessChecker.check(concreteEndpointClass,
+                    methodToInvoke, principal, rolesChecker);
+        }
         if (checkError != null) {
             throw new EndpointAccessDeniedException(String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
