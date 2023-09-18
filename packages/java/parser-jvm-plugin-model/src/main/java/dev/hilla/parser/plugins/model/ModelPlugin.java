@@ -101,9 +101,11 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             addAnnotationsToSchema(propertyModel, schema);
         }
         if (signature instanceof BaseSignatureModel) {
-            schema.addExtension(JAVA_TYPE_KEY, ((BaseSignatureModel) signature).getType().getName());
+            schema.addExtension(JAVA_TYPE_KEY,
+                    ((BaseSignatureModel) signature).getType().getName());
         } else if (signature instanceof ClassRefSignatureModel) {
-            schema.addExtension(JAVA_TYPE_KEY, ((ClassRefSignatureModel) signature).getName());
+            schema.addExtension(JAVA_TYPE_KEY,
+                    ((ClassRefSignatureModel) signature).getName());
         }
         addConstraintsToSchema((AnnotatedNode) typedNode, schema);
     }
