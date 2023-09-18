@@ -77,6 +77,7 @@ module.exports = (config) => {
 
     vite: {
       config: {
+	optimizeDeps: { entries: ["test/*.spec.tsx"] },
         cacheDir: resolve(cwd, '.vite'),
       }
     }
