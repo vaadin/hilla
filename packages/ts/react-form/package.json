@@ -16,7 +16,7 @@
     "React"
   ],
   "scripts": {
-    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
     "build": "concurrently npm:build:*",
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",

@@ -14,7 +14,8 @@ import { PersonModel, type Person } from './TestModels.js';
 use(sinonChai);
 
 const fakeService: CrudService<Person> = {
-  list: async (request: Pageable, filter: Filter | undefined): Promise<Person[]> => {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async list(request: Pageable, filter: Filter | undefined): Promise<Person[]> {
     const data: Person[] = [
       { firstName: 'John', lastName: 'Dove', email: 'john@example.com' },
       { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com' },
@@ -52,7 +53,7 @@ describe('@hilla/react-grid', () => {
     return <AutoGrid service={fakeService} model={PersonModel} {...customProps}></AutoGrid>;
   }
   describe('useAutoGrid', () => {
-    it('creates columns based on model', async () => {
+    it('creates columns based on model', () => {
       const result = render(<TestAutoGrid />);
       const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
       expect(columns.length).to.equal(3);
@@ -63,7 +64,7 @@ describe('@hilla/react-grid', () => {
       expect(columns[2].path).to.equal('email');
       expect(columns[2].header).to.equal('Email');
     });
-    it('sets a data provider, but only once', async () => {
+    it('sets a data provider, but only once', () => {
       const result = render(<TestAutoGrid />);
       const grid = result.container.querySelector('vaadin-grid')!;
       const dp = grid.dataProvider;
@@ -82,7 +83,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
     });
-    it('does not pass its own parameters to the underlying grid', async () => {
+    it('does not pass its own parameters to the underlying grid', () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       expect(grid.getAttribute('model')).to.be.null;

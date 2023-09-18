@@ -14,6 +14,7 @@
     "Hilla"
   ],
   "scripts": {
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
     "build": "concurrently npm:build:*",
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
