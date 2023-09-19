@@ -1,6 +1,6 @@
 import type { Grid } from '@vaadin/grid';
 // @ts-expect-error no types for the utils
-import { getCellContent, getRowCells, getPhysicalItems } from './grid-test-utils.js';
+import { getCellContent, getRowCells, getPhysicalItems, getContainerCellContent } from './grid-test-utils.js';
 
 export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement => {
   const physicalItems = getPhysicalItems(grid);
@@ -11,5 +11,10 @@ export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): 
 };
 export const getVisibleRowCount = <T>(grid: Grid<T>): number =>
   // eslint-disable-next-line
-   (grid as any)._cache.size
-;
+  (grid as any)._cache.size;
+
+export const getHeaderCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement => {
+  // eslint-disable-next-line
+  const container = (grid as any).$.header;
+  return getContainerCellContent(container, row, col);
+};
