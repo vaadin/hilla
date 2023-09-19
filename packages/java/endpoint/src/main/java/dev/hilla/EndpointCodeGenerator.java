@@ -44,7 +44,7 @@ public class EndpointCodeGenerator {
 
     /**
      * Creates the singleton.
-     * 
+     *
      * @param context
      *            the context the application is running in
      * @param endpointController
@@ -67,7 +67,7 @@ public class EndpointCodeGenerator {
     /**
      * Re-generates the endpoint TypeScript and re-registers the endpoints in
      * Java.
-     * 
+     *
      * @throws IOException
      *             if something went wrong
      */

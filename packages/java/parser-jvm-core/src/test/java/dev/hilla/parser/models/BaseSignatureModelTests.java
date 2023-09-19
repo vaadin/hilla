@@ -148,15 +148,15 @@ public class BaseSignatureModelTests {
     static final class Context {
         private static final Annotation annotation = getDeclaredMethod(
                 Sample.class, "getByte").getAnnotatedReturnType()
-                        .getAnnotation(Bar.class);
+                .getAnnotation(Bar.class);
         private static final Map<String, Class<?>> bareReflectionOrigins = getDeclaredMethods(
                 Sample.class)
-                        .collect(Collectors.toMap(Method::getName,
-                                Method::getReturnType));
+                .collect(Collectors.toMap(Method::getName,
+                        Method::getReturnType));
         private static final Map<String, AnnotatedType> completeReflectionOrigins = getDeclaredMethods(
                 Sample.class)
-                        .collect(Collectors.toMap(Method::getName,
-                                Method::getAnnotatedReturnType));
+                .collect(Collectors.toMap(Method::getName,
+                        Method::getAnnotatedReturnType));
         private final Map<String, BaseTypeSignature> sourceOrigins;
 
         Context(ExtensionContext context) {

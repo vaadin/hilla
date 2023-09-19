@@ -119,11 +119,11 @@ public class TypeVariableModelTests {
                         .toMap(TypeVariable::getName, Function.identity()));
         private static final Map<String, AnnotatedTypeVariable> reflectionOrigins = getDeclaredFields(
                 Sample.class).map(Field::getAnnotatedType)
-                        .map(AnnotatedTypeVariable.class::cast)
-                        .collect(Collectors.toMap(
-                                variable -> ((TypeVariable<?>) variable
-                                        .getType()).getName(),
-                                Function.identity()));
+                .map(AnnotatedTypeVariable.class::cast)
+                .collect(Collectors.toMap(
+                        variable -> ((TypeVariable<?>) variable.getType())
+                                .getName(),
+                        Function.identity()));
 
         Context(ScanResult source) {
             super(source, reflectionOrigins,

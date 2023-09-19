@@ -270,8 +270,8 @@ public class EndpointControllerTest {
         ResponseEntity<String> response = createVaadinController(TEST_ENDPOINT,
                 new JacksonObjectMapperFactory.Json(), restrictingCheckerMock,
                 nameCheckerMock, explicitNullableTypeCheckerMock, null)
-                        .serveEndpoint(TEST_ENDPOINT_NAME,
-                                TEST_METHOD.getName(), null, requestMock);
+                .serveEndpoint(TEST_ENDPOINT_NAME, TEST_METHOD.getName(), null,
+                        requestMock);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         String responseBody = response.getBody();
@@ -477,9 +477,8 @@ public class EndpointControllerTest {
 
         EndpointController controller = createVaadinController(TEST_ENDPOINT);
         controller.endpointRegistry
-                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods.put(
-                        TEST_METHOD.getName().toLowerCase(),
-                        endpointMethodMock);
+                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods
+                .put(TEST_METHOD.getName().toLowerCase(), endpointMethodMock);
 
         ResponseEntity<String> response = controller.serveEndpoint(
                 TEST_ENDPOINT_NAME, TEST_METHOD.getName(),
@@ -509,9 +508,8 @@ public class EndpointControllerTest {
 
         EndpointController controller = createVaadinController(TEST_ENDPOINT);
         controller.endpointRegistry
-                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods.put(
-                        TEST_METHOD.getName().toLowerCase(),
-                        endpointMethodMock);
+                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods
+                .put(TEST_METHOD.getName().toLowerCase(), endpointMethodMock);
 
         ResponseEntity<String> response = controller.serveEndpoint(
                 TEST_ENDPOINT_NAME, TEST_METHOD.getName(),
@@ -542,9 +540,8 @@ public class EndpointControllerTest {
 
         EndpointController controller = createVaadinController(TEST_ENDPOINT);
         controller.endpointRegistry
-                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods.put(
-                        TEST_METHOD.getName().toLowerCase(),
-                        endpointMethodMock);
+                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods
+                .put(TEST_METHOD.getName().toLowerCase(), endpointMethodMock);
 
         ResponseEntity<String> response = controller.serveEndpoint(
                 TEST_ENDPOINT_NAME, TEST_METHOD.getName(),
@@ -576,9 +573,8 @@ public class EndpointControllerTest {
 
         EndpointController controller = createVaadinController(TEST_ENDPOINT);
         controller.endpointRegistry
-                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods.put(
-                        TEST_METHOD.getName().toLowerCase(),
-                        endpointMethodMock);
+                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods
+                .put(TEST_METHOD.getName().toLowerCase(), endpointMethodMock);
 
         ResponseEntity<String> response = controller.serveEndpoint(
                 TEST_ENDPOINT_NAME, TEST_METHOD.getName(),
@@ -616,9 +612,8 @@ public class EndpointControllerTest {
 
         EndpointController controller = createVaadinController(TEST_ENDPOINT);
         controller.endpointRegistry
-                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods.put(
-                        TEST_METHOD.getName().toLowerCase(),
-                        endpointMethodMock);
+                .get(TEST_ENDPOINT_NAME.toLowerCase()).methods
+                .put(TEST_METHOD.getName().toLowerCase(), endpointMethodMock);
 
         ResponseEntity<String> response = controller.serveEndpoint(
                 TEST_ENDPOINT_NAME, TEST_METHOD.getName(),
@@ -965,8 +960,8 @@ public class EndpointControllerTest {
         String testOkMethod = "testOkMethod";
         ResponseEntity<String> response = createVaadinController(
                 new NullCheckerTestClass(), null, null, null,
-                explicitNullableTypeChecker, null).serveEndpoint(
-                        NullCheckerTestClass.class.getSimpleName(),
+                explicitNullableTypeChecker, null)
+                .serveEndpoint(NullCheckerTestClass.class.getSimpleName(),
                         testOkMethod, createRequestParameters("{}"),
                         requestMock);
 
@@ -994,8 +989,8 @@ public class EndpointControllerTest {
 
         ResponseEntity<String> response = createVaadinController(
                 new NullCheckerTestClass(), null, null, null,
-                explicitNullableTypeChecker, null).serveEndpoint(
-                        NullCheckerTestClass.class.getSimpleName(),
+                explicitNullableTypeChecker, null)
+                .serveEndpoint(NullCheckerTestClass.class.getSimpleName(),
                         testNullMethodName, createRequestParameters("{}"),
                         requestMock);
 
@@ -1019,11 +1014,10 @@ public class EndpointControllerTest {
     public void should_ReturnResult_When_CallingSuperClassMethodWithGenericTypedParameter() {
         ResponseEntity<?> response = createVaadinController(
                 new PersonEndpoint())
-                        .serveEndpoint(PersonEndpoint.class.getSimpleName(),
-                                "update",
-                                createRequestParameters(
-                                        "{\"entity\":{\"name\":\"aa\"}}"),
-                                requestMock);
+                .serveEndpoint(PersonEndpoint.class.getSimpleName(), "update",
+                        createRequestParameters(
+                                "{\"entity\":{\"name\":\"aa\"}}"),
+                        requestMock);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("{\"name\":\"aa\"}", response.getBody());
@@ -1041,8 +1035,8 @@ public class EndpointControllerTest {
         packagePrivateEndpointConstructor.setAccessible(true);
 
         ResponseEntity<?> response = createVaadinController(
-                packagePrivateEndpointConstructor.newInstance()).serveEndpoint(
-                        "PackagePrivateEndpoint", "getRequest",
+                packagePrivateEndpointConstructor.newInstance())
+                .serveEndpoint("PackagePrivateEndpoint", "getRequest",
                         createRequestParameters("{}"), requestMock);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

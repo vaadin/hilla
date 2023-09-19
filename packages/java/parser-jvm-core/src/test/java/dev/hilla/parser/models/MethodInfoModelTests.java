@@ -186,8 +186,8 @@ public class MethodInfoModelTests {
             public static final String genericMethodName = "genericMethod";
             private static final Map<String, Method> reflectionOrigins = getDeclaredMethods(
                     Sample.class)
-                            .collect(Collectors.toMap(Method::getName,
-                                    Function.identity()));
+                    .collect(Collectors.toMap(Method::getName,
+                            Function.identity()));
 
             private static final List<TypeVariable<?>> typeParameterOrigins;
 

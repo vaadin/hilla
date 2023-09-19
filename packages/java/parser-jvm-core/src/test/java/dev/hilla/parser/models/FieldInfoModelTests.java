@@ -282,8 +282,8 @@ public class FieldInfoModelTests {
             private static final String defaultFieldName = "field";
             private static final Map<String, Field> reflectionOrigins = getDeclaredFields(
                     Sample.class)
-                            .collect(Collectors.toMap(Field::getName,
-                                    Function.identity()));
+                    .collect(Collectors.toMap(Field::getName,
+                            Function.identity()));
 
             static {
                 annotation = reflectionOrigins.get(defaultFieldName)
