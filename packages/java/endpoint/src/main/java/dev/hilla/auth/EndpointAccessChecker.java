@@ -133,7 +133,7 @@ public class EndpointAccessChecker {
 
     /**
      * Check that the endpoint is accessible for the current user.
-     * 
+     *
      * @param clazz
      *            the Vaadin endpoint class to check ACL
      * @param principal
@@ -143,7 +143,7 @@ public class EndpointAccessChecker {
      * @return an error String with an issue description, if any validation
      *         issues occur, {@code null} otherwise
      */
-    public String check(Class<?> clazz, Method method, Principal principal,
+    public String check(Class<?> clazz, Principal principal,
             Function<String, Boolean> rolesChecker) {
         if (accessAnnotationChecker.hasAccess(clazz, principal, rolesChecker)) {
             return null;
