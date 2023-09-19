@@ -27,9 +27,9 @@ public final class TestHelper {
         }
     }
 
-    public void executeParserWithConfig(OpenAPI openAPI)
+    public void executeParserWithConfig(OpenAPI openAPI, String snapshotName)
             throws IOException, URISyntaxException {
-        var expected = mapper.readValue(resourceLoader.find("openapi.json"),
+        var expected = mapper.readValue(resourceLoader.find(snapshotName),
                 OpenAPI.class);
 
         assertEquals(expected, openAPI);
