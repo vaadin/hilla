@@ -15,37 +15,12 @@
  */
 package dev.hilla;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.security.Principal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import jakarta.annotation.security.DenyAll;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.lang.NonNullApi;
-import org.springframework.util.ClassUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
-
 import com.vaadin.flow.server.VaadinServletContext;
-
 import dev.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import dev.hilla.EndpointInvocationException.EndpointBadRequestException;
 import dev.hilla.EndpointInvocationException.EndpointInternalException;
@@ -57,11 +32,27 @@ import dev.hilla.exception.EndpointException;
 import dev.hilla.exception.EndpointValidationException;
 import dev.hilla.exception.EndpointValidationException.ValidationErrorData;
 import dev.hilla.parser.jackson.JacksonObjectMapperFactory;
-
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.NonNullApi;
+import org.springframework.util.ClassUtils;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.security.Principal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Handles invocation of endpoint methods after checking the user has proper
@@ -381,24 +372,17 @@ public class EndpointInvoker {
             EndpointInternalException {
         EndpointAccessChecker accessChecker = getAccessChecker();
 
-        var methodWrappingClass = methodToInvoke.getDeclaringClass();
-        var concreteEndpointClass = vaadinEndpointData.getEndpointObject()
+        var methodDeclaringClass = methodToInvoke.getDeclaringClass();
+        var invokedEndpointClass = vaadinEndpointData.getEndpointObject()
                 .getClass();
 
-        var accessAnnotations = Set.of(AnonymousAllowed.class, PermitAll.class,
-                RolesAllowed.class, DenyAll.class);
-        boolean isMethodExplicitlyAnnotated = Arrays
-                .stream(methodToInvoke.getDeclaredAnnotations())
-                .anyMatch(annotation -> accessAnnotations
-                        .contains(annotation.annotationType()));
         String checkError;
-        if (methodWrappingClass.equals(concreteEndpointClass)
-                || isMethodExplicitlyAnnotated) {
+        if (methodDeclaringClass.equals(invokedEndpointClass)) {
             checkError = accessChecker.check(methodToInvoke, principal,
                     rolesChecker);
         } else {
-            checkError = accessChecker.check(concreteEndpointClass,
-                    methodToInvoke, principal, rolesChecker);
+            checkError = accessChecker.check(invokedEndpointClass,
+                    principal, rolesChecker);
         }
         if (checkError != null) {
             throw new EndpointAccessDeniedException(String.format(
