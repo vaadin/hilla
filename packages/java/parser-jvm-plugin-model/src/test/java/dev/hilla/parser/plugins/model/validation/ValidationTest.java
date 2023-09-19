@@ -28,6 +28,6 @@ public class ValidationTest {
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
                 .execute();
 
-        helper.executeParserWithConfig(openAPI, "openapi.json");
+        helper.executeParserWithConfig(openAPI);
     }
 }

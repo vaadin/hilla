@@ -27,6 +27,6 @@ public class AnnotationsTest {
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
                 .execute();
 
-        helper.executeParserWithConfig(openAPI, "openapi.json");
+        helper.executeParserWithConfig(openAPI);
     }
 }
