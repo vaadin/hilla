@@ -381,8 +381,8 @@ public class EndpointInvoker {
             checkError = accessChecker.check(methodToInvoke, principal,
                     rolesChecker);
         } else {
-            checkError = accessChecker.check(invokedEndpointClass,
-                    principal, rolesChecker);
+            checkError = accessChecker.check(invokedEndpointClass, principal,
+                    rolesChecker);
         }
         if (checkError != null) {
             throw new EndpointAccessDeniedException(String.format(
