@@ -107,6 +107,20 @@ public class EndpointAccessChecker {
     /**
      * Check that the endpoint is accessible for the current user.
      *
+     * @param clazz
+     *            the Vaadin endpoint class to check ACL
+     * @param request
+     *            the request that triggers the <code>method</code> invocation
+     * @return an error String with an issue description, if any validation
+     *         issues occur, {@code null} otherwise
+     */
+    public String check(Class<?> clazz, HttpServletRequest request) {
+        return check(clazz, request.getUserPrincipal(), request::isUserInRole);
+    }
+
+    /**
+     * Check that the endpoint is accessible for the current user.
+     *
      * @param method
      *            the Vaadin endpoint method to check ACL
      * @param principal

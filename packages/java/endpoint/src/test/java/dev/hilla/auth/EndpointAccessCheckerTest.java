@@ -53,9 +53,27 @@ public class EndpointAccessCheckerTest {
         assertNull(checker.check(method, requestMock));
     }
 
+    private void shouldPassInherited(Class<?> test) throws Exception {
+        Method method = test.getMethod("sayHello");
+        if (method.getDeclaringClass().equals(test)) {
+            assertNull(checker.check(method, requestMock));
+        } else {
+            assertNull(checker.check(test, requestMock));
+        }
+    }
+
     private void shouldFail(Class<?> test) throws Exception {
         Method method = test.getMethod("test");
         assertNotNull(checker.check(method, requestMock));
+    }
+
+    private void shouldFailInherited(Class<?> test) throws Exception {
+        Method method = test.getMethod("sayHello");
+        if (method.getDeclaringClass().equals(test)) {
+            assertNotNull(checker.check(method, requestMock));
+        } else {
+            assertNotNull(checker.check(test, requestMock));
+        }
     }
 
     @Test
@@ -399,4 +417,258 @@ public class EndpointAccessCheckerTest {
             CurrentInstance.clearAll();
         }
     }
+
+    @Test
+    public void should_fail_When_Endpoint_is_not_annotated() throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldFailInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_overridden_method_is_AnonymousAllowed()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            @Override
+            @AnonymousAllowed
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_fail_When_Endpoint_is_DenyAll() throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @DenyAll
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldFailInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_is_AnonymousAllowed()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @AnonymousAllowed
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldPass(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_is_PermitAll() throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @PermitAll
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldPass(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_method_is_PermitAll()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            @Override
+            @PermitAll
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_is_RolesAllowed_User()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @RolesAllowed(ROLE_USER)
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldPass(Test.class);
+    }
+
+    @Test
+    public void should_pass_When_Endpoint_method_is_RolesAllowed_User()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            @Override
+            @RolesAllowed(ROLE_USER)
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        shouldPassInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_fail_When_Endpoint_is_RolesAllowed_Admin()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @RolesAllowed("ROLE_ADMIN")
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        shouldFailInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_fail_When_Endpoint_method_is_RolesAllowed_Admin()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            @Override
+            @RolesAllowed("ROLE_ADMIN")
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        shouldFailInherited(Test.class);
+        shouldFail(Test.class);
+    }
+
+    @Test
+    public void should_fail_When_Endpoint_method_is_RolesAllowed_Admin_Endpoint_PermitAll()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @PermitAll
+        class Test extends ParentEndpoint {
+
+            @RolesAllowed("ROLE_ADMIN")
+            @Override
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        shouldFailInherited(Test.class);
+        shouldPass(Test.class);
+    }
+
 }
