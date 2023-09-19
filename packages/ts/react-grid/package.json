@@ -41,7 +41,8 @@
   },
   "homepage": "https://hilla.dev",
   "files": [
-    "*.{d.ts.map,d.ts,js.map,js}"
+    "*.{d.ts.map,d.ts,js.map,js}",
+    "types/**"
   ],
   "publishConfig": {
     "access": "public"
