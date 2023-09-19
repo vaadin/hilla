@@ -3,7 +3,7 @@ import { StringModel, type AbstractModel, type ModelConstructor, NumberModel } f
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
-  modelType: 'string' | 'number' | undefined;
+  modelType: 'number' | 'string' | undefined;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -16,18 +16,15 @@ function _generateHeader(path: string) {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-export const getProperties = (model: ModelConstructor<unknown | undefined, AbstractModel<unknown>>): PropertyInfo[] => {
+export const getProperties = (model: ModelConstructor<unknown, AbstractModel<unknown>>): PropertyInfo[] => {
   const properties = Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
   const modelInstance: any = new model({ value: undefined }, '', false);
   return properties.map((name) => {
+    // eslint-disable-next-line
     const propertyModel = modelInstance[name];
     const humanReadableName = _generateHeader(name);
-    const modelType =
-      propertyModel.constructor === StringModel
-        ? 'string'
-        : propertyModel.constructor === NumberModel
-        ? 'number'
-        : undefined;
+    const { constructor } = propertyModel;
+    const modelType = constructor === StringModel ? 'string' : constructor === NumberModel ? 'number' : undefined;
     return {
       name,
       humanReadableName,

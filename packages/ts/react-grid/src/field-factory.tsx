@@ -1,5 +1,5 @@
 import { TextField } from '@hilla/react-components/TextField.js';
-import { PropertyInfo } from './utils';
+import type { PropertyInfo } from './utils';
 
 export function createFilterField(prop: PropertyInfo, additionalProps: Record<string, any>): JSX.Element | null {
   let field: JSX.Element | null;

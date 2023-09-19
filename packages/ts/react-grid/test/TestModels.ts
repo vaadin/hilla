@@ -21,6 +21,7 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   get email(): StringModel {
     return this[_getPropertyModel]('email', StringModel, [false]);
   }
+
   get someNumber(): NumberModel {
     return this[_getPropertyModel]('someNumber', NumberModel, [false]);
   }

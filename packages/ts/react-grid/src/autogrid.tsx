@@ -1,21 +1,21 @@
 import type { AbstractModel, ModelConstructor } from '@hilla/form';
 import {
-    Grid,
-    type GridDataProvider,
-    type GridDataProviderCallback,
-    type GridDataProviderParams,
-    type GridDefaultItem,
-    type GridElement,
-    type GridProps,
+  Grid,
+  type GridDataProvider,
+  type GridDataProviderCallback,
+  type GridDataProviderParams,
+  type GridDefaultItem,
+  type GridElement,
+  type GridProps,
 } from '@hilla/react-components/Grid.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
 import { createFilterField } from './field-factory';
-import AndFilter from './types/dev/hilla/crud/filter/AndFilter';
+import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
-import PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
@@ -98,32 +98,34 @@ function createColumns(
   return effectiveProperties.map((p) => {
     const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
     if (options.headerFilters) {
-      const headerRenderer = useCallback(() => {
-        return createFilterField(p, {
-          onInput: (e: any) => {
-            const fieldValue = (e.target as any).value;
-            const filterValue = fieldValue;
+      const headerRenderer = useCallback(
+        () =>
+          createFilterField(p, {
+            onInput: (e: { target: { value: string } }) => {
+              const fieldValue = e.target.value;
+              const filterValue = fieldValue;
 
-            const filter = {
-              propertyId: p.name,
-              filterValue,
-              matcher: Matcher.CONTAINS,
-            };
+              const filter = {
+                propertyId: p.name,
+                filterValue,
+                matcher: Matcher.CONTAINS,
+              };
 
-            (filter as any).t = 'propertyString';
-            setPropertyFilter(filter);
-          },
-        });
-      }, []);
+              // eslint-disable-next-line
+              (filter as any).t = 'propertyString';
+              setPropertyFilter(filter);
+            },
+          }),
+        [],
+      );
 
       return (
-        <GridColumnGroup key={'group' + p.name} headerRenderer={headerRenderer}>
+        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerRenderer}>
           {column}
         </GridColumnGroup>
       );
-    } else {
-      return column;
     }
+    return column;
   });
 }
 
@@ -137,21 +139,19 @@ export function AutoGrid<TItem>({
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
 
-  const setHeaderPropertyFilter = (filter: PropertyStringFilter) => {
+  const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
-      (f) => (f as PropertyStringFilter).propertyId === filter.propertyId,
+      (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
     );
-    if (filter.filterValue === '') {
+    if (propertyFilter.filterValue === '') {
       // Delete empty filter
       if (filterIndex >= 0) {
         internalFilter.children.splice(filterIndex, 1);
       }
+    } else if (filterIndex >= 0) {
+      internalFilter.children[filterIndex] = propertyFilter;
     } else {
-      if (filterIndex >= 0) {
-        internalFilter.children[filterIndex] = filter;
-      } else {
-        internalFilter.children.push(filter);
-      }
+      internalFilter.children.push(propertyFilter);
     }
     setInternalFilter({ ...internalFilter });
   };
