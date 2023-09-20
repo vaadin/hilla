@@ -165,13 +165,6 @@
                   }
                 ]
               },
-              "annotations": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormAnnotations"
-                  }
-                ]
-              },
               "validationConstraints": {
                 "allOf": [
                   {
@@ -310,114 +303,11 @@
         "properties": {
           "Id": {
             "type": "number",
-            "x-annotations": ["NotNull()"]
-          }
-        }
-      },
-      "com.example.application.endpoints.TsFormEndpoint.FormAnnotations": {
-        "type": "object",
-        "properties": {
-          "list": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-annotations": ["NotEmpty()"]
-          },
-          "email": {
-            "type": "string",
-            "x-annotations": ["Email({message:\"foo\"})"]
-          },
-          "isNull": {
-            "type": "string",
-            "x-annotations": ["Null()"]
-          },
-          "notNull": {
-            "type": "string",
-            "x-annotations": ["NotNull()"]
-          },
-          "notEmpty": {
-            "type": "string",
-            "x-annotations": ["NotEmpty()", "NotNull()"]
-          },
-          "notNullEntity": {
-            "allOf": [
+            "x-validation-constraints": [
               {
-                "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+                "simpleName": "NotNull"
               }
-            ],
-            "x-annotations": ["NotNull()"]
-          },
-          "notBlank": {
-            "type": "string",
-            "x-annotations": ["NotBlank()"]
-          },
-          "assertTrue": {
-            "type": "string",
-            "x-annotations": ["AssertTrue()"]
-          },
-          "assertFalse": {
-            "type": "string",
-            "x-annotations": ["AssertFalse()"]
-          },
-          "min": {
-            "type": "number",
-            "x-annotations": ["Min({value:1, message:\"foo\"})"]
-          },
-          "max": {
-            "type": "number",
-            "x-annotations": ["Max(2)"]
-          },
-          "decimalMin": {
-            "type": "number",
-            "x-annotations": ["DecimalMin(\"0.01\")"]
-          },
-          "decimalMax": {
-            "type": "number",
-            "x-annotations": ["DecimalMax({value:\"0.01\", inclusive:false})"]
-          },
-          "negative": {
-            "type": "number",
-            "x-annotations": ["Negative()"]
-          },
-          "negativeOrZero": {
-            "type": "number",
-            "x-annotations": ["NegativeOrZero()"]
-          },
-          "positive": {
-            "type": "number",
-            "x-annotations": ["Positive()"]
-          },
-          "positiveOrZero": {
-            "type": "number",
-            "x-annotations": ["PositiveOrZero()"]
-          },
-          "size": {
-            "type": "string",
-            "x-annotations": ["Size()"]
-          },
-          "size1": {
-            "type": "string",
-            "x-annotations": ["Size({min:1})"]
-          },
-          "digits": {
-            "type": "string",
-            "x-annotations": ["Digits({integer:5, fraction:2})"]
-          },
-          "past": {
-            "type": "string",
-            "format": "date",
-            "x-annotations": ["Past()"]
-          },
-          "future": {
-            "type": "string",
-            "format": "date",
-            "x-annotations": ["Future()"]
-          },
-          "pattern": {
-            "type": "string",
-            "x-annotations": ["Pattern({regexp:\"\\\\d+\\\\..+\"})"]
+            ]
           }
         }
       },

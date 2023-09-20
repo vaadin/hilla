@@ -127,20 +127,6 @@ describe('AnnotationParser', () => {
     str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,
   };
 
-  it('should parse string annotations', () => {
-    assertAnnotation(parser.parse(notBlank.str), notBlank.expected ?? notBlank.str);
-    assertAnnotation(parser.parse(min.str), min.expected ?? min.str);
-    assertAnnotation(parser.parse(max.str), max.expected ?? max.str);
-    assertAnnotation(parser.parse(sizeSimple.str), sizeSimple.expected ?? sizeSimple.str);
-    assertAnnotation(parser.parse(sizeComplex.str), sizeComplex.expected ?? sizeComplex.str);
-    assertAnnotation(parser.parse(decimalMin.str), decimalMin.expected ?? decimalMin.str);
-    assertAnnotation(parser.parse(decimalMax.str), decimalMax.expected ?? decimalMax.str);
-    assertAnnotation(parser.parse(decimalMaxInclusive.str), decimalMaxInclusive.expected ?? decimalMaxInclusive.str);
-    assertAnnotation(parser.parse(digits.str), digits.expected ?? digits.str);
-    assertAnnotation(parser.parse(email.str), email.expected ?? email.str);
-    assertAnnotation(parser.parse(pattern.str), pattern.expected ?? pattern.str);
-  });
-
   it('should parse object annotations', () => {
     assertAnnotation(parser.parse(notBlank.obj), notBlank.expected ?? notBlank.str);
     assertAnnotation(parser.parse(min.obj), min.expected ?? min.str);
