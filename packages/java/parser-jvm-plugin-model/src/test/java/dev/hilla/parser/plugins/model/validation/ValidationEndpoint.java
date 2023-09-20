@@ -3,6 +3,7 @@ package dev.hilla.parser.plugins.model.validation;
 import java.time.LocalDate;
 import java.util.List;
 
+import dev.hilla.parser.plugins.model.Endpoint;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
