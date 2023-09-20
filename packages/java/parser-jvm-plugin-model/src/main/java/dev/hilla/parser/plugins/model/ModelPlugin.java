@@ -1,5 +1,6 @@
 package dev.hilla.parser.plugins.model;
 
+import java.lang.reflect.AnnotatedArrayType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.AnnotatedModel;
 import dev.hilla.parser.models.AnnotationInfoModel;
 import dev.hilla.parser.models.AnnotationParameterModel;
+import dev.hilla.parser.models.ArraySignatureModel;
 import dev.hilla.parser.models.BaseSignatureModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.models.SignatureModel;
@@ -93,6 +95,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
         var schema = typedNode.getTarget();
         addConstraintsToSchema(typedNode, schema);
+        addJavaTypeToSchema(typedNode, schema);
 
         // Add annotations from parent property model to schema
         if (nodePath.getParentPath() != null && nodePath.getParentPath()
@@ -100,14 +103,6 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
             var propertyModel = propertyNode.getSource();
             addAnnotationsToSchema(propertyModel, schema);
         }
-        if (signature instanceof BaseSignatureModel) {
-            schema.addExtension(JAVA_TYPE_KEY,
-                    ((BaseSignatureModel) signature).getType().getName());
-        } else if (signature instanceof ClassRefSignatureModel) {
-            schema.addExtension(JAVA_TYPE_KEY,
-                    ((ClassRefSignatureModel) signature).getName());
-        }
-        addConstraintsToSchema((AnnotatedNode) typedNode, schema);
     }
 
     @Override
@@ -148,5 +143,50 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         if (!annotations.isEmpty()) {
             schema.addExtension(ANNOTATIONS_KEY, annotations);
         }
+    }
+
+    private void addJavaTypeToSchema(TypedNode typedNode, Schema<?> schema) {
+        var signature = (SignatureModel) typedNode.getType();
+        String typeName = null;
+
+        if (signature instanceof BaseSignatureModel baseSignatureModel) {
+            typeName = baseSignatureModel.getType().getName();
+        } else if (signature instanceof ClassRefSignatureModel classRefSignatureModel) {
+            typeName = classRefSignatureModel.getName();
+        } else if (signature instanceof ArraySignatureModel arraySignatureModel) {
+            AnnotatedArrayType o = (AnnotatedArrayType) arraySignatureModel.get();
+            typeName = o.toString();
+        }
+
+        if (includeJavaType(typeName)) {
+            schema.addExtension(JAVA_TYPE_KEY, typeName);
+        }
+    }
+
+    private boolean includeJavaType(String typeName) {
+        if (typeName == null) {
+            return false;
+        }
+
+        // Handle array types just the same
+        if (typeName.endsWith("[]")) {
+            typeName = typeName.substring(0, typeName.length() - 2);
+        }
+
+        // Include all primitive types
+        if (typeName.equals("boolean") || typeName.equals("byte")
+                || typeName.equals("char") || typeName.equals("double")
+                || typeName.equals("float") || typeName.equals("int")
+                || typeName.equals("long") || typeName.equals("short")) {
+            return true;
+        }
+
+        // Include all types from java package
+        if (typeName.startsWith("java.")) {
+            return true;
+        }
+
+        // Otherwise don't include
+        return false;
     }
 }
