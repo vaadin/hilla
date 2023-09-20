@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,7 +27,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPattern.PathMatchInfo;
+
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -63,30 +63,7 @@ public class EndpointUtil implements EndpointRequestUtil {
     }
 
     private Optional<Method> getEndpoint(HttpServletRequest request) {
-        PathPatternParser pathParser = new PathPatternParser();
-        PathPattern pathPattern = pathParser
-                .parse(endpointProperties.getEndpointPrefix()
-                        + EndpointController.ENDPOINT_METHODS);
-
-        RequestPath requestPath = RequestPath.parse(request.getRequestURI(),
-                request.getContextPath());
-        PathContainer pathWithinApplication = requestPath
-                .pathWithinApplication();
-        PathMatchInfo matchInfo = pathPattern
-                .matchAndExtract(pathWithinApplication);
-        if (matchInfo == null) {
-            return Optional.empty();
-        }
-
-        Map<String, String> uriVariables = matchInfo.getUriVariables();
-        String endpointName = uriVariables.get("endpoint");
-        String endpointMethod = uriVariables.get("method");
-
-        EndpointRegistry.VaadinEndpointData data = registry.get(endpointName);
-        if (data == null) {
-            return Optional.empty();
-        }
-        return data.getMethod(endpointMethod);
+        return getEndpointData(request).map(EndpointData::method);
     }
 
     /**
@@ -99,13 +76,59 @@ public class EndpointUtil implements EndpointRequestUtil {
      */
     @Override
     public boolean isAnonymousEndpoint(HttpServletRequest request) {
-        Optional<Method> method = getEndpoint(request);
-        if (!method.isPresent()) {
+        var endpointData = getEndpointData(request);
+        if (endpointData.isEmpty()) {
             return false;
         }
+        var concreteEndpointClass = endpointData.get().endpointObject()
+                .getClass();
+        var methodWrappingClass = endpointData.get().method()
+                .getDeclaringClass();
+        if (concreteEndpointClass.equals(methodWrappingClass)) {
+            return accessChecker.getAccessAnnotationChecker().hasAccess(
+                    endpointData.get().method(), null, role -> false);
+        } else {
+            return accessChecker.getAccessAnnotationChecker()
+                    .hasAccess(concreteEndpointClass, null, role -> false);
+        }
+    }
 
-        return accessChecker.getAccessAnnotationChecker()
-                .hasAccess(method.get(), null, role -> false);
+    private Optional<PathPattern.PathMatchInfo> getPathMatchInfo(
+            HttpServletRequest request) {
+        PathPatternParser pathParser = new PathPatternParser();
+        PathPattern pathPattern = pathParser
+                .parse(endpointProperties.getEndpointPrefix()
+                        + EndpointController.ENDPOINT_METHODS);
+
+        RequestPath requestPath = RequestPath.parse(request.getRequestURI(),
+                request.getContextPath());
+        PathContainer pathWithinApplication = requestPath
+                .pathWithinApplication();
+        PathPattern.PathMatchInfo matchInfo = pathPattern
+                .matchAndExtract(pathWithinApplication);
+        return Optional.ofNullable(matchInfo);
+    }
+
+    private Optional<EndpointData> getEndpointData(HttpServletRequest request) {
+        Optional<PathPattern.PathMatchInfo> matchInfo = getPathMatchInfo(
+                request);
+        if (matchInfo.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Map<String, String> uriVariables = matchInfo.get().getUriVariables();
+        String endpointName = uriVariables.get("endpoint");
+        String methodName = uriVariables.get("method");
+        EndpointRegistry.VaadinEndpointData data = registry.get(endpointName);
+        if (data == null) {
+            return Optional.empty();
+        }
+        Optional<Method> endpointMethod = data.getMethod(methodName);
+        return endpointMethod.map(
+                method -> new EndpointData(method, data.getEndpointObject()));
+    }
+
+    private record EndpointData(Method method, Object endpointObject) {
     }
 
 }
