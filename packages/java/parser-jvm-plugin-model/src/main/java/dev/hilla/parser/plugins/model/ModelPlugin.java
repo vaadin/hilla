@@ -79,7 +79,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (!(nodePath.getNode()instanceof TypedNode typedNode)) {
+        if (!(nodePath.getNode() instanceof TypedNode typedNode)) {
             return;
         }
 
@@ -93,7 +93,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
         // Add annotations from parent property model to schema
         if (nodePath.getParentPath() != null && nodePath.getParentPath()
-                .getNode()instanceof PropertyNode propertyNode) {
+                .getNode() instanceof PropertyNode propertyNode) {
             var propertyModel = propertyNode.getSource();
             addAnnotationsToSchema(propertyModel, schema);
         }
