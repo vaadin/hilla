@@ -1,9 +1,13 @@
 package dev.hilla;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.hilla.auth.EndpointAccessChecker;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.lang.reflect.Method;
+import java.security.Principal;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.hilla.auth.EndpointAccessChecker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,19 +21,15 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.lang.reflect.Method;
-import java.security.Principal;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class,
-        ApplicationContextProvider.class })
+        JacksonProperties.class, EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
+@RunWith(SpringRunner.class)
 public class EndpointInvokerTest {
 
     private final ObjectNode body = null;
