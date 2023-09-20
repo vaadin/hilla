@@ -48,13 +48,9 @@ public class EndpointAccessCheckerTest {
         when(requestMock.getUserPrincipal()).thenReturn(null);
     }
 
-    private void shouldPass(Class<?> test) throws Exception {
-        Method method = test.getMethod("test");
-        assertNull(checker.check(method, requestMock));
-    }
-
-    private void shouldPassInherited(Class<?> test) throws Exception {
-        Method method = test.getMethod("sayHello");
+    private void assertAccessGranted(Class<?> test, String methodName)
+            throws Exception {
+        Method method = test.getMethod(methodName);
         if (method.getDeclaringClass().equals(test)) {
             assertNull(checker.check(method, requestMock));
         } else {
@@ -62,13 +58,9 @@ public class EndpointAccessCheckerTest {
         }
     }
 
-    private void shouldFail(Class<?> test) throws Exception {
-        Method method = test.getMethod("test");
-        assertNotNull(checker.check(method, requestMock));
-    }
-
-    private void shouldFailInherited(Class<?> test) throws Exception {
-        Method method = test.getMethod("sayHello");
+    private void assertAccessDenied(Class<?> test, String methodName)
+            throws Exception {
+        Method method = test.getMethod(methodName);
         if (method.getDeclaringClass().equals(test)) {
             assertNotNull(checker.check(method, requestMock));
         } else {
@@ -83,7 +75,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -93,7 +85,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -103,7 +95,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -113,7 +105,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test()
@@ -125,7 +117,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -137,7 +129,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -147,7 +139,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test()
@@ -159,7 +151,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -171,7 +163,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -181,7 +173,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -194,7 +186,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -206,7 +198,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -217,7 +209,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -229,7 +221,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -243,7 +235,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -255,7 +247,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -268,7 +260,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -280,7 +272,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -292,7 +284,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -304,7 +296,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -317,7 +309,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -331,7 +323,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -345,7 +337,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -359,7 +351,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -419,7 +411,8 @@ public class EndpointAccessCheckerTest {
     }
 
     @Test
-    public void should_fail_When_Endpoint_is_not_annotated() throws Exception {
+    public void access_denied_for_inherited_method_when_Endpoint_is_not_annotated()
+            throws Exception {
 
         class ParentEndpoint {
             public String sayHello() {
@@ -433,12 +426,11 @@ public class EndpointAccessCheckerTest {
             }
         }
 
-        shouldFailInherited(Test.class);
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "sayHello");
     }
 
     @Test
-    public void should_pass_When_Endpoint_overridden_method_is_AnonymousAllowed()
+    public void access_granted_when_Endpoint_overrides_and_annotates_inherited_method()
             throws Exception {
 
         class ParentEndpoint {
@@ -459,32 +451,12 @@ public class EndpointAccessCheckerTest {
             }
         }
 
-        shouldPassInherited(Test.class);
-        shouldFail(Test.class);
+        assertAccessGranted(Test.class, "sayHello");
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
-    public void should_fail_When_Endpoint_is_DenyAll() throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        @DenyAll
-        class Test extends ParentEndpoint {
-
-            public void test() {
-            }
-        }
-
-        shouldFailInherited(Test.class);
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_Endpoint_is_AnonymousAllowed()
+    public void access_granted_for_inherited_method_when_Endpoint_is_annotated()
             throws Exception {
 
         class ParentEndpoint {
@@ -500,175 +472,8 @@ public class EndpointAccessCheckerTest {
             }
         }
 
-        shouldPassInherited(Test.class);
-        shouldPass(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_Endpoint_is_PermitAll() throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        @PermitAll
-        class Test extends ParentEndpoint {
-
-            public void test() {
-            }
-        }
-
-        shouldPassInherited(Test.class);
-        shouldPass(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_Endpoint_method_is_PermitAll()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        class Test extends ParentEndpoint {
-
-            @Override
-            @PermitAll
-            public String sayHello() {
-                return "Hello from Test Endpoint";
-            }
-
-            public void test() {
-            }
-        }
-
-        shouldPassInherited(Test.class);
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_Endpoint_is_RolesAllowed_User()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        @RolesAllowed(ROLE_USER)
-        class Test extends ParentEndpoint {
-
-            public void test() {
-            }
-        }
-
-        shouldPassInherited(Test.class);
-        shouldPass(Test.class);
-    }
-
-    @Test
-    public void should_pass_When_Endpoint_method_is_RolesAllowed_User()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        class Test extends ParentEndpoint {
-
-            @Override
-            @RolesAllowed(ROLE_USER)
-            public String sayHello() {
-                return "Hello from Test Endpoint";
-            }
-
-            public void test() {
-            }
-        }
-
-        shouldPassInherited(Test.class);
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_Endpoint_is_RolesAllowed_Admin()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        @RolesAllowed("ROLE_ADMIN")
-        class Test extends ParentEndpoint {
-
-            public void test() {
-            }
-        }
-
-        shouldFailInherited(Test.class);
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_Endpoint_method_is_RolesAllowed_Admin()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        class Test extends ParentEndpoint {
-
-            @Override
-            @RolesAllowed("ROLE_ADMIN")
-            public String sayHello() {
-                return "Hello from Test Endpoint";
-            }
-
-            public void test() {
-            }
-        }
-
-        shouldFailInherited(Test.class);
-        shouldFail(Test.class);
-    }
-
-    @Test
-    public void should_fail_When_Endpoint_method_is_RolesAllowed_Admin_Endpoint_PermitAll()
-            throws Exception {
-
-        class ParentEndpoint {
-            public String sayHello() {
-                return "Hello from ParentEndpoint";
-            }
-        }
-
-        @PermitAll
-        class Test extends ParentEndpoint {
-
-            @RolesAllowed("ROLE_ADMIN")
-            @Override
-            public String sayHello() {
-                return "Hello from Test Endpoint";
-            }
-
-            public void test() {
-            }
-        }
-
-        shouldFailInherited(Test.class);
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "sayHello");
+        assertAccessGranted(Test.class, "test");
     }
 
 }
