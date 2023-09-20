@@ -32,8 +32,7 @@
                     {
                       "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
                     }
-                  ],
-                  "x-java-type": "dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+                  ]
                 }
               }
             }
@@ -50,27 +49,26 @@
           "assertFalse": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "AssertFalse"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "assertTrue": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "AssertTrue"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "decimalMax": {
             "type": "number",
             "format": "double",
-            "x-java-type": "double",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -79,12 +77,12 @@
                 },
                 "simpleName": "DecimalMax"
               }
-            ]
+            ],
+            "x-java-type": "double"
           },
           "decimalMin": {
             "type": "number",
             "format": "double",
-            "x-java-type": "double",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -92,12 +90,12 @@
                 },
                 "simpleName": "DecimalMin"
               }
-            ]
+            ],
+            "x-java-type": "double"
           },
           "digits": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -106,12 +104,12 @@
                 },
                 "simpleName": "Digits"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "email": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -119,28 +117,29 @@
                 },
                 "simpleName": "Email"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "future": {
             "type": "string",
             "format": "date",
             "nullable": true,
-            "x-java-type": "java.time.LocalDate",
             "x-validation-constraints": [
               {
                 "simpleName": "Future"
               }
-            ]
+            ],
+            "x-java-type": "java.time.LocalDate"
           },
           "isNull": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "Null"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "list": {
             "type": "array",
@@ -150,18 +149,17 @@
               "nullable": true,
               "x-java-type": "java.lang.String"
             },
-            "x-java-type": "java.util.List",
             "x-validation-constraints": [
               {
                 "simpleName": "NotEmpty"
               }
-            ]
+            ],
+            "x-java-type": "java.util.List"
           },
           "max": {
             "type": "integer",
             "format": "int32",
             "nullable": true,
-            "x-java-type": "java.lang.Integer",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -169,13 +167,13 @@
                 },
                 "simpleName": "Max"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.Integer"
           },
           "min": {
             "type": "integer",
             "format": "int32",
             "nullable": true,
-            "x-java-type": "java.lang.Integer",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -184,42 +182,42 @@
                 },
                 "simpleName": "Min"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.Integer"
           },
           "negative": {
             "type": "integer",
             "format": "int32",
-            "x-java-type": "int",
             "x-validation-constraints": [
               {
                 "simpleName": "Negative"
               }
-            ]
+            ],
+            "x-java-type": "int"
           },
           "negativeOrZero": {
             "type": "integer",
             "format": "int32",
-            "x-java-type": "int",
             "x-validation-constraints": [
               {
                 "simpleName": "NegativeOrZero"
               }
-            ]
+            ],
+            "x-java-type": "int"
           },
           "notBlank": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "NotBlank"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "notEmpty": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "NotNull"
@@ -227,17 +225,18 @@
               {
                 "simpleName": "NotEmpty"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "notNull": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "NotNull"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "notNullEntity": {
             "nullable": true,
@@ -246,7 +245,6 @@
                 "$ref": "#/components/schemas/dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
               }
             ],
-            "x-java-type": "dev.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData",
             "x-validation-constraints": [
               {
                 "simpleName": "NotNull"
@@ -257,17 +255,16 @@
             "type": "string",
             "format": "date",
             "nullable": true,
-            "x-java-type": "java.time.LocalDate",
             "x-validation-constraints": [
               {
                 "simpleName": "Past"
               }
-            ]
+            ],
+            "x-java-type": "java.time.LocalDate"
           },
           "pattern": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -275,42 +272,42 @@
                 },
                 "simpleName": "Pattern"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "positive": {
             "type": "integer",
             "format": "int32",
-            "x-java-type": "int",
             "x-validation-constraints": [
               {
                 "simpleName": "Positive"
               }
-            ]
+            ],
+            "x-java-type": "int"
           },
           "positiveOrZero": {
             "type": "integer",
             "format": "int32",
-            "x-java-type": "int",
             "x-validation-constraints": [
               {
                 "simpleName": "PositiveOrZero"
               }
-            ]
+            ],
+            "x-java-type": "int"
           },
           "size": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "Size"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "size1": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "attributes": {
@@ -318,12 +315,12 @@
                 },
                 "simpleName": "Size"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "withConstraintsOnSetter": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "NotNull"
@@ -334,22 +331,22 @@
               {
                 "simpleName": "Email"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "withGetter": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "NotBlank"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           },
           "withSetter": {
             "type": "string",
             "nullable": true,
-            "x-java-type": "java.lang.String",
             "x-validation-constraints": [
               {
                 "simpleName": "Email"
@@ -357,7 +354,8 @@
               {
                 "simpleName": "NotBlank"
               }
-            ]
+            ],
+            "x-java-type": "java.lang.String"
           }
         }
       }
