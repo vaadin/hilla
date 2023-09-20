@@ -48,14 +48,24 @@ public class EndpointAccessCheckerTest {
         when(requestMock.getUserPrincipal()).thenReturn(null);
     }
 
-    private void shouldPass(Class<?> test) throws Exception {
-        Method method = test.getMethod("test");
-        assertNull(checker.check(method, requestMock));
+    private void assertAccessGranted(Class<?> test, String methodName)
+            throws Exception {
+        Method method = test.getMethod(methodName);
+        if (method.getDeclaringClass().equals(test)) {
+            assertNull(checker.check(method, requestMock));
+        } else {
+            assertNull(checker.check(test, requestMock));
+        }
     }
 
-    private void shouldFail(Class<?> test) throws Exception {
-        Method method = test.getMethod("test");
-        assertNotNull(checker.check(method, requestMock));
+    private void assertAccessDenied(Class<?> test, String methodName)
+            throws Exception {
+        Method method = test.getMethod(methodName);
+        if (method.getDeclaringClass().equals(test)) {
+            assertNotNull(checker.check(method, requestMock));
+        } else {
+            assertNotNull(checker.check(test, requestMock));
+        }
     }
 
     @Test
@@ -65,7 +75,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -75,7 +85,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -85,7 +95,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -95,7 +105,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test()
@@ -107,7 +117,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -119,7 +129,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -129,7 +139,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test()
@@ -141,7 +151,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -153,7 +163,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test()
@@ -163,7 +173,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -176,7 +186,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -188,7 +198,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -199,7 +209,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -211,7 +221,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -225,7 +235,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -237,7 +247,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -250,7 +260,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -262,7 +272,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -274,7 +284,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -286,7 +296,7 @@ public class EndpointAccessCheckerTest {
             public void test() {
             }
         }
-        shouldPass(Test.class);
+        assertAccessGranted(Test.class, "test");
     }
 
     @Test
@@ -299,7 +309,7 @@ public class EndpointAccessCheckerTest {
             }
         }
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -313,7 +323,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -327,7 +337,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -341,7 +351,7 @@ public class EndpointAccessCheckerTest {
         }
 
         createAnonymousContext();
-        shouldFail(Test.class);
+        assertAccessDenied(Test.class, "test");
     }
 
     @Test
@@ -399,4 +409,71 @@ public class EndpointAccessCheckerTest {
             CurrentInstance.clearAll();
         }
     }
+
+    @Test
+    public void access_denied_for_inherited_method_when_Endpoint_is_not_annotated()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        assertAccessDenied(Test.class, "sayHello");
+    }
+
+    @Test
+    public void access_granted_when_Endpoint_overrides_and_annotates_inherited_method()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        class Test extends ParentEndpoint {
+
+            @Override
+            @AnonymousAllowed
+            public String sayHello() {
+                return "Hello from Test Endpoint";
+            }
+
+            public void test() {
+            }
+        }
+
+        assertAccessGranted(Test.class, "sayHello");
+        assertAccessDenied(Test.class, "test");
+    }
+
+    @Test
+    public void access_granted_for_inherited_method_when_Endpoint_is_annotated()
+            throws Exception {
+
+        class ParentEndpoint {
+            public String sayHello() {
+                return "Hello from ParentEndpoint";
+            }
+        }
+
+        @AnonymousAllowed
+        class Test extends ParentEndpoint {
+
+            public void test() {
+            }
+        }
+
+        assertAccessGranted(Test.class, "sayHello");
+        assertAccessGranted(Test.class, "test");
+    }
+
 }

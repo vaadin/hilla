@@ -1,5 +1,4 @@
 import { _getPropertyModel as _getPropertyModel_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1 } from "@hilla/form";
-import FormAnnotationsModel_1 from "./FormAnnotationsModel.js";
 import FormArrayTypesModel_1 from "./FormArrayTypesModel.js";
 import FormDataPrimitivesModel_1 from "./FormDataPrimitivesModel.js";
 import type FormEntity_1 from "./FormEntity.js";
@@ -33,9 +32,6 @@ class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityI
     }
     get recordTypes(): FormRecordTypesModel_1 {
         return this[_getPropertyModel_1]("recordTypes", FormRecordTypesModel_1, [false]) as FormRecordTypesModel_1;
-    }
-    get annotations(): FormAnnotationsModel_1 {
-        return this[_getPropertyModel_1]("annotations", FormAnnotationsModel_1, [false]) as FormAnnotationsModel_1;
     }
     get validationConstraints(): FormValidationConstraintsModel_1 {
         return this[_getPropertyModel_1]("validationConstraints", FormValidationConstraintsModel_1, [false]) as FormValidationConstraintsModel_1;
