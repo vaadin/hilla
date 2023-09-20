@@ -1,0 +1,216 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "JavaTypeEndpoint",
+      "x-class-name" : "dev.hilla.parser.plugins.model.javatypes.JavaTypeEndpoint"
+    }
+  ],
+  "paths" : {
+    "/JavaTypeEndpoint/getTestEntity" : {
+      "post" : {
+        "tags" : [
+          "JavaTypeEndpoint"
+        ],
+        "operationId" : "JavaTypeEndpoint_getTestEntity_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.javatypes.JavaTypeEndpoint$JavaTypeTestEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "dev.hilla.parser.plugins.model.javatypes.JavaTypeEndpoint$JavaTypeTestEntity" : {
+        "type" : "object",
+        "properties" : {
+          "aBoolean" : {
+            "type" : "boolean",
+            "x-java-type" : "boolean"
+          },
+          "aNullableBoolean" : {
+            "type" : "boolean",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Boolean"
+          },
+          "aByte" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "byte"
+          },
+          "aNullableByte" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Byte"
+          },
+          "aChar" : {
+            "type" : "string",
+            "x-java-type" : "char"
+          },
+          "aNullableChar" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Character"
+          },
+          "aDouble" : {
+            "type" : "number",
+            "format" : "double",
+            "x-java-type" : "double"
+          },
+          "aNullableDouble" : {
+            "type" : "number",
+            "format" : "double",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Double"
+          },
+          "aFloat" : {
+            "type" : "number",
+            "format" : "float",
+            "x-java-type" : "float"
+          },
+          "aNullableFloat" : {
+            "type" : "number",
+            "format" : "float",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Float"
+          },
+          "aInt" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "int"
+          },
+          "aNullableInt" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Integer"
+          },
+          "aLong" : {
+            "type" : "integer",
+            "format" : "int64",
+            "x-java-type" : "long"
+          },
+          "aNullableLong" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Long"
+          },
+          "aShort" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "short"
+          },
+          "aNullableShort" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Short"
+          },
+          "aString" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          },
+          "aDate" : {
+            "type" : "string",
+            "format" : "date",
+            "nullable" : true,
+            "x-java-type" : "java.util.Date"
+          },
+          "aLocalDate" : {
+            "type" : "string",
+            "format" : "date",
+            "nullable" : true,
+            "x-java-type" : "java.time.LocalDate"
+          },
+          "aLocalTime" : {
+            "type" : "string",
+            "format" : "date-time",
+            "nullable" : true,
+            "x-java-type" : "java.time.LocalTime"
+          },
+          "aLocalDateTime" : {
+            "type" : "string",
+            "format" : "date-time",
+            "nullable" : true,
+            "x-java-type" : "java.time.LocalDateTime"
+          },
+          "aStringArray" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "string",
+              "nullable" : true,
+              "x-java-type" : "java.lang.String"
+            },
+            "x-java-type" : "java.lang.String[]"
+          },
+          "aByteArray" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "x-java-type" : "byte"
+            },
+            "x-java-type" : "byte[]"
+          },
+          "aStringList" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "type" : "string",
+              "nullable" : true,
+              "x-java-type" : "java.lang.String"
+            },
+            "x-java-type" : "java.util.List"
+          },
+          "aCustomEntity" : {
+            "nullable" : true,
+            "anyOf" : [
+              {
+                "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.javatypes.JavaTypeEndpoint$CustomEntity"
+              }
+            ]
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.model.javatypes.JavaTypeEndpoint$CustomEntity" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          }
+        }
+      }
+    }
+  }
+}
