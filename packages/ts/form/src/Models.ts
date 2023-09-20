@@ -1,7 +1,5 @@
-import type { Constructor } from 'type-fest';
 import isNumeric from 'validator/es/lib/isNumeric.js';
 import { type BinderNode, getBinderNode } from './BinderNode.js';
-import type { BinderRoot } from './BinderRoot.js';
 import type { Validator } from './Validation.js';
 import { IsNumber } from './Validators.js';
 
@@ -12,8 +10,6 @@ export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
-
-export const defaultKey = '$value$';
 
 const _optional = Symbol('optional');
 
@@ -27,6 +23,14 @@ export function hasFromString<T>(model: AbstractModel<T>): model is AbstractMode
 
 export type Value<M> = M extends AbstractModel<infer T> ? T : never;
 
+export interface HasValue<T> {
+  value?: T;
+}
+
+export type ModelParent<T> = AbstractModel | HasValue<T>;
+
+export type ModelConstructor<M> = new (parent: { value: undefined }, key: 'value', optional: boolean) => M;
+
 export abstract class AbstractModel<T = unknown> {
   static createEmptyValue(): unknown {
     return undefined;
@@ -34,7 +38,7 @@ export abstract class AbstractModel<T = unknown> {
 
   declare readonly ['constructor']: typeof AbstractModel<T>;
 
-  readonly [_parent]?: AbstractModel | BinderRoot;
+  readonly [_parent]?: AbstractModel | HasValue<T>;
 
   readonly [_validators]: ReadonlyArray<Validator<T>>;
 
@@ -42,14 +46,9 @@ export abstract class AbstractModel<T = unknown> {
 
   [_key]: keyof any;
 
-  constructor(
-    parent: AbstractModel | BinderRoot | undefined,
-    key: keyof any | undefined,
-    optional: boolean,
-    ...validators: ReadonlyArray<Validator<T>>
-  ) {
+  constructor(parent: ModelParent<T>, key: keyof any, optional: boolean, ...validators: ReadonlyArray<Validator<T>>) {
     this[_parent] = parent;
-    this[_key] = key ?? defaultKey;
+    this[_key] = key;
     this[_optional] = optional;
     this[_validators] = validators;
   }
@@ -85,7 +84,7 @@ export class NumberModel extends PrimitiveModel<number> implements HasFromString
   static override createEmptyValue = Number;
 
   constructor(
-    parent: AbstractModel,
+    parent: ModelParent<number>,
     key: keyof any,
     optional: boolean,
     ...validators: ReadonlyArray<Validator<number>>
@@ -109,10 +108,8 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 
 declare enum Enum {}
 
-export function makeEnumEmptyValueCreator<M extends EnumModel>(
-  type: Constructor<M, ConstructorParameters<typeof EnumModel>>,
-): () => Value<M> {
-  const { [_enum]: enumObject } = new type(undefined, undefined, false);
+export function makeEnumEmptyValueCreator<M extends EnumModel>(type: ModelConstructor<M>): () => Value<M> {
+  const { [_enum]: enumObject } = new type({ value: undefined }, 'value', true);
   const defaultValue = Object.values(enumObject)[0] as Value<M>;
 
   return () => defaultValue;
@@ -146,10 +143,8 @@ export function* getObjectModelOwnAndParentGetters<M extends ObjectModel>(
   }
 }
 
-export function makeObjectEmptyValueCreator<M extends ObjectModel>(
-  type: Constructor<M, ConstructorParameters<typeof ObjectModel>>,
-): () => Value<M> {
-  const model = new type(undefined, undefined, false);
+export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: ModelConstructor<M>): () => Value<M> {
+  const model = new type({ value: undefined }, 'value', true);
 
   return () => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -200,7 +195,7 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
   #items: Array<MItem | undefined> = [];
 
   constructor(
-    parent: AbstractModel,
+    parent: ModelParent<ReadonlyArray<Value<MItem>>>,
     key: keyof any,
     optional: boolean,
     createItem: (parent: ArrayModel<MItem>, key: number) => MItem,

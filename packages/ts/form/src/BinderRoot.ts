@@ -9,7 +9,7 @@ import {
   CHANGED,
 } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { _parent, type AbstractModel, type Value } from './Models.js';
+import { _parent, type AbstractModel, type HasValue, type Value } from './Models.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -72,13 +72,14 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     Model: Constructor<M, ConstructorParameters<typeof AbstractModel>>,
     config?: BinderRootConfiguration<Value<M>>,
   ) {
-    super(new Model(undefined, undefined, false));
+    const valueContainer: HasValue<Value<M>> = { value: undefined };
+    super(new Model(valueContainer, 'value', true));
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;
     this.#config = config;
     // Initialize value instead of the parent.
-    this.initializeValue();
+    this.initializeValue(true);
     this.#emptyValue = this.value;
     this.read(this.#emptyValue);
   }
