@@ -748,7 +748,7 @@ public class ClassInfoModelTests {
                                 .getName())
                         .getFieldInfo("array")
                         .getTypeSignatureOrTypeDescriptor())
-                                .getArrayClassInfo();
+                        .getArrayClassInfo();
             }
         }
 

@@ -111,8 +111,8 @@ public class JacksonPropertyModelTests {
     public void should_ProvideCorrectMutator(JacksonPropertyModel model,
             String name) {
         var expected = switch (name) {
-        case "privatePropertyWithAccessors", "propertySetterOnly" -> model
-                .getSetter();
+        case "privatePropertyWithAccessors", "propertySetterOnly" ->
+            model.getSetter();
         case "propertyGetterOnly" -> Optional.empty();
         default -> model.getField();
         };
@@ -153,8 +153,8 @@ public class JacksonPropertyModelTests {
                 "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$FieldAnnotation",
                 "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$MethodAnnotation",
                 "dev.hilla.parser.models.jackson.JacksonPropertySharedTests$ParameterAnnotation");
-        case "renamedPublicProperty", "renamedPrivateProperty" -> Set
-                .of("com.fasterxml.jackson.annotation.JsonProperty");
+        case "renamedPublicProperty", "renamedPrivateProperty" ->
+            Set.of("com.fasterxml.jackson.annotation.JsonProperty");
         default -> Set.of();
         };
 

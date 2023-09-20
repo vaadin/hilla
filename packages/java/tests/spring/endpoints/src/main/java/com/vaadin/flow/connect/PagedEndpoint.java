@@ -19,7 +19,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
- * 
+ *
  * {@link org.springframework.data.domain.Page} data.
  */
 @Endpoint

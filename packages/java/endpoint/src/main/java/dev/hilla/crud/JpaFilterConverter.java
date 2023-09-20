@@ -19,7 +19,7 @@ public class JpaFilterConverter {
     /**
      * Converts the given Hilla filter specification into a JPA filter
      * specification.
-     * 
+     *
      * @param <T>
      *            the type of the entity
      * @param rawFilter
