@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-cli",
-  "version": "2.3.0-alpha3",
+  "version": "2.3.0-alpha5",
   "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
@@ -44,15 +44,15 @@
     "tsgen": "bin/index.js"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^2.3.0-alpha3"
+    "@hilla/generator-typescript-core": "^2.3.0-alpha5"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.3.0-alpha3",
+    "@hilla/generator-typescript-utils": "^2.3.0-alpha5",
     "get-stdin": "^9.0.0",
     "meow": "^12.1.0"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^2.3.0-alpha3",
+    "@hilla/generator-typescript-core": "^2.3.0-alpha5",
     "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
