@@ -258,8 +258,8 @@ public class EndpointControllerTest {
 
         EndpointAccessChecker restrictingCheckerMock = mock(
                 EndpointAccessChecker.class);
-        when(restrictingCheckerMock.check(Mockito.any(), Mockito.any(),
-                Mockito.any())).thenReturn(accessErrorMessage);
+        when(restrictingCheckerMock.check(any(Method.class), any(), any()))
+                .thenReturn(accessErrorMessage);
 
         EndpointNameChecker nameCheckerMock = mock(EndpointNameChecker.class);
         when(nameCheckerMock.check(TEST_ENDPOINT_NAME)).thenReturn(null);
@@ -279,11 +279,11 @@ public class EndpointControllerTest {
         assertTrue(String.format("Invalid response body: '%s'", responseBody),
                 responseBody.contains(accessErrorMessage));
 
-        verify(restrictingCheckerMock).check(Mockito.any(), Mockito.any(),
-                Mockito.any());
-        Mockito.verifyNoMoreInteractions(restrictingCheckerMock);
-        verify(restrictingCheckerMock, times(1)).check(Mockito.any(),
+        verify(restrictingCheckerMock).check(Mockito.any(Method.class),
                 Mockito.any(), Mockito.any());
+        Mockito.verifyNoMoreInteractions(restrictingCheckerMock);
+        verify(restrictingCheckerMock, times(1))
+                .check(Mockito.any(Method.class), Mockito.any(), Mockito.any());
     }
 
     @Test

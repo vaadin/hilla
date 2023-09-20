@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -77,7 +77,7 @@ public class EndpointAccessChecker {
     public static final String ACCESS_DENIED_MSG_DEV_MODE = "Unauthorized access to Vaadin endpoint; "
             + "to enable endpoint access use one of the following annotations: @AnonymousAllowed, @PermitAll, @RolesAllowed";
 
-    private AccessAnnotationChecker accessAnnotationChecker;
+    private final AccessAnnotationChecker accessAnnotationChecker;
 
     /**
      * Creates a new instance.
@@ -107,6 +107,20 @@ public class EndpointAccessChecker {
     /**
      * Check that the endpoint is accessible for the current user.
      *
+     * @param clazz
+     *            the Vaadin endpoint class to check ACL
+     * @param request
+     *            the request that triggers the <code>method</code> invocation
+     * @return an error String with an issue description, if any validation
+     *         issues occur, {@code null} otherwise
+     */
+    public String check(Class<?> clazz, HttpServletRequest request) {
+        return check(clazz, request.getUserPrincipal(), request::isUserInRole);
+    }
+
+    /**
+     * Check that the endpoint is accessible for the current user.
+     *
      * @param method
      *            the Vaadin endpoint method to check ACL
      * @param principal
@@ -120,6 +134,32 @@ public class EndpointAccessChecker {
             Function<String, Boolean> rolesChecker) {
         if (accessAnnotationChecker.hasAccess(method, principal,
                 rolesChecker)) {
+            return null;
+        }
+
+        if (isDevMode()) {
+            // suggest access control annotations in dev mode
+            return ACCESS_DENIED_MSG_DEV_MODE;
+        } else {
+            return ACCESS_DENIED_MSG;
+        }
+    }
+
+    /**
+     * Check that the endpoint is accessible for the current user.
+     *
+     * @param clazz
+     *            the Vaadin endpoint class to check ACL
+     * @param principal
+     *            the user principal object
+     * @param rolesChecker
+     *            a function for checking if a user is in a given role
+     * @return an error String with an issue description, if any validation
+     *         issues occur, {@code null} otherwise
+     */
+    public String check(Class<?> clazz, Principal principal,
+            Function<String, Boolean> rolesChecker) {
+        if (accessAnnotationChecker.hasAccess(clazz, principal, rolesChecker)) {
             return null;
         }
 
