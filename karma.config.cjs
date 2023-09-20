@@ -81,8 +81,6 @@ module.exports = (config) => {
       reporters: [!isCI && { type: 'html', subdir: 'html' }, { type: 'lcovonly', subdir: '.' }].filter(Boolean),
     },
 
-    logLevel: config.LOG_DEBUG,
-
     vite: {
       autoInit: false,
       config: {
