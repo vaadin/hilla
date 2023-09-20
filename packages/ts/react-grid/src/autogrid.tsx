@@ -84,7 +84,7 @@ function createDataProvider<TItem>(
   };
 }
 
-function createColumns(
+function useColumns(
   model: ModelConstructor<unknown, AbstractModel<unknown>>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
@@ -163,7 +163,7 @@ export function AutoGrid<TItem>({
   };
 
   // This cast should go away with #1252
-  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
+  const children = useColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
     visibleColumns,
     headerFilters,
   });
