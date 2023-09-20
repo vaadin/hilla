@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -130,7 +131,7 @@ public class EndpointInvokerTest {
         Mockito.verify(endpointAccessChecker, Mockito.times(0))
                 .check(any(Method.class), any(), any());
         Mockito.verify(endpointAccessChecker, Mockito.times(1))
-                .check(any(Class.class), any(), any());
+                .check(eq(TestEndpoint.class), any(), any());
     }
 
     @Test
@@ -164,7 +165,10 @@ public class EndpointInvokerTest {
                 requestMock::isUserInRole);
 
         Mockito.verify(endpointAccessChecker, Mockito.times(1))
-                .check(any(Method.class), any(), any());
+                .check(eq(test.getClass().getMethod("sayHello")), any(), any());
+        Mockito.verify(endpointAccessChecker, Mockito.times(0)).check(
+                eq(test.getClass().getSuperclass().getMethod("sayHello")),
+                any(), any());
         Mockito.verify(endpointAccessChecker, Mockito.times(0))
                 .check(any(Class.class), any(), any());
     }
