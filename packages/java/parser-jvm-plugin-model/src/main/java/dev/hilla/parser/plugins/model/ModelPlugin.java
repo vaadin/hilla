@@ -154,7 +154,8 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
         } else if (signature instanceof ClassRefSignatureModel classRefSignatureModel) {
             typeName = classRefSignatureModel.getName();
         } else if (signature instanceof ArraySignatureModel arraySignatureModel) {
-            AnnotatedArrayType o = (AnnotatedArrayType) arraySignatureModel.get();
+            AnnotatedArrayType o = (AnnotatedArrayType) arraySignatureModel
+                    .get();
             typeName = o.toString();
         }
 
