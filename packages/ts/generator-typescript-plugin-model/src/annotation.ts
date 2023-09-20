@@ -12,13 +12,8 @@ import ts, {
   type VariableStatement,
 } from 'typescript';
 
-export type AnnotatedSchema = NonComposedRegularSchema & Readonly<{ 'x-annotations': readonly string[] }>;
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
   Readonly<{ 'x-validation-constraints': readonly Annotation[] }>;
-
-export function isAnnotatedSchema(schema: Schema): schema is AnnotatedSchema {
-  return isNonComposedRegularSchema(schema) && 'x-annotations' in schema;
-}
 
 export function isValidationConstrainedSchema(schema: Schema): schema is ValidationConstrainedSchema {
   return isNonComposedRegularSchema(schema) && 'x-validation-constraints' in schema;
