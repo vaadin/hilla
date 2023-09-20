@@ -52,6 +52,7 @@
             "type" : "integer",
             "format" : "int64",
             "nullable" : true,
+            "x-java-type" : "java.lang.Long",
             "x-annotations" : [
               {
                 "name" : "jakarta.persistence.Id"
@@ -61,6 +62,7 @@
           "version" : {
             "type" : "integer",
             "format" : "int32",
+            "x-java-type" : "int",
             "x-annotations" : [
               {
                 "name" : "jakarta.persistence.Version"
@@ -69,7 +71,8 @@
           },
           "name" : {
             "type" : "string",
-            "nullable" : true
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
           }
         }
       }
