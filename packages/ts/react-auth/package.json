@@ -1,0 +1,69 @@
+{
+  "name": "@hilla/react-auth",
+  "version": "2.2.0-beta1",
+  "description": "Hilla auth utils for React",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/react-auth"
+  },
+  "keywords": [
+    "Hilla",
+    "Authentication",
+    "React"
+  ],
+  "scripts": {
+    "build": "tsc --isolatedModules -p tsconfig.build.json",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "karma start ../../../karma.config.cjs --port 9877",
+    "test:coverage": "echo \"Skipping\"",
+    "test:watch": "npm run test -- --watch",
+    "typecheck": "tsc --noEmit",
+    "version": "node ../../../scripts/bump/package-update.js"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    }
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/hilla/issues"
+  },
+  "homepage": "https://hilla.dev",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@hilla/frontend": "*"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-router-dom": "^6"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/chai": "^4.3.5",
+    "@types/chai-dom": "^1.11.0",
+    "@types/mocha": "^10.0.1",
+    "@types/react": "^18.2.20",
+    "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
+    "@types/validator": "^13.11.1",
+    "chai-dom": "^1.11.0",
+    "react-router-dom": "^6.16.0",
+    "sinon": "^15.2.0",
+    "sinon-chai": "^3.7.0",
+    "typescript": "^5.1.6"
+  }
+}
