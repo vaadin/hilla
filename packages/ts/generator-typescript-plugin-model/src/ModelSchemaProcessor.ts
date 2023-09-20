@@ -22,13 +22,7 @@ import {
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
-import {
-  type AnnotatedSchema,
-  AnnotationParser,
-  isAnnotatedSchema,
-  isValidationConstrainedSchema,
-  type ValidationConstrainedSchema,
-} from './annotation.js';
+import { AnnotationParser, isValidationConstrainedSchema, type ValidationConstrainedSchema } from './annotation.js';
 import { importBuiltInFormModel } from './utils.js';
 
 const $dependencies = Symbol();
@@ -232,10 +226,6 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
     let result = super.process();
 
-    if (isAnnotatedSchema(schema)) {
-      result = [...result, ...this.#getValidatorsFromAnnotations(schema)];
-    }
-
     if (isValidationConstrainedSchema(schema)) {
       result = [...result, ...this.#getValidatorsFromValidationConstraints(schema)];
     }
@@ -274,10 +264,6 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
   protected override [$processUnknown](_: Schema): readonly Expression[] {
     return [];
-  }
-
-  #getValidatorsFromAnnotations(schema: AnnotatedSchema): readonly Expression[] {
-    return schema['x-annotations'].map(this.#parse);
   }
 
   #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
