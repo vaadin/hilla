@@ -7,12 +7,12 @@ import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-import { PersonModel, type Person } from './TestModels.js';
 import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import { PersonModel, type Person } from './TestModels.js';
 
 use(sinonChai);
 let lastFilter: Filter | undefined;

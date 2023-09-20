@@ -20,7 +20,6 @@ import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher'
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
-import { GridColumnGroup as _GridColumnGroup } from '@vaadin/grid/vaadin-grid-column-group';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -97,19 +96,21 @@ function createColumns(
     .filter(Boolean) as PropertyInfo[];
 
   const headerFilterRenderer = useCallback((column: any) => {
-    if (!column || !column.original) {
-        return null;
+    // eslint-disable-next-line
+    if (!column?.original) {
+      return null;
     }
-    const path = column.original.querySelector('vaadin-grid-sort-column')!.path;
-    const p: PropertyInfo = properties.find((p) => p.name === path)!;
+    // eslint-disable-next-line
+    const { path } = column.original.querySelector('vaadin-grid-sort-column')!;
+    const propertyInfo: PropertyInfo = properties.find((p) => p.name === path)!;
 
-    return createFilterField(p, {
+    return createFilterField(propertyInfo, {
       onInput: (e: { target: { value: string } }) => {
         const fieldValue = e.target.value;
         const filterValue = fieldValue;
 
         const filter = {
-          propertyId: p.name,
+          propertyId: propertyInfo.name,
           filterValue,
           matcher: Matcher.CONTAINS,
         };
@@ -129,9 +130,8 @@ function createColumns(
           {column}
         </GridColumnGroup>
       );
-    } else {
-      return column;
     }
+    return column;
   });
 }
 
