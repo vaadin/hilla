@@ -1,0 +1,78 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "AnnotationsEndpoint",
+      "x-class-name" : "dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint"
+    }
+  ],
+  "paths" : {
+    "/AnnotationsEndpoint/getTestEntity" : {
+      "post" : {
+        "tags" : [
+          "AnnotationsEndpoint"
+        ],
+        "operationId" : "AnnotationsEndpoint_getTestEntity_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$AnnotationTestEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$AnnotationTestEntity" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true,
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Id"
+              }
+            ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Version"
+              }
+            ]
+          },
+          "name" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }
+      }
+    }
+  }
+}
