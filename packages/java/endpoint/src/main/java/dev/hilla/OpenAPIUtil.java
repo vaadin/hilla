@@ -21,7 +21,7 @@ public class OpenAPIUtil {
 
     /**
      * Reads the open api file from the build directory.
-     * 
+     *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
      * @return the contents of the generated openapi.json
@@ -38,7 +38,7 @@ public class OpenAPIUtil {
     /**
      * Generate a new openapi.json and return it, based on the classes in the
      * build directory.
-     * 
+     *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
      * @return the contents of the generated openapi.json

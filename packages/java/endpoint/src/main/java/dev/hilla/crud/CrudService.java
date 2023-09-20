@@ -17,7 +17,7 @@ public interface CrudService<T> {
     /**
      * Lists objects of the given type using the paging and sorting options
      * provided in the parameter.
-     * 
+     *
      * @param pageable
      *            contains information about paging and sorting
      * @param filter

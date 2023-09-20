@@ -47,13 +47,12 @@ public final class EngineConfigureMojo extends AbstractMojo {
             var buildDir = project.getBuild().getDirectory();
             var conf = new EngineConfiguration.Builder(
                     project.getBasedir().toPath())
-                            .classPath(new LinkedHashSet<>(
-                                    project.getRuntimeClasspathElements()))
-                            .outputDir(generatedTsFolder.toPath())
-                            .generator(generator).parser(parser)
-                            .buildDir(buildDir)
-                            .classesDir(project.getBuild().getOutputDirectory())
-                            .create();
+                    .classPath(new LinkedHashSet<>(
+                            project.getRuntimeClasspathElements()))
+                    .outputDir(generatedTsFolder.toPath()).generator(generator)
+                    .parser(parser).buildDir(buildDir)
+                    .classesDir(project.getBuild().getOutputDirectory())
+                    .create();
 
             // The configuration gathered from the Maven plugin is saved in a
             // file so that further runs can skip running a separate Maven
