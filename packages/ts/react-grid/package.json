@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-grid",
-  "version": "2.3.0-alpha3",
+  "version": "2.3.0-alpha5",
   "description": "Hilla grid utils for React",
   "main": "index.js",
   "module": "index.js",
