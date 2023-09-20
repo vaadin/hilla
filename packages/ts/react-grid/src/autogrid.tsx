@@ -20,6 +20,7 @@ import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher'
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
+import { GridColumnGroup as _GridColumnGroup } from '@vaadin/grid/vaadin-grid-column-group';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -95,37 +96,42 @@ function createColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
+  const headerFilterRenderer = useCallback((column: any) => {
+    if (!column || !column.original) {
+        return null;
+    }
+    const path = column.original.querySelector('vaadin-grid-sort-column')!.path;
+    const p: PropertyInfo = properties.find((p) => p.name === path)!;
+
+    return createFilterField(p, {
+      onInput: (e: { target: { value: string } }) => {
+        const fieldValue = e.target.value;
+        const filterValue = fieldValue;
+
+        const filter = {
+          propertyId: p.name,
+          filterValue,
+          matcher: Matcher.CONTAINS,
+        };
+
+        // eslint-disable-next-line
+        (filter as any).t = 'propertyString';
+        setPropertyFilter(filter);
+      },
+    });
+  }, []);
+
   return effectiveProperties.map((p) => {
     const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
     if (options.headerFilters) {
-      const headerRenderer = useCallback(
-        () =>
-          createFilterField(p, {
-            onInput: (e: { target: { value: string } }) => {
-              const fieldValue = e.target.value;
-              const filterValue = fieldValue;
-
-              const filter = {
-                propertyId: p.name,
-                filterValue,
-                matcher: Matcher.CONTAINS,
-              };
-
-              // eslint-disable-next-line
-              (filter as any).t = 'propertyString';
-              setPropertyFilter(filter);
-            },
-          }),
-        [],
-      );
-
       return (
-        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerRenderer}>
+        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
           {column}
         </GridColumnGroup>
       );
+    } else {
+      return column;
     }
-    return column;
   });
 }
 
