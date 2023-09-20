@@ -50,7 +50,7 @@ public interface EndpointHotSwapService {
     /**
      * The method that enables registering {@code HotSwapListener}s to be
      * notified whenever an {@code EndpointChangedEvent} is fired.
-     * 
+     *
      * @param listener
      *            an instance of HotSwapListener that implements the
      *            {@code endpointChanged} method that will be called when an

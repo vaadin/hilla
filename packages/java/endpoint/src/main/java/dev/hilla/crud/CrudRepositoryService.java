@@ -26,7 +26,7 @@ public class CrudRepositoryService<T, ID> implements CrudService<T> {
 
     /**
      * Creates the service using the given repository.
-     * 
+     *
      * @param repository
      *            the JPA repository
      */
