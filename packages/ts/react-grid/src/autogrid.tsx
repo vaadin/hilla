@@ -94,8 +94,9 @@ function useColumns(
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
-
-  const headerFilterRenderer = useHeaderFilterRenderer(properties, setPropertyFilter);
+  const propertiesRef = useRef<PropertyInfo[]>([]);
+  propertiesRef.current = properties;
+  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilter);
 
   return effectiveProperties.map((p) => {
     const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
@@ -111,7 +112,7 @@ function useColumns(
 }
 
 function useHeaderFilterRenderer(
-  properties: PropertyInfo[],
+  properties: React.MutableRefObject<PropertyInfo[]>,
   setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
 ) {
   return useCallback((column: any) => {
@@ -121,7 +122,7 @@ function useHeaderFilterRenderer(
     }
     // eslint-disable-next-line
     const { path } = column.original.querySelector('vaadin-grid-sort-column')!;
-    const propertyInfo: PropertyInfo = properties.find((p) => p.name === path)!;
+    const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
 
     return createFilterField(propertyInfo, {
       onInput: (e: { target: { value: string } }) => {
@@ -182,7 +183,7 @@ export function AutoGrid<TItem>({
     // Sets the data provider, should be done only once
     const grid = ref.current!;
     grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
-  }, []);
+  }, [model, service]);
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes

@@ -7,7 +7,7 @@ export interface PropertyInfo {
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
-function _generateHeader(path: string) {
+export function _generateHeader(path: string) {
   return path
     .substring(path.lastIndexOf('.') + 1)
     .replace(/([A-Z])/gu, '-$1')

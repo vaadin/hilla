@@ -1,57 +1,18 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
-import { render } from '@testing-library/react';
+import { RenderResult, render } from '@testing-library/react';
+
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
-import type { CrudService } from '../src/crud.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import type Filter from '../src/types/dev/hilla/crud/filter/Filter.js';
-import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
-import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import { CompanyModel, PersonModel, personService, type Person, companyService } from './test-models-and-services.js';
 import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
-import { PersonModel, type Person } from './TestModels.js';
+import { _generateHeader } from '../src/utils.js';
 
 use(sinonChai);
-let lastFilter: Filter | undefined;
-
-const fakeService: CrudService<Person> = {
-  list: async (request: Pageable, filter: Filter | undefined): Promise<Person[]> => {
-    lastFilter = filter;
-    let data: Person[] = [
-      { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12 },
-      { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55 },
-    ];
-    if (request.pageNumber === 0) {
-      /* eslint-disable */
-      if (filter && (filter as any).t === 'propertyString') {
-        const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
-        data = data.filter((person) => {
-          const propertyValue = (person as any)[propertyFilter.propertyId];
-          if (propertyFilter.matcher === 'CONTAINS') {
-            return propertyValue.includes(propertyFilter.filterValue);
-          }
-          return propertyValue === propertyFilter.filterValue;
-        });
-      }
-      /* eslint-enable */
-    } else {
-      data = [];
-    }
-
-    if (request.sort.orders.length === 1) {
-      const sortPropertyId = request.sort.orders[0]!.property;
-      const directionMod = request.sort.orders[0]!.direction === Direction.ASC ? 1 : -1;
-      data.sort((a, b) =>
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (a as any)[sortPropertyId] > (b as any)[sortPropertyId] ? Number(directionMod) : -1 * directionMod,
-      );
-    }
-    return data;
-  },
-};
 
 export async function nextFrame(): Promise<void> {
   return new Promise((resolve) => {
@@ -63,21 +24,19 @@ export async function nextFrame(): Promise<void> {
 
 describe('@hilla/react-grid', () => {
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
-    return <AutoGrid service={fakeService} model={PersonModel} {...customProps}></AutoGrid>;
+    return <AutoGrid service={personService} model={PersonModel} {...customProps}></AutoGrid>;
   }
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
-      const result = render(<TestAutoGrid />);
+      const result: RenderResult = render(<TestAutoGrid />);
       const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
-      expect(columns.length).to.equal(4);
-      expect(columns[0].path).to.equal('firstName');
-      expect(columns[0].header).to.equal('First name');
-      expect(columns[1].path).to.equal('lastName');
-      expect(columns[1].header).to.equal('Last name');
-      expect(columns[2].path).to.equal('email');
-      expect(columns[2].header).to.equal('Email');
-      expect(columns[3].path).to.equal('someNumber');
-      expect(columns[3].header).to.equal('Some number');
+      assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
+    });
+    it('can change model and recreate columns', async () => {
+      const result = render(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
+      assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
+      result.rerender(<AutoGrid service={companyService} model={CompanyModel}></AutoGrid>);
+      assertColumns(result, 'name', 'foundedDate');
     });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
@@ -165,7 +124,7 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(lastFilter).to.eql(expectedFilter);
+        expect(personService.lastFilter).to.eql(expectedFilter);
       });
       it('combine filters (and) when you type in multiple fields', async () => {
         const result = render(<TestAutoGrid headerFilters />);
@@ -196,7 +155,38 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'and' },
           children: [expectedFirstNameFilter, expectedLastNameFilter],
         };
-        expect(lastFilter).to.eql(expectedFilter);
+        expect(personService.lastFilter).to.eql(expectedFilter);
+      });
+      it('removes filters if turning header filters off', async () => {
+        const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
+        await nextFrame();
+        await nextFrame();
+        result.rerender(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
+        await nextFrame();
+        await nextFrame();
+        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        expect(getHeaderCellContent(grid, 0, 0).innerText).to.equal('First name');
+      });
+      it('filters correctly after changing model', async () => {
+        const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
+        await nextFrame();
+        await nextFrame();
+        result.rerender(<AutoGrid service={companyService} model={CompanyModel} headerFilters></AutoGrid>);
+        await nextFrame();
+        await nextFrame();
+        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const companyNameFilter = getHeaderCellContent(grid, 0, 0).firstElementChild as TextFieldElement;
+        companyNameFilter.value = 'vaad';
+        companyNameFilter.dispatchEvent(new CustomEvent('input'));
+
+        const expectedPropertyFilter: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'vaad',
+          propertyId: 'name',
+          matcher: Matcher.CONTAINS,
+        };
+        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        expect(personService.lastFilter).to.eql(expectedFilter);
       });
     });
     it('removes the filters when you clear the fields', async () => {
@@ -215,13 +205,13 @@ describe('@hilla/react-grid', () => {
         ...{ t: 'and' },
         children: [],
       };
-      expect(lastFilter).not.to.eql(expectedFilter);
+      expect(personService.lastFilter).not.to.eql(expectedFilter);
       firstNameFilter.value = '';
       lastNameFilter.value = '';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
 
-      expect(lastFilter).to.eql(expectedFilter);
+      expect(personService.lastFilter).to.eql(expectedFilter);
     });
   });
   describe('customize columns', () => {
@@ -246,3 +236,11 @@ describe('@hilla/react-grid', () => {
     });
   });
 });
+function assertColumns(result: RenderResult, ...ids: string[]) {
+  const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
+  expect(columns.length).to.equal(ids.length);
+  for (var i = 0; i < ids.length; i++) {
+    expect(columns[i].path).to.equal(ids[i]);
+    expect(columns[i].header).to.equal(_generateHeader(ids[i]));
+  }
+}
