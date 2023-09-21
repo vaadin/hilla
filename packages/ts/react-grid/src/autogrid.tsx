@@ -95,7 +95,26 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
-  const headerFilterRenderer = useCallback((column: any) => {
+  const headerFilterRenderer = useHeaderFilterRenderer(properties, setPropertyFilter);
+
+  return effectiveProperties.map((p) => {
+    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
+    if (options.headerFilters) {
+      return (
+        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
+          {column}
+        </GridColumnGroup>
+      );
+    }
+    return column;
+  });
+}
+
+function useHeaderFilterRenderer(
+  properties: PropertyInfo[],
+  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+) {
+  return useCallback((column: any) => {
     // eslint-disable-next-line
     if (!column?.original) {
       return null;
@@ -121,18 +140,6 @@ function useColumns(
       },
     });
   }, []);
-
-  return effectiveProperties.map((p) => {
-    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
-    if (options.headerFilters) {
-      return (
-        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
-          {column}
-        </GridColumnGroup>
-      );
-    }
-    return column;
-  });
 }
 
 export function AutoGrid<TItem>({
