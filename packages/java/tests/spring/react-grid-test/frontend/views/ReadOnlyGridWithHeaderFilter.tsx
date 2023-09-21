@@ -1,10 +1,10 @@
-import { AutoGrid, CrudService } from '@hilla/react-grid';
+import { ModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
+import { AutoGrid, CrudService } from '@hilla/react-grid';
+import CompanyModel from 'Frontend/generated/dev/hilla/test/reactgrid/CompanyModel';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
 import { CompanyService, PersonService } from 'Frontend/generated/endpoints';
 import { useState } from 'react';
-import CompanyModel from 'Frontend/generated/dev/hilla/test/reactgrid/CompanyModel';
-import { AbstractModel, ModelConstructor, ObjectModel } from '@hilla/form';
 
 export function ReadOnlyGridWithHeaderFilters() {
   const [model, setModel] = useState<ModelConstructor<any, any>[]>([PersonModel]);
