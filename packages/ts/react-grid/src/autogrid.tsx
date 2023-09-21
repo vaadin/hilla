@@ -86,7 +86,7 @@ function createDataProvider<TItem>(
 
 function useColumns(
   model: ModelConstructor<unknown, AbstractModel<unknown>>,
-  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
@@ -112,7 +112,7 @@ function useColumns(
 
 function useHeaderFilterRenderer(
   properties: PropertyInfo[],
-  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
 ) {
   return useCallback((column: any) => {
     // eslint-disable-next-line
@@ -136,7 +136,7 @@ function useHeaderFilterRenderer(
 
         // eslint-disable-next-line
         (filter as any).t = 'propertyString';
-        setPropertyFilter(filter);
+        setPropertyFilter.current(filter);
       },
     });
   }, []);
@@ -152,7 +152,7 @@ export function AutoGrid<TItem>({
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
 
-  const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
+  const setHeaderPropertyFilter = useRef((propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
       (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
     );
@@ -167,7 +167,7 @@ export function AutoGrid<TItem>({
       internalFilter.children.push(propertyFilter);
     }
     setInternalFilter({ ...internalFilter });
-  };
+  });
 
   // This cast should go away with #1252
   const children = useColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
