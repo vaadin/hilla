@@ -6,7 +6,7 @@ package dev.hilla.crud.filter;
  */
 public class PropertyStringFilter implements Filter {
     public enum Matcher {
-        EQUALS, CONTAINS;
+        EQUALS, CONTAINS, LESS_THAN, GREATER_THAN;
     }
 
     private String propertyId;

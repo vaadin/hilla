@@ -10,15 +10,13 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { createFilterField } from './field-factory';
+import { useFilterField } from './field-factory';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
@@ -102,22 +100,7 @@ function useHeaderFilterRenderer(
     }
     const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
 
-    return createFilterField(propertyInfo, {
-      onInput: (e: { target: { value: string } }) => {
-        const fieldValue = e.target.value;
-        const filterValue = fieldValue;
-
-        const filter = {
-          propertyId: propertyInfo.name,
-          filterValue,
-          matcher: Matcher.CONTAINS,
-        };
-
-        // eslint-disable-next-line
-        (filter as any).t = 'propertyString';
-        setPropertyFilter.current(filter);
-      },
-    });
+    return useFilterField(propertyInfo, {}, setPropertyFilter);
   }, []);
 }
 
@@ -179,17 +162,23 @@ export function AutoGrid<TItem>({
     const filterIndex = internalFilter.children.findIndex(
       (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
     );
+    let changed = false;
     if (propertyFilter.filterValue === '') {
       // Delete empty filter
       if (filterIndex >= 0) {
         internalFilter.children.splice(filterIndex, 1);
+        changed = true;
       }
     } else if (filterIndex >= 0) {
       internalFilter.children[filterIndex] = propertyFilter;
+      changed = true;
     } else {
       internalFilter.children.push(propertyFilter);
+      changed = true;
     }
-    setInternalFilter({ ...internalFilter });
+    if (changed) {
+      setInternalFilter({ ...internalFilter });
+    }
   };
 
   // This cast should go away with #1252

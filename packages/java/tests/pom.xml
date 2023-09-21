@@ -92,6 +92,11 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-select-testbench</artifactId>
+      <version>${vaadin.component.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-testbench</artifactId>
       <version>${vaadin.component.version}</version>
     </dependency>
