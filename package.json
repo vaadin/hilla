@@ -43,6 +43,7 @@
     "eslint": "^8.41.0",
     "eslint-config-vaadin": "^1.0.0-alpha.14",
     "eslint-plugin-perfectionist": "^1.5.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-tsdoc": "^0.2.17",
     "glob": "^10.3.3",
     "karma": "^6.4.1",
