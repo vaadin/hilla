@@ -136,7 +136,7 @@ function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo
 
 function useColumns(
   model: ModelConstructor<unknown, AbstractModel<unknown>>,
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
+  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
@@ -146,18 +146,22 @@ function useColumns(
     .filter(Boolean) as PropertyInfo[];
   const propertiesRef = useRef<PropertyInfo[]>([]);
   propertiesRef.current = properties;
-  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilter);
+  const setPropertyFilterRef = useRef(setPropertyFilter);
+  setPropertyFilterRef.current = setPropertyFilter;
+  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilterRef);
   const headerSorterRenderer = useHeaderSorterRenderer(propertiesRef);
 
   return effectiveProperties.map((p) => {
     if (options.headerFilters) {
       return (
-        <GridColumnGroup data-path={p.name} key={`group-${p.name}`} headerRenderer={headerSorterRenderer}>
+        <GridColumnGroup key={`group-${p.name}`} data-path={p.name} headerRenderer={headerSorterRenderer}>
           <GridColumn path={p.name} headerRenderer={headerFilterRenderer} autoWidth></GridColumn>
         </GridColumnGroup>
       );
     }
-    return <GridColumn path={p.name} headerRenderer={headerSorterRenderer} autoWidth></GridColumn>;
+    return (
+      <GridColumn key={`col-${p.name}`} path={p.name} headerRenderer={headerSorterRenderer} autoWidth></GridColumn>
+    );
   });
 }
 
@@ -171,7 +175,7 @@ export function AutoGrid<TItem>({
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
 
-  const setHeaderPropertyFilter = useRef((propertyFilter: PropertyStringFilter) => {
+  const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
       (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
     );
@@ -186,7 +190,7 @@ export function AutoGrid<TItem>({
       internalFilter.children.push(propertyFilter);
     }
     setInternalFilter({ ...internalFilter });
-  });
+  };
 
   // This cast should go away with #1252
   const children = useColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
