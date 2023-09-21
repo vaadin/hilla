@@ -39,13 +39,13 @@ describe('@hilla/react-grid', () => {
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
       const result: RenderResult = render(<TestAutoGrid />);
-      assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
+      await assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
     });
     it('can change model and recreate columns', async () => {
       const result = render(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
-      assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
+      await assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
       result.rerender(<AutoGrid service={companyService} model={CompanyModel}></AutoGrid>);
-      assertColumns(result, 'Name', 'Founded date');
+      await assertColumns(result, 'Name', 'Founded date');
     });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
@@ -224,14 +224,14 @@ describe('@hilla/react-grid', () => {
     });
   });
   describe('customize columns', () => {
-    it('should only show configured columns in specified order', () => {
+    it('should only show configured columns in specified order', async () => {
       const result = render(<TestAutoGrid visibleColumns={['email', 'firstName']} />);
-      assertColumns(result, 'Email', 'First name');
+      await assertColumns(result, 'Email', 'First name');
     });
 
-    it('should ignore unknown columns', () => {
+    it('should ignore unknown columns', async () => {
       const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
-      assertColumns(result, 'Email', 'First name');
+      await assertColumns(result, 'Email', 'First name');
     });
   });
 });
