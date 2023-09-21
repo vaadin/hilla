@@ -8,8 +8,10 @@ import {
   type GridElement,
   type GridProps,
 } from '@hilla/react-components/Grid.js';
+import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
+import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
 import { createFilterField } from './field-factory';
@@ -36,6 +38,11 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
       size?: number;
     };
   }>;
+
+function pathFromColumn(column: any): string {
+  // eslint-disable-next-line
+  return column?.original?.path ?? column?.original?.dataset?.path;
+}
 
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
@@ -89,12 +96,10 @@ function useHeaderFilterRenderer(
   setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
 ) {
   return useCallback((column: any) => {
-    // eslint-disable-next-line
-    if (!column?.original) {
+    const path = pathFromColumn(column);
+    if (!path) {
       return null;
     }
-    // eslint-disable-next-line
-    const { path } = column.original.querySelector('vaadin-grid-sort-column')!;
     const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
 
     return createFilterField(propertyInfo, {
@@ -116,6 +121,19 @@ function useHeaderFilterRenderer(
   }, []);
 }
 
+function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo[]>) {
+  return useCallback((column: any) => {
+    const path = pathFromColumn(column);
+    if (!path) {
+      return null;
+    }
+
+    const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
+
+    return <GridSorter path={path}>{propertyInfo.humanReadableName}</GridSorter>;
+  }, []);
+}
+
 function useColumns(
   model: ModelConstructor<unknown, AbstractModel<unknown>>,
   setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
@@ -129,17 +147,17 @@ function useColumns(
   const propertiesRef = useRef<PropertyInfo[]>([]);
   propertiesRef.current = properties;
   const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilter);
+  const headerSorterRenderer = useHeaderSorterRenderer(propertiesRef);
 
   return effectiveProperties.map((p) => {
-    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
     if (options.headerFilters) {
       return (
-        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
-          {column}
+        <GridColumnGroup data-path={p.name} key={`group-${p.name}`} headerRenderer={headerSorterRenderer}>
+          <GridColumn path={p.name} headerRenderer={headerFilterRenderer} autoWidth></GridColumn>
         </GridColumnGroup>
       );
     }
-    return column;
+    return <GridColumn path={p.name} headerRenderer={headerSorterRenderer} autoWidth></GridColumn>;
   });
 }
 
