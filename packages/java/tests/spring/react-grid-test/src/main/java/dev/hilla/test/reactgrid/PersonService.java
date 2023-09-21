@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @BrowserCallable
-@Service
 @AnonymousAllowed
 public class PersonService extends CrudRepositoryService<Person, Long, PersonRepository> {
 
