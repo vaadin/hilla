@@ -1,11 +1,15 @@
 package dev.hilla.crud;
 
-import java.lang.reflect.ParameterizedType;
+
+import java.lang.reflect.Type;
 import java.util.List;
+
+import com.googlecode.gentyref.GenericTypeReflector;
 
 import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
 import dev.hilla.crud.filter.Filter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -30,13 +34,19 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
     private JpaSpecificationExecutor<T> repository;
     private final Class<T> entityClass;
 
-    /**
-     * Creates the service using the given repository.
-     */
     public CrudRepositoryService() {
         this.entityClass = resolveEntityClass();
     }
 
+    /**
+     * Initializes the repository instance if it hasn't been initialized yet,
+     * otherwise returns the existing one.
+     * <p>
+     * This method uses ApplicationContext to obtain the Repository instance, so
+     * it is not suitable for use in the constructor.
+     *
+     * @return the repository instance
+     */
     protected JpaSpecificationExecutor<T> getRepository() {
         if (repository == null) {
             repository = resolveRepository();
@@ -52,22 +62,33 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
 
     @SuppressWarnings("unchecked")
     private JpaSpecificationExecutor<T> resolveRepository() {
-        Class<R> repositoryClass = (Class<R>) resolveGenericRuntimeClass(2);
+        var repositoryTypeParam = CrudRepositoryService.class
+                .getTypeParameters()[2];
+        Type entityType = GenericTypeReflector.getTypeParameter(getClass(),
+                repositoryTypeParam);
+        if (entityType == null) {
+            throw new IllegalStateException(String.format(
+                    "Unable to detect the type for the class '%s' in the "
+                            + "class '%s'.",
+                    repositoryTypeParam, getClass()));
+        }
+        Class<R> repositoryClass = (Class<R>) GenericTypeReflector
+                .erase(entityType);
         return applicationContext.getBean(repositoryClass);
     }
 
     @SuppressWarnings("unchecked")
     private Class<T> resolveEntityClass() {
-        return (Class<T>) resolveGenericRuntimeClass(0);
-    }
-
-    private Class<?> resolveGenericRuntimeClass(int argIndex) {
-        Class<?> clazz = getClass();
-        while (!clazz.getSuperclass().equals(CrudRepositoryService.class)) {
-            clazz = clazz.getSuperclass();
+        var entityTypeParam = CrudRepositoryService.class
+                .getTypeParameters()[0];
+        Type entityType = GenericTypeReflector.getTypeParameter(getClass(),
+                entityTypeParam);
+        if (entityType == null) {
+            throw new IllegalStateException(String.format(
+                    "Unable to detect the type for the class '%s' in the "
+                            + "class '%s'.",
+                    entityTypeParam, getClass()));
         }
-        return (Class<?>) ((ParameterizedType) clazz.getGenericSuperclass())
-                .getActualTypeArguments()[argIndex];
+        return (Class<T>) GenericTypeReflector.erase(entityType);
     }
-
 }
