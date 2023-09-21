@@ -1,6 +1,5 @@
 package dev.hilla.crud;
 
-
 import java.lang.reflect.Type;
 import java.util.List;
 
