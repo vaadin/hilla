@@ -8,7 +8,7 @@ import { AbstractModel, ModelConstructor, ObjectModel } from '@hilla/form';
 
 export function ReadOnlyGridWithHeaderFilters() {
   const [model, setModel] = useState<ModelConstructor<any, any>[]>([PersonModel]);
-  const [service, setService] = useState<CrudService>(PersonService);
+  const [service, setService] = useState<CrudService<any>>(PersonService);
   const [headerFilters, setHeaderFilters] = useState(true);
   return (
     <>
