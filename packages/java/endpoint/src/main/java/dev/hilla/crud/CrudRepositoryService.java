@@ -18,7 +18,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * repository.
  */
 @EndpointExposed
-public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSpecificationExecutor<T>> implements CrudService<T> {
+public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSpecificationExecutor<T>>
+        implements CrudService<T> {
 
     @Autowired
     private JpaFilterConverter jpaFilterConverter;
@@ -65,7 +66,8 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
         while (!clazz.getSuperclass().equals(CrudRepositoryService.class)) {
             clazz = clazz.getSuperclass();
         }
-        return (Class<?>) ((ParameterizedType) clazz.getGenericSuperclass()).getActualTypeArguments()[argIndex];
+        return (Class<?>) ((ParameterizedType) clazz.getGenericSuperclass())
+                .getActualTypeArguments()[argIndex];
     }
 
 }

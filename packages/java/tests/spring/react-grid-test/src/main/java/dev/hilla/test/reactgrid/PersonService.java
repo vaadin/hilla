@@ -13,6 +13,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @BrowserCallable
 @AnonymousAllowed
-public class PersonService extends CrudRepositoryService<Person, Long, PersonRepository> {
+public class PersonService
+        extends CrudRepositoryService<Person, Long, PersonRepository> {
 
 }
