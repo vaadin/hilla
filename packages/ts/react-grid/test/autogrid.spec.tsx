@@ -10,7 +10,13 @@ import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
-import { getBodyCellContent, getHeaderCell, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import {
+  getBodyCellContent,
+  getHeaderCell,
+  getHeaderCellContent,
+  getHeaderRows,
+  getVisibleRowCount,
+} from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, personService, type Person, companyService } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -173,11 +179,35 @@ describe('@hilla/react-grid', () => {
         const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
+        const grid = result.container.querySelector('vaadin-grid')!;
+        expect(getHeaderRows(grid).length).to.equal(2);
+
+        const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
+        companyNameFilter.value = 'Joh';
+        companyNameFilter.dispatchEvent(new CustomEvent('input'));
+
+        const filter: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'Joh',
+          matcher: Matcher.CONTAINS,
+          propertyId: 'firstName',
+        };
+        const expectedFilter1: AndFilter = {
+          ...{ t: 'and' },
+          children: [filter],
+        };
+        expect(personService.lastFilter).to.eql(expectedFilter1);
+
         result.rerender(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        expect(getHeaderCellContent(grid, 0, 0).innerText).to.equal('First name');
+        expect(getHeaderRows(grid).length).to.equal(1);
+
+        const expectedFilter2: AndFilter = {
+          ...{ t: 'and' },
+          children: [],
+        };
+        expect(personService.lastFilter).to.eql(expectedFilter2);
       });
       it('filters correctly after changing model', async () => {
         const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);

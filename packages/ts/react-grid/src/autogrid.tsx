@@ -198,6 +198,13 @@ export function AutoGrid<TItem>({
     headerFilters,
   });
 
+  useEffect(() => {
+    // Remove all filtering if header filters are removed
+    if (!headerFilters) {
+      setInternalFilter({ ...{ t: 'and' }, children: [] });
+    }
+  }, [headerFilters]);
+
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
 
