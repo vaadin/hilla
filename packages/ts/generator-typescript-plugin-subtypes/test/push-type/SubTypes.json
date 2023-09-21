@@ -33,7 +33,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.subtypes.Event"
+                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.subtypes.BaseEvent"
                       }
                     ]
                   }
@@ -64,7 +64,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.subtypes.Event"
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.subtypes.BaseEvent"
                     }
                   ]
                 }
