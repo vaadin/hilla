@@ -22,12 +22,13 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-function assertColumns(result: RenderResult, ...ids: string[]) {
-  const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
+async function assertColumns(result: RenderResult, ...ids: string[]) {
+  const grid = result.container.querySelector('vaadin-grid')!;
+  await nextFrame();
+  const columns = grid.querySelectorAll('vaadin-grid-column');
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {
-    expect(columns[i].path).to.equal(ids[i]);
-    expect(columns[i].header).to.equal(_generateHeader(ids[i]));
+    expect(getHeaderCellContent(grid, 0, i).innerText).to.equal(_generateHeader(ids[i]));
   }
 }
 
@@ -38,14 +39,13 @@ describe('@hilla/react-grid', () => {
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
       const result: RenderResult = render(<TestAutoGrid />);
-      const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
-      assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
+      assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
     });
     it('can change model and recreate columns', async () => {
       const result = render(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
-      assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
+      assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
       result.rerender(<AutoGrid service={companyService} model={CompanyModel}></AutoGrid>);
-      assertColumns(result, 'name', 'foundedDate');
+      assertColumns(result, 'Name', 'Founded date');
     });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
@@ -106,7 +106,7 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const cell = getHeaderCellContent(grid, 0, 0);
+        const cell = getHeaderCellContent(grid, 1, 0);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
       });
       it('no filters created for other columns', async () => {
@@ -114,7 +114,7 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const cell = getHeaderCellContent(grid, 0, 3);
+        const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild).to.null;
       });
       it('filter when you type in the field for a string column', async () => {
@@ -122,7 +122,7 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const firstNameFilterField = getHeaderCellContent(grid, 0, 0).firstElementChild as TextFieldElement;
+        const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filter-value';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
 
@@ -140,11 +140,11 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const firstNameFilterField = getHeaderCellContent(grid, 0, 0).firstElementChild as TextFieldElement;
+        const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filterFirst';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
 
-        const lastNameFilterField = getHeaderCellContent(grid, 0, 1).firstElementChild as TextFieldElement;
+        const lastNameFilterField = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
         lastNameFilterField.value = 'filterLast';
         lastNameFilterField.dispatchEvent(new CustomEvent('input'));
 
@@ -184,7 +184,7 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const companyNameFilter = getHeaderCellContent(grid, 0, 0).firstElementChild as TextFieldElement;
+        const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'vaad';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
 
@@ -203,8 +203,8 @@ describe('@hilla/react-grid', () => {
       await nextFrame();
       await nextFrame();
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      const firstNameFilter = getHeaderCellContent(grid, 0, 0).firstElementChild as TextFieldElement;
-      const lastNameFilter = getHeaderCellContent(grid, 0, 1).firstElementChild as TextFieldElement;
+      const firstNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
+      const lastNameFilter = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
       firstNameFilter.value = 'filterFirst';
       lastNameFilter.value = 'filterLast';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
@@ -226,22 +226,12 @@ describe('@hilla/react-grid', () => {
   describe('customize columns', () => {
     it('should only show configured columns in specified order', () => {
       const result = render(<TestAutoGrid visibleColumns={['email', 'firstName']} />);
-      const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
-      expect(columns.length).to.equal(2);
-      expect(columns[0].path).to.equal('email');
-      expect(columns[0].header).to.equal('Email');
-      expect(columns[1].path).to.equal('firstName');
-      expect(columns[1].header).to.equal('First name');
+      assertColumns(result, 'Email', 'First name');
     });
 
     it('should ignore unknown columns', () => {
       const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
-      const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
-      expect(columns.length).to.equal(2);
-      expect(columns[0].path).to.equal('email');
-      expect(columns[0].header).to.equal('Email');
-      expect(columns[1].path).to.equal('firstName');
-      expect(columns[1].header).to.equal('First name');
+      assertColumns(result, 'Email', 'First name');
     });
   });
 });

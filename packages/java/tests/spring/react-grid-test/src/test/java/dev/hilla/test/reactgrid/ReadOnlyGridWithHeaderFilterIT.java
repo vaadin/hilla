@@ -29,7 +29,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     }
 
     private void setHeaderFilter(int columnIndex, String filter) {
-        TestBenchElement cont = grid.getHeaderCellContent(0, columnIndex);
+        TestBenchElement cont = grid.getHeaderCellContent(1, columnIndex);
         TextFieldElement filterField = cont.$(TextFieldElement.class).first();
         filterField.setValue(filter);
     }
