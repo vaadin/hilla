@@ -3,7 +3,6 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@hilla/form": "../../../../ts/form",
     "@hilla/frontend": "../../../../ts/hilla-frontend",
     "@hilla/generator-typescript-cli": "../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "../../../../ts/generator-typescript-core",
@@ -22,10 +21,11 @@
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.2",
     "@rollup/pluginutils": "5.0.2",
+    "@vitejs/plugin-react": "4.0.4",
     "async": "3.2.4",
     "glob": "10.3.3",
-    "mkdirp": "1.0.4",
     "rollup-plugin-brotli": "3.1.0",
+    "rollup-plugin-visualizer": "5.9.2",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.1.6",
@@ -33,22 +33,19 @@
     "vite-plugin-checker": "0.6.1",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
-    "workbox-precaching": "7.0.0",
-    "rollup-plugin-visualizer": "5.9.2",
-    "@vitejs/plugin-react": "4.0.4"
+    "workbox-precaching": "7.0.0"
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/form": "2.1.0-alpha4",
-      "@hilla/frontend": "2.1.0-alpha4",
-      "@hilla/generator-typescript-cli": "2.1.0-alpha4",
-      "@hilla/generator-typescript-core": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-backbone": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-barrel": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-client": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-model": "2.1.0-alpha4",
-      "@hilla/generator-typescript-plugin-push": "2.1.0-alpha4",
-      "@hilla/generator-typescript-utils": "2.1.0-alpha4",
+      "@hilla/frontend": "2.3.0-alpha5",
+      "@hilla/generator-typescript-cli": "2.3.0-alpha5",
+      "@hilla/generator-typescript-core": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-backbone": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-barrel": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
@@ -58,10 +55,11 @@
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.2",
       "@rollup/pluginutils": "5.0.2",
+      "@vitejs/plugin-react": "4.0.4",
       "async": "3.2.4",
       "glob": "10.3.3",
-      "mkdirp": "1.0.4",
       "rollup-plugin-brotli": "3.1.0",
+      "rollup-plugin-visualizer": "5.9.2",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.1.6",
@@ -69,11 +67,9 @@
       "vite-plugin-checker": "0.6.1",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
-      "workbox-precaching": "7.0.0",
-      "rollup-plugin-visualizer": "5.9.2",
-      "@vitejs/plugin-react": "4.0.4"
+      "workbox-precaching": "7.0.0"
     },
-    "hash": "6edd3d45928bd7f9d03805280d69fec97b93f35b615b4b1269056c1e1a736e28"
+    "hash": "a90eca5b02dcc2ada8d7af34f783f6827a4051990a84c51dca3aa5ffd39ab01e"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -81,7 +77,6 @@
     "lit": "$lit",
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
-    "@hilla/form": "$@hilla/form",
     "@hilla/frontend": "$@hilla/frontend",
     "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli",
     "@hilla/generator-typescript-core": "$@hilla/generator-typescript-core",
