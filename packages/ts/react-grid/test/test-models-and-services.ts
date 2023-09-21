@@ -1,8 +1,8 @@
 import { NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
-import { CrudService } from '../src/crud';
-import Filter from '../src/types/dev/hilla/crud/filter/Filter';
-import PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
-import Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
+import type { CrudService } from '../src/crud';
+import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
+import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
 
 export interface Company {
@@ -49,37 +49,38 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
 }
 
 const createService = <T>(data: T[]) => {
-  let _lastFilter: Filter | undefined = undefined;
+  let _lastFilter: Filter | undefined;
 
   return {
     list: async (request: Pageable, filter: Filter | undefined): Promise<T[]> => {
       _lastFilter = filter;
+      let filteredData: T[] = [];
       if (request.pageNumber === 0) {
         /* eslint-disable */
         if (filter && (filter as any).t === 'propertyString') {
           const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
-          data = data.filter((item) => {
+          filteredData = data.filter((item) => {
             const propertyValue = (item as any)[propertyFilter.propertyId];
             if (propertyFilter.matcher === 'CONTAINS') {
               return propertyValue.includes(propertyFilter.filterValue);
             }
             return propertyValue === propertyFilter.filterValue;
           });
+        } else {
+          filteredData = data;
         }
         /* eslint-enable */
-      } else {
-        data = [];
       }
 
       if (request.sort.orders.length === 1) {
         const sortPropertyId = request.sort.orders[0]!.property;
         const directionMod = request.sort.orders[0]!.direction === Direction.ASC ? 1 : -1;
-        data.sort((a, b) =>
+        filteredData.sort((a, b) =>
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           (a as any)[sortPropertyId] > (b as any)[sortPropertyId] ? Number(directionMod) : -1 * directionMod,
         );
       }
-      return data;
+      return filteredData;
     },
     get lastFilter() {
       return _lastFilter;
@@ -87,12 +88,12 @@ const createService = <T>(data: T[]) => {
   };
 };
 
-let personData: Person[] = [
+const personData: Person[] = [
   { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12 },
   { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55 },
 ];
 
-let companyData: Company[] = [
+const companyData: Company[] = [
   { name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
   { name: 'Google', foundedDate: '1998-09-04' },
 ];

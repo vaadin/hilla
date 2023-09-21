@@ -1,16 +1,16 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
-import { RenderResult, render } from '@testing-library/react';
+import { type RenderResult, render } from '@testing-library/react';
 
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import { CompanyModel, PersonModel, personService, type Person, companyService } from './test-models-and-services.js';
-import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
+import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import { CompanyModel, PersonModel, personService, type Person, companyService } from './test-models-and-services.js';
 
 use(sinonChai);
 
@@ -20,6 +20,15 @@ export async function nextFrame(): Promise<void> {
       resolve(undefined);
     });
   });
+}
+
+function assertColumns(result: RenderResult, ...ids: string[]) {
+  const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
+  expect(columns.length).to.equal(ids.length);
+  for (let i = 0; i < ids.length; i++) {
+    expect(columns[i].path).to.equal(ids[i]);
+    expect(columns[i].header).to.equal(_generateHeader(ids[i]));
+  }
 }
 
 describe('@hilla/react-grid', () => {
@@ -236,11 +245,3 @@ describe('@hilla/react-grid', () => {
     });
   });
 });
-function assertColumns(result: RenderResult, ...ids: string[]) {
-  const columns = result.container.querySelectorAll('vaadin-grid-sort-column');
-  expect(columns.length).to.equal(ids.length);
-  for (var i = 0; i < ids.length; i++) {
-    expect(columns[i].path).to.equal(ids[i]);
-    expect(columns[i].header).to.equal(_generateHeader(ids[i]));
-  }
-}

@@ -84,33 +84,6 @@ function createDataProvider<TItem>(
   };
 }
 
-function useColumns(
-  model: ModelConstructor<unknown, AbstractModel<unknown>>,
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
-  options: { visibleColumns?: string[]; headerFilters?: boolean },
-) {
-  const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name);
-  const effectiveProperties = effectiveColumns
-    .map((name) => properties.find((prop) => prop.name === name))
-    .filter(Boolean) as PropertyInfo[];
-  const propertiesRef = useRef<PropertyInfo[]>([]);
-  propertiesRef.current = properties;
-  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilter);
-
-  return effectiveProperties.map((p) => {
-    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
-    if (options.headerFilters) {
-      return (
-        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
-          {column}
-        </GridColumnGroup>
-      );
-    }
-    return column;
-  });
-}
-
 function useHeaderFilterRenderer(
   properties: React.MutableRefObject<PropertyInfo[]>,
   setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
@@ -141,6 +114,33 @@ function useHeaderFilterRenderer(
       },
     });
   }, []);
+}
+
+function useColumns(
+  model: ModelConstructor<unknown, AbstractModel<unknown>>,
+  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
+  options: { visibleColumns?: string[]; headerFilters?: boolean },
+) {
+  const properties = getProperties(model);
+  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name);
+  const effectiveProperties = effectiveColumns
+    .map((name) => properties.find((prop) => prop.name === name))
+    .filter(Boolean) as PropertyInfo[];
+  const propertiesRef = useRef<PropertyInfo[]>([]);
+  propertiesRef.current = properties;
+  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilter);
+
+  return effectiveProperties.map((p) => {
+    const column = <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>;
+    if (options.headerFilters) {
+      return (
+        <GridColumnGroup key={`group${p.name}`} headerRenderer={headerFilterRenderer}>
+          {column}
+        </GridColumnGroup>
+      );
+    }
+    return column;
+  });
 }
 
 export function AutoGrid<TItem>({
