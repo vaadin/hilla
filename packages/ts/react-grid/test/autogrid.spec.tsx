@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { GridElement } from '@hilla/react-components/Grid.js';
+import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { type RenderResult, render } from '@testing-library/react';
 
@@ -9,7 +10,7 @@ import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
-import { getBodyCellContent, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
+import { getBodyCellContent, getHeaderCell, getHeaderCellContent, getVisibleRowCount } from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, personService, type Person, companyService } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -29,7 +30,8 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
   const columns = grid.querySelectorAll('vaadin-grid-column');
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {
-    expect(getHeaderCellContent(grid, 0, i).innerText).to.equal(ids[i]);
+    expect(getHeaderCellContent(grid, 0, i).innerText).to.equal(_generateHeader(ids[i]));
+    expect(columns[i].path).to.equal(ids[i]);
   }
 }
 
@@ -40,13 +42,13 @@ describe('@hilla/react-grid', () => {
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
       const result: RenderResult = render(<TestAutoGrid />);
-      await assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
+      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
     });
     it('can change model and recreate columns', async () => {
       const result = render(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
-      await assertColumns(result, 'First name', 'Last name', 'Email', 'Some number');
+      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber');
       result.rerender(<AutoGrid service={companyService} model={CompanyModel}></AutoGrid>);
-      await assertColumns(result, 'Name', 'Founded date');
+      await assertColumns(result, 'name', 'foundedDate');
     });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
@@ -227,12 +229,12 @@ describe('@hilla/react-grid', () => {
   describe('customize columns', () => {
     it('should only show configured columns in specified order', async () => {
       const result = render(<TestAutoGrid visibleColumns={['email', 'firstName']} />);
-      await assertColumns(result, 'Email', 'First name');
+      await assertColumns(result, 'email', 'firstName');
     });
 
     it('should ignore unknown columns', async () => {
       const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
-      await assertColumns(result, 'Email', 'First name');
+      await assertColumns(result, 'email', 'firstName');
     });
   });
 });
