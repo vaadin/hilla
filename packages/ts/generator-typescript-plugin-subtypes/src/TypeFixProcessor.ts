@@ -8,11 +8,6 @@ function propertyNameToString(node: ts.PropertyName): string | null {
   return null;
 }
 
-export type EndpointOperations = {
-  methodsToPatch: string[];
-  removeInitImport: boolean;
-};
-
 export class TypeFixProcessor {
   readonly #source: ts.SourceFile;
   readonly #typeValue: string;

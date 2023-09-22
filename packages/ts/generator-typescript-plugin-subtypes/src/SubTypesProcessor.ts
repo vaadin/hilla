@@ -10,11 +10,6 @@ import DependencyManager from '@hilla/generator-typescript-utils/dependencies/De
 import PathManager from '@hilla/generator-typescript-utils/dependencies/PathManager.js';
 import ts from 'typescript';
 
-export type EndpointOperations = {
-  methodsToPatch: string[];
-  removeInitImport: boolean;
-};
-
 export class SubTypesProcessor {
   readonly #source: ts.SourceFile;
   readonly #typeName: string;

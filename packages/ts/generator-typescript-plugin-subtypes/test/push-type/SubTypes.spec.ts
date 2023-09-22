@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import BackbonePlugin from '@hilla/generator-typescript-plugin-backbone/index.js';
+import ModelPlugin from '@hilla/generator-typescript-plugin-model/index.js';
 import snapshotMatcher from '@hilla/generator-typescript-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
@@ -13,10 +14,10 @@ describe('SubTypesPlugin', () => {
   context('when the entity has `oneOf`', () => {
     it('generates as union type', async () => {
       const sectionName = 'SubTypes';
-      const generator = createGenerator([BackbonePlugin, SubTypesPlugin]);
+      const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(5);
+      expect(files.length).to.equal(9);
 
       const t = await files[1].text();
       expect(t).to.exist;
@@ -35,6 +36,11 @@ describe('SubTypesPlugin', () => {
       expect(addEventFile).to.exist;
       await expect(await addEventFile.text()).toMatchSnapshot('AddEvent', import.meta.url);
       expect(addEventFile.name).to.equal('dev/hilla/parser/plugins/subtypes/AddEvent.ts');
+
+      const addEventModelFile = files.find((f) => f.name === 'dev/hilla/parser/plugins/subtypes/AddEventModel.ts')!;
+      expect(addEventModelFile).to.exist;
+      await expect(await addEventModelFile.text()).toMatchSnapshot('AddEventModel', import.meta.url);
+      expect(addEventModelFile.name).to.equal('dev/hilla/parser/plugins/subtypes/AddEventModel.ts');
     });
   });
 });
