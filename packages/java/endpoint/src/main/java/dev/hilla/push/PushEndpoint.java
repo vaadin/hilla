@@ -160,7 +160,7 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
 
     /**
      * Called when the push channel is disconnected.
-     * 
+     *
      * @param event
      *            the Atmosphere event
      */

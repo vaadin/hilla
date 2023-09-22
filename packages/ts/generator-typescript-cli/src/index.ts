@@ -53,6 +53,7 @@ const resolvedPlugins = await Promise.all(
 const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
 const files = await generator.process(await processInput(io, input));
-await io.cleanOutputDir();
-await io.createFileIndex(files.map((file) => file.name));
-await Promise.all(files.map(async (file) => io.write(file)));
+const filesToDelete = await io.getGeneratedFiles();
+const generatedFiles = await io.writeGeneratedFiles(files);
+
+await io.cleanOutputDir(generatedFiles, filesToDelete);

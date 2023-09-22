@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-form",
-  "version": "2.2.0-beta1",
+  "version": "2.3.0-alpha5",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -16,11 +16,15 @@
     "React"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
-    "lint": "echo \"Skipping\"",
-    "lint:fix": "echo \"Skipping\"",
-    "test": "karma start ../../../karma.config.cjs --port 9877",
-    "test:coverage": "echo \"Skipping\"",
+    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "karma start ../../../karma.config.cjs --port 9878",
+    "test:coverage": "echo 'ignoring until it has been fixed'",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit",
     "version": "node ../../../scripts/bump/package-update.js"

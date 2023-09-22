@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Set;
 
+import dev.hilla.parser.plugins.model.Endpoint;
+import dev.hilla.parser.plugins.model.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import dev.hilla.parser.core.Parser;
@@ -18,6 +20,8 @@ public class ValidationTest {
     public void should_GenerateValidations()
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
+                .exposedPackages(
+                        Set.of("dev.hilla.parser.plugins.model.validation"))
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

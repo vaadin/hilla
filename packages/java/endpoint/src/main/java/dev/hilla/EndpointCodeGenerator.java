@@ -17,6 +17,7 @@ package dev.hilla;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Set;
 
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
@@ -36,12 +37,14 @@ public class EndpointCodeGenerator {
     private final EndpointController endpointController;
     private final VaadinContext context;
     private Path buildDirectory;
+
     private ApplicationConfiguration configuration;
     private String nodeExecutable;
+    private Set<String> classesUsedInOpenApi = null;
 
     /**
      * Creates the singleton.
-     * 
+     *
      * @param context
      *            the context the application is running in
      * @param endpointController
@@ -54,9 +57,17 @@ public class EndpointCodeGenerator {
     }
 
     /**
+     * Gets the singleton instance.
+     */
+    public static EndpointCodeGenerator getInstance() {
+        return ApplicationContextProvider.getApplicationContext()
+                .getBean(EndpointCodeGenerator.class);
+    }
+
+    /**
      * Re-generates the endpoint TypeScript and re-registers the endpoints in
      * Java.
-     * 
+     *
      * @throws IOException
      *             if something went wrong
      */
@@ -93,4 +104,12 @@ public class EndpointCodeGenerator {
         }
     }
 
+    public Set<String> getClassesUsedInOpenApi() throws IOException {
+        if (classesUsedInOpenApi == null) {
+            initIfNeeded();
+            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
+                    OpenAPIUtil.getCurrentOpenAPI(buildDirectory));
+        }
+        return classesUsedInOpenApi;
+    }
 }

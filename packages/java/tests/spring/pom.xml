@@ -1,214 +1,223 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>dev.hilla</groupId>
-    <artifactId>tests</artifactId>
-    <version>2.3-SNAPSHOT</version>
-  </parent>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.hilla</groupId>
+        <artifactId>tests</artifactId>
+        <version>2.3-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>tests-spring</artifactId>
-  <name>Hilla Spring Tests</name>
+    <artifactId>tests-spring</artifactId>
+    <name>Hilla Spring Tests</name>
 
-  <packaging>pom</packaging>
+    <packaging>pom</packaging>
 
-  <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
-    <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
-    <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-        <exclusions>
-          <!-- Exclude logback as Selenium via netty otherwise logs excessively -->
-          <exclusion>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-          </exclusion>
-        </exclusions>
-        <version>${spring.boot.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-testbench-bom</artifactId>
-        <type>pom</type>
-        <scope>import</scope>
-        <version>${testbench.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-lumo-theme</artifactId>
-        <version>${vaadin.component.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.nimbusds</groupId>
-        <artifactId>nimbus-jose-jwt</artifactId>
-        <version>${nimbus-jose-jwt.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <!-- Project dependencies -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- JDK 9+ dependencies -->
-    <dependency>
-      <groupId>jakarta.activation</groupId>
-      <artifactId>jakarta.activation-api</artifactId>
-      <version>${jakarta.activation.api.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.annotation</groupId>
-      <artifactId>jakarta.annotation-api</artifactId>
-      <version>${jakarta.annotation.api.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>${jaxb.version}</version>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${spring.boot.version}</version>
-          <executions>
-            <!-- start and stop application when running integration tests -->
-            <execution>
-              <id>pre-integration-test</id>
-              <goals>
-                <goal>start</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>post-integration-test</id>
-              <goals>
-                <goal>stop</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <!-- Remove generated files on clean -->
-            <fileset>
-              <directory>frontend/generated</directory>
-              <includes>
-                <include>**</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
-  <profiles>
-    <profile>
-      <id>it-modules</id>
-      <activation>
-        <property>
-          <name>!skipTests</name>
-        </property>
-      </activation>
-      <modules>
-        <module>endpoints</module>
-        <module>endpoints-contextpath</module>
-        <module>endpoints discovery</module>
-        <module>endpoints-custom-client</module>
-        <!--
-        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
-        <module>endpoints-maven-engine</module>
-        -->
-        <module>endpoints-latest-java</module>
-
-        <module>security</module>
-        <module>security-contextpath</module>
-        <module>security-jwt</module>
-        <module>security-urlmapping</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>it-modules-group-1</id>
-      <modules>
-        <module>endpoints</module>
-        <module>endpoints discovery</module>
-        <module>endpoints-custom-client</module>
-        <!--
-        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
-        <module>endpoints-maven-engine</module>
-        -->
-        <module>endpoints-latest-java</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>it-modules-group-2</id>
-      <modules>
-        <module>security</module>
-        <module>security-contextpath</module>
-        <module>security-jwt</module>
-        <module>security-urlmapping</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>it-modules-some</id>
-      <modules>
-        <module>endpoints</module>
-        <module>endpoints discovery</module>
-        <module>security</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>native</id>
-      <modules>
-        <module>native</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>validation</id>
-      <properties>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-      </properties>
-    </profile>
-  </profiles>
+        <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
+        <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <exclusions>
+                    <!-- Exclude logback as Selenium via netty otherwise logs excessively -->
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-testbench-bom</artifactId>
+                <type>pom</type>
+                <scope>import</scope>
+                <version>${testbench.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-bom</artifactId>
+                <type>pom</type>
+                <scope>import</scope>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-lumo-theme</artifactId>
+                <version>${vaadin.component.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Project dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JDK 9+ dependencies -->
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>${jakarta.activation.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                    <executions>
+                        <!-- start and stop application when running integration tests -->
+                        <execution>
+                            <id>pre-integration-test</id>
+                            <goals>
+                                <goal>start</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>post-integration-test</id>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <!-- Remove generated files on clean -->
+                        <fileset>
+                            <directory>frontend/generated</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>it-modules</id>
+            <activation>
+                <property>
+                    <name>!skipTests</name>
+                </property>
+            </activation>
+            <modules>
+                <module>endpoints</module>
+                <module>endpoints-contextpath</module>
+                <module>endpoints discovery</module>
+                <module>endpoints-custom-client</module>
+                <!--
+        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
+        <module>endpoints-maven-engine</module>
+        -->
+                <module>endpoints-latest-java</module>
+
+                <module>security</module>
+                <module>security-contextpath</module>
+                <module>security-jwt</module>
+                <module>security-urlmapping</module>
+                <module>react-grid-test</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>it-modules-group-1</id>
+            <modules>
+                <module>endpoints</module>
+                <module>endpoints discovery</module>
+                <module>endpoints-custom-client</module>
+                <!--
+        TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
+        <module>endpoints-maven-engine</module>
+        -->
+                <module>endpoints-latest-java</module>
+                <module>react-grid-test</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>it-modules-group-2</id>
+            <modules>
+                <module>security</module>
+                <module>security-contextpath</module>
+                <module>security-jwt</module>
+                <module>security-urlmapping</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>it-modules-some</id>
+            <modules>
+                <module>endpoints</module>
+                <module>endpoints discovery</module>
+                <module>security</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>native</id>
+            <modules>
+                <module>native</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>validation</id>
+            <properties>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

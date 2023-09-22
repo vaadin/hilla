@@ -4,20 +4,21 @@ import {
   _validity,
   type AbstractModel,
   type BinderConfiguration,
+  type BinderNode,
   BinderRoot,
   CHANGED,
+  type EmptyModelConstructor,
   type FieldStrategy,
+  getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
   isFieldElement,
-  getBinderNode,
-  type BinderNode,
   type Validator,
   type ValueError,
   type Value,
 } from '@hilla/form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
-import type { Constructor, Writable } from 'type-fest';
+import type { Writable } from 'type-fest';
 import type { VaadinWindow } from './types.js';
 
 declare const __VERSION__: string;
@@ -215,7 +216,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 }
 
 export function useForm<M extends AbstractModel>(
-  Model: Constructor<M>,
+  Model: EmptyModelConstructor<M>,
   config?: BinderConfiguration<Value<M>>,
 ): UseFormResult<M> {
   const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});

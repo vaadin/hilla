@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import dev.hilla.EndpointCodeGenerator;
+import dev.hilla.OpenAPIUtil;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.push.PushEndpoint;
 import dev.hilla.push.messages.fromclient.AbstractServerMessage;
@@ -65,7 +66,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     new InputStreamReader(resource.openStream()));
             String openApiAsText = reader.lines()
                     .collect(Collectors.joining("\n"));
-            Set<String> types = parseOpenApi(openApiAsText);
+            Set<String> types = OpenAPIUtil.findOpenApiClasses(openApiAsText);
             for (String type : types) {
                 hints.reflection().registerType(TypeReference.of(type),
                         MemberCategory.values());
@@ -75,36 +76,6 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     e);
         }
         hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
-    }
-
-    /**
-     * Parses the given open api and finds the used custom types.
-     *
-     * @param openApiAsText
-     *            the open api JSON as text
-     * @return a set of custom types used
-     * @throws IOException
-     *             if parsing fails
-     */
-    public static Set<String> parseOpenApi(String openApiAsText)
-            throws IOException {
-        JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
-        if (!openApi.has("components")) {
-            return Collections.emptySet();
-        }
-        ObjectNode schemas = (ObjectNode) openApi.get("components")
-                .get("schemas");
-
-        Set<String> types = new HashSet<>();
-        if (schemas != null) {
-
-            schemas.fieldNames().forEachRemaining(type -> {
-                types.add(type);
-            });
-        }
-
-        return types;
-
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {

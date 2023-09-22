@@ -238,7 +238,7 @@ public class EndpointControllerConfiguration {
 
     /**
      * Can re-generate the TypeScipt code.
-     * 
+     *
      * @param context
      *            the servlet context
      * @param endpointController
