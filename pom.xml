@@ -78,16 +78,16 @@
     <jackson.version>2.15.2</jackson.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.1.12</flow.version>
+    <flow.version>24.2.0.alpha9</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
     <spring.boot.version>3.1.2</spring.boot.version>
-    <testbench.version>9.0.7</testbench.version>
+    <testbench.version>9.1.0.alpha1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
-    <github.javaparser.core.version>3.25.3</github.javaparser.core.version>
+    <github.javaparser.core.version>3.25.5</github.javaparser.core.version>
   </properties>
 
   <organization>
@@ -156,7 +156,14 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench-bom</artifactId>
+            <version>${testbench.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
