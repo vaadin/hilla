@@ -25,7 +25,6 @@ import {
   type ArrayItemModel,
   ArrayModel,
   getObjectModelOwnAndParentGetters,
-  type HasValue,
   ObjectModel,
   type Value,
 } from './Models.js';
@@ -84,7 +83,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget implements HasValue<Value<M>> {
+export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
   declare readonly ['constructor']: typeof BinderNode;
   readonly model: M;
   /**
