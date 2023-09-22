@@ -11,14 +11,14 @@ import PathManager from '@hilla/generator-typescript-utils/dependencies/PathMana
 import ts from 'typescript';
 
 export class SubTypesProcessor {
-  readonly #source: ts.SourceFile;
   readonly #typeName: string;
+  readonly #source: ts.SourceFile;
   readonly #oneOf: ReferenceSchema[];
   readonly #dependencies;
 
   constructor(typeName: string, source: ts.SourceFile, oneOf: ReferenceSchema[]) {
-    this.#source = source;
     this.#typeName = typeName;
+    this.#source = source;
     this.#oneOf = oneOf;
     this.#dependencies = new DependencyManager(
       new PathManager({ extension: '.js', relativeTo: dirname(source.fileName) }),

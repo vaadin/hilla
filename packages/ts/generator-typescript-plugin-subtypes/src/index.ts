@@ -39,7 +39,7 @@ export default class SubTypesPlugin extends Plugin {
                     const typeValue = s.properties['@type'].example as string;
                     const subFn = `${convertFullyQualifiedNameToRelativePath(subKey)}.ts`;
                     const subSource = sources.find(({ fileName }) => fileName === subFn)!;
-                    const fixedSource = new TypeFixProcessor(subSource, typeValue).process();
+                    const fixedSource = new TypeFixProcessor(baseKey, subSource, typeValue).process();
                     sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
                     const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
