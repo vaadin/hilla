@@ -47,10 +47,9 @@ export function useFilterField(
         {...commonProps}
         onInput={(e: any) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-          const filterValue = fieldValue;
 
           setMatcher(Matcher.CONTAINS);
-          setFilterValue(filterValue);
+          setFilterValue(fieldValue);
         }}
       ></TextField>
     );
