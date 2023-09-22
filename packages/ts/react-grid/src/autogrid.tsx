@@ -21,6 +21,7 @@ import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStr
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
+import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -179,10 +180,21 @@ export function AutoGrid<TItem>({
     // Update the filtering, whenever the filter changes
     const grid = ref.current;
     if (grid) {
-      dataProviderFilter.current = filter ?? internalFilter;
-      grid.clearCache();
+      // Always use an undefined filter for the data provider to avoid extra renders
+      const newFilter = emptyAndToUndefined(filter ?? internalFilter);
+      if (dataProviderFilter.current || newFilter) {
+        dataProviderFilter.current = newFilter;
+        grid.clearCache();
+      }
     }
   }, [filter, internalFilter]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
+}
+
+function emptyAndToUndefined(filter: Filter): Filter | undefined {
+  if ((filter as any).t === 'and' && (filter as any).children.length === 0) {
+    return undefined;
+  }
+  return filter;
 }

@@ -6,12 +6,13 @@ import { render, type RenderResult } from '@testing-library/react';
 
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
+import { CrudService } from '../src/crud.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { _generateHeader } from '../src/utils.js';
 import { getBodyCellContent, getHeaderCellContent, getHeaderRows, getVisibleRowCount } from './grid-test-helpers.js';
-import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
+import { CompanyModel, HasTestInfo, PersonModel, companyService, createService, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
 
@@ -84,6 +85,15 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
+    });
+    it('calls data provider list() only once for initial data', async () => {
+      const testService: CrudService<Person> & HasTestInfo = createService([
+        { firstName: 'a', email: 'e', lastName: 'l', someNumber: 12 },
+      ]);
+      expect(testService.callCount).to.equal(0);
+      render(<AutoGrid service={testService} model={PersonModel} />);
+      await nextFrame();
+      expect(testService.callCount).to.equal(1);
     });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
@@ -242,11 +252,7 @@ describe('@hilla/react-grid', () => {
         await nextFrame();
         expect(getHeaderRows(grid).length).to.equal(1);
 
-        const expectedFilter2: AndFilter = {
-          ...{ t: 'and' },
-          children: [],
-        };
-        expect(personService.lastFilter).to.eql(expectedFilter2);
+        expect(personService.lastFilter).to.eql(undefined);
       });
       it('filters correctly after changing model', async () => {
         const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
@@ -284,11 +290,7 @@ describe('@hilla/react-grid', () => {
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
       await nextFrame();
 
-      const expectedFilter: AndFilter = {
-        ...{ t: 'and' },
-        children: [],
-      };
-      expect(personService.lastFilter).not.to.eql(expectedFilter);
+      expect(personService.lastFilter).not.to.eql(undefined);
 
       firstNameFilter.value = '';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
@@ -296,7 +298,7 @@ describe('@hilla/react-grid', () => {
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
       await nextFrame();
 
-      expect(personService.lastFilter).to.eql(expectedFilter);
+      expect(personService.lastFilter).to.eql(undefined);
     });
   });
   describe('customize columns', () => {

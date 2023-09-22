@@ -53,12 +53,15 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
-const createService = <T>(data: T[]) => {
+export const createService = <T>(data: T[]) => {
   let _lastFilter: Filter | undefined;
+  let _callCount: number = 0;
 
   return {
     list: async (request: Pageable, filter: Filter | undefined): Promise<T[]> => {
       _lastFilter = filter;
+      _callCount++;
+
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
         /* eslint-disable */
@@ -90,6 +93,9 @@ const createService = <T>(data: T[]) => {
     get lastFilter() {
       return _lastFilter;
     },
+    get callCount() {
+      return _callCount;
+    },
   };
 };
 
@@ -102,7 +108,7 @@ const companyData: Company[] = [
   { name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
   { name: 'Google', foundedDate: '1998-09-04' },
 ];
-type HasLastFilter = { lastFilter: Filter | undefined };
+export type HasTestInfo = { lastFilter: Filter | undefined; callCount: number };
 
-export const personService: CrudService<Person> & HasLastFilter = createService(personData);
-export const companyService: CrudService<Company> & HasLastFilter = createService(companyData);
+export const personService: CrudService<Person> & HasTestInfo = createService(personData);
+export const companyService: CrudService<Company> & HasTestInfo = createService(companyData);
