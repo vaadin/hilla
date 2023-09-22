@@ -66,5 +66,8 @@
     "type-fest": "^4.1.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.8"
+  },
+  "dependencies": {
+    "@hilla/react-components": "^2.2.0-beta1"
   }
 }
