@@ -49,6 +49,14 @@ export const views: ViewRoute[] = [
       return undefined;
     },
   },
+  {
+    path: 'proxied-service',
+    component: 'proxied-service-test-view',
+    title: 'Proxied Service Test View',
+    action: async () => {
+      await import('./views/public/proxied-service-test-view');
+    },
+  },
 ];
 export const routes: ViewRoute[] = [
   {
