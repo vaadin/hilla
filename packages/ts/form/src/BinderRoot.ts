@@ -1,5 +1,4 @@
 import { EndpointValidationError, type ValidationErrorData } from '@hilla/frontend/EndpointErrors.js';
-import type { Constructor } from 'type-fest';
 import {
   _clearValidation,
   _setErrorsWithDescendants,
@@ -9,7 +8,7 @@ import {
   CHANGED,
 } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { _parent, type AbstractModel, type HasValue, type Value } from './Models.js';
+import { _parent, type AbstractModel, type EmptyModelConstructor, type Value } from './Models.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -68,12 +67,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(
-    Model: Constructor<M, ConstructorParameters<typeof AbstractModel>>,
-    config?: BinderRootConfiguration<Value<M>>,
-  ) {
-    const valueContainer: HasValue<Value<M>> = { value: undefined };
-    super(new Model(valueContainer, 'value', true));
+  constructor(Model: EmptyModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
+    super(new Model({ value: undefined }, 'value', true));
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;
@@ -81,7 +76,6 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     // Initialize value instead of the parent.
     this.initializeValue(true);
     this.#emptyValue = this.value;
-    this.read(this.#emptyValue);
   }
 
   /**

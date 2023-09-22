@@ -29,7 +29,7 @@ export interface HasValue<T> {
 
 export type ModelParent<T> = AbstractModel | HasValue<T>;
 
-export type ModelConstructor<M> = new (parent: { value: undefined }, key: 'value', optional: boolean) => M;
+export type EmptyModelConstructor<M> = new (parent: { value: undefined }, key: 'value', optional: boolean) => M;
 
 export abstract class AbstractModel<T = unknown> {
   static createEmptyValue(): unknown {
@@ -108,7 +108,7 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 
 declare enum Enum {}
 
-export function makeEnumEmptyValueCreator<M extends EnumModel>(type: ModelConstructor<M>): () => Value<M> {
+export function makeEnumEmptyValueCreator<M extends EnumModel>(type: EmptyModelConstructor<M>): () => Value<M> {
   const { [_enum]: enumObject } = new type({ value: undefined }, 'value', true);
   const defaultValue = Object.values(enumObject)[0] as Value<M>;
 
@@ -143,7 +143,7 @@ export function* getObjectModelOwnAndParentGetters<M extends ObjectModel>(
   }
 }
 
-export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: ModelConstructor<M>): () => Value<M> {
+export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: EmptyModelConstructor<M>): () => Value<M> {
   const model = new type({ value: undefined }, 'value', true);
 
   return () => {
