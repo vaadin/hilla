@@ -74,31 +74,37 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-login-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-grid-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-notification-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-select-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-text-field-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
