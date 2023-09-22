@@ -30,10 +30,21 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
     @Autowired
     private ApplicationContext applicationContext;
 
-    private JpaSpecificationExecutor<T> repository;
+    private R repository;
     private final Class<T> entityClass;
 
     public CrudRepositoryService() {
+        this.entityClass = resolveEntityClass();
+    }
+
+    /**
+     * Creates the service using the given repository.
+     *
+     * @param repository
+     *            the JPA repository
+     */
+    public CrudRepositoryService(R repository) {
+        this.repository = repository;
         this.entityClass = resolveEntityClass();
     }
 
@@ -60,7 +71,7 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
     }
 
     @SuppressWarnings("unchecked")
-    private JpaSpecificationExecutor<T> resolveRepository() {
+    private R resolveRepository() {
         var repositoryTypeParam = CrudRepositoryService.class
                 .getTypeParameters()[2];
         Type entityType = GenericTypeReflector.getTypeParameter(getClass(),
