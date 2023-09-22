@@ -63,7 +63,7 @@ public class AppViewIT extends ChromeBrowserTest {
         button.click();
 
         // Wait for the server connect response
-        verifyContent("Access denied");
+        verifyContent("but got 401");
     }
 
     @Test
@@ -74,7 +74,7 @@ public class AppViewIT extends ChromeBrowserTest {
         button.click();
 
         // Wait for the server connect response
-        verifyContent("Access denied");
+        verifyContent("but got 401");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @Test
     public void should_notAbleToRequestAdminOnly_when_NotLoggedIn() {
-        verifyCallingAdminService("Access denied");
+        verifyCallingAdminService("but got 401");
     }
 
     @Test
