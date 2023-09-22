@@ -1,4 +1,4 @@
-import { StringModel, type AbstractModel, type ModelConstructor, NumberModel } from '@hilla/form';
+import { StringModel, type AbstractModel, type EmptyModelConstructor, NumberModel } from '@hilla/form';
 
 export interface PropertyInfo {
   name: string;
@@ -16,7 +16,7 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-export const getProperties = (model: ModelConstructor<unknown, AbstractModel<unknown>>): PropertyInfo[] => {
+export const getProperties = (model: EmptyModelConstructor<AbstractModel>): PropertyInfo[] => {
   const properties = Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
   const modelInstance: any = new model({ value: undefined }, '', false);
   return properties.map((name) => {

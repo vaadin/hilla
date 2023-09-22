@@ -1,4 +1,4 @@
-import type { AbstractModel, ModelConstructor } from '@hilla/form';
+import type { AbstractModel, EmptyModelConstructor } from '@hilla/form';
 import {
   Grid,
   type GridDataProvider,
@@ -26,7 +26,7 @@ import { getProperties, type PropertyInfo } from './utils.js';
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
-    model: ModelConstructor<TItem, AbstractModel<TItem>>;
+    model: EmptyModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
     headerFilters?: boolean;
@@ -135,7 +135,7 @@ function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo
 }
 
 function useColumns(
-  model: ModelConstructor<unknown, AbstractModel<unknown>>,
+  model: EmptyModelConstructor<AbstractModel>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
@@ -193,7 +193,7 @@ export function AutoGrid<TItem>({
   };
 
   // This cast should go away with #1252
-  const children = useColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
+  const children = useColumns(model, setHeaderPropertyFilter, {
     visibleColumns,
     headerFilters,
   });
