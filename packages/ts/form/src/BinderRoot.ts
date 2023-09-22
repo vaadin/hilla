@@ -8,7 +8,7 @@ import {
   CHANGED,
 } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { _parent, type AbstractModel, type EmptyModelConstructor, type Value } from './Models.js';
+import { _createDetachedModel, _parent, type AbstractModel, type EmptyModelConstructor, type Value } from './Models.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -68,7 +68,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * ```
    */
   constructor(Model: EmptyModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
-    super(new Model({ value: undefined }, 'value', true));
+    super(_createDetachedModel(Model));
     // @ts-expect-error the model's parent is the binder
     this.model[_parent] = this;
     this.#context = config?.context ?? this;

@@ -279,7 +279,7 @@ describe('@hilla/form', () => {
         const nodes1 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
-        binder.for(binder.model.fieldArrayModel).value = idEntities;
+        binder.for(binder.model.fieldArrayModel).value = idEntities.slice();
         const nodes2 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);

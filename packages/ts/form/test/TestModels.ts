@@ -177,7 +177,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
 export interface Employee extends IdEntity {
   fullName: string;
   supervisor?: Employee;
-  colleagues?: readonly Employee[];
+  colleagues?: Employee[];
 }
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(EmployeeModel);

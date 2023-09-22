@@ -25,7 +25,6 @@ import {
   type ArrayItemModel,
   ArrayModel,
   getObjectModelOwnAndParentGetters,
-  type HasValue,
   ObjectModel,
   type Value,
 } from './Models.js';
@@ -71,7 +70,7 @@ class NotArrayItemModelError extends Error {
 
 declare class ArrayItemBinderNode<M extends AbstractModel> extends BinderNode<M> {
   // @ts-expect-error: re-defining the parent getter.
-  declare parent: BinderNode<ArrayModel<M>>;
+  declare readonly parent: BinderNode<ArrayModel<M>>;
 }
 
 const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
@@ -84,7 +83,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget implements HasValue<Value<M>> {
+export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
   declare readonly ['constructor']: typeof BinderNode;
   readonly model: M;
   /**
@@ -312,7 +311,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
   removeSelf(): void {
     if (this.#isArrayItem()) {
-      this.parent.value = (this.parent.value ?? []).filter((_, i) => i !== this.model[_key]) as Value<ArrayModel<M>>;
+      this.parent.value = (this.parent.value ?? []).filter((_, i) => i !== this.model[_key]);
     } else {
       throw new NotArrayItemModelError();
     }
