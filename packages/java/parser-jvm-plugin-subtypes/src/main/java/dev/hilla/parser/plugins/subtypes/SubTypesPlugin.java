@@ -104,14 +104,16 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        var subTypes = getJsonSubTypes((Class<?>) ref.getClassInfo().get())
-                .map(JsonSubTypes.Type::value).map(ClassInfoModel::of)
-                .<Node<?, ?>> map(EntityNode::of);
+        Class<?> refClass = (Class<?>) ref.getClassInfo().get();
+        var subTypes = getJsonSubTypes(refClass).map(JsonSubTypes.Type::value)
+                .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
 
-        var unionType = UnionNode.of(ref.getClassInfo());
+        if (refClass.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
+            var unionType = UnionNode.of(ref.getClassInfo());
+            subTypes = Stream.concat(Stream.of(unionType), subTypes);
+        }
 
-        return nodeDependencies.appendRelatedNodes(
-                Stream.concat(Stream.of(unionType), subTypes));
+        return nodeDependencies.appendRelatedNodes(subTypes);
     }
 
     private static Stream<JsonSubTypes.Type> getJsonSubTypes(Class<?> cls) {
