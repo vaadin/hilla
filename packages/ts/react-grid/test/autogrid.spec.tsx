@@ -1,17 +1,17 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { GridElement } from '@hilla/react-components/Grid.js';
+import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
 
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
 import { getBodyCellContent, getHeaderCellContent, getHeaderRows, getVisibleRowCount } from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
-import { SelectElement } from '@hilla/react-components/Select.js';
 
 use(sinonChai);
 

@@ -1,13 +1,12 @@
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
-import { Select, SelectElement } from '@hilla/react-components/Select.js';
-import { TextField } from '@hilla/react-components/TextField.js';
+import { Select, type SelectElement } from '@hilla/react-components/Select.js';
+import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { useEffect, useRef, useState } from 'react';
-import type { PropertyInfo } from './utils';
-//@ts-ignore
 import css from './field-factory.module.css';
-import PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
+import type { PropertyInfo } from './utils';
 
 export function useFilterField(
   propertyInfo: PropertyInfo,
@@ -22,8 +21,8 @@ export function useFilterField(
       <TextField
         placeholder="Filter..."
         {...commonProps}
-        onInput={(e) => {
-          const fieldValue = (e as any).target.value;
+        onInput={(e: any) => {
+          const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
           const filterValue = fieldValue;
 
           const filter = {
@@ -55,7 +54,7 @@ export function useFilterField(
       const filter = {
         propertyId: propertyInfo.name,
         filterValue,
-        matcher: matcher,
+        matcher,
       };
       // eslint-disable-next-line
       (filter as any).t = 'propertyString';
@@ -85,7 +84,7 @@ export function useFilterField(
         <TextField
           placeholder="Filter..."
           onInput={(e) => {
-            const fieldValue = (e as any).target.value;
+            const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
             setFilterValue(fieldValue);
           }}
         />
