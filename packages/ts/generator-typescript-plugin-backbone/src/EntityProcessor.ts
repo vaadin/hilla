@@ -110,17 +110,14 @@ export class EntityProcessor {
       const decomposed = decomposeSchema(schema);
 
       if (decomposed.length > 2) {
-        logger.debug(
-          schema,
-          `Schema for '${this.#fullyQualifiedName}' class component has more than 2 decomposed schemas, ignoring.`,
-        );
+        logger.error(schema, `Schema for '${this.#fullyQualifiedName}' class component is broken.`);
         return undefined;
       }
 
       const [parent, child] = decomposed;
 
       if (!isReferenceSchema(parent)) {
-        logger.debug(parent, 'Parent schema is not a reference, ignoring.');
+        logger.error(parent, 'Only reference schema allowed for parent class');
         return undefined;
       }
 
