@@ -43,20 +43,19 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
                 var schema = (Schema<?>) unionNode.getTarget();
                 getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
-                    .forEach(c -> {
-                        schema.addOneOfItem(new Schema<Object>() {
-                            {
-                                set$ref("#/components/schemas/"
-                                    + c.getName());
-                            }
+                        .forEach(c -> {
+                            schema.addOneOfItem(new Schema<Object>() {
+                                {
+                                    set$ref("#/components/schemas/"
+                                            + c.getName());
+                                }
+                            });
                         });
-                    });
             }
 
-            EntityPlugin.attachSchemaWithNameToOpenApi(
-                    unionNode.getTarget(), cls.getName()+"Union",
-                    (OpenAPI) nodePath.getParentPath().getNode()
-                            .getTarget());
+            EntityPlugin.attachSchemaWithNameToOpenApi(unionNode.getTarget(),
+                    cls.getName() + "Union",
+                    (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
         if (nodePath.getNode() instanceof EntityNode) {
@@ -66,7 +65,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             Optional.ofNullable(cls.getSuperclass())
                     .map(SubTypesPlugin::getJsonSubTypes).stream()
                     .flatMap(Function.identity())
-                    .filter(t->cls.equals(t.value())).findAny().ifPresent(t -> {
+                    .filter(t -> cls.equals(t.value())).findAny()
+                    .ifPresent(t -> {
                         var schema = (ComposedSchema) entityNode.getTarget();
                         schema.getAnyOf().stream()
                                 .filter(s -> s instanceof ObjectSchema)
@@ -110,7 +110,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
         var unionType = UnionNode.of(ref.getClassInfo());
 
-        return nodeDependencies.appendRelatedNodes(Stream.concat(Stream.of(unionType), subTypes));
+        return nodeDependencies.appendRelatedNodes(
+                Stream.concat(Stream.of(unionType), subTypes));
     }
 
     private static Stream<JsonSubTypes.Type> getJsonSubTypes(Class<?> cls) {
@@ -120,9 +121,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
     }
 
-    public static class UnionNode extends AbstractNode<ClassInfoModel, Schema<?>> {
+    public static class UnionNode
+            extends AbstractNode<ClassInfoModel, Schema<?>> {
         private UnionNode(@Nonnull ClassInfoModel source,
-                          @Nonnull ObjectSchema target) {
+                @Nonnull ObjectSchema target) {
             super(source, target);
         }
 
