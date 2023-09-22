@@ -39,7 +39,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        // deal with the union nodes, which does not correspond to an existing class, but express the union of all the @JsonSubTypes
+        // deal with the union nodes, which does not correspond to an existing
+        // class, but express the union of all the @JsonSubTypes
         if (nodePath.getNode() instanceof UnionNode) {
             var unionNode = (UnionNode) nodePath.getNode();
             var cls = (Class<?>) unionNode.getSource().get();
@@ -65,7 +66,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
-        // entity nodes whose superclass has a @JsonSubTypes annotation must have a @type property whose value comes from the annotation
+        // entity nodes whose superclass has a @JsonSubTypes annotation must
+        // have a @type property whose value comes from the annotation
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
@@ -112,7 +114,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
-        // all types mentioned in @JsonSubTypes must be parsed, even if they are not used directly
+        // all types mentioned in @JsonSubTypes must be parsed, even if they are
+        // not used directly
         Class<?> refClass = (Class<?>) ref.getClassInfo().get();
         var subTypes = getJsonSubTypes(refClass).map(JsonSubTypes.Type::value)
                 .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
@@ -134,7 +137,8 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     }
 
     /**
-     * A node that represents the union of all the mentioned subclasses of a class annotated with {@code @JsonSubTypes}.
+     * A node that represents the union of all the mentioned subclasses of a
+     * class annotated with {@code @JsonSubTypes}.
      */
     public static class UnionNode
             extends AbstractNode<ClassInfoModel, Schema<?>> {
