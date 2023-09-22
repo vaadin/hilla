@@ -53,12 +53,6 @@
             </dependency>
 
             <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-lumo-theme</artifactId>
-                <version>${vaadin.component.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>

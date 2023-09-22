@@ -74,35 +74,40 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
       <version>${vaadin.component.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-login-testbench</artifactId>
-      <version>${vaadin.component.version}</version>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-login-testbench</artifactId>
+        <version>${vaadin.component.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-grid-testbench</artifactId>
-      <version>${vaadin.component.version}</version>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-grid-testbench</artifactId>
+        <version>${vaadin.component.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-notification-testbench</artifactId>
-      <version>${vaadin.component.version}</version>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-notification-testbench</artifactId>
+        <version>${vaadin.component.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-text-field-testbench</artifactId>
-      <version>${vaadin.component.version}</version>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-text-field-testbench</artifactId>
+        <version>${vaadin.component.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.httpcomponents.client5</groupId>
-      <artifactId>httpclient5</artifactId>
-      <version>5.2.1</version>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>5.2.1</version>
     </dependency>
-  </dependencies>
+</dependencies>
 
-  <build>
+<build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
