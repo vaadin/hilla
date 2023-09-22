@@ -136,6 +136,7 @@ describe('@hilla/react-grid', () => {
         const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filter-value';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+        await nextFrame();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -191,6 +192,7 @@ describe('@hilla/react-grid', () => {
         const lastNameFilterField = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
         lastNameFilterField.value = 'filterLast';
         lastNameFilterField.dispatchEvent(new CustomEvent('input'));
+        await nextFrame();
 
         const expectedFirstNameFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -220,6 +222,7 @@ describe('@hilla/react-grid', () => {
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'Joh';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
+        await nextFrame();
 
         const filter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -255,6 +258,7 @@ describe('@hilla/react-grid', () => {
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'vaad';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
+        await nextFrame();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -277,16 +281,19 @@ describe('@hilla/react-grid', () => {
       lastNameFilter.value = 'filterLast';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
+      await nextFrame();
 
       const expectedFilter: AndFilter = {
         ...{ t: 'and' },
         children: [],
       };
       expect(personService.lastFilter).not.to.eql(expectedFilter);
+
       firstNameFilter.value = '';
-      lastNameFilter.value = '';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
+      lastNameFilter.value = '';
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
+      await nextFrame();
 
       expect(personService.lastFilter).to.eql(expectedFilter);
     });

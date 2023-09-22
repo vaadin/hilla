@@ -16,6 +16,30 @@ export function useFilterField(
   let field: JSX.Element | null;
   let commonProps = {};
   commonProps = { ...commonProps, ...additionalProps };
+  const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
+  const [filterValue, setFilterValue] = useState('');
+  const select = useRef<SelectElement>(null);
+  useEffect(() => {
+    // Workaround for https://github.com/vaadin/react-components/issues/148
+    setTimeout(() => {
+      if (select.current) {
+        select.current.requestContentUpdate();
+      }
+    }, 1);
+  }, []);
+
+  useEffect(() => {
+    // Update filter
+    const filter = {
+      propertyId: propertyInfo.name,
+      filterValue,
+      matcher,
+    };
+    // eslint-disable-next-line
+    (filter as any).t = 'propertyString';
+    setPropertyFilter.current(filter);
+  }, [matcher, filterValue]);
+
   if (propertyInfo.modelType === 'string') {
     field = (
       <TextField
@@ -25,41 +49,12 @@ export function useFilterField(
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
           const filterValue = fieldValue;
 
-          const filter = {
-            propertyId: propertyInfo.name,
-            filterValue,
-            matcher: Matcher.CONTAINS,
-          };
-
-          // eslint-disable-next-line
-          (filter as any).t = 'propertyString';
-          setPropertyFilter.current(filter);
+          setMatcher(Matcher.CONTAINS);
+          setFilterValue(filterValue);
         }}
       ></TextField>
     );
   } else if (propertyInfo.modelType === 'number') {
-    const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
-    const [filterValue, setFilterValue] = useState('');
-    const select = useRef<SelectElement>(null);
-    useEffect(() => {
-      // Workaround for https://github.com/vaadin/react-components/issues/148
-      setTimeout(() => {
-        if (select.current) {
-          select.current.requestContentUpdate();
-        }
-      }, 1);
-    }, []);
-    useEffect(() => {
-      // Update filter
-      const filter = {
-        propertyId: propertyInfo.name,
-        filterValue,
-        matcher,
-      };
-      // eslint-disable-next-line
-      (filter as any).t = 'propertyString';
-      setPropertyFilter.current(filter);
-    }, [matcher, filterValue]);
     field = (
       <>
         <Select
