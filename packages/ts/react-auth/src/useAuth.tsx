@@ -136,7 +136,7 @@ export type Authentication<TUser extends AuthUser> = Readonly<{
  * The hook that can be used to get the authentication state.
  * It returns the state of the authentication.
  */
-const AuthContext = createContext<Authentication<AuthUser>>({
+export const AuthContext = createContext<Authentication<AuthUser>>({
   state: initialState,
   async login() {
     throw new Error('AuthContext not initialized');
