@@ -382,7 +382,7 @@ public class EndpointInvoker {
 
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
         var invokedEndpointClass = ClassUtils
-            .getUserClass(vaadinEndpointData.getEndpointObject());
+                .getUserClass(vaadinEndpointData.getEndpointObject());
 
         String checkError;
         if (methodDeclaringClass.equals(invokedEndpointClass)) {
