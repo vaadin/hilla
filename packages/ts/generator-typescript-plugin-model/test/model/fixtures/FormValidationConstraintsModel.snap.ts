@@ -4,7 +4,7 @@ import type FormValidationConstraints_1 from "./FormValidationConstraints.js";
 class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = FormValidationConstraints_1> extends ObjectModel_1<T> {
     static override createEmptyValue = makeObjectEmptyValueCreator_1(FormValidationConstraintsModel);
     get list(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("list", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true), StringModel_1, new NotEmpty_1()));
+        return this[_getPropertyModel_1]("list", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true), new NotEmpty_1()));
     }
     get email(): StringModel_1 {
         return this[_getPropertyModel_1]("email", (parent, key) => new StringModel_1(parent, key, false, new Email_1({ message: "foo" })));

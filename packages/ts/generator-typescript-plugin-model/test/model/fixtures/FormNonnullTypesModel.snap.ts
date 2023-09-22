@@ -6,10 +6,10 @@ class FormNonnullTypesModel<T extends FormNonnullTypes_1 = FormNonnullTypes_1> e
         return this[_getPropertyModel_1]("nonNullableString", (parent, key) => new StringModel_1(parent, key, false));
     }
     get nonNullableList(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("nonNullableList", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true), StringModel_1));
+        return this[_getPropertyModel_1]("nonNullableList", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true)));
     }
     get nonNullableMatrix(): ArrayModel_1<ArrayModel_1<StringModel_1>> {
-        return this[_getPropertyModel_1]("nonNullableMatrix", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true), StringModel_1), ArrayModel_1));
+        return this[_getPropertyModel_1]("nonNullableMatrix", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true))));
     }
 }
 export default FormNonnullTypesModel;

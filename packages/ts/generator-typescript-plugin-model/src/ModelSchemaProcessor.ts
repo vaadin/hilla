@@ -238,7 +238,6 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
         model,
         new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
       ),
-      model,
     ];
   }
 

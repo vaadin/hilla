@@ -10,10 +10,10 @@ class FormOptionalTypesModel<T extends FormOptionalTypes_1 = FormOptionalTypes_1
         return this[_getPropertyModel_1]("optionalEntity", (parent, key) => new FormEntityModel_1(parent, key, false));
     }
     get optionalList(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("optionalList", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true), StringModel_1));
+        return this[_getPropertyModel_1]("optionalList", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true)));
     }
     get optionalMatrix(): ArrayModel_1<ArrayModel_1<StringModel_1>> {
-        return this[_getPropertyModel_1]("optionalMatrix", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true), StringModel_1), ArrayModel_1));
+        return this[_getPropertyModel_1]("optionalMatrix", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new StringModel_1(parent, key, true))));
     }
 }
 export default FormOptionalTypesModel;
