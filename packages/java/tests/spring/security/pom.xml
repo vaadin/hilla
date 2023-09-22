@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.hilla</groupId>
@@ -18,22 +19,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
+            <groupId>dev.hilla</groupId>
+            <artifactId>hilla</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev-server</artifactId>
-            <exclusions>
-              <exclusion>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-              </exclusion>
-            </exclusions>
+            <groupId>dev.hilla</groupId>
+            <artifactId>hilla-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -41,10 +32,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -61,10 +48,10 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
             <exclusions>
-              <exclusion>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>com.nimbusds</groupId>
+                    <artifactId>nimbus-jose-jwt</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -73,8 +60,8 @@
         </dependency>
 
         <dependency>
-          <groupId>com.nimbusds</groupId>
-          <artifactId>nimbus-jose-jwt</artifactId>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
     </dependencies>
 
