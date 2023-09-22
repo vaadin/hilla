@@ -38,7 +38,6 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -382,14 +381,8 @@ public class EndpointInvoker {
         EndpointAccessChecker accessChecker = getAccessChecker();
 
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
-        var invokedEndpointClass = vaadinEndpointData.getEndpointObject()
-                .getClass();
-
-        // if the invoked endpoint is proxied, then take the original class:
-        // This is only to supports CGLIB proxies as Spring AOP proxies are.
-        if (Enhancer.isEnhanced(invokedEndpointClass)) {
-            invokedEndpointClass = invokedEndpointClass.getSuperclass();
-        }
+        var invokedEndpointClass = ClassUtils
+            .getUserClass(vaadinEndpointData.getEndpointObject());
 
         String checkError;
         if (methodDeclaringClass.equals(invokedEndpointClass)) {
