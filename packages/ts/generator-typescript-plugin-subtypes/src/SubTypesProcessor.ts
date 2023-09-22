@@ -30,7 +30,7 @@ export class SubTypesProcessor {
     const subTypes = this.#oneOf.map((schema) => {
       const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
       const subType = convertReferenceSchemaToSpecifier(schema);
-      return imports.named.add(path, subType);
+      return imports.default.add(path, subType, true);
     });
 
     const union = ts.factory.createUnionTypeNode(
