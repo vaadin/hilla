@@ -52,6 +52,10 @@ export default class SubTypesPlugin extends Plugin {
             });
           }
         });
+
+        const unionFn = `${convertFullyQualifiedNameToRelativePath(baseKey)}Union.ts`;
+        const unionSource = sources.find(({ fileName }) => fileName === unionFn)!;
+        sources.splice(sources.indexOf(unionSource), 1);
       }
     });
   }

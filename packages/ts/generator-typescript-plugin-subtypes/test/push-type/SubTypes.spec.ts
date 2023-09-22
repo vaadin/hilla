@@ -17,7 +17,7 @@ describe('SubTypesPlugin', () => {
       const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(11);
+      expect(files.length).to.equal(10);
 
       const t = await files[1].text();
       expect(t).to.exist;
