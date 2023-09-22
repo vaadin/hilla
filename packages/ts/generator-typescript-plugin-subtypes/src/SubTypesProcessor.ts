@@ -27,16 +27,20 @@ export class SubTypesProcessor {
 
   process(): ts.SourceFile {
     const { exports, imports, paths } = this.#dependencies;
+
+    // import all sub types and return them
     const subTypes = this.#oneOf.map((schema) => {
       const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
       const subType = convertReferenceSchemaToSpecifier(schema);
       return imports.default.add(path, subType, true);
     });
 
+    // create a union type from the sub types
     const union = ts.factory.createUnionTypeNode(
       subTypes.map((subType) => ts.factory.createTypeReferenceNode(subType)),
     );
 
+    // create the statement
     const { fileName, statements } = this.#source;
     const unionTypeName = `${simplifyFullyQualifiedName(this.#typeName)}`;
     const unionIdentifier = ts.factory.createIdentifier(unionTypeName);

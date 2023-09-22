@@ -17,24 +17,17 @@ export class ModelFixProcessor {
 
   process(): ts.SourceFile {
     const statements = this.#source.statements.map((statement) => {
-      if (statement.kind === ts.SyntaxKind.ClassDeclaration) {
-        const classDeclaration = statement as ClassDeclaration;
-        const members = classDeclaration.members.filter((member) => {
-          if (
-            member.kind === ts.SyntaxKind.GetAccessor &&
-            propertyNameToString((member as GetAccessorDeclaration).name) === '@type'
-          ) {
-            return false;
-          }
-
-          return true;
-        });
+      // filter out the @type property from all models
+      if (ts.isClassDeclaration(statement)) {
+        const members = statement.members.filter(
+          (member) => !(ts.isGetAccessor(member) && propertyNameToString(member.name) === '@type'),
+        );
 
         return ts.factory.createClassDeclaration(
-          classDeclaration.modifiers,
-          classDeclaration.name,
-          classDeclaration.typeParameters,
-          classDeclaration.heritageClauses,
+          statement.modifiers,
+          statement.name,
+          statement.typeParameters,
+          statement.heritageClauses,
           members,
         );
       }

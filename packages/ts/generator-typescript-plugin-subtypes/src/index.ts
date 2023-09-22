@@ -23,12 +23,15 @@ export default class SubTypesPlugin extends Plugin {
     }
 
     Object.entries(components).forEach(([baseKey, baseComponent]) => {
+      // search for components with oneOf: those are union types
       if ('oneOf' in baseComponent && Array.isArray(baseComponent.oneOf)) {
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
         const source = sources.find(({ fileName }) => fileName === fn)!;
+        // replace the (empty) source with a newly-generated one
         const newSource = new SubTypesProcessor(baseKey, source, baseComponent.oneOf).process();
         sources.splice(sources.indexOf(source), 1, newSource);
 
+        // mentioned types in the oneOf need to be fixed as well
         baseComponent.oneOf.forEach((schema) => {
           if ('$ref' in schema) {
             const path = (schema as ReferenceSchema).$ref;
@@ -39,9 +42,11 @@ export default class SubTypesPlugin extends Plugin {
                     const typeValue = s.properties['@type'].example as string;
                     const subFn = `${convertFullyQualifiedNameToRelativePath(subKey)}.ts`;
                     const subSource = sources.find(({ fileName }) => fileName === subFn)!;
-                    const fixedSource = new TypeFixProcessor(baseKey, subSource, typeValue).process();
+                    // fix the source to replace the @type property name with a quoted string
+                    const fixedSource = new TypeFixProcessor(subSource, typeValue).process();
                     sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
+                    // fix the model to remove the @type property
                     const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
                     const modelSource = sources.find(({ fileName }) => fileName === modelFn)!;
                     const fixedModelSource = new ModelFixProcessor(modelSource).process();
@@ -53,6 +58,7 @@ export default class SubTypesPlugin extends Plugin {
           }
         });
 
+        // remove the union type model file
         const unionFn = `${convertFullyQualifiedNameToRelativePath(baseKey)}Union.ts`;
         const unionSource = sources.find(({ fileName }) => fileName === unionFn)!;
         sources.splice(sources.indexOf(unionSource), 1);

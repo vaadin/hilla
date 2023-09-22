@@ -29,6 +29,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * This plugin adds support for {@code @JsonTypeInfo} and {@code @JsonSubTypes}.
+ */
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -36,10 +39,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
     @Override
     public void exit(NodePath<?> nodePath) {
+        // deal with the union nodes, which does not correspond to an existing class, but express the union of all the @JsonSubTypes
         if (nodePath.getNode() instanceof UnionNode) {
             var unionNode = (UnionNode) nodePath.getNode();
             var cls = (Class<?>) unionNode.getSource().get();
 
+            // verify that the class has a @JsonTypeInfo annotation
+            // and then add all the @JsonSubTypes to the schema as a `oneOf`
             if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
                 var schema = (Schema<?>) unionNode.getTarget();
                 getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
@@ -53,11 +59,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                         });
             }
 
+            // attach the schema to the openapi
             EntityPlugin.attachSchemaWithNameToOpenApi(unionNode.getTarget(),
                     cls.getName() + "Union",
                     (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
+        // entity nodes whose superclass has a @JsonSubTypes annotation must have a @type property whose value comes from the annotation
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
@@ -104,10 +112,12 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             return nodeDependencies;
         }
 
+        // all types mentioned in @JsonSubTypes must be parsed, even if they are not used directly
         Class<?> refClass = (Class<?>) ref.getClassInfo().get();
         var subTypes = getJsonSubTypes(refClass).map(JsonSubTypes.Type::value)
                 .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
 
+        // create a union node for classes annotated with @JsonTypeInfo
         if (refClass.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
             var unionType = UnionNode.of(ref.getClassInfo());
             subTypes = Stream.concat(Stream.of(unionType), subTypes);
@@ -123,6 +133,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
     }
 
+    /**
+     * A node that represents the union of all the mentioned subclasses of a class annotated with {@code @JsonSubTypes}.
+     */
     public static class UnionNode
             extends AbstractNode<ClassInfoModel, Schema<?>> {
         private UnionNode(@Nonnull ClassInfoModel source,
