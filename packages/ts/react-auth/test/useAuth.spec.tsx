@@ -1,38 +1,39 @@
 import { expect } from '@esm-bundle/chai';
 import { render, waitFor } from '@testing-library/react';
-import { AuthContext, useAuth } from '../src';
+import { type AuthUser, configureAuth } from '../src';
 
-function SuccessfulLoginComponent() {
-  const getAuthenticatedUser = async () => Promise.resolve({ name: 'John', roles: ['admin'] });
-  const auth = useAuth(getAuthenticatedUser);
-
-  return (
-    <AuthContext.Provider value={auth}>
-      <div>{auth.state.user?.name}</div>
-    </AuthContext.Provider>
-  );
+interface CustomUser extends AuthUser {
+  name: string;
 }
 
-function FailedLoginComponent() {
-  const getAuthenticatedUser = async () => Promise.resolve(undefined);
-  const auth = useAuth(getAuthenticatedUser);
+let user: CustomUser | undefined;
+const getAuthenticatedUser = async () => Promise.resolve(user);
+const { AuthProvider, useAuth } = configureAuth(getAuthenticatedUser);
 
+function TestComponent() {
+  const auth = useAuth();
+  return <div>{auth.state.user ? auth.state.user.name : 'Not logged in'}</div>;
+}
+
+function TestApp() {
   return (
-    <AuthContext.Provider value={auth}>
-      <div>{auth.state.user ? auth.state.user.name : 'Not logged in'}</div>
-    </AuthContext.Provider>
+    <AuthProvider>
+      <TestComponent />
+    </AuthProvider>
   );
 }
 
 describe('@hilla/react-auth', () => {
   describe('useAuth', () => {
     it('should be able to access user information after login', async () => {
-      const { getByText } = render(<SuccessfulLoginComponent />);
+      user = { name: 'John', roles: ['admin'] };
+      const { getByText } = render(<TestApp />);
       await waitFor(() => expect(getByText('John')).to.exist);
     });
 
     it('should not be able to access user information after login', async () => {
-      const { getByText } = render(<FailedLoginComponent />);
+      user = undefined;
+      const { getByText } = render(<TestApp />);
       await waitFor(() => expect(getByText('Not logged in')).to.exist);
     });
   });

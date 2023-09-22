@@ -1,5 +1,5 @@
 import { login as _login, logout as _logout, type LoginResult } from '@hilla/frontend';
-import { createContext, type Dispatch, useEffect, useReducer } from 'react';
+import { createContext, type Dispatch, type ReactNode, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
 type LogoutFunction = () => Promise<void>;
@@ -18,38 +18,20 @@ const LOGOUT = 'LOGOUT';
  * The user is not required to comply with this format. This is just for convenience.
  */
 export type AuthUser = Readonly<{
-  sub?: string;
-  name?: string;
-  givenName?: string;
-  familyName?: string;
-  middleName?: string;
-  nickName?: string;
-  preferredUsername?: string;
-  profile?: string;
-  picture?: string;
-  website?: string;
-  email?: string;
-  emailVerified?: boolean;
-  gender?: string;
-  birthdate?: string;
-  zoneinfo?: string;
-  locale?: string;
-  phoneNumber?: string;
-  phoneNumberVerified?: boolean;
-  roles?: string[];
+  roles: string[];
 }>;
 
 /**
  * The type of the function that is used to get the authenticated user.
  */
-export type AuthFunctionType = () => Promise<Partial<AuthUser> | undefined>;
+export type GetUserFn<TUser extends AuthUser> = () => Promise<TUser | undefined>;
 
-type AuthState = Readonly<{
+type AuthState<TUser extends AuthUser> = Readonly<{
   initializing: boolean;
   loading: boolean;
-  user?: AuthUser;
+  user?: TUser;
   error?: string;
-  getAuthenticatedUser?: AuthFunctionType;
+  getAuthenticatedUser?: GetUserFn<TUser>;
 }>;
 
 type LoginFetchAction = Readonly<{
@@ -72,7 +54,7 @@ type LogoutAction = Readonly<{
   type: typeof LOGOUT;
 }>;
 
-function createAuthenticateThunk(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: AuthFunctionType) {
+function createAuthenticateThunk(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<AuthUser>) {
   async function authenticate() {
     dispatch({ type: LOGIN_FETCH });
 
@@ -100,12 +82,12 @@ function createUnauthenticateThunk(dispatch: Dispatch<LogoutAction>) {
   };
 }
 
-const initialState: AuthState = {
+const initialState: AuthState<never> = {
   initializing: true,
   loading: false,
 };
 
-function reducer(state: AuthState, action: LoginActions | LogoutAction) {
+function reducer(state: AuthState<AuthUser>, action: LoginActions | LogoutAction) {
   switch (action.type) {
     case LOGIN_FETCH:
       return {
@@ -143,24 +125,37 @@ export type AccessProps = Readonly<{
 /**
  * The type of the authentication hook.
  */
-export type Authentication = Readonly<{
-  state: AuthState;
+export type Authentication<TUser extends AuthUser> = Readonly<{
+  state: AuthState<TUser>;
   login: LoginFunction;
   logout: LogoutFunction;
   hasAccess(accessProps: AccessProps): boolean;
 }>;
 
 /**
- * The hook that can be used to authenticate the user.
- * It returns the state of the authentication and the functions
- * to authenticate and unauthenticate the user.
+ * The hook that can be used to get the authentication state.
+ * It returns the state of the authentication.
  */
-export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication {
+const AuthContext = createContext<Authentication<AuthUser>>({
+  state: initialState,
+  async login() {
+    throw new Error('AuthContext not initialized');
+  },
+  async logout() {
+    throw new Error('AuthContext not initialized');
+  },
+  hasAccess(): boolean {
+    throw new Error('AuthContext not initialized');
+  },
+});
+
+interface AuthProviderProps<TUser extends AuthUser> extends React.PropsWithChildren {
+  getAuthenticatedUser: GetUserFn<TUser>;
+}
+
+function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }: AuthProviderProps<TUser>) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const authenticate = createAuthenticateThunk(
-    dispatch,
-    getAuthenticatedUser ?? (async () => Promise.resolve(undefined)),
-  );
+  const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
   const unauthenticate = createUnauthenticateThunk(dispatch);
 
   async function login(username: string, password: string): Promise<LoginResult> {
@@ -178,48 +173,62 @@ export function useAuth(getAuthenticatedUser?: AuthFunctionType): Authentication
     unauthenticate();
   }
 
+  function hasAccess(accessProps: AccessProps): boolean {
+    const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
+    if (!requiresAuth) {
+      return true;
+    }
+
+    if (!state.user) {
+      return false;
+    }
+
+    if (accessProps.rolesAllowed) {
+      return accessProps.rolesAllowed.some((allowedRole) => state.user?.roles.includes(allowedRole));
+    }
+
+    return true;
+  }
+
   useEffect(() => {
     authenticate().catch(() => {
       // Do nothing
     });
   }, []);
 
-  return {
+  const auth = {
     state,
     login,
     logout,
-    hasAccess(accessProps: AccessProps): boolean {
-      const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
-      if (!requiresAuth) {
-        return true;
-      }
-
-      if (!state.user) {
-        return false;
-      }
-
-      if (accessProps.rolesAllowed) {
-        return accessProps.rolesAllowed.some((allowedRole) => state.user?.roles?.includes(allowedRole));
-      }
-
-      return true;
-    },
+    hasAccess,
   };
+
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
+export type AuthHook<TUser extends AuthUser> = () => Authentication<TUser>;
+
 /**
- * The hook that can be used to get the authentication state.
- * It returns the state of the authentication.
+ * The hook that can be used to authenticate the user.
+ * It returns the state of the authentication and the functions
+ * to authenticate and unauthenticate the user.
  */
-export const AuthContext = createContext<Authentication>({
-  state: initialState,
-  async login() {
-    throw new Error('AuthContext not initialized');
-  },
-  async logout() {
-    throw new Error('AuthContext not initialized');
-  },
-  hasAccess(): boolean {
-    throw new Error('AuthContext not initialized');
-  },
-});
+function useAuth(): Authentication<AuthUser> {
+  return useContext(AuthContext);
+}
+
+interface AuthModule<TUser extends AuthUser> {
+  AuthProvider: React.FC<React.PropsWithChildren>;
+  useAuth: AuthHook<TUser>;
+}
+
+export function configureAuth<TUser extends AuthUser>(getAuthenticatedUser: GetUserFn<TUser>): AuthModule<TUser> {
+  function PreconfiguredAuthProvider({ children }: React.PropsWithChildren) {
+    return <AuthProvider<TUser> getAuthenticatedUser={getAuthenticatedUser}>{children}</AuthProvider>;
+  }
+
+  return {
+    AuthProvider: PreconfiguredAuthProvider,
+    useAuth: useAuth as AuthHook<TUser>,
+  };
+}

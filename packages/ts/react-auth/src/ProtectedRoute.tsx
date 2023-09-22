@@ -1,7 +1,6 @@
-import { useContext } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { type IndexRouteObject, Navigate, type NonIndexRouteObject, useLocation } from 'react-router-dom';
-import { type AccessProps, AuthContext } from './useAuth.js';
+import { type AccessProps, useAuth } from './useAuth.js';
 
 type CustomMetadata = Record<string, any>;
 
@@ -28,7 +27,7 @@ function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps):
   const {
     state: { initializing, loading, user },
     hasAccess,
-  } = useContext(AuthContext);
+  } = useAuth();
 
   const location = useLocation();
 

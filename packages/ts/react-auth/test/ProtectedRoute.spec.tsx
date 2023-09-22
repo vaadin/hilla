@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { render, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { AuthContext, type AuthUser, protectRoutes, type RouteObjectWithAuth, useAuth } from '../src';
+import { type AuthUser, configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 
 function TestView({ route }: { route: string }) {
   return <div>{`route: ${route}`}</div>;
@@ -56,16 +56,16 @@ const testRoutes: RouteObjectWithAuth[] = [
 ];
 
 function TestApp({ user, initialRoute }: { user?: AuthUser; initialRoute: string }) {
-  const auth = useAuth(async () => Promise.resolve(user));
+  const { AuthProvider } = configureAuth(async () => Promise.resolve(user));
   const protectedRoutes = protectRoutes(testRoutes);
   const router = createMemoryRouter(protectedRoutes, {
     initialEntries: [initialRoute],
   });
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthProvider>
       <RouterProvider router={router} />
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 
@@ -88,7 +88,7 @@ describe('@hilla/react-auth', () => {
     });
 
     it('should protect routes when user without roles is authenticated', async () => {
-      const user = { name: 'John' };
+      const user = { name: 'John', roles: [] };
       await testRoute('/public', user, true);
       await testRoute('/protected/login', user, true);
       await testRoute('/protected/role/user', user, false);
