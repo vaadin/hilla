@@ -2,6 +2,7 @@ package dev.hilla.parser.plugins.subtypes;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import dev.hilla.parser.core.AbstractNode;
 import dev.hilla.parser.core.AbstractPlugin;
 import dev.hilla.parser.core.Node;
 import dev.hilla.parser.core.NodeDependencies;
@@ -11,8 +12,10 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.models.ClassInfoModel;
 import dev.hilla.parser.models.ClassRefSignatureModel;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
+import dev.hilla.parser.plugins.backbone.EntityPlugin;
 import dev.hilla.parser.plugins.backbone.nodes.EntityNode;
 import dev.hilla.parser.plugins.backbone.nodes.TypedNode;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -29,34 +32,36 @@ import java.util.stream.Stream;
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
     public void enter(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode) {
-            var entityNode = (EntityNode) nodePath.getNode();
-            var cls = (Class<?>) entityNode.getSource().get();
-
-            if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
-                entityNode.setTarget(new Schema<>());
-            }
-        }
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
+        if (nodePath.getNode() instanceof UnionNode) {
+            var unionNode = (UnionNode) nodePath.getNode();
+            var cls = (Class<?>) unionNode.getSource().get();
+
+            if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
+                var schema = (Schema<?>) unionNode.getTarget();
+                getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
+                    .forEach(c -> {
+                        schema.addOneOfItem(new Schema<Object>() {
+                            {
+                                set$ref("#/components/schemas/"
+                                    + c.getName());
+                            }
+                        });
+                    });
+            }
+
+            EntityPlugin.attachSchemaWithNameToOpenApi(
+                    unionNode.getTarget(), cls.getName()+"Union",
+                    (OpenAPI) nodePath.getParentPath().getNode()
+                            .getTarget());
+        }
+
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
-
-            if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
-                var schema = (Schema<?>) entityNode.getTarget();
-                getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
-                        .forEach(c -> {
-                            schema.addOneOfItem(new Schema<Object>() {
-                                {
-                                    set$ref("#/components/schemas/"
-                                            + c.getName());
-                                }
-                            });
-                        });
-            }
 
             Optional.ofNullable(cls.getSuperclass())
                     .map(SubTypesPlugin::getJsonSubTypes).stream()
@@ -103,7 +108,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(JsonSubTypes.Type::value).map(ClassInfoModel::of)
                 .<Node<?, ?>> map(EntityNode::of);
 
-        return nodeDependencies.appendRelatedNodes(subTypes);
+        var unionType = UnionNode.of(ref.getClassInfo());
+
+        return nodeDependencies.appendRelatedNodes(Stream.concat(Stream.of(unionType), subTypes));
     }
 
     private static Stream<JsonSubTypes.Type> getJsonSubTypes(Class<?> cls) {
@@ -111,5 +118,17 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(c -> c.getAnnotationsByType(JsonSubTypes.class))
                 .filter(a -> a.length > 0).map(a -> a[0])
                 .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
+    }
+
+    public static class UnionNode extends AbstractNode<ClassInfoModel, Schema<?>> {
+        private UnionNode(@Nonnull ClassInfoModel source,
+                          @Nonnull ObjectSchema target) {
+            super(source, target);
+        }
+
+        @Nonnull
+        static public UnionNode of(@Nonnull ClassInfoModel model) {
+            return new UnionNode(model, new ObjectSchema());
+        }
     }
 }

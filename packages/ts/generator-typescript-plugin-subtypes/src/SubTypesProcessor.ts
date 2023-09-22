@@ -37,12 +37,13 @@ export class SubTypesProcessor {
       subTypes.map((subType) => ts.factory.createTypeReferenceNode(subType)),
     );
 
-    const { fileName } = this.#source;
-    const typeName = ts.factory.createIdentifier(simplifyFullyQualifiedName(this.#typeName));
-    const statement = ts.factory.createTypeAliasDeclaration(undefined, typeName, undefined, union);
+    const { fileName, statements } = this.#source;
+    const unionTypeName = `${simplifyFullyQualifiedName(this.#typeName)}`;
+    const unionIdentifier = ts.factory.createIdentifier(unionTypeName);
+    const statement = ts.factory.createTypeAliasDeclaration(undefined, unionIdentifier, undefined, union);
 
-    exports.default.set(typeName);
+    exports.default.set(unionTypeName);
 
-    return createSourceFile([...imports.toCode(), statement, ...exports.toCode()], fileName);
+    return createSourceFile([...imports.toCode(), ...statements, statement, ...exports.toCode()], fileName);
   }
 }

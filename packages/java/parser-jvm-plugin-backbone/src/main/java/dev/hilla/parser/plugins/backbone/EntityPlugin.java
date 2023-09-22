@@ -67,7 +67,7 @@ public final class EntityPlugin
                 Stream.of(EntityNode.of(ref.getClassInfo())));
     }
 
-    private void attachSchemaWithNameToOpenApi(Schema<?> schema, String name,
+    public static void attachSchemaWithNameToOpenApi(Schema<?> schema, String name,
             OpenAPI openApi) {
         var components = openApi.getComponents();
 

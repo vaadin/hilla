@@ -78,12 +78,16 @@
   "components": {
     "schemas": {
       "dev.hilla.parser.plugins.subtypes.BaseEvent": {
+        "type": "object",
         "properties": {
           "id": {
             "type": "integer",
             "format": "int32"
           }
-        },
+        }
+      },
+      "dev.hilla.parser.plugins.subtypes.BaseEventUnion": {
+        "type": "object",
         "oneOf": [
           {
             "$ref": "#/components/schemas/dev.hilla.parser.plugins.subtypes.AddEvent"

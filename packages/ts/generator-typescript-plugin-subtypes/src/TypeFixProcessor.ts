@@ -57,7 +57,7 @@ export class TypeFixProcessor {
           statement.modifiers,
           statement.name,
           statement.typeParameters,
-          undefined,
+          statement.heritageClauses,
           members,
         );
       }
