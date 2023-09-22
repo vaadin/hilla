@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vaadin.component.version>24.1.0.alpha2</vaadin.component.version>
+    <testbench.element.version>24.2.0.alpha11</testbench.element.version>
     <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
@@ -73,31 +73,31 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-button-testbench</artifactId>
-      <version>${vaadin.component.version}</version>
+      <version>${testbench.element.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-login-testbench</artifactId>
-        <version>${vaadin.component.version}</version>
+        <version>${testbench.element.version}</version>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-grid-testbench</artifactId>
-        <version>${vaadin.component.version}</version>
+        <version>${testbench.element.version}</version>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-notification-testbench</artifactId>
-        <version>${vaadin.component.version}</version>
+        <version>${testbench.element.version}</version>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-text-field-testbench</artifactId>
-        <version>${vaadin.component.version}</version>
+        <version>${testbench.element.version}</version>
         <scope>test</scope>
     </dependency>
     <dependency>
