@@ -12,6 +12,7 @@ import dev.hilla.parser.core.PluginConfiguration;
 import dev.hilla.parser.plugins.backbone.BackbonePlugin;
 import dev.hilla.parser.plugins.model.ModelPlugin;
 import dev.hilla.parser.plugins.nonnull.NonnullPlugin;
+import dev.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import dev.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import dev.hilla.parser.utils.ConfigList;
 
@@ -188,6 +189,7 @@ public final class ParserConfiguration {
                 new Plugin(BackbonePlugin.class.getName()),
                 new Plugin(TransferTypesPlugin.class.getName()),
                 new Plugin(NonnullPlugin.class.getName()),
+                new Plugin(SubTypesPlugin.class.getName()),
                 new Plugin(ModelPlugin.class.getName()));
 
         PluginsProcessor() {
