@@ -23,9 +23,9 @@ public class SecurityConfig extends VaadinWebSecurity {
         http.authorizeHttpRequests(
                 (h) -> h.requestMatchers(new AntPathRequestMatcher("/flux"))
                         .permitAll());
-        http.authorizeHttpRequests(
-                (h) -> h.requestMatchers(new AntPathRequestMatcher("/type-script"))
-                        .permitAll());
+        http.authorizeHttpRequests((h) -> h
+                .requestMatchers(new AntPathRequestMatcher("/type-script"))
+                .permitAll());
         super.configure(http);
         setLoginView(http, "/login");
     }
