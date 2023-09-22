@@ -54,17 +54,6 @@ public class AppViewIT extends ChromeBrowserTest {
 
     /**
      * Just a control test that assures that webcomponents is working.
-     */
-    @Test
-    public void should_load_web_component() {
-        WebElement button = testComponent.$(TestBenchElement.class)
-                .id("button");
-        button.click();
-        verifyContent("Hello World");
-    }
-
-    /**
-     * Just a control test that assures that webcomponents is working.
      *
      * @throws Exception
      */
