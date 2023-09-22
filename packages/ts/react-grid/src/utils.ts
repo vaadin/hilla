@@ -1,4 +1,10 @@
-import { StringModel, type AbstractModel, type EmptyModelConstructor, NumberModel } from '@hilla/form';
+import {
+  _createDetachedModel,
+  StringModel,
+  type AbstractModel,
+  type EmptyModelConstructor,
+  NumberModel,
+} from '@hilla/form';
 
 export interface PropertyInfo {
   name: string;
@@ -18,7 +24,8 @@ export function _generateHeader(path: string): string {
 
 export const getProperties = (model: EmptyModelConstructor<AbstractModel>): PropertyInfo[] => {
   const properties = Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
-  const modelInstance: any = new model({ value: undefined }, '', false);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const modelInstance: any = _createDetachedModel(model);
   return properties.map((name) => {
     // eslint-disable-next-line
     const propertyModel = modelInstance[name];
