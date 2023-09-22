@@ -203,12 +203,14 @@ public class SecurityIT extends ChromeBrowserTest {
     @Test
     public void anonymously_allowed_method_from_not_annotated_proxied_endpoint_is_accessible() {
         open("proxied-service");
-        waitUntil(driver -> $("vaadin-button").attribute("id", "say-hello-btn").exists());
+        waitUntil(driver -> $("vaadin-button").attribute("id", "say-hello-btn")
+                .exists());
         $(ButtonElement.class).id("say-hello-btn").click();
         NotificationElement notification = $(NotificationElement.class).first();
         Assert.assertNotNull(notification);
         waitUntil(driver -> notification.isOpen());
-        Assert.assertTrue(notification.getText().contains("Hello from GreetingService"));
+        Assert.assertTrue(
+                notification.getText().contains("Hello from GreetingService"));
     }
 
     @Test
