@@ -8,7 +8,7 @@ import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
 export function HeaderFilter(): ReactElement {
-  const context = useContext(HeaderColumnContext);
+  const context = useContext(HeaderColumnContext)!;
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
   const select = useRef<SelectElement>(null);
@@ -24,16 +24,16 @@ export function HeaderFilter(): ReactElement {
   useEffect(() => {
     // Update filter
     const filter = {
-      propertyId: context!.propertyInfo.name,
+      propertyId: context.propertyInfo.name,
       filterValue,
       matcher,
     };
     // eslint-disable-next-line
     (filter as any).t = 'propertyString';
-    context!.setPropertyFilter(filter);
+    context.setPropertyFilter(filter);
   }, [matcher, filterValue]);
 
-  if (context!.propertyInfo.modelType === 'string') {
+  if (context.propertyInfo.modelType === 'string') {
     return (
       <TextField
         placeholder="Filter..."
@@ -45,7 +45,7 @@ export function HeaderFilter(): ReactElement {
         }}
       ></TextField>
     );
-  } else if (context!.propertyInfo.modelType === 'number') {
+  } else if (context.propertyInfo.modelType === 'number') {
     return (
       <>
         <Select
