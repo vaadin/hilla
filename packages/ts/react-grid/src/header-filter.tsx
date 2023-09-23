@@ -2,7 +2,7 @@ import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
-import { createContext, useEffect, useRef, useState, useContext } from 'react';
+import { createContext, useEffect, useRef, useState, useContext, type ReactElement } from 'react';
 import css from './header-filter.module.css';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
@@ -15,7 +15,7 @@ export type HeaderFilterContextProps = {
 
 export const HeaderFilterContext = createContext<HeaderFilterContextProps | null>(null);
 
-export function HeaderFilter() {
+export function HeaderFilter(): ReactElement {
   const context = useContext(HeaderFilterContext);
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
@@ -84,7 +84,6 @@ export function HeaderFilter() {
         />
       </>
     );
-  } else {
-    return <></>;
   }
+  return <></>;
 }

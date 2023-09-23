@@ -90,9 +90,7 @@ function createDataProvider<TItem>(
 }
 
 function useHeaderFilterRenderer() {
-  return useCallback((column: any) => {
-    return <HeaderFilter></HeaderFilter>;
-  }, []);
+  return useCallback((column: any) => <HeaderFilter></HeaderFilter>, []);
 }
 
 function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo[]>) {
