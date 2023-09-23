@@ -2,18 +2,21 @@ import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useRef, useState, useContext } from 'react';
 import css from './header-filter.module.css';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type { PropertyInfo } from './utils';
 
-export type HeaderFilterProps = {
+export type HeaderFilterContextProps = {
   propertyInfo: PropertyInfo;
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>;
+  setPropertyFilterRef: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>;
 };
 
-export function HeaderFilter({ propertyInfo, setPropertyFilter }: HeaderFilterProps) {
+export const HeaderFilterContext = createContext<HeaderFilterContextProps | null>(null);
+
+export function HeaderFilter() {
+  const context = useContext(HeaderFilterContext);
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
   const select = useRef<SelectElement>(null);
@@ -29,16 +32,16 @@ export function HeaderFilter({ propertyInfo, setPropertyFilter }: HeaderFilterPr
   useEffect(() => {
     // Update filter
     const filter = {
-      propertyId: propertyInfo.name,
+      propertyId: context!.propertyInfo.name,
       filterValue,
       matcher,
     };
     // eslint-disable-next-line
     (filter as any).t = 'propertyString';
-    setPropertyFilter.current(filter);
+    context!.setPropertyFilterRef.current(filter);
   }, [matcher, filterValue]);
 
-  if (propertyInfo.modelType === 'string') {
+  if (context!.propertyInfo.modelType === 'string') {
     return (
       <TextField
         placeholder="Filter..."
@@ -50,7 +53,7 @@ export function HeaderFilter({ propertyInfo, setPropertyFilter }: HeaderFilterPr
         }}
       ></TextField>
     );
-  } else if (propertyInfo.modelType === 'number') {
+  } else if (context!.propertyInfo.modelType === 'number') {
     return (
       <>
         <Select

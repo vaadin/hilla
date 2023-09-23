@@ -11,15 +11,15 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
+import { HeaderFilter, HeaderFilterContext } from './header-filter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
-import { HeaderFilter } from './header-filter';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -89,18 +89,9 @@ function createDataProvider<TItem>(
   };
 }
 
-function useHeaderFilterRenderer(
-  properties: React.MutableRefObject<PropertyInfo[]>,
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
-) {
+function useHeaderFilterRenderer() {
   return useCallback((column: any) => {
-    const path = pathFromColumn(column);
-    if (!path) {
-      return null;
-    }
-    const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
-
-    return <HeaderFilter propertyInfo={propertyInfo} setPropertyFilter={setPropertyFilter}></HeaderFilter>;
+    return <HeaderFilter></HeaderFilter>;
   }, []);
 }
 
@@ -131,19 +122,30 @@ function useColumns(
   propertiesRef.current = properties;
   const setPropertyFilterRef = useRef(setPropertyFilter);
   setPropertyFilterRef.current = setPropertyFilter;
-  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilterRef);
+  const headerFilterRenderer = useHeaderFilterRenderer();
   const headerSorterRenderer = useHeaderSorterRenderer(propertiesRef);
 
-  return effectiveProperties.map((p) => {
+  return effectiveProperties.map((propertyInfo) => {
     if (options.headerFilters) {
       return (
-        <GridColumnGroup key={`group-${p.name}`} data-path={p.name} headerRenderer={headerSorterRenderer}>
-          <GridColumn path={p.name} headerRenderer={headerFilterRenderer} autoWidth></GridColumn>
+        <GridColumnGroup
+          key={`group-${propertyInfo.name}`}
+          data-path={propertyInfo.name}
+          headerRenderer={headerSorterRenderer}
+        >
+          <HeaderFilterContext.Provider value={{ propertyInfo, setPropertyFilterRef }}>
+            <GridColumn path={propertyInfo.name} headerRenderer={headerFilterRenderer} autoWidth></GridColumn>
+          </HeaderFilterContext.Provider>
         </GridColumnGroup>
       );
     }
     return (
-      <GridColumn key={`col-${p.name}`} path={p.name} headerRenderer={headerSorterRenderer} autoWidth></GridColumn>
+      <GridColumn
+        key={`col-${propertyInfo.name}`}
+        path={propertyInfo.name}
+        headerRenderer={headerSorterRenderer}
+        autoWidth
+      ></GridColumn>
     );
   });
 }
