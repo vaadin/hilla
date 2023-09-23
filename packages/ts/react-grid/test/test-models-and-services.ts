@@ -1,5 +1,11 @@
-import { BooleanModel, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
-import { makeObjectEmptyValueCreator } from '@hilla/form';
+import {
+  BooleanModel,
+  NumberModel,
+  ObjectModel,
+  StringModel,
+  _getPropertyModel,
+  makeObjectEmptyValueCreator,
+} from '@hilla/form';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
@@ -68,11 +74,12 @@ type HasId = {
   id: number;
 };
 
-const createService = <T extends HasId>(data: T[]) => {
+export const createService = <T extends HasId>(initialData: T[]): CrudService<T> & HasLastFilter => {
   let _lastFilter: Filter | undefined;
+  let data = initialData;
 
   return {
-    list: async (request: Pageable, filter: Filter | undefined): Promise<T[]> => {
+    async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
@@ -102,22 +109,26 @@ const createService = <T extends HasId>(data: T[]) => {
       }
       return filteredData;
     },
+    async update(value: T): Promise<T | undefined> {
+      data = data.map((item) => (item.id === value.id ? value : item));
+      return data.find((item) => item.id === value.id);
+    },
     get lastFilter() {
       return _lastFilter;
     },
   };
 };
 
-const personData: Person[] = [
+export const personData: Person[] = [
   { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
   { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
 ];
 
-const companyData: Company[] = [
+export const companyData: Company[] = [
   { id: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
   { id: 2, name: 'Google', foundedDate: '1998-09-04' },
 ];
-type HasLastFilter = { lastFilter: Filter | undefined };
+export type HasLastFilter = { lastFilter: Filter | undefined };
 
-export const personService: CrudService<Person> & HasLastFilter = createService(personData);
-export const companyService: CrudService<Company> & HasLastFilter = createService(companyData);
+export const personService: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+export const companyService: CrudService<Company> & HasLastFilter = createService<Company>(companyData);
