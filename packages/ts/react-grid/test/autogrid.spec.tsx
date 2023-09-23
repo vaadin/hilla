@@ -27,6 +27,7 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
   const grid = result.container.querySelector('vaadin-grid')!;
   await nextFrame();
   await nextFrame();
+  await nextFrame();
   const columns = grid.querySelectorAll('vaadin-grid-column');
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {

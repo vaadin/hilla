@@ -2,21 +2,13 @@ import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
-import { createContext, useEffect, useRef, useState, useContext, type ReactElement } from 'react';
+import { useContext, useEffect, useRef, useState, type ReactElement } from 'react';
+import { HeaderColumnContext } from './header-column-context.js';
 import css from './header-filter.module.css';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
-import type { PropertyInfo } from './utils';
-
-export type HeaderFilterContextProps = {
-  propertyInfo: PropertyInfo;
-  setPropertyFilterRef: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>;
-};
-
-export const HeaderFilterContext = createContext<HeaderFilterContextProps | null>(null);
 
 export function HeaderFilter(): ReactElement {
-  const context = useContext(HeaderFilterContext);
+  const context = useContext(HeaderColumnContext);
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
   const select = useRef<SelectElement>(null);
@@ -38,7 +30,7 @@ export function HeaderFilter(): ReactElement {
     };
     // eslint-disable-next-line
     (filter as any).t = 'propertyString';
-    context!.setPropertyFilterRef.current(filter);
+    context!.setPropertyFilter(filter);
   }, [matcher, filterValue]);
 
   if (context!.propertyInfo.modelType === 'string') {
