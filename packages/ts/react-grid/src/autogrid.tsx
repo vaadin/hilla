@@ -13,13 +13,13 @@ import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { useFilterField } from './field-factory';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
+import { HeaderFilter } from './header-filter';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -100,7 +100,7 @@ function useHeaderFilterRenderer(
     }
     const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
 
-    return useFilterField(propertyInfo, {}, setPropertyFilter);
+    return <HeaderFilter propertyInfo={propertyInfo} setPropertyFilter={setPropertyFilter}></HeaderFilter>;
   }, []);
 }
 

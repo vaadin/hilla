@@ -3,19 +3,17 @@ import { ListBox } from '@hilla/react-components/ListBox.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { useEffect, useRef, useState } from 'react';
-import css from './field-factory.module.css';
+import css from './header-filter.module.css';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type { PropertyInfo } from './utils';
 
-export function useFilterField(
-  propertyInfo: PropertyInfo,
-  additionalProps: Record<string, any>,
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
-): JSX.Element | null {
-  let field: JSX.Element | null;
-  let commonProps = {};
-  commonProps = { ...commonProps, ...additionalProps };
+export type HeaderFilterProps = {
+  propertyInfo: PropertyInfo;
+  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>;
+};
+
+export function HeaderFilter({ propertyInfo, setPropertyFilter }: HeaderFilterProps) {
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
   const select = useRef<SelectElement>(null);
@@ -41,10 +39,9 @@ export function useFilterField(
   }, [matcher, filterValue]);
 
   if (propertyInfo.modelType === 'string') {
-    field = (
+    return (
       <TextField
         placeholder="Filter..."
-        {...commonProps}
         onInput={(e: any) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
 
@@ -54,7 +51,7 @@ export function useFilterField(
       ></TextField>
     );
   } else if (propertyInfo.modelType === 'number') {
-    field = (
+    return (
       <>
         <Select
           ref={select}
@@ -85,8 +82,6 @@ export function useFilterField(
       </>
     );
   } else {
-    field = null;
+    return <></>;
   }
-
-  return field;
 }
