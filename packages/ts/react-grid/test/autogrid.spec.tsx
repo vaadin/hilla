@@ -1,5 +1,4 @@
 import { expect, use } from '@esm-bundle/chai';
-import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
@@ -10,7 +9,13 @@ import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
-import { getBodyCellContent, getHeaderCellContent, getHeaderRows, getVisibleRowCount } from './grid-test-helpers.js';
+import {
+  getBodyCellContent,
+  getGrid,
+  getHeaderCellContent,
+  getHeaderRows,
+  getVisibleRowCount,
+} from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -24,7 +29,7 @@ export async function nextFrame(): Promise<void> {
 }
 
 async function assertColumns(result: RenderResult, ...ids: string[]) {
-  const grid = result.container.querySelector('vaadin-grid')!;
+  const grid = getGrid(result);
   await nextFrame();
   await nextFrame();
   await nextFrame();
@@ -53,7 +58,7 @@ describe('@hilla/react-grid', () => {
     });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       await nextFrame();
       await nextFrame();
       const firstNameSorter = getHeaderCellContent(grid, 0, 0).firstElementChild as HTMLElement;
@@ -69,17 +74,17 @@ describe('@hilla/react-grid', () => {
     it('sets a data provider, but only once', async () => {
       const service = personService();
       const result = render(<TestAutoGrid service={service} />);
-      const grid = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       const dp = grid.dataProvider;
       expect(dp).to.not.be.undefined;
       result.rerender(<TestAutoGrid service={service} />);
-      const grid2 = result.container.querySelector('vaadin-grid')!;
+      const grid2 = getGrid(result);
       expect(dp).to.equal(grid2.dataProvider);
     });
     it('data provider provides data', async () => {
       const result = render(<TestAutoGrid />);
       await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       expect(getVisibleRowCount(grid)).to.equal(2);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
@@ -88,7 +93,7 @@ describe('@hilla/react-grid', () => {
     });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       expect(grid.getAttribute('model')).to.be.null;
       expect(grid.getAttribute('service')).to.be.null;
     });
@@ -99,7 +104,7 @@ describe('@hilla/react-grid', () => {
 
       const result = render(<TestAutoGrid filter={filter} />);
       await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       expect(getVisibleRowCount(grid)).to.equal(1);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
@@ -110,7 +115,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const cell = getHeaderCellContent(grid, 1, 0);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
       });
@@ -118,7 +123,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
       });
@@ -126,7 +131,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const cell = getHeaderCellContent(grid, 1, 4);
         expect(cell.firstElementChild).to.null;
       });
@@ -135,7 +140,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filter-value';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
@@ -155,7 +160,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const someNumberFilterField = getHeaderCellContent(grid, 1, 3).firstElementChild!
           .nextElementSibling as TextFieldElement;
         someNumberFilterField.value = '123';
@@ -189,7 +194,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filterFirst';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
@@ -223,7 +228,7 @@ describe('@hilla/react-grid', () => {
         const result = render(<AutoGrid service={service} model={PersonModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
-        const grid = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         expect(getHeaderRows(grid).length).to.equal(2);
 
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
@@ -264,7 +269,7 @@ describe('@hilla/react-grid', () => {
         result.rerender(<AutoGrid service={_companyService} model={CompanyModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const grid = getGrid(result);
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'vaad';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
@@ -285,7 +290,7 @@ describe('@hilla/react-grid', () => {
       const result = render(<TestAutoGrid headerFilters service={service} />);
       await nextFrame();
       await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      const grid = getGrid(result);
       const firstNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
       const lastNameFilter = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
       firstNameFilter.value = 'filterFirst';

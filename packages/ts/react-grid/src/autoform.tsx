@@ -1,4 +1,4 @@
-import { type AbstractModel, ValidationError, type DetachedModelConstructor } from '@hilla/form';
+import { ValidationError, type AbstractModel, type DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
@@ -6,7 +6,7 @@ import { useForm } from '@hilla/react-form';
 import { useEffect, useState, type JSX } from 'react';
 import { AutoFormField } from './autoform-field';
 import type { CrudService } from './crud';
-import { getProperties } from './utils';
+import { getProperties, isInternalProperty, type PropertyInfo } from './utils.js';
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -18,6 +18,7 @@ export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   item?: TItem;
+  disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   onSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
@@ -28,6 +29,7 @@ export function ExperimentalAutoForm<TItem>({
   item,
   onSubmitError,
   onSubmit,
+  disabled,
 }: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -64,12 +66,20 @@ export function ExperimentalAutoForm<TItem>({
 
   return (
     <VerticalLayout theme="padding">
-      {getProperties(model).map((propertyInfo) => (
-        <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form}></AutoFormField>
-      ))}
+      {getProperties(model)
+        .filter((prop) => !isInternalProperty(prop.name))
+        .map((propertyInfo) => (
+          <AutoFormField
+            key={propertyInfo.name}
+            propertyInfo={propertyInfo}
+            form={form}
+            disabled={disabled}
+          ></AutoFormField>
+        ))}
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
         <Button
+          disabled={disabled}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}
         >

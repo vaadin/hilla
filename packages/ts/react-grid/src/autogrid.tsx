@@ -21,16 +21,7 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, type PropertyInfo } from './utils.js';
-
-function includeColumn(propertyId: string): unknown {
-  // Exclude id and version columns
-  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
-  if (propertyId === 'id' || propertyId === 'version') {
-    return false;
-  }
-  return true;
-}
+import { getProperties, isInternalProperty, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -39,6 +30,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     filter?: Filter;
     visibleColumns?: string[];
     headerFilters?: boolean;
+    refreshTrigger?: number;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -47,11 +39,6 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
       size?: number;
     };
   }>;
-
-function pathFromColumn(column: any): string {
-  // eslint-disable-next-line
-  return column?.original?.path ?? column?.original?.dataset?.path;
-}
 
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
@@ -106,7 +93,8 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
+  const effectiveColumns =
+    options.visibleColumns ?? properties.map((p) => p.name).filter((p) => !isInternalProperty(p));
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
@@ -136,6 +124,7 @@ export function AutoGrid<TItem>({
   filter,
   visibleColumns,
   headerFilters,
+  refreshTrigger = 0,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
@@ -192,7 +181,7 @@ export function AutoGrid<TItem>({
       dataProviderFilter.current = filter ?? internalFilter;
       grid.clearCache();
     }
-  }, [filter, internalFilter]);
+  }, [filter, internalFilter, refreshTrigger]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }

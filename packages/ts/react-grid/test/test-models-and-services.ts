@@ -10,6 +10,7 @@ import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
 
 export interface Company {
@@ -142,3 +143,12 @@ export type HasLastFilter = { lastFilter: Filter | undefined };
 
 export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
 export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
+
+const noSort: Sort = { orders: [] };
+
+export async function getItem<T extends HasId>(
+  service: CrudService<T> & HasLastFilter,
+  id: number,
+): Promise<T | undefined> {
+  return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);
+}

@@ -1,9 +1,9 @@
 import {
-  createDetachedModel,
+  NumberModel,
   StringModel,
+  createDetachedModel,
   type AbstractModel,
   type DetachedModelConstructor,
-  NumberModel,
 } from '@hilla/form';
 
 export interface PropertyInfo {
@@ -39,3 +39,12 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     };
   });
 };
+
+export function isInternalProperty(propertyId: string): unknown {
+  // Exclude id and version columns
+  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
+  if (propertyId === 'id' || propertyId === 'version') {
+    return true;
+  }
+  return false;
+}
