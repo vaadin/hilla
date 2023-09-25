@@ -54,6 +54,7 @@
       "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@hilla/react-auth": "2.3.0-alpha5",
       "@hilla/react-components": "2.2.0-alpha16",
@@ -83,7 +84,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "dce0cc083f9abdcefe7283629a5d1619d8cdd4c52cc608f1642cd8e6fe087680"
+    "hash": "4513a6659c5c61eaeb3d5bb9143049548eef7e66e72c2d9dcddd6d5fb38fd014"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

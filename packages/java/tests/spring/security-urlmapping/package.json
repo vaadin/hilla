@@ -123,6 +123,7 @@
       "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@polymer/polymer": "3.5.1",
       "@vaadin/a11y-base": "24.2.0-alpha16",
@@ -215,7 +216,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "476296adbe542b74f72ff6d156ab1e0f0701ec7159df8950e14d7404e5c3a755"
+    "hash": "379dac7a23052759024951295f3f8ec5e4ffce6d2239086301143448b6778eef"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
