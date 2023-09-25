@@ -27,6 +27,10 @@ export const modelDetachedParent = { $value$: undefined };
 
 export type ModelParent = AbstractModel | BinderNode | typeof modelDetachedParent;
 
+export interface ModelOptions<T> {
+  validators?: ReadonlyArray<Validator<T>>;
+}
+
 export type DetachedModelConstructor<M> = new (
   parent: typeof modelDetachedParent,
   key: '$value$',
@@ -52,11 +56,11 @@ export abstract class AbstractModel<T = unknown> {
 
   [_key]: keyof any;
 
-  constructor(parent: ModelParent, key: keyof any, optional: boolean, ...validators: ReadonlyArray<Validator<T>>) {
+  constructor(parent: ModelParent, key: keyof any, optional: boolean, options?: ModelOptions<T>) {
     this[_parent] = parent;
     this[_key] = key;
     this[_optional] = optional;
-    this[_validators] = validators;
+    this[_validators] = options?.validators ?? [];
   }
 
   toString(): string {
@@ -89,9 +93,10 @@ export class BooleanModel extends PrimitiveModel<boolean> implements HasFromStri
 export class NumberModel extends PrimitiveModel<number> implements HasFromString<number | undefined> {
   static override createEmptyValue = Number;
 
-  constructor(parent: ModelParent, key: keyof any, optional: boolean, ...validators: ReadonlyArray<Validator<number>>) {
+  constructor(parent: ModelParent, key: keyof any, optional: boolean, options?: ModelOptions<number>) {
     // Prepend a built-in validator to indicate NaN input
-    super(parent, key, optional, new IsNumber(optional), ...validators);
+    const validators = [new IsNumber(optional), ...(options?.validators ?? [])];
+    super(parent, key, optional, { ...options, validators });
   }
 
   [_fromString](str: string): number | undefined {
@@ -200,9 +205,9 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     key: keyof any,
     optional: boolean,
     createItem: (parent: ArrayModel<MItem>, key: number) => MItem,
-    ...validators: ReadonlyArray<Validator<Array<Value<MItem>>>>
+    options?: ModelOptions<Array<Value<MItem>>>,
   ) {
-    super(parent, key, optional, ...validators);
+    super(parent, key, optional, options);
     this.#createItem = createItem;
     this[_createEmptyItemValue] = createItem(this, 0).constructor.createEmptyValue as () => Value<MItem>;
   }

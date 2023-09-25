@@ -21,6 +21,7 @@ import {
 export interface IdEntity {
   idString: string;
 }
+
 export class IdEntityModel<T extends IdEntity = IdEntity> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(IdEntityModel);
 
@@ -34,15 +35,22 @@ export interface Product extends IdEntity {
   price: number;
   isInStock: boolean;
 }
+
 export class ProductModel<T extends Product = Product> extends IdEntityModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(ProductModel);
 
   get description(): StringModel {
-    return this[_getPropertyModel]('description', (parent, key) => new StringModel(parent, key, false, new Required()));
+    return this[_getPropertyModel](
+      'description',
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Required()] }),
+    );
   }
 
   get price(): NumberModel {
-    return this[_getPropertyModel]('price', (parent, key) => new NumberModel(parent, key, false, new Positive()));
+    return this[_getPropertyModel](
+      'price',
+      (parent, key) => new NumberModel(parent, key, false, { validators: [new Positive()] }),
+    );
   }
 
   get isInStock(): BooleanModel {
@@ -54,20 +62,21 @@ export interface Customer extends IdEntity {
   fullName: string;
   nickName: string;
 }
+
 export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(CustomerModel);
 
   get fullName(): StringModel {
     return this[_getPropertyModel](
       'fullName',
-      (parent, key) => new StringModel(parent, key, false, new Size({ min: 4 }), new Required()),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Size({ min: 4 }), new Required()] }),
     );
   }
 
   get nickName(): StringModel {
     return this[_getPropertyModel](
       'nickName',
-      (parent, key) => new StringModel(parent, key, false, new Pattern('....*')),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Pattern('....*')] }),
     );
   }
 }
@@ -79,15 +88,22 @@ export interface Order extends IdEntity {
   products: readonly Product[];
   total?: number;
 }
+
 export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(OrderModel);
 
   get customer(): CustomerModel {
-    return this[_getPropertyModel]('customer', (parent, key) => new CustomerModel(parent, key, false, new Required()));
+    return this[_getPropertyModel](
+      'customer',
+      (parent, key) => new CustomerModel(parent, key, false, { validators: [new Required()] }),
+    );
   }
 
   get notes(): StringModel {
-    return this[_getPropertyModel]('notes', (parent, key) => new StringModel(parent, key, false, new Required()));
+    return this[_getPropertyModel](
+      'notes',
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Required()] }),
+    );
   }
 
   get priority(): NumberModel {
@@ -160,7 +176,12 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
           key,
           false,
           (parent, key) =>
-            new ArrayModel(parent, key, false, (parent, key) => new NumberModel(parent, key, false, new Positive())),
+            new ArrayModel(
+              parent,
+              key,
+              false,
+              (parent, key) => new NumberModel(parent, key, false, { validators: [new Positive()] }),
+            ),
         ),
     );
   }
@@ -179,6 +200,7 @@ export interface Employee extends IdEntity {
   supervisor?: Employee;
   colleagues?: Employee[];
 }
+
 export class EmployeeModel<T extends Employee = Employee> extends IdEntityModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(EmployeeModel);
 
@@ -202,6 +224,7 @@ export interface TestMessageInterpolationEntity {
   stringMinSize: string;
   stringNotBlank: string;
 }
+
 export class TestMessageInterpolationModel<
   T extends TestMessageInterpolationEntity = TestMessageInterpolationEntity,
 > extends ObjectModel<T> {
@@ -210,14 +233,14 @@ export class TestMessageInterpolationModel<
   get stringMinSize(): StringModel {
     return this[_getPropertyModel](
       'stringMinSize',
-      (parent, key) => new StringModel(parent, key, false, new Size({ min: 4 }), new Required()),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Size({ min: 4 }), new Required()] }),
     );
   }
 
   get stringNotBlank(): StringModel {
     return this[_getPropertyModel](
       'stringNotBlank',
-      (parent, key) => new StringModel(parent, key, false, new NotBlank(), new Required()),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new NotBlank(), new Required()] }),
     );
   }
 }
