@@ -75,6 +75,11 @@
     </dependency>
     <dependency>
       <groupId>dev.hilla</groupId>
+      <artifactId>parser-jvm-plugin-subtypes</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.hilla</groupId>
       <artifactId>parser-jvm-plugin-model</artifactId>
       <version>${project.version}</version>
     </dependency>

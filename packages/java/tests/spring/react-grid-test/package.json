@@ -12,6 +12,7 @@
     "@hilla/generator-typescript-plugin-client": "file:../../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "file:../../../../ts/generator-typescript-plugin-model",
     "@hilla/generator-typescript-plugin-push": "file:../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-subtypes": "file:../../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "file:../../../../ts/generator-typescript-utils",
     "@hilla/hilla-frontend": "file:../../../../ts/hilla-frontend",
     "@hilla/react-auth": "file:../../../../ts/react-auth",
@@ -53,6 +54,7 @@
       "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@hilla/react-auth": "2.3.0-alpha5",
       "@hilla/react-components": "2.2.0-alpha16",
@@ -82,7 +84,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "dce0cc083f9abdcefe7283629a5d1619d8cdd4c52cc608f1642cd8e6fe087680"
+    "hash": "5938147ed4e6040b7221ac3648b8d7b777a9db5f0797171a13ad0ad4bba8417a"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

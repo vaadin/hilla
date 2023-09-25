@@ -11,6 +11,7 @@
     "@hilla/generator-typescript-plugin-client": "../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "../../../ts/generator-typescript-plugin-model",
     "@hilla/generator-typescript-plugin-push": "../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-subtypes": "../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.18",
@@ -45,6 +46,7 @@
       "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.18",
@@ -69,7 +71,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "a7a154a5f79c2c1f92242d6a8f75c4bf6df97cf1d21c6505bf6e543827b8b4a0"
+    "hash": "bdc792e23e473f252035f18d9b973ebbda3ba7431ac0ee2c6daab9bb5f0fa890"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

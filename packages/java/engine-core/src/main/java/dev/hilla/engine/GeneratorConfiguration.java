@@ -142,7 +142,8 @@ public final class GeneratorConfiguration {
                 new Plugin("@hilla/generator-typescript-plugin-client"),
                 new Plugin("@hilla/generator-typescript-plugin-barrel"),
                 new Plugin("@hilla/generator-typescript-plugin-model"),
-                new Plugin("@hilla/generator-typescript-plugin-push"));
+                new Plugin("@hilla/generator-typescript-plugin-push"),
+                new Plugin("@hilla/generator-typescript-plugin-subtypes"));
 
         PluginsProcessor() {
             super(DEFAULTS);
