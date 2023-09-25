@@ -15,22 +15,26 @@ import com.vaadin.testbench.elementsbase.Element;
 
 public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
+    private static final int FIRST_NAME_COLUMN = 0;
+    private static final int LAST_NAME_COLUMN = 1;
+    private static final int LUCKY_NUMBER_COLUMN = 2;
+
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid-with-headerfilters";
     }
 
     @Test
     public void stringMatchesContains() {
-        setHeaderFilter(2, "al");
+        setHeaderFilter(FIRST_NAME_COLUMN, "al");
         assertRowCount(1);
         assertName(0, "Alice", "Johnson");
 
         // Test that we are and:ing
-        setHeaderFilter(3, "j");
+        setHeaderFilter(LAST_NAME_COLUMN, "j");
         assertRowCount(1);
         assertName(0, "Alice", "Johnson");
 
-        setHeaderFilter(2, "");
+        setHeaderFilter(FIRST_NAME_COLUMN, "");
         assertRowCount(2);
         assertName(0, "Alice", "Johnson");
         assertName(1, "Henry", "Jackson");
@@ -38,25 +42,28 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
     @Test
     public void numberFilterWorks() {
-        setHeaderFilter(0, null, "40"); // Default is greater_than
-        assertRowCount(10);
-        assertName(0, "Oliver", "Quinn");
+        // Default is greater_than
+        assertRowCount(50);
+        sortByColumn(LUCKY_NUMBER_COLUMN);
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, null, "150");
+        assertName(0, "George", "Lee");
+        assertRowCount(4);
 
-        setHeaderFilter(0, Matcher.LESS_THAN, null);
-        assertRowCount(39);
-        assertName(0, "Alice", "Johnson");
-
-        setHeaderFilter(0, Matcher.EQUALS, "30");
-        assertRowCount(1);
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.LESS_THAN, null);
+        assertRowCount(50 - 4);
         assertName(0, "Dylan", "Fisher");
+
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.EQUALS, "25");
+        assertRowCount(1);
+        assertName(0, "Thomas", "Vance");
 
     }
 
     @Test
     public void numberFilterWithInvalidInputIgnored() {
-        setHeaderFilter(0, null, "a");
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, null, "a");
         assertRowCount(50);
-        setHeaderFilter(0, null, "49");
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, null, "10000");
         assertRowCount(1);
     }
 

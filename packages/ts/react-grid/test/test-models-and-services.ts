@@ -7,10 +7,12 @@ import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
 
 export interface Company {
+  id: number;
   name: string;
   foundedDate: string;
 }
 export interface Person {
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -21,12 +23,16 @@ export interface Person {
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
+  get id(): NumberModel {
+    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+
   get firstName(): StringModel {
     return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get lastName(): StringModel {
-    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
+    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get email(): StringModel {
@@ -45,6 +51,10 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
 export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
+  get id(): NumberModel {
+    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+
   get name(): StringModel {
     return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
   }
@@ -54,7 +64,11 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
-const createService = <T>(data: T[]) => {
+type HasId = {
+  id: number;
+};
+
+const createService = <T extends HasId>(data: T[]) => {
   let _lastFilter: Filter | undefined;
 
   return {
@@ -95,13 +109,13 @@ const createService = <T>(data: T[]) => {
 };
 
 const personData: Person[] = [
-  { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
-  { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
+  { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
+  { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
 ];
 
 const companyData: Company[] = [
-  { name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
-  { name: 'Google', foundedDate: '1998-09-04' },
+  { id: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
+  { id: 2, name: 'Google', foundedDate: '1998-09-04' },
 ];
 type HasLastFilter = { lastFilter: Filter | undefined };
 
