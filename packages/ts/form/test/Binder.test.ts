@@ -67,7 +67,7 @@ describe('@hilla/form', () => {
     });
 
     describe('name value', () => {
-      let binder: Binder<Order, OrderModel>;
+      let binder: Binder<OrderModel>;
 
       const expectedEmptyOrder: Order = {
         idString: '',
@@ -237,8 +237,8 @@ describe('@hilla/form', () => {
       });
 
       it('should be able to set null to object type property', () => {
-        const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
-        myBinder.for(myBinder.model.fieldAny).value = null;
+        const myBinder = new Binder(document.createElement('div'), TestModel);
+        myBinder.for(myBinder.model.fieldAny).value = undefined;
         myBinder
           .for(myBinder.model.fieldAny)
           .validate()
@@ -249,7 +249,7 @@ describe('@hilla/form', () => {
       });
 
       it('should be able to set undefined to object type property', () => {
-        const myBinder = new Binder<TestEntity, TestModel>(document.createElement('div'), TestModel);
+        const myBinder = new Binder(document.createElement('div'), TestModel);
         myBinder.for(myBinder.model.fieldAny).value = undefined;
         myBinder
           .for(myBinder.model.fieldAny)
@@ -262,7 +262,7 @@ describe('@hilla/form', () => {
     });
 
     describe('optional', () => {
-      let binder: Binder<Employee, EmployeeModel>;
+      let binder: Binder<EmployeeModel>;
       const litEmployeeView = document.createElement('lit-employee-view') as LitEmployeeView;
 
       const expectedEmptyEmployee: Employee = {

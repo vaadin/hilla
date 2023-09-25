@@ -9,20 +9,21 @@ import sinonChai from 'sinon-chai';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
 import {
+  AbstractFieldStrategy,
+  type AbstractModel,
   Binder,
-  field,
   CheckedFieldStrategy,
+  ComboBoxFieldStrategy,
+  field,
+  type FieldElement,
+  type FieldStrategy,
   GenericFieldStrategy,
+  MultiSelectComboBoxFieldStrategy,
+  Required,
   SelectedFieldStrategy,
   VaadinFieldStrategy,
-  Required,
-  type AbstractModel,
-  type FieldStrategy,
-  AbstractFieldStrategy,
-  ComboBoxFieldStrategy,
-  MultiSelectComboBoxFieldStrategy,
 } from '../src/index.js';
-import { OrderModel, TestModel, type TestEntity, type Order } from './TestModels.js';
+import { OrderModel, TestModel } from './TestModels.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -254,7 +255,7 @@ describe('@hilla/form', () => {
       describe('number model', () => {
         let view: OrderViewWithTextField;
         let priorityField: MockTextFieldElement;
-        let binder: Binder<Order, OrderModel>;
+        let binder: Binder<OrderModel>;
 
         beforeEach(async () => {
           view = orderViewWithTextField;
@@ -406,7 +407,7 @@ describe('@hilla/form', () => {
       describe('number model', () => {
         let view: OrderViewWithInput;
         let priorityField: MockInputElement;
-        let binder: Binder<Order, OrderModel>;
+        let binder: Binder<OrderModel>;
 
         beforeEach(async () => {
           view = orderViewWithInput;
@@ -475,17 +476,12 @@ describe('@hilla/form', () => {
 
     describe('field/Strategy', () => {
       const div = document.createElement('div');
-      let currentStrategy: FieldStrategy;
-      const binder = new (class StrategySpyBinder<T, M extends AbstractModel<T>> extends Binder<T, M> {
-        override getFieldStrategy(elm: any, model?: AbstractModel<any>): FieldStrategy {
-          currentStrategy = super.getFieldStrategy(elm, model);
-          return currentStrategy;
-        }
-      })(div, TestModel);
+      const binder = new Binder(div, TestModel);
+      const getFieldStrategySpy = sinon.spy(binder, 'getFieldStrategy');
 
-      async function resetBinderNodeValidation(binderNode: BinderNode<any, AbstractModel<any>>) {
-        binderNode.validators = [];
-        await binderNode.validate();
+      async function resetBinderNodeValidation(node: BinderNode) {
+        node.validators = [];
+        await node.validate();
       }
 
       @customElement('any-vaadin-element-tag')
@@ -499,6 +495,7 @@ describe('@hilla/form', () => {
       }
 
       beforeEach(() => {
+        getFieldStrategySpy.resetHistory();
         render(nothing, div);
       });
 
@@ -523,6 +520,8 @@ describe('@hilla/form', () => {
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }];
 
           renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
           expect(currentStrategy instanceof GenericFieldStrategy).to.be.true;
           expect(currentStrategy.value).to.be.equal('foo');
@@ -573,6 +572,8 @@ describe('@hilla/form', () => {
 
           element = renderElement();
 
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
           expect(currentStrategy instanceof CheckedFieldStrategy).to.be.true;
           expect(currentStrategy.value).to.be.true;
           expect(currentStrategy.model).to.be.equal(model);
@@ -600,6 +601,8 @@ describe('@hilla/form', () => {
         binderNode.validators = [{ message: 'any-err-msg', validate: () => false }];
 
         element = renderElement();
+
+        const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
         expect(currentStrategy instanceof SelectedFieldStrategy).to.be.true;
         expect(currentStrategy.value).to.be.true;
@@ -644,6 +647,8 @@ describe('@hilla/form', () => {
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
 
           element = renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
           expect(currentStrategy instanceof VaadinFieldStrategy).to.be.true;
           expect(currentStrategy.value).to.be.equal(value);
@@ -690,6 +695,8 @@ describe('@hilla/form', () => {
 
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
           element = renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
           expect(currentStrategy.constructor).to.equal(ComboBoxFieldStrategy);
           expect(currentStrategy.value).to.be.equal(value);
@@ -738,6 +745,8 @@ describe('@hilla/form', () => {
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
           element = renderElement();
 
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
           expect(currentStrategy.constructor).to.equal(ComboBoxFieldStrategy);
           expect(currentStrategy.value).to.be.equal(value);
           expect(currentStrategy.model).to.be.equal(model);
@@ -784,6 +793,8 @@ describe('@hilla/form', () => {
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
           element = renderElement();
 
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
           expect(currentStrategy.constructor).to.equal(MultiSelectComboBoxFieldStrategy);
           expect(currentStrategy.value).to.be.equal(value);
           expect(currentStrategy.model).to.be.equal(model);
@@ -806,67 +817,154 @@ describe('@hilla/form', () => {
         });
       });
 
-      it(`Dynamic strategy`, async () => {
-        const stringValue = 'a-string-value';
-        let model = binder.model.fieldString as AbstractModel<any>;
-        let binderNode = binder.for(model);
-        binderNode.value = stringValue;
-        await resetBinderNodeValidation(binderNode);
-
-        let element;
-        const renderElement = (tag: string, renderModel: AbstractModel<any>) => {
+      describe('Dynamic strategy', () => {
+        function renderElement<T extends HTMLElement>(tag: string, renderModel: AbstractModel): T {
           const tagName = unsafeStatic(tag);
+
           render(
             html`
             <${tagName} ${field(renderModel)}></${tagName}>`,
             div,
           );
-          return div.firstElementChild as HTMLInputElement & {
-            value?: any;
+
+          return div.firstElementChild as T;
+        }
+
+        const stringValue = 'a-string-value';
+        let model: AbstractModel;
+        let binderNode: BinderNode;
+
+        beforeEach(async () => {
+          model = binder.model.fieldString;
+          binderNode = binder.for(model);
+          binderNode.value = stringValue;
+          await resetBinderNodeValidation(binderNode);
+        });
+
+        it('should work for an input element', () => {
+          let element = renderElement<HTMLInputElement>('some-text-field', model);
+
+          let currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(element.localName).to.equal('some-text-field');
+          const textFieldElement = element;
+          expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+          const textFieldStrategy = currentStrategy;
+          expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+          expect(element.value).to.equal(stringValue);
+
+          element = renderElement('some-text-field', model);
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(element).to.equal(textFieldElement);
+          expect(currentStrategy).to.equal(textFieldStrategy);
+          expect(element.value).to.equal(stringValue);
+
+          element = renderElement('some-password-field', model);
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(element.localName).to.equal('some-password-field');
+          expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+          expect(currentStrategy).to.not.equal(textFieldStrategy);
+          expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+          expect(element.value).to.equal(stringValue);
+        });
+
+        it('should work for ComboBox element', async () => {
+          type ComboBoxFieldElement<T> = FieldElement<T> & {
+            value: string;
+            selectedItem: T | null;
           };
-        };
 
-        element = renderElement('some-text-field', model);
+          const stringElement = renderElement<ComboBoxFieldElement<string>>('vaadin-combo-box', model);
+          let currentStrategy = getFieldStrategySpy.lastCall.returnValue;
 
-        expect(element.localName).to.equal('some-text-field');
-        const textFieldElement = element;
-        expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
-        const textFieldStrategy = currentStrategy;
-        expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
-        expect(element.value).to.equal(stringValue);
+          expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+          const comboBoxFieldStrategy = currentStrategy;
+          expect(stringElement.value).to.equal(stringValue);
+          expect(stringElement.selectedItem).to.be.undefined;
 
-        element = renderElement('some-text-field', model);
+          type ValueObject = { label: string; value: string };
 
-        expect(element).to.equal(textFieldElement);
-        expect(currentStrategy).to.equal(textFieldStrategy);
-        expect(element.value).to.equal(stringValue);
+          model = binder.model.fieldObject;
+          binderNode = binder.for(model);
+          binderNode.value = { label: 'Object string item', value: 'obj-string-value' };
+          await resetBinderNodeValidation(binderNode);
 
-        element = renderElement('some-password-field', model);
-        expect(element.localName).to.equal('some-password-field');
-        expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
-        expect(currentStrategy).to.not.equal(textFieldStrategy);
-        expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
-        expect(element.value).to.equal(stringValue);
-
-        element = renderElement('vaadin-combo-box', model);
-        expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
-        const comboBoxFieldStrategy = currentStrategy;
-        expect(element.value).to.equal(stringValue);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect((element as any).selectedItem).to.be.undefined;
-
-        model = binder.model.fieldObject;
-        binderNode = binder.for(model);
-        binderNode.value = { label: 'Object string item', value: 'obj-string-value' };
-        await resetBinderNodeValidation(binderNode);
-
-        element = renderElement('vaadin-combo-box', model);
-        expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
-        expect(currentStrategy).to.not.equal(comboBoxFieldStrategy);
-        expect(element.value).to.equal(stringValue);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect((element as any).selectedItem).to.equal(binderNode.value);
+          const objectElement = renderElement<ComboBoxFieldElement<ValueObject>>('vaadin-combo-box', model);
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+          expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+          expect(currentStrategy).to.not.equal(comboBoxFieldStrategy);
+          expect(objectElement.value).to.equal(stringValue);
+          expect(objectElement.selectedItem).to.equal(binderNode.value);
+        });
       });
+
+      // it(`Dynamic strategy`, async () => {
+      //   const stringValue = 'a-string-value';
+      //   let model = binder.model.fieldString;
+      //   let binderNode = binder.for(model);
+      //   binderNode.value = stringValue;
+      //   await resetBinderNodeValidation(binderNode);
+      //
+      //   const renderElement = <T extends HTMLElement>(tag: string, renderModel: AbstractModel) => {
+      //     const tagName = unsafeStatic(tag);
+      //
+      //     render(
+      //       html`
+      //       <${tagName} ${field(renderModel)}></${tagName}>`,
+      //       div,
+      //     );
+      //
+      //     return div.firstElementChild as T;
+      //   };
+      //
+      //   let element = renderElement<HTMLInputElement>('some-text-field', model);
+      //
+      //   let currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+      //
+      //   expect(element.localName).to.equal('some-text-field');
+      //   const textFieldElement = element;
+      //   expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+      //   const textFieldStrategy = currentStrategy;
+      //   expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+      //   expect(element.value).to.equal(stringValue);
+      //
+      //   element = renderElement('some-text-field', model);
+      //   currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+      //
+      //   expect(element).to.equal(textFieldElement);
+      //   expect(currentStrategy).to.equal(textFieldStrategy);
+      //   expect(element.value).to.equal(stringValue);
+      //
+      //   element = renderElement('some-password-field', model);
+      //   currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+      //
+      //   expect(element.localName).to.equal('some-password-field');
+      //   expect(currentStrategy).to.be.instanceof(GenericFieldStrategy);
+      //   expect(currentStrategy).to.not.equal(textFieldStrategy);
+      //   expect((currentStrategy as AbstractFieldStrategy).element).to.equal(element);
+      //   expect(element.value).to.equal(stringValue);
+      //
+      //   element = renderElement('vaadin-combo-box', model);
+      //   currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+      //
+      //   expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+      //   const comboBoxFieldStrategy = currentStrategy;
+      //   expect(element.value).to.equal(stringValue);
+      //   expect(element.selectedItem).to.be.undefined;
+      //
+      //   model = binder.model.fieldObject;
+      //   binderNode = binder.for(model);
+      //   binderNode.value = { label: 'Object string item', value: 'obj-string-value' };
+      //   await resetBinderNodeValidation(binderNode);
+      //
+      //   const comboBoxElement = renderElement<ComboBox>('vaadin-combo-box', model);
+      //   expect(currentStrategy).to.be.instanceof(ComboBoxFieldStrategy);
+      //   expect(currentStrategy).to.not.equal(comboBoxFieldStrategy);
+      //   expect(element.value).to.equal(stringValue);
+      //   expect(element.selectedItem).to.equal(binderNode.value);
+      // });
 
       it(`Strategy can be overridden in binder`, async () => {
         const element = document.createElement('div');
@@ -877,21 +975,25 @@ describe('@hilla/form', () => {
           required = true;
         }
 
-        class MyBinder extends Binder<TestEntity, TestModel> {
+        class MyBinder extends Binder<TestModel> {
           constructor(elm: Element) {
             super(elm, TestModel);
           }
 
           override getFieldStrategy(elm: any, model: AbstractModel<any>): FieldStrategy {
-            currentStrategy = new MyStrategy(elm, model);
-            return currentStrategy;
+            return new MyStrategy(elm, model);
           }
         }
 
         const myBinder = new MyBinder(element);
+        const myBinderGetFieldStrategySpy = sinon.spy(myBinder, 'getFieldStrategy');
+
         const { model } = myBinder;
 
         render(html` <div ${field(model)}></div>`, element);
+
+        const currentStrategy: FieldStrategy = myBinderGetFieldStrategySpy.lastCall.returnValue;
+
         expect(currentStrategy instanceof MyStrategy).to.be.true;
         expect(currentStrategy.model).to.be.equal(model);
       });
