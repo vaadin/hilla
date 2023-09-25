@@ -38,7 +38,7 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   }
 
   get vip(): BooleanModel {
-    return this[_getPropertyModel]('vip', BooleanModel, [false]);
+    return this[_getPropertyModel]('vip', (parent, key) => new BooleanModel(parent, key, false));
   }
 }
 
