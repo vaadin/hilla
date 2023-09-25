@@ -7,7 +7,7 @@ import {
   type BinderNode,
   BinderRoot,
   CHANGED,
-  type EmptyModelConstructor,
+  type DetachedModelConstructor,
   type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
@@ -216,7 +216,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 }
 
 export function useForm<M extends AbstractModel>(
-  Model: EmptyModelConstructor<M>,
+  Model: DetachedModelConstructor<M>,
   config?: BinderConfiguration<Value<M>>,
 ): UseFormResult<M> {
   const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});

@@ -1,4 +1,4 @@
-import type { AbstractModel, EmptyModelConstructor } from '@hilla/form';
+import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import {
   Grid,
   type GridDataProvider,
@@ -10,7 +10,6 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
@@ -26,7 +25,7 @@ import { getProperties, type PropertyInfo } from './utils.js';
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
-    model: EmptyModelConstructor<AbstractModel<TItem>>;
+    model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
     headerFilters?: boolean;
@@ -135,7 +134,7 @@ function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo
 }
 
 function useColumns(
-  model: EmptyModelConstructor<AbstractModel>,
+  model: DetachedModelConstructor<AbstractModel>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {

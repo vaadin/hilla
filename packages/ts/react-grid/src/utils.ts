@@ -1,8 +1,8 @@
 import {
-  _createDetachedModel,
+  createDetachedModel,
   StringModel,
   type AbstractModel,
-  type EmptyModelConstructor,
+  type DetachedModelConstructor,
   NumberModel,
 } from '@hilla/form';
 
@@ -22,10 +22,10 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-export const getProperties = (model: EmptyModelConstructor<AbstractModel>): PropertyInfo[] => {
+export const getProperties = (model: DetachedModelConstructor<AbstractModel>): PropertyInfo[] => {
   const properties = Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const modelInstance: any = _createDetachedModel(model);
+  const modelInstance: any = createDetachedModel(model);
   return properties.map((name) => {
     // eslint-disable-next-line
     const propertyModel = modelInstance[name];

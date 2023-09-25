@@ -23,18 +23,18 @@ export function hasFromString<T>(model: AbstractModel<T>): model is AbstractMode
 
 export type Value<M> = M extends AbstractModel<infer T> ? T : never;
 
-export const _modelDetachedParent = { $value: undefined };
+export const modelDetachedParent = { $value$: undefined };
 
-export type ModelParent = AbstractModel | BinderNode | typeof _modelDetachedParent;
+export type ModelParent = AbstractModel | BinderNode | typeof modelDetachedParent;
 
-export type EmptyModelConstructor<M> = new (
-  parent: typeof _modelDetachedParent,
+export type DetachedModelConstructor<M> = new (
+  parent: typeof modelDetachedParent,
   key: '$value$',
   optional: boolean,
 ) => M;
 
-export function _createDetachedModel<M extends AbstractModel>(type: EmptyModelConstructor<M>): M {
-  return new type(_modelDetachedParent, '$value$', false);
+export function createDetachedModel<M extends AbstractModel>(type: DetachedModelConstructor<M>): M {
+  return new type(modelDetachedParent, '$value$', false);
 }
 
 export abstract class AbstractModel<T = unknown> {
@@ -109,8 +109,8 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 
 declare enum Enum {}
 
-export function makeEnumEmptyValueCreator<M extends EnumModel>(type: EmptyModelConstructor<M>): () => Value<M> {
-  const { [_enum]: enumObject } = _createDetachedModel(type);
+export function makeEnumEmptyValueCreator<M extends EnumModel>(type: DetachedModelConstructor<M>): () => Value<M> {
+  const { [_enum]: enumObject } = createDetachedModel(type);
   const defaultValue = Object.values(enumObject)[0] as Value<M>;
 
   return () => defaultValue;
@@ -144,8 +144,8 @@ export function* getObjectModelOwnAndParentGetters<M extends ObjectModel>(
   }
 }
 
-export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: EmptyModelConstructor<M>): () => Value<M> {
-  const model = _createDetachedModel(type);
+export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: DetachedModelConstructor<M>): () => Value<M> {
+  const model = createDetachedModel(type);
 
   return () => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
