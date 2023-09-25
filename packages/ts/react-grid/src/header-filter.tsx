@@ -7,7 +7,6 @@ import { useContext, useEffect, useRef, useState, type ReactElement } from 'reac
 import { HeaderColumnContext } from './header-column-context.js';
 import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
-import { PropertyInfo } from './utils.js';
 
 export function HeaderFilter(): ReactElement {
   const context = useContext(HeaderColumnContext)!;
