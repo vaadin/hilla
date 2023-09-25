@@ -12,6 +12,7 @@
     "@hilla/generator-typescript-plugin-client": "file:../../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "file:../../../../ts/generator-typescript-plugin-model",
     "@hilla/generator-typescript-plugin-push": "file:../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-subtypes": "file:../../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "file:../../../../ts/generator-typescript-utils",
     "@hilla/react-auth": "file:../../../../ts/react-auth",
     "@hilla/react-form": "file:../../../../ts/react-form",
@@ -117,6 +118,7 @@
       "@hilla/generator-typescript-plugin-client": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-model": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-push": "2.3.0-alpha5",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@polymer/polymer": "3.5.1",
       "@vaadin/a11y-base": "24.2.0-alpha16",
@@ -208,7 +210,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "59abee59e375f62daa0b7ff8be48faf218271fb72df78af36363c4cc91f44332"
+    "hash": "3b4aa01b7c39fc3363189e08c226366c953f77e1881b8587cd50bc7d5dad6ee7"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
