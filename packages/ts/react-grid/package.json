@@ -20,7 +20,7 @@
     "build": "concurrently npm:build:*",
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
-    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "build:copy": "cd src && copyfiles **/*.d.ts .. && copyfiles *.module.css ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "karma start ../../../karma.config.cjs --port 9879",
@@ -41,7 +41,7 @@
   },
   "homepage": "https://hilla.dev",
   "files": [
-    "*.{d.ts.map,d.ts,js.map,js}",
+    "*.{d.ts.map,d.ts,js.map,js,module.css}",
     "types/**"
   ],
   "publishConfig": {

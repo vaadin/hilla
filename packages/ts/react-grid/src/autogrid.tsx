@@ -10,15 +10,14 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { createFilterField } from './field-factory';
+import { HeaderColumnContext } from './header-column-context';
+import { HeaderFilter } from './header-filter';
+import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
@@ -91,49 +90,6 @@ function createDataProvider<TItem>(
   };
 }
 
-function useHeaderFilterRenderer(
-  properties: React.MutableRefObject<PropertyInfo[]>,
-  setPropertyFilter: React.MutableRefObject<(propertyFilter: PropertyStringFilter) => void>,
-) {
-  return useCallback((column: any) => {
-    const path = pathFromColumn(column);
-    if (!path) {
-      return null;
-    }
-    const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
-
-    return createFilterField(propertyInfo, {
-      onInput: (e: { target: { value: string } }) => {
-        const fieldValue = e.target.value;
-        const filterValue = fieldValue;
-
-        const filter = {
-          propertyId: propertyInfo.name,
-          filterValue,
-          matcher: Matcher.CONTAINS,
-        };
-
-        // eslint-disable-next-line
-        (filter as any).t = 'propertyString';
-        setPropertyFilter.current(filter);
-      },
-    });
-  }, []);
-}
-
-function useHeaderSorterRenderer(properties: React.MutableRefObject<PropertyInfo[]>) {
-  return useCallback((column: any) => {
-    const path = pathFromColumn(column);
-    if (!path) {
-      return null;
-    }
-
-    const propertyInfo: PropertyInfo = properties.current.find((p) => p.name === path)!;
-
-    return <GridSorter path={path}>{propertyInfo.humanReadableName}</GridSorter>;
-  }, []);
-}
-
 function useColumns(
   model: ModelConstructor<unknown, AbstractModel<unknown>>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
@@ -144,23 +100,22 @@ function useColumns(
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
-  const propertiesRef = useRef<PropertyInfo[]>([]);
-  propertiesRef.current = properties;
-  const setPropertyFilterRef = useRef(setPropertyFilter);
-  setPropertyFilterRef.current = setPropertyFilter;
-  const headerFilterRenderer = useHeaderFilterRenderer(propertiesRef, setPropertyFilterRef);
-  const headerSorterRenderer = useHeaderSorterRenderer(propertiesRef);
 
-  return effectiveProperties.map((p) => {
+  return effectiveProperties.map((propertyInfo) => {
+    let column;
     if (options.headerFilters) {
-      return (
-        <GridColumnGroup key={`group-${p.name}`} data-path={p.name} headerRenderer={headerSorterRenderer}>
-          <GridColumn path={p.name} headerRenderer={headerFilterRenderer} autoWidth></GridColumn>
+      column = (
+        <GridColumnGroup headerRenderer={HeaderSorter}>
+          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilter} autoWidth></GridColumn>
         </GridColumnGroup>
       );
+    } else {
+      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
     return (
-      <GridColumn key={`col-${p.name}`} path={p.name} headerRenderer={headerSorterRenderer} autoWidth></GridColumn>
+      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+        {column}
+      </HeaderColumnContext.Provider>
     );
   });
 }
@@ -179,17 +134,23 @@ export function AutoGrid<TItem>({
     const filterIndex = internalFilter.children.findIndex(
       (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
     );
+    let changed = false;
     if (propertyFilter.filterValue === '') {
       // Delete empty filter
       if (filterIndex >= 0) {
         internalFilter.children.splice(filterIndex, 1);
+        changed = true;
       }
     } else if (filterIndex >= 0) {
       internalFilter.children[filterIndex] = propertyFilter;
+      changed = true;
     } else {
       internalFilter.children.push(propertyFilter);
+      changed = true;
     }
-    setInternalFilter({ ...internalFilter });
+    if (changed) {
+      setInternalFilter({ ...internalFilter });
+    }
   };
 
   // This cast should go away with #1252

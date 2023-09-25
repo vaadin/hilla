@@ -34,6 +34,7 @@ packages/ts/*/*.d.ts
 packages/ts/*/*.d.ts.map
 packages/ts/*/*.js
 packages/ts/*/*.js.map
+packages/ts/*/*.module.css
 packages/ts/*/.coverage
 packages/ts/*/.vite
 packages/ts/*/types/**

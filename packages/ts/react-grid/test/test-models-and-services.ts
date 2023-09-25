@@ -1,4 +1,4 @@
-import { NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
+import { BooleanModel, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
@@ -14,6 +14,7 @@ export interface Person {
   lastName: string;
   email: string;
   someNumber: number;
+  vip: boolean;
 }
 
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
@@ -33,6 +34,10 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
 
   get someNumber(): NumberModel {
     return this[_getPropertyModel]('someNumber', NumberModel, [false]);
+  }
+
+  get vip(): BooleanModel {
+    return this[_getPropertyModel]('vip', BooleanModel, [false]);
   }
 }
 
@@ -89,8 +94,8 @@ const createService = <T>(data: T[]) => {
 };
 
 const personData: Person[] = [
-  { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12 },
-  { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55 },
+  { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
+  { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
 ];
 
 const companyData: Company[] = [
