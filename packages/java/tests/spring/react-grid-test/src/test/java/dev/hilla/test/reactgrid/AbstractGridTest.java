@@ -28,15 +28,15 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     }
 
     protected void assertFirstName(int row, String firstName) {
-        Assert.assertEquals(firstName, grid.getCell(row, 2).getText());
+        Assert.assertEquals(firstName, grid.getCell(row, 0).getText());
     }
 
     protected void assertLastName(int row, String lastName) {
-        Assert.assertEquals(lastName, grid.getCell(row, 3).getText());
+        Assert.assertEquals(lastName, grid.getCell(row, 1).getText());
     }
 
     protected void sortByColumn(int i) {
-        grid.getHeaderCell(i).$("vaadin-grid-sorter").first().click();
+        grid.getHeaderCellContent(0, i).$("vaadin-grid-sorter").first().click();
     }
 
     protected void assertRowCount(int i) {

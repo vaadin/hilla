@@ -23,6 +23,15 @@ import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
 
+function includeColumn(propertyId: string): unknown {
+  // Exclude id and version columns
+  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
+  if (propertyId === 'id' || propertyId === 'version') {
+    return false;
+  }
+  return true;
+}
+
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
@@ -97,7 +106,7 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name);
+  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
