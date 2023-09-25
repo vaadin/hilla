@@ -7,6 +7,19 @@ import { useContext, useEffect, useRef, useState, type ReactElement } from 'reac
 import { HeaderColumnContext } from './header-column-context.js';
 import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
+import { PropertyInfo } from './utils.js';
+
+function triggerFilterUpdate(matcher: Matcher, filterValue: string, context: HeaderColumnContext) {
+  // Update filter
+  const filter = {
+    propertyId: context.propertyInfo.name,
+    filterValue,
+    matcher,
+  };
+  // eslint-disable-next-line
+  (filter as any).t = 'propertyString';
+  context.setPropertyFilter(filter);
+}
 
 export function HeaderFilter(): ReactElement {
   const context = useContext(HeaderColumnContext)!;
@@ -22,27 +35,13 @@ export function HeaderFilter(): ReactElement {
     }, 1);
   }, []);
 
-  useEffect(() => {
-    // Update filter
-    const filter = {
-      propertyId: context.propertyInfo.name,
-      filterValue,
-      matcher,
-    };
-    // eslint-disable-next-line
-    (filter as any).t = 'propertyString';
-    context.setPropertyFilter(filter);
-  }, [matcher, filterValue]);
-
   if (context.propertyInfo.modelType === 'string') {
     return (
       <TextField
         placeholder="Filter..."
         onInput={(e: any) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-
-          setMatcher(Matcher.CONTAINS);
-          setFilterValue(fieldValue);
+          triggerFilterUpdate(Matcher.CONTAINS, fieldValue, context);
         }}
       ></TextField>
     );
@@ -51,7 +50,11 @@ export function HeaderFilter(): ReactElement {
       <>
         <Select
           ref={select}
-          onValueChanged={(e) => setMatcher(e.detail.value as Matcher)}
+          onValueChanged={(e) => {
+            const newMatcher = e.detail.value as Matcher;
+            setMatcher(newMatcher);
+            triggerFilterUpdate(newMatcher, filterValue, context);
+          }}
           renderer={() => (
             <ListBox>
               <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
@@ -73,6 +76,7 @@ export function HeaderFilter(): ReactElement {
           onInput={(e) => {
             const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
             setFilterValue(fieldValue);
+            triggerFilterUpdate(matcher, fieldValue, context);
           }}
         />
       </>
