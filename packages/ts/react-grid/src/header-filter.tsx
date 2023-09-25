@@ -9,23 +9,26 @@ import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import { PropertyInfo } from './utils.js';
 
-function triggerFilterUpdate(matcher: Matcher, filterValue: string, context: HeaderColumnContext) {
-  // Update filter
-  const filter = {
-    propertyId: context.propertyInfo.name,
-    filterValue,
-    matcher,
-  };
-  // eslint-disable-next-line
-  (filter as any).t = 'propertyString';
-  context.setPropertyFilter(filter);
-}
-
 export function HeaderFilter(): ReactElement {
   const context = useContext(HeaderColumnContext)!;
   const [matcher, setMatcher] = useState(Matcher.GREATER_THAN);
   const [filterValue, setFilterValue] = useState('');
   const select = useRef<SelectElement>(null);
+
+  function updateFilter(newMatcher: Matcher, newFilterValue: string) {
+    setFilterValue(newFilterValue);
+    setMatcher(newMatcher);
+
+    const filter = {
+      propertyId: context.propertyInfo.name,
+      filterValue: newFilterValue,
+      matcher: newMatcher,
+    };
+    // eslint-disable-next-line
+    (filter as any).t = 'propertyString';
+    context.setPropertyFilter(filter);
+  }
+
   useEffect(() => {
     // Workaround for https://github.com/vaadin/react-components/issues/148
     setTimeout(() => {
@@ -41,7 +44,7 @@ export function HeaderFilter(): ReactElement {
         placeholder="Filter..."
         onInput={(e: any) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-          triggerFilterUpdate(Matcher.CONTAINS, fieldValue, context);
+          updateFilter(Matcher.CONTAINS, fieldValue);
         }}
       ></TextField>
     );
@@ -52,8 +55,7 @@ export function HeaderFilter(): ReactElement {
           ref={select}
           onValueChanged={(e) => {
             const newMatcher = e.detail.value as Matcher;
-            setMatcher(newMatcher);
-            triggerFilterUpdate(newMatcher, filterValue, context);
+            updateFilter(newMatcher, filterValue);
           }}
           renderer={() => (
             <ListBox>
@@ -75,8 +77,7 @@ export function HeaderFilter(): ReactElement {
           placeholder="Filter..."
           onInput={(e) => {
             const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-            setFilterValue(fieldValue);
-            triggerFilterUpdate(matcher, fieldValue, context);
+            updateFilter(matcher, fieldValue);
           }}
         />
       </>
