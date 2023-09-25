@@ -26,7 +26,7 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
   const {
-    state: { initializing, loading, user },
+    state: { initializing, loading },
     hasAccess,
   } = useContext(AuthContext);
 

@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { render, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { type AuthUser, configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
+import { configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 
 function TestView({ route }: { route: string }) {
   return <div>{`route: ${route}`}</div>;
@@ -55,7 +55,7 @@ const testRoutes: RouteObjectWithAuth[] = [
   },
 ];
 
-function TestApp({ user, initialRoute }: { user?: AuthUser; initialRoute: string }) {
+function TestApp({ user, initialRoute }: { user?: unknown; initialRoute: string }) {
   const { AuthProvider } = configureAuth(async () => Promise.resolve(user));
   const protectedRoutes = protectRoutes(testRoutes);
   const router = createMemoryRouter(protectedRoutes, {
@@ -71,7 +71,7 @@ function TestApp({ user, initialRoute }: { user?: AuthUser; initialRoute: string
 
 describe('@hilla/react-auth', () => {
   describe('protectRoutes', () => {
-    async function testRoute(route: string, user: AuthUser | undefined, canAccess: boolean) {
+    async function testRoute(route: string, user: unknown, canAccess: boolean) {
       const result = render(<TestApp initialRoute={route} user={user} />);
       const expectedText = canAccess ? `route: ${route}` : 'route: /login';
       await waitFor(() => expect(result.getByText(expectedText)).to.exist);
