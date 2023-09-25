@@ -10,23 +10,13 @@ const LOGIN_FAILURE = 'LOGIN_FAILURE';
 const LOGOUT = 'LOGOUT';
 
 /**
- * The user object returned from the authentication provider.
- * The properties are the same as the ones returned from the
- * {@link https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims | OpenID Connect Standard Claims}
- * specification, with the addition of the `roles` property.
- *
- * The user is not required to comply with this format. This is just for convenience.
- */
-export type AuthUser = Readonly<{
-  roles: string[];
-}>;
-
-/**
  * The type of the function that is used to get the authenticated user.
  */
-export type GetUserFn<TUser extends AuthUser> = () => Promise<TUser | undefined>;
+export type GetUserFn<TUser> = () => Promise<TUser | undefined>;
 
-type AuthState<TUser extends AuthUser> = Readonly<{
+export type UserInRoleFn = (role: string) => boolean;
+
+type AuthState<TUser> = Readonly<{
   initializing: boolean;
   loading: boolean;
   user?: TUser;
@@ -39,7 +29,7 @@ type LoginFetchAction = Readonly<{
 }>;
 
 type LoginSuccessAction = Readonly<{
-  user: AuthUser;
+  user: unknown;
   type: typeof LOGIN_SUCCESS;
 }>;
 
@@ -54,7 +44,7 @@ type LogoutAction = Readonly<{
   type: typeof LOGOUT;
 }>;
 
-function createAuthenticateThunk(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<AuthUser>) {
+function createAuthenticateThunk(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<unknown>) {
   async function authenticate() {
     dispatch({ type: LOGIN_FETCH });
 
@@ -87,7 +77,7 @@ const initialState: AuthState<never> = {
   loading: false,
 };
 
-function reducer(state: AuthState<AuthUser>, action: LoginActions | LogoutAction) {
+function reducer(state: AuthState<unknown>, action: LoginActions | LogoutAction) {
   switch (action.type) {
     case LOGIN_FETCH:
       return {
@@ -125,7 +115,7 @@ export type AccessProps = Readonly<{
 /**
  * The type of the authentication hook.
  */
-export type Authentication<TUser extends AuthUser> = Readonly<{
+export type Authentication<TUser> = Readonly<{
   state: AuthState<TUser>;
   login: LoginFunction;
   logout: LogoutFunction;
@@ -136,7 +126,7 @@ export type Authentication<TUser extends AuthUser> = Readonly<{
  * The hook that can be used to get the authentication state.
  * It returns the state of the authentication.
  */
-export const AuthContext = createContext<Authentication<AuthUser>>({
+export const AuthContext = createContext<Authentication<unknown>>({
   state: initialState,
   async login() {
     throw new Error('AuthContext not initialized');
@@ -149,11 +139,12 @@ export const AuthContext = createContext<Authentication<AuthUser>>({
   },
 });
 
-interface AuthProviderProps<TUser extends AuthUser> extends React.PropsWithChildren {
+interface AuthProviderProps<TUser> extends React.PropsWithChildren {
   getAuthenticatedUser: GetUserFn<TUser>;
+  isUserInRole?: UserInRoleFn;
 }
 
-function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }: AuthProviderProps<TUser>) {
+function AuthProvider<TUser>({ children, getAuthenticatedUser, isUserInRole }: AuthProviderProps<TUser>) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
   const unauthenticate = createUnauthenticateThunk(dispatch);
@@ -173,6 +164,10 @@ function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }
     unauthenticate();
   }
 
+  type HasRoles = Readonly<{
+    roles: string[];
+  }>;
+
   function hasAccess(accessProps: AccessProps): boolean {
     const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
     if (!requiresAuth) {
@@ -184,7 +179,9 @@ function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }
     }
 
     if (accessProps.rolesAllowed) {
-      return accessProps.rolesAllowed.some((allowedRole) => state.user?.roles.includes(allowedRole));
+      return accessProps.rolesAllowed.some(
+        isUserInRole ?? ((role) => state.user && (state.user as HasRoles).roles.includes(role)),
+      );
     }
 
     return true;
@@ -206,25 +203,32 @@ function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
-export type AuthHook<TUser extends AuthUser> = () => Authentication<TUser>;
+export type AuthHook<TUser> = () => Authentication<TUser>;
 
 /**
  * The hook that can be used to authenticate the user.
  * It returns the state of the authentication and the functions
  * to authenticate and unauthenticate the user.
  */
-function useAuth(): Authentication<AuthUser> {
+function useAuth(): Authentication<unknown> {
   return useContext(AuthContext);
 }
 
-interface AuthModule<TUser extends AuthUser> {
+interface AuthModule<TUser> {
   AuthProvider: React.FC<React.PropsWithChildren>;
   useAuth: AuthHook<TUser>;
 }
 
-export function configureAuth<TUser extends AuthUser>(getAuthenticatedUser: GetUserFn<TUser>): AuthModule<TUser> {
+export function configureAuth<TUser>(
+  getAuthenticatedUser: GetUserFn<TUser>,
+  isUserInRole?: UserInRoleFn,
+): AuthModule<TUser> {
   function PreconfiguredAuthProvider({ children }: React.PropsWithChildren) {
-    return <AuthProvider<TUser> getAuthenticatedUser={getAuthenticatedUser}>{children}</AuthProvider>;
+    return (
+      <AuthProvider<TUser> getAuthenticatedUser={getAuthenticatedUser} isUserInRole={isUserInRole}>
+        {children}
+      </AuthProvider>
+    );
   }
 
   return {

@@ -4,10 +4,6 @@ import { configureAuth } from '../src';
 
 interface CustomUser {
   name: string;
-}
-
-interface CustomUserWithRoles {
-  name: string;
   roles: string[];
 }
 
@@ -16,8 +12,8 @@ const getAuthenticatedUser = async () => Promise.resolve(user);
 const { AuthProvider, useAuth } = configureAuth(getAuthenticatedUser);
 
 function TestComponent() {
-  const auth = useAuth();
-  return <div>{auth.state.user ? auth.state.user.name : 'Not logged in'}</div>;
+  const { hasAccess, state } = useAuth();
+  return <div>{hasAccess({ rolesAllowed: ['admin'] }) ? state.user?.name : 'Not an admin'}</div>;
 }
 
 function TestApp() {
@@ -30,16 +26,22 @@ function TestApp() {
 
 describe('@hilla/react-auth', () => {
   describe('useAuth', () => {
-    it('should be able to access user information after login', async () => {
-      user = { name: 'John' };
+    it('should have access when the role matches', async () => {
+      user = { name: 'John', roles: ['admin'] };
       const { getByText } = render(<TestApp />);
       await waitFor(() => expect(getByText('John')).to.exist);
     });
 
-    it('should not be able to access user information after login', async () => {
+    it('should not have access when the role does not match', async () => {
+      user = { name: 'John', roles: ['manager'] };
+      const { getByText } = render(<TestApp />);
+      await waitFor(() => expect(getByText('Not an admin')).to.exist);
+    });
+
+    it('should not have access when not logged in', async () => {
       user = undefined;
       const { getByText } = render(<TestApp />);
-      await waitFor(() => expect(getByText('Not logged in')).to.exist);
+      await waitFor(() => expect(getByText('Not an admin')).to.exist);
     });
   });
 });
