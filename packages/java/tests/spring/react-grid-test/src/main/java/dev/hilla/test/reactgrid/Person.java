@@ -14,6 +14,7 @@ public class Person {
     private Long version;
 
     private String firstName, lastName;
+    private int luckyNumber;
 
     public Long getId() {
         return id;
@@ -45,5 +46,13 @@ public class Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public int getLuckyNumber() {
+        return luckyNumber;
+    }
+
+    public void setLuckyNumber(int luckyNumber) {
+        this.luckyNumber = luckyNumber;
     }
 }
