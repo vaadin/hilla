@@ -6,11 +6,6 @@ interface CustomUser {
   name: string;
 }
 
-interface CustomUserWithRoles {
-  name: string;
-  roles: string[];
-}
-
 let user: CustomUser | undefined;
 const getAuthenticatedUser = async () => Promise.resolve(user);
 const { AuthProvider, useAuth } = configureAuth(getAuthenticatedUser);
