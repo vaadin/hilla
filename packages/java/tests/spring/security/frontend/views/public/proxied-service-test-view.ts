@@ -15,7 +15,7 @@ export class ProxiedServiceTestView extends View {
 
   render() {
     return html`<div style="display:flex;flex-direction:column;height:100%">
-      <vaadin-button id="say-hello-btn" @click="${this.callSayHello}">Say Hello!</vaadin-button>
+      <vaadin-button id="say-hello-btn" @click="${() => this.callSayHello()}">Say Hello!</vaadin-button>
     </div>`;
   }
 
