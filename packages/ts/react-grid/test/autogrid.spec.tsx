@@ -155,13 +155,13 @@ describe('@hilla/react-grid', () => {
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
         const someNumberFilterField = getHeaderCellContent(grid, 1, 3).firstElementChild!
           .nextElementSibling as TextFieldElement;
-        someNumberFilterField.value = 'filter-value';
+        someNumberFilterField.value = '123';
         someNumberFilterField.dispatchEvent(new CustomEvent('input'));
         await nextFrame();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
-          filterValue: 'filter-value',
+          filterValue: '123',
           propertyId: 'someNumber',
           matcher: Matcher.GREATER_THAN,
         };
@@ -174,7 +174,7 @@ describe('@hilla/react-grid', () => {
 
         const expectedPropertyFilter2: PropertyStringFilter = {
           ...{ t: 'propertyString' },
-          filterValue: 'filter-value',
+          filterValue: '123',
           propertyId: 'someNumber',
           matcher: Matcher.EQUALS,
         };

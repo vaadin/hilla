@@ -1,5 +1,6 @@
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
+import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { useContext, useEffect, useRef, useState, type ReactElement } from 'react';
@@ -67,7 +68,7 @@ export function HeaderFilter(): ReactElement {
           className={css.filterWithLessGreaterEquals}
           value={matcher}
         ></Select>
-        <TextField
+        <NumberField
           placeholder="Filter..."
           onInput={(e) => {
             const fieldValue = ((e as InputEvent).target as TextFieldElement).value;

@@ -1,11 +1,17 @@
 package dev.hilla.test.reactgrid;
 
+import java.util.Locale;
+import java.util.function.Consumer;
+
 import dev.hilla.crud.filter.PropertyStringFilter.Matcher;
 import org.junit.Test;
 
 import com.vaadin.flow.component.select.testbench.SelectElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
@@ -46,6 +52,14 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
     }
 
+    @Test
+    public void numberFilterWithInvalidInputIgnored() {
+        setHeaderFilter(0, null, "a");
+        assertRowCount(50);
+        setHeaderFilter(0, null, "49");
+        assertRowCount(1);
+    }
+
     private void setHeaderFilter(int columnIndex, String filter) {
         TestBenchElement cont = grid.getHeaderCellContent(1, columnIndex);
         TextFieldElement filterField = cont.$(TextFieldElement.class).first();
@@ -63,9 +77,22 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         } else if (matcher == Matcher.EQUALS) {
             filterSelect.setProperty("value", "EQUALS");
         }
-        TextFieldElement filterField = cont.$(TextFieldElement.class).first();
+        TestBenchElement filterField = filterSelect
+                .getPropertyElement("nextElementSibling");
         if (filter != null) {
-            filterField.setValue(filter);
+            ifType(filterField, TextFieldElement.class,
+                    e -> e.setValue(filter));
+            ifType(filterField, NumberFieldElement.class,
+                    e -> e.setValue(filter));
+        }
+    }
+
+    private <T extends TestBenchElement> void ifType(TestBenchElement element,
+            Class<T> type, Consumer<T> cmd) {
+        Element annotation = type.getAnnotation(Element.class);
+        if (element.getTagName().toLowerCase(Locale.ENGLISH)
+                .equals(annotation.value().toLowerCase(Locale.ENGLISH))) {
+            cmd.accept(TestBench.wrap(element, type));
         }
     }
 
