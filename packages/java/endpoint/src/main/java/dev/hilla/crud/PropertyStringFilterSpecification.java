@@ -34,13 +34,39 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             case CONTAINS:
                 return criteriaBuilder.like(expr,
                         "%" + value.toLowerCase() + "%");
+            case GREATER_THAN:
+                throw new IllegalArgumentException(
+                        "A string cannot be filtered using greater than");
+            case LESS_THAN:
+                throw new IllegalArgumentException(
+                        "A string cannot be filtered using less than");
+            default:
+                break;
             }
 
-            throw new IllegalArgumentException(
-                    "Matcher of type " + filter.getMatcher() + " is unknown");
-        } else {
-            return criteriaBuilder.equal(propertyPath, value.toLowerCase());
+        } else if (isNumber(javaType)) {
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(propertyPath, value);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A number cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(propertyPath, value);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(propertyPath, value);
+            default:
+                break;
+            }
         }
+        throw new IllegalArgumentException("No implementation for " + javaType
+                + " using " + filter.getMatcher() + ".");
+    }
+
+    private boolean isNumber(Class<?> javaType) {
+        return javaType == int.class || javaType == Integer.class
+                || javaType == double.class || javaType == Double.class
+                || javaType == long.class || javaType == Long.class;
     }
 
 }
