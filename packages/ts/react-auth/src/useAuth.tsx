@@ -1,5 +1,5 @@
-import { login as _login, logout as _logout, type LoginResult } from '@hilla/frontend';
-import { createContext, type Dispatch, type ReactNode, useContext, useEffect, useReducer } from 'react';
+import { login as _login, type LoginResult, logout as _logout } from '@hilla/frontend';
+import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
 type LogoutFunction = () => Promise<void>;
@@ -10,23 +10,11 @@ const LOGIN_FAILURE = 'LOGIN_FAILURE';
 const LOGOUT = 'LOGOUT';
 
 /**
- * The user object returned from the authentication provider.
- * The properties are the same as the ones returned from the
- * {@link https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims | OpenID Connect Standard Claims}
- * specification, with the addition of the `roles` property.
- *
- * The user is not required to comply with this format. This is just for convenience.
- */
-export type AuthUser = Readonly<{
-  roles: string[];
-}>;
-
-/**
  * The type of the function that is used to get the authenticated user.
  */
-export type GetUserFn<TUser extends AuthUser> = () => Promise<TUser | undefined>;
+export type GetUserFn<TUser> = () => Promise<TUser | undefined>;
 
-type AuthState<TUser extends AuthUser> = Readonly<{
+type AuthState<TUser> = Readonly<{
   initializing: boolean;
   loading: boolean;
   user?: TUser;
@@ -39,7 +27,7 @@ type LoginFetchAction = Readonly<{
 }>;
 
 type LoginSuccessAction = Readonly<{
-  user: AuthUser;
+  user: unknown;
   type: typeof LOGIN_SUCCESS;
 }>;
 
@@ -54,7 +42,7 @@ type LogoutAction = Readonly<{
   type: typeof LOGOUT;
 }>;
 
-function createAuthenticateThunk(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<AuthUser>) {
+function createAuthenticateThunk<TUser>(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<TUser>) {
   async function authenticate() {
     dispatch({ type: LOGIN_FETCH });
 
@@ -82,12 +70,12 @@ function createUnauthenticateThunk(dispatch: Dispatch<LogoutAction>) {
   };
 }
 
-const initialState: AuthState<never> = {
+const initialState: AuthState<unknown> = {
   initializing: true,
   loading: false,
 };
 
-function reducer(state: AuthState<AuthUser>, action: LoginActions | LogoutAction) {
+function reducer(state: AuthState<unknown>, action: LoginActions | LogoutAction) {
   switch (action.type) {
     case LOGIN_FETCH:
       return {
@@ -125,7 +113,7 @@ export type AccessProps = Readonly<{
 /**
  * The type of the authentication hook.
  */
-export type Authentication<TUser extends AuthUser> = Readonly<{
+export type Authentication<TUser> = Readonly<{
   state: AuthState<TUser>;
   login: LoginFunction;
   logout: LogoutFunction;
@@ -136,7 +124,7 @@ export type Authentication<TUser extends AuthUser> = Readonly<{
  * The hook that can be used to get the authentication state.
  * It returns the state of the authentication.
  */
-export const AuthContext = createContext<Authentication<AuthUser>>({
+export const AuthContext = createContext<Authentication<unknown>>({
   state: initialState,
   async login() {
     throw new Error('AuthContext not initialized');
@@ -149,11 +137,25 @@ export const AuthContext = createContext<Authentication<AuthUser>>({
   },
 });
 
-interface AuthProviderProps<TUser extends AuthUser> extends React.PropsWithChildren {
-  getAuthenticatedUser: GetUserFn<TUser>;
+interface AuthConfig<TUser> {
+  getRoles?(user: TUser): readonly string[];
 }
 
-function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }: AuthProviderProps<TUser>) {
+interface AuthProviderProps<TUser> extends React.PropsWithChildren {
+  getAuthenticatedUser: GetUserFn<TUser>;
+  config?: AuthConfig<TUser>;
+}
+
+interface UserWithRoles {
+  roles?: any;
+}
+
+const getDefaultRoles = (user: unknown) => {
+  const userWithRoles = user as UserWithRoles;
+  return Array.isArray(userWithRoles.roles) ? userWithRoles.roles : [];
+};
+
+function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthProviderProps<TUser>) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
   const unauthenticate = createUnauthenticateThunk(dispatch);
@@ -184,7 +186,8 @@ function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }
     }
 
     if (accessProps.rolesAllowed) {
-      return accessProps.rolesAllowed.some((allowedRole) => state.user?.roles.includes(allowedRole));
+      const userRoles = config?.getRoles ? config.getRoles(state.user as TUser) : getDefaultRoles(state.user);
+      return accessProps.rolesAllowed.some((allowedRole) => userRoles.includes(allowedRole));
     }
 
     return true;
@@ -206,25 +209,32 @@ function AuthProvider<TUser extends AuthUser>({ children, getAuthenticatedUser }
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
-export type AuthHook<TUser extends AuthUser> = () => Authentication<TUser>;
+export type AuthHook<TUser> = () => Authentication<TUser>;
 
 /**
  * The hook that can be used to authenticate the user.
  * It returns the state of the authentication and the functions
  * to authenticate and unauthenticate the user.
  */
-function useAuth(): Authentication<AuthUser> {
-  return useContext(AuthContext);
+function useAuth<TUser>(): Authentication<TUser> {
+  return useContext(AuthContext) as Authentication<TUser>;
 }
 
-interface AuthModule<TUser extends AuthUser> {
+interface AuthModule<TUser> {
   AuthProvider: React.FC<React.PropsWithChildren>;
   useAuth: AuthHook<TUser>;
 }
 
-export function configureAuth<TUser extends AuthUser>(getAuthenticatedUser: GetUserFn<TUser>): AuthModule<TUser> {
+export function configureAuth<TUser>(
+  getAuthenticatedUser: GetUserFn<TUser>,
+  config?: AuthConfig<TUser>,
+): AuthModule<TUser> {
   function PreconfiguredAuthProvider({ children }: React.PropsWithChildren) {
-    return <AuthProvider<TUser> getAuthenticatedUser={getAuthenticatedUser}>{children}</AuthProvider>;
+    return (
+      <AuthProvider<TUser> getAuthenticatedUser={getAuthenticatedUser} config={config}>
+        {children}
+      </AuthProvider>
+    );
   }
 
   return {
