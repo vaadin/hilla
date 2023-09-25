@@ -59,7 +59,7 @@ export default class SubTypesPlugin extends Plugin {
         });
 
         // remove the union type model file
-        const unionFn = `${convertFullyQualifiedNameToRelativePath(baseKey)}Union.ts`;
+        const unionFn = `${convertFullyQualifiedNameToRelativePath(baseKey)}Model.ts`;
         const unionSource = sources.find(({ fileName }) => fileName === unionFn)!;
         sources.splice(sources.indexOf(unionSource), 1);
       }
