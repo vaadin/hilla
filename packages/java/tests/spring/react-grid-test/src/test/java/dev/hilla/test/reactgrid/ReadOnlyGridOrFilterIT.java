@@ -13,15 +13,15 @@ public class ReadOnlyGridOrFilterIT extends AbstractGridTest {
     @Test
     public void findsMatches() {
         setFilter("car");
-        assertVisibleRows(2);
+        assertRowCount(2);
         assertName(0, "Oscar", "Nelson");
         assertName(1, "Abigail", "Carter");
 
         setFilter("");
-        assertVisibleRows(10);
+        assertRowCount(50);
 
         setFilter("zan");
-        assertVisibleRows(1);
+        assertRowCount(1);
         assertName(0, "Xander", "Zane");
 
     }

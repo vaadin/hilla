@@ -1,4 +1,5 @@
-import { NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
+import { BooleanModel, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
+import { makeObjectEmptyValueCreator } from '@hilla/form';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
@@ -14,25 +15,30 @@ export interface Person {
   lastName: string;
   email: string;
   someNumber: number;
+  vip: boolean;
 }
 
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Person;
+  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
   get firstName(): StringModel {
-    return this[_getPropertyModel]('firstName', StringModel, [false]);
+    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get lastName(): StringModel {
-    return this[_getPropertyModel]('firstName', StringModel, [false]);
+    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get email(): StringModel {
-    return this[_getPropertyModel]('email', StringModel, [false]);
+    return this[_getPropertyModel]('email', (parent, key) => new StringModel(parent, key, false));
   }
 
   get someNumber(): NumberModel {
-    return this[_getPropertyModel]('someNumber', NumberModel, [false]);
+    return this[_getPropertyModel]('someNumber', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get vip(): BooleanModel {
+    return this[_getPropertyModel]('vip', (parent, key) => new BooleanModel(parent, key, false));
   }
 }
 
@@ -40,11 +46,11 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
   get name(): StringModel {
-    return this[_getPropertyModel]('name', StringModel, [false]);
+    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
   }
 
   get foundedDate(): StringModel {
-    return this[_getPropertyModel]('foundedDate', StringModel, [false]);
+    return this[_getPropertyModel]('foundedDate', (parent, key) => new StringModel(parent, key, false));
   }
 }
 
@@ -89,8 +95,8 @@ const createService = <T>(data: T[]) => {
 };
 
 const personData: Person[] = [
-  { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12 },
-  { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55 },
+  { firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
+  { firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
 ];
 
 const companyData: Company[] = [

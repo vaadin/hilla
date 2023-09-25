@@ -1,6 +1,8 @@
 import type { LitElement } from 'lit';
+import type { Constructor } from 'type-fest';
 import { BinderRoot, type BinderConfiguration } from './BinderRoot.js';
-import type { AbstractModel, ModelConstructor } from './Models.js';
+import type { AbstractModel } from './Models.js';
+import type { Value } from './Models.js';
 
 /**
  * A Binder controls all aspects of a single form.
@@ -10,7 +12,7 @@ import type { AbstractModel, ModelConstructor } from './Models.js';
  * @typeParam T - Type of the value that binds to a form
  * @typeParam M - Type of the model that describes the structure of the value
  */
-export class Binder<T, M extends AbstractModel<T>> extends BinderRoot<T, M> {
+export class Binder<M extends AbstractModel> extends BinderRoot<M> {
   context: Element;
 
   /**
@@ -25,7 +27,7 @@ export class Binder<T, M extends AbstractModel<T>> extends BinderRoot<T, M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(context: Element, Model: ModelConstructor<T, M>, config?: BinderConfiguration<T>) {
+  constructor(context: Element, Model: Constructor<M>, config?: BinderConfiguration<Value<M>>) {
     const changeCallback =
       config?.onChange ??
       (typeof (context as LitElement).requestUpdate === 'function'

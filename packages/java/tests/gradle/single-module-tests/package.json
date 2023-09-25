@@ -3,7 +3,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@hilla/form": "file:../../../../ts/form",
-    "@hilla/frontend": "../../../../ts/hilla-frontend",
+    "@hilla/frontend": "file:../../../../ts/frontend",
     "@hilla/generator-typescript-cli": "file:../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "file:../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "file:../../../../ts/generator-typescript-plugin-backbone",
