@@ -1,4 +1,4 @@
-import type { AbstractModel, ModelConstructor } from '@hilla/form';
+import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import {
   Grid,
   type GridDataProvider,
@@ -10,7 +10,8 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { GridSorter } from '@hilla/react-components/GridSorter.js';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
 import { HeaderColumnContext } from './header-column-context';
 import { HeaderFilter } from './header-filter';
@@ -25,7 +26,7 @@ import { getProperties, type PropertyInfo } from './utils.js';
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
-    model: ModelConstructor<TItem, AbstractModel<TItem>>;
+    model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
     headerFilters?: boolean;
@@ -91,7 +92,7 @@ function createDataProvider<TItem>(
 }
 
 function useColumns(
-  model: ModelConstructor<unknown, AbstractModel<unknown>>,
+  model: DetachedModelConstructor<AbstractModel>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
@@ -154,7 +155,7 @@ export function AutoGrid<TItem>({
   };
 
   // This cast should go away with #1252
-  const children = useColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, setHeaderPropertyFilter, {
+  const children = useColumns(model, setHeaderPropertyFilter, {
     visibleColumns,
     headerFilters,
   });
