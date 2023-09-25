@@ -39,9 +39,10 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         grid.getHeaderCell(i).$("vaadin-grid-sorter").first().click();
     }
 
-    protected void assertVisibleRows(int i) {
+    protected void assertRowCount(int i) {
+        grid.scrollToRow(3403034);
         waitUntil(driver -> {
-            return grid.getLastVisibleRowIndex() == i - 1;
+            return grid.getRowCount() == i;
         });
 
     }
