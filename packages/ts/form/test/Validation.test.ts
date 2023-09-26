@@ -22,14 +22,12 @@ import {
 } from '../src/index.js';
 import {
   type Customer,
-  type IdEntity,
   IdEntityModel,
   type Order,
   OrderModel,
   type TestEntity,
-  TestModel,
-  type TestMessageInterpolationEntity,
   TestMessageInterpolationModel,
+  TestModel,
 } from './TestModels.js';
 
 use(sinonChai);
@@ -140,7 +138,7 @@ const fireEvent = async (elm: Element, name: string) => {
 
 describe('@hilla/form', () => {
   describe('Validation', () => {
-    let binder: Binder<Order, OrderModel>;
+    let binder: Binder<OrderModel>;
     const view = document.createElement('div');
 
     beforeEach(async () => {
@@ -156,36 +154,36 @@ describe('@hilla/form', () => {
           expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['Required', 'Size']);
         }));
 
-    it('should run all nested validations per model', async () =>
-      binder.validate().then((errors) => {
-        expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
-      }));
+    it('should run all nested validations per model', async () => {
+      const errors = await binder.validate();
+      expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
+    });
 
     it('should run all validations per array items', async () => {
       binder.for(binder.model.products).appendItem();
       binder.for(binder.model.products).appendItem();
-      return binder.validate().then((errors) => {
-        expect(errors.map((e) => e.property)).to.eql([
-          'customer.fullName',
-          'customer.fullName',
-          'notes',
-          'products.0.description',
-          'products.0.price',
-          'products.1.description',
-          'products.1.price',
-        ]);
-      });
+
+      const errors = await binder.validate();
+
+      expect(errors.map((e) => e.property)).to.eql([
+        'customer.fullName',
+        'customer.fullName',
+        'notes',
+        'products.0.description',
+        'products.0.price',
+        'products.1.description',
+        'products.1.price',
+      ]);
     });
 
     describe('clearing', () => {
-      ['reset', 'clear'].forEach((methodName) => {
+      (['reset', 'clear'] as const).forEach((methodName) => {
         it(`should reset validation on ${methodName}`, async () => {
-          await binder.validate();
+          const errors = await binder.validate();
           expect(binder.invalid).to.be.true;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.true;
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-          (binder as any)[methodName]();
+          binder[methodName]();
 
           expect(binder.invalid).to.be.false;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.false;
@@ -375,7 +373,7 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator', () => {
-      let idBinder: Binder<IdEntity, IdEntityModel>;
+      let idBinder: Binder<IdEntityModel>;
 
       beforeEach(async () => {
         idBinder = new Binder(view, IdEntityModel);
@@ -483,7 +481,7 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator (multiple fields)', () => {
-      let testBinder: Binder<TestEntity, TestModel>;
+      let testBinder: Binder<TestModel>;
 
       beforeEach(async () => {
         testBinder = new Binder(view, TestModel);
@@ -790,7 +788,7 @@ describe('@hilla/form', () => {
     });
 
     describe('message interpolation', () => {
-      let testMessageBinder: Binder<TestMessageInterpolationEntity, TestMessageInterpolationModel>;
+      let testMessageBinder: Binder<TestMessageInterpolationModel>;
 
       beforeEach(async () => {
         testMessageBinder = new Binder(view, TestMessageInterpolationModel);

@@ -1,21 +1,24 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
   type AbstractModel,
   type BinderConfiguration,
+  type BinderNode,
   BinderRoot,
   CHANGED,
+  type DetachedModelConstructor,
   type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
   hasFromString,
   isFieldElement,
-  type ModelConstructor,
   type Validator,
   type ValueError,
+  type Value,
 } from '@hilla/form';
-import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
+import type { Writable } from 'type-fest';
 import type { VaadinWindow } from './types.js';
 
 declare const __VERSION__: string;
@@ -26,7 +29,7 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.3.0-alpha5',
+  version: __VERSION__,
 });
 
 function useUpdate() {
@@ -42,40 +45,40 @@ export type FieldDirectiveResult = Readonly<{
   ref(element: HTMLElement | null): void;
 }>;
 
-export type FieldDirective = (model: AbstractModel<any>) => FieldDirectiveResult;
+export type FieldDirective = (model: AbstractModel) => FieldDirectiveResult;
 
-export type UseFormPartResult<T, M extends AbstractModel<T>> = Readonly<{
-  defaultValue: T;
+export type UseFormPartResult<M extends AbstractModel> = Readonly<{
+  defaultValue?: Value<M>;
   dirty: boolean;
-  errors: ReadonlyArray<ValueError<unknown>>;
+  errors: readonly ValueError[];
   invalid: boolean;
   model: M;
   name: string;
   field: FieldDirective;
-  ownErrors: ReadonlyArray<ValueError<T>>;
+  ownErrors: ReadonlyArray<ValueError<Value<M>>>;
   required: boolean;
-  validators: ReadonlyArray<Validator<T>>;
-  value?: T;
+  validators: ReadonlyArray<Validator<Value<M>>>;
+  value?: Value<M>;
   visited: boolean;
-  addValidator(validator: Validator<T>): void;
-  setValidators(validators: ReadonlyArray<Validator<T>>): void;
-  setValue(value: T | undefined): void;
+  addValidator(validator: Validator<Value<M>>): void;
+  setValidators(validators: ReadonlyArray<Validator<Value<M>>>): void;
+  setValue(value: Value<M> | undefined): void;
   setVisited(visited: boolean): void;
-  validate(): Promise<ReadonlyArray<ValueError<unknown>>>;
+  validate(): Promise<readonly ValueError[]>;
 }>;
 
-export type UseFormResult<T, M extends AbstractModel<T>> = Omit<UseFormPartResult<T, M>, 'setValue' | 'value'> &
+export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
   Readonly<{
-    value: T;
-    setDefaultValue(value: T): void;
-    setValue(value: T): void;
-    submit(): Promise<T | undefined>;
+    value: Value<M>;
+    setDefaultValue(value: Value<M>): void;
+    setValue(value: Value<M>): void;
+    submit(): Promise<Value<M> | undefined | void>;
     reset(): void;
     clear(): void;
-    read(value: T | null | undefined): void;
+    read(value: Value<M> | null | undefined): void;
   }>;
 
-type FieldState<T> = {
+type FieldState<T = unknown> = {
   value?: T;
   required: boolean;
   invalid: boolean;
@@ -87,11 +90,11 @@ type FieldState<T> = {
   ref(element: HTMLElement | null): void;
 };
 
-function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
-function getFormPart<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Omit<UseFormPartResult<T, M>, 'field'> {
+function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
     defaultValue: node.defaultValue,
@@ -118,15 +121,15 @@ function getFormPart<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Omi
   };
 }
 
-function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): FieldDirective {
+function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
   return useMemo(() => {
-    const registry = new WeakMap<AbstractModel<any>, FieldState<any>>();
+    const registry = new WeakMap<AbstractModel, FieldState>();
 
-    return ((model: AbstractModel<any>) => {
+    return ((model: AbstractModel) => {
       const n = getBinderNode(model);
       n.initializeValue(true);
 
-      const fieldState: FieldState<unknown> = registry.get(model) ?? {
+      const fieldState: FieldState = registry.get(model) ?? {
         element: undefined,
         errorMessage: '',
         invalid: false,
@@ -135,11 +138,8 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
         },
         ref(element: HTMLElement | null) {
           if (!element) {
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('change', fieldState.updateValue);
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('input', fieldState.updateValue);
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element?.removeEventListener('blur', fieldState.markVisited);
             fieldState.strategy?.removeEventListeners();
             fieldState.element = undefined;
@@ -153,11 +153,8 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
           if (fieldState.element !== element) {
             fieldState.element = element;
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('change', fieldState.updateValue);
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('input', fieldState.updateValue);
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             fieldState.element.addEventListener('blur', fieldState.markVisited);
             fieldState.strategy = getDefaultFieldStrategy(element, model);
           }
@@ -212,22 +209,17 @@ function useFields<T, M extends AbstractModel<T>>(node: BinderNode<T, M>): Field
 
       return {
         name: n.name,
-        // eslint-disable-next-line @typescript-eslint/unbound-method
         ref: fieldState.ref,
       };
     }) as FieldDirective;
   }, [node]);
 }
 
-type MutableBinderConfiguration<T> = {
-  -readonly [K in keyof BinderConfiguration<T>]: BinderConfiguration<T>[K];
-};
-
-export function useForm<T, M extends AbstractModel<T>>(
-  Model: ModelConstructor<T, M>,
-  config?: BinderConfiguration<T>,
-): UseFormResult<T, M> {
-  const configRef = useRef<MutableBinderConfiguration<T>>({});
+export function useForm<M extends AbstractModel>(
+  Model: DetachedModelConstructor<M>,
+  config?: BinderConfiguration<Value<M>>,
+): UseFormResult<M> {
+  const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});
   configRef.current.onSubmit = config?.onSubmit;
   configRef.current.onChange = config?.onChange;
   const update = useUpdate();
@@ -255,7 +247,7 @@ export function useForm<T, M extends AbstractModel<T>>(
   };
 }
 
-export function useFormPart<M extends AbstractModel<any>>(model: M): UseFormPartResult<ReturnType<M['valueOf']>, M> {
+export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
   return {

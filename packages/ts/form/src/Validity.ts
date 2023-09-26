@@ -17,6 +17,5 @@ export const defaultValidity: ValidityState = {
   tooShort: false,
   typeMismatch: false,
   valueMissing: false,
-  // eslint-disable-next-line sort-keys
   valid: true,
 };

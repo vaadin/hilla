@@ -1,6 +1,8 @@
 {
   "extends": ["../../../.eslintrc"],
   "rules": {
+    "@typescript-eslint/no-use-before-define": "off",
+    "import/no-cycle": "off",
     "perfectionist/sort-enums": "off",
     "perfectionist/sort-objects": "off"
   },

@@ -2,6 +2,7 @@ import type { VaadinWindow } from './types.js';
 
 export * from './Binder.js';
 export * from './BinderRoot.js';
+export * from './BinderNode.js';
 export * from './Field.js';
 export * from './Models.js';
 export * from './Validation.js';
@@ -16,5 +17,5 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/form',
-  version: /* updated-by-script */ '2.3.0-alpha5',
+  version: __VERSION__,
 });

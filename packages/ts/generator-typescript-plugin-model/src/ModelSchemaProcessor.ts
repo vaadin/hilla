@@ -23,7 +23,7 @@ import {
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
 import { AnnotationParser, isValidationConstrainedSchema, type ValidationConstrainedSchema } from './annotation.js';
-import { importBuiltInFormModel } from './utils.js';
+import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -35,8 +35,6 @@ const $processBoolean = Symbol();
 const $processUnknown = Symbol();
 const $originalSchema = Symbol();
 const $schema = Symbol();
-
-export type OptionalChecker = (schema: Schema) => boolean;
 
 export abstract class ModelSchemaPartProcessor<T> {
   protected readonly [$dependencies]: DependencyManager;
@@ -178,7 +176,6 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
   protected override [$processArray](schema: ArraySchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processArray](schema), [
-      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
       new ModelSchemaTypeProcessor(schema.items, this[$dependencies]).process(),
     ]);
   }
@@ -234,9 +231,11 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
   }
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {
+    const model = new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process();
+
     return [
-      new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process(),
-      ts.factory.createArrayLiteralExpression(
+      createModelBuildingCallback(
+        model,
         new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
       ),
     ];

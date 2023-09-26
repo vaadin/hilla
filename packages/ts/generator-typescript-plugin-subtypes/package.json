@@ -1,0 +1,84 @@
+{
+  "name": "@hilla/generator-typescript-plugin-subtypes",
+  "version": "2.3.0-alpha5",
+  "description": "A Hilla TypeScript Generator plugin to support JsonSubTypes",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">= 16.13"
+  },
+  "scripts": {
+    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "build": "concurrently npm:build:*",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
+    "test:update": "npm run test -- --update",
+    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
+    "typecheck": "tsc --noEmit",
+    "version": "node ../../../scripts/bump/package-update.js"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "default": "./index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/generator-typescript-plugin-subtypes"
+  },
+  "keywords": [
+    "hilla",
+    "typescript",
+    "generator"
+  ],
+  "author": "Vaadin Ltd.",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/hilla/issues"
+  },
+  "homepage": "https://hilla.dev",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@hilla/generator-typescript-core": "^2.3.0-alpha5",
+    "@hilla/generator-typescript-plugin-client": "^2.3.0-alpha5",
+    "@hilla/generator-typescript-plugin-model": "^2.3.0-alpha5"
+  },
+  "dependencies": {
+    "@hilla/generator-typescript-utils": "^2.3.0-alpha5",
+    "fast-deep-equal": "^3.1.3",
+    "openapi-types": "^12.1.3",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "@hilla/generator-typescript-core": "^2.3.0-alpha5",
+    "@hilla/generator-typescript-plugin-client": "^2.3.0-alpha5",
+    "@hilla/generator-typescript-plugin-model": "^2.3.0-alpha5",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.5.0",
+    "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
+    "c8": "^8.0.1",
+    "chai": "^4.3.7",
+    "concurrently": "^8.2.0",
+    "copyfiles": "^2.4.1",
+    "mocha": "^10.2.0",
+    "pino": "^8.15.0",
+    "rimraf": "^5.0.1",
+    "sinon": "^15.2.0",
+    "sinon-chai": "^3.7.0",
+    "type-fest": "^4.2.0"
+  }
+}

@@ -1,4 +1,4 @@
-import { ModelConstructor } from '@hilla/form';
+import { AbstractModel, type DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { AutoGrid, CrudService } from '@hilla/react-grid';
 import CompanyModel from 'Frontend/generated/dev/hilla/test/reactgrid/CompanyModel';
@@ -7,7 +7,7 @@ import { CompanyService, PersonService } from 'Frontend/generated/endpoints';
 import { useState } from 'react';
 
 export function ReadOnlyGridWithHeaderFilters() {
-  const [model, setModel] = useState<ModelConstructor<any, any>[]>([PersonModel]);
+  const [model, setModel] = useState<DetachedModelConstructor<AbstractModel>[]>([PersonModel]);
   const [service, setService] = useState<CrudService<any>>(PersonService);
   const [headerFilters, setHeaderFilters] = useState(true);
   return (
