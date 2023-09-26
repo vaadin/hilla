@@ -1,4 +1,4 @@
-import { AutoForm } from '@hilla/react-grid';
+import { ExperimentalAutoForm } from '@hilla/react-grid';
 import Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel';
 import { AppointmentService } from 'Frontend/generated/endpoints';
@@ -14,7 +14,7 @@ export function AutoFormView() {
         <>
           <h1>Make a new appointment</h1>
           <br />
-          <AutoForm
+          <ExperimentalAutoForm
             service={AppointmentService}
             model={AppointmentModel}
             onSubmit={({ item }) => {

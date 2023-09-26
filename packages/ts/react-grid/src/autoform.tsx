@@ -22,7 +22,13 @@ export type AutoFormProps<TItem> = Readonly<{
   onSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
 
-export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit }: AutoFormProps<TItem>): JSX.Element {
+export function ExperimentalAutoForm<TItem>({
+  service,
+  model,
+  item,
+  onSubmitError,
+  onSubmit,
+}: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
