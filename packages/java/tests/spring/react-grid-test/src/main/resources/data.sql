@@ -48,3 +48,6 @@ INSERT INTO person (id, version, first_name, last_name, lucky_number) VALUES (47
 INSERT INTO person (id, version, first_name, last_name, lucky_number) VALUES (48, 0, 'Vivian', 'Xavier',19);
 INSERT INTO person (id, version, first_name, last_name, lucky_number) VALUES (49, 0, 'William', 'Young',22);
 INSERT INTO person (id, version, first_name, last_name, lucky_number) VALUES (50, 0, 'Xander', 'Zane',18);
+
+INSERT INTO company (id, version, name) VALUES (1, 0, 'Vaadin');
+INSERT INTO company (id, version, name) VALUES (2, 0, 'Google');
