@@ -14,11 +14,13 @@ import Direction from '../src/types/org/springframework/data/domain/Sort/Directi
 
 export interface Company {
   id: number;
+  version: number;
   name: string;
   foundedDate: string;
 }
 export interface Person {
   id: number;
+  version: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -31,6 +33,10 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
 
   get id(): NumberModel {
     return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel]('version', (parent, key) => new NumberModel(parent, key, false));
   }
 
   get firstName(): StringModel {
@@ -59,6 +65,10 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
 
   get id(): NumberModel {
     return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel]('version', (parent, key) => new NumberModel(parent, key, false));
   }
 
   get name(): StringModel {
@@ -120,13 +130,13 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
 };
 
 export const personData: Person[] = [
-  { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
-  { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
+  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
+  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
 ];
 
 export const companyData: Company[] = [
-  { id: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
-  { id: 2, name: 'Google', foundedDate: '1998-09-04' },
+  { id: 1, version: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
+  { id: 2, version: 1, name: 'Google', foundedDate: '1998-09-04' },
 ];
 export type HasLastFilter = { lastFilter: Filter | undefined };
 

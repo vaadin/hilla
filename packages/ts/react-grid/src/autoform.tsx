@@ -31,46 +31,41 @@ export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit 
     form.read(item);
   }, [item]);
 
+  async function submitButtonClicked(): Promise<void> {
+    try {
+      setFormError('');
+      const newItem = await form.submit();
+      form.clear();
+      if (!newItem) {
+        // If update returns an empty object, then no update was performed
+        throw new Error('generic error');
+      } else if (onSubmit) {
+        onSubmit({ item: newItem });
+      }
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        // Handled automatically
+        return;
+      }
+      const genericError = 'Something went wrong, please check all your values';
+      if (onSubmitError) {
+        onSubmitError({ error });
+      } else {
+        setFormError(genericError);
+      }
+    }
+  }
+
   return (
     <VerticalLayout theme="padding">
       {getProperties(model).map((propertyInfo) => (
-        <AutoFormField
-          key={propertyInfo.name}
-          propertyInfo={propertyInfo}
-          form={form}
-        ></AutoFormField>
+        <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form}></AutoFormField>
       ))}
-      <div id="formerror" style={{ color: 'red' }}>
-        {formError}
-      </div>
+      {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
         <Button
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={async () => {
-            try {
-              setFormError('');
-              const newItem = await form.submit();
-              if (!newItem) {
-                // If update returns an empty object, then no update was performed
-                throw new Error('generic error');
-              } else if (onSubmit) {
-                onSubmit({ item: newItem });
-              } else {
-                form.clear();
-              }
-            } catch (error) {
-              if (error instanceof ValidationError) {
-                // Handled automatically
-                return;
-              }
-              const genericError = 'Something went wrong, please check all your values';
-              if (onSubmitError) {
-                onSubmitError({ error });
-              } else {
-                setFormError(genericError);
-              }
-            }
-          }}
+          onClick={submitButtonClicked}
         >
           Submit
         </Button>

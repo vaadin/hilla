@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@hilla/form": "file:../../../../ts/form",
-    "@hilla/frontend": "file:../../../../ts/frontend",
     "@hilla/generator-typescript-cli": "file:../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "file:../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "file:../../../../ts/generator-typescript-plugin-backbone",
@@ -46,7 +45,6 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/frontend": "2.3.0-alpha5",
       "@hilla/generator-typescript-cli": "2.3.0-alpha5",
       "@hilla/generator-typescript-core": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-backbone": "2.3.0-alpha5",
@@ -84,7 +82,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "5938147ed4e6040b7221ac3648b8d7b777a9db5f0797171a13ad0ad4bba8417a"
+    "hash": "bca8511176f3e4e5c8acea6655a0be7559385a8585223377175c6a8dbf9ec3a0"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -93,7 +91,6 @@
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@hilla/generator-typescript-plugin-model": "$@hilla/generator-typescript-plugin-model",
-    "@hilla/frontend": "$@hilla/frontend",
     "@hilla/generator-typescript-plugin-barrel": "$@hilla/generator-typescript-plugin-barrel",
     "@hilla/generator-typescript-plugin-push": "$@hilla/generator-typescript-plugin-push",
     "@hilla/generator-typescript-core": "$@hilla/generator-typescript-core",
