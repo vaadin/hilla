@@ -21,9 +21,15 @@ import {
   type StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
-import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
-import { AnnotationParser, isValidationConstrainedSchema, type ValidationConstrainedSchema } from './annotation.js';
+import ts, {
+  type ArrayLiteralExpression,
+  type Expression,
+  type Identifier,
+  type TypeNode,
+  type TypeReferenceNode,
+} from 'typescript';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
+import { hasValidationConstraints, ValidationConstraintParser } from './ValidationConstraintParser.js';
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -210,12 +216,13 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 }
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #parse: typeof AnnotationParser.prototype.parse;
+  readonly #validationConstraintParser: ValidationConstraintParser;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
-    const parser = new AnnotationParser((name) => importBuiltInFormModel(name, dependencies));
-    this.#parse = parser.parse.bind(parser);
+    this.#validationConstraintParser = new ValidationConstraintParser((name) =>
+      importBuiltInFormModel(name, dependencies),
+    );
   }
 
   override process(): readonly ts.Expression[] {
@@ -223,12 +230,11 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
     let result = super.process();
 
-    if (isValidationConstrainedSchema(schema)) {
+    const validationConstraints = this.#getValidationConstraints(schema);
+
+    if (validationConstraints) {
       const optionsObject = ts.factory.createObjectLiteralExpression([
-        ts.factory.createPropertyAssignment(
-          'validators',
-          ts.factory.createArrayLiteralExpression(this.#getValidatorsFromValidationConstraints(schema)),
-        ),
+        ts.factory.createPropertyAssignment('validators', validationConstraints),
       ]);
 
       result = [...result, optionsObject];
@@ -272,7 +278,14 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return [];
   }
 
-  #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
-    return schema['x-validation-constraints'].map(this.#parse);
+  #getValidationConstraints(schema: Schema): ArrayLiteralExpression | null {
+    if (!hasValidationConstraints(schema)) {
+      return null;
+    }
+
+    const constraints = schema['x-validation-constraints'].map((constraint) =>
+      this.#validationConstraintParser.parse(constraint),
+    );
+    return ts.factory.createArrayLiteralExpression(constraints);
   }
 }
