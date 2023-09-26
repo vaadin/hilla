@@ -131,7 +131,7 @@ describe('@hilla/react-grid', () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       const person = await getItem(service, 1);
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      await setFormField(result, 'First name', 'foo');
+      await setFormField(result, 'First name', 'bar');
       await submit(result);
       await nextFrame();
       await assertFormFieldValue(result, 'First name', '');
@@ -146,7 +146,7 @@ describe('@hilla/react-grid', () => {
       const result = render(
         <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
       );
-      await setFormField(result, 'First name', 'foo');
+      await setFormField(result, 'First name', 'baz');
       await submit(result);
       await nextFrame();
       await assertFormFieldValue(result, 'First name', '');
@@ -169,11 +169,11 @@ describe('@hilla/react-grid', () => {
           }}
         />,
       );
-      await setFormField(result, 'First name', 'foo');
+      await setFormField(result, 'First name', 'bag');
       await submit(result);
 
       await nextFrame();
-      expect(submittedItem!.firstName).to.equal('foo');
+      expect(submittedItem!.firstName).to.equal('bag');
     });
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
