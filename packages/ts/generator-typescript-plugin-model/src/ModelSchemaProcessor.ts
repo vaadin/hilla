@@ -22,12 +22,13 @@ import {
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
 import ts, {
-  type ArrayLiteralExpression,
   type Expression,
   type Identifier,
+  type PropertyAssignment,
   type TypeNode,
   type TypeReferenceNode,
 } from 'typescript';
+import { MetadataParser } from './MetadataParser';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 import { hasValidationConstraints, ValidationConstraintParser } from './ValidationConstraintParser.js';
 
@@ -217,12 +218,14 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
   readonly #validationConstraintParser: ValidationConstraintParser;
+  readonly #metadataParser: MetadataParser;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
     this.#validationConstraintParser = new ValidationConstraintParser((name) =>
       importBuiltInFormModel(name, dependencies),
     );
+    this.#metadataParser = new MetadataParser();
   }
 
   override process(): readonly ts.Expression[] {
@@ -230,12 +233,13 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
     let result = super.process();
 
-    const validationConstraints = this.#getValidationConstraints(schema);
+    const modelOptionsProperties = [
+      this.#createValidatorsProperty(schema),
+      this.#createMetadataProperty(schema),
+    ].filter(Boolean) as PropertyAssignment[];
 
-    if (validationConstraints) {
-      const optionsObject = ts.factory.createObjectLiteralExpression([
-        ts.factory.createPropertyAssignment('validators', validationConstraints),
-      ]);
+    if (modelOptionsProperties.length > 0) {
+      const optionsObject = ts.factory.createObjectLiteralExpression(modelOptionsProperties);
 
       result = [...result, optionsObject];
     }
@@ -278,7 +282,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return [];
   }
 
-  #getValidationConstraints(schema: Schema): ArrayLiteralExpression | null {
+  #createValidatorsProperty(schema: Schema): PropertyAssignment | null {
     if (!hasValidationConstraints(schema)) {
       return null;
     }
@@ -286,6 +290,11 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     const constraints = schema['x-validation-constraints'].map((constraint) =>
       this.#validationConstraintParser.parse(constraint),
     );
-    return ts.factory.createArrayLiteralExpression(constraints);
+    return ts.factory.createPropertyAssignment('validators', ts.factory.createArrayLiteralExpression(constraints));
+  }
+
+  #createMetadataProperty(schema: Schema): PropertyAssignment | null {
+    const metadata = this.#metadataParser.parse(schema);
+    return metadata ? ts.factory.createPropertyAssignment('metadata', metadata) : null;
   }
 }
