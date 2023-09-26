@@ -133,14 +133,14 @@ describe('@hilla/react-grid', () => {
         throw new Error('foobar');
       };
       const person = await getItem(service, 1);
-      let error;
+      let lastError;
       const result = render(
         <AutoForm
           service={service}
           model={PersonModel}
           item={person}
-          onSubmitError={({ errorMessage }) => {
-            error = errorMessage;
+          onSubmitError={({ error }) => {
+            lastError = (error as Error).message;
           }}
         />,
       );
@@ -149,7 +149,7 @@ describe('@hilla/react-grid', () => {
       // eslint-disable-next-line
       const formError = (result.container.querySelector('#formerror') as HTMLElement).innerText;
       expect(formError).to.equal('');
-      expect(error).to.equal('Something went wrong, please check all your values');
+      expect(lastError).to.deep.equal('foobar');
     });
   });
 });

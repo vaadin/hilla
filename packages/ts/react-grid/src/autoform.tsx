@@ -9,7 +9,7 @@ import type { CrudService } from './crud';
 import { getProperties } from './utils';
 
 type SubmitErrorEvent = {
-  errorMessage: string;
+  error: unknown;
 };
 type SubmitEvent<TItem> = {
   item: TItem;
@@ -18,7 +18,7 @@ export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   item?: TItem;
-  onSubmitError?({ errorMessage }: SubmitErrorEvent): void;
+  onSubmitError?({ error }: SubmitErrorEvent): void;
   onSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
 
@@ -58,14 +58,14 @@ export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit 
               } else {
                 form.clear();
               }
-            } catch (e) {
-              if (e instanceof ValidationError) {
+            } catch (error) {
+              if (error instanceof ValidationError) {
                 // Handled automatically
                 return;
               }
               const genericError = 'Something went wrong, please check all your values';
               if (onSubmitError) {
-                onSubmitError({ errorMessage: genericError });
+                onSubmitError({ error });
               } else {
                 setFormError(genericError);
               }
