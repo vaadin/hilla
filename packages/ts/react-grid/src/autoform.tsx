@@ -24,7 +24,7 @@ export type AutoFormProps<TItem> = Readonly<{
 
 export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit }: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
-    onSubmit: async (formItem) => service.update(formItem),
+    onSubmit: async (formItem) => service.save(formItem),
   });
   const [formError, setFormError] = useState('');
   useEffect(() => {

@@ -47,7 +47,7 @@ public class CrudRepositoryService<T, ID> implements CrudService<T, ID> {
     }
 
     @Override
-    public @Nullable T update(T value) {
+    public @Nullable T save(T value) {
         return ((JpaRepository<T, ID>) repository).save(value);
     }
 

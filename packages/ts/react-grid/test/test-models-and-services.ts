@@ -119,7 +119,7 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
       }
       return filteredData;
     },
-    async update(value: T): Promise<T | undefined> {
+    async save(value: T): Promise<T | undefined> {
       data = data.map((item) => (item.id === value.id ? value : item));
       return data.find((item) => item.id === value.id);
     },

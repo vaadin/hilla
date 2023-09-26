@@ -175,7 +175,7 @@ describe('@hilla/react-grid', () => {
     });
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
-      service.update = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');
       };
       const person = await getItem(service, 1);
@@ -189,7 +189,7 @@ describe('@hilla/react-grid', () => {
     });
     it('calls onSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
-      service.update = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');
       };
       const person = await getItem(service, 1);

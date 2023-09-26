@@ -27,18 +27,17 @@ public interface CrudService<T, ID> {
     List<T> list(Pageable pageable, @Nullable Filter filter);
 
     /**
-     * Updates (or creates) the given object and returns a potentially updated
-     * object.
+     * Saves the given object and returns the (potentially) updated object.
      * <p>
      * If you store the object in a SQL database, the returned object might have
      * a new id or updated consistency version.
      *
      * @param value
-     *            the object to update/store
+     *            the object to save
      * @return the fresh object or {@code null} if no object was found to update
      */
     @Nullable
-    T update(T value);
+    T save(T value);
 
     /**
      * Delets the object with the given id.

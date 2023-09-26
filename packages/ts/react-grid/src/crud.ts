@@ -3,6 +3,6 @@ import type Pageable from './types/dev/hilla/mappedtypes/Pageable';
 
 export interface CrudService<T> {
   list(request: Pageable, filter: Filter | undefined): Promise<T[]>;
-  update(value: T): Promise<T | undefined>;
+  save(value: T): Promise<T | undefined>;
   // delete(id: ID): Promise<void>;
 }
