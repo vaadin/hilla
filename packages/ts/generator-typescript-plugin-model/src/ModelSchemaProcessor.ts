@@ -28,7 +28,7 @@ import ts, {
   type TypeNode,
   type TypeReferenceNode,
 } from 'typescript';
-import { MetadataParser } from './MetadataParser';
+import { MetadataParser } from './MetadataParser.js';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 import { hasValidationConstraints, ValidationConstraintParser } from './ValidationConstraintParser.js';
 
