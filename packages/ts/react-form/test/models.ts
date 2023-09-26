@@ -26,14 +26,14 @@ export class UserModel<T extends User = User> extends ObjectModel<T> {
   get name(): StringModel {
     return this[_getPropertyModel](
       'name',
-      (parent, key) => new StringModel(parent, key, false, new Required(), new Size({ max: 10 })),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Required(), new Size({ max: 10 })] }),
     );
   }
 
   get password(): StringModel {
     return this[_getPropertyModel](
       'password',
-      (parent, key) => new StringModel(parent, key, false, new Required(), new Size({ min: 6 })),
+      (parent, key) => new StringModel(parent, key, false, { validators: [new Required(), new Size({ min: 6 })] }),
     );
   }
 

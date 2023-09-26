@@ -18,7 +18,7 @@ class OrderModel<T extends Order_1 = Order_1> extends ObjectModel_1<T> {
     }
     get property(): StringModel_1 {
         return this[_getPropertyModel_1]("property", (parent, key) =>
-            new StringModel_1(parent, key, false, new NotBlank_1())
+            new StringModel_1(parent, key, false, { validators: [new NotBlank_1()] })
         );
     }
     get ignoreCase(): BooleanModel_1 {

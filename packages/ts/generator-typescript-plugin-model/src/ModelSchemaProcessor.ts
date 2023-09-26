@@ -224,7 +224,14 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     let result = super.process();
 
     if (isValidationConstrainedSchema(schema)) {
-      result = [...result, ...this.#getValidatorsFromValidationConstraints(schema)];
+      const optionsObject = ts.factory.createObjectLiteralExpression([
+        ts.factory.createPropertyAssignment(
+          'validators',
+          ts.factory.createArrayLiteralExpression(this.#getValidatorsFromValidationConstraints(schema)),
+        ),
+      ]);
+
+      result = [...result, optionsObject];
     }
 
     return [isNullableSchema(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
