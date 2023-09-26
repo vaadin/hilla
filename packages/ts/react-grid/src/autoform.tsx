@@ -32,10 +32,10 @@ export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit 
   }, [item]);
 
   return (
-    <VerticalLayout theme="padding spacing">
+    <VerticalLayout theme="padding">
       {getProperties(model).map((propertyInfo) => (
         <AutoFormField
-          key={`auto-form-field-${propertyInfo.name}`}
+          key={propertyInfo.name}
           propertyInfo={propertyInfo}
           form={form}
         ></AutoFormField>
@@ -43,7 +43,7 @@ export function AutoForm<TItem>({ service, model, item, onSubmitError, onSubmit 
       <div id="formerror" style={{ color: 'red' }}>
         {formError}
       </div>
-      <HorizontalLayout theme="spacing">
+      <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
         <Button
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={async () => {
