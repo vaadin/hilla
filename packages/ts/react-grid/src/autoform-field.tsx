@@ -1,4 +1,3 @@
-import type { AbstractModel } from '@hilla/form';
 import { TextField } from '@hilla/react-components/TextField.js';
 import type { UseFormResult } from '@hilla/react-form';
 import type { PropertyInfo } from './utils.js';
