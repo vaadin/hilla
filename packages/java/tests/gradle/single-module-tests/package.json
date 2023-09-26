@@ -11,6 +11,7 @@
     "@hilla/generator-typescript-plugin-client": "file:../../../../ts/generator-typescript-plugin-client",
     "@hilla/generator-typescript-plugin-model": "file:../../../../ts/generator-typescript-plugin-model",
     "@hilla/generator-typescript-plugin-push": "file:../../../../ts/generator-typescript-plugin-push",
+    "@hilla/generator-typescript-plugin-subtypes": "file:../../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "file:../../../../ts/generator-typescript-utils",
     "@hilla/hilla-frontend": "file:../../../../ts/hilla-frontend",
     "@hilla/react-auth": "file:../../../../ts/react-auth",

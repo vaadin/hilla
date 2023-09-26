@@ -25,6 +25,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "2.3.0-alpha5")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.3.0-alpha5")
 @NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.3.0-alpha5")
+@NpmPackage(value = "@hilla/generator-typescript-plugin-subtypes", version = "2.3.0-alpha5")
 public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
