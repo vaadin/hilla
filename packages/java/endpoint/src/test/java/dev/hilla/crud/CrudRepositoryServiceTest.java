@@ -26,6 +26,7 @@ import java.util.function.Function;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
         CrudRepositoryServiceTest.DefaultJpaRepositoryService.class,
         CrudRepositoryServiceTest.CustomCrudRepository.class,
@@ -33,7 +34,6 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
 @ContextConfiguration(classes = { CrudConfiguration.class })
-@RunWith(SpringRunner.class)
 @EnableAutoConfiguration
 public class CrudRepositoryServiceTest {
 

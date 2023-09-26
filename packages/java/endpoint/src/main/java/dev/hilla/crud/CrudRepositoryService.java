@@ -9,6 +9,7 @@ import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
 import dev.hilla.crud.filter.Filter;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -48,19 +49,19 @@ public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
         this.entityClass = resolveEntityClass();
     }
 
+    @PostConstruct
+    private void init() {
+        if (repository == null) {
+            repository = resolveRepository();
+        }
+    }
+
     /**
-     * Initializes the repository instance if it hasn't been initialized yet,
-     * otherwise returns the existing one.
-     * <p>
-     * This method uses ApplicationContext to obtain the Repository instance, so
-     * it is not suitable for use in the constructor.
+     * Accessor for the repository instance.
      *
      * @return the repository instance
      */
     protected R getRepository() {
-        if (repository == null) {
-            repository = resolveRepository();
-        }
         return repository;
     }
 
