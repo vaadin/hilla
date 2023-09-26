@@ -32,7 +32,7 @@ public interface CrudService<T, ID> {
      * <p>
      * If you store the object in a SQL database, the returned object might have
      * a new id or updated consistency version.
-     * 
+     *
      * @param value
      *            the object to update/store
      * @return the fresh object or {@code null} if no object was found to update
@@ -42,7 +42,7 @@ public interface CrudService<T, ID> {
 
     /**
      * Delets the object with the given id.
-     * 
+     *
      * @param id
      *            the id of the object to delete
      */
