@@ -5,7 +5,6 @@ import { ReadOnlyGrid } from './views/ReadOnlyGrid';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter';
-import { AutoCrudView } from './views/AutoCrudView';
 
 export const routes = [
   {
@@ -31,10 +30,6 @@ export const routes = [
       {
         path: '/auto-form',
         element: <AutoFormView />,
-      },
-      {
-        path: '/auto-crud',
-        element: <AutoCrudView />,
       },
     ],
   },
