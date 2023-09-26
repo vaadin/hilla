@@ -4,5 +4,15 @@ import { HeaderColumnContext } from './header-column-context.js';
 
 export function HeaderSorter(): ReactElement {
   const context = useContext(HeaderColumnContext)!;
-  return <GridSorter path={context.propertyInfo.name}>{context.propertyInfo.humanReadableName}</GridSorter>;
+  return (
+    <GridSorter
+      direction={context.sortDirection}
+      path={context.propertyInfo.name}
+      onDirectionChanged={(e) => {
+        context.sortDirection = e.detail.value;
+      }}
+    >
+      {context.propertyInfo.humanReadableName}
+    </GridSorter>
+  );
 }

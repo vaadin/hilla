@@ -10,7 +10,7 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
+import { GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
 import { HeaderColumnContext } from './header-column-context';
@@ -47,11 +47,6 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
       size?: number;
     };
   }>;
-
-function pathFromColumn(column: any): string {
-  // eslint-disable-next-line
-  return column?.original?.path ?? column?.original?.dataset?.path;
-}
 
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
@@ -111,6 +106,7 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
+  let firstProperty = true;
   return effectiveProperties.map((propertyInfo) => {
     let column;
     if (options.headerFilters) {
@@ -122,8 +118,13 @@ function useColumns(
     } else {
       column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
+    const sortDirection = firstProperty ? 'asc' : null;
+    firstProperty = false;
     return (
-      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <HeaderColumnContext.Provider
+        key={`group-${propertyInfo.name}`}
+        value={{ propertyInfo, setPropertyFilter, sortDirection }}
+      >
         {column}
       </HeaderColumnContext.Provider>
     );
@@ -182,7 +183,9 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    setTimeout(() => {
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    }, 1);
   }, [model, service]);
 
   useEffect(() => {
