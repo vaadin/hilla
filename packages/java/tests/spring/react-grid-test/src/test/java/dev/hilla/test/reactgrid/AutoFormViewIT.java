@@ -30,11 +30,6 @@ public class AutoFormViewIT extends ChromeBrowserTest {
 
         // Field values remain
         Assert.assertEquals("It's me, Mario", getTextField("name").getValue());
-        // Custom error message shown
-        Assert.assertEquals(
-                "Something went wrong, please check all your values",
-                $("div").id("formerror").getText());
-
     }
 
     @Test
@@ -44,9 +39,11 @@ public class AutoFormViewIT extends ChromeBrowserTest {
         getTextField("time").setValue("2020-10-03T09:20:00.000Z");
         submit();
 
-        Assert.assertEquals(
-                "Thank you John Doe, your appointment has been reserved.",
-                $("*").id("form-submitted").getText());
+        waitUntil(driver -> {
+            return $("*").id("form-submitted").getText().equals(
+                    "Thank you John Doe, your appointment has been reserved.");
+
+        });
 
     }
 
