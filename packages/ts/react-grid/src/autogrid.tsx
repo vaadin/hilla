@@ -13,7 +13,7 @@ import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { HeaderColumnContext } from './header-column-context';
+import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -51,6 +51,37 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 function pathFromColumn(column: any): string {
   // eslint-disable-next-line
   return column?.original?.path ?? column?.original?.dataset?.path;
+}
+
+interface DataProviderRequest<TItem> {
+  params: GridDataProviderParams<TItem>;
+  callback: GridDataProviderCallback<TItem>;
+}
+
+function debouncedDataProvider<TItem>(dataProvider: GridDataProvider<TItem>) {
+  const timeout = 0;
+  let pendingRequests = new Map<number, DataProviderRequest<TItem>>();
+  let pendingUpdate: any = null;
+
+  function flush() {
+    Array.from(pendingRequests.values()).forEach((request) => {
+      dataProvider(request.params, request.callback);
+    });
+    pendingRequests = new Map();
+    pendingUpdate = null;
+  }
+
+  function scheduleFlush() {
+    if (pendingUpdate) {
+      clearTimeout(pendingUpdate);
+    }
+    pendingUpdate = setTimeout(flush, timeout);
+  }
+
+  return (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
+    pendingRequests.set(params.page, { params, callback });
+    scheduleFlush();
+  };
 }
 
 function createDataProvider<TItem>(
@@ -110,6 +141,9 @@ function useColumns(
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
@@ -123,7 +157,10 @@ function useColumns(
       column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
     return (
-      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <HeaderColumnContext.Provider
+        key={`group-${propertyInfo.name}`}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+      >
         {column}
       </HeaderColumnContext.Provider>
     );
@@ -181,8 +218,10 @@ export function AutoGrid<TItem>({
 
   useEffect(() => {
     // Sets the data provider, should be done only once
-    const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    setTimeout(() => {
+      const grid = ref.current!;
+      grid.dataProvider = debouncedDataProvider(createDataProvider(grid, service, dataProviderFilter));
+    }, 1);
   }, [model, service]);
 
   useEffect(() => {
