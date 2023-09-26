@@ -13,15 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  * A browser-callable service that delegates crud operations to a JPA
  * repository.
  */
 @EndpointExposed
-public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSpecificationExecutor<T>>
+public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements CrudService<T> {
 
     @Autowired
@@ -57,7 +57,7 @@ public class CrudRepositoryService<T, ID, R extends JpaRepository<T, ID> & JpaSp
      *
      * @return the repository instance
      */
-    protected JpaSpecificationExecutor<T> getRepository() {
+    protected R getRepository() {
         if (repository == null) {
             repository = resolveRepository();
         }
