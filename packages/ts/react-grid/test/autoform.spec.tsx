@@ -69,36 +69,39 @@ describe('@hilla/react-grid', () => {
         someNumber: 24451,
         vip: false,
       };
-      const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
+      const result = render(<ExperimentalAutoForm service={personService()} model={PersonModel} item={person} />);
       await assertFormFieldValues(result, person);
     });
     it('works without an item', async () => {
-      const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} />);
+      const result = render(<ExperimentalAutoForm service={personService()} model={PersonModel} />);
       await assertFormFieldValues(result, undefined);
     });
     it('uses values from an item', async () => {
-      const person = (await getItem(personService, 2))!;
+      const service = personService();
+      const person = (await getItem(service, 2))!;
 
-      const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       await assertFormFieldValues(result, person);
     });
     it('updates values when changing item', async () => {
-      const person1 = (await getItem(personService, 2))!;
-      const person2 = (await getItem(personService, 1))!;
+      const service = personService();
+      const person1 = (await getItem(service, 2))!;
+      const person2 = (await getItem(service, 1))!;
 
-      const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person1} />);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person1} />);
       await assertFormFieldValues(result, person1);
 
-      result.rerender(<ExperimentalAutoForm service={personService} model={PersonModel} item={person2} />);
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={person2} />);
       await assertFormFieldValues(result, person2);
     });
     it('clears the form when setting the item to undefined', async () => {
-      const person = (await getItem(personService, 2))!;
+      const service = personService();
+      const person = (await getItem(service, 2))!;
 
-      const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       await assertFormFieldValues(result, person);
 
-      result.rerender(<ExperimentalAutoForm service={personService} model={PersonModel} item={undefined} />);
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
       await assertFormFieldValues(result, undefined);
     });
     it('submits a valid form', async () => {
@@ -139,22 +142,17 @@ describe('@hilla/react-grid', () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
 
       const person = await getItem(service, 1);
-      let submittedItem: Person | undefined;
+      const submitSpy = sinon.spy();
       const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          onSubmit={({ item }) => {
-            submittedItem = item;
-          }}
-        />,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
       );
       await setFormField(result, 'First name', 'bag');
       await submit(result);
 
       await nextFrame();
-      expect(submittedItem!.firstName).to.equal('bag');
+      await nextFrame();
+
+      assert(submitSpy.calledWithMatch(sinon.match.hasNested('item.firstName', 'bag')));
     });
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
