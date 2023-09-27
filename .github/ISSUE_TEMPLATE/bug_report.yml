@@ -1,0 +1,42 @@
+name: "\U0001F41E Bug report"
+description: Report an issue with Hilla
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is. If you intend to submit a PR for this issue later, please let us know here.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected-behavior
+      description: Describe what the expected behavior you think, and we will validate on our designs. 
+      placeholder: expected behavior
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Please tell us how to reproduce this issue step by step. If you have an example project to show, please provide us the link. 
+      placeholder: Reproduction
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: Please let us know your environment when reproducing the issue. 
+      placeholder: Operating System, Hilla version, Browsers type and version
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Please vote on this issue by adding a 👍 reaction to the original issue to help the community and maintainers prioritize this request.
