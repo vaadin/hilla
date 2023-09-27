@@ -57,11 +57,13 @@ function createDataProvider<TItem>(
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
+      orders: params.sortOrders
+        .filter((order) => order.direction != null)
+        .map((order) => ({
+          property: order.path,
+          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+          ignoreCase: false,
+        })),
     };
 
     const pageNumber = params.page;
