@@ -4,17 +4,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+import io.github.classgraph.ClassGraph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +29,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import org.junit.platform.commons.util.ReflectionUtils;
+import org.mockito.Mockito;
 
 public class ParserConfigTests {
     private final ResourceLoader resourceLoader = new ResourceLoader(
@@ -171,6 +178,44 @@ public class ParserConfigTests {
                         }));
         assertThat(e.getMessage(), startsWith("Requires instance of class "
                 + BazPluginConfig.class.getName()));
+    }
+
+    @Test
+    public void exposedPackagesAreNotEmpty_rootPackage_shouldAlsoBeIncludedInClassGraphScan()
+            throws IllegalAccessException {
+
+        var parserWithRootPackageFinder = new Parser()
+                .classLoader(getClass().getClassLoader())
+                .classPath(defaultClassPathElements)
+                .endpointAnnotation(defaultEndpointAnnotationName)
+                .endpointExposedAnnotation(defaultEndpointExposedAnnotationName)
+                .exposedPackages(List.of("test.sample.app"));
+
+        var rootPackageFinder = mock(
+                Parser.SpringBootAppRootPackageFinder.class);
+        when(rootPackageFinder.findRootPackage(Mockito.anyList()))
+                .thenReturn(Optional.of("com.example.app"));
+
+        Field rootPackageFinderField = ReflectionUtils.findFields(Parser.class,
+                f -> f.getName().equals("rootPackageFinder"),
+                ReflectionUtils.HierarchyTraversalMode.TOP_DOWN).get(0);
+        rootPackageFinderField.setAccessible(true);
+        rootPackageFinderField.set(parserWithRootPackageFinder,
+                rootPackageFinder);
+
+        var classGraph = mock(ClassGraph.class);
+
+        Field classGraphField = ReflectionUtils
+                .findFields(Parser.class, f -> f.getName().equals("classGraph"),
+                        ReflectionUtils.HierarchyTraversalMode.TOP_DOWN)
+                .get(0);
+        classGraphField.setAccessible(true);
+        classGraphField.set(parserWithRootPackageFinder, classGraph);
+
+        parserWithRootPackageFinder.execute();
+
+        Mockito.verify(classGraph, Mockito.times(1))
+                .acceptPackages("test.sample.app", "com.example.app");
     }
 
     private void testOpenAPISourceFile(String fileName, OpenAPIFileType type)
