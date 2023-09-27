@@ -4,6 +4,7 @@ import {
   _enum,
   _fromString,
   _key,
+  _meta,
   ArrayModel,
   Binder,
   EnumModel,
@@ -12,6 +13,8 @@ import {
   NotEmpty,
   NotNull,
   NumberModel,
+  ObjectModel,
+  type ModelMetadata,
   Positive,
   Size,
 } from '../src/index.js';
@@ -401,6 +404,22 @@ describe('@hilla/form', () => {
 
         expect(results.length).to.equal(0);
       });
+    });
+  });
+
+  describe('metadata', () => {
+    it('should initialize with empty metadata by default', () => {
+      const model = new ObjectModel(null as any, '', true);
+      expect(model[_meta]).to.eql({});
+    });
+
+    it('should initialize with metadata from options', () => {
+      const meta: ModelMetadata = {
+        javaType: 'java.lang.String',
+        annotations: [{ name: 'jakarta.persistence.Id' }, { name: 'jakarta.persistence.Version' }],
+      };
+      const model = new ObjectModel(null as any, '', true, { meta });
+      expect(model[_meta]).to.equal(meta);
     });
   });
 });

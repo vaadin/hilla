@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import ts, { type NewExpression } from 'typescript';
-import { AnnotationParser, type Annotation } from '../../src/annotation.js';
+import { ValidationConstraintProcessor, type ValidationConstraint } from '../../src/ValidationConstraintProcessor.js';
 
 type AnnotationPack = Readonly<{
   expected?: string;
   str: string;
-  obj: Annotation;
+  obj: ValidationConstraint;
 }>;
 
-function assertAnnotation(actual: NewExpression, expected: string): void {
+function assertValidationConstraint(actual: NewExpression, expected: string): void {
   const printer = ts.createPrinter();
   let file = ts.createSourceFile('f.ts', '', ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
   file = ts.factory.updateSourceFile(file, [
@@ -24,13 +24,13 @@ function assertAnnotation(actual: NewExpression, expected: string): void {
   expect(printer.printFile(file).trim()).to.equal(`const a = new ${expected};`);
 }
 
-describe('AnnotationParser', () => {
+describe('ValidationConstraintProcessor', () => {
   let importer: sinon.SinonSpy;
-  let parser: AnnotationParser;
+  let processor: ValidationConstraintProcessor;
 
   beforeEach(() => {
     importer = sinon.fake((name: string) => ts.factory.createIdentifier(name));
-    parser = new AnnotationParser(importer);
+    processor = new ValidationConstraintProcessor(importer);
   });
 
   const notBlank: AnnotationPack = {
@@ -127,17 +127,20 @@ describe('AnnotationParser', () => {
     str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,
   };
 
-  it('should parse object annotations', () => {
-    assertAnnotation(parser.parse(notBlank.obj), notBlank.expected ?? notBlank.str);
-    assertAnnotation(parser.parse(min.obj), min.expected ?? min.str);
-    assertAnnotation(parser.parse(max.obj), max.expected ?? max.str);
-    assertAnnotation(parser.parse(sizeSimple.obj), sizeSimple.expected ?? sizeSimple.str);
-    assertAnnotation(parser.parse(sizeComplex.obj), sizeComplex.expected ?? sizeComplex.str);
-    assertAnnotation(parser.parse(decimalMin.obj), decimalMin.expected ?? decimalMin.str);
-    assertAnnotation(parser.parse(decimalMax.obj), decimalMax.expected ?? decimalMax.str);
-    assertAnnotation(parser.parse(decimalMaxInclusive.obj), decimalMaxInclusive.expected ?? decimalMaxInclusive.str);
-    assertAnnotation(parser.parse(digits.obj), digits.expected ?? digits.str);
-    assertAnnotation(parser.parse(email.obj), email.expected ?? email.str);
-    assertAnnotation(parser.parse(pattern.obj), pattern.expected ?? pattern.str);
+  it('should process object annotations', () => {
+    assertValidationConstraint(processor.process(notBlank.obj), notBlank.expected ?? notBlank.str);
+    assertValidationConstraint(processor.process(min.obj), min.expected ?? min.str);
+    assertValidationConstraint(processor.process(max.obj), max.expected ?? max.str);
+    assertValidationConstraint(processor.process(sizeSimple.obj), sizeSimple.expected ?? sizeSimple.str);
+    assertValidationConstraint(processor.process(sizeComplex.obj), sizeComplex.expected ?? sizeComplex.str);
+    assertValidationConstraint(processor.process(decimalMin.obj), decimalMin.expected ?? decimalMin.str);
+    assertValidationConstraint(processor.process(decimalMax.obj), decimalMax.expected ?? decimalMax.str);
+    assertValidationConstraint(
+      processor.process(decimalMaxInclusive.obj),
+      decimalMaxInclusive.expected ?? decimalMaxInclusive.str,
+    );
+    assertValidationConstraint(processor.process(digits.obj), digits.expected ?? digits.str);
+    assertValidationConstraint(processor.process(email.obj), email.expected ?? email.str);
+    assertValidationConstraint(processor.process(pattern.obj), pattern.expected ?? pattern.str);
   });
 });
