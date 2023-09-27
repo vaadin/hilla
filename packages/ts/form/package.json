@@ -15,8 +15,13 @@
     "Form"
   ],
   "scripts": {
-    "build": "tsc --isolatedModules -p tsconfig.build.json",
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "echo \"Skipping\"",
+    "lint:fix": "echo \"Skipping\"",
     "test": "karma start ../../../karma.config.cjs --port 9877",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
@@ -62,24 +67,23 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "^2.1.10",
-    "rimraf": "^3.0.2",
-    "validator": "^13.6.0"
+    "@hilla/frontend": "^2.1",
+    "validator": "^13.11.0"
   },
   "peerDependencies": {
     "lit": "^2.3.0"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@types/chai": "^4.2.21",
-    "@types/chai-dom": "^1.11.0",
-    "@types/mocha": "^9.0.0",
-    "@types/sinon": "^10.0.2",
-    "@types/sinon-chai": "^3.2.5",
-    "@types/validator": "^13.6.0",
+    "@types/chai": "^4.3.6",
+    "@types/chai-dom": "^1.11.1",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.17",
+    "@types/sinon-chai": "^3.2.10",
+    "@types/validator": "^13.11.2",
     "chai-dom": "^1.11.0",
-    "sinon": "^11.1.2",
+    "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "^5.0.1-rc"
+    "typescript": "^5.2.2"
   }
 }
