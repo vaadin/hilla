@@ -13,15 +13,15 @@ public class ReadOnlyGridSinglePropertyFilterIT extends AbstractGridTest {
     @Test
     public void findsMatches() {
         setFilter("Ali");
-        assertVisibleRows(1);
+        assertRowCount(1);
         assertName(0, "Alice", "Johnson");
 
         setFilter("");
         assertName(0, "Alice", "Johnson");
-        assertVisibleRows(10);
+        assertRowCount(50);
 
         setFilter("xan");
-        assertVisibleRows(2);
+        assertRowCount(2);
         assertName(0, "Xander", "Hill");
         assertName(1, "Xander", "Zane");
 

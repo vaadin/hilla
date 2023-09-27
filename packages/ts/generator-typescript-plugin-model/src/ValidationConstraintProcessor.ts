@@ -13,18 +13,22 @@ import ts, {
 } from 'typescript';
 
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
-  Readonly<{ 'x-validation-constraints': readonly Annotation[] }>;
+  Readonly<{ 'x-validation-constraints': readonly ValidationConstraint[] }>;
 
-export function isValidationConstrainedSchema(schema: Schema): schema is ValidationConstrainedSchema {
-  return isNonComposedRegularSchema(schema) && 'x-validation-constraints' in schema;
+export function hasValidationConstraints(schema: Schema): schema is ValidationConstrainedSchema {
+  return (
+    isNonComposedRegularSchema(schema) &&
+    'x-validation-constraints' in schema &&
+    (schema as ValidationConstrainedSchema)['x-validation-constraints'].length > 0
+  );
 }
 
-export interface Annotation {
+export interface ValidationConstraint {
   simpleName: string;
   attributes?: Record<string, unknown>;
 }
 
-export type AnnotationImporter = (name: string) => Identifier;
+export type ValidationConstraintImporter = (name: string) => Identifier;
 
 function selector<T extends Expression>([statement]: readonly Statement[]): T {
   return (statement as VariableStatement).declarationList.declarations[0].initializer as T;
@@ -32,32 +36,22 @@ function selector<T extends Expression>([statement]: readonly Statement[]): T {
 
 const variableStatementVar = 'const a';
 
-export class AnnotationParser {
-  readonly #importer: AnnotationImporter;
+export class ValidationConstraintProcessor {
+  readonly #importer: ValidationConstraintImporter;
 
-  constructor(importer: AnnotationImporter) {
+  constructor(importer: ValidationConstraintImporter) {
     this.#importer = importer;
   }
 
-  parse(annotation: Annotation | string): ts.NewExpression {
-    if (typeof annotation === 'string') {
-      const nameEndIndex = annotation.indexOf('(');
-      const simpleName = nameEndIndex >= 0 ? annotation.slice(0, nameEndIndex) : annotation;
-      const id = this.#importer(simpleName);
-
-      return template<NewExpression>(`${variableStatementVar} = new ${annotation}`, selector, [
-        transform((node) => (ts.isIdentifier(node) && node.text === simpleName ? id : node)),
-      ]);
-    }
-
+  process(constraint: ValidationConstraint): NewExpression {
     return ts.factory.createNewExpression(
-      this.#importer(annotation.simpleName),
+      this.#importer(constraint.simpleName),
       undefined,
-      annotation.attributes ? [this.#parseAnnotationAttributes(annotation.attributes)] : [],
+      constraint.attributes ? [this.#processAttributes(constraint.attributes)] : [],
     );
   }
 
-  #parseAnnotationAttributes(attributes: Record<string, unknown>): Expression {
+  #processAttributes(attributes: Record<string, unknown>): Expression {
     const names = Object.keys(attributes);
     const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
 

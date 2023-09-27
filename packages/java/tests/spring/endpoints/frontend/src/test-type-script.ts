@@ -5,7 +5,7 @@ import { Binder } from '@hilla/form';
 import AnnotatedEntityModel from 'Frontend/generated/com/vaadin/flow/connect/AnnotatedEndpoint/AnnotatedEntityModel';
 
 @customElement('test-type-script')
-class TestTypeScriptComponent extends LitElement {
+export class TestTypeScriptComponent extends LitElement {
   @query('#content')
   private content!: HTMLOutputElement;
 

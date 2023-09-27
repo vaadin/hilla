@@ -8,6 +8,7 @@
   "ignorePatterns": ["packages/ts/*/test/**/*.snap.ts"],
   "plugins": ["tsdoc"],
   "rules": {
+    "@typescript-eslint/no-invalid-void-type": "off",
     "@typescript-eslint/member-ordering": "off",
     "class-methods-use-this": "off",
     "import/no-duplicates": "off",

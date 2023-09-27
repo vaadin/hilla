@@ -3,6 +3,7 @@ import MainLayout from './MainLayout';
 import { ReadOnlyGrid } from './views/ReadOnlyGrid';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter';
+import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter';
 
 export const routes = [
   {
@@ -20,6 +21,10 @@ export const routes = [
       {
         path: '/readonly-grid-or-filter',
         element: <ReadOnlyGridOrFilter />,
+      },
+      {
+        path: '/readonly-grid-with-headerfilters',
+        element: <ReadOnlyGridWithHeaderFilters />,
       },
     ],
   },
