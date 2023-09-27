@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-cli",
-  "version": "1.3.23",
+  "version": "1.3.24",
   "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
