@@ -8,11 +8,10 @@ import {
   type GridElement,
   type GridProps,
 } from '@hilla/react-components/Grid.js';
-import { GridColumn, type GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
-import { AutoGridNumberRenderer } from './autogrid-number-renderer';
+import { useEffect, useRef, useState, type JSX } from 'react';
+import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
 import { ColumnContext } from './header-column-context';
 import { HeaderFilter } from './header-filter';
@@ -121,8 +120,7 @@ function useColumns(
           <GridColumn
             path={propertyInfo.name}
             headerRenderer={HeaderFilter}
-            renderer={propertyInfo.gridRenderer}
-            {...propertyInfo.gridColumnOptions}
+            {...getColumnProps(propertyInfo)}
           ></GridColumn>
         </GridColumnGroup>
       );
@@ -131,8 +129,7 @@ function useColumns(
         <GridColumn
           path={propertyInfo.name}
           headerRenderer={HeaderSorter}
-          renderer={propertyInfo.gridRenderer}
-          {...propertyInfo.gridColumnOptions}
+          {...getColumnProps(propertyInfo)}
         ></GridColumn>
       );
     }
