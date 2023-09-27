@@ -9,8 +9,4 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @AnonymousAllowed
 public class CompanyService
         extends CrudRepositoryService<Company, Long, CompanyRepository> {
-
-    public CompanyService(CompanyRepository repository) {
-        super(repository);
-    }
 }
