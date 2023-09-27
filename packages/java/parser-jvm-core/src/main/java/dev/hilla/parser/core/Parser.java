@@ -289,7 +289,7 @@ public final class Parser {
         var buildDirectories = config.getClassPathElements().stream()
                 .filter(e -> !e.endsWith(".jar")).toList();
 
-        Collection<String> packages = getConfig().getExposedPackages();
+        Collection<String> packages = config.getExposedPackages();
 
         // Packages explicitly defined in pom.xml have priority
         if (packages != null && !packages.isEmpty()) {
