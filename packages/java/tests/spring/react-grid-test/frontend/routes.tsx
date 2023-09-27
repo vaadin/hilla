@@ -1,8 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout';
+import { AutoFormView } from './views/AutoFormView';
 import { ReadOnlyGrid } from './views/ReadOnlyGrid';
-import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter';
+import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter';
 
 export const routes = [
@@ -25,6 +26,10 @@ export const routes = [
       {
         path: '/readonly-grid-with-headerfilters',
         element: <ReadOnlyGridWithHeaderFilters />,
+      },
+      {
+        path: '/auto-form',
+        element: <AutoFormView />,
       },
     ],
   },
