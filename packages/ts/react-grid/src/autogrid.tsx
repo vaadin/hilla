@@ -20,12 +20,14 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, type PropertyInfo } from './utils.js';
+import { getProperties, hasAnnotation, type PropertyInfo } from './utils.js';
 
-function includeColumn(propertyId: string): unknown {
-  // Exclude id and version columns
-  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
-  if (propertyId === 'id' || propertyId === 'version') {
+function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
     return false;
   }
   return true;
@@ -102,7 +104,7 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
+  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
