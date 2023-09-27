@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import ts, { type NewExpression } from 'typescript';
-import { ValidationConstraintParser, type ValidationConstraint } from '../../src/ValidationConstraintParser.js';
+import { ValidationConstraintProcessor, type ValidationConstraint } from '../../src/ValidationConstraintProcessor.js';
 
 type AnnotationPack = Readonly<{
   expected?: string;
@@ -24,13 +24,13 @@ function assertValidationConstraint(actual: NewExpression, expected: string): vo
   expect(printer.printFile(file).trim()).to.equal(`const a = new ${expected};`);
 }
 
-describe('ValidationConstraintParser', () => {
+describe('ValidationConstraintProcessor', () => {
   let importer: sinon.SinonSpy;
-  let parser: ValidationConstraintParser;
+  let processor: ValidationConstraintProcessor;
 
   beforeEach(() => {
     importer = sinon.fake((name: string) => ts.factory.createIdentifier(name));
-    parser = new ValidationConstraintParser(importer);
+    processor = new ValidationConstraintProcessor(importer);
   });
 
   const notBlank: AnnotationPack = {
@@ -127,20 +127,20 @@ describe('ValidationConstraintParser', () => {
     str: String.raw`Pattern({ regexp: "\\d+\\..+" })`,
   };
 
-  it('should parse object annotations', () => {
-    assertValidationConstraint(parser.parse(notBlank.obj), notBlank.expected ?? notBlank.str);
-    assertValidationConstraint(parser.parse(min.obj), min.expected ?? min.str);
-    assertValidationConstraint(parser.parse(max.obj), max.expected ?? max.str);
-    assertValidationConstraint(parser.parse(sizeSimple.obj), sizeSimple.expected ?? sizeSimple.str);
-    assertValidationConstraint(parser.parse(sizeComplex.obj), sizeComplex.expected ?? sizeComplex.str);
-    assertValidationConstraint(parser.parse(decimalMin.obj), decimalMin.expected ?? decimalMin.str);
-    assertValidationConstraint(parser.parse(decimalMax.obj), decimalMax.expected ?? decimalMax.str);
+  it('should process object annotations', () => {
+    assertValidationConstraint(processor.process(notBlank.obj), notBlank.expected ?? notBlank.str);
+    assertValidationConstraint(processor.process(min.obj), min.expected ?? min.str);
+    assertValidationConstraint(processor.process(max.obj), max.expected ?? max.str);
+    assertValidationConstraint(processor.process(sizeSimple.obj), sizeSimple.expected ?? sizeSimple.str);
+    assertValidationConstraint(processor.process(sizeComplex.obj), sizeComplex.expected ?? sizeComplex.str);
+    assertValidationConstraint(processor.process(decimalMin.obj), decimalMin.expected ?? decimalMin.str);
+    assertValidationConstraint(processor.process(decimalMax.obj), decimalMax.expected ?? decimalMax.str);
     assertValidationConstraint(
-      parser.parse(decimalMaxInclusive.obj),
+      processor.process(decimalMaxInclusive.obj),
       decimalMaxInclusive.expected ?? decimalMaxInclusive.str,
     );
-    assertValidationConstraint(parser.parse(digits.obj), digits.expected ?? digits.str);
-    assertValidationConstraint(parser.parse(email.obj), email.expected ?? email.str);
-    assertValidationConstraint(parser.parse(pattern.obj), pattern.expected ?? pattern.str);
+    assertValidationConstraint(processor.process(digits.obj), digits.expected ?? digits.str);
+    assertValidationConstraint(processor.process(email.obj), email.expected ?? email.str);
+    assertValidationConstraint(processor.process(pattern.obj), pattern.expected ?? pattern.str);
   });
 });

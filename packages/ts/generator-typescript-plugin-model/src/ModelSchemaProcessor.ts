@@ -28,9 +28,9 @@ import ts, {
   type TypeNode,
   type TypeReferenceNode,
 } from 'typescript';
-import { MetadataParser } from './MetadataParser.js';
+import { MetadataProcessor } from './MetadataProcessor.js';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
-import { hasValidationConstraints, ValidationConstraintParser } from './ValidationConstraintParser.js';
+import { hasValidationConstraints, ValidationConstraintProcessor } from './ValidationConstraintProcessor.js';
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -217,15 +217,15 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 }
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #validationConstraintParser: ValidationConstraintParser;
-  readonly #metadataParser: MetadataParser;
+  readonly #validationConstraintProcessor: ValidationConstraintProcessor;
+  readonly #metadataProcessor: MetadataProcessor;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
-    this.#validationConstraintParser = new ValidationConstraintParser((name) =>
+    this.#validationConstraintProcessor = new ValidationConstraintProcessor((name) =>
       importBuiltInFormModel(name, dependencies),
     );
-    this.#metadataParser = new MetadataParser();
+    this.#metadataProcessor = new MetadataProcessor();
   }
 
   override process(): readonly ts.Expression[] {
@@ -288,13 +288,13 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     }
 
     const constraints = schema['x-validation-constraints'].map((constraint) =>
-      this.#validationConstraintParser.parse(constraint),
+      this.#validationConstraintProcessor.process(constraint),
     );
     return ts.factory.createPropertyAssignment('validators', ts.factory.createArrayLiteralExpression(constraints));
   }
 
   #createMetadataProperty(schema: Schema): PropertyAssignment | null {
-    const metadata = this.#metadataParser.parse(schema);
+    const metadata = this.#metadataProcessor.process(schema);
     return metadata ? ts.factory.createPropertyAssignment('metadata', metadata) : null;
   }
 }

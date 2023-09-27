@@ -36,22 +36,22 @@ function selector<T extends Expression>([statement]: readonly Statement[]): T {
 
 const variableStatementVar = 'const a';
 
-export class ValidationConstraintParser {
+export class ValidationConstraintProcessor {
   readonly #importer: ValidationConstraintImporter;
 
   constructor(importer: ValidationConstraintImporter) {
     this.#importer = importer;
   }
 
-  parse(constraint: ValidationConstraint): NewExpression {
+  process(constraint: ValidationConstraint): NewExpression {
     return ts.factory.createNewExpression(
       this.#importer(constraint.simpleName),
       undefined,
-      constraint.attributes ? [this.#parseAttributes(constraint.attributes)] : [],
+      constraint.attributes ? [this.#processAttributes(constraint.attributes)] : [],
     );
   }
 
-  #parseAttributes(attributes: Record<string, unknown>): Expression {
+  #processAttributes(attributes: Record<string, unknown>): Expression {
     const names = Object.keys(attributes);
     const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
 

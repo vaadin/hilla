@@ -11,8 +11,8 @@ export type SchemaWithMetadata = Schema & {
   'x-java-type'?: string;
 };
 
-export class MetadataParser {
-  parse(schema: Schema): ObjectLiteralExpression | null {
+export class MetadataProcessor {
+  process(schema: Schema): ObjectLiteralExpression | null {
     const schemaWithMetadata = schema as SchemaWithMetadata;
 
     const properties = [
