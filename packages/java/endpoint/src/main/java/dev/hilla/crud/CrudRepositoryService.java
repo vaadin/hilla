@@ -21,8 +21,9 @@ import org.springframework.data.repository.CrudRepository;
  * A browser-callable service that delegates crud operations to a JPA
  * repository.
  */
+@EndpointExposed
 public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
-        implements CrudService<T> {
+        implements CrudService<T, ID> {
 
     @Autowired
     private JpaFilterConverter jpaFilterConverter;
@@ -72,12 +73,12 @@ public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public @Nullable T save(T value) {
-        return ((JpaRepository<T, ID>) repository).save(value);
+        return getRepository().save(value);
     }
 
     @Override
     public void delete(ID id) {
-        ((JpaRepository<T, ID>) repository).deleteById(id);
+        getRepository().deleteById(id);
     }
 
     @SuppressWarnings("unchecked")
