@@ -1,19 +1,19 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import {
-    Grid,
-    type GridDataProvider,
-    type GridDataProviderCallback,
-    type GridDataProviderParams,
-    type GridDefaultItem,
-    type GridElement,
-    type GridProps,
+  Grid,
+  type GridDataProvider,
+  type GridDataProviderCallback,
+  type GridDataProviderParams,
+  type GridDefaultItem,
+  type GridElement,
+  type GridProps,
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { HeaderColumnContext, type SortState } from './header-column-context';
+import { ColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -137,12 +137,12 @@ function useColumns(
       );
     }
     return (
-      <HeaderColumnContext.Provider
+      <ColumnContext.Provider
         key={propertyInfo.name}
         value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
       >
         {column}
-      </HeaderColumnContext.Provider>
+      </ColumnContext.Provider>
     );
   });
 }

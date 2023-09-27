@@ -8,11 +8,11 @@ export interface SortState {
   direction: GridSorterDirection;
 }
 
-export type HeaderColumnContext = {
+export type ColumnContext = {
   propertyInfo: PropertyInfo;
   setPropertyFilter(propertyFilter: PropertyStringFilter): void;
   sortState: SortState | null;
   setSortState: Dispatch<SetStateAction<SortState | null>>;
 };
 
-export const HeaderColumnContext = createContext<HeaderColumnContext | null>(null);
+export const ColumnContext = createContext<ColumnContext | null>(null);
