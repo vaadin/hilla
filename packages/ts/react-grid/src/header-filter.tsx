@@ -4,7 +4,7 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { useContext, useEffect, useRef, useState, type ReactElement } from 'react';
-import { ColumnContext } from './header-column-context.js';
+import { ColumnContext } from './autogrid-column-context.js';
 import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 

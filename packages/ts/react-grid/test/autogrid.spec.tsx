@@ -130,6 +130,17 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('-12');
       expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('123,456');
     });
+    it('renders booleans as icons', async () => {
+      const result = render(<TestAutoGrid />);
+      await nextFrame();
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
+      await nextFrame();
+      const vip = getBodyCellContent(grid, 0, 4).querySelector('vaadin-icon')!;
+      expect(vip.icon).to.equal('lumo:checkmark');
+      const notVip = getBodyCellContent(grid, 1, 4).querySelector('vaadin-icon')!;
+      expect(notVip.icon).to.equal('lumo:minus');
+    });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
