@@ -10,10 +10,9 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSorterElement } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { HeaderColumnContext } from './header-column-context';
+import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -106,7 +105,10 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
-  let firstProperty = true;
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
+
   return effectiveProperties.map((propertyInfo) => {
     let column;
     if (options.headerFilters) {
@@ -118,12 +120,10 @@ function useColumns(
     } else {
       column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
-    const sortDirection = firstProperty ? 'asc' : null;
-    firstProperty = false;
     return (
       <HeaderColumnContext.Provider
-        key={`group-${propertyInfo.name}`}
-        value={{ propertyInfo, setPropertyFilter, sortDirection }}
+        key={propertyInfo.name}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
       >
         {column}
       </HeaderColumnContext.Provider>
