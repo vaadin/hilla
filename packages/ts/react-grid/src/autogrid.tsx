@@ -11,8 +11,9 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
+import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { HeaderColumnContext, type SortState } from './header-column-context';
+import { ColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -115,22 +116,33 @@ function useColumns(
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
+
     if (options.headerFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilter} autoWidth></GridColumn>
+          <GridColumn
+            path={propertyInfo.name}
+            headerRenderer={HeaderFilter}
+            {...getColumnProps(propertyInfo)}
+          ></GridColumn>
         </GridColumnGroup>
       );
     } else {
-      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
+      column = (
+        <GridColumn
+          path={propertyInfo.name}
+          headerRenderer={HeaderSorter}
+          {...getColumnProps(propertyInfo)}
+        ></GridColumn>
+      );
     }
     return (
-      <HeaderColumnContext.Provider
+      <ColumnContext.Provider
         key={propertyInfo.name}
         value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
       >
         {column}
-      </HeaderColumnContext.Provider>
+      </ColumnContext.Provider>
     );
   });
 }

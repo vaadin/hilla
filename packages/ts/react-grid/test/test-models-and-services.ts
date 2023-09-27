@@ -147,8 +147,8 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
 };
 
 export const personData: Person[] = [
-  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
-  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
+  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: -12, vip: true },
+  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 123456, vip: false },
 ];
 
 export const companyData: Company[] = [
