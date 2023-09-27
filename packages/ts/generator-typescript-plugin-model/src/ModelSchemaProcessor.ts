@@ -21,9 +21,16 @@ import {
   type StringSchema,
 } from '@hilla/generator-typescript-core/Schema.js';
 import type DependencyManager from '@hilla/generator-typescript-utils/dependencies/DependencyManager.js';
-import ts, { type Expression, type Identifier, type TypeNode, type TypeReferenceNode } from 'typescript';
-import { AnnotationParser, isValidationConstrainedSchema, type ValidationConstrainedSchema } from './annotation.js';
+import ts, {
+  type Expression,
+  type Identifier,
+  type PropertyAssignment,
+  type TypeNode,
+  type TypeReferenceNode,
+} from 'typescript';
+import { MetadataProcessor } from './MetadataProcessor.js';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
+import { hasValidationConstraints, ValidationConstraintProcessor } from './ValidationConstraintProcessor.js';
 
 const $dependencies = Symbol();
 const $processArray = Symbol();
@@ -210,12 +217,15 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 }
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
-  readonly #parse: typeof AnnotationParser.prototype.parse;
+  readonly #validationConstraintProcessor: ValidationConstraintProcessor;
+  readonly #metadataProcessor: MetadataProcessor;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
-    const parser = new AnnotationParser((name) => importBuiltInFormModel(name, dependencies));
-    this.#parse = parser.parse.bind(parser);
+    this.#validationConstraintProcessor = new ValidationConstraintProcessor((name) =>
+      importBuiltInFormModel(name, dependencies),
+    );
+    this.#metadataProcessor = new MetadataProcessor();
   }
 
   override process(): readonly ts.Expression[] {
@@ -223,13 +233,13 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
     let result = super.process();
 
-    if (isValidationConstrainedSchema(schema)) {
-      const optionsObject = ts.factory.createObjectLiteralExpression([
-        ts.factory.createPropertyAssignment(
-          'validators',
-          ts.factory.createArrayLiteralExpression(this.#getValidatorsFromValidationConstraints(schema)),
-        ),
-      ]);
+    const modelOptionsProperties = [
+      this.#createValidatorsProperty(schema),
+      this.#createMetadataProperty(schema),
+    ].filter(Boolean) as PropertyAssignment[];
+
+    if (modelOptionsProperties.length > 0) {
+      const optionsObject = ts.factory.createObjectLiteralExpression(modelOptionsProperties);
 
       result = [...result, optionsObject];
     }
@@ -272,7 +282,19 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return [];
   }
 
-  #getValidatorsFromValidationConstraints(schema: ValidationConstrainedSchema): readonly Expression[] {
-    return schema['x-validation-constraints'].map(this.#parse);
+  #createValidatorsProperty(schema: Schema): PropertyAssignment | null {
+    if (!hasValidationConstraints(schema)) {
+      return null;
+    }
+
+    const constraints = schema['x-validation-constraints'].map((constraint) =>
+      this.#validationConstraintProcessor.process(constraint),
+    );
+    return ts.factory.createPropertyAssignment('validators', ts.factory.createArrayLiteralExpression(constraints));
+  }
+
+  #createMetadataProperty(schema: Schema): PropertyAssignment | null {
+    const metadata = this.#metadataProcessor.process(schema);
+    return metadata ? ts.factory.createPropertyAssignment('meta', metadata) : null;
   }
 }

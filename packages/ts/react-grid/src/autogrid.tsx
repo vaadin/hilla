@@ -1,19 +1,19 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import {
-  Grid,
-  type GridDataProvider,
-  type GridDataProviderCallback,
-  type GridDataProviderParams,
-  type GridDefaultItem,
-  type GridElement,
-  type GridProps,
+    Grid,
+    type GridDataProvider,
+    type GridDataProviderCallback,
+    type GridDataProviderParams,
+    type GridDefaultItem,
+    type GridElement,
+    type GridProps,
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { ColumnContext } from './header-column-context';
+import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -21,12 +21,14 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, type PropertyInfo } from './utils.js';
+import { getProperties, hasAnnotation, type PropertyInfo } from './utils.js';
 
-function includeColumn(propertyId: string): unknown {
-  // Exclude id and version columns
-  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
-  if (propertyId === 'id' || propertyId === 'version') {
+function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
     return false;
   }
   return true;
@@ -48,11 +50,6 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
-function pathFromColumn(column: any): string {
-  // eslint-disable-next-line
-  return column?.original?.path ?? column?.original?.dataset?.path;
-}
-
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: CrudService<TItem>,
@@ -63,11 +60,13 @@ function createDataProvider<TItem>(
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
+      orders: params.sortOrders
+        .filter((order) => order.direction != null)
+        .map((order) => ({
+          property: order.path,
+          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+          ignoreCase: false,
+        })),
     };
 
     const pageNumber = params.page;
@@ -106,10 +105,14 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
+  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
+
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
@@ -134,9 +137,12 @@ function useColumns(
       );
     }
     return (
-      <ColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <HeaderColumnContext.Provider
+        key={propertyInfo.name}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+      >
         {column}
-      </ColumnContext.Provider>
+      </HeaderColumnContext.Provider>
     );
   });
 }
@@ -193,7 +199,10 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    setTimeout(() => {
+      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    }, 1);
   }, [model, service]);
 
   useEffect(() => {

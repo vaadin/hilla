@@ -130,14 +130,19 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       const decomposed = decomposeSchema(this.#component);
 
       if (decomposed.length > 2) {
-        logger.error(this.#component, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
+        logger.debug(
+          this.#component,
+          `The schema for a class component ${
+            this.#fullyQualifiedName
+          } has more than two components. This plugin will ignore it.`,
+        );
         return undefined;
       }
 
       const [parentSchema, childSchema] = decomposed;
 
       if (!isReferenceSchema(parentSchema)) {
-        logger.error(parentSchema, 'Only reference schema allowed for parent class');
+        logger.debug(parentSchema, 'Only reference schema allowed for parent class');
         return undefined;
       }
 
@@ -184,7 +189,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     const { logger } = this.#context.owner;
 
     if (!isObjectSchema(schema)) {
-      logger.error(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
+      logger.debug(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
       return undefined;
     }
 
