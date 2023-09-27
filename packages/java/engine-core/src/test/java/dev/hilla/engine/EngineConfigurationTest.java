@@ -65,11 +65,10 @@ public class EngineConfigurationTest {
 
         this.configurationBuilder = new EngineConfiguration.Builder(
                 this.baseDirectory).buildDir("build")
-                        .outputDir("src/frontend/typescript/generated")
-                        .classPath(new LinkedHashSet<>(
-                                List.of("build/classes", "dependency")))
-                        .parser(parserConfiguration)
-                        .generator(generatorConfiguration);
+                .outputDir("src/frontend/typescript/generated")
+                .classPath(new LinkedHashSet<>(
+                        List.of("build/classes", "dependency")))
+                .parser(parserConfiguration).generator(generatorConfiguration);
     }
 
     @Test

@@ -4,6 +4,7 @@ import {
   _enum,
   _fromString,
   _key,
+  _meta,
   ArrayModel,
   Binder,
   EnumModel,
@@ -12,6 +13,8 @@ import {
   NotEmpty,
   NotNull,
   NumberModel,
+  ObjectModel,
+  type ModelMetadata,
   Positive,
   Size,
 } from '../src/index.js';
@@ -21,14 +24,13 @@ import {
   IdEntityModel,
   RecordStatus,
   RecordStatusModel,
-  WithPossibleCharListModel,
-  type TestEntity,
   TestModel,
+  WithPossibleCharListModel,
 } from './TestModels.js';
 
 describe('@hilla/form', () => {
   describe('Model', () => {
-    let binder: Binder<TestEntity, TestModel>;
+    let binder: Binder<TestModel>;
 
     beforeEach(() => {
       binder = new Binder(document.createElement('div'), TestModel);
@@ -280,7 +282,7 @@ describe('@hilla/form', () => {
         const nodes1 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
-        binder.for(binder.model.fieldArrayModel).value = idEntities;
+        binder.for(binder.model.fieldArrayModel).value = idEntities.slice();
         const nodes2 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);
@@ -365,8 +367,8 @@ describe('@hilla/form', () => {
         expect(binder.model.fieldEnum.valueOf()).to.equal(RecordStatus.REMOVED);
       });
 
-      it('should fail if the EnumModel.createEmptyValue() is used', () => {
-        expect(() => EnumModel.createEmptyValue()).to.throw('Cannot create an instance of an abstract class');
+      it('should be undefined if the EnumModel.createEmptyValue() is used', () => {
+        expect(EnumModel.createEmptyValue()).to.be.undefined;
       });
 
       it('should extract value from string', () => {
@@ -402,6 +404,22 @@ describe('@hilla/form', () => {
 
         expect(results.length).to.equal(0);
       });
+    });
+  });
+
+  describe('metadata', () => {
+    it('should initialize with empty metadata by default', () => {
+      const model = new ObjectModel(null as any, '', true);
+      expect(model[_meta]).to.eql({});
+    });
+
+    it('should initialize with metadata from options', () => {
+      const meta: ModelMetadata = {
+        javaType: 'java.lang.String',
+        annotations: [{ name: 'jakarta.persistence.Id' }, { name: 'jakarta.persistence.Version' }],
+      };
+      const model = new ObjectModel(null as any, '', true, { meta });
+      expect(model[_meta]).to.equal(meta);
     });
   });
 });

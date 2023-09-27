@@ -61,6 +61,10 @@ public class SecurityConfig extends VaadinWebSecurity {
                 .requestMatchers(
                         new AntPathRequestMatcher(applyUrlMapping("/form")))
                 .permitAll();
+        http.authorizeHttpRequests().requestMatchers(
+                new AntPathRequestMatcher(applyUrlMapping("/proxied-service")))
+                .permitAll();
+
         // Admin only access
         http.authorizeHttpRequests()
                 .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))

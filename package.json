@@ -44,6 +44,7 @@
     "esbuild": "^0.18.20",
     "eslint": "^8.41.0",
     "eslint-config-vaadin": "1.0.0-alpha.18",
+    "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-tsdoc": "^0.2.17",
     "glob": "^10.3.3",
     "karma": "^6.4.1",

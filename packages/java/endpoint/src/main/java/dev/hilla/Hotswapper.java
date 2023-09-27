@@ -21,7 +21,7 @@ public class Hotswapper {
      * <p>
      * The hot swap solution should not pre-filter the classes but pass
      * everything to this method.
-     * 
+     *
      * @param redefined
      *            {@code true} if the class was redefined, {@code false} if it
      *            was loaded for the first time
@@ -80,7 +80,7 @@ public class Hotswapper {
     /**
      * Checks if changes in the given classes can affect the generated
      * TypeScript for endpoints.
-     * 
+     *
      * @param changedClasses
      *            the changed classes
      * @return {@code true} if the classes can affect endpoint generation,

@@ -115,8 +115,8 @@ public class ArraySignatureModelTests {
         private static final String fieldName = "foo";
         private static final Annotation annotation = ((AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType())
-                        .getAnnotatedGenericComponentType()
-                        .getAnnotation(Sample.Bar.class);
+                .getAnnotatedGenericComponentType()
+                .getAnnotation(Sample.Bar.class);
         private static final AnnotatedArrayType reflectionOrigin = (AnnotatedArrayType) getDeclaredField(
                 Sample.class, fieldName).getAnnotatedType();
         private final ArrayTypeSignature sourceOrigin;

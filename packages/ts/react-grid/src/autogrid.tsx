@@ -1,4 +1,4 @@
-import type { AbstractModel, ModelConstructor } from '@hilla/form';
+import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import {
   Grid,
   type GridDataProvider,
@@ -8,20 +8,36 @@ import {
   type GridElement,
   type GridProps,
 } from '@hilla/react-components/Grid.js';
-import { GridSortColumn } from '@hilla/react-components/GridSortColumn.js';
-import { useEffect, useRef, type JSX } from 'react';
+import { GridColumn } from '@hilla/react-components/GridColumn.js';
+import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
+import { HeaderColumnContext, type SortState } from './header-column-context';
+import { HeaderFilter } from './header-filter';
+import { HeaderSorter } from './header-sorter';
+import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
 
+function includeColumn(propertyId: string): unknown {
+  // Exclude id and version columns
+  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
+  if (propertyId === 'id' || propertyId === 'version') {
+    return false;
+  }
+  return true;
+}
+
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: CrudService<TItem>;
-    model: ModelConstructor<TItem, AbstractModel<TItem>>;
+    model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
+    headerFilters?: boolean;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -41,11 +57,13 @@ function createDataProvider<TItem>(
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
+      orders: params.sortOrders
+        .filter((order) => order.direction != null)
+        .map((order) => ({
+          property: order.path,
+          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+          ignoreCase: false,
+        })),
     };
 
     const pageNumber = params.page;
@@ -78,16 +96,41 @@ function createDataProvider<TItem>(
   };
 }
 
-function createColumns(model: ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns?: string[]) {
+function useColumns(
+  model: DetachedModelConstructor<AbstractModel>,
+  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+  options: { visibleColumns?: string[]; headerFilters?: boolean },
+) {
   const properties = getProperties(model);
-  const effectiveColumns = visibleColumns ?? properties.map((p) => p.name);
+  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
-  return effectiveProperties.map((p) => (
-    <GridSortColumn path={p.name} header={p.humanReadableName} key={p.name} autoWidth></GridSortColumn>
-  ));
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
+
+  return effectiveProperties.map((propertyInfo) => {
+    let column;
+    if (options.headerFilters) {
+      column = (
+        <GridColumnGroup headerRenderer={HeaderSorter}>
+          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilter} autoWidth></GridColumn>
+        </GridColumnGroup>
+      );
+    } else {
+      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
+    }
+    return (
+      <HeaderColumnContext.Provider
+        key={propertyInfo.name}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+      >
+        {column}
+      </HeaderColumnContext.Provider>
+    );
+  });
 }
 
 export function AutoGrid<TItem>({
@@ -95,10 +138,46 @@ export function AutoGrid<TItem>({
   model,
   filter,
   visibleColumns,
+  headerFilters,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
+  const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
+
+  const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
+    const filterIndex = internalFilter.children.findIndex(
+      (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
+    );
+    let changed = false;
+    if (propertyFilter.filterValue === '') {
+      // Delete empty filter
+      if (filterIndex >= 0) {
+        internalFilter.children.splice(filterIndex, 1);
+        changed = true;
+      }
+    } else if (filterIndex >= 0) {
+      internalFilter.children[filterIndex] = propertyFilter;
+      changed = true;
+    } else {
+      internalFilter.children.push(propertyFilter);
+      changed = true;
+    }
+    if (changed) {
+      setInternalFilter({ ...internalFilter });
+    }
+  };
+
   // This cast should go away with #1252
-  const children = createColumns(model as ModelConstructor<unknown, AbstractModel<unknown>>, visibleColumns);
+  const children = useColumns(model, setHeaderPropertyFilter, {
+    visibleColumns,
+    headerFilters,
+  });
+
+  useEffect(() => {
+    // Remove all filtering if header filters are removed
+    if (!headerFilters) {
+      setInternalFilter({ ...{ t: 'and' }, children: [] });
+    }
+  }, [headerFilters]);
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
@@ -106,17 +185,20 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
-  }, []);
+    setTimeout(() => {
+      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    }, 1);
+  }, [model, service]);
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
     const grid = ref.current;
     if (grid) {
-      dataProviderFilter.current = filter;
+      dataProviderFilter.current = filter ?? internalFilter;
       grid.clearCache();
     }
-  }, [filter]);
+  }, [filter, internalFilter]);
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }

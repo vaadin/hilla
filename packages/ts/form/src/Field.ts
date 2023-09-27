@@ -1,15 +1,8 @@
 /* eslint-disable accessor-pairs,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
-import {
-  _fromString,
-  type AbstractModel,
-  ArrayModel,
-  BooleanModel,
-  ObjectModel,
-  getBinderNode,
-  hasFromString,
-} from './Models.js';
+import { getBinderNode } from './BinderNode.js';
+import { _fromString, type AbstractModel, ArrayModel, BooleanModel, hasFromString, ObjectModel } from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -28,7 +21,7 @@ export type FieldConstraintValidation = Readonly<{
   checkValidity(): boolean;
 }>;
 
-export type FieldElement<T> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
+export type FieldElement<T = unknown> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
 
 const props = ['required', 'invalid', 'errorMessage', 'value', 'validity', 'checkValidity'];
 export function isFieldElement<T>(element: HTMLElement): element is FieldElement<T> {
@@ -69,21 +62,21 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   readonly model?: AbstractModel<T>;
 
-  private _element: E;
+  #element: E;
 
   /**
    * @privateRemarks
    * Fallback for missing .validity property API in Vaadin components.
    */
-  private _validityFallback: ValidityState = defaultValidity;
+  #validityFallback: ValidityState = defaultValidity;
 
   constructor(element: E, model?: AbstractModel<T>) {
-    this._element = element;
+    this.#element = element;
     this.model = model;
   }
 
   get element(): E {
-    return this._element;
+    return this.#element;
   }
 
   /**
@@ -91,56 +84,56 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
    * @deprecated will be read-only in future
    */
   set element(element: E) {
-    this._element = element;
+    this.#element = element;
   }
 
   get value(): T | undefined {
-    return this.element.value;
+    return this.#element.value;
   }
 
   set value(value: T | undefined) {
-    this.element.value = value;
+    this.#element.value = value;
   }
 
-  set errorMessage(_: string) {} // eslint-disable-line @typescript-eslint/no-empty-function
+  set errorMessage(_: string) {}
 
   get validity(): ValidityState {
-    return this.element.validity ?? this._validityFallback;
+    return this.#element.validity ?? this.#validityFallback;
   }
 
   checkValidity(): boolean {
-    if (!this.element.checkValidity) {
+    if (!this.#element.checkValidity) {
       return true;
     }
 
-    const valid = this.element.checkValidity();
-    this._validityFallback = {
+    const valid = this.#element.checkValidity();
+    this.#validityFallback = {
       ...defaultValidity,
       valid,
-      ...(valid ? {} : this._detectValidityError()),
+      ...(valid ? {} : this.#detectValidityError()),
     };
     return valid;
   }
 
   setAttribute(key: string, val: any): void {
     if (val) {
-      this.element.setAttribute(key, '');
+      this.#element.setAttribute(key, '');
     } else {
-      this.element.removeAttribute(key);
+      this.#element.removeAttribute(key);
     }
   }
 
   removeEventListeners(): void {}
 
-  private _detectValidityError(): Readonly<Partial<ValidityState>> {
-    if (!('inputElement' in this.element)) {
+  #detectValidityError(): Readonly<Partial<ValidityState>> {
+    if (!('inputElement' in this.#element)) {
       // Not a Vaadin component field
       return { customError: true };
     }
 
-    const inputElement = this.element.inputElement as FieldElement<string>;
+    const inputElement = this.#element.inputElement as FieldElement<string>;
 
-    if (this.element.value === '') {
+    if (this.#element.value === '') {
       if (inputElement.value === '') {
         return { valueMissing: true };
       }
@@ -157,13 +150,12 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   T,
   E
 > {
-  private _invalid = false;
-  private readonly _boundOnValidated = this._onValidated.bind(this);
+  #invalid = false;
+  readonly #boundOnValidated = this.#onValidated.bind(this);
 
   constructor(element: E, model?: AbstractModel<T>) {
     super(element, model);
-
-    (element as EventTarget).addEventListener('validated', this._boundOnValidated);
+    element.addEventListener('validated', this.#boundOnValidated);
   }
 
   set required(value: boolean) {
@@ -171,7 +163,7 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   }
 
   set invalid(value: boolean) {
-    this._invalid = value;
+    this.#invalid = value;
     this.element.invalid = value;
   }
 
@@ -180,10 +172,10 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   }
 
   override removeEventListeners(): void {
-    this.element.removeEventListener('validated', this._boundOnValidated);
+    this.element.removeEventListener('validated', this.#boundOnValidated);
   }
 
-  private _onValidated(e: Event): void {
+  #onValidated(e: Event): void {
     if (!(e instanceof CustomEvent) || typeof e.detail !== 'object') {
       return;
     }
@@ -191,8 +183,8 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
     // Override built-in changes of the `invalid` flag in Vaadin components
     // to keep the `invalid` property state of the web component in sync.
     const invalid = !(e.detail satisfies Partial<ValidityState> as Partial<ValidityState>).valid;
-    if (this._invalid !== invalid) {
-      this.element.invalid = this._invalid;
+    if (this.#invalid !== invalid) {
+      this.element.invalid = this.#invalid;
     }
   }
 }
@@ -321,7 +313,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
   }
 }
 
-function convertFieldValue<T extends AbstractModel<unknown>>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
@@ -353,7 +345,7 @@ export const field = directive(
     }
 
     override update(part: ElementPart | PropertyPart, [model, effect]: DirectiveParameters<this>) {
-      const element = part.element as FieldElement<any> & HTMLInputElement;
+      const element = part.element as FieldElement & HTMLInputElement;
 
       const binderNode = getBinderNode(model);
 

@@ -19,9 +19,9 @@ describe('@hilla/react-form', () => {
     model: UserModel;
   }>;
 
-  function UserForm({ model: m }: UserFormProps) {
-    const { field, model } = useFormPart(m);
-    const name = useFormPart(m.name);
+  function UserForm({ model: user }: UserFormProps) {
+    const { field, model } = useFormPart(user);
+    const name = useFormPart(user.name);
 
     return (
       <fieldset>
@@ -35,7 +35,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, read, submit, value } = useForm(LoginModel, { onChange, onSubmit });
+    const { field, model, submit, value } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>

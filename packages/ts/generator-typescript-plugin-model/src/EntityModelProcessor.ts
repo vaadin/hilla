@@ -28,7 +28,7 @@ import ts, {
   type Statement,
 } from 'typescript';
 import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
-import { importBuiltInFormModel, type Context } from './utils.js';
+import { importBuiltInFormModel, type Context, createModelBuildingCallback, createEmptyValueMaker } from './utils.js';
 
 export type DependencyData = Readonly<{
   id: Identifier;
@@ -104,6 +104,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
   readonly #context: Context;
   readonly #fullyQualifiedName: string;
   readonly #getPropertyModelSymbol: Identifier;
+  readonly #makeObjectEmptyValueCreator: Identifier;
 
   constructor(name: string, component: Schema, context: Context) {
     super(name, true);
@@ -113,6 +114,10 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     this.#fullyQualifiedName = name;
 
     this.#getPropertyModelSymbol = this[$dependencies].imports.named.add('@hilla/form', '_getPropertyModel');
+    this.#makeObjectEmptyValueCreator = this[$dependencies].imports.named.add(
+      '@hilla/form',
+      'makeObjectEmptyValueCreator',
+    );
   }
 
   protected [$processDeclaration](): ClassDeclaration | undefined {
@@ -125,14 +130,19 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       const decomposed = decomposeSchema(this.#component);
 
       if (decomposed.length > 2) {
-        logger.error(this.#component, `The schema for a class component ${this.#fullyQualifiedName} is broken.`);
+        logger.debug(
+          this.#component,
+          `The schema for a class component ${
+            this.#fullyQualifiedName
+          } has more than two components. This plugin will ignore it.`,
+        );
         return undefined;
       }
 
       const [parentSchema, childSchema] = decomposed;
 
       if (!isReferenceSchema(parentSchema)) {
-        logger.error(parentSchema, 'Only reference schema allowed for parent class');
+        logger.debug(parentSchema, 'Only reference schema allowed for parent class');
         return undefined;
       }
 
@@ -162,17 +172,10 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
         ts.factory.createBlock(
           [
             ts.factory.createReturnStatement(
-              ts.factory.createAsExpression(
-                ts.factory.createCallExpression(
-                  ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getPropertyModelSymbol),
-                  undefined,
-                  [
-                    ts.factory.createStringLiteral(name),
-                    type.typeName as Identifier,
-                    ts.factory.createArrayLiteralExpression(args),
-                  ],
-                ),
-                type,
+              ts.factory.createCallExpression(
+                ts.factory.createElementAccessExpression(ts.factory.createThis(), this.#getPropertyModelSymbol),
+                undefined,
+                [ts.factory.createStringLiteral(name), createModelBuildingCallback(type.typeName as Identifier, args)],
               ),
             ),
           ],
@@ -186,7 +189,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     const { logger } = this.#context.owner;
 
     if (!isObjectSchema(schema)) {
-      logger.error(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
+      logger.debug(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
       return undefined;
     }
 
@@ -202,14 +205,6 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       ts.factory.createTypeReferenceNode(entity),
     );
 
-    const emptyValueElement = ts.factory.createPropertyDeclaration(
-      [ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword), ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)],
-      'createEmptyValue',
-      undefined,
-      ts.factory.createFunctionTypeNode(undefined, [], ts.factory.createTypeReferenceNode(entity)),
-      undefined,
-    );
-
     return ts.factory.createClassDeclaration(
       undefined,
       this[$model].id,
@@ -219,7 +214,10 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
           ts.factory.createExpressionWithTypeArguments(parent, [ts.factory.createTypeReferenceNode(typeT)]),
         ]),
       ],
-      [emptyValueElement, ...this.#processClassElements(schema)],
+      [
+        createEmptyValueMaker(this.#makeObjectEmptyValueCreator, this[$model].id),
+        ...this.#processClassElements(schema),
+      ],
     );
   }
 
@@ -243,6 +241,7 @@ export class EntityEnumModelProcessor extends EntityModelProcessor {
   protected [$processDeclaration](): ClassDeclaration {
     const enumModel = importBuiltInFormModel('EnumModel', this[$dependencies]);
     const enumPropertySymbol = this[$dependencies].imports.named.add('@hilla/form', '_enum');
+    const makeEnumEmptyValueCreator = this[$dependencies].imports.named.add('@hilla/form', 'makeEnumEmptyValueCreator');
 
     return ts.factory.createClassDeclaration(
       undefined,
@@ -256,6 +255,7 @@ export class EntityEnumModelProcessor extends EntityModelProcessor {
         ]),
       ],
       [
+        createEmptyValueMaker(makeEnumEmptyValueCreator, this[$model].id),
         ts.factory.createPropertyDeclaration(
           [ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword)],
           ts.factory.createComputedPropertyName(enumPropertySymbol),

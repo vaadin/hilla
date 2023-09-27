@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -197,6 +198,17 @@ public class SecurityIT extends ChromeBrowserTest {
         assertPrivatePageShown(USER_FULLNAME);
         refresh();
         assertPrivatePageShown(USER_FULLNAME);
+    }
+
+    @Test
+    public void when_endpoint_class_is_proxied_and_not_annotated_then_anonymously_allowed_method_is_accessible() {
+        open("proxied-service");
+        var view = $("proxied-service-test-view").waitForFirst();
+        view.$(ButtonElement.class).id("say-hello-btn").click();
+        NotificationElement notification = $(NotificationElement.class).first();
+        Assert.assertNotNull(notification);
+        Assert.assertTrue(
+                notification.getText().contains("Hello from GreetingService"));
     }
 
     @Test

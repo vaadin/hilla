@@ -22,14 +22,12 @@ import {
 } from '../src/index.js';
 import {
   type Customer,
-  type IdEntity,
   IdEntityModel,
   type Order,
   OrderModel,
   type TestEntity,
-  TestModel,
-  type TestMessageInterpolationEntity,
   TestMessageInterpolationModel,
+  TestModel,
 } from './TestModels.js';
 
 use(sinonChai);
@@ -105,17 +103,16 @@ class OrderView extends LitElement {
       <button id="add" @click=${() => this.binder.for(products).appendItem()}>+</button>
       ${repeat(
         products,
-        ({ model: { description, price } }, index) =>
-          html`<div>
-            <input id="description${index}" ...="${field(description)}" />
-            <input id="price${index}" ...="${field(price)}" />
-            <output id="priceError${index}">
-              ${this.binder
-                .for(price)
-                .errors.map((error) => error.message)
-                .join('\n')}
-            </output>
-          </div>`,
+        ({ model: { description, price } }, index) => html`<div>
+          <input id="description${index}" ...="${field(description)}" />
+          <input id="price${index}" ...="${field(price)}" />
+          <output id="priceError${index}">
+            ${this.binder
+              .for(price)
+              .errors.map((error) => error.message)
+              .join('\n')}
+          </output>
+        </div>`,
       )}
       <h4>Total: <number-output id="total" ${field(total)}></number-output></h4>
       <div id="submitting">${this.binder.submitting}</div>
@@ -141,15 +138,10 @@ const fireEvent = async (elm: Element, name: string) => {
 
 describe('@hilla/form', () => {
   describe('Validation', () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async function ident<T>(val: T): Promise<T> {
-      return val;
-    }
-
-    let binder: Binder<Order, OrderModel>;
+    let binder: Binder<OrderModel>;
     const view = document.createElement('div');
 
-    beforeEach(() => {
+    beforeEach(async () => {
       binder = new Binder(view, OrderModel);
     });
 
@@ -158,34 +150,36 @@ describe('@hilla/form', () => {
         .for(binder.model.customer)
         .validate()
         .then((errors) => {
+          // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
           expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['Required', 'Size']);
         }));
 
-    it('should run all nested validations per model', async () =>
-      binder.validate().then((errors) => {
-        expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
-      }));
+    it('should run all nested validations per model', async () => {
+      const errors = await binder.validate();
+      expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
+    });
 
     it('should run all validations per array items', async () => {
       binder.for(binder.model.products).appendItem();
       binder.for(binder.model.products).appendItem();
-      return binder.validate().then((errors) => {
-        expect(errors.map((e) => e.property)).to.eql([
-          'customer.fullName',
-          'customer.fullName',
-          'notes',
-          'products.0.description',
-          'products.0.price',
-          'products.1.description',
-          'products.1.price',
-        ]);
-      });
+
+      const errors = await binder.validate();
+
+      expect(errors.map((e) => e.property)).to.eql([
+        'customer.fullName',
+        'customer.fullName',
+        'notes',
+        'products.0.description',
+        'products.0.price',
+        'products.1.description',
+        'products.1.price',
+      ]);
     });
 
     describe('clearing', () => {
       (['reset', 'clear'] as const).forEach((methodName) => {
         it(`should reset validation on ${methodName}`, async () => {
-          await binder.validate();
+          const errors = await binder.validate();
           expect(binder.invalid).to.be.true;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.true;
 
@@ -210,7 +204,7 @@ describe('@hilla/form', () => {
       });
 
       it('should return the result of the endpoint call when calling submit()', async () => {
-        const testBinder = new Binder(view, TestModel, { onSubmit: ident });
+        const testBinder = new Binder(view, TestModel, { onSubmit: async (testEntity) => testEntity });
         const result = await testBinder.submit();
         assert.deepEqual(result, testBinder.value);
       });
@@ -229,8 +223,9 @@ describe('@hilla/form', () => {
             // do nothing
           });
           expect.fail();
-        } catch (error: unknown) {
-          expect(error).to.have.property('errors').that.has.property('length').to.gt(0);
+        } catch (error: any) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          expect(error.errors.length).to.gt(0);
         }
       });
 
@@ -238,7 +233,6 @@ describe('@hilla/form', () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
         try {
-          // eslint-disable-next-line @typescript-eslint/require-await
           await binder.submitTo(async () => {
             throw new Error('whatever');
           });
@@ -253,7 +247,6 @@ describe('@hilla/form', () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
         try {
-          // eslint-disable-next-line @typescript-eslint/require-await
           await binder.submitTo(async () => {
             throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
               {
@@ -277,7 +270,6 @@ describe('@hilla/form', () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
         try {
-          // eslint-disable-next-line @typescript-eslint/require-await
           await binder.submitTo(async () => {
             throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
               {
@@ -381,9 +373,9 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator', () => {
-      let idBinder: Binder<IdEntity, IdEntityModel>;
+      let idBinder: Binder<IdEntityModel>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         idBinder = new Binder(view, IdEntityModel);
       });
 
@@ -466,7 +458,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should not cause required by default', () => {
+      it('should not cause required by default', async () => {
         idBinder.for(idBinder.model.idString).addValidator({
           message: 'foo',
           validate: () => false,
@@ -474,7 +466,7 @@ describe('@hilla/form', () => {
         expect(idBinder.for(idBinder.model.idString).required).to.be.false;
       });
 
-      it('should cause required when having impliesRequired: true', () => {
+      it('should cause required when having impliesRequired: true', async () => {
         idBinder.for(idBinder.model.idString).addValidator({
           message: 'foo',
           validate: () => false,
@@ -489,9 +481,9 @@ describe('@hilla/form', () => {
     });
 
     describe('model add validator (multiple fields)', () => {
-      let testBinder: Binder<TestEntity, TestModel>;
+      let testBinder: Binder<TestModel>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         testBinder = new Binder(view, TestModel);
       });
 
@@ -501,6 +493,7 @@ describe('@hilla/form', () => {
           validate: () => [
             { property: testBinder.model.fieldString },
             { property: testBinder.model.fieldNumber },
+            // eslint-disable-next-line sort-keys
             { property: testBinder.model.fieldBoolean, message: 'bar' },
           ],
         });
@@ -577,7 +570,7 @@ describe('@hilla/form', () => {
         expect(orderView.nickName).to.not.have.attribute('invalid');
 
         try {
-          await orderView.binder.submitTo(ident);
+          await orderView.binder.submitTo(async (item) => item);
           expect.fail();
         } catch (error) {
           // do nothing
@@ -597,7 +590,7 @@ describe('@hilla/form', () => {
         expect(orderView.price).to.not.have.attribute('invalid');
 
         try {
-          await orderView.binder.submitTo(ident);
+          await orderView.binder.submitTo(async (item) => item);
           expect.fail();
         } catch (error) {
           expect((error as ValidationError).errors.map((e) => e.property)).to.be.eql([
@@ -625,7 +618,7 @@ describe('@hilla/form', () => {
         expect(orderView.price).to.not.have.attribute('invalid');
 
         try {
-          await orderView.binder.submitTo(ident);
+          await orderView.binder.submitTo(async (item) => item);
           expect.fail();
         } catch (error) {
           // do nothing
@@ -647,7 +640,7 @@ describe('@hilla/form', () => {
         await fireEvent(orderView.description, 'change');
 
         try {
-          await orderView.binder.submitTo(ident);
+          await orderView.binder.submitTo(async (item) => item);
           expect.fail();
         } catch (error) {
           // do nothing
@@ -667,7 +660,7 @@ describe('@hilla/form', () => {
         orderView.price.value = '10';
         await fireEvent(orderView.price, 'change');
 
-        const item = await orderView.binder.submitTo(ident);
+        const item = await orderView.binder.submitTo(async (order) => order);
         expect(item).not.to.be.undefined;
         expect(item.products[0].description).to.be.equal('bread');
         expect(item.products[0].price).to.be.equal(10);
@@ -680,7 +673,7 @@ describe('@hilla/form', () => {
         binder.for(binder.model.notes).value = 'whatever';
         const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
         try {
-          await binder.submitTo(() => {
+          await binder.submitTo(async () => {
             requestUpdateSpy.resetHistory();
             throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
               {
@@ -724,7 +717,7 @@ describe('@hilla/form', () => {
       // https://github.com/vaadin/flow/issues/8688
       it('should update binder properties after submit when a field changes value', async () => {
         try {
-          await orderView.binder.submitTo(ident);
+          await orderView.binder.submitTo(async (item) => item);
           expect.fail();
         } catch (error) {
           // do nothing
@@ -795,13 +788,13 @@ describe('@hilla/form', () => {
     });
 
     describe('message interpolation', () => {
-      let testMessageBinder: Binder<TestMessageInterpolationEntity, TestMessageInterpolationModel>;
+      let testMessageBinder: Binder<TestMessageInterpolationModel>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         testMessageBinder = new Binder(view, TestMessageInterpolationModel);
       });
 
-      afterEach(() => {
+      afterEach(async () => {
         Binder.interpolateMessageCallback = undefined;
       });
 
