@@ -10,10 +10,9 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { HeaderColumnContext } from './header-column-context';
+import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -21,7 +20,18 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, isInternalProperty, type PropertyInfo } from './utils.js';
+import { getProperties, hasAnnotation, type PropertyInfo } from './utils.js';
+
+function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
+    return false;
+  }
+  return true;
+}
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -50,11 +60,13 @@ function createDataProvider<TItem>(
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
+      orders: params.sortOrders
+        .filter((order) => order.direction != null)
+        .map((order) => ({
+          property: order.path,
+          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+          ignoreCase: false,
+        })),
     };
 
     const pageNumber = params.page;
@@ -93,11 +105,14 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns =
-    options.visibleColumns ?? properties.map((p) => p.name).filter((p) => !isInternalProperty(p));
+  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
+
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
@@ -111,7 +126,10 @@ function useColumns(
       column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
     return (
-      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <HeaderColumnContext.Provider
+        key={propertyInfo.name}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+      >
         {column}
       </HeaderColumnContext.Provider>
     );
@@ -171,7 +189,10 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    setTimeout(() => {
+      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    }, 1);
   }, [model, service]);
 
   useEffect(() => {

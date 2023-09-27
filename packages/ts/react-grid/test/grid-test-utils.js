@@ -119,4 +119,3 @@ export const flushGrid = (grid) => {
 
   grid.__virtualizer.flush();
 };
-

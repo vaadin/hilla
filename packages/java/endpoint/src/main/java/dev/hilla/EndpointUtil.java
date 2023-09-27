@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -80,16 +81,16 @@ public class EndpointUtil implements EndpointRequestUtil {
         if (endpointData.isEmpty()) {
             return false;
         }
-        var concreteEndpointClass = endpointData.get().endpointObject()
-                .getClass();
-        var methodWrappingClass = endpointData.get().method()
+        var invokedEndpointClass = ClassUtils
+                .getUserClass(endpointData.get().endpointObject());
+        var methodDeclaringClass = endpointData.get().method()
                 .getDeclaringClass();
-        if (concreteEndpointClass.equals(methodWrappingClass)) {
+        if (methodDeclaringClass.equals(invokedEndpointClass)) {
             return accessChecker.getAccessAnnotationChecker().hasAccess(
                     endpointData.get().method(), null, role -> false);
         } else {
             return accessChecker.getAccessAnnotationChecker()
-                    .hasAccess(concreteEndpointClass, null, role -> false);
+                    .hasAccess(invokedEndpointClass, null, role -> false);
         }
     }
 

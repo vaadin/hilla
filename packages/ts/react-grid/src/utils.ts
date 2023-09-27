@@ -1,15 +1,22 @@
 import {
-  NumberModel,
-  StringModel,
-  createDetachedModel,
-  type AbstractModel,
-  type DetachedModelConstructor,
+    NumberModel,
+    StringModel,
+    _meta,
+    createDetachedModel,
+    type AbstractModel,
+    type DetachedModelConstructor,
+    type ModelMetadata
 } from '@hilla/form';
 
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
   modelType: 'number' | 'string' | undefined;
+  meta: ModelMetadata;
+}
+
+export function hasAnnotation(propertyInfo: PropertyInfo, annotationName: string): boolean {
+  return propertyInfo.meta.annotations?.some((annotation) => annotation.name === annotationName) ?? false;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -28,7 +35,9 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
   const modelInstance: any = createDetachedModel(model);
   return properties.map((name) => {
     // eslint-disable-next-line
-    const propertyModel = modelInstance[name];
+    const propertyModel = modelInstance[name] as AbstractModel;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const meta = propertyModel[_meta];
     const humanReadableName = _generateHeader(name);
     const { constructor } = propertyModel;
     const modelType = constructor === StringModel ? 'string' : constructor === NumberModel ? 'number' : undefined;
@@ -36,15 +45,7 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
       name,
       humanReadableName,
       modelType,
+      meta,
     };
   });
 };
-
-export function isInternalProperty(propertyId: string): unknown {
-  // Exclude id and version columns
-  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
-  if (propertyId === 'id' || propertyId === 'version') {
-    return true;
-  }
-  return false;
-}
