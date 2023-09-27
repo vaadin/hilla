@@ -16,11 +16,11 @@
     "@hilla/generator-typescript-utils": "file:../../../../ts/generator-typescript-utils",
     "@hilla/hilla-frontend": "file:../../../../ts/hilla-frontend",
     "@hilla/react-auth": "file:../../../../ts/react-auth",
-    "@hilla/react-components": "2.2.0-alpha16",
+    "@hilla/react-components": "2.2.0-beta1",
     "@hilla/react-form": "file:../../../../ts/react-form",
     "@hilla/react-grid": "file:../../../../ts/react-grid",
     "@polymer/polymer": "3.5.1",
-    "@vaadin/bundles": "24.2.0-alpha16",
+    "@vaadin/bundles": "24.2.0-beta1",
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
@@ -57,11 +57,11 @@
       "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha5",
       "@hilla/generator-typescript-utils": "2.3.0-alpha5",
       "@hilla/react-auth": "2.3.0-alpha5",
-      "@hilla/react-components": "2.2.0-alpha16",
+      "@hilla/react-components": "2.2.0-beta1",
       "@hilla/react-form": "2.3.0-alpha5",
       "@hilla/react-grid": "2.3.0-alpha5",
       "@polymer/polymer": "3.5.1",
-      "@vaadin/bundles": "24.2.0-alpha16",
+      "@vaadin/bundles": "24.2.0-beta1",
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
@@ -84,7 +84,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "bfcf418ab63d9a564f95fdb97f5c84566c75d6973465f7c26480b59b9a39e598"
+    "hash": "26e3e529dc951fb6344276a3d5e95e2cfcb12bb93597a6ad7e4c813cb35dfd81"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

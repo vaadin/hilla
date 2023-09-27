@@ -15,7 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <testbench.element.version>24.2.0.alpha11</testbench.element.version>
+    <testbench.element.version>24.2.0.beta1</testbench.element.version>
     <jetty.version>11.0.7</jetty.version>
     <jetty.scantrigger></jetty.scantrigger>
 
