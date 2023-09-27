@@ -122,7 +122,7 @@ function useColumns(
             path={propertyInfo.name}
             headerRenderer={HeaderFilter}
             renderer={propertyInfo.gridRenderer}
-            {...(propertyInfo.gridColumnOptions as any)}
+            {...propertyInfo.gridColumnOptions}
           ></GridColumn>
         </GridColumnGroup>
       );
@@ -132,7 +132,7 @@ function useColumns(
           path={propertyInfo.name}
           headerRenderer={HeaderSorter}
           renderer={propertyInfo.gridRenderer}
-          {...(propertyInfo.gridColumnOptions as any)}
+          {...propertyInfo.gridColumnOptions}
         ></GridColumn>
       );
     }

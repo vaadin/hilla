@@ -10,6 +10,7 @@ import type { GridColumnElement, GridColumnProps } from '@hilla/react-components
 import type { ComponentType } from 'react';
 import { AutoGridNumberRenderer } from './autogrid-number-renderer';
 
+type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
@@ -18,7 +19,7 @@ export interface PropertyInfo {
     | ComponentType<Readonly<{ item: any; model: GridItemModel<any>; original: GridColumnElement }>>
     | null
     | undefined;
-  gridColumnOptions: GridColumnProps<any>;
+  gridColumnOptions: ColumnOptions;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -43,7 +44,7 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const modelType = constructor === StringModel ? 'string' : constructor === NumberModel ? 'number' : undefined;
     let gridRenderer;
 
-    const gridColumnOptions: GridColumnProps<any> = { autoWidth: true };
+    const gridColumnOptions: ColumnOptions = { autoWidth: true };
     if (modelType === 'number') {
       gridRenderer = AutoGridNumberRenderer;
       gridColumnOptions.textAlign = 'end';
