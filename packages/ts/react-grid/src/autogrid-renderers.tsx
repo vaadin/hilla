@@ -1,7 +1,14 @@
+import type { GridItemModel } from '@hilla/react-components/Grid.js';
+import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
 import { useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
-import { RendererOptions } from './autogrid-columns';
+
+export type RendererOptions<TItem> = {
+  item: TItem;
+  model: GridItemModel<TItem>;
+  original: GridColumnElement<TItem>;
+};
 
 export function AutoGridNumberRenderer<TItem>({ item, model, original }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;

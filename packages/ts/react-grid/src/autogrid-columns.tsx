@@ -1,17 +1,12 @@
-import { GridItemModel } from '@hilla/react-components/Grid.js';
-import type { GridColumnElement, GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { AutoGridBooleanRenderer, AutoGridNumberRenderer } from './autogrid-renderers';
 import type { PropertyInfo } from './utils';
 
 type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
-export type RendererOptions<TItem> = {
-  item: TItem;
-  model: GridItemModel<TItem>;
-  original: GridColumnElement<TItem>;
-};
-
-export function getColumnProps<TItem>(propertyInfo: PropertyInfo): ColumnOptions {
+// eslint-disable-next-line consistent-return
+export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
+  // eslint-disable-next-line default-case
   switch (propertyInfo.modelType) {
     case 'number':
       return {
