@@ -12,7 +12,7 @@ import { GridColumn, type GridColumnProps } from '@hilla/react-components/GridCo
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
-import { AutoGridColumn } from './autogrid-column';
+import { AutoGridNumberRenderer } from './autogrid-number-renderer';
 import type { CrudService } from './crud';
 import { ColumnContext } from './header-column-context';
 import { HeaderFilter } from './header-filter';
@@ -115,20 +115,14 @@ function useColumns(
   return effectiveProperties.map((propertyInfo) => {
     let column;
 
-    const columnOptions: GridColumnProps<any> = { autoWidth: true };
-    if (propertyInfo.modelType === 'number') {
-      columnOptions.textAlign = 'end';
-      columnOptions.flexGrow = 0;
-    }
-
     if (options.headerFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn
             path={propertyInfo.name}
             headerRenderer={HeaderFilter}
-            renderer={AutoGridColumn}
-            {...(columnOptions as any)}
+            renderer={propertyInfo.gridRenderer}
+            {...(propertyInfo.gridColumnOptions as any)}
           ></GridColumn>
         </GridColumnGroup>
       );
@@ -137,8 +131,8 @@ function useColumns(
         <GridColumn
           path={propertyInfo.name}
           headerRenderer={HeaderSorter}
-          renderer={AutoGridColumn}
-          {...(columnOptions as any)}
+          renderer={propertyInfo.gridRenderer}
+          {...(propertyInfo.gridColumnOptions as any)}
         ></GridColumn>
       );
     }

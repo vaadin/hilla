@@ -5,11 +5,20 @@ import {
   type DetachedModelConstructor,
   NumberModel,
 } from '@hilla/form';
+import type { GridItemModel } from '@hilla/react-components/Grid.js';
+import type { GridColumnElement, GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { ComponentType } from 'react';
+import { AutoGridNumberRenderer } from './autogrid-number-renderer';
 
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
   modelType: 'number' | 'string' | undefined;
+  gridRenderer:
+    | ComponentType<Readonly<{ item: any; model: GridItemModel<any>; original: GridColumnElement }>>
+    | null
+    | undefined;
+  gridColumnOptions: GridColumnProps<any>;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -32,10 +41,20 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const humanReadableName = _generateHeader(name);
     const { constructor } = propertyModel;
     const modelType = constructor === StringModel ? 'string' : constructor === NumberModel ? 'number' : undefined;
+    let gridRenderer;
+
+    const gridColumnOptions: GridColumnProps<any> = { autoWidth: true };
+    if (modelType === 'number') {
+      gridRenderer = AutoGridNumberRenderer;
+      gridColumnOptions.textAlign = 'end';
+      gridColumnOptions.flexGrow = 0;
+    }
     return {
       name,
       humanReadableName,
       modelType,
+      gridRenderer,
+      gridColumnOptions,
     };
   });
 };

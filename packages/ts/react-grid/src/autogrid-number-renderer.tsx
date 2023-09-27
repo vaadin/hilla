@@ -8,15 +8,13 @@ type RendererOptions<TItem> = {
   model: GridItemModel<TItem>;
   original: GridColumnElement<TItem>;
 };
-export function AutoGridColumn<TItem>({ item, model, original }: RendererOptions<TItem>): JSX.Element {
+
+export function AutoGridNumberRenderer<TItem>({ item, model, original }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const value = (item as any)[context.propertyInfo.name];
-  if (context.propertyInfo.modelType === 'number') {
-    const formatted = new Intl.NumberFormat(undefined, {
-      maximumFractionDigits: 0,
-    }).format(value);
-    return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
-  }
-  return <>{value}</>;
+  const formatted = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 0,
+  }).format(value);
+  return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }
