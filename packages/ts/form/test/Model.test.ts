@@ -4,7 +4,7 @@ import {
   _enum,
   _fromString,
   _key,
-  _metadata,
+  _meta,
   ArrayModel,
   Binder,
   EnumModel,
@@ -410,16 +410,16 @@ describe('@hilla/form', () => {
   describe('metadata', () => {
     it('should initialize with empty metadata by default', () => {
       const model = new ObjectModel(null as any, '', true);
-      expect(model[_metadata]).to.eql({});
+      expect(model[_meta]).to.eql({});
     });
 
     it('should initialize with metadata from options', () => {
-      const metadata: ModelMetadata = {
+      const meta: ModelMetadata = {
         javaType: 'java.lang.String',
         annotations: [{ name: 'jakarta.persistence.Id' }, { name: 'jakarta.persistence.Version' }],
       };
-      const model = new ObjectModel(null as any, '', true, { metadata });
-      expect(model[_metadata]).to.equal(metadata);
+      const model = new ObjectModel(null as any, '', true, { meta });
+      expect(model[_meta]).to.equal(meta);
     });
   });
 });

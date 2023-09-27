@@ -295,6 +295,6 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
   #createMetadataProperty(schema: Schema): PropertyAssignment | null {
     const metadata = this.#metadataProcessor.process(schema);
-    return metadata ? ts.factory.createPropertyAssignment('metadata', metadata) : null;
+    return metadata ? ts.factory.createPropertyAssignment('meta', metadata) : null;
   }
 }

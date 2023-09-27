@@ -6,19 +6,19 @@ class FormEntityMetadataModel<T extends FormEntityMetadata_1 = FormEntityMetadat
         return this[_getPropertyModel_1]("withoutMetadata", (parent, key) => new StringModel_1(parent, key, false));
     }
     get withJavaType(): StringModel_1 {
-        return this[_getPropertyModel_1]("withJavaType", (parent, key) => new StringModel_1(parent, key, false, { metadata: { javaType: "java.time.LocalDateTime" } }));
+        return this[_getPropertyModel_1]("withJavaType", (parent, key) => new StringModel_1(parent, key, false, { meta: { javaType: "java.time.LocalDateTime" } }));
     }
     get listWithJavaType(): ArrayModel_1<StringModel_1> {
-        return this[_getPropertyModel_1]("listWithJavaType", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true, { metadata: { javaType: "java.time.LocalDateTime" } }), { metadata: { javaType: "java.util.List" } }));
+        return this[_getPropertyModel_1]("listWithJavaType", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new StringModel_1(parent, key, true, { meta: { javaType: "java.time.LocalDateTime" } }), { meta: { javaType: "java.util.List" } }));
     }
     get withAnnotations(): NumberModel_1 {
-        return this[_getPropertyModel_1]("withAnnotations", (parent, key) => new NumberModel_1(parent, key, false, { metadata: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }] } }));
+        return this[_getPropertyModel_1]("withAnnotations", (parent, key) => new NumberModel_1(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }] } }));
     }
     get listWithAnnotations(): ArrayModel_1<NumberModel_1> {
-        return this[_getPropertyModel_1]("listWithAnnotations", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new NumberModel_1(parent, key, true, { metadata: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }] } }), { metadata: { javaType: "java.util.List" } }));
+        return this[_getPropertyModel_1]("listWithAnnotations", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new NumberModel_1(parent, key, true, { meta: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }] } }), { meta: { javaType: "java.util.List" } }));
     }
     get withAll(): NumberModel_1 {
-        return this[_getPropertyModel_1]("withAll", (parent, key) => new NumberModel_1(parent, key, false, { metadata: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }], javaType: "java.lang.Long" } }));
+        return this[_getPropertyModel_1]("withAll", (parent, key) => new NumberModel_1(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }], javaType: "java.lang.Long" } }));
     }
 }
 export default FormEntityMetadataModel;

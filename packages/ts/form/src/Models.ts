@@ -8,7 +8,7 @@ export const _parent = Symbol('parent');
 export const _key = Symbol('key');
 export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
-export const _metadata = Symbol('metadata');
+export const _meta = Symbol('meta');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
 
@@ -40,7 +40,7 @@ export interface ModelMetadata {
 
 export interface ModelOptions<T> {
   validators?: ReadonlyArray<Validator<T>>;
-  metadata?: ModelMetadata;
+  meta?: ModelMetadata;
 }
 
 export type DetachedModelConstructor<M> = new (
@@ -64,7 +64,7 @@ export abstract class AbstractModel<T = unknown> {
 
   readonly [_validators]: ReadonlyArray<Validator<T>>;
 
-  readonly [_metadata]: ModelMetadata;
+  readonly [_meta]: ModelMetadata;
 
   readonly [_optional]: boolean;
 
@@ -75,7 +75,7 @@ export abstract class AbstractModel<T = unknown> {
     this[_key] = key;
     this[_optional] = optional;
     this[_validators] = options?.validators ?? [];
-    this[_metadata] = options?.metadata ?? {};
+    this[_meta] = options?.meta ?? {};
   }
 
   toString(): string {
