@@ -186,6 +186,7 @@ export function AutoGrid<TItem>({
     // Sets the data provider, should be done only once
     const grid = ref.current!;
     setTimeout(() => {
+      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
       grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
     }, 1);
   }, [model, service]);

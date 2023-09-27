@@ -81,8 +81,7 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
-      const firstNameSorter = getHeaderCellContent(grid, 0, 0).firstElementChild as HTMLElement;
-      firstNameSorter.click();
+      sortGrid(grid, 'firstName','desc');
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
