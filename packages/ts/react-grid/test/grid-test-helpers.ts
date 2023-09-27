@@ -1,6 +1,13 @@
 import type { Grid } from '@vaadin/grid';
 // @ts-expect-error no types for the utils
-import { getCellContent, getPhysicalItems, getRowCells, getContainerCell, getRows } from './grid-test-utils.js';
+import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
+import { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
+import { GridElement } from '@hilla/react-components/Grid.js';
+
+export interface SortState {
+  path?: string;
+  direction?: GridSorterDirection;
+}
 
 export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement => {
   const physicalItems = getPhysicalItems(grid);
@@ -25,3 +32,15 @@ export const getHeaderCell = <T>(grid: Grid<T>, row: number, col: number): HTMLE
 };
 export const getHeaderCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement =>
   getCellContent(getHeaderCell(grid, row, col));
+
+export const sortGrid = (grid: GridElement, path: string, direction: GridSorterDirection): void => {
+  const sorter = Array.from(grid.querySelectorAll('vaadin-grid-sorter')).find((sorter) => sorter.path === path);
+  if (!sorter) {
+    throw new Error('No sorter found for path ' + path);
+  }
+  sorter.direction = direction;
+};
+export const getSortOrder = (grid: GridElement): SortState => {
+  const sorter = Array.from(grid.querySelectorAll('vaadin-grid-sorter')).find((sorter) => !!sorter.direction);
+  return { path: sorter?.path ?? undefined, direction: sorter?.direction };
+};

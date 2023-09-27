@@ -10,7 +10,14 @@ import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
-import { getBodyCellContent, getHeaderCellContent, getHeaderRows, getVisibleRowCount } from './grid-test-helpers.js';
+import {
+  getBodyCellContent,
+  getHeaderCellContent,
+  getHeaderRows,
+  getSortOrder,
+  getVisibleRowCount,
+  sortGrid,
+} from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -59,6 +66,16 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
     });
+    it('retains sorting when re-rendering', async () => {
+      const result = render(<TestAutoGrid />);
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
+      await nextFrame();
+      sortGrid(grid, 'lastName', 'desc');
+      expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
+      result.rerender(<TestAutoGrid />);
+      expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
+    });
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -74,6 +91,7 @@ describe('@hilla/react-grid', () => {
       const service = personService();
       const result = render(<TestAutoGrid service={service} />);
       const grid = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
       await nextFrame();
       const dp = grid.dataProvider;
       expect(dp).to.not.be.undefined;
