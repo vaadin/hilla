@@ -81,7 +81,7 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
-      sortGrid(grid, 'firstName','desc');
+      sortGrid(grid, 'firstName', 'desc');
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
