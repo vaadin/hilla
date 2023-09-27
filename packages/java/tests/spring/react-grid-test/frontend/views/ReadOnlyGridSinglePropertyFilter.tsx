@@ -7,7 +7,6 @@ import { useState } from 'react';
 
 export function ReadOnlyGridSinglePropertyFilter() {
   const [filter, setFilter] = useState<Filter | undefined>(undefined);
-
   return (
     <div>
       <TextField

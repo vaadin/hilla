@@ -4,5 +4,4 @@ import type Pageable from './types/dev/hilla/mappedtypes/Pageable';
 export interface CrudService<T> {
   list(request: Pageable, filter: Filter | undefined): Promise<T[]>;
   save(value: T): Promise<T | undefined>;
-  // delete(id: ID): Promise<void>;
 }
