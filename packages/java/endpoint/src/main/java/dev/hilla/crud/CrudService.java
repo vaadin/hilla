@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  * <p>
  * Note! Not yet fully implemented but limited to read operations
  */
-public interface CrudService<T> {
+public interface CrudService<T, ID> {
 
     /**
      * Lists objects of the given type using the paging and sorting options
@@ -26,4 +26,24 @@ public interface CrudService<T> {
      */
     List<T> list(Pageable pageable, @Nullable Filter filter);
 
+    /**
+     * Saves the given object and returns the (potentially) updated object.
+     * <p>
+     * If you store the object in a SQL database, the returned object might have
+     * a new id or updated consistency version.
+     *
+     * @param value
+     *            the object to save
+     * @return the fresh object or {@code null} if no object was found to update
+     */
+    @Nullable
+    T save(T value);
+
+    /**
+     * Delets the object with the given id.
+     *
+     * @param id
+     *            the id of the object to delete
+     */
+    void delete(ID id);
 }

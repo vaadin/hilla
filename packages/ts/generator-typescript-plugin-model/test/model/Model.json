@@ -311,6 +311,66 @@
           }
         }
       },
+      "com.example.application.endpoints.TsFormEndpoint.FormEntityMetadata": {
+        "type": "object",
+        "properties": {
+          "withoutMetadata": {
+            "type": "string"
+          },
+          "withJavaType": {
+            "type": "string",
+            "x-java-type": "java.time.LocalDateTime"
+          },
+          "listWithJavaType": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true,
+              "x-java-type": "java.time.LocalDateTime"
+            },
+            "x-java-type": "java.util.List"
+          },
+          "withAnnotations": {
+            "type": "number",
+            "x-annotations": [
+              {
+                "name": "jakarta.persistence.Id"
+              },
+              {
+                "name": "jakarta.persistence.Version"
+              }
+            ]
+          },
+          "listWithAnnotations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "nullable": true,
+              "x-annotations": [
+                {
+                  "name": "jakarta.persistence.Id"
+                },
+                {
+                  "name": "jakarta.persistence.Version"
+                }
+              ]
+            },
+            "x-java-type": "java.util.List"
+          },
+          "withAll": {
+            "type": "number",
+            "x-annotations": [
+              {
+                "name": "jakarta.persistence.Id"
+              },
+              {
+                "name": "jakarta.persistence.Version"
+              }
+            ],
+            "x-java-type": "java.lang.Long"
+          }
+        }
+      },
       "com.example.application.endpoints.TsFormEndpoint.FormValidationConstraints": {
         "type": "object",
         "properties": {
