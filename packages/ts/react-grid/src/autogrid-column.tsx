@@ -1,22 +1,22 @@
+import type { GridItemModel } from '@hilla/react-components/Grid.js';
+import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { useContext } from 'react';
 import { ColumnContext } from './header-column-context';
-import { GridItemModel } from '@hilla/react-components/Grid.js';
-import { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 
 type RendererOptions<TItem> = {
   item: TItem;
   model: GridItemModel<TItem>;
   original: GridColumnElement<TItem>;
 };
-export function AutoGridColumn<TItem>({ item, model, original }: RendererOptions<TItem>) {
+export function AutoGridColumn<TItem>({ item, model, original }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const value = (item as any)[context.propertyInfo.name];
-  if (context?.propertyInfo.modelType === 'number') {
+  if (context.propertyInfo.modelType === 'number') {
     const formatted = new Intl.NumberFormat(undefined, {
       maximumFractionDigits: 0,
     }).format(value);
     return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
-  } else {
-    return <>{value}</>;
   }
+  return <>{value}</>;
 }

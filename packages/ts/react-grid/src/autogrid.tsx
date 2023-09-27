@@ -8,10 +8,11 @@ import {
   type GridElement,
   type GridProps,
 } from '@hilla/react-components/Grid.js';
-import { GridColumn, GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import { GridColumn, type GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { AutoGridColumn } from './autogrid-column';
 import type { CrudService } from './crud';
 import { ColumnContext } from './header-column-context';
 import { HeaderFilter } from './header-filter';
@@ -22,7 +23,6 @@ import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStr
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
-import { AutoGridColumn } from './autogrid-column';
 
 function includeColumn(propertyId: string): unknown {
   // Exclude id and version columns
@@ -116,7 +116,7 @@ function useColumns(
     let column;
 
     const columnOptions: GridColumnProps<any> = { autoWidth: true };
-    if (propertyInfo.modelType == 'number') {
+    if (propertyInfo.modelType === 'number') {
       columnOptions.textAlign = 'end';
       columnOptions.flexGrow = 0;
     }
