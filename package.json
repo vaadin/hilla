@@ -19,7 +19,8 @@
     "lint:fix": "nx run-many -t lint:fix --all --output-style stream",
     "test": "nx run-many -t test --all --output-style stream",
     "test:coverage": "nx run-many -t test:coverage --all --output-style stream",
-    "typecheck": "nx run-many -t typecheck --all --output-style stream"
+    "typecheck": "nx run-many -t typecheck --all --output-style stream",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -32,16 +33,15 @@
   },
   "devDependencies": {
     "@types/karma": "^6.3.5",
-    "@types/node": "^20.6.3",
+    "@types/node": "^20.7.0",
     "concurrently": "^8.2.1",
     "esbuild": "^0.19.3",
-    "eslint": "^8.49.0",
+    "eslint": "^8.50.0",
     "eslint-config-vaadin": "^1.0.0-alpha.12",
-    "eslint-plugin-prettier": "^5.0.0",
-    "glob": "^10.3.5",
-    "karma": "^6.4.1",
-    "karma-chrome-launcher": "^3.1.1",
-    "karma-coverage": "^2.2.0",
+    "glob": "^10.3.10",
+    "karma": "^6.4.2",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage": "^2.2.1",
     "karma-mocha": "^2.0.1",
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
@@ -50,10 +50,10 @@
     "micromatch": "^4.0.5",
     "minimist": "^1.2.8",
     "mocha": "^10.2.0",
-    "nx": "^16.8.1",
-    "prettier": "^3.0.3",
+    "nx": "^16.9.1",
+    "prettier": "^2.8.4",
     "simple-git-hooks": "^2.9.0",
-    "tsx": "^3.12.10",
+    "tsx": "^3.13.0",
     "vite": "^4.4.9"
   }
 }
