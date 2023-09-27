@@ -18,6 +18,7 @@ export interface Company {
   name: string;
   foundedDate: string;
 }
+
 export interface Person {
   id: number;
   version: number;
@@ -32,11 +33,19 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
   get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
   }
 
   get version(): NumberModel {
-    return this[_getPropertyModel]('version', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
   }
 
   get firstName(): StringModel {
@@ -64,11 +73,19 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
   get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
   }
 
   get version(): NumberModel {
-    return this[_getPropertyModel]('version', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
   }
 
   get name(): StringModel {
@@ -138,7 +155,9 @@ export const companyData: Company[] = [
   { id: 1, version: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
   { id: 2, version: 1, name: 'Google', foundedDate: '1998-09-04' },
 ];
-export type HasLastFilter = { lastFilter: Filter | undefined };
+export type HasLastFilter = {
+  lastFilter: Filter | undefined;
+};
 
 export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
 export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);

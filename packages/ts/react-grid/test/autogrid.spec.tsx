@@ -47,6 +47,7 @@ describe('@hilla/react-grid', () => {
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
     return <AutoGrid service={personService()} model={PersonModel} {...customProps}></AutoGrid>;
   }
+
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
       const result: RenderResult = render(<TestAutoGrid />);
@@ -341,6 +342,11 @@ describe('@hilla/react-grid', () => {
     it('should only show configured columns in specified order', async () => {
       const result = render(<TestAutoGrid visibleColumns={['email', 'firstName']} />);
       await assertColumns(result, 'email', 'firstName');
+    });
+
+    it('should show columns that would be excluded by default', async () => {
+      const result = render(<TestAutoGrid visibleColumns={['id', 'version']} />);
+      await assertColumns(result, 'id', 'version');
     });
 
     it('should ignore unknown columns', async () => {
