@@ -111,12 +111,14 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
-    it('does not pass its own parameters to the underlying grid', async () => {
+
+    it('does not pass its own parameters to the underlying grid', () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       expect(grid.getAttribute('model')).to.be.null;
       expect(grid.getAttribute('service')).to.be.null;
     });
+
     it('passes filter to the data provider', async () => {
       const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
       // eslint-disable-next-line

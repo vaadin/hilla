@@ -31,15 +31,19 @@ export async function nextFrame(): Promise<void> {
     });
   });
 }
+
+// eslint-disable-next-line @typescript-eslint/require-await
 async function getFormField(result: RenderResult, label: string): Promise<TextFieldElement | undefined> {
   return result.queryByLabelText(label)?.parentElement as TextFieldElement;
 }
+
 async function setFormField(result: RenderResult, label: string, value: string) {
   const field = (await getFormField(result, label))!;
   field.value = value;
   field.dispatchEvent(new CustomEvent('input'));
   await nextFrame();
 }
+
 async function assertFormFieldValue(result: RenderResult, fieldLabel: string, expected: number | string) {
   const field = (await getFormField(result, fieldLabel))!;
   expect(field.value).to.equal(expected);
@@ -156,6 +160,7 @@ describe('@hilla/react-grid', () => {
     });
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');
       };
@@ -173,6 +178,7 @@ describe('@hilla/react-grid', () => {
     });
     it('calls onSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');
       };

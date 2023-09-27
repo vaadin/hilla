@@ -89,6 +89,7 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
   let data = initialData;
 
   return {
+    // eslint-disable-next-line @typescript-eslint/require-await
     async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
       let filteredData: T[] = [];
@@ -119,6 +120,7 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
       }
       return filteredData;
     },
+    // eslint-disable-next-line @typescript-eslint/require-await
     async save(value: T): Promise<T | undefined> {
       data = data.map((item) => (item.id === value.id ? value : item));
       return data.find((item) => item.id === value.id);
