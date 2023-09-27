@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@hilla/form": "file:../../../../ts/form",
+    "@hilla/frontend": "2.3.0-alpha5",
     "@hilla/generator-typescript-cli": "file:../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "file:../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "file:../../../../ts/generator-typescript-plugin-backbone",
@@ -45,6 +46,7 @@
   },
   "vaadin": {
     "dependencies": {
+      "@hilla/frontend": "2.3.0-alpha5",
       "@hilla/generator-typescript-cli": "2.3.0-alpha5",
       "@hilla/generator-typescript-core": "2.3.0-alpha5",
       "@hilla/generator-typescript-plugin-backbone": "2.3.0-alpha5",
@@ -82,7 +84,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "bca8511176f3e4e5c8acea6655a0be7559385a8585223377175c6a8dbf9ec3a0"
+    "hash": "bfcf418ab63d9a564f95fdb97f5c84566c75d6973465f7c26480b59b9a39e598"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -103,6 +105,7 @@
     "@hilla/react-form": "$@hilla/react-form",
     "@hilla/react-grid": "$@hilla/react-grid",
     "react-router-dom": "$react-router-dom",
-    "@hilla/react-auth": "$@hilla/react-auth"
+    "@hilla/react-auth": "$@hilla/react-auth",
+    "@hilla/frontend": "$@hilla/frontend"
   }
 }

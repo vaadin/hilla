@@ -140,5 +140,5 @@ export const companyData: Company[] = [
 ];
 export type HasLastFilter = { lastFilter: Filter | undefined };
 
-export const personService: CrudService<Person> & HasLastFilter = createService<Person>(personData);
-export const companyService: CrudService<Company> & HasLastFilter = createService<Company>(companyData);
+export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
+export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);

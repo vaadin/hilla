@@ -78,12 +78,12 @@ export class EntityProcessor {
     const { logger } = this.#owner;
 
     if (!isObjectSchema(schema)) {
-      logger.error(schema, `Component is not an object: '${this.#fullyQualifiedName}'`);
+      logger.debug(schema, `Component is not an object: '${this.#fullyQualifiedName}'`);
       return undefined;
     }
 
     if (isEmptyObject(schema)) {
-      logger.warn(`Component has no properties:' ${this.#fullyQualifiedName}'`);
+      logger.debug(`Component has no properties:' ${this.#fullyQualifiedName}'`);
     }
 
     return ts.factory.createInterfaceDeclaration(
@@ -110,14 +110,17 @@ export class EntityProcessor {
       const decomposed = decomposeSchema(schema);
 
       if (decomposed.length > 2) {
-        logger.error(schema, `Schema for '${this.#fullyQualifiedName}' class component is broken.`);
+        logger.debug(
+          schema,
+          `Schema for '${this.#fullyQualifiedName}' has more than two components. This plugin will ignore it.`,
+        );
         return undefined;
       }
 
       const [parent, child] = decomposed;
 
       if (!isReferenceSchema(parent)) {
-        logger.error(parent, 'Only reference schema allowed for parent class');
+        logger.debug(parent, 'Only reference schema allowed for parent class');
         return undefined;
       }
 
