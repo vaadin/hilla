@@ -7,6 +7,10 @@ import {
   NumberModel,
   type ModelMetadata,
 } from '@hilla/form';
+import type { GridItemModel } from '@hilla/react-components/Grid.js';
+import type { GridColumnElement, GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { ComponentType } from 'react';
+import { AutoGridNumberRenderer } from './autogrid-number-renderer';
 
 export interface PropertyInfo {
   name: string;

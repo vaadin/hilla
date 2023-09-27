@@ -112,6 +112,24 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
+    it('renders strings without formatting and with default alignment', async () => {
+      const result = render(<TestAutoGrid />);
+      await nextFrame();
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
+      expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('');
+      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
+    });
+    it('renders numbers as right aligned numbers', async () => {
+      const result = render(<TestAutoGrid />);
+      await nextFrame();
+      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+      await nextFrame();
+      expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('-12');
+      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('123,456');
+    });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
