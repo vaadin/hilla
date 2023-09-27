@@ -109,8 +109,8 @@ const createService = <T extends HasId>(data: T[]) => {
 };
 
 const personData: Person[] = [
-  { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
-  { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
+  { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: -12, vip: true },
+  { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 123456, vip: false },
 ];
 
 const companyData: Company[] = [

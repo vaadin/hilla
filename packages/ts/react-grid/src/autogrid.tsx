@@ -8,12 +8,12 @@ import {
   type GridElement,
   type GridProps,
 } from '@hilla/react-components/Grid.js';
-import { GridColumn } from '@hilla/react-components/GridColumn.js';
+import { GridColumn, GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { HeaderColumnContext } from './header-column-context';
+import { ColumnContext } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -22,6 +22,7 @@ import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStr
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import { getProperties, type PropertyInfo } from './utils.js';
+import { AutoGridColumn } from './autogrid-column';
 
 function includeColumn(propertyId: string): unknown {
   // Exclude id and version columns
@@ -113,19 +114,38 @@ function useColumns(
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
+
+    const columnOptions: GridColumnProps<any> = { autoWidth: true };
+    if (propertyInfo.modelType == 'number') {
+      columnOptions.textAlign = 'end';
+      columnOptions.flexGrow = 0;
+    }
+
     if (options.headerFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilter} autoWidth></GridColumn>
+          <GridColumn
+            path={propertyInfo.name}
+            headerRenderer={HeaderFilter}
+            renderer={AutoGridColumn}
+            {...(columnOptions as any)}
+          ></GridColumn>
         </GridColumnGroup>
       );
     } else {
-      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
+      column = (
+        <GridColumn
+          path={propertyInfo.name}
+          headerRenderer={HeaderSorter}
+          renderer={AutoGridColumn}
+          {...(columnOptions as any)}
+        ></GridColumn>
+      );
     }
     return (
-      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <ColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
         {column}
-      </HeaderColumnContext.Provider>
+      </ColumnContext.Provider>
     );
   });
 }
