@@ -51,7 +51,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
         setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.LESS_THAN, null);
         assertRowCount(50 - 4);
-        assertName(0, "Abigail", "Carter");
+        assertName(0, "Dylan", "Fisher");
 
         setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.EQUALS, "25");
         assertRowCount(1);
