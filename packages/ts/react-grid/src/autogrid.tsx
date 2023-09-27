@@ -10,10 +10,9 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import type { CrudService } from './crud';
-import { HeaderColumnContext } from './header-column-context';
+import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -48,11 +47,6 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
-function pathFromColumn(column: any): string {
-  // eslint-disable-next-line
-  return column?.original?.path ?? column?.original?.dataset?.path;
-}
-
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: CrudService<TItem>,
@@ -63,11 +57,13 @@ function createDataProvider<TItem>(
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
+      orders: params.sortOrders
+        .filter((order) => order.direction != null)
+        .map((order) => ({
+          property: order.path,
+          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+          ignoreCase: false,
+        })),
     };
 
     const pageNumber = params.page;
@@ -111,6 +107,10 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
+  const [sortState, setSortState] = useState<SortState | null>(
+    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  );
+
   return effectiveProperties.map((propertyInfo) => {
     let column;
     if (options.headerFilters) {
@@ -123,7 +123,10 @@ function useColumns(
       column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
     }
     return (
-      <HeaderColumnContext.Provider key={`group-${propertyInfo.name}`} value={{ propertyInfo, setPropertyFilter }}>
+      <HeaderColumnContext.Provider
+        key={propertyInfo.name}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+      >
         {column}
       </HeaderColumnContext.Provider>
     );
@@ -182,7 +185,10 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
-    grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    setTimeout(() => {
+      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+    }, 1);
   }, [model, service]);
 
   useEffect(() => {
