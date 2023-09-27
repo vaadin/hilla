@@ -19,7 +19,8 @@
     "lint:fix": "nx run-many -t lint:fix --all --output-style stream",
     "test": "nx run-many -t test --all --output-style stream",
     "test:coverage": "nx run-many -t test:coverage --all --output-style stream",
-    "typecheck": "nx run-many -t typecheck --all --output-style stream"
+    "typecheck": "nx run-many -t typecheck --all --output-style stream",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
