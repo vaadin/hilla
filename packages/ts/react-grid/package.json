@@ -49,7 +49,8 @@
   },
   "dependencies": {
     "@hilla/form": "*",
-    "@hilla/react-components": "2.2.0-alpha16"
+    "@hilla/react-components": "2.2.0-alpha16",
+    "@hilla/react-form": "*"
   },
   "peerDependencies": {
     "react": "^18"

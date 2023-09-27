@@ -38,7 +38,7 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
 
 describe('@hilla/react-grid', () => {
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
-    return <AutoGrid service={personService} model={PersonModel} {...customProps}></AutoGrid>;
+    return <AutoGrid service={personService()} model={PersonModel} {...customProps}></AutoGrid>;
   }
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
@@ -46,9 +46,9 @@ describe('@hilla/react-grid', () => {
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
     });
     it('can change model and recreate columns', async () => {
-      const result = render(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
+      const result = render(<AutoGrid service={personService()} model={PersonModel}></AutoGrid>);
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
-      result.rerender(<AutoGrid service={companyService} model={CompanyModel}></AutoGrid>);
+      result.rerender(<AutoGrid service={companyService()} model={CompanyModel}></AutoGrid>);
       await assertColumns(result, 'name', 'foundedDate');
     });
     it('creates sortable columns', async () => {
@@ -67,11 +67,12 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
     });
     it('sets a data provider, but only once', async () => {
-      const result = render(<TestAutoGrid />);
+      const service = personService();
+      const result = render(<TestAutoGrid service={service} />);
       const grid = result.container.querySelector('vaadin-grid')!;
       const dp = grid.dataProvider;
       expect(dp).to.not.be.undefined;
-      result.rerender(<TestAutoGrid />);
+      result.rerender(<TestAutoGrid service={service} />);
       const grid2 = result.container.querySelector('vaadin-grid')!;
       expect(dp).to.equal(grid2.dataProvider);
     });
@@ -130,7 +131,8 @@ describe('@hilla/react-grid', () => {
         expect(cell.firstElementChild).to.null;
       });
       it('filter when you type in the field for a string column', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const service = personService();
+        const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -146,10 +148,11 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(personService.lastFilter).to.eql(expectedFilter);
+        expect(service.lastFilter).to.eql(expectedFilter);
       });
       it('filter when you type in the field for a number column', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const service = personService();
+        const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -166,7 +169,7 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.GREATER_THAN,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(personService.lastFilter).to.eql(expectedFilter);
+        expect(service.lastFilter).to.eql(expectedFilter);
 
         const someNumberFilterSelect = someNumberFilterField.previousElementSibling as SelectElement;
         someNumberFilterSelect.value = Matcher.EQUALS;
@@ -179,10 +182,11 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.EQUALS,
         };
         const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
-        expect(personService.lastFilter).to.eql(expectedFilter2);
+        expect(service.lastFilter).to.eql(expectedFilter2);
       });
       it('combine filters (and) when you type in multiple fields', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const service = personService();
+        const result = render(<TestAutoGrid service={service} headerFilters />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -211,10 +215,12 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'and' },
           children: [expectedFirstNameFilter, expectedLastNameFilter],
         };
-        expect(personService.lastFilter).to.eql(expectedFilter);
+        expect(service.lastFilter).to.eql(expectedFilter);
       });
       it('removes filters if turning header filters off', async () => {
-        const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
+        const service = personService();
+
+        const result = render(<AutoGrid service={service} model={PersonModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
         const grid = result.container.querySelector('vaadin-grid')!;
@@ -235,9 +241,9 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'and' },
           children: [filter],
         };
-        expect(personService.lastFilter).to.eql(expectedFilter1);
+        expect(service.lastFilter).to.eql(expectedFilter1);
 
-        result.rerender(<AutoGrid service={personService} model={PersonModel}></AutoGrid>);
+        result.rerender(<AutoGrid service={service} model={PersonModel}></AutoGrid>);
         await nextFrame();
         await nextFrame();
         expect(getHeaderRows(grid).length).to.equal(1);
@@ -246,13 +252,16 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'and' },
           children: [],
         };
-        expect(personService.lastFilter).to.eql(expectedFilter2);
+        expect(service.lastFilter).to.eql(expectedFilter2);
       });
       it('filters correctly after changing model', async () => {
-        const result = render(<AutoGrid service={personService} model={PersonModel} headerFilters></AutoGrid>);
+        const _personService = personService();
+        const _companyService = companyService();
+
+        const result = render(<AutoGrid service={_personService} model={PersonModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
-        result.rerender(<AutoGrid service={companyService} model={CompanyModel} headerFilters></AutoGrid>);
+        result.rerender(<AutoGrid service={_companyService} model={CompanyModel} headerFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -268,11 +277,12 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(personService.lastFilter).to.eql(expectedFilter);
+        expect(_personService.lastFilter).to.eql(expectedFilter);
       });
     });
     it('removes the filters when you clear the fields', async () => {
-      const result = render(<TestAutoGrid headerFilters />);
+      const service = personService();
+      const result = render(<TestAutoGrid headerFilters service={service} />);
       await nextFrame();
       await nextFrame();
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -288,7 +298,7 @@ describe('@hilla/react-grid', () => {
         ...{ t: 'and' },
         children: [],
       };
-      expect(personService.lastFilter).not.to.eql(expectedFilter);
+      expect(service.lastFilter).not.to.eql(expectedFilter);
 
       firstNameFilter.value = '';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
@@ -296,7 +306,7 @@ describe('@hilla/react-grid', () => {
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
       await nextFrame();
 
-      expect(personService.lastFilter).to.eql(expectedFilter);
+      expect(service.lastFilter).to.eql(expectedFilter);
     });
   });
   describe('customize columns', () => {

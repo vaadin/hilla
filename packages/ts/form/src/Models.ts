@@ -8,6 +8,7 @@ export const _parent = Symbol('parent');
 export const _key = Symbol('key');
 export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
+export const _meta = Symbol('meta');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
 
@@ -27,8 +28,19 @@ export const modelDetachedParent = { $value$: undefined };
 
 export type ModelParent = AbstractModel | BinderNode | typeof modelDetachedParent;
 
+export interface Annotation {
+  name: string;
+  attributes?: Record<string, unknown>;
+}
+
+export interface ModelMetadata {
+  javaType?: string;
+  annotations?: Annotation[];
+}
+
 export interface ModelOptions<T> {
   validators?: ReadonlyArray<Validator<T>>;
+  meta?: ModelMetadata;
 }
 
 export type DetachedModelConstructor<M> = new (
@@ -52,6 +64,8 @@ export abstract class AbstractModel<T = unknown> {
 
   readonly [_validators]: ReadonlyArray<Validator<T>>;
 
+  readonly [_meta]: ModelMetadata;
+
   readonly [_optional]: boolean;
 
   [_key]: keyof any;
@@ -61,6 +75,7 @@ export abstract class AbstractModel<T = unknown> {
     this[_key] = key;
     this[_optional] = optional;
     this[_validators] = options?.validators ?? [];
+    this[_meta] = options?.meta ?? {};
   }
 
   toString(): string {
