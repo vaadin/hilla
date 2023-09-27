@@ -9,6 +9,6 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @BrowserCallable
 @Service
 @AnonymousAllowed
-public class AppointmentService
-        extends CrudRepositoryService<Appointment, Long, AppointmentRepository> {
+public class AppointmentService extends
+        CrudRepositoryService<Appointment, Long, AppointmentRepository> {
 }
