@@ -20,18 +20,7 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, hasAnnotation, type PropertyInfo } from './utils.js';
-
-function includeProperty(propertyInfo: PropertyInfo): unknown {
-  // Exclude properties annotated with id and version
-  if (
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
-  ) {
-    return false;
-  }
-  return true;
-}
+import { getProperties, hasAnnotation, includeProperty, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{

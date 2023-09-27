@@ -1,4 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
+import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
@@ -6,8 +7,8 @@ import { render, type RenderResult } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { _generateHeader } from '../src/utils.js';
 import {
   getBodyCellContent,
@@ -19,7 +20,6 @@ import {
   sortGrid,
 } from './grid-test-helpers.js';
 import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
-import { GridElement } from '@hilla/react-components/Grid.js';
 
 use(sinonChai);
 
@@ -123,6 +123,7 @@ describe('@hilla/react-grid', () => {
       (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
       const result = render(<TestAutoGrid filter={filter} />);
+      await nextFrame();
       await nextFrame();
       const grid = getGrid(result);
       expect(getVisibleRowCount(grid)).to.equal(1);

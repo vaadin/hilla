@@ -27,10 +27,12 @@ describe('@hilla/react-grid', () => {
     });
     it('passes the selected item and populates the form', async () => {
       const result = render(<TestAutoCrud />);
+      await nextFrame();
+      await nextFrame();
       const grid = getGrid(result);
       await nextFrame();
       await nextFrame();
-      toggleRowSelected(grid, 1);
+      toggleRowSelected(grid, 0);
       await nextFrame();
       expect((await getFormField(result, 'First name')).value).to.equal('Jane');
       expect((await getFormField(result, 'Last name')).value).to.equal('Love');
@@ -55,6 +57,7 @@ describe('@hilla/react-grid', () => {
       const service = createService(personData);
       const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
       const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
       await nextFrame();
       toggleRowSelected(grid, 1);
       await nextFrame();

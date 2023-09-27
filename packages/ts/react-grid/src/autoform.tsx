@@ -6,7 +6,7 @@ import { useForm } from '@hilla/react-form';
 import { useEffect, useState, type JSX } from 'react';
 import { AutoFormField } from './autoform-field';
 import type { CrudService } from './crud';
-import { getProperties, isInternalProperty, type PropertyInfo } from './utils.js';
+import { getProperties, includeProperty } from './utils.js';
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -67,7 +67,7 @@ export function ExperimentalAutoForm<TItem>({
   return (
     <VerticalLayout theme="padding">
       {getProperties(model)
-        .filter((prop) => !isInternalProperty(prop.name))
+        .filter(includeProperty)
         .map((propertyInfo) => (
           <AutoFormField
             key={propertyInfo.name}

@@ -1,11 +1,11 @@
 import {
-    NumberModel,
-    StringModel,
-    _meta,
-    createDetachedModel,
-    type AbstractModel,
-    type DetachedModelConstructor,
-    type ModelMetadata
+  NumberModel,
+  StringModel,
+  _meta,
+  createDetachedModel,
+  type AbstractModel,
+  type DetachedModelConstructor,
+  type ModelMetadata,
 } from '@hilla/form';
 
 export interface PropertyInfo {
@@ -49,3 +49,14 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     };
   });
 };
+
+export function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
+    return false;
+  }
+  return true;
+}
