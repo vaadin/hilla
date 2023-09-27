@@ -44,6 +44,13 @@ async function assertFormFieldValue(result: RenderResult, fieldLabel: string, ex
   const field = (await getFormField(result, fieldLabel))!;
   expect(field.value).to.equal(expected);
 }
+async function assertFormFieldValues(result: RenderResult, expected: Person | undefined) {
+  const person = expected ?? { firstName: '', lastName: '', email: '', someNumber: 0, id: -1, version: -1, vip: false };
+  await assertFormFieldValue(result, 'First name', person.firstName);
+  await assertFormFieldValue(result, 'Last name', person.lastName);
+  await assertFormFieldValue(result, 'Email', person.email);
+  await assertFormFieldValue(result, 'Some number', person.someNumber);
+}
 async function submit(result: RenderResult) {
   const submitButton = await result.findByText('Submit');
   submitButton.click();
@@ -63,57 +70,36 @@ describe('@hilla/react-grid', () => {
         vip: false,
       };
       const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
-      await assertFormFieldValue(result, 'First name', person.firstName);
-      await assertFormFieldValue(result, 'Last name', person.lastName);
-      await assertFormFieldValue(result, 'Email', person.email);
-      await assertFormFieldValue(result, 'Some number', person.someNumber);
+      await assertFormFieldValues(result, person);
     });
     it('works without an item', async () => {
       const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} />);
-      await assertFormFieldValue(result, 'First name', '');
-      await assertFormFieldValue(result, 'Last name', '');
-      await assertFormFieldValue(result, 'Email', '');
-      await assertFormFieldValue(result, 'Some number', 0);
+      await assertFormFieldValues(result, undefined);
     });
     it('uses values from an item', async () => {
       const person = (await getItem(personService, 2))!;
 
       const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
-      await assertFormFieldValue(result, 'First name', person.firstName);
-      await assertFormFieldValue(result, 'Last name', person.lastName);
-      await assertFormFieldValue(result, 'Email', person.email);
-      await assertFormFieldValue(result, 'Some number', person.someNumber);
+      await assertFormFieldValues(result, person);
     });
     it('updates values when changing item', async () => {
       const person1 = (await getItem(personService, 2))!;
       const person2 = (await getItem(personService, 1))!;
 
       const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person1} />);
-      await assertFormFieldValue(result, 'First name', person1.firstName);
-      await assertFormFieldValue(result, 'Last name', person1.lastName);
-      await assertFormFieldValue(result, 'Email', person1.email);
-      await assertFormFieldValue(result, 'Some number', person1.someNumber);
+      await assertFormFieldValues(result, person1);
 
       result.rerender(<ExperimentalAutoForm service={personService} model={PersonModel} item={person2} />);
-      await assertFormFieldValue(result, 'First name', person2.firstName);
-      await assertFormFieldValue(result, 'Last name', person2.lastName);
-      await assertFormFieldValue(result, 'Email', person2.email);
-      await assertFormFieldValue(result, 'Some number', person2.someNumber);
+      await assertFormFieldValues(result, person2);
     });
     it('clears the form when setting the item to undefined', async () => {
       const person = (await getItem(personService, 2))!;
 
       const result = render(<ExperimentalAutoForm service={personService} model={PersonModel} item={person} />);
-      await assertFormFieldValue(result, 'First name', person.firstName);
-      await assertFormFieldValue(result, 'Last name', person.lastName);
-      await assertFormFieldValue(result, 'Email', person.email);
-      await assertFormFieldValue(result, 'Some number', person.someNumber);
+      await assertFormFieldValues(result, person);
 
       result.rerender(<ExperimentalAutoForm service={personService} model={PersonModel} item={undefined} />);
-      await assertFormFieldValue(result, 'First name', '');
-      await assertFormFieldValue(result, 'Last name', '');
-      await assertFormFieldValue(result, 'Email', '');
-      await assertFormFieldValue(result, 'Some number', 0);
+      await assertFormFieldValues(result, undefined);
     });
     it('submits a valid form', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
@@ -134,10 +120,8 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'bar');
       await submit(result);
       await nextFrame();
-      await assertFormFieldValue(result, 'First name', '');
-      await assertFormFieldValue(result, 'Last name', '');
-      await assertFormFieldValue(result, 'Email', '');
-      await assertFormFieldValue(result, 'Some number', 0);
+      await nextFrame();
+      await assertFormFieldValues(result, undefined);
     });
     it('clears the form after a valid submit when using onSubmit', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
@@ -149,10 +133,7 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'baz');
       await submit(result);
       await nextFrame();
-      await assertFormFieldValue(result, 'First name', '');
-      await assertFormFieldValue(result, 'Last name', '');
-      await assertFormFieldValue(result, 'Email', '');
-      await assertFormFieldValue(result, 'Some number', 0);
+      await assertFormFieldValues(result, undefined);
     });
     it('calls onSubmit with the new item', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
@@ -186,6 +167,7 @@ describe('@hilla/react-grid', () => {
         <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
       );
       await submit(result);
+      await nextFrame();
       await nextFrame();
 
       assert(submitSpy.notCalled);
