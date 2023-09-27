@@ -381,8 +381,8 @@ public class EndpointInvoker {
         EndpointAccessChecker accessChecker = getAccessChecker();
 
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
-        var invokedEndpointClass = vaadinEndpointData.getEndpointObject()
-                .getClass();
+        var invokedEndpointClass = ClassUtils
+                .getUserClass(vaadinEndpointData.getEndpointObject());
 
         String checkError;
         if (methodDeclaringClass.equals(invokedEndpointClass)) {
