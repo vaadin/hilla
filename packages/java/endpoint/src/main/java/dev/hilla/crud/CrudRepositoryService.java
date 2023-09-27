@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * repository.
  */
 @EndpointExposed
-public class CrudRepositoryService<T, ID> implements CrudService<T> {
+public class CrudRepositoryService<T, ID> implements CrudService<T, ID> {
 
     @Autowired
     private JpaFilterConverter jpaFilterConverter;
@@ -43,7 +43,17 @@ public class CrudRepositoryService<T, ID> implements CrudService<T> {
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
         Specification<T> spec = jpaFilterConverter.toSpec(filter, entityClass);
-        return repository.findAll(spec, pageable).getContent();
+        return getRepository().findAll(spec, pageable).getContent();
+    }
+
+    @Override
+    public @Nullable T save(T value) {
+        return ((JpaRepository<T, ID>) repository).save(value);
+    }
+
+    @Override
+    public void delete(ID id) {
+        ((JpaRepository<T, ID>) repository).deleteById(id);
     }
 
 }
