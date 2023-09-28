@@ -1,14 +1,22 @@
 /* eslint-disable sort-keys */
 import { assert, expect, use } from '@esm-bundle/chai';
 import { LitElement } from 'lit';
-// TODO: remove when the new version of eslint-config-vaadin is released.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
 import { Binder, type BinderConfiguration } from '../src/index.js';
-import { type Employee, EmployeeModel, type Order, OrderModel, type TestEntity, TestModel } from './TestModels.js';
+import {
+  type Employee,
+  EmployeeModel,
+  type Order,
+  OrderModel,
+  type TestEntity,
+  TestModel,
+  type Level1,
+  Level1Model,
+  Level2Model,
+} from './TestModels.js';
 
 use(sinonChai);
 
@@ -383,6 +391,32 @@ describe('@hilla/form', () => {
         const superNameNode = binder.for(binder.model.supervisor.fullName);
         binder.clear();
         assert.equal('', superNameNode.value);
+      });
+    });
+
+    @customElement('lit-hierarchy-view')
+    class LitHierarchyView extends LitElement {
+      binder: Binder<Level1, Level1Model>;
+
+      constructor() {
+        super();
+        this.binder = new Binder(this, Level1Model);
+        const level1 = Level1Model.createEmptyValue();
+        const level2 = Level2Model.createEmptyValue();
+        level1.level2 = [level2];
+        this.binder.read(level1);
+      }
+    }
+
+    describe('complex hierarchy', () => {
+      it('should create binder in complex hierarchy', async () => {
+        const litHierarchyView = document.createElement('lit-hierarchy-view') as LitHierarchyView;
+        document.body.appendChild(litHierarchyView);
+        const { binder } = litHierarchyView;
+        await litHierarchyView.updateComplete;
+        for (const item of binder.model.level2) {
+          assert.isDefined(binder.for(item.model.level3.level4.name4).defaultValue);
+        }
       });
     });
   });
