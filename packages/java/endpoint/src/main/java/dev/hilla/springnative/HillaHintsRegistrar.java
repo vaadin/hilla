@@ -5,29 +5,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import dev.hilla.OpenAPIUtil;
+import dev.hilla.engine.EngineConfiguration;
+import dev.hilla.push.PushEndpoint;
+import dev.hilla.push.messages.fromclient.AbstractServerMessage;
+import dev.hilla.push.messages.toclient.AbstractClientMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
-
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.hilla.EndpointCodeGenerator;
-import dev.hilla.OpenAPIUtil;
-import dev.hilla.engine.EngineConfiguration;
-import dev.hilla.push.PushEndpoint;
-import dev.hilla.push.messages.fromclient.AbstractServerMessage;
-import dev.hilla.push.messages.toclient.AbstractClientMessage;
 
 /**
  * Registers runtime hints for Spring 3 native support for Hilla.

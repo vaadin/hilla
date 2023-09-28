@@ -22,6 +22,8 @@ import java.util.Set;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
 import dev.hilla.engine.ParserProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.server.VaadinContext;
@@ -60,8 +62,14 @@ public class EndpointCodeGenerator {
      * Gets the singleton instance.
      */
     public static EndpointCodeGenerator getInstance() {
+        getLogger().error("Trying to find EndpointCodeGenerator using context "
+                + ApplicationContextProvider.getApplicationContext());
         return ApplicationContextProvider.getApplicationContext()
                 .getBean(EndpointCodeGenerator.class);
+    }
+
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(EndpointCodeGenerator.class);
     }
 
     /**

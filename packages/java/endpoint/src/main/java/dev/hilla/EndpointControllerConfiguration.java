@@ -18,6 +18,8 @@ package dev.hilla;
 
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -247,9 +249,17 @@ public class EndpointControllerConfiguration {
      */
     @Bean
     EndpointCodeGenerator endpointCodeGenerator(ServletContext servletContext,
-            EndpointController endpointController) {
-        return new EndpointCodeGenerator(
+            EndpointController endpointController,
+            ApplicationContext applicationContext) {
+        EndpointCodeGenerator bean = new EndpointCodeGenerator(
                 new VaadinServletContext(servletContext), endpointController);
+        getLogger().error("Creating new EndpointCodeGenerator bean " + bean
+                + " for appContext " + applicationContext);
+        return bean;
+    }
+
+    private Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 
 }
