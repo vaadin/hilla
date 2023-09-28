@@ -118,8 +118,8 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
+      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
     it('renders numbers as right aligned numbers', async () => {
       const result = render(<TestAutoGrid />);
@@ -127,8 +127,8 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('-12');
-      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('-12');
     });
     it('renders booleans as icons', async () => {
       const result = render(<TestAutoGrid />);
@@ -136,9 +136,9 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
-      const vip = getBodyCellContent(grid, 0, 4).querySelector('vaadin-icon')!;
+      const vip = getBodyCellContent(grid, 1, 4).querySelector('vaadin-icon')!;
       expect(vip.icon).to.equal('lumo:checkmark');
-      const notVip = getBodyCellContent(grid, 1, 4).querySelector('vaadin-icon')!;
+      const notVip = getBodyCellContent(grid, 0, 4).querySelector('vaadin-icon')!;
       expect(notVip.icon).to.equal('lumo:minus');
     });
     it('does not pass its own parameters to the underlying grid', async () => {
