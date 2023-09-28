@@ -118,8 +118,8 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
+      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
     it('renders numbers as right aligned numbers', async () => {
       const result = render(<TestAutoGrid />);
@@ -127,8 +127,8 @@ describe('@hilla/react-grid', () => {
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('-12');
-      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('-12');
     });
     it('renders booleans as icons', async () => {
       const result = render(<TestAutoGrid />);
@@ -137,9 +137,9 @@ describe('@hilla/react-grid', () => {
       await nextFrame();
       await nextFrame();
       const vip = getBodyCellContent(grid, 0, 4).querySelector('vaadin-icon')!;
-      expect(vip.icon).to.equal('lumo:checkmark');
+      expect(vip.icon).to.equal('lumo:minus');
       const notVip = getBodyCellContent(grid, 1, 4).querySelector('vaadin-icon')!;
-      expect(notVip.icon).to.equal('lumo:minus');
+      expect(notVip.icon).to.equal('lumo:checkmark');
     });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
@@ -177,14 +177,6 @@ describe('@hilla/react-grid', () => {
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
-      });
-      it('no filters created for other columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
-        await nextFrame();
-        await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const cell = getHeaderCellContent(grid, 1, 4);
-        expect(cell.firstElementChild).to.null;
       });
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
@@ -236,6 +228,39 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'propertyString' },
           filterValue: '123',
           propertyId: 'someNumber',
+          matcher: Matcher.EQUALS,
+        };
+        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
+        expect(service.lastFilter).to.eql(expectedFilter2);
+      });
+      it('filters for a boolean column', async () => {
+        const service = personService();
+        const result = render(<TestAutoGrid service={service} headerFilters />);
+        await nextFrame();
+        await nextFrame();
+        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const select = getHeaderCellContent(grid, 1, 4).firstElementChild as SelectElement;
+        select.value = 'True';
+        await nextFrame();
+        await nextFrame();
+
+        const expectedPropertyFilter: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'True',
+          propertyId: 'vip',
+          matcher: Matcher.EQUALS,
+        };
+        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        expect(service.lastFilter).to.eql(expectedFilter);
+
+        select.value = 'False';
+        await nextFrame();
+        await nextFrame();
+
+        const expectedPropertyFilter2: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'False',
+          propertyId: 'vip',
           matcher: Matcher.EQUALS,
         };
         const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };

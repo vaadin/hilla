@@ -1,5 +1,6 @@
 import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { AutoGridBooleanRenderer, AutoGridNumberRenderer } from './autogrid-renderers';
+import { BooleanHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
 import type { PropertyInfo } from './utils';
 
 type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
@@ -14,6 +15,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridNumberRenderer,
+        headerRenderer: NumberHeaderFilter,
       };
     case 'boolean':
       return {
@@ -21,10 +23,12 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridBooleanRenderer,
+        headerRenderer: BooleanHeaderFilter,
       };
     case 'string':
       return {
         autoWidth: true,
+        headerRenderer: StringHeaderFilter,
       };
     case undefined:
       return {
