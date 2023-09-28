@@ -6,10 +6,10 @@ import { render, type RenderResult } from '@testing-library/react';
 
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
+import { _generateHeader } from '../src/property-info.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import { _generateHeader } from '../src/utils.js';
 import {
   getBodyCellContent,
   getHeaderCellContent,

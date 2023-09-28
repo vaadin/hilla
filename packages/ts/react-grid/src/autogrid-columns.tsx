@@ -1,6 +1,6 @@
 import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { AutoGridBooleanRenderer, AutoGridNumberRenderer } from './autogrid-renderers';
-import type { PropertyInfo } from './utils';
+import type { PropertyInfo } from './property-info';
 
 type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
