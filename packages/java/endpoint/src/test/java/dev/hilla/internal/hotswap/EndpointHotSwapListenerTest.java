@@ -10,6 +10,7 @@ import dev.hilla.ServletContextTestSetup;
 import dev.hilla.engine.EngineConfiguration;
 import dev.hilla.engine.GeneratorProcessor;
 import dev.hilla.engine.ParserProcessor;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -21,14 +22,13 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.vaadin.flow.di.Lookup;
-
 import static org.mockito.Mockito.mockConstruction;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
         JacksonProperties.class, EndpointController.class })
+@NotThreadSafe
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 public class EndpointHotSwapListenerTest {
 

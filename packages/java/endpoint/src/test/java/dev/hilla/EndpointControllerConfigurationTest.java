@@ -11,12 +11,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import dev.hilla.auth.EndpointAccessChecker;
+import net.jcip.annotations.NotThreadSafe;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
         JacksonProperties.class, EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
+@NotThreadSafe
 public class EndpointControllerConfigurationTest {
 
     @Autowired

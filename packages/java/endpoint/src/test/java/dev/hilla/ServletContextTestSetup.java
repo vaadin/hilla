@@ -11,7 +11,9 @@ import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ServletContextAware;
 
@@ -21,9 +23,12 @@ public class ServletContextTestSetup implements ServletContextAware {
     @MockBean
     private FeatureFlagCondition featureFlagCondition;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     @Override
     public void setServletContext(ServletContext servletContext) {
-        clearStaticAppContext();
+        checkStaticAppContext();
         Lookup lookup = Mockito.mock(Lookup.class);
         servletContext.setAttribute(Lookup.class.getName(), lookup);
         ApplicationConfiguration applicationConfiguration = Mockito
@@ -52,12 +57,19 @@ public class ServletContextTestSetup implements ServletContextAware {
         }
     }
 
-    private void clearStaticAppContext() {
+    private void checkStaticAppContext() {
         try {
             Field f = ApplicationContextProvider.class
                     .getDeclaredField("applicationContext");
             f.setAccessible(true);
-            f.set(null, null);
+            ApplicationContext appContext = (ApplicationContext) f.get(null);
+            if (appContext != null && appContext != applicationContext) {
+                throw new IllegalStateException(
+                        "Application context is " + applicationContext
+                                + " for the test but the static field in "
+                                + ApplicationContextProvider.class.getName()
+                                + " is " + appContext);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

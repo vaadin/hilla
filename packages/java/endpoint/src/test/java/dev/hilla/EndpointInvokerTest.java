@@ -8,6 +8,7 @@ import java.security.Principal;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.hilla.auth.EndpointAccessChecker;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.when;
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
         JacksonProperties.class, EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
+@NotThreadSafe
 @RunWith(SpringRunner.class)
 public class EndpointInvokerTest {
 
