@@ -3,6 +3,8 @@ import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
 import { useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
+// eslint-disable-next-line
+import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 export type RendererOptions<TItem> = {
   item: TItem;
