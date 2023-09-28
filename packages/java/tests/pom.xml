@@ -154,8 +154,6 @@
                         <execution>
                             <goals>
                                 <goal>prepare-frontend</goal>
-                                <!-- FIXME: CI build timeouts with dev server -->
-                                <goal>build-frontend</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -250,6 +248,27 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>production</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>dev.hilla</groupId>
+                            <artifactId>hilla-maven-plugin</artifactId>
+                            <version>${project.version}</version>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>build-frontend</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
         <profile>
             <id>it-modules</id>
             <activation>
