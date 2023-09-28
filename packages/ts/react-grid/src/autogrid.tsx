@@ -11,9 +11,9 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
+import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { ColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';

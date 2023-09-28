@@ -15,6 +15,7 @@ public class Person {
 
     private String firstName, lastName;
     private int luckyNumber;
+    private boolean emailVerified;
 
     public Long getId() {
         return id;
@@ -54,5 +55,13 @@ public class Person {
 
     public void setLuckyNumber(int luckyNumber) {
         this.luckyNumber = luckyNumber;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }
