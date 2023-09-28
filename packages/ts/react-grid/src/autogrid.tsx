@@ -10,7 +10,7 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX, forwardRef, useImperativeHandle } from 'react';
 import type { CrudService } from './crud';
 import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
@@ -29,7 +29,6 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     filter?: Filter;
     visibleColumns?: string[];
     headerFilters?: boolean;
-    refreshTrigger?: number;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -125,16 +124,22 @@ function useColumns(
   });
 }
 
-export function AutoGrid<TItem>({
-  service,
-  model,
-  filter,
-  visibleColumns,
-  headerFilters,
-  refreshTrigger = 0,
-  ...gridProps
-}: AutoGridProps<TItem>): JSX.Element {
+export interface AutoGridHandle {
+  refresh(): void;
+}
+
+function AutoGridInner<TItem>(
+  { service, model, filter, visibleColumns, headerFilters, ...gridProps }: AutoGridProps<TItem>,
+  forwardedRef: React.ForwardedRef<AutoGridHandle>,
+): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useImperativeHandle(forwardedRef, () => ({
+    refresh() {
+      setRefreshTrigger(refreshTrigger + 1);
+    },
+  }));
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -195,3 +200,11 @@ export function AutoGrid<TItem>({
 
   return <Grid {...gridProps} ref={ref} children={children}></Grid>;
 }
+
+type AutoGridType = <TItem>(
+  props: AutoGridProps<TItem> & {
+    ref?: React.ForwardedRef<AutoGridHandle>;
+  },
+) => ReturnType<typeof AutoGridInner>;
+
+export const AutoGrid: AutoGridType = forwardRef(AutoGridInner) as AutoGridType;

@@ -1,9 +1,9 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { createContext, useState, type JSX } from 'react';
+import { createContext, useState, type JSX, useRef } from 'react';
 import { ExperimentalAutoForm } from './autoform';
-import { AutoGrid } from './autogrid';
+import { AutoGrid, type AutoGridHandle } from './autogrid';
 import type { CrudService } from './crud';
 
 export type AutoCrudProps<TItem> = Readonly<{
@@ -19,13 +19,12 @@ export const AutoCrudContext = createContext<AutoCrudContextType<any>>({ item: u
 
 export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | undefined>(undefined);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const gridRef = useRef<AutoGridHandle>(null);
 
   return (
     <>
       <HorizontalLayout>
         <AutoGrid
-          refreshTrigger={refreshTrigger}
           service={service}
           model={model}
           onActiveItemChanged={(e) => {
@@ -36,6 +35,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TI
             const selectedItem = e.detail.value[0];
             setItem({ ...selectedItem });
           }}
+          ref={gridRef}
         ></AutoGrid>
         <ExperimentalAutoForm
           disabled={!item}
@@ -44,7 +44,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TI
           item={item}
           onSubmit={() => {
             // Trigger grid data refresh
-            setRefreshTrigger(refreshTrigger + 1);
+            gridRef.current?.refresh();
           }}
         ></ExperimentalAutoForm>
       </HorizontalLayout>
