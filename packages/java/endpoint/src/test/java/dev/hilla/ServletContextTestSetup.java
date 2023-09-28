@@ -3,6 +3,7 @@ package dev.hilla;
 import jakarta.servlet.ServletContext;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -22,6 +23,7 @@ public class ServletContextTestSetup implements ServletContextAware {
 
     @Override
     public void setServletContext(ServletContext servletContext) {
+        clearStaticAppContext();
         Lookup lookup = Mockito.mock(Lookup.class);
         servletContext.setAttribute(Lookup.class.getName(), lookup);
         ApplicationConfiguration applicationConfiguration = Mockito
@@ -48,6 +50,18 @@ public class ServletContextTestSetup implements ServletContextAware {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void clearStaticAppContext() {
+        try {
+            Field f = ApplicationContextProvider.class
+                    .getDeclaredField("applicationContext");
+            f.setAccessible(true);
+            f.set(null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
