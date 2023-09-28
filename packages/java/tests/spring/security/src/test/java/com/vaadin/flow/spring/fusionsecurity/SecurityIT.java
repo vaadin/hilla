@@ -205,8 +205,8 @@ public class SecurityIT extends ChromeBrowserTest {
         open("proxied-service");
         var view = $("proxied-service-test-view").waitForFirst();
         view.$(ButtonElement.class).id("say-hello-btn").click();
-        NotificationElement notification = $(NotificationElement.class).first();
-        Assert.assertNotNull(notification);
+        NotificationElement notification = $(NotificationElement.class)
+                .waitForFirst();
         Assert.assertTrue(
                 notification.getText().contains("Hello from GreetingService"));
     }
