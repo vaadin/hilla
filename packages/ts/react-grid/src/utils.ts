@@ -69,11 +69,11 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const meta = propertyModel[_meta];
     const humanReadableName = _generateHeader(name);
     const { constructor } = propertyModel;
-    const modelType = determinePropertyType(propertyModel);
+    const type = determinePropertyType(propertyModel);
     return {
       name,
       humanReadableName,
-      type: modelType,
+      type,
       meta,
     };
   });
