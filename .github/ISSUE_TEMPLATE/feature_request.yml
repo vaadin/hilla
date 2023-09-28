@@ -1,0 +1,38 @@
+name: "\U0001F680 Feature Request"
+description: Asking for a new feature/API in Hilla
+labels: ["feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Describe your motivation
+      description: A concise description of why you are proposing a change. For example, you would like a new feature to solve a use-case, or you want an existing feature changed because it is difficult to use.
+      placeholder: describe the current issue with existing feature/API
+    validations:
+      required: true
+  - type: textarea
+    id: expected-solution
+    attributes:
+      label: Describe the solution you'd like
+      description: Provide a clear and concise description of what you want to happen.
+      placeholder: expected solution
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Provide information about other solutions you've tried or researched.
+      placeholder: alternatives
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Is there anything else you can add about the proposal?
+      placeholder: additional context
+  - type: markdown
+    attributes:
+      value: |
+        Please vote on this issue by adding a 👍 reaction to the original issue to help the community and maintainers prioritize this request.
