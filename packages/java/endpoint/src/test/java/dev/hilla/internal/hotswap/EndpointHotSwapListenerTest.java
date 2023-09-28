@@ -3,7 +3,6 @@ package dev.hilla.internal.hotswap;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import dev.hilla.ApplicationContextProvider;
 import dev.hilla.EndpointController;
 import dev.hilla.EndpointControllerConfiguration;
 import dev.hilla.EndpointProperties;
@@ -22,13 +21,14 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.vaadin.flow.di.Lookup;
+
 import static org.mockito.Mockito.mockConstruction;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class,
-        ApplicationContextProvider.class })
+        JacksonProperties.class, EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 public class EndpointHotSwapListenerTest {
 
