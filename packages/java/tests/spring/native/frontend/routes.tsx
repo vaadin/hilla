@@ -1,11 +1,12 @@
 import {createBrowserRouter, RouteObject} from 'react-router-dom';
 import {ChatView} from "Frontend/views/ChatView.js";
 import {LoginView} from "Frontend/views/LoginView.js";
+import {ReadOnlyGrid} from "Frontend/views/ReadOnlyGrid";
 
 export const routes: RouteObject[] = [
-  { path: '/', element: <ChatView/> },
-  { path: '/login', element: <LoginView/> },
+      { path: '/', element: <ChatView />, handle: { title: 'Chat', requiresLogin: true } },
+      { path: '/grid', element: <ReadOnlyGrid/>, handle: { title: 'Grid' } },
+      { path: '/login', element: <LoginView /> }
 ];
 
-const router = createBrowserRouter(routes);
-export default router;
+export default createBrowserRouter(routes);
