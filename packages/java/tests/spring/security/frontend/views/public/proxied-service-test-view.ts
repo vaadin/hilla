@@ -20,6 +20,7 @@ export class ProxiedServiceTestView extends View {
   }
 
   public async callSayHello() {
-    GreetingService.sayHello().then((response) => Notification.show(response));
+    let response = await GreetingService.sayHello();
+    Notification.show(response);
   }
 }
