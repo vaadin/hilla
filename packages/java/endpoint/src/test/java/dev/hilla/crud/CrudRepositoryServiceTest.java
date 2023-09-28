@@ -1,6 +1,7 @@
 package dev.hilla.crud;
 
 import dev.hilla.BrowserCallable;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
 @ContextConfiguration(classes = { CrudConfiguration.class })
 @EnableAutoConfiguration
+@NotThreadSafe
 public class CrudRepositoryServiceTest {
 
     @Repository
