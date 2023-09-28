@@ -11,8 +11,9 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
+import { ColumnContext, type SortState } from './autogrid-column-context.js';
+import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { HeaderColumnContext, type SortState } from './header-column-context';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -20,12 +21,14 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, type PropertyInfo } from './utils.js';
+import { getProperties, hasAnnotation, type PropertyInfo } from './utils.js';
 
-function includeColumn(propertyId: string): unknown {
-  // Exclude id and version columns
-  // Currently based on name until https://github.com/vaadin/hilla/issues/1266
-  if (propertyId === 'id' || propertyId === 'version') {
+function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
     return false;
   }
   return true;
@@ -102,7 +105,7 @@ function useColumns(
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
   const properties = getProperties(model);
-  const effectiveColumns = options.visibleColumns ?? properties.map((p) => p.name).filter((p) => includeColumn(p));
+  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
@@ -113,22 +116,33 @@ function useColumns(
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
+
     if (options.headerFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilter} autoWidth></GridColumn>
+          <GridColumn
+            path={propertyInfo.name}
+            headerRenderer={HeaderFilter}
+            {...getColumnProps(propertyInfo)}
+          ></GridColumn>
         </GridColumnGroup>
       );
     } else {
-      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} autoWidth></GridColumn>;
+      column = (
+        <GridColumn
+          path={propertyInfo.name}
+          headerRenderer={HeaderSorter}
+          {...getColumnProps(propertyInfo)}
+        ></GridColumn>
+      );
     }
     return (
-      <HeaderColumnContext.Provider
+      <ColumnContext.Provider
         key={propertyInfo.name}
         value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
       >
         {column}
-      </HeaderColumnContext.Provider>
+      </ColumnContext.Provider>
     );
   });
 }
