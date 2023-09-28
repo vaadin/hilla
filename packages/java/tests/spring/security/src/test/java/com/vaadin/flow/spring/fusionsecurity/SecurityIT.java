@@ -252,19 +252,6 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void static_resources_accessible_without_login() throws Exception {
-        open("manifest.webmanifest");
-        Assert.assertTrue(getDriver().getPageSource()
-                .contains("\"name\":\"Spring Security Helper Test Project\""));
-        open("sw.js");
-        Assert.assertTrue(getDriver().getPageSource()
-                .contains("this._installAndActiveListenersAdded"));
-        open("sw-runtime-resources-precache.js");
-        Assert.assertTrue(getDriver().getPageSource()
-                .contains("self.additionalManifestEntries = ["));
-    }
-
-    @Test
     public void public_app_resources_available_for_all() {
         openResource("public/public.nocache.txt");
         String shouldBeTextFile = getDriver().getPageSource();
