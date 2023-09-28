@@ -219,6 +219,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin.external</groupId>
+            <artifactId>gentyref</artifactId>
+            <version>${gentyref.version}</version>
+        </dependency>
+
         <!-- Testing dependencies -->
 
         <!-- TODO: re-enable tests mocking final classes in the connect

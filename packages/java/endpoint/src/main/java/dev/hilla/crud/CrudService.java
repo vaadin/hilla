@@ -40,7 +40,7 @@ public interface CrudService<T, ID> {
     T save(T value);
 
     /**
-     * Delets the object with the given id.
+     * Deletes the object with the given id.
      *
      * @param id
      *            the id of the object to delete
