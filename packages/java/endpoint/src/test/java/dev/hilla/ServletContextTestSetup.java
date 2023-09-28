@@ -11,6 +11,8 @@ import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
@@ -64,16 +66,20 @@ public class ServletContextTestSetup implements ServletContextAware {
             f.setAccessible(true);
             ApplicationContext appContext = (ApplicationContext) f.get(null);
             if (appContext != null && appContext != applicationContext) {
-                throw new IllegalStateException(
-                        "Application context is " + applicationContext
-                                + " for the test but the static field in "
-                                + ApplicationContextProvider.class.getName()
-                                + " is " + appContext);
+                getLogger().error("Application context is " + applicationContext
+                        + " for the test but the static field in "
+                        + ApplicationContextProvider.class.getName() + " is "
+                        + appContext);
+                f.set(null, applicationContext);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 
 }
