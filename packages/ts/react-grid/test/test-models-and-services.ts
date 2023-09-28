@@ -34,10 +34,10 @@ export interface ColumnRendererTestValues {
   string: string;
   number: number;
   boolean: boolean;
-  date: string;
-  localDate: string;
-  localTime: string;
-  localDateTime: string;
+  date?: string;
+  localDate?: string;
+  localTime?: string;
+  localDateTime?: string;
 }
 
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
@@ -228,7 +228,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     number: 123456,
     boolean: true,
     date: '2021-05-13T00:00:00',
-    localDate: '2021-05-14',
+    localDate: '2021-05-13',
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
   },
@@ -237,10 +237,26 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     string: 'Hello World 2',
     number: -12,
     boolean: false,
-    date: '2021-05-13T00:00:00',
+    date: '2021-05-14T00:00:00',
     localDate: '2021-05-14',
     localTime: '20:45:00',
     localDateTime: '2021-05-14T20:45:00',
+  },
+  {
+    id: 3,
+    string: 'Hello World 3',
+    number: -12,
+    boolean: false,
+  },
+  {
+    id: 4,
+    string: 'Hello World 4',
+    number: -12,
+    boolean: false,
+    date: 'foo',
+    localDate: 'foo',
+    localTime: 'foo',
+    localDateTime: 'foo',
   },
 ];
 

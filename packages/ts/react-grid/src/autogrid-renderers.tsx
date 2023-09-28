@@ -35,11 +35,19 @@ export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>)
   return <Icon aria-label="true" style={{ color: 'var(--lumo-secondary-text-color)' }} icon="lumo:minus" />;
 }
 
+function tryFormatDateTime(value: string, format: Intl.DateTimeFormat): string {
+  try {
+    return format.format(new Date(value));
+  } catch (e) {
+    return '';
+  }
+}
+
 export function AutoGridDateRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
   const value = getColumnValue(context, item);
   const format = new Intl.DateTimeFormat();
-  const formatted = format.format(new Date(value));
+  const formatted = value ? tryFormatDateTime(value, format) : '';
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }
 
@@ -50,7 +58,7 @@ export function AutoGridTimeRenderer<TItem>({ item }: RendererOptions<TItem>): J
     hour: 'numeric',
     minute: 'numeric',
   });
-  const formatted = format.format(new Date(`2000-01-01T${value}`));
+  const formatted = value ? tryFormatDateTime(`2000-01-01T${value}`, format) : '';
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }
 
@@ -64,6 +72,6 @@ export function AutoGridDateTimeRenderer<TItem>({ item }: RendererOptions<TItem>
     hour: 'numeric',
     minute: 'numeric',
   });
-  const formatted = format.format(new Date(value));
+  const formatted = value ? tryFormatDateTime(value, format) : '';
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }

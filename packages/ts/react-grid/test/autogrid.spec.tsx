@@ -398,23 +398,33 @@ describe('@hilla/react-grid', () => {
     it('renders java.util.Date as right aligned', async () => {
       expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 3).textContent).to.equal('5/13/2021');
+      expect(getBodyCellContent(grid, 1, 3).textContent).to.equal('5/14/2021');
+      expect(getBodyCellContent(grid, 2, 3).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 3).textContent).to.equal('');
     });
 
     it('renders java.time.LocalDate as right aligned', async () => {
       expect(getBodyCellContent(grid, 0, 4).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 4).textContent).to.equal('5/14/2021');
+      expect(getBodyCellContent(grid, 0, 4).textContent).to.equal('5/13/2021');
+      expect(getBodyCellContent(grid, 1, 4).textContent).to.equal('5/14/2021');
+      expect(getBodyCellContent(grid, 2, 4).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 4).textContent).to.equal('');
     });
 
     it('renders java.time.LocalTime as right aligned', async () => {
       expect(getBodyCellContent(grid, 0, 5).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 5).textContent).to.equal('8:45 AM');
       expect(getBodyCellContent(grid, 1, 5).textContent).to.equal('8:45 PM');
+      expect(getBodyCellContent(grid, 2, 5).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 5).textContent).to.equal('');
     });
 
     it('renders java.time.LocalDateTime as right aligned', async () => {
       expect(getBodyCellContent(grid, 0, 6).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 6).textContent).to.equal('5/13/2021, 8:45 AM');
       expect(getBodyCellContent(grid, 1, 6).textContent).to.equal('5/14/2021, 8:45 PM');
+      expect(getBodyCellContent(grid, 2, 6).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 6).textContent).to.equal('');
     });
   });
 });
