@@ -1,4 +1,5 @@
 import {
+  BooleanModel,
   NumberModel,
   StringModel,
   _meta,
@@ -11,7 +12,7 @@ import {
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
-  modelType: 'number' | 'string' | undefined;
+  modelType: 'boolean' | 'number' | 'string' | undefined;
   meta: ModelMetadata;
 }
 
@@ -40,7 +41,14 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const meta = propertyModel[_meta];
     const humanReadableName = _generateHeader(name);
     const { constructor } = propertyModel;
-    const modelType = constructor === StringModel ? 'string' : constructor === NumberModel ? 'number' : undefined;
+    const modelType =
+      constructor === StringModel
+        ? 'string'
+        : constructor === NumberModel
+        ? 'number'
+        : constructor === BooleanModel
+        ? 'boolean'
+        : undefined;
     return {
       name,
       humanReadableName,
