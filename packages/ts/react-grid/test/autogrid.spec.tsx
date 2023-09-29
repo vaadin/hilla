@@ -120,7 +120,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
-    it('does not pass its own parameters to the underlying grid', async () => {
+    it('does not pass its own parameters to the underlying grid', () => {
       const result = render(<TestAutoGrid />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       expect(grid.getAttribute('model')).to.be.null;
@@ -376,26 +376,26 @@ describe('@hilla/react-grid', () => {
       grid = result.container.querySelector('vaadin-grid')!;
     });
 
-    it('renders strings without formatting and with default alignment', async () => {
+    it('renders strings without formatting and with default alignment', () => {
       expect(getBodyCellContent(grid, 0, 0).style.textAlign).to.equal('');
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Hello World 1');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Hello World 2');
     });
 
-    it('renders numbers as right aligned numbers', async () => {
+    it('renders numbers as right aligned numbers', () => {
       expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('123,456');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('-12');
     });
 
-    it('renders booleans as icons', async () => {
+    it('renders booleans as icons', () => {
       const vip = getBodyCellContent(grid, 0, 2).querySelector('vaadin-icon')!;
       expect(vip.icon).to.equal('lumo:checkmark');
       const notVip = getBodyCellContent(grid, 1, 2).querySelector('vaadin-icon')!;
       expect(notVip.icon).to.equal('lumo:minus');
     });
 
-    it('renders java.util.Date as right aligned', async () => {
+    it('renders java.util.Date as right aligned', () => {
       expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 3).textContent).to.equal('5/13/2021');
       expect(getBodyCellContent(grid, 1, 3).textContent).to.equal('5/14/2021');
@@ -403,7 +403,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 3, 3).textContent).to.equal('');
     });
 
-    it('renders java.time.LocalDate as right aligned', async () => {
+    it('renders java.time.LocalDate as right aligned', () => {
       expect(getBodyCellContent(grid, 0, 4).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 4).textContent).to.equal('5/13/2021');
       expect(getBodyCellContent(grid, 1, 4).textContent).to.equal('5/14/2021');
@@ -411,7 +411,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 3, 4).textContent).to.equal('');
     });
 
-    it('renders java.time.LocalTime as right aligned', async () => {
+    it('renders java.time.LocalTime as right aligned', () => {
       expect(getBodyCellContent(grid, 0, 5).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 5).textContent).to.equal('8:45 AM');
       expect(getBodyCellContent(grid, 1, 5).textContent).to.equal('8:45 PM');
@@ -419,7 +419,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 3, 5).textContent).to.equal('');
     });
 
-    it('renders java.time.LocalDateTime as right aligned', async () => {
+    it('renders java.time.LocalDateTime as right aligned', () => {
       expect(getBodyCellContent(grid, 0, 6).style.textAlign).to.equal('end');
       expect(getBodyCellContent(grid, 0, 6).textContent).to.equal('5/13/2021, 8:45 AM');
       expect(getBodyCellContent(grid, 1, 6).textContent).to.equal('5/14/2021, 8:45 PM');
