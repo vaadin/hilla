@@ -24,18 +24,18 @@ Options:
   {
     flags: {
       outputDir: {
-        alias: 'o',
         default: 'frontend/generated',
+        shortFlag: 'o',
         type: 'string',
       },
       plugin: {
-        alias: 'p',
         default: [],
         isMultiple: true,
+        shortFlag: 'p',
         type: 'string',
       },
       verbose: {
-        alias: 'v',
+        shortFlag: 'v',
         type: 'boolean',
       },
     },
