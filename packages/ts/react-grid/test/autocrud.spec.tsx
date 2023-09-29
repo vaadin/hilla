@@ -37,7 +37,7 @@ describe('@hilla/react-grid', () => {
       expect((await getFormField(result, 'First name')).value).to.equal('Jane');
       expect((await getFormField(result, 'Last name')).value).to.equal('Love');
     });
-    it('clears the form when deselecting an item', async () => {
+    it('clears and disables the form when deselecting an item', async () => {
       const result = render(<TestAutoCrud />);
       const grid = getGrid(result);
       await nextFrame();
@@ -45,8 +45,13 @@ describe('@hilla/react-grid', () => {
       toggleRowSelected(grid, 1);
       await nextFrame();
       toggleRowSelected(grid, 1);
-      expect((await getFormField(result, 'First name')).value).to.equal('');
-      expect((await getFormField(result, 'Last name')).value).to.equal('');
+      const firstName = await getFormField(result, 'First name');
+      expect(firstName.value).to.equal('');
+      expect(firstName.disabled).to.be.true;
+
+      const someNumber = await getFormField(result, 'Some number');
+      expect(someNumber.value).to.equal(0);
+      expect(someNumber.disabled).to.be.true;
     });
     it('disables the form when nothing is selected', async () => {
       const result = render(<TestAutoCrud />);

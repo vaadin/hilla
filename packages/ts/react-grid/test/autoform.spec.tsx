@@ -125,7 +125,7 @@ describe('@hilla/react-grid', () => {
       await submit(result);
       await nextFrame();
       await nextFrame();
-      const newPerson: Person = { ...person } as Person;
+      const newPerson: Person = { ...person! };
       newPerson.firstName = 'bar';
       await assertFormFieldValues(result, newPerson);
     });
@@ -139,7 +139,7 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'baz');
       await submit(result);
       await nextFrame();
-      const newPerson: Person = { ...person } as Person;
+      const newPerson: Person = { ...person! };
       newPerson.firstName = 'baz';
       await assertFormFieldValues(result, newPerson);
     });

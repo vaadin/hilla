@@ -33,8 +33,12 @@ export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TI
             (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
           }}
           onSelectedItemsChanged={(e) => {
-            const selectedItem = e.detail.value[0];
-            setItem({ ...selectedItem });
+            if (e.detail.value.length === 0) {
+              setItem(undefined);
+            } else {
+              const selectedItem = e.detail.value[0];
+              setItem({ ...selectedItem });
+            }
           }}
         ></AutoGrid>
         <ExperimentalAutoForm
