@@ -6,7 +6,7 @@ import type { SortState } from '../src/autogrid-column-context.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
 
-export const getBodyRow = (grid: Grid, row: number) => {
+export const getBodyRow = (grid: Grid, row: number): HTMLTableRowElement => {
   const physicalItems = getPhysicalItems(grid);
   // eslint-disable-next-line
   return physicalItems.find((item: any) => item.index === row);

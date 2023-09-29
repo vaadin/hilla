@@ -6,13 +6,13 @@ import {
   _getPropertyModel,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
+import { CrudEdit } from '@hilla/react-components/CrudEdit.js';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
 import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
-import { CrudEdit } from '@hilla/react-components/CrudEdit.js';
 
 export interface Company {
   id: number;
@@ -142,7 +142,7 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
     async save(value: T): Promise<T | undefined> {
       const currentValue = data.find((item) => item.id === value.id);
       if (currentValue) {
-        if (currentValue.version != value.version) {
+        if (currentValue.version !== value.version) {
           // Trying to update an old value
           throw new Error('Trying to update an old value');
         }
