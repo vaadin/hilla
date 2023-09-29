@@ -43,7 +43,6 @@ export function ExperimentalAutoForm<TItem>({
     try {
       setFormError('');
       const newItem = await form.submit();
-      form.clear();
       if (!newItem) {
         // If update returns an empty object, then no update was performed
         throw new Error('generic error');

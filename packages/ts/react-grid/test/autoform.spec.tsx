@@ -117,7 +117,7 @@ describe('@hilla/react-grid', () => {
       const newItem = await getItem(service, 1);
       expect(newItem!.firstName).to.equal('foo');
     });
-    it('clears the form after a valid submit', async () => {
+    it('retains the form values a valid submit', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       const person = await getItem(service, 1);
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
@@ -125,9 +125,11 @@ describe('@hilla/react-grid', () => {
       await submit(result);
       await nextFrame();
       await nextFrame();
-      await assertFormFieldValues(result, undefined);
+      const newPerson: Person = { ...person } as Person;
+      newPerson.firstName = 'bar';
+      await assertFormFieldValues(result, newPerson);
     });
-    it('clears the form after a valid submit when using onSubmit', async () => {
+    it('retains the form values after a valid submit when using onSubmit', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
@@ -137,7 +139,9 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'baz');
       await submit(result);
       await nextFrame();
-      await assertFormFieldValues(result, undefined);
+      const newPerson: Person = { ...person } as Person;
+      newPerson.firstName = 'baz';
+      await assertFormFieldValues(result, newPerson);
     });
     it('calls onSubmit with the new item', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
