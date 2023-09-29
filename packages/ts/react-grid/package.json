@@ -26,8 +26,7 @@
     "test": "karma start ../../../karma.config.cjs --port 9879",
     "test:coverage": "echo 'ignoring until it has been fixed'",
     "test:watch": "npm run test -- --watch",
-    "typecheck": "tsc --noEmit",
-    "version": "node ../../../scripts/bump/package-update.js"
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {

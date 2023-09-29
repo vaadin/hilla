@@ -17,8 +17,7 @@
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
     "test:update": "npm run test -- --update",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
-    "typecheck": "tsc --noEmit",
-    "version": "node ../../../scripts/bump/package-update.js"
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {
