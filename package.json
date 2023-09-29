@@ -29,13 +29,13 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "eslint-plugin-prettier": "$eslint-plugin-prettier"
+    "prettier": "$prettier"
   },
   "devDependencies": {
     "@types/karma": "^6.3.5",
-    "@types/node": "^20.7.0",
+    "@types/node": "^20.7.1",
     "concurrently": "^8.2.1",
-    "esbuild": "^0.19.3",
+    "esbuild": "^0.19.4",
     "eslint": "^8.50.0",
     "eslint-config-vaadin": "^1.0.0-alpha.12",
     "eslint-plugin-prettier": "^4.2.1",
