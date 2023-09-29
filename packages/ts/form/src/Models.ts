@@ -43,11 +43,14 @@ export interface ModelOptions<T> {
   meta?: ModelMetadata;
 }
 
-export type DetachedModelConstructor<M> = new (
-  parent: typeof modelDetachedParent,
-  key: '$value$',
-  optional: boolean,
-) => M;
+export type DetachedModelConstructor<M> = {
+  prototype: M;
+  new (
+    parent: typeof modelDetachedParent,
+    key: '$value$',
+    optional: boolean,
+  ): M;
+};
 
 export function createDetachedModel<M extends AbstractModel>(type: DetachedModelConstructor<M>): M {
   return new type(modelDetachedParent, '$value$', false);
