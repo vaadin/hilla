@@ -21,7 +21,7 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getIdProperty, getProperties, hasAnnotation, includeProperty, type PropertyInfo } from './utils.js';
+import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{

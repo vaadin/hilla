@@ -6,7 +6,6 @@ import {
   _getPropertyModel,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
-import { CrudEdit } from '@hilla/react-components/CrudEdit.js';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';

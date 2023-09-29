@@ -5,7 +5,7 @@ import sinonChai from 'sinon-chai';
 import { ExperimentalAutoCrud, type AutoCrudProps } from '../src/autocrud.js';
 import { getFormField, setFormField, submit } from './form-test-utils.js';
 import { getBodyCellContent, getGrid, isSelected, nextFrame, toggleRowSelected } from './grid-test-helpers.js';
-import { PersonModel, createService, personData, personService, type Person } from './test-models-and-services.js';
+import { PersonModel, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
 
