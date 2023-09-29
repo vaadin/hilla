@@ -16,12 +16,12 @@ import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
 import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
+import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{

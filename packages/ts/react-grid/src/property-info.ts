@@ -9,10 +9,38 @@ import {
   type ModelMetadata,
 } from '@hilla/form';
 
+export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'string' | 'time' | undefined;
+
+const javaTypeMap: Record<string, PropertyType> = {
+  'java.util.Date': 'date',
+  'java.time.LocalDate': 'date',
+  'java.time.LocalTime': 'time',
+  'java.time.LocalDateTime': 'datetime',
+};
+
+function determinePropertyType(model: AbstractModel) {
+  // Try detecting by Java type
+  const { javaType } = model[_meta];
+  const propertyType = javaType ? javaTypeMap[javaType] : undefined;
+  if (propertyType) {
+    return propertyType;
+  }
+
+  // Otherwise detect by model constructor
+  const { constructor } = model;
+  return constructor === StringModel
+    ? 'string'
+    : constructor === NumberModel
+    ? 'number'
+    : constructor === BooleanModel
+    ? 'boolean'
+    : undefined;
+}
+
 export interface PropertyInfo {
   name: string;
   humanReadableName: string;
-  modelType: 'boolean' | 'number' | 'string' | undefined;
+  type: PropertyType;
   meta: ModelMetadata;
 }
 
@@ -41,18 +69,11 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const meta = propertyModel[_meta];
     const humanReadableName = _generateHeader(name);
     const { constructor } = propertyModel;
-    const modelType =
-      constructor === StringModel
-        ? 'string'
-        : constructor === NumberModel
-        ? 'number'
-        : constructor === BooleanModel
-        ? 'boolean'
-        : undefined;
+    const type = determinePropertyType(propertyModel);
     return {
       name,
       humanReadableName,
-      modelType,
+      type,
       meta,
     };
   });

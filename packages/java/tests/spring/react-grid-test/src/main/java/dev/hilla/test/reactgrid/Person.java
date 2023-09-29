@@ -4,6 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Entity
 public class Person {
 
@@ -16,6 +20,9 @@ public class Person {
     private String firstName, lastName;
     private int luckyNumber;
     private boolean emailVerified;
+    private LocalDate birthDate;
+    private LocalTime shiftStart;
+    private LocalDateTime appointmentTime;
 
     public Long getId() {
         return id;
@@ -63,5 +70,29 @@ public class Person {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public LocalTime getShiftStart() {
+        return shiftStart;
+    }
+
+    public void setShiftStart(LocalTime shiftStart) {
+        this.shiftStart = shiftStart;
+    }
+
+    public LocalDateTime getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public void setAppointmentTime(LocalDateTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 }
