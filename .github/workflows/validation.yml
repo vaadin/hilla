@@ -34,12 +34,8 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Validate Java Format
-        run: mvn -B formatter:validate
       - name: Build TypeScript
         run: npm run build
-      - name: Lint TypeScript
-        run: npm run check
       - name: Build Java
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
       - name: Save Workspace
@@ -62,6 +58,35 @@ jobs:
           path: workspace.tar
           retention-days: 1
           if-no-files-found: error
+
+  check-style:
+    needs: init
+    name: Check style
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Validate Java Format
+        run: mvn -B formatter:validate
+      - name: Lint TypeScript
+        run: npm run check
 
   test-java:
     needs: init
