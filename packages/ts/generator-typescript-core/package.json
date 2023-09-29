@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@hilla/generator-typescript-utils": "^2.3.0-alpha5",
+    "@hilla/generator-typescript-utils": "*",
     "meow": "^12.1.1",
     "openapi-types": "^12.1.3",
     "typescript": "^5.2.2"
