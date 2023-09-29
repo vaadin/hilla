@@ -6,7 +6,7 @@ import { useForm } from '@hilla/react-form';
 import { useEffect, useState, type JSX } from 'react';
 import { AutoFormField } from './autoform-field';
 import type { CrudService } from './crud';
-import { getProperties } from './utils';
+import { getProperties } from './property-info';
 
 type SubmitErrorEvent = {
   error: unknown;

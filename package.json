@@ -16,7 +16,7 @@
     "build": "sh ./scripts/prepare.sh && lerna run build",
     "lint": "lerna run lint --parallel",
     "lint:fix": "lerna run lint --parallel -- --fix",
-    "test": "lerna run test --parallel",
+    "test": "lerna run test",
     "test:coverage": "lerna run test:coverage --parallel",
     "typecheck": "lerna run typecheck --parallel"
   },
