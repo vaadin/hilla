@@ -4,7 +4,7 @@ import { render, type RenderResult } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { ExperimentalAutoCrud, type AutoCrudProps } from '../src/autocrud.js';
 import { getFormField, setFormField, submit } from './form-test-utils.js';
-import { getGrid, nextFrame, toggleRowSelected } from './grid-test-helpers.js';
+import { getBodyCellContent, getGrid, isSelected, nextFrame, toggleRowSelected } from './grid-test-helpers.js';
 import { PersonModel, createService, personData, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -59,7 +59,7 @@ describe('@hilla/react-grid', () => {
       expect(field.disabled).to.be.true;
     });
     it('refreshes the grid when the form is submitted', async () => {
-      const service = createService(personData);
+      const service = personService();
       const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
       const grid: GridElement<Person> = getGrid(result);
       await nextFrame();
@@ -70,8 +70,40 @@ describe('@hilla/react-grid', () => {
       await nextFrame();
       await submit(result);
       await nextFrame();
+      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('foo');
+    });
+    it('keeps the selection when the form is submitted', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
       toggleRowSelected(grid, 1);
-      expect(grid.activeItem!.firstName).to.equal('foo');
+      await nextFrame();
+      await setFormField(result, 'First name', 'newName');
+      await nextFrame();
+      await submit(result);
+      await nextFrame();
+      expect(isSelected(grid, 1)).to.be.true;
+    });
+    it('allows multiple subsequent edits', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      toggleRowSelected(grid, 1);
+      await nextFrame();
+      await setFormField(result, 'Last name', '1');
+      await nextFrame();
+      await submit(result);
+      await nextFrame();
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('1');
+      await setFormField(result, 'Last name', '2');
+      await nextFrame();
+      await submit(result);
+      await nextFrame();
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('2');
     });
   });
 });

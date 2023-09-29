@@ -68,3 +68,12 @@ export function includeProperty(propertyInfo: PropertyInfo): unknown {
   }
   return true;
 }
+
+export function getIdProperty(properties: PropertyInfo[]): PropertyInfo | undefined {
+  const idProperty = properties.find((propertyInfo) => hasAnnotation(propertyInfo, 'jakarta.persistence.Id'));
+  if (idProperty) {
+    return idProperty;
+  }
+
+  return undefined;
+}

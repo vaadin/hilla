@@ -12,6 +12,7 @@ import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/Proper
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
 import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
+import { CrudEdit } from '@hilla/react-components/CrudEdit.js';
 
 export interface Company {
   id: number;
@@ -98,11 +99,12 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
-type HasId = {
+type HasIdVersion = {
   id: number;
+  version: number;
 };
 
-export const createService = <T extends HasId>(initialData: T[]): CrudService<T> & HasLastFilter => {
+export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasLastFilter => {
   let _lastFilter: Filter | undefined;
   let data = initialData;
 
@@ -138,8 +140,19 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
       return filteredData;
     },
     async save(value: T): Promise<T | undefined> {
-      data = data.map((item) => (item.id === value.id ? value : item));
-      return data.find((item) => item.id === value.id);
+      const currentValue = data.find((item) => item.id === value.id);
+      if (currentValue) {
+        if (currentValue.version != value.version) {
+          // Trying to update an old value
+          throw new Error('Trying to update an old value');
+        }
+      }
+      const newValue = { ...value };
+      if (currentValue) {
+        newValue.version = currentValue.version + 1;
+      }
+      data = data.map((item) => (item.id === newValue.id ? newValue : item));
+      return data.find((item) => item.id === newValue.id);
     },
     get lastFilter() {
       return _lastFilter;
@@ -165,7 +178,7 @@ export const companyService = (): CrudService<Company> & HasLastFilter => create
 
 const noSort: Sort = { orders: [] };
 
-export async function getItem<T extends HasId>(
+export async function getItem<T extends HasIdVersion>(
   service: CrudService<T> & HasLastFilter,
   id: number,
 ): Promise<T | undefined> {

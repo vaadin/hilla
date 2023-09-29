@@ -46,7 +46,8 @@ export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TI
           service={service}
           model={model}
           item={item}
-          onSubmit={() => {
+          onSubmit={({ item }) => {
+            setItem(item);
             // Trigger grid data refresh
             setRefreshTrigger(refreshTrigger + 1);
           }}

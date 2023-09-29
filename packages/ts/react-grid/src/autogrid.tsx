@@ -21,7 +21,7 @@ import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import { getProperties, hasAnnotation, includeProperty, type PropertyInfo } from './utils.js';
+import { getIdProperty, getProperties, hasAnnotation, includeProperty, type PropertyInfo } from './utils.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -90,11 +90,10 @@ function createDataProvider<TItem>(
 }
 
 function useColumns(
-  model: DetachedModelConstructor<AbstractModel>,
+  properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; headerFilters?: boolean },
 ) {
-  const properties = getProperties(model);
   const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
@@ -171,8 +170,8 @@ export function AutoGrid<TItem>({
     }
   };
 
-  // This cast should go away with #1252
-  const children = useColumns(model, setHeaderPropertyFilter, {
+  const properties = getProperties(model);
+  const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     headerFilters,
   });
@@ -205,5 +204,5 @@ export function AutoGrid<TItem>({
     }
   }, [filter, internalFilter, refreshTrigger]);
 
-  return <Grid {...gridProps} ref={ref} children={children}></Grid>;
+  return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children}></Grid>;
 }

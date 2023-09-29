@@ -6,10 +6,13 @@ import type { SortState } from '../src/autogrid-column-context.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
 
-export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement => {
+export const getBodyRow = (grid: Grid, row: number) => {
   const physicalItems = getPhysicalItems(grid);
   // eslint-disable-next-line
-  const physicalRow = physicalItems.find((item: any) => item.index === row);
+  return physicalItems.find((item: any) => item.index === row);
+};
+export const getBodyCellContent = <T>(grid: Grid<T>, row: number, col: number): HTMLElement => {
+  const physicalRow = getBodyRow(grid, row);
   const cells = getRowCells(physicalRow);
   return getCellContent(cells[col]);
 };
@@ -51,6 +54,10 @@ export async function setActiveItem<T>(grid: Grid<T>, item: T | undefined): Prom
 export function toggleRowSelected(grid: Grid, row: number): void {
   getBodyCellContent(grid, row, 0).click();
 }
+export function isSelected(grid: Grid, row: number): void {
+  return getBodyRow(grid, row).part.contains('selected-row');
+}
+
 export const sortGrid = (grid: GridElement, path: string, direction: GridSorterDirection): void => {
   const sorter = Array.from(grid.querySelectorAll('vaadin-grid-sorter')).find((gridSorter) => gridSorter.path === path);
   if (!sorter) {
