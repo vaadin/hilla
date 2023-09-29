@@ -46,15 +46,15 @@
     "tsgen": "bin/index.js"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "^2.1"
+    "@hilla/generator-typescript-core": "~2.1"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "^2.1",
+    "@hilla/generator-typescript-utils": "~2.1",
     "get-stdin": "^9.0.0",
     "meow": "^12.1.1"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "^2.1",
+    "@hilla/generator-typescript-core": "~2.1",
     "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.7.1",
