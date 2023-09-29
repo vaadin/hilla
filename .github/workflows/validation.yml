@@ -114,8 +114,6 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
         run: mvn -B -am -P\!it-modules verify
-      - name: Test gradle-plugin's functional tests
-        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
@@ -224,13 +222,56 @@ jobs:
               -Pit-modules-${{ matrix.it-modules }} \
               verify
           )
-      - name: Gradle ITs
-        if: ${{ matrix.it-modules == 'group-1' || runner.os == 'windows' }}
-        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs
+          path: |
+            packages/java/tests/**/target/*-reports/*
+            packages/java/tests/**/error-screenshots/*.png
+
+  test-gradle:
+    needs:
+      - init
+    name: Gradle tests
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Set TB License
+        run: |
+          TB_LICENSE=${{secrets.TB_LICENSE}}
+          mkdir -p ~/.vaadin/
+          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      - name: Test gradle-plugin's functional tests
+        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
+      - name: Gradle ITs
+        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs-gradle
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
