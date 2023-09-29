@@ -22,9 +22,9 @@ on:
 
 jobs:
   init:
-    name: Build
+    name: Build Java and npm for other tasks
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 5
 
     steps:
       - name: Checkout Project Code
@@ -41,7 +41,7 @@ jobs:
       - name: Lint TypeScript
         run: npm run check
       - name: Build Java
-        run: mvn install -B -ntp -DskipTests
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
       - name: Save Workspace
         run: |
           tar cf workspace.tar -C ~/ $( \
