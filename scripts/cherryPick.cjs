@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/** foobar
  * This script is used for cherry-pick commits for hilla repo.
  * To run this script:
  * 1.collect committed-PRs marked with target/<branch-name>  labels
