@@ -54,7 +54,7 @@ export async function setActiveItem<T>(grid: Grid<T>, item: T | undefined): Prom
 export function toggleRowSelected(grid: Grid, row: number): void {
   getBodyCellContent(grid, row, 0).click();
 }
-export function isSelected(grid: Grid, row: number): void {
+export function isSelected(grid: Grid, row: number): boolean {
   return getBodyRow(grid, row).part.contains('selected-row');
 }
 
