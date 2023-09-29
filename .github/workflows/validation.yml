@@ -151,8 +151,6 @@ jobs:
   test-it:
     needs:
       - init
-      - test-java
-      - test-typescript
     name: ITs
     timeout-minutes: 25
     strategy:
