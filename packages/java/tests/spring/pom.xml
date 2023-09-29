@@ -181,10 +181,15 @@
         </profile>
 
         <profile>
-            <id>it-modules-some</id>
+            <id>it-modules-windows-1</id>
             <modules>
                 <module>endpoints</module>
                 <module>endpoints discovery</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>it-modules-windows-2</id>
+            <modules>
                 <module>security</module>
             </modules>
         </profile>

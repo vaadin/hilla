@@ -278,7 +278,13 @@
     </profile>
 
     <profile>
-      <id>it-modules-some</id>
+      <id>it-modules-windows-1</id>
+      <modules>
+        <module>spring</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>it-modules-windows-2</id>
       <modules>
         <module>spring</module>
       </modules>
