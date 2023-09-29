@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '2.2', '2.1', '1.3' ]
+    branches: [ main, '2.2', '2.1', '1.3','run-its-immediately' ]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
