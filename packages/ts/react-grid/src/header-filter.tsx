@@ -4,7 +4,7 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { useContext, useEffect, useRef, useState, type ReactElement } from 'react';
-import { ColumnContext } from './header-column-context.js';
+import { ColumnContext } from './autogrid-column-context.js';
 import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
@@ -37,7 +37,7 @@ export function HeaderFilter(): ReactElement {
     }, 1);
   }, []);
 
-  if (context.propertyInfo.modelType === 'string') {
+  if (context.propertyInfo.type === 'string') {
     return (
       <TextField
         placeholder="Filter..."
@@ -47,7 +47,7 @@ export function HeaderFilter(): ReactElement {
         }}
       ></TextField>
     );
-  } else if (context.propertyInfo.modelType === 'number') {
+  } else if (context.propertyInfo.type === 'number') {
     return (
       <>
         <Select

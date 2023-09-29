@@ -29,7 +29,7 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: __VERSION__,
+  version: /* updated-by-script */ '2.3.0-alpha6',
 });
 
 function useUpdate() {

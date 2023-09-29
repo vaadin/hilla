@@ -1,7 +1,7 @@
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
 import type { Grid } from '@vaadin/grid';
-import type { SortState } from '../src/header-column-context.js';
+import type { SortState } from '../src/autogrid-column-context.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
 

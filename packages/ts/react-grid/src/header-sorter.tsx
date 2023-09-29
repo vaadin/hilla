@@ -1,6 +1,6 @@
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useContext, type ReactElement } from 'react';
-import { ColumnContext } from './header-column-context.js';
+import { ColumnContext } from './autogrid-column-context.js';
 
 export function HeaderSorter(): ReactElement {
   const context = useContext(ColumnContext)!;
