@@ -18,7 +18,15 @@ import {
   getVisibleRowCount,
   sortGrid,
 } from './grid-test-helpers.js';
-import { CompanyModel, PersonModel, companyService, personService, type Person } from './test-models-and-services.js';
+import {
+  ColumnRendererTestModel,
+  CompanyModel,
+  PersonModel,
+  columnRendererTestService,
+  companyService,
+  personService,
+  type Person,
+} from './test-models-and-services.js';
 
 use(sinonChai);
 
@@ -111,35 +119,6 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
-    });
-    it('renders strings without formatting and with default alignment', async () => {
-      const result = render(<TestAutoGrid />);
-      await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Dove');
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Love');
-    });
-    it('renders numbers as right aligned numbers', async () => {
-      const result = render(<TestAutoGrid />);
-      await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 3).innerText).to.equal('-12');
-      expect(getBodyCellContent(grid, 1, 3).innerText).to.equal('123,456');
-    });
-    it('renders booleans as icons', async () => {
-      const result = render(<TestAutoGrid />);
-      await nextFrame();
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      await nextFrame();
-      const vip = getBodyCellContent(grid, 0, 4).querySelector('vaadin-icon')!;
-      expect(vip.icon).to.equal('lumo:checkmark');
-      const notVip = getBodyCellContent(grid, 1, 4).querySelector('vaadin-icon')!;
-      expect(notVip.icon).to.equal('lumo:minus');
     });
     it('does not pass its own parameters to the underlying grid', async () => {
       const result = render(<TestAutoGrid />);
@@ -381,6 +360,71 @@ describe('@hilla/react-grid', () => {
     it('should ignore unknown columns', async () => {
       const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
       await assertColumns(result, 'email', 'firstName');
+    });
+  });
+
+  describe('default renderers', () => {
+    let grid: GridElement;
+
+    beforeEach(async () => {
+      const result = render(
+        <AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>,
+      );
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      grid = result.container.querySelector('vaadin-grid')!;
+    });
+
+    it('renders strings without formatting and with default alignment', async () => {
+      expect(getBodyCellContent(grid, 0, 0).style.textAlign).to.equal('');
+      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Hello World 1');
+      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Hello World 2');
+    });
+
+    it('renders numbers as right aligned numbers', async () => {
+      expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('-12');
+    });
+
+    it('renders booleans as icons', async () => {
+      const vip = getBodyCellContent(grid, 0, 2).querySelector('vaadin-icon')!;
+      expect(vip.icon).to.equal('lumo:checkmark');
+      const notVip = getBodyCellContent(grid, 1, 2).querySelector('vaadin-icon')!;
+      expect(notVip.icon).to.equal('lumo:minus');
+    });
+
+    it('renders java.util.Date as right aligned', async () => {
+      expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 3).textContent).to.equal('5/13/2021');
+      expect(getBodyCellContent(grid, 1, 3).textContent).to.equal('5/14/2021');
+      expect(getBodyCellContent(grid, 2, 3).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 3).textContent).to.equal('');
+    });
+
+    it('renders java.time.LocalDate as right aligned', async () => {
+      expect(getBodyCellContent(grid, 0, 4).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 4).textContent).to.equal('5/13/2021');
+      expect(getBodyCellContent(grid, 1, 4).textContent).to.equal('5/14/2021');
+      expect(getBodyCellContent(grid, 2, 4).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 4).textContent).to.equal('');
+    });
+
+    it('renders java.time.LocalTime as right aligned', async () => {
+      expect(getBodyCellContent(grid, 0, 5).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 5).textContent).to.equal('8:45 AM');
+      expect(getBodyCellContent(grid, 1, 5).textContent).to.equal('8:45 PM');
+      expect(getBodyCellContent(grid, 2, 5).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 5).textContent).to.equal('');
+    });
+
+    it('renders java.time.LocalDateTime as right aligned', async () => {
+      expect(getBodyCellContent(grid, 0, 6).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 6).textContent).to.equal('5/13/2021, 8:45 AM');
+      expect(getBodyCellContent(grid, 1, 6).textContent).to.equal('5/14/2021, 8:45 PM');
+      expect(getBodyCellContent(grid, 2, 6).textContent).to.equal('');
+      expect(getBodyCellContent(grid, 3, 6).textContent).to.equal('');
     });
   });
 });
