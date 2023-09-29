@@ -394,29 +394,40 @@ describe('@hilla/form', () => {
       });
     });
 
-    @customElement('lit-hierarchy-view')
-    class LitHierarchyView extends LitElement {
-      binder: Binder<Level1, Level1Model>;
-
-      constructor() {
-        super();
-        this.binder = new Binder(this, Level1Model);
-        const level1 = Level1Model.createEmptyValue();
-        const level2 = Level2Model.createEmptyValue();
-        level1.level2 = [level2];
-        this.binder.read(level1);
-      }
-    }
-
     describe('complex hierarchy', () => {
-      it('should create binder in complex hierarchy', async () => {
-        const litHierarchyView = document.createElement('lit-hierarchy-view') as LitHierarchyView;
+      @customElement('lit-hierarchy-view')
+      class LitHierarchyView extends LitElement {
+        binder: Binder<Level1, Level1Model>;
+
+        constructor() {
+          super();
+          this.binder = new Binder(this, Level1Model);
+          const level1 = Level1Model.createEmptyValue();
+          const level2 = Level2Model.createEmptyValue();
+          level1.level2 = [level2];
+          this.binder.read(level1);
+        }
+      }
+
+      let litHierarchyView: LitHierarchyView;
+
+      beforeEach(() => {
+        litHierarchyView = document.createElement('lit-hierarchy-view') as LitHierarchyView;
         document.body.appendChild(litHierarchyView);
+      });
+
+      afterEach(() => {
+        document.body.removeChild(litHierarchyView);
+      });
+
+      it('should create binder in complex hierarchy', async () => {
         const { binder } = litHierarchyView;
         await litHierarchyView.updateComplete;
-        for (const item of binder.model.level2) {
-          assert.isDefined(binder.for(item.model.level3.level4.name4).defaultValue);
-        }
+        const level3Nodes = [...binder.model.level2];
+        assert.lengthOf(level3Nodes, 1);
+        assert.isDefined(binder.for(level3Nodes[0].model.level3.level4.name4).parent?.defaultValue);
+        // Automatic node initialization should preserve pristine state
+        assert.isFalse(binder.dirty);
       });
     });
   });
