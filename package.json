@@ -29,7 +29,8 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "prettier": "$prettier"
+    "prettier": "$prettier",
+    "eslint-plugin-prettier": "$eslint-plugin-prettier"
   },
   "devDependencies": {
     "@types/karma": "^6.3.5",
