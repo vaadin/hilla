@@ -47,3 +47,4 @@ cp scripts/generator/results/Lumo.java packages/java/hilla-react/src/main/java/d
 cp scripts/generator/results/Lumo.java packages/java/hilla/src/main/java/dev/hilla/theme/Lumo.java
 cp scripts/generator/results/Material.java packages/java/hilla-react/src/main/java/dev/hilla/theme/Material.java
 cp scripts/generator/results/Material.java packages/java/hilla/src/main/java/dev/hilla/theme/Material.java
+
