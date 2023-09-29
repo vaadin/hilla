@@ -8,7 +8,7 @@ plugins {
     id 'maven-publish'
     id 'idea'
     id 'com.gradle.plugin-publish' version '0.11.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.20-Beta2'
     id 'org.jetbrains.dokka' version '1.9.0'
 }
 
@@ -46,7 +46,7 @@ configurations {
 }
 
 task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
@@ -186,7 +186,7 @@ publishing {
  *
  **********************************************************************************************************************/
 wrapper {
-    gradleVersion = '7.6.1'
+    gradleVersion = '8.3'
     distributionType = Wrapper.DistributionType.ALL
 }
 
