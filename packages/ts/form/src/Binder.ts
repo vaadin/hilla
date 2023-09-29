@@ -1,5 +1,5 @@
 import type { LitElement } from 'lit';
-import type { Constructor } from 'type-fest';
+import type { Class } from 'type-fest';
 import { BinderRoot, type BinderConfiguration } from './BinderRoot.js';
 import type { AbstractModel } from './Models.js';
 import type { Value } from './Models.js';
@@ -27,7 +27,7 @@ export class Binder<M extends AbstractModel> extends BinderRoot<M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(context: Element, Model: Constructor<M>, config?: BinderConfiguration<Value<M>>) {
+  constructor(context: Element, Model: Class<M>, config?: BinderConfiguration<Value<M>>) {
     const changeCallback =
       config?.onChange ??
       (typeof (context as LitElement).requestUpdate === 'function'
