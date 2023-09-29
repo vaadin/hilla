@@ -10,6 +10,7 @@ export default class BarrelPlugin extends Plugin {
     return import.meta.url;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   override async execute({ pluginStorage, sources }: SharedStorage): Promise<void> {
     const tags = pluginStorage.get(BackbonePlugin.BACKBONE_PLUGIN_FILE_TAGS) as WeakMap<SourceFile, string> | undefined;
 
