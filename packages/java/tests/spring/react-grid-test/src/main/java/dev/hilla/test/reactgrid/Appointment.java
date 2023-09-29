@@ -13,8 +13,6 @@ public class Appointment extends AbstractEntity {
     private String name;
     @NotBlank
     private String doctor;
-    @NotNull
-    private LocalDateTime time;
     private boolean sendInvoice;
 
     public String getName() {
@@ -31,14 +29,6 @@ public class Appointment extends AbstractEntity {
 
     public void setDoctor(String doctor) {
         this.doctor = doctor;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
-
-    public void setTime(LocalDateTime time) {
-        this.time = time;
     }
 
     public boolean isSendInvoice() {

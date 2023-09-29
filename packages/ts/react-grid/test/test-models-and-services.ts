@@ -29,6 +29,17 @@ export interface Person {
   vip: boolean;
 }
 
+export interface ColumnRendererTestValues {
+  id: number;
+  string: string;
+  number: number;
+  boolean: boolean;
+  date?: string;
+  localDate?: string;
+  localTime?: string;
+  localDateTime?: string;
+}
+
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
@@ -97,6 +108,60 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
+export class ColumnRendererTestModel<
+  T extends ColumnRendererTestValues = ColumnRendererTestValues,
+> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Company;
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get string(): StringModel {
+    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get number(): NumberModel {
+    return this[_getPropertyModel]('number', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get boolean(): BooleanModel {
+    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get date(): StringModel {
+    return this[_getPropertyModel](
+      'date',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
+    );
+  }
+
+  get localDate(): StringModel {
+    return this[_getPropertyModel](
+      'localDate',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
+    );
+  }
+
+  get localTime(): StringModel {
+    return this[_getPropertyModel](
+      'localTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
+    );
+  }
+
+  get localDateTime(): StringModel {
+    return this[_getPropertyModel](
+      'localDateTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
+    );
+  }
+}
+
 type HasId = {
   id: number;
 };
@@ -155,9 +220,51 @@ export const companyData: Company[] = [
   { id: 1, version: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
   { id: 2, version: 1, name: 'Google', foundedDate: '1998-09-04' },
 ];
+
+export const columnRendererTestData: ColumnRendererTestValues[] = [
+  {
+    id: 1,
+    string: 'Hello World 1',
+    number: 123456,
+    boolean: true,
+    date: '2021-05-13T00:00:00',
+    localDate: '2021-05-13',
+    localTime: '08:45:00',
+    localDateTime: '2021-05-13T08:45:00',
+  },
+  {
+    id: 2,
+    string: 'Hello World 2',
+    number: -12,
+    boolean: false,
+    date: '2021-05-14T00:00:00',
+    localDate: '2021-05-14',
+    localTime: '20:45:00',
+    localDateTime: '2021-05-14T20:45:00',
+  },
+  {
+    id: 3,
+    string: 'Hello World 3',
+    number: -12,
+    boolean: false,
+  },
+  {
+    id: 4,
+    string: 'Hello World 4',
+    number: -12,
+    boolean: false,
+    date: 'foo',
+    localDate: 'foo',
+    localTime: 'foo',
+    localDateTime: 'foo',
+  },
+];
+
 export type HasLastFilter = {
   lastFilter: Filter | undefined;
 };
 
 export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
 export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
+export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasLastFilter =>
+  createService(columnRendererTestData);
