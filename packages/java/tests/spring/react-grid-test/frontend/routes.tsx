@@ -32,6 +32,10 @@ export const routes = [
         path: '/auto-form',
         element: <AutoFormView />,
       },
+      {
+        path: '/auto-crud',
+        element: <AutoCrudView />,
+      },
     ],
   },
 ];
