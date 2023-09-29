@@ -60,6 +60,7 @@ jobs:
           if-no-files-found: error
 
   check-style:
+    needs: init
     name: Check style
     runs-on: ubuntu-latest
     timeout-minutes: 25
