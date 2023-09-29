@@ -24,8 +24,7 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     @Test
     public void valuesRemainWhenSubmittingInvalidData() {
         getTextField("name").setValue("It's me, Mario");
-        getTextField("doctor").setValue("Evil");
-        getTextField("time").setValue("now");
+        getTextField("doctor").setValue("");
         submit();
 
         // Field values remain
@@ -36,7 +35,6 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     public void validDataSubmitted() {
         getTextField("name").setValue("John Doe");
         getTextField("doctor").setValue("Evil");
-        getTextField("time").setValue("2020-10-03T09:20:00.000Z");
         submit();
 
         waitUntil(driver -> {
@@ -44,7 +42,6 @@ public class AutoFormViewIT extends ChromeBrowserTest {
                     "Thank you John Doe, your appointment has been reserved.");
 
         });
-
     }
 
     @Test
@@ -54,10 +51,6 @@ public class AutoFormViewIT extends ChromeBrowserTest {
                 getTextField("name").getPropertyString("errorMessage"));
         Assert.assertEquals("must not be blank",
                 getTextField("doctor").getPropertyString("errorMessage"));
-        // The time field should have an error but it does not
-        // Assert.assertEquals("must not be blank",
-        // getTextField("time").getPropertyString("errorMessage"));
-
     }
 
     private void submit() {
