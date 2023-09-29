@@ -7,7 +7,6 @@
   },
   "targetDefaults": {
     "build": {
-      "dependencies": true,
       "dependsOn": ["^build"]
     }
   },
