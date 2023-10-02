@@ -157,14 +157,6 @@ describe('@hilla/react-grid', () => {
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
       });
-      it('no filters created for other columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
-        await nextFrame();
-        await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const cell = getHeaderCellContent(grid, 1, 4);
-        expect(cell.firstElementChild).to.null;
-      });
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} headerFilters />);
@@ -215,6 +207,39 @@ describe('@hilla/react-grid', () => {
           ...{ t: 'propertyString' },
           filterValue: '123',
           propertyId: 'someNumber',
+          matcher: Matcher.EQUALS,
+        };
+        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
+        expect(service.lastFilter).to.eql(expectedFilter2);
+      });
+      it('filters for a boolean column', async () => {
+        const service = personService();
+        const result = render(<TestAutoGrid service={service} headerFilters />);
+        await nextFrame();
+        await nextFrame();
+        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
+        const select = getHeaderCellContent(grid, 1, 4).firstElementChild as SelectElement;
+        select.value = 'True';
+        await nextFrame();
+        await nextFrame();
+
+        const expectedPropertyFilter: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'True',
+          propertyId: 'vip',
+          matcher: Matcher.EQUALS,
+        };
+        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        expect(service.lastFilter).to.eql(expectedFilter);
+
+        select.value = 'False';
+        await nextFrame();
+        await nextFrame();
+
+        const expectedPropertyFilter2: PropertyStringFilter = {
+          ...{ t: 'propertyString' },
+          filterValue: 'False',
+          propertyId: 'vip',
           matcher: Matcher.EQUALS,
         };
         const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
