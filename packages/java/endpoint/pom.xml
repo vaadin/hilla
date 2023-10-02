@@ -219,6 +219,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin.external</groupId>
+            <artifactId>gentyref</artifactId>
+            <version>${gentyref.version}</version>
+        </dependency>
+
         <!-- Testing dependencies -->
 
         <!-- TODO: re-enable tests mocking final classes in the connect
@@ -285,5 +291,15 @@
 
 
     </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <parallel>none</parallel>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

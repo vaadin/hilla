@@ -1,7 +1,7 @@
 import type { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
 import { type Dispatch, type SetStateAction, createContext } from 'react';
+import type { PropertyInfo } from './property-info';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import type { PropertyInfo } from './utils';
 
 export interface SortState {
   path: string;

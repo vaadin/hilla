@@ -13,6 +13,7 @@ export default class SubTypesPlugin extends Plugin {
     return import.meta.url;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   override async execute(storage: SharedStorage): Promise<void> {
     const { api, sources } = storage;
 

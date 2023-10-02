@@ -109,7 +109,7 @@ describe('@hilla/form', () => {
         await orderViewWithTextField.updateComplete;
       });
 
-      afterEach(async () => {
+      afterEach(() => {
         document.body.removeChild(orderViewWithTextField);
       });
 
@@ -257,14 +257,14 @@ describe('@hilla/form', () => {
         let priorityField: MockTextFieldElement;
         let binder: Binder<OrderModel>;
 
-        beforeEach(async () => {
+        beforeEach(() => {
           view = orderViewWithTextField;
           // eslint-disable-next-line prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
 
-        it('should set initial zero', async () => {
+        it('should set initial zero', () => {
           expect(priorityField.value).to.equal('0');
         });
 
@@ -378,7 +378,7 @@ describe('@hilla/form', () => {
         await orderViewWithInput.updateComplete;
       });
 
-      afterEach(async () => {
+      afterEach(() => {
         document.body.removeChild(orderViewWithInput);
       });
 
@@ -409,14 +409,14 @@ describe('@hilla/form', () => {
         let priorityField: MockInputElement;
         let binder: Binder<OrderModel>;
 
-        beforeEach(async () => {
+        beforeEach(() => {
           view = orderViewWithInput;
           // eslint-disable-next-line prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
 
-        it('should set initial zero', async () => {
+        it('should set initial zero', () => {
           expect(priorityField.value).to.equal('0');
         });
 
@@ -966,7 +966,7 @@ describe('@hilla/form', () => {
       //   expect(element.selectedItem).to.equal(binderNode.value);
       // });
 
-      it(`Strategy can be overridden in binder`, async () => {
+      it(`Strategy can be overridden in binder`, () => {
         const element = document.createElement('div');
 
         class MyStrategy extends AbstractFieldStrategy {

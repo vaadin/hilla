@@ -37,7 +37,7 @@ export function HeaderFilter(): ReactElement {
     }, 1);
   }, []);
 
-  if (context.propertyInfo.modelType === 'string') {
+  if (context.propertyInfo.type === 'string') {
     return (
       <TextField
         placeholder="Filter..."
@@ -47,7 +47,7 @@ export function HeaderFilter(): ReactElement {
         }}
       ></TextField>
     );
-  } else if (context.propertyInfo.modelType === 'number') {
+  } else if (context.propertyInfo.type === 'number') {
     return (
       <>
         <Select

@@ -37,38 +37,38 @@ describe('@hilla/form', () => {
     });
 
     describe('model/requiredFlag', () => {
-      it('should not be initially required', async () => {
+      it('should not be initially required', () => {
         expect(binder.for(binder.model.fieldString).required).to.be.false;
       });
 
-      it(`NotEmpty validator should mark a model as required`, async () => {
+      it(`NotEmpty validator should mark a model as required`, () => {
         binder.for(binder.model.fieldString).addValidator(new NotEmpty());
         expect(binder.for(binder.model.fieldString).required).to.be.true;
       });
 
-      it(`NotNull validator should mark a model as required`, async () => {
+      it(`NotNull validator should mark a model as required`, () => {
         binder.for(binder.model.fieldString).addValidator(new NotNull());
         expect(binder.for(binder.model.fieldString).required).to.be.true;
       });
 
-      it(`NotBlank validator should mark a model as required`, async () => {
+      it(`NotBlank validator should mark a model as required`, () => {
         binder.for(binder.model.fieldString).addValidator(new NotBlank());
         expect(binder.for(binder.model.fieldString).required).to.be.true;
       });
 
-      it(`Size validator with min bigger than 0 should mark a model as required`, async () => {
+      it(`Size validator with min bigger than 0 should mark a model as required`, () => {
         binder.for(binder.model.fieldString).addValidator(new Size({ min: 1 }));
         expect(binder.for(binder.model.fieldString).required).to.be.true;
       });
 
-      it(`Size validator with min 0 should not be mark a model as required`, async () => {
+      it(`Size validator with min 0 should not be mark a model as required`, () => {
         binder.for(binder.model.fieldString).addValidator(new Size({ min: 0 }));
         expect(binder.for(binder.model.fieldString).required).to.be.false;
       });
     });
 
     describe('number model', () => {
-      it('should contain IsNumber validator by default', async () => {
+      it('should contain IsNumber validator by default', () => {
         const { validators } = binder.for(binder.model.fieldNumber);
         expect(validators[0]).to.be.instanceOf(IsNumber);
       });
@@ -80,11 +80,11 @@ describe('@hilla/form', () => {
           fromString = binder.model.fieldNumber[_fromString];
         });
 
-        it('should disallow empty string', async () => {
+        it('should disallow empty string', () => {
           expect(fromString('')).to.equal(undefined);
         });
 
-        it('should integer format', async () => {
+        it('should integer format', () => {
           expect(fromString('0')).to.equal(0);
           expect(fromString('01')).to.equal(1);
           expect(fromString('10')).to.equal(10);
@@ -92,14 +92,14 @@ describe('@hilla/form', () => {
           expect(fromString('-10')).to.equal(-10);
         });
 
-        it('should support decimal format', async () => {
+        it('should support decimal format', () => {
           expect(fromString('1.2')).to.equal(1.2);
           expect(fromString('.2')).to.equal(0.2);
           expect(fromString('+1.2')).to.equal(1.2);
           expect(fromString('-1.2')).to.equal(-1.2);
         });
 
-        it('should disallow incorrect formats', async () => {
+        it('should disallow incorrect formats', () => {
           expect(fromString('1.')).to.satisfy(Number.isNaN);
           // Wrong separator
           expect(fromString('1,')).to.satisfy(Number.isNaN);
@@ -121,7 +121,7 @@ describe('@hilla/form', () => {
           fromString = binder.model.fieldBoolean[_fromString];
         });
 
-        it('should do semantic conversion from string to boolean model', async () => {
+        it('should do semantic conversion from string to boolean model', () => {
           // The validator.js library is used as a reference of valid boolean values
           // see https://github.com/validatorjs/validator.js/blob/master/src/lib/isBoolean.js
           expect(fromString('true')).to.be.true;
@@ -158,7 +158,7 @@ describe('@hilla/form', () => {
         };
       });
 
-      it('should be iterable', async () => {
+      it('should be iterable', () => {
         [binder.model.fieldArrayString, binder.model.fieldArrayModel].forEach((arrayModel) => {
           const values = binder.for(arrayModel).value!;
           const iterator = arrayModel[Symbol.iterator]();
@@ -176,7 +176,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should support prependItem on binder node', async () => {
+      it('should support prependItem on binder node', () => {
         binder.for(binder.model.fieldArrayString).prependItem();
         binder.for(binder.model.fieldArrayString).prependItem('new');
 
@@ -193,7 +193,7 @@ describe('@hilla/form', () => {
         ]);
       });
 
-      it('should support appendItem on binder node', async () => {
+      it('should support appendItem on binder node', () => {
         binder.for(binder.model.fieldArrayString).appendItem();
         binder.for(binder.model.fieldArrayString).appendItem('new');
 
@@ -217,13 +217,13 @@ describe('@hilla/form', () => {
        * comparing the default value, which is getting from the parent
        * order line model, which is an array item.
        */
-      it('array item defaultValue should not be undefined', async () => {
+      it('array item defaultValue should not be undefined', () => {
         binder.for(binder.model.fieldArrayModel).appendItem();
         const entityModels = [...binder.model.fieldArrayModel];
         expect(binder.for(entityModels[0].model).defaultValue).to.be.not.undefined;
       });
 
-      it('should support removeSelf on binder node', async () => {
+      it('should support removeSelf on binder node', () => {
         binder.for(binder.model.fieldArrayString).appendItem();
         const stringModels = [...binder.model.fieldArrayString];
         binder.for(stringModels[1].model).removeSelf();
@@ -237,7 +237,7 @@ describe('@hilla/form', () => {
         expect(binder.for(binder.model.fieldArrayModel).value).to.deep.equal([{ idString: 'id0' }, { idString: '' }]);
       });
 
-      it('should throw for prependItem on non-array binder node', async () => {
+      it('should throw for prependItem on non-array binder node', () => {
         [
           binder,
           binder.for(binder.model.fieldString),
@@ -251,7 +251,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should throw for appendItem on non-array binder node', async () => {
+      it('should throw for appendItem on non-array binder node', () => {
         [
           binder,
           binder.for(binder.model.fieldString),
@@ -265,7 +265,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should throw for removeSelf on non-array item binder node', async () => {
+      it('should throw for removeSelf on non-array item binder node', () => {
         expect(() => {
           binder.removeSelf();
         }).to.throw('array');
@@ -278,7 +278,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should reuse model instance for the same array item', async () => {
+      it('should reuse model instance for the same array item', () => {
         const nodes1 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
@@ -291,7 +291,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should reuse model instance for the same array item after it is modified', async () => {
+      it('should reuse model instance for the same array item after it is modified', () => {
         const nodes1 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
@@ -311,7 +311,7 @@ describe('@hilla/form', () => {
         });
       });
 
-      it('should update model keySymbol when inserting items', async () => {
+      it('should update model keySymbol when inserting items', () => {
         const nodes1 = [...binder.model.fieldArrayModel].slice();
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
@@ -332,7 +332,7 @@ describe('@hilla/form', () => {
         }
       });
 
-      it('should pass variable arguments down', async () => {
+      it('should pass variable arguments down', () => {
         const matrix = [
           [0, 1],
           [2, 3],
