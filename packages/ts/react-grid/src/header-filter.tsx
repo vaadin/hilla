@@ -124,3 +124,6 @@ export function BooleanHeaderFilter(): ReactElement {
     ></Select>
   );
 }
+export function NoHeaderFilter(): ReactElement {
+  return <></>;
+}

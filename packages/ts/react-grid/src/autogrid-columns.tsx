@@ -1,4 +1,4 @@
-import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { GridColumnElement, GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,
@@ -6,10 +6,12 @@ import {
   AutoGridNumberRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
-import { BooleanHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
+import { BooleanHeaderFilter, NoHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
 import type { PropertyInfo } from './property-info';
 
-type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
+type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
+  headerRenderer: React.ComponentType<Readonly<{ original: GridColumnElement }>>;
+};
 
 // eslint-disable-next-line consistent-return
 export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
@@ -37,6 +39,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateRenderer,
+        headerRenderer: NoHeaderFilter,
       };
     case 'time':
       return {
@@ -44,6 +47,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridTimeRenderer,
+        headerRenderer: NoHeaderFilter,
       };
     case 'datetime':
       return {
@@ -51,6 +55,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
+        headerRenderer: NoHeaderFilter,
       };
     case 'string':
       return {
@@ -60,6 +65,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
     case undefined:
       return {
         autoWidth: true,
+        headerRenderer: NoHeaderFilter,
       };
   }
 }
