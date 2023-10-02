@@ -53,7 +53,7 @@ export type InterpolateMessageCallback<T> = (
 ) => string;
 
 export interface Validator<T> {
-  validate: ValidationCallback<T>;
+  validate(...args: Parameters<ValidationCallback<T>>): ReturnType<ValidationCallback<T>>;
   message: string;
   impliesRequired?: boolean;
 }

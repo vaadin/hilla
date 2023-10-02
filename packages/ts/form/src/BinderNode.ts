@@ -26,6 +26,7 @@ import {
   AbstractModel,
   ArrayModel,
   getBinderNode,
+  type ModelValue,
   ObjectModel,
 } from './Models.js';
 import type { Validator, ValueError } from './Validation.js';
@@ -55,6 +56,34 @@ const getDefaultArrayItem = <TItem>(arrayNode: ArrayBinderNode<TItem>): TItem =>
   cache.set(arrayNode, defaultArrayItem);
   return defaultArrayItem;
 };
+
+function updateParentKey<M extends AbstractModel<unknown>>(
+  model: M,
+  value: ModelValue<M>,
+  key: keyof ModelValue<M>,
+  keyValue: ModelValue<M>[typeof key],
+): ModelValue<M> {
+  if (model instanceof ObjectModel) {
+    // Value contained in object - replace object in parent
+    return {
+      ...(value as ModelValue<M> & Record<never, never>),
+      [key]: keyValue,
+    };
+  }
+
+  if ((keyValue as unknown) === undefined) {
+    throw new TypeError('Unexpected undefined value');
+  }
+
+  if (model instanceof ArrayModel) {
+    // Value contained in array - replace array in parent
+    const array = (value as unknown[]).slice();
+    array[key as number] = keyValue;
+    return array as ModelValue<M>;
+  }
+
+  throw new TypeError(`Unknown model type ${(model as AbstractModel<unknown>).constructor.name}`);
+}
 
 export const CHANGED = new Event('binder-node-changed');
 
@@ -137,20 +166,20 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   }
 
   set value(value: T | undefined) {
-    this.setValueState(value);
+    this.initializeValue();
+    this.setValueState(value, undefined);
   }
 
   /**
    * The default value related to the model
    */
   get defaultValue(): T {
-    if (this.isArrayItem()) {
-      const arrayNode = this.parent.asArray<T>();
-      return getDefaultArrayItem(arrayNode);
-    }
-
     const key = this.model[_key];
-    return (this.parent!.defaultValue as { readonly [key in typeof key]: T })[key];
+    const parentDefaultValue = this.parent!.defaultValue as { readonly [key in typeof key]?: T };
+    if (this.isArrayItem() && !(key in parentDefaultValue)) {
+      return getDefaultArrayItem(this.parent.asArray());
+    }
+    return parentDefaultValue[key]!;
   }
 
   /**
@@ -272,8 +301,10 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   ): void {
     const arrayNode = this.asArray<TItem>();
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const itemValueOrEmptyValue = itemValue ?? arrayNode.model[_ItemModel].createEmptyValue();
-    arrayNode.value = [...(arrayNode.value ?? []), itemValueOrEmptyValue];
+    const itemValueOrEmptyValue = itemValue ?? getDefaultArrayItem(arrayNode);
+    const newValue = [...(arrayNode.value ?? []), itemValueOrEmptyValue];
+    const newDefaultValue = [...((arrayNode.defaultValue as TItem[] | undefined) ?? []), itemValueOrEmptyValue];
+    this.setValueState(newValue as T, newDefaultValue as T);
   }
 
   /**
@@ -289,8 +320,10 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   ): void {
     const arrayNode = this.asArray<TItem>();
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const itemValueOrEmptyValue = itemValue ?? arrayNode.model[_ItemModel].createEmptyValue();
-    arrayNode.value = [itemValueOrEmptyValue, ...(arrayNode.value ?? [])];
+    const itemValueOrEmptyValue = itemValue ?? getDefaultArrayItem(arrayNode);
+    const newValue = [itemValueOrEmptyValue, ...(arrayNode.value ?? [])];
+    const newDefaultValue = [itemValueOrEmptyValue, ...((arrayNode.defaultValue as TItem[] | undefined) ?? [])];
+    this.setValueState(newValue as T, newDefaultValue as T);
   }
 
   /**
@@ -302,7 +335,9 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     const arrayItemNode = this.asArrayItem();
     const itemIndex = this.model[_key];
     const arrayNode = arrayItemNode.parent;
-    arrayNode.value = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
+    const newValue = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
+    const newDefaultValue = (arrayNode.value ?? []).filter((_, i) => i !== itemIndex);
+    this.parent!.setValueState(newValue as T, newDefaultValue as T);
   }
 
   protected clearValidation(): boolean {
@@ -368,7 +403,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       if (this.defaultValue) {
         for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
           const childModel = getter.call(this.model);
-          if (childModel instanceof AbstractModel) {
+          if (childModel instanceof AbstractModel && childModel[_key] in (this.defaultValue as Record<never, never>)) {
             yield getBinderNode(childModel);
           }
         }
@@ -428,49 +463,47 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       ? (this.parent.value as { readonly [key in typeof key]: T })[this.model[_key]]
       : undefined;
 
+    const defaultValue: T | undefined = this.parent
+      ? (this.parent.defaultValue as { readonly [key in typeof key]: T })[this.model[_key]]
+      : undefined;
+
     if (value === undefined) {
       // Initialize value if this is the root level node, or it is enforced
       if (forceInitialize || !this.parent) {
         value = this.model.constructor.createEmptyValue() as T;
-        this.setValueState(value, this.defaultValue === undefined);
+        this.setValueState(value, defaultValue === undefined ? value : defaultValue);
       } else if (
         this.parent.model instanceof ObjectModel &&
         !(key in ((this.parent.value || {}) as { readonly [key in typeof key]?: T }))
       ) {
-        this.setValueState(undefined, this.defaultValue === undefined);
+        this.setValueState(undefined, defaultValue === undefined ? value : defaultValue);
       }
     }
   }
 
-  private setValueState(value: T | undefined, keepPristine = false): void {
+  private setValueState(value: T | undefined, defaultValue: T | undefined): void {
     const modelParent = this.model[_parent];
-    const key = this.model[_key];
-    if (modelParent instanceof ObjectModel) {
-      // Value contained in object - replace object in parent
-      const object: { readonly [key in typeof key]?: T } = {
-        ...(this.parent!.value as { readonly [key in typeof key]?: T }),
-        [key]: value,
-      };
-      this.parent!.setValueState(object, keepPristine);
-      return;
-    }
-
-    if (value === undefined) {
-      throw new TypeError('Unexpected undefined value');
-    }
-
-    if (this.isArrayItem()) {
-      // Value contained in array - replace array in parent
-      const array = (this.parent.value ?? []).slice();
-      array[key as number] = value;
-      this.parent.setValueState(array, keepPristine);
-    } else {
-      // Value contained elsewhere, probably binder - use value property setter
-      const binder = modelParent as Binder<T, M>;
-      if (keepPristine && !binder.dirty) {
-        binder.defaultValue = value;
+    if (modelParent instanceof AbstractModel) {
+      const key = this.model[_key];
+      const parentValue = updateParentKey(modelParent, this.parent!.value, key, value);
+      const keepPristine = value === defaultValue && this.parent?.value === this.parent?.defaultValue;
+      if (keepPristine) {
+        // Keep value and defaultValue equal, so that `dirty` stays false
+        this.parent!.setValueState(parentValue, parentValue);
+      } else if (defaultValue !== undefined) {
+        // Update value and defaultValue at the same time with different content
+        const parentDefaultValue = updateParentKey(modelParent, this.parent!.defaultValue, key, value);
+        this.parent!.setValueState(parentValue, parentDefaultValue);
+      } else {
+        this.parent!.setValueState(parentValue, undefined);
       }
+    } else {
+      // Root level model - update the binder
+      const binder = modelParent as Binder<T, M>;
       binder.value = value!;
+      if (defaultValue !== undefined) {
+        binder.defaultValue = defaultValue;
+      }
     }
   }
 
