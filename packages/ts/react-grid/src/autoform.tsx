@@ -20,7 +20,7 @@ export type AutoFormProps<TItem> = Readonly<{
   item?: TItem;
   disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
-  onSubmit?({ item }: SubmitEvent<TItem>): void;
+  afterSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
 
 export function ExperimentalAutoForm<TItem>({
@@ -28,7 +28,7 @@ export function ExperimentalAutoForm<TItem>({
   model,
   item,
   onSubmitError,
-  onSubmit,
+  afterSubmit,
   disabled,
 }: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
@@ -46,8 +46,8 @@ export function ExperimentalAutoForm<TItem>({
       if (!newItem) {
         // If update returns an empty object, then no update was performed
         throw new Error('generic error');
-      } else if (onSubmit) {
-        onSubmit({ item: newItem });
+      } else if (afterSubmit) {
+        afterSubmit({ item: newItem });
       }
     } catch (error) {
       if (error instanceof ValidationError) {
