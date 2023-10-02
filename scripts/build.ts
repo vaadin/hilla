@@ -8,7 +8,7 @@ import type { PackageJson } from 'type-fest';
 const root = pathToFileURL(process.cwd() + sep);
 const [packageJsonFile, srcFiles] = await Promise.all([
   readFile(new URL('package.json', root), 'utf8'),
-  glob('src/**/*.{ts,tsx}'),
+  glob('src/**/*.{ts,tsx}', { ignore: 'src/**/*.d.ts' }),
 ]);
 
 const packageJson: PackageJson = JSON.parse(packageJsonFile);

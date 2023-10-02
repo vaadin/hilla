@@ -19,6 +19,7 @@ export default class ModelPlugin extends Plugin {
     return import.meta.url;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   override async execute(storage: SharedStorage): Promise<void> {
     const files = this.#processEntities(storage.api.components?.schemas);
     files.forEach((file) => this.#tags.set(file, ModelPluginSourceType.Model));
