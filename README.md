@@ -18,7 +18,7 @@ Hilla integrates a Spring Boot Java backend with a reactive TypeScript front end
 
 ## Simple type-safe server communication
 
-Hilla helps you access the backend easily with type-safe endpoints.
+Hilla helps you access the backend easily with type-safe endpoints.d
 
 `index.ts`
 
