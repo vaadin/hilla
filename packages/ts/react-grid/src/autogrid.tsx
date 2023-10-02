@@ -14,7 +14,6 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
-import { HeaderFilter } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import { getProperties, hasAnnotation, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -116,25 +115,18 @@ function useColumns(
 
   return effectiveProperties.map((propertyInfo) => {
     let column;
+    // Header renderer is effectively the header filter, which should only be
+    // applied when header filters are enabled
+    const { headerRenderer, ...columnProps } = getColumnProps(propertyInfo);
 
     if (options.headerFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn
-            path={propertyInfo.name}
-            headerRenderer={HeaderFilter}
-            {...getColumnProps(propertyInfo)}
-          ></GridColumn>
+          <GridColumn path={propertyInfo.name} headerRenderer={headerRenderer} {...columnProps}></GridColumn>
         </GridColumnGroup>
       );
     } else {
-      column = (
-        <GridColumn
-          path={propertyInfo.name}
-          headerRenderer={HeaderSorter}
-          {...getColumnProps(propertyInfo)}
-        ></GridColumn>
-      );
+      column = <GridColumn path={propertyInfo.name} headerRenderer={HeaderSorter} {...columnProps}></GridColumn>;
     }
     return (
       <ColumnContext.Provider
