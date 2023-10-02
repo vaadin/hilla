@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout';
 import { AutoCrudView } from './views/AutoCrudView';
 import { AutoFormView } from './views/AutoFormView';
+import { GridWithEntityReferences } from './views/GridWithEntityReferences';
 import { ReadOnlyGrid } from './views/ReadOnlyGrid';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter';
@@ -27,6 +28,10 @@ export const routes = [
       {
         path: '/readonly-grid-with-headerfilters',
         element: <ReadOnlyGridWithHeaderFilters />,
+      },
+      {
+        path: '/grid-entityrefs',
+        element: <GridWithEntityReferences />,
       },
       {
         path: '/auto-form',

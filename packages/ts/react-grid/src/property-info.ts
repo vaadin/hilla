@@ -7,9 +7,10 @@ import {
   type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
+  ObjectModel,
 } from '@hilla/form';
 
-export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'string' | 'time' | undefined;
+export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'object' | 'string' | 'time' | undefined;
 
 const javaTypeMap: Record<string, PropertyType> = {
   'java.util.Date': 'date',
@@ -18,7 +19,7 @@ const javaTypeMap: Record<string, PropertyType> = {
   'java.time.LocalDateTime': 'datetime',
 };
 
-function determinePropertyType(model: AbstractModel) {
+function determinePropertyType(model: AbstractModel): PropertyType {
   // Try detecting by Java type
   const { javaType } = model[_meta];
   const propertyType = javaType ? javaTypeMap[javaType] : undefined;
@@ -28,13 +29,16 @@ function determinePropertyType(model: AbstractModel) {
 
   // Otherwise detect by model constructor
   const { constructor } = model;
-  return constructor === StringModel
-    ? 'string'
-    : constructor === NumberModel
-    ? 'number'
-    : constructor === BooleanModel
-    ? 'boolean'
-    : undefined;
+  if (constructor === StringModel) {
+    return 'string';
+  } else if (constructor === NumberModel) {
+    return 'number';
+  } else if (constructor === BooleanModel) {
+    return 'boolean';
+  } else if (model instanceof ObjectModel) {
+    return 'object';
+  }
+  return undefined;
 }
 
 export interface PropertyInfo {
@@ -44,8 +48,8 @@ export interface PropertyInfo {
   meta: ModelMetadata;
 }
 
-export function hasAnnotation(propertyInfo: PropertyInfo, annotationName: string): boolean {
-  return propertyInfo.meta.annotations?.some((annotation) => annotation.name === annotationName) ?? false;
+export function hasAnnotation(meta: ModelMetadata, annotationName: string): boolean {
+  return meta.annotations?.some((annotation) => annotation.name === annotationName) ?? false;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -58,18 +62,29 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
+export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): string[] =>
+  Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
+
 export const getProperties = (model: DetachedModelConstructor<AbstractModel>): PropertyInfo[] => {
-  const properties = Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
+  const propertyIds = getPropertyIds(model);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const modelInstance: any = createDetachedModel(model);
-  return properties.map((name) => {
+  return propertyIds.flatMap((name) => {
     // eslint-disable-next-line
     const propertyModel = modelInstance[name] as AbstractModel;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const meta = propertyModel[_meta];
     const humanReadableName = _generateHeader(name);
-    const { constructor } = propertyModel;
     const type = determinePropertyType(propertyModel);
+
+    if (type === 'object') {
+      if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
+        // Expand sub properties
+        const subProps = getProperties(propertyModel.constructor as any);
+        return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
+      }
+    }
+
     return {
       name,
       humanReadableName,
@@ -82,8 +97,8 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
 export function includeProperty(propertyInfo: PropertyInfo): unknown {
   // Exclude properties annotated with id and version
   if (
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+    hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Version')
   ) {
     return false;
   }
@@ -91,7 +106,7 @@ export function includeProperty(propertyInfo: PropertyInfo): unknown {
 }
 
 export function getIdProperty(properties: PropertyInfo[]): PropertyInfo | undefined {
-  const idProperty = properties.find((propertyInfo) => hasAnnotation(propertyInfo, 'jakarta.persistence.Id'));
+  const idProperty = properties.find((propertyInfo) => hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'));
   if (idProperty) {
     return idProperty;
   }

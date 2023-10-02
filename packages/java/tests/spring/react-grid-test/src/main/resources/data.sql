@@ -51,3 +51,59 @@ INSERT INTO person (id, version, first_name, last_name, lucky_number, email_veri
 
 INSERT INTO company (id, version, name) VALUES (1, 0, 'Vaadin');
 INSERT INTO company (id, version, name) VALUES (2, 0, 'Google');
+
+-- Addresses
+INSERT INTO address (id, version, street_address, city, country) VALUES
+(1, 1, '12 Baker St', 'London', 'UK'),
+(2, 1, '2345 Park Ave', 'New York', 'USA'),
+(3, 1, '9/11 Kings Rd', 'Sydney', 'Australia'),
+(4, 1, '888 Orchard Ln', 'Vancouver', 'Canada'),
+(5, 1, '67 Shinjuku', 'Tokyo', 'Japan'),
+(6, 1, '23 Quay St', 'Dublin', 'Ireland'),
+(7, 1, '4321 King Blvd', 'Toronto', 'Canada'),
+(8, 1, '71 Beach Dr', 'Los Angeles', 'USA'),
+(9, 1, '222 Elm St', 'San Francisco', 'USA'),
+(10, 1, '56 River Rd', 'Paris', 'France');
+
+-- Departments
+INSERT INTO department (id, version, name) VALUES
+(1, 1, 'IT'),
+(2, 1, 'HR');
+
+-- Employees
+INSERT INTO employee (id, version, name, home_address_id, department_id) VALUES
+(1, 1, 'Alice', 1, 1),
+(2, 1, 'Bob', 2, 1),
+(3, 1, 'Charlie', 3, 2),
+(4, 1, 'David', 4, 2),
+(5, 1, 'Eve', 5, 1),
+(6, 1, 'Frank', 6, 2),
+(7, 1, 'Grace', 7, 1),
+(8, 1, 'Hank', 8, 2),
+(9, 1, 'Irene', 9, 1),
+(10, 1, 'Jack', 10, 2);
+
+-- FoodItems (allergies)
+INSERT INTO food_item (id, version, name) VALUES
+(1, 1, 'Peanuts'),
+(2, 1, 'Strawberries'),
+(3, 1, 'Dairy'),
+(4, 1, 'Gluten'),
+(5, 1, 'Soy'),
+(6, 1, 'Shellfish'),
+(7, 1, 'Eggs'),
+(8, 1, 'Tree Nuts'),
+(9, 1, 'Fish');
+
+-- Assigning food allergies to employees
+INSERT INTO employee_allergies (employee_id, allergies_id) VALUES 
+(1, 1), (1, 2),
+(2, 3),
+(3, 4),
+(4, 5),
+(5, 6),
+(6, 7),
+(7, 8),
+(8, 9),
+(9, 3), (9, 5),
+(10, 6), (10, 8);

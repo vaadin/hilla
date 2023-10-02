@@ -1,9 +1,12 @@
 package dev.hilla.test.reactgrid;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public abstract class AbstractGridTest extends ChromeBrowserTest {
@@ -20,6 +23,21 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
             Object prop = grid.getProperty("_lastVisibleIndex");
             return prop != null;
         });
+    }
+
+    protected void assertColumns(String... expected) {
+        List<String> actual = grid.getVisibleColumns().stream()
+                .map(column -> column.getHeaderCell().getText()).toList();
+        Assert.assertEquals(List.of(expected), actual);
+
+    }
+
+    protected void assertRow(int row, String... expected) {
+        GridTRElement tr = grid.getRow(row);
+        List<String> actual = grid.getVisibleColumns().stream()
+                .map(col -> tr.getCell(col).getText()).toList();
+
+        Assert.assertEquals(List.of(expected), actual);
     }
 
     protected void assertName(int row, String firstName, String lastName) {
