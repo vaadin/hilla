@@ -282,6 +282,10 @@ jobs:
     if: ${{ always() }}
     needs:
       - test-it
+      - test-java
+      - test-typescript
+      - test-it
+      - test-gradle
     steps:
       - name: Fail if test jobs did not succeed
         if: ${{ needs.test-it.result != 'success' }}
