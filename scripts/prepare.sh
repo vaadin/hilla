@@ -21,6 +21,7 @@ do
  [ ! -f "${src}/${i}.js" ] && curl -L -s "${url}/platform/${branch}/${src}/${i}.js" > ${src}/${i}.js
 done
 
+
 # run the generator
 cmd="node scripts/generator/generate.js $version scripts/generator/results/versions.json"
 echo Running: "$cmd" >&2
