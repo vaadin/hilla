@@ -370,7 +370,7 @@ describe('@hilla/form', () => {
       });
 
       // https://github.com/vaadin/hilla/issues/43
-      it('should be able to bind to a nested property of an optional parent', async () => {
+      it('should be able to bind to a nested property of an optional parent', () => {
         const superNameNode = binder.for(binder.model.supervisor.fullName);
         binder.read({
           ...expectedEmptyEmployee,
@@ -379,7 +379,7 @@ describe('@hilla/form', () => {
       });
 
       // https://github.com/vaadin/hilla/issues/43
-      it('should be able to read a nested property of an optional parent after clear', async () => {
+      it('should be able to read a nested property of an optional parent after clear', () => {
         const superNameNode = binder.for(binder.model.supervisor.fullName);
         binder.clear();
         assert.equal('', superNameNode.value);
