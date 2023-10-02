@@ -40,7 +40,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
-    headerFilters?: boolean;
+    noHeaderFilters?: boolean;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -102,7 +102,7 @@ function createDataProvider<TItem>(
 function useColumns(
   model: DetachedModelConstructor<AbstractModel>,
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  options: { visibleColumns?: string[]; headerFilters?: boolean },
+  options: { visibleColumns?: string[]; noHeaderFilters?: boolean },
 ) {
   const properties = getProperties(model);
   const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
@@ -117,7 +117,7 @@ function useColumns(
   return effectiveProperties.map((propertyInfo) => {
     let column;
 
-    if (options.headerFilters) {
+    if (!options.noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn
@@ -152,7 +152,7 @@ export function AutoGrid<TItem>({
   model,
   filter,
   visibleColumns,
-  headerFilters,
+  noHeaderFilters,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
@@ -183,15 +183,15 @@ export function AutoGrid<TItem>({
   // This cast should go away with #1252
   const children = useColumns(model, setHeaderPropertyFilter, {
     visibleColumns,
-    headerFilters,
+    noHeaderFilters,
   });
 
   useEffect(() => {
     // Remove all filtering if header filters are removed
-    if (!headerFilters) {
+    if (noHeaderFilters) {
       setInternalFilter({ ...{ t: 'and' }, children: [] });
     }
-  }, [headerFilters]);
+  }, [noHeaderFilters]);
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);

@@ -52,13 +52,16 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
 }
 
 describe('@hilla/react-grid', () => {
+  function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
+    return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps}></AutoGrid>;
+  }
   function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
     return <AutoGrid service={personService()} model={PersonModel} {...customProps}></AutoGrid>;
   }
 
   describe('Auto grid', () => {
     it('creates columns based on model', async () => {
-      const result: RenderResult = render(<TestAutoGrid />);
+      const result: RenderResult = render(<TestAutoGridNoHeaderFilters />);
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
     });
     it('can change model and recreate columns', async () => {
@@ -68,7 +71,7 @@ describe('@hilla/react-grid', () => {
       await assertColumns(result, 'name', 'foundedDate');
     });
     it('sorts according to first column by default', async () => {
-      const result = render(<TestAutoGrid />);
+      const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
@@ -76,17 +79,17 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
     });
     it('retains sorting when re-rendering', async () => {
-      const result = render(<TestAutoGrid />);
+      const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
       sortGrid(grid, 'lastName', 'desc');
       expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
-      result.rerender(<TestAutoGrid />);
+      result.rerender(<TestAutoGridNoHeaderFilters />);
       expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
     });
     it('creates sortable columns', async () => {
-      const result = render(<TestAutoGrid />);
+      const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
@@ -97,18 +100,18 @@ describe('@hilla/react-grid', () => {
     });
     it('sets a data provider, but only once', async () => {
       const service = personService();
-      const result = render(<TestAutoGrid service={service} />);
+      const result = render(<TestAutoGridNoHeaderFilters service={service} />);
       const grid = result.container.querySelector('vaadin-grid')!;
       await nextFrame();
       await nextFrame();
       const dp = grid.dataProvider;
       expect(dp).to.not.be.undefined;
-      result.rerender(<TestAutoGrid service={service} />);
+      result.rerender(<TestAutoGridNoHeaderFilters service={service} />);
       const grid2 = result.container.querySelector('vaadin-grid')!;
       expect(dp).to.equal(grid2.dataProvider);
     });
     it('data provider provides data', async () => {
-      const result = render(<TestAutoGrid />);
+      const result = render(<TestAutoGridNoHeaderFilters />);
       await nextFrame();
       await nextFrame();
 
@@ -121,7 +124,7 @@ describe('@hilla/react-grid', () => {
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
     });
     it('does not pass its own parameters to the underlying grid', () => {
-      const result = render(<TestAutoGrid />);
+      const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
       expect(grid.getAttribute('model')).to.be.null;
       expect(grid.getAttribute('service')).to.be.null;
@@ -142,7 +145,7 @@ describe('@hilla/react-grid', () => {
 
     describe('header filters', () => {
       it('created for string columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const result = render(<TestAutoGrid />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -150,7 +153,7 @@ describe('@hilla/react-grid', () => {
         expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
       });
       it('created for number columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const result = render(<TestAutoGrid />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -158,7 +161,7 @@ describe('@hilla/react-grid', () => {
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
       });
       it('no filters created for other columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
+        const result = render(<TestAutoGrid />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -167,7 +170,7 @@ describe('@hilla/react-grid', () => {
       });
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} headerFilters />);
+        const result = render(<TestAutoGrid service={service} />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -187,7 +190,7 @@ describe('@hilla/react-grid', () => {
       });
       it('filter when you type in the field for a number column', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} headerFilters />);
+        const result = render(<TestAutoGrid service={service} />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -222,7 +225,7 @@ describe('@hilla/react-grid', () => {
       });
       it('combine filters (and) when you type in multiple fields', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} headerFilters />);
+        const result = render(<TestAutoGrid service={service} />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -256,7 +259,7 @@ describe('@hilla/react-grid', () => {
       it('removes filters if turning header filters off', async () => {
         const service = personService();
 
-        const result = render(<AutoGrid service={service} model={PersonModel} headerFilters></AutoGrid>);
+        const result = render(<AutoGrid service={service} model={PersonModel}></AutoGrid>);
         await nextFrame();
         await nextFrame();
         const grid = result.container.querySelector('vaadin-grid')!;
@@ -294,10 +297,10 @@ describe('@hilla/react-grid', () => {
         const _personService = personService();
         const _companyService = companyService();
 
-        const result = render(<AutoGrid service={_personService} model={PersonModel} headerFilters></AutoGrid>);
+        const result = render(<AutoGrid service={_personService} model={PersonModel}></AutoGrid>);
         await nextFrame();
         await nextFrame();
-        result.rerender(<AutoGrid service={_companyService} model={CompanyModel} headerFilters></AutoGrid>);
+        result.rerender(<AutoGrid service={_companyService} model={CompanyModel}></AutoGrid>);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -318,7 +321,7 @@ describe('@hilla/react-grid', () => {
     });
     it('removes the filters when you clear the fields', async () => {
       const service = personService();
-      const result = render(<TestAutoGrid headerFilters service={service} />);
+      const result = render(<TestAutoGrid service={service} />);
       await nextFrame();
       await nextFrame();
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
