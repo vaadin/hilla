@@ -18,7 +18,7 @@ describe('@hilla/react-grid', () => {
     return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...customProps} />;
   }
   describe('Auto crud', () => {
-    it('shows a grid and a form', async () => {
+    it('shows a grid and a form', () => {
       const result = render(<TestAutoCrud />);
       const grid = getGrid(result);
       const form = getForm(result);
