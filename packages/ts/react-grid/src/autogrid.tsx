@@ -13,7 +13,7 @@ import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { getColumnProps } from './autogrid-columns.js';
-import type { CrudService } from './crud';
+import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getProperties, hasAnnotation, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
@@ -35,7 +35,7 @@ function includeProperty(propertyInfo: PropertyInfo): unknown {
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
-    service: CrudService<TItem>;
+    service: ListService<TItem>;
     model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
@@ -51,7 +51,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
-  service: CrudService<TItem>,
+  service: ListService<TItem>,
   filter: React.MutableRefObject<Filter | undefined>,
 ): GridDataProvider<TItem> {
   let first = true;
