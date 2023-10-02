@@ -35,7 +35,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build TypeScript
-        run: npm run build
+        run: npm run build:nocache
       - name: Build Java
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
       - name: Save Workspace
