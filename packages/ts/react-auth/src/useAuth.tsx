@@ -126,10 +126,10 @@ export type Authentication<TUser> = Readonly<{
  */
 export const AuthContext = createContext<Authentication<unknown>>({
   state: initialState,
-  async login() {
+  login() {
     throw new Error('AuthContext not initialized');
   },
-  async logout() {
+  logout() {
     throw new Error('AuthContext not initialized');
   },
   hasAccess(): boolean {

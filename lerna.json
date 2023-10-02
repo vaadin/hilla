@@ -1,8 +1,0 @@
-{
-  "packages": [
-    "packages/ts/*"
-  ],
-  "npmClient": "npm",
-  "useNx": true,
-  "version": "2.3.0-alpha6"
-}

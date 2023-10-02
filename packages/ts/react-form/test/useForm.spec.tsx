@@ -104,7 +104,7 @@ describe('@hilla/react-form', () => {
       expect(onSubmit).to.not.have.been.called;
     });
 
-    it('shows empty values by default', async () => {
+    it('shows empty values by default', () => {
       const { getByTestId } = render(<LoginForm />);
 
       expect(getByTestId('user.name')).to.have.property('value', '');
@@ -115,6 +115,7 @@ describe('@hilla/react-form', () => {
     it('shows read values', async () => {
       const { getByTestId } = render(<LoginForm />);
 
+      // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
         const { read } = (useForm as UseFormSpy).returnValues[0];
         read({
@@ -132,7 +133,7 @@ describe('@hilla/react-form', () => {
       expect(getByTestId('rememberMe')).to.have.property('checked', true);
     });
 
-    it('dispays default value', async () => {
+    it('dispays default value', () => {
       const { getByTestId } = render(<LoginForm />);
 
       expect(getByTestId('output.user.name')).to.have.property('textContent', '');

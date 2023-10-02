@@ -439,6 +439,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     const hasInvalidState = this[_validity] && !this[_validity].valid;
     const hasBadInput = !!this[_validity]?.badInput;
 
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if ((hasInvalidState && !hasBadInput) || !hasInvalidState) {
       for (const validator of this.#validators) {
         yield this.binder.requestValidation(this.model, validator);

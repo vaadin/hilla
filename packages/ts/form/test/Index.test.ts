@@ -20,7 +20,7 @@ describe('@hilla/form', () => {
   describe('Index', () => {
     const $wnd = window as VaadinWindow;
 
-    it('should add registration', async () => {
+    it('should add registration', () => {
       assert.isDefined($wnd.Vaadin);
       assert.isArray($wnd.Vaadin!.registrations);
       const formRegistrations = $wnd.Vaadin!.registrations!.filter((r) => r.is === '@hilla/form');
