@@ -28,7 +28,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     model: DetachedModelConstructor<AbstractModel<TItem>>;
     filter?: Filter;
     visibleColumns?: string[];
-    headerFilters?: boolean;
+    noHeaderFilters?: boolean;
     refreshTrigger?: number;
   }>;
 
@@ -91,7 +91,7 @@ function createDataProvider<TItem>(
 function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  options: { visibleColumns?: string[]; headerFilters?: boolean },
+  options: { visibleColumns?: string[]; noHeaderFilters?: boolean },
 ) {
   const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
@@ -108,7 +108,7 @@ function useColumns(
     // applied when header filters are enabled
     const { headerRenderer, ...columnProps } = getColumnProps(propertyInfo);
 
-    if (options.headerFilters) {
+    if (!options.noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn path={propertyInfo.name} headerRenderer={headerRenderer} {...columnProps}></GridColumn>
@@ -133,7 +133,7 @@ export function AutoGrid<TItem>({
   model,
   filter,
   visibleColumns,
-  headerFilters,
+  noHeaderFilters,
   refreshTrigger = 0,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
@@ -165,15 +165,15 @@ export function AutoGrid<TItem>({
   const properties = getProperties(model);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
-    headerFilters,
+    noHeaderFilters,
   });
 
   useEffect(() => {
     // Remove all filtering if header filters are removed
-    if (!headerFilters) {
+    if (noHeaderFilters) {
       setInternalFilter({ ...{ t: 'and' }, children: [] });
     }
-  }, [headerFilters]);
+  }, [noHeaderFilters]);
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<Filter | undefined>(undefined);
