@@ -160,14 +160,6 @@ describe('@hilla/react-grid', () => {
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
       });
-      it('no filters created for other columns', async () => {
-        const result = render(<TestAutoGrid />);
-        await nextFrame();
-        await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const cell = getHeaderCellContent(grid, 1, 4);
-        expect(cell.firstElementChild).to.null;
-      });
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
@@ -225,7 +217,7 @@ describe('@hilla/react-grid', () => {
       });
       it('filters for a boolean column', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} headerFilters />);
+        const result = render(<TestAutoGrid service={service} />);
         await nextFrame();
         await nextFrame();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
@@ -315,7 +307,7 @@ describe('@hilla/react-grid', () => {
         };
         expect(service.lastFilter).to.eql(expectedFilter1);
 
-        result.rerender(<AutoGrid service={service} model={PersonModel}></AutoGrid>);
+        result.rerender(<AutoGrid service={service} model={PersonModel} noHeaderFilters></AutoGrid>);
         await nextFrame();
         await nextFrame();
         expect(getHeaderRows(grid).length).to.equal(1);
