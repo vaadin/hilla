@@ -20,15 +20,18 @@ export default class BarrelProcessor {
   process(): SourceFile {
     this.#owner.logger.debug(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
 
-    const { exports, imports } = this.#endpoints.reduce((acc, { fileName }) => {
-      const specifier = basename(fileName, '.ts');
-      const path = `${dirname(fileName)}/${specifier}`;
+    const { exports, imports } = this.#endpoints.reduce(
+      (acc, { fileName }) => {
+        const specifier = basename(fileName, '.ts');
+        const path = `${dirname(fileName)}/${specifier}`;
 
-      const id = acc.imports.namespace.add(acc.paths.createRelativePath(path), specifier);
-      acc.exports.named.add(specifier, false, id);
+        const id = acc.imports.namespace.add(acc.paths.createRelativePath(path), specifier);
+        acc.exports.named.add(specifier, false, id);
 
-      return acc;
-    }, new DependencyManager(new PathManager({ extension: '.js' })));
+        return acc;
+      },
+      new DependencyManager(new PathManager({ extension: '.js' })),
+    );
 
     return createSourceFile(
       [...imports.toCode(), ...exports.toCode()],

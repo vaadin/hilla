@@ -173,6 +173,7 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
   let data = initialData;
 
   return {
+    // eslint-disable-next-line @typescript-eslint/require-await
     async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
       let filteredData: T[] = [];
@@ -203,6 +204,7 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
       }
       return filteredData;
     },
+    // eslint-disable-next-line @typescript-eslint/require-await
     async save(value: T): Promise<T | undefined> {
       const currentValue = data.find((item) => item.id === value.id);
       if (currentValue) {
