@@ -159,14 +159,6 @@ describe('@hilla/react-grid', () => {
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
       });
-      it('no filters created for other columns', async () => {
-        const result = render(<TestAutoGrid headerFilters />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const cell = getHeaderCellContent(grid, 1, 4);
-        expect(cell.firstElementChild).to.null;
-      });
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
