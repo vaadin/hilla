@@ -58,6 +58,23 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (isBoolean(javaType)) {
+            Boolean booleanValue = Boolean.valueOf(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(propertyPath, booleanValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A boolean cannot be filtered using contains");
+            case GREATER_THAN:
+                throw new IllegalArgumentException(
+                        "A boolean cannot be filtered using greater than");
+            case LESS_THAN:
+                throw new IllegalArgumentException(
+                        "A boolean cannot be filtered using less than");
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -67,6 +84,10 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
         return javaType == int.class || javaType == Integer.class
                 || javaType == double.class || javaType == Double.class
                 || javaType == long.class || javaType == Long.class;
+    }
+
+    private boolean isBoolean(Class<?> javaType) {
+        return javaType == boolean.class || javaType == Boolean.class;
     }
 
 }
