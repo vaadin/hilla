@@ -45,6 +45,7 @@ describe('@hilla/react-grid', () => {
       toggleRowSelected(grid, 1);
       await nextFrame();
       toggleRowSelected(grid, 1);
+      await nextFrame();
       const firstName = await getFormField(result, 'First name');
       expect(firstName.value).to.equal('');
       expect(firstName.disabled).to.be.true;
@@ -69,6 +70,8 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'foo');
       await nextFrame();
       await submit(result);
+      await nextFrame();
+      await nextFrame();
       await nextFrame();
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('foo');
     });
