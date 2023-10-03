@@ -1,6 +1,6 @@
 name: "\U0001F680 Feature Request"
 description: Asking for a new feature/API in Hilla
-labels: ["feature request"]
+labels: ["feature request", "hilla"]
 body:
   - type: markdown
     attributes:
