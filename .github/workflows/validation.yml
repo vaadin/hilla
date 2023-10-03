@@ -13,13 +13,18 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
   pull_request_target:
+    types: [opened, synchronize, reopened, edited]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   init:
     name: Build Java and npm for other tasks
@@ -27,6 +32,21 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - uses: actions-cool/check-user-permission@main
+        id: checkUser
+        with:
+          username: ${{github.triggering_actor}}
+          require: 'write'
+      - name: Fail on external workflow triggering
+        if: ${{ steps.checkUser.outputs.require-result != 'true' && github.actor != 'dependabot[bot]' }}
+        run: |
+          echo "🚫 **${{ github.actor }}** is an external contributor, a **${{ github.repository }}** team member has to review this changes and re-run this build" \
+            | tee -a $GITHUB_STEP_SUMMARY && exit 1
+      - name: Check secrets
+        run: |
+          [ -z "${{secrets.TB_LICENSE}}" ] \
+            && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
+            | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
