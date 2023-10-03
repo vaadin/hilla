@@ -88,10 +88,10 @@ module.exports = (config) => {
           target: 'esnext',
         },
         cacheDir: '.vite',
-        define: {
-          __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
-        },
         esbuild: {
+          define: {
+            __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
+          },
           tsconfigRaw: {
             ...tsconfig,
             compilerOptions: {

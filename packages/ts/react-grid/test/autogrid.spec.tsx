@@ -32,9 +32,9 @@ import {
 use(sinonChai);
 
 export async function nextFrame(): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     requestAnimationFrame(() => {
-      resolve(undefined);
+      resolve();
     });
   });
 }
