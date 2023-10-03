@@ -220,6 +220,9 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
       data = data.map((item) => (item.id === newValue.id ? newValue : item));
       return data.find((item) => item.id === newValue.id);
     },
+    async delete(id: any): Promise<void> {
+      data = data.filter((item) => item.id !== id);
+    },
     get lastFilter() {
       return _lastFilter;
     },

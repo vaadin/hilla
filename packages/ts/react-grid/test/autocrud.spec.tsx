@@ -4,7 +4,14 @@ import { render, type RenderResult } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { ExperimentalAutoCrud, type AutoCrudProps } from '../src/autocrud.js';
 import { getFormField, setFormField, submit } from './form-test-utils.js';
-import { getBodyCellContent, getGrid, isSelected, nextFrame, toggleRowSelected } from './grid-test-helpers.js';
+import {
+  getBodyCellContent,
+  getGrid,
+  getVisibleRowCount,
+  isSelected,
+  nextFrame,
+  toggleRowSelected,
+} from './grid-test-helpers.js';
 import { PersonModel, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -104,6 +111,65 @@ describe('@hilla/react-grid', () => {
       await submit(result);
       await nextFrame();
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('2');
+    });
+    it('shows a confirmation dialog before deleting', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = cell.querySelector('vaadin-confirm-dialog');
+      const content = (dialog as any).$.dialog.$.overlay.$.content as HTMLElement;
+      const text = content
+        .querySelector('slot')!
+        .assignedNodes()
+        .map((e) => (e as HTMLElement).innerText)
+        .join('');
+      expect(text).to.equal('Are you sure you want to delete the selected item?');
+      expect('Dove').to.equal(getBodyCellContent(grid, 1, 1).innerText);
+    });
+    it('deletes and refreshes grid after confirming', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = cell.querySelector('vaadin-confirm-dialog');
+      const content = (dialog as any).$.dialog.$.overlay;
+      const confirmButton = content?.querySelector("[slot='confirm-button']") as HTMLElement;
+      confirmButton.click();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(1);
+    });
+    it('does not delete when not confirming', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = cell.querySelector('vaadin-confirm-dialog');
+      const content = (dialog as any).$.dialog.$.overlay;
+      const cancelButton = content?.querySelector("[slot='cancel-button']") as HTMLElement;
+      cancelButton.click();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
     });
   });
 });
