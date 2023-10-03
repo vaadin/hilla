@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 
 import dev.hilla.crud.filter.PropertyStringFilter.Matcher;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
@@ -50,7 +52,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         assertName(0, "George", "Lee");
         assertRowCount(4);
 
-        setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.LESS_THAN, null);
+        setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.LESS_THAN, (String) null);
         assertRowCount(50 - 4);
         assertName(0, "Dylan", "Fisher");
 
@@ -64,13 +66,17 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     public void booleanFilterWorks() {
         // Default is greater_than
         assertRowCount(50);
-        setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, "true");
+        setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, true);
         assertName(0, "Abigail", "Carter");
         assertRowCount(42);
 
-        setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, "false");
+        setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, false);
         assertRowCount(50 - 42);
         assertName(0, "Catherine", "Evans");
+
+        setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, (Boolean) null);
+        assertRowCount(50);
+        assertName(0, "Abigail", "Carter");
 
     }
 
@@ -86,6 +92,18 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         TestBenchElement cont = grid.getHeaderCellContent(1, columnIndex);
         TextFieldElement filterField = cont.$(TextFieldElement.class).first();
         filterField.setValue(filter);
+    }
+
+    private void setHeaderFilter(int columnIndex, Matcher matcher,
+            Boolean filter) {
+        TestBenchElement cont = grid.getHeaderCellContent(1, columnIndex);
+        SelectElement filterSelect = cont.$(SelectElement.class).first();
+        String text = filter == null ? "" : filter ? "Yes" : "No";
+        filterSelect.openPopup();
+
+        filterSelect.getPropertyElement("_overlayElement").$("vaadin-item")
+                .attribute("label", text).first().click();
+
     }
 
     private void setHeaderFilter(int columnIndex, Matcher matcher,
