@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-barrel",
-  "version": "2.3.0-alpha6",
+  "version": "2.3.0-alpha7",
   "description": "A Hilla TypeScript Generator plugin to generate barrel file",
   "main": "index.js",
   "type": "module",
