@@ -28,6 +28,7 @@ import {
   personService,
   type Person,
 } from './test-models-and-services.js';
+import { GridColumn } from '@hilla/react-components/GridColumn.js';
 
 use(sinonChai);
 
@@ -48,7 +49,11 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {
     expect(getHeaderCellContent(grid, 0, i).innerText).to.equal(_generateHeader(ids[i]));
-    expect(columns[i].path).to.equal(ids[i]);
+    if (ids[i] === '') {
+      expect(columns[i].path).to.equal(undefined);
+    } else {
+      expect(columns[i].path).to.equal(ids[i]);
+    }
   }
 }
 
@@ -387,6 +392,22 @@ describe('@hilla/react-grid', () => {
     it('should ignore unknown columns', async () => {
       const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
       await assertColumns(result, 'email', 'firstName');
+    });
+
+    it('renders custom columns at the end', async () => {
+      const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName} {item.lastName}
+        </span>
+      );
+      const result = render(
+        <TestAutoGrid customColumns={[<GridColumn autoWidth renderer={NameRenderer}></GridColumn>]} />,
+      );
+      await nextFrame();
+      await nextFrame();
+      const grid = getGrid(result);
+      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
+      expect(getBodyCellContent(grid, 0, 5).innerText).to.equal('Jane Love');
     });
   });
 
