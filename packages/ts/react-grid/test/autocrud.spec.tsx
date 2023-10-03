@@ -12,6 +12,7 @@ import {
   nextFrame,
   toggleRowSelected,
 } from './grid-test-helpers.js';
+import { findConfirmDialog } from './test-confirm-dialog.js';
 import { PersonModel, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -123,14 +124,8 @@ describe('@hilla/react-grid', () => {
       (cell.querySelector('vaadin-button') as HTMLElement).click();
       await nextFrame();
       await nextFrame();
-      const dialog = cell.querySelector('vaadin-confirm-dialog');
-      const content = (dialog as any).$.dialog.$.overlay.$.content as HTMLElement;
-      const text = content
-        .querySelector('slot')!
-        .assignedNodes()
-        .map((e) => (e as HTMLElement).innerText)
-        .join('');
-      expect(text).to.equal('Are you sure you want to delete the selected item?');
+      const dialog = findConfirmDialog(cell);
+      expect(dialog?._getDialogText()).to.equal('Are you sure you want to delete the selected item?');
       expect('Dove').to.equal(getBodyCellContent(grid, 1, 1).innerText);
     });
     it('deletes and refreshes grid after confirming', async () => {
@@ -145,10 +140,8 @@ describe('@hilla/react-grid', () => {
       (cell.querySelector('vaadin-button') as HTMLElement).click();
       await nextFrame();
       await nextFrame();
-      const dialog = cell.querySelector('vaadin-confirm-dialog');
-      const content = (dialog as any).$.dialog.$.overlay;
-      const confirmButton = content?.querySelector("[slot='confirm-button']") as HTMLElement;
-      confirmButton.click();
+      const dialog = findConfirmDialog(cell)!;
+      dialog._getConfirmButton().click();
       await nextFrame();
       expect(getVisibleRowCount(grid)).to.equal(1);
     });
@@ -164,10 +157,8 @@ describe('@hilla/react-grid', () => {
       (cell.querySelector('vaadin-button') as HTMLElement).click();
       await nextFrame();
       await nextFrame();
-      const dialog = cell.querySelector('vaadin-confirm-dialog');
-      const content = (dialog as any).$.dialog.$.overlay;
-      const cancelButton = content?.querySelector("[slot='cancel-button']") as HTMLElement;
-      cancelButton.click();
+      const dialog = findConfirmDialog(cell)!;
+      dialog._getCancelButton().click();
       await nextFrame();
       expect(getVisibleRowCount(grid)).to.equal(2);
     });
