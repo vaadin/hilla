@@ -268,3 +268,65 @@ export class WithPossibleCharListModel extends ObjectModel<WithPossibleCharList>
     return this[_getPropertyModel]('charList', (parent, key) => new StringModel(parent, key, true));
   }
 }
+
+export interface Level4 {
+  name4?: string;
+}
+
+export interface Level3 {
+  level4?: Level4;
+  name3?: string;
+}
+
+export interface Level2 {
+  level3?: Level3;
+  name2?: string;
+}
+
+export interface Level1 {
+  level2?: Array<Level2 | undefined>;
+  name1?: string;
+}
+
+export class Level4Model<T extends Level4 = Level4> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Level4;
+  get name4(): StringModel {
+    return this[_getPropertyModel]('name4', (parent, key) => new StringModel(parent, key, true));
+  }
+}
+
+export class Level3Model<T extends Level3 = Level3> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Level3;
+  get level4(): Level4Model {
+    return this[_getPropertyModel]('level4', (parent, key) => new Level4Model(parent, key, true));
+  }
+
+  get name3(): StringModel {
+    return this[_getPropertyModel]('name3', (parent, key) => new StringModel(parent, key, true));
+  }
+}
+
+export class Level2Model<T extends Level2 = Level2> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Level2;
+  get level3(): Level3Model {
+    return this[_getPropertyModel]('level3', (parent, key) => new Level3Model(parent, key, true));
+  }
+
+  get name2(): StringModel {
+    return this[_getPropertyModel]('name2', (parent, key) => new StringModel(parent, key, true));
+  }
+}
+
+export class Level1Model<T extends Level1 = Level1> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Level1;
+  get level2(): ArrayModel<Level2Model> {
+    return this[_getPropertyModel](
+      'level2',
+      (parent, key) => new ArrayModel(parent, key, true, (parent, key) => new Level2Model(parent, key, true)),
+    );
+  }
+
+  get name1(): StringModel {
+    return this[_getPropertyModel]('name1', (parent, key) => new StringModel(parent, key, true));
+  }
+}
