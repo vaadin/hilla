@@ -281,7 +281,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
-      - test-it
+      - check-style
       - test-java
       - test-typescript
       - test-it
