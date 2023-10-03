@@ -1,4 +1,4 @@
-import type { VaadinWindow } from './types.js';
+import type { VaadinWindow } from './vaadin.types.js';
 
 export * from './autogrid.js';
 export * from './crud.js';
