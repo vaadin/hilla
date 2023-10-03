@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-client",
-  "version": "2.3.0-alpha6",
+  "version": "2.3.0-alpha7",
   "description": "A Hilla TypeScript Generator plugin to generate default client implementation",
   "main": "index.js",
   "type": "module",
