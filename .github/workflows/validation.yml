@@ -220,6 +220,7 @@ jobs:
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
               -Pit-modules-${{ matrix.it-modules }} \
+              -Pproduction \
               verify
           )
       - uses: actions/upload-artifact@v3

@@ -50,6 +50,14 @@
                         </packages>
                     </parser>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- The test here assumes the build creates frontend files -->
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
