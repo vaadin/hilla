@@ -20,7 +20,11 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   init:
     name: Build Java and npm for other tasks
@@ -42,7 +46,7 @@ jobs:
         run: |
           [ -z "${{secrets.TB_LICENSE}}" ] \
             && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
-            | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0                            
+            | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
         uses: actions/checkout@v3
         with:
