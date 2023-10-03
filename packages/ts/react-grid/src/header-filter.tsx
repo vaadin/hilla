@@ -10,15 +10,15 @@ import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher'
 const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');
 autoGridFilterWithLessGreaterEqualsStyle.id = 'autoGridFilterWithLessGreaterEquals';
 autoGridFilterWithLessGreaterEqualsStyle.textContent = `
-.autoGridFilterWithLessGreaterEquals {
+.${autoGridFilterWithLessGreaterEqualsStyle.id} {
   --vaadin-field-default-width: 2em;
   margin-right: 3px;
 }
-.autoGridFilterWithLessGreaterEquals > vaadin-select-value-button {
+.${autoGridFilterWithLessGreaterEqualsStyle.id} > vaadin-select-value-button {
   --_lumo-text-field-overflow-mask-image: none !important;
 }
 
-.autoGridFilterWithLessGreaterEquals::part(toggle-button) {
+.${autoGridFilterWithLessGreaterEqualsStyle.id}::part(toggle-button) {
   display: none;
 }`;
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
