@@ -49,3 +49,4 @@ cp scripts/generator/results/Material.java packages/java/hilla-react/src/main/ja
 cp scripts/generator/results/Material.java packages/java/hilla/src/main/java/dev/hilla/theme/Material.java
 
 
+
