@@ -13,6 +13,7 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
   pull_request_target:
+    types: [opened, synchronize, reopened, edited]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
