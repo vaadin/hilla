@@ -78,3 +78,23 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     };
   });
 };
+
+export function includeProperty(propertyInfo: PropertyInfo): unknown {
+  // Exclude properties annotated with id and version
+  if (
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export function getIdProperty(properties: PropertyInfo[]): PropertyInfo | undefined {
+  const idProperty = properties.find((propertyInfo) => hasAnnotation(propertyInfo, 'jakarta.persistence.Id'));
+  if (idProperty) {
+    return idProperty;
+  }
+
+  return undefined;
+}

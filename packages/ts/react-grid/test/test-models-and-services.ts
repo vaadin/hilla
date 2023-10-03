@@ -10,16 +10,17 @@ import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
 
-export interface Company {
+export interface Company extends HasIdVersion {
   id: number;
   version: number;
   name: string;
   foundedDate: string;
 }
 
-export interface Person {
+export interface Person extends HasIdVersion {
   id: number;
   version: number;
   firstName: string;
@@ -29,7 +30,7 @@ export interface Person {
   vip: boolean;
 }
 
-export interface ColumnRendererTestValues {
+export interface ColumnRendererTestValues extends HasIdVersion {
   id: number;
   string: string;
   number: number;
@@ -162,11 +163,12 @@ export class ColumnRendererTestModel<
   }
 }
 
-type HasId = {
+type HasIdVersion = {
   id: number;
+  version: number;
 };
 
-export const createService = <T extends HasId>(initialData: T[]): CrudService<T> & HasLastFilter => {
+export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasLastFilter => {
   let _lastFilter: Filter | undefined;
   let data = initialData;
 
@@ -204,8 +206,19 @@ export const createService = <T extends HasId>(initialData: T[]): CrudService<T>
     },
     // eslint-disable-next-line @typescript-eslint/require-await
     async save(value: T): Promise<T | undefined> {
-      data = data.map((item) => (item.id === value.id ? value : item));
-      return data.find((item) => item.id === value.id);
+      const currentValue = data.find((item) => item.id === value.id);
+      if (currentValue) {
+        if (currentValue.version !== value.version) {
+          // Trying to update an old value
+          throw new Error('Trying to update an old value');
+        }
+      }
+      const newValue = { ...value };
+      if (currentValue) {
+        newValue.version = currentValue.version + 1;
+      }
+      data = data.map((item) => (item.id === newValue.id ? newValue : item));
+      return data.find((item) => item.id === newValue.id);
     },
     get lastFilter() {
       return _lastFilter;
@@ -226,6 +239,7 @@ export const companyData: Company[] = [
 export const columnRendererTestData: ColumnRendererTestValues[] = [
   {
     id: 1,
+    version: 1,
     string: 'Hello World 1',
     number: 123456,
     boolean: true,
@@ -236,6 +250,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
   },
   {
     id: 2,
+    version: 1,
     string: 'Hello World 2',
     number: -12,
     boolean: false,
@@ -246,12 +261,14 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
   },
   {
     id: 3,
+    version: 1,
     string: 'Hello World 3',
     number: -12,
     boolean: false,
   },
   {
     id: 4,
+    version: 1,
     string: 'Hello World 4',
     number: -12,
     boolean: false,
@@ -270,3 +287,12 @@ export const personService = (): CrudService<Person> & HasLastFilter => createSe
 export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
 export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasLastFilter =>
   createService(columnRendererTestData);
+
+const noSort: Sort = { orders: [] };
+
+export async function getItem<T extends HasIdVersion>(
+  service: CrudService<T> & HasLastFilter,
+  id: number,
+): Promise<T | undefined> {
+  return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);
+}

@@ -15,23 +15,12 @@ import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { getColumnProps } from './autogrid-columns.js';
 import type { CrudService } from './crud';
 import { HeaderSorter } from './header-sorter';
-import { getProperties, hasAnnotation, type PropertyInfo } from './property-info.js';
+import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
 import type Filter from './types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-
-function includeProperty(propertyInfo: PropertyInfo): unknown {
-  // Exclude properties annotated with id and version
-  if (
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
-  ) {
-    return false;
-  }
-  return true;
-}
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -40,6 +29,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     filter?: Filter;
     visibleColumns?: string[];
     noHeaderFilters?: boolean;
+    refreshTrigger?: number;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -99,11 +89,10 @@ function createDataProvider<TItem>(
 }
 
 function useColumns(
-  model: DetachedModelConstructor<AbstractModel>,
+  properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: { visibleColumns?: string[]; noHeaderFilters?: boolean },
 ) {
-  const properties = getProperties(model);
   const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
     .map((name) => properties.find((prop) => prop.name === name))
@@ -145,6 +134,7 @@ export function AutoGrid<TItem>({
   filter,
   visibleColumns,
   noHeaderFilters,
+  refreshTrigger = 0,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
@@ -172,8 +162,8 @@ export function AutoGrid<TItem>({
     }
   };
 
-  // This cast should go away with #1252
-  const children = useColumns(model, setHeaderPropertyFilter, {
+  const properties = getProperties(model);
+  const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,
   });
@@ -204,7 +194,7 @@ export function AutoGrid<TItem>({
       dataProviderFilter.current = filter ?? internalFilter;
       grid.clearCache();
     }
-  }, [filter, internalFilter]);
+  }, [filter, internalFilter, refreshTrigger]);
 
-  return <Grid {...gridProps} ref={ref} children={children}></Grid>;
+  return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children}></Grid>;
 }

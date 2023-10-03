@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout';
+import { AutoCrudView } from './views/AutoCrudView';
 import { AutoFormView } from './views/AutoFormView';
 import { ReadOnlyGrid } from './views/ReadOnlyGrid';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter';
@@ -30,6 +31,10 @@ export const routes = [
       {
         path: '/auto-form',
         element: <AutoFormView />,
+      },
+      {
+        path: '/auto-crud',
+        element: <AutoCrudView />,
       },
     ],
   },

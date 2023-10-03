@@ -14,7 +14,6 @@
     "@hilla/generator-typescript-plugin-push": "file:../../../../ts/generator-typescript-plugin-push",
     "@hilla/generator-typescript-plugin-subtypes": "file:../../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "file:../../../../ts/generator-typescript-utils",
-    "@hilla/hilla-frontend": "file:../../../../ts/hilla-frontend",
     "@hilla/react-auth": "file:../../../../ts/react-auth",
     "@hilla/react-components": "2.2.0-beta2",
     "@hilla/react-form": "file:../../../../ts/react-form",
@@ -84,7 +83,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "4a30ce0cc2aa941e25195c4d5b7b125b9c2c78c1c47f224621b004763f2f713f"
+    "hash": "3655b34f5d90d8cd113195b7a69ea930ef9e919a551ba9fcf736ee2d4b98f21f"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -106,6 +105,7 @@
     "@hilla/react-grid": "$@hilla/react-grid",
     "react-router-dom": "$react-router-dom",
     "@hilla/react-auth": "$@hilla/react-auth",
-    "@hilla/frontend": "$@hilla/frontend"
+    "@hilla/frontend": "$@hilla/frontend",
+    "@hilla/generator-typescript-plugin-subtypes": "$@hilla/generator-typescript-plugin-subtypes"
   }
 }
