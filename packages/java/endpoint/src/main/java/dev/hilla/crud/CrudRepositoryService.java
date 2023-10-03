@@ -1,28 +1,25 @@
 package dev.hilla.crud;
 
-import java.util.List;
-
 import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
-import dev.hilla.crud.filter.Filter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  * A browser-callable service that delegates crud operations to a JPA
  * repository.
  */
 @EndpointExposed
-public class CrudRepositoryService<T, ID> implements CrudService<T> {
+public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
+        extends ListRepositoryService<T, ID, R> implements CrudService<T, ID> {
 
-    @Autowired
-    private JpaFilterConverter jpaFilterConverter;
-
-    private JpaSpecificationExecutor<T> repository;
-    private Class<T> entityClass;
+    /*
+     * Creates the service by autodetecting the type of repository and entity to
+     * use from the generics.
+     */
+    public CrudRepositoryService() {
+        super();
+    }
 
     /**
      * Creates the service using the given repository.
@@ -30,20 +27,18 @@ public class CrudRepositoryService<T, ID> implements CrudService<T> {
      * @param repository
      *            the JPA repository
      */
-    public <R extends JpaRepository<T, ID> & JpaSpecificationExecutor<T>> CrudRepositoryService(
-            Class<T> entityClass, R repository) {
-        this.repository = repository;
-        this.entityClass = entityClass;
-    }
-
-    protected JpaSpecificationExecutor<T> getRepository() {
-        return repository;
+    public CrudRepositoryService(R repository) {
+        super(repository);
     }
 
     @Override
-    public List<T> list(Pageable pageable, @Nullable Filter filter) {
-        Specification<T> spec = jpaFilterConverter.toSpec(filter, entityClass);
-        return repository.findAll(spec, pageable).getContent();
+    public @Nullable T save(T value) {
+        return getRepository().save(value);
+    }
+
+    @Override
+    public void delete(ID id) {
+        getRepository().deleteById(id);
     }
 
 }

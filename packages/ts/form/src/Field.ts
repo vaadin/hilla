@@ -235,7 +235,7 @@ export class ComboBoxFieldStrategy<
   override get value(): T | undefined {
     if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
       const { selectedItem } = this.element;
-      return (selectedItem === null ? undefined : selectedItem) as T;
+      return selectedItem ?? undefined;
     }
 
     return super.value;
@@ -243,7 +243,7 @@ export class ComboBoxFieldStrategy<
 
   override set value(val: T | undefined) {
     if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
-      this.element.selectedItem = val === undefined ? null : val;
+      this.element.selectedItem = val ?? null;
     } else {
       super.value = val;
     }

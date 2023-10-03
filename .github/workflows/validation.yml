@@ -22,9 +22,9 @@ on:
 
 jobs:
   init:
-    name: Build
+    name: Build Java and npm for other tasks
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 5
 
     steps:
       - name: Checkout Project Code
@@ -34,14 +34,10 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Validate Java Format
-        run: mvn -B formatter:validate
       - name: Build TypeScript
-        run: npm run build
-      - name: Lint TypeScript
-        run: npm run check
+        run: npm run build:nocache
       - name: Build Java
-        run: mvn install -B -ntp -DskipTests
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
       - name: Save Workspace
         run: |
           tar cf workspace.tar -C ~/ $( \
@@ -62,6 +58,35 @@ jobs:
           path: workspace.tar
           retention-days: 1
           if-no-files-found: error
+
+  check-style:
+    needs: init
+    name: Check style
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Validate Java Format
+        run: mvn -B formatter:validate
+      - name: Lint TypeScript
+        run: npm run check
 
   test-java:
     needs: init
@@ -89,8 +114,6 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
         run: mvn -B -am -P\!it-modules verify
-      - name: Test gradle-plugin's functional tests
-        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
@@ -151,8 +174,6 @@ jobs:
   test-it:
     needs:
       - init
-      - test-java
-      - test-typescript
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -195,20 +216,63 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
               -Pit-modules-${{ matrix.it-modules }} \
+              -Pproduction \
               verify
           )
-      - name: Gradle ITs
-        if: ${{ matrix.it-modules == 'group-1' || runner.os == 'windows' }}
-        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs
+          path: |
+            packages/java/tests/**/target/*-reports/*
+            packages/java/tests/**/error-screenshots/*.png
+
+  test-gradle:
+    needs:
+      - init
+    name: Gradle tests
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v3
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Set TB License
+        run: |
+          TB_LICENSE=${{secrets.TB_LICENSE}}
+          mkdir -p ~/.vaadin/
+          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      - name: Test gradle-plugin's functional tests
+        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
+      - name: Gradle ITs
+        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs-gradle
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png

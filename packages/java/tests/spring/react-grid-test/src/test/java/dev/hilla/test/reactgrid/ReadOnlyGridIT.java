@@ -11,28 +11,28 @@ public class ReadOnlyGridIT extends AbstractGridTest {
 
     @Test
     public void dataShown() {
-        Assert.assertEquals(9, grid.getLastVisibleRowIndex());
-        assertName(0, "Alice", "Johnson");
-        assertName(8, "Ian", "Clark");
+        Assert.assertEquals(8, grid.getLastVisibleRowIndex());
+        assertName(0, "Abigail", "Carter");
+        assertName(8, "Edward", "Gonzalez");
     }
 
     @Test
     public void sortingWorks() {
-        assertName(0, "Alice", "Johnson");
-        sortByColumn(0);
         assertName(0, "Abigail", "Carter");
         sortByColumn(0);
         assertName(0, "Zack", "Baker");
+        sortByColumn(0);
+        assertName(0, "Alice", "Johnson");
     }
 
     @Test
     public void scrollingLoadsData() {
-        Assert.assertEquals(9, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(8, grid.getLastVisibleRowIndex());
         grid.scrollToRow(10);
         waitUntil(driver -> {
-            return grid.getLastVisibleRowIndex() == 19;
+            return grid.getLastVisibleRowIndex() == 18;
         });
-        assertName(19, "Tina", "Phillips");
+        assertName(18, "Jack", "Lewis");
     }
 
 }

@@ -14,8 +14,8 @@ public class ReadOnlyGridOrFilterIT extends AbstractGridTest {
     public void findsMatches() {
         setFilter("car");
         assertRowCount(2);
-        assertName(0, "Oscar", "Nelson");
-        assertName(1, "Abigail", "Carter");
+        assertName(0, "Abigail", "Carter");
+        assertName(1, "Oscar", "Nelson");
 
         setFilter("");
         assertRowCount(50);

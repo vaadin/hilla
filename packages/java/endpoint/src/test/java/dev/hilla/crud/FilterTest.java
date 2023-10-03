@@ -49,7 +49,7 @@ public class FilterTest {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createNameFilter(Matcher.LESS_THAN,
                 "John");
-        assertFilterResult(filter, "John");
+        executeFilter(filter);
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
@@ -57,14 +57,14 @@ public class FilterTest {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createNameFilter(Matcher.GREATER_THAN,
                 "John");
-        assertFilterResult(filter, "John");
+        executeFilter(filter);
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
     public void filterNumberPropertyUsingContains() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createIdFilter(Matcher.CONTAINS, "2");
-        assertFilterResult(filter, "John");
+        executeFilter(filter);
     }
 
     @Test
@@ -95,6 +95,48 @@ public class FilterTest {
         PropertyStringFilter filter = createIdFilter(Matcher.GREATER_THAN,
                 johnnyId + "");
         assertFilterResult(filter, "Polly", "Josh");
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterBooleanPropertyUsingContains() {
+        setupBooleans();
+        PropertyStringFilter filter = createBooleanFilter(Matcher.CONTAINS,
+                "True");
+        executeFilter(filter);
+    }
+
+    @Test
+    public void filterBooleanPropertyUsingEquals() {
+        setupBooleans();
+
+        PropertyStringFilter filter = createBooleanFilter(Matcher.EQUALS,
+                "True");
+        List<TestObject> testObjects = executeFilter(filter);
+
+        Assert.assertEquals(1, testObjects.size());
+        Assert.assertTrue(testObjects.get(0).getBooleanValue());
+
+        filter = createBooleanFilter(Matcher.EQUALS, "False");
+        testObjects = executeFilter(filter);
+
+        Assert.assertEquals(1, testObjects.size());
+        Assert.assertFalse(testObjects.get(0).getBooleanValue());
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterBooleanPropertyUsingLessThan() {
+        setupBooleans();
+        PropertyStringFilter filter = createBooleanFilter(Matcher.LESS_THAN,
+                "True");
+        executeFilter(filter);
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterBooleanPropertyUsingGreaterThan() {
+        setupBooleans();
+        PropertyStringFilter filter = createBooleanFilter(Matcher.GREATER_THAN,
+                "True");
+        executeFilter(filter);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -129,9 +171,7 @@ public class FilterTest {
     }
 
     private void assertFilterResult(Filter filter, String... expectedNames) {
-        Specification<TestObject> spec = jpaFilterConverter.toSpec(filter,
-                TestObject.class);
-        List<TestObject> result = repository.findAll(spec);
+        List<TestObject> result = executeFilter(filter);
         assertFilterResult(result, expectedNames);
     }
 
@@ -139,6 +179,12 @@ public class FilterTest {
         Assert.assertEquals(names.length, result.size());
         Object[] actual = result.stream().map(o -> o.getName()).toArray();
         Assert.assertArrayEquals(names, actual);
+    }
+
+    private List<TestObject> executeFilter(Filter filter) {
+        Specification<TestObject> spec = jpaFilterConverter.toSpec(filter,
+                TestObject.class);
+        return repository.findAll(spec);
     }
 
     private PropertyStringFilter createNameFilter(Matcher matcher,
@@ -159,6 +205,15 @@ public class FilterTest {
         return filter;
     }
 
+    private PropertyStringFilter createBooleanFilter(Matcher matcher,
+            String filterString) {
+        PropertyStringFilter filter = new PropertyStringFilter();
+        filter.setPropertyId("booleanValue");
+        filter.setFilterValue(filterString);
+        filter.setMatcher(matcher);
+        return filter;
+    }
+
     private List<TestObject> setupNames(String... names) {
         List<TestObject> created = new ArrayList<>();
         for (String name : names) {
@@ -168,5 +223,15 @@ public class FilterTest {
         }
         entityManager.flush();
         return created;
+    }
+
+    private void setupBooleans() {
+        TestObject testObject = new TestObject();
+        testObject.setBooleanValue(true);
+        entityManager.persist(testObject);
+        testObject = new TestObject();
+        testObject.setBooleanValue(false);
+        entityManager.persist(testObject);
+        entityManager.flush();
     }
 }

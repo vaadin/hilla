@@ -71,7 +71,7 @@ describe('@hilla/frontend', () => {
       expect($wnd.Vaadin?.connectionIndicator).is.not.undefined;
     });
 
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow.client.TypeScript not loaded', async () => {
+    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow.client.TypeScript not loaded', () => {
       new ConnectClient();
       expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
       dispatchEvent(new Event('offline'));
@@ -80,7 +80,7 @@ describe('@hilla/frontend', () => {
       expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow is loaded but Flow.client.TypeScript not loaded', async () => {
+    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow is loaded but Flow.client.TypeScript not loaded', () => {
       new ConnectClient();
       $wnd.Vaadin!.Flow = {};
       expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
@@ -90,7 +90,7 @@ describe('@hilla/frontend', () => {
       expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
-    it('should not transition connection state if Flow loaded', async () => {
+    it('should not transition connection state if Flow loaded', () => {
       new ConnectClient();
       $wnd.Vaadin!.Flow = {};
       $wnd.Vaadin!.Flow.clients = {};
@@ -477,7 +477,7 @@ describe('@hilla/frontend', () => {
       });
 
       describe('middleware invocation', () => {
-        it('should not invoke middleware before call', async () => {
+        it('should not invoke middleware before call', () => {
           const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => next(context));
           client.middlewares = [spyMiddleware];
 
@@ -523,7 +523,7 @@ describe('@hilla/frontend', () => {
         });
 
         it('should allow modified response', async () => {
-          myMiddleware = async (_context: any, _next?: any) => new Response('{"baz": "qux"}');
+          myMiddleware = (_context: any, _next?: any) => new Response('{"baz": "qux"}');
 
           client.middlewares = [myMiddleware];
           const responseData = await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
@@ -571,7 +571,7 @@ describe('@hilla/frontend', () => {
             return response;
           };
 
-          const secondMiddleware = async (context: MiddlewareContext, _: MiddlewareNext) => {
+          const secondMiddleware = (context: MiddlewareContext, _: MiddlewareNext) => {
             // Expect modified context
             expect(context).to.equal(myContext);
             // Pass modified response
@@ -591,19 +591,19 @@ describe('@hilla/frontend', () => {
         client = new ConnectClient();
       });
 
-      it('should create a fluxConnection', async () => {
+      it('should create a fluxConnection', () => {
         client.subscribe('FooEndpoint', 'fooMethod');
         expect(fluxConnectionSubscriptionStubs.at(-1)).to.have.been.calledOnce;
       });
 
-      it('should reuse the fluxConnection', async () => {
+      it('should reuse the fluxConnection', () => {
         client.subscribe('FooEndpoint', 'fooMethod');
         const { fluxConnection } = client;
         client.subscribe('FooEndpoint', 'barMethod');
         expect(client.fluxConnection).to.equal(fluxConnection);
       });
 
-      it('should call FluxConnection', async () => {
+      it('should call FluxConnection', () => {
         client.subscribe('FooEndpoint', 'fooMethod', { param: 1 });
         expect(fluxConnectionSubscriptionStubs.at(-1)).to.have.been.calledOnceWith('FooEndpoint', 'fooMethod', [1]);
       });

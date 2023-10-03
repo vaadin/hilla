@@ -1,18 +1,28 @@
-import { BooleanModel, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
-import { makeObjectEmptyValueCreator } from '@hilla/form';
+import {
+  BooleanModel,
+  NumberModel,
+  ObjectModel,
+  StringModel,
+  _getPropertyModel,
+  makeObjectEmptyValueCreator,
+} from '@hilla/form';
 import type { CrudService } from '../src/crud';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
 
-export interface Company {
+export interface Company extends HasIdVersion {
   id: number;
+  version: number;
   name: string;
   foundedDate: string;
 }
-export interface Person {
+
+export interface Person extends HasIdVersion {
   id: number;
+  version: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -20,11 +30,34 @@ export interface Person {
   vip: boolean;
 }
 
+export interface ColumnRendererTestValues extends HasIdVersion {
+  id: number;
+  string: string;
+  number: number;
+  boolean: boolean;
+  date?: string;
+  localDate?: string;
+  localTime?: string;
+  localDateTime?: string;
+}
+
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
   get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
   }
 
   get firstName(): StringModel {
@@ -52,7 +85,19 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
   get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
   }
 
   get name(): StringModel {
@@ -64,15 +109,72 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
-type HasId = {
+export class ColumnRendererTestModel<
+  T extends ColumnRendererTestValues = ColumnRendererTestValues,
+> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Company;
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get string(): StringModel {
+    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get number(): NumberModel {
+    return this[_getPropertyModel]('number', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get boolean(): BooleanModel {
+    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get date(): StringModel {
+    return this[_getPropertyModel](
+      'date',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
+    );
+  }
+
+  get localDate(): StringModel {
+    return this[_getPropertyModel](
+      'localDate',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
+    );
+  }
+
+  get localTime(): StringModel {
+    return this[_getPropertyModel](
+      'localTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
+    );
+  }
+
+  get localDateTime(): StringModel {
+    return this[_getPropertyModel](
+      'localDateTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
+    );
+  }
+}
+
+type HasIdVersion = {
   id: number;
+  version: number;
 };
 
-const createService = <T extends HasId>(data: T[]) => {
+export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasLastFilter => {
   let _lastFilter: Filter | undefined;
+  let data = initialData;
 
   return {
-    list: async (request: Pageable, filter: Filter | undefined): Promise<T[]> => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
@@ -102,22 +204,95 @@ const createService = <T extends HasId>(data: T[]) => {
       }
       return filteredData;
     },
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async save(value: T): Promise<T | undefined> {
+      const currentValue = data.find((item) => item.id === value.id);
+      if (currentValue) {
+        if (currentValue.version !== value.version) {
+          // Trying to update an old value
+          throw new Error('Trying to update an old value');
+        }
+      }
+      const newValue = { ...value };
+      if (currentValue) {
+        newValue.version = currentValue.version + 1;
+      }
+      data = data.map((item) => (item.id === newValue.id ? newValue : item));
+      return data.find((item) => item.id === newValue.id);
+    },
     get lastFilter() {
       return _lastFilter;
     },
   };
 };
 
-const personData: Person[] = [
-  { id: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: 12, vip: true },
-  { id: 2, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 55, vip: false },
+export const personData: Person[] = [
+  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: -12, vip: true },
+  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 123456, vip: false },
 ];
 
-const companyData: Company[] = [
-  { id: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
-  { id: 2, name: 'Google', foundedDate: '1998-09-04' },
+export const companyData: Company[] = [
+  { id: 1, version: 1, name: 'Vaadin Ltd', foundedDate: '2000-05-06' },
+  { id: 2, version: 1, name: 'Google', foundedDate: '1998-09-04' },
 ];
-type HasLastFilter = { lastFilter: Filter | undefined };
+
+export const columnRendererTestData: ColumnRendererTestValues[] = [
+  {
+    id: 1,
+    version: 1,
+    string: 'Hello World 1',
+    number: 123456,
+    boolean: true,
+    date: '2021-05-13T00:00:00',
+    localDate: '2021-05-13',
+    localTime: '08:45:00',
+    localDateTime: '2021-05-13T08:45:00',
+  },
+  {
+    id: 2,
+    version: 1,
+    string: 'Hello World 2',
+    number: -12,
+    boolean: false,
+    date: '2021-05-14T00:00:00',
+    localDate: '2021-05-14',
+    localTime: '20:45:00',
+    localDateTime: '2021-05-14T20:45:00',
+  },
+  {
+    id: 3,
+    version: 1,
+    string: 'Hello World 3',
+    number: -12,
+    boolean: false,
+  },
+  {
+    id: 4,
+    version: 1,
+    string: 'Hello World 4',
+    number: -12,
+    boolean: false,
+    date: 'foo',
+    localDate: 'foo',
+    localTime: 'foo',
+    localDateTime: 'foo',
+  },
+];
+
+export type HasLastFilter = {
+  lastFilter: Filter | undefined;
+};
 
 export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
 export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
+export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasLastFilter =>
+  createService(columnRendererTestData);
+
+const noSort: Sort = { orders: [] };
+
+export async function getItem<T extends HasIdVersion>(
+  service: CrudService<T> & HasLastFilter,
+  id: number,
+): Promise<T | undefined> {
+  return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);
+}

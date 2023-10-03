@@ -68,6 +68,16 @@
             <plugin>
                 <groupId>dev.hilla</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- For some reason there is "Connection reset by peer", "No buffer
+                            space available" and similar errors when running this test in dev mode
+                            (on a mac) -->
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

@@ -30,7 +30,7 @@ export function ReadOnlyGridOrFilter() {
           setFilter({ t: 'or', children: [firstNameFilter, lasttNameFilter] });
         }}
       ></TextField>
-      <AutoGrid pageSize={10} service={PersonService} model={PersonModel} filter={filter} />
+      <AutoGrid pageSize={10} service={PersonService} model={PersonModel} filter={filter} noHeaderFilters />
     </div>
     /* page size is defined only to make testing easier */
   );
