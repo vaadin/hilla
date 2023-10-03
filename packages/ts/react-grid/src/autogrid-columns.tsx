@@ -9,9 +9,11 @@ import {
 import {
   BooleanHeaderFilter,
   DateHeaderFilter,
+  DateTimeHeaderFilter,
   NoHeaderFilter,
   NumberHeaderFilter,
   StringHeaderFilter,
+  TimeHeaderFilter,
 } from './header-filter';
 import type { PropertyInfo } from './property-info';
 
@@ -53,7 +55,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridTimeRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: TimeHeaderFilter,
       };
     case 'datetime':
       return {
@@ -61,7 +63,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: DateTimeHeaderFilter,
       };
     case 'string':
       return {

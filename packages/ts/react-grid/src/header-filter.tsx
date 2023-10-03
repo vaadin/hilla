@@ -1,9 +1,11 @@
-import { DatePicker, DatePickerElement } from '@hilla/react-components/DatePicker.js';
+import { DatePicker } from '@hilla/react-components/DatePicker.js';
+import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
+import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
@@ -58,6 +60,43 @@ function useSelectInitWorkaround(selectRef: RefObject<SelectElement>) {
   }, []);
 }
 
+// extracted component (and type) to avoid code duplication
+type ComparationSelectionProps = {
+  filterValue: string;
+  matcher: Matcher;
+  updateFilter(newMatcher: Matcher, newFilterValue: string): void;
+};
+
+function ComparationSelection({ filterValue, matcher, updateFilter }: ComparationSelectionProps): ReactElement {
+  const select = useRef<SelectElement>(null);
+
+  useSelectInitWorkaround(select);
+
+  return (
+    <Select
+      ref={select}
+      onValueChanged={({ detail: { value } }) => {
+        updateFilter(value as Matcher, filterValue);
+      }}
+      renderer={() => (
+        <ListBox>
+          <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
+            &gt; Greater than
+          </Item>
+          <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
+            &lt; Less than
+          </Item>
+          <Item value={Matcher.EQUALS} {...{ label: '=' }}>
+            = Equals
+          </Item>
+        </ListBox>
+      )}
+      className={autoGridFilterWithLessGreaterEqualsStyle.id}
+      value={matcher}
+    ></Select>
+  );
+}
+
 export function StringHeaderFilter(): ReactElement {
   const { updateFilter } = useFilterState(Matcher.CONTAINS);
 
@@ -80,79 +119,12 @@ export function NumberHeaderFilter(): ReactElement {
 
   return (
     <>
-      <Select
-        ref={select}
-        onValueChanged={(e) => {
-          const newMatcher = e.detail.value as Matcher;
-          updateFilter(newMatcher, filterValue);
-        }}
-        renderer={() => (
-          <ListBox>
-            <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
-              &gt; Greater than
-            </Item>
-            <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
-              &lt; Less than
-            </Item>
-            <Item value={Matcher.EQUALS} {...{ label: '=' }}>
-              = Equals
-            </Item>
-          </ListBox>
-        )}
-        className={autoGridFilterWithLessGreaterEqualsStyle.id}
-        value={matcher}
-      ></Select>
+      <ComparationSelection {...{ filterValue, matcher, select, updateFilter }} />
       <NumberField
         placeholder="Filter..."
         onInput={(e) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
           updateFilter(matcher, fieldValue);
-        }}
-      />
-    </>
-  );
-}
-
-export function DateHeaderFilter(): ReactElement {
-  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
-  const [invalid, setInvalid] = useState(false);
-  const select = useRef<SelectElement>(null);
-
-  useSelectInitWorkaround(select);
-
-  return (
-    <>
-      <Select
-        ref={select}
-        onValueChanged={(e) => {
-          const newMatcher = e.detail.value as Matcher;
-          updateFilter(newMatcher, filterValue);
-        }}
-        renderer={() => (
-          <ListBox>
-            <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
-              &gt; Greater than
-            </Item>
-            <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
-              &lt; Less than
-            </Item>
-            <Item value={Matcher.EQUALS} {...{ label: '=' }}>
-              = Equals
-            </Item>
-          </ListBox>
-        )}
-        className={css.filterWithLessGreaterEquals}
-        value={matcher}
-      ></Select>
-      <DatePicker
-        placeholder="Filter..."
-        onInvalidChanged={({ detail: { value } }) => {
-          setInvalid(value);
-        }}
-        onValueChanged={({ detail: { value } }) => {
-          if (!invalid) {
-            updateFilter(matcher, value);
-          }
         }}
       />
     </>
@@ -187,6 +159,73 @@ export function BooleanHeaderFilter(): ReactElement {
     ></Select>
   );
 }
+
+export function DateHeaderFilter(): ReactElement {
+  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
+  const [invalid, setInvalid] = useState(false);
+
+  return (
+    <>
+      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <DatePicker
+        placeholder="Filter..."
+        onInvalidChanged={({ detail: { value } }) => {
+          setInvalid(value);
+        }}
+        onValueChanged={({ detail: { value } }) => {
+          if (!invalid) {
+            updateFilter(matcher, value);
+          }
+        }}
+      />
+    </>
+  );
+}
+
+export function TimeHeaderFilter(): ReactElement {
+  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
+  const [invalid, setInvalid] = useState(false);
+
+  return (
+    <>
+      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <TimePicker
+        placeholder="Filter..."
+        onInvalidChanged={({ detail: { value } }) => {
+          setInvalid(value);
+        }}
+        onValueChanged={({ detail: { value } }) => {
+          if (!invalid) {
+            updateFilter(matcher, value);
+          }
+        }}
+      />
+    </>
+  );
+}
+
+export function DateTimeHeaderFilter(): ReactElement {
+  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
+  const [invalid, setInvalid] = useState(false);
+
+  return (
+    <>
+      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <DateTimePicker
+        placeholder="Filter..."
+        onInvalidChanged={({ detail: { value } }) => {
+          setInvalid(value);
+        }}
+        onValueChanged={({ detail: { value } }) => {
+          if (!invalid) {
+            updateFilter(matcher, value);
+          }
+        }}
+      />
+    </>
+  );
+}
+
 export function NoHeaderFilter(): ReactElement {
   return <></>;
 }

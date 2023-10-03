@@ -1,6 +1,8 @@
 package dev.hilla.crud;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -93,6 +95,38 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (isLocalTime(javaType)) {
+            var path = root.<LocalTime> get(filter.getPropertyId());
+            var timeValue = LocalTime.parse(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, timeValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A time cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, timeValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, timeValue);
+            default:
+                break;
+            }
+        } else if (isLocalDateTime(javaType)) {
+            var path = root.<LocalDateTime> get(filter.getPropertyId());
+            var dateTimeValue = LocalDateTime.parse(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, dateTimeValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A datetime cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, dateTimeValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, dateTimeValue);
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -112,4 +146,11 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
         return javaType == java.time.LocalDate.class;
     }
 
+    private boolean isLocalTime(Class<?> javaType) {
+        return javaType == java.time.LocalTime.class;
+    }
+
+    private boolean isLocalDateTime(Class<?> javaType) {
+        return javaType == java.time.LocalDateTime.class;
+    }
 }

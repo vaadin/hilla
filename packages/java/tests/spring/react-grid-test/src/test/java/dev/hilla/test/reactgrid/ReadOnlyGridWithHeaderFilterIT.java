@@ -86,7 +86,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         // Default is greater_than
         assertRowCount(50);
         sortByColumn(BIRTH_DATE_COLUMN);
-        setHeaderFilter(BIRTH_DATE_COLUMN, null, "4/30/1999");
+        setHeaderFilter(BIRTH_DATE_COLUMN, null, "1999-04-30");
         assertName(0, "Mark", "Young");
         assertRowCount(3);
 
