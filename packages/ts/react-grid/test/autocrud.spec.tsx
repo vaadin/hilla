@@ -162,5 +162,15 @@ describe('@hilla/react-grid', () => {
       await nextFrame();
       expect(getVisibleRowCount(grid)).to.equal(2);
     });
+    it('does not render a delete button when noDelete', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} noDelete />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      const cell = getBodyCellContent(grid, 1, 5);
+      expect(cell).to.be.null;
+    });
   });
 });

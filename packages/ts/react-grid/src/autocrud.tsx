@@ -13,11 +13,17 @@ import { getProperties } from './property-info';
 export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
+  noDelete?: boolean;
 }>;
 
-export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TItem>): JSX.Element {
+export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const customColumns = [];
+  if (!noDelete) {
+    customColumns.push(<GridColumn autoWidth renderer={DeleteButton}></GridColumn>);
+  }
 
   return (
     <>
@@ -41,7 +47,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model }: AutoCrudProps<TI
                 setItem({ ...selectedItem });
               }
             }}
-            customColumns={[<GridColumn autoWidth renderer={DeleteButton}></GridColumn>]}
+            customColumns={customColumns}
           ></AutoGrid>
           <ExperimentalAutoForm
             disabled={!item}
