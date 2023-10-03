@@ -302,7 +302,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
+      - check-style
+      - test-java
+      - test-typescript
       - test-it
+      - test-gradle
     steps:
       - name: Fail if test jobs did not succeed
         if: ${{ needs.test-it.result != 'success' }}
