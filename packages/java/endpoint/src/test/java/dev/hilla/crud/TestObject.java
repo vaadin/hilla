@@ -19,6 +19,7 @@ public class TestObject {
     private LocalDate localDate;
     private LocalTime localTime;
     private LocalDateTime localDateTime;
+    private Boolean booleanValue;
 
     public Integer getId() {
         return id;
@@ -58,5 +59,13 @@ public class TestObject {
 
     public void setLocalTime(LocalTime localTime) {
         this.localTime = localTime;
+    }
+
+    public Boolean getBooleanValue() {
+        return booleanValue;
+    }
+
+    public void setBooleanValue(Boolean aBoolean) {
+        this.booleanValue = aBoolean;
     }
 }

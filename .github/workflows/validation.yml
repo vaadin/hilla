@@ -35,7 +35,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build TypeScript
-        run: npm run build
+        run: npm run build:nocache
       - name: Build Java
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
       - name: Save Workspace
@@ -220,6 +220,7 @@ jobs:
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
               -Pit-modules-${{ matrix.it-modules }} \
+              -Pproduction \
               verify
           )
       - uses: actions/upload-artifact@v3
