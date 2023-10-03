@@ -6,7 +6,13 @@ import {
   AutoGridNumberRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
-import { BooleanHeaderFilter, NoHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
+import {
+  BooleanHeaderFilter,
+  DateHeaderFilter,
+  NoHeaderFilter,
+  NumberHeaderFilter,
+  StringHeaderFilter,
+} from './header-filter';
 import type { PropertyInfo } from './property-info';
 
 type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
@@ -39,7 +45,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: DateHeaderFilter,
       };
     case 'time':
       return {

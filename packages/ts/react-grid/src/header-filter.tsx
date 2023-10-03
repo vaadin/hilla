@@ -1,3 +1,4 @@
+import { DatePicker, DatePickerElement } from '@hilla/react-components/DatePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
@@ -106,6 +107,52 @@ export function NumberHeaderFilter(): ReactElement {
         onInput={(e) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
           updateFilter(matcher, fieldValue);
+        }}
+      />
+    </>
+  );
+}
+
+export function DateHeaderFilter(): ReactElement {
+  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
+  const [invalid, setInvalid] = useState(false);
+  const select = useRef<SelectElement>(null);
+
+  useSelectInitWorkaround(select);
+
+  return (
+    <>
+      <Select
+        ref={select}
+        onValueChanged={(e) => {
+          const newMatcher = e.detail.value as Matcher;
+          updateFilter(newMatcher, filterValue);
+        }}
+        renderer={() => (
+          <ListBox>
+            <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
+              &gt; Greater than
+            </Item>
+            <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
+              &lt; Less than
+            </Item>
+            <Item value={Matcher.EQUALS} {...{ label: '=' }}>
+              = Equals
+            </Item>
+          </ListBox>
+        )}
+        className={css.filterWithLessGreaterEquals}
+        value={matcher}
+      ></Select>
+      <DatePicker
+        placeholder="Filter..."
+        onInvalidChanged={({ detail: { value } }) => {
+          setInvalid(value);
+        }}
+        onValueChanged={({ detail: { value } }) => {
+          if (!invalid) {
+            updateFilter(matcher, value);
+          }
         }}
       />
     </>

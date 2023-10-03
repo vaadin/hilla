@@ -21,6 +21,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     private static final int LAST_NAME_COLUMN = 1;
     private static final int LUCKY_NUMBER_COLUMN = 2;
     private static final int EMAIL_VERIFIED_COLUMN = 3;
+    private static final int BIRTH_DATE_COLUMN = 4;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid-with-headerfilters";
@@ -76,6 +77,25 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
         setHeaderFilter(EMAIL_VERIFIED_COLUMN, null, (Boolean) null);
         assertRowCount(50);
+        assertName(0, "Abigail", "Carter");
+
+    }
+
+    @Test
+    public void localDateFilterWorks() {
+        // Default is greater_than
+        assertRowCount(50);
+        sortByColumn(BIRTH_DATE_COLUMN);
+        setHeaderFilter(BIRTH_DATE_COLUMN, null, "4/30/1999");
+        assertName(0, "Mark", "Young");
+        assertRowCount(3);
+
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.LESS_THAN, null);
+        assertRowCount(46);
+        assertName(0, "Alice", "Johnson");
+
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.EQUALS, null);
+        assertRowCount(1);
         assertName(0, "Abigail", "Carter");
 
     }

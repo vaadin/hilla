@@ -1,5 +1,7 @@
 package dev.hilla.crud;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -75,6 +77,22 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (isLocalDate(javaType)) {
+            var path = root.<LocalDate> get(filter.getPropertyId());
+            var dateValue = LocalDate.parse(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, dateValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A date cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, dateValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, dateValue);
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -88,6 +106,10 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isBoolean(Class<?> javaType) {
         return javaType == boolean.class || javaType == Boolean.class;
+    }
+
+    private boolean isLocalDate(Class<?> javaType) {
+        return javaType == java.time.LocalDate.class;
     }
 
 }
