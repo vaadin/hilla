@@ -1,16 +1,23 @@
 import { Button } from '@hilla/react-components/Button.js';
+
 import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog.js';
 import { useContext, useState, type JSX } from 'react';
 import { AutoCrudContext } from './autocrud-context';
 import { getIdProperty } from './property-info';
 
-export default function DeleteButton(renderContext: any): JSX.Element {
+type GridBodyReactRendererProps<TItem> = {
+  item: TItem;
+};
+
+export default function DeleteButton({ item }: GridBodyReactRendererProps<any>): JSX.Element {
   const context = useContext(AutoCrudContext)!;
   const [opened, setOpened] = useState(false);
 
   async function deleteItem(): Promise<void> {
-    const idProperty = getIdProperty(context.properties!)!;
-    await context.service!.delete(renderContext.item[idProperty.name]);
+    const idProperty = getIdProperty(context.properties)!;
+    // eslint-disable-next-line
+    const id = item[idProperty.name];
+    await context.service.delete(id);
     context.refreshGrid();
   }
 
@@ -23,8 +30,9 @@ export default function DeleteButton(renderContext: any): JSX.Element {
         opened={opened}
         header="Delete item"
         confirmTheme="error"
-        onConfirm={() => {
-          deleteItem();
+        // eslint-disable-next-line
+        onConfirm={async () => {
+          await deleteItem();
           setOpened(false);
         }}
         cancelButtonVisible

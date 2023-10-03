@@ -129,9 +129,8 @@ function useColumns(
   });
   if (options.customColumns) {
     return [...autoColumns, ...options.customColumns];
-  } else {
-    return autoColumns;
   }
+  return autoColumns;
 }
 
 export function AutoGrid<TItem>({
