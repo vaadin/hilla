@@ -62,12 +62,10 @@ function useSelectInitWorkaround(selectRef: RefObject<SelectElement>) {
 
 // extracted component (and type) to avoid code duplication
 type ComparationSelectionProps = {
-  filterValue: string;
-  matcher: Matcher;
-  updateFilter(newMatcher: Matcher, newFilterValue: string): void;
+  onMatcherChanged(matcher: Matcher): void;
 };
 
-function ComparationSelection({ filterValue, matcher, updateFilter }: ComparationSelectionProps): ReactElement {
+function ComparationSelection({ onMatcherChanged }: ComparationSelectionProps): ReactElement {
   const select = useRef<SelectElement>(null);
 
   useSelectInitWorkaround(select);
@@ -76,10 +74,10 @@ function ComparationSelection({ filterValue, matcher, updateFilter }: Comparatio
     <Select
       ref={select}
       onValueChanged={({ detail: { value } }) => {
-        updateFilter(value as Matcher, filterValue);
+        onMatcherChanged(value as Matcher);
       }}
       renderer={() => (
-        <ListBox>
+        <ListBox selected={0}>
           <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
             &gt; Greater than
           </Item>
@@ -92,7 +90,6 @@ function ComparationSelection({ filterValue, matcher, updateFilter }: Comparatio
         </ListBox>
       )}
       className={autoGridFilterWithLessGreaterEqualsStyle.id}
-      value={matcher}
     ></Select>
   );
 }
@@ -119,7 +116,7 @@ export function NumberHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection {...{ filterValue, matcher, select, updateFilter }} />
+      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <NumberField
         placeholder="Filter..."
         onInput={(e) => {
@@ -166,7 +163,7 @@ export function DateHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DatePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
@@ -188,7 +185,7 @@ export function TimeHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <TimePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
@@ -210,7 +207,7 @@ export function DateTimeHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection {...{ filterValue, matcher, updateFilter }} />
+      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DateTimePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
