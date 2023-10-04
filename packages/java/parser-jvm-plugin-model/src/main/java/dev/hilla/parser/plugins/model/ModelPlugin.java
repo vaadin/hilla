@@ -35,8 +35,10 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
     private static final String VALIDATION_CONSTRAINTS_PACKAGE_NAME = "jakarta.validation.constraints";
 
     // Include-list of annotations that should be added to the schema
-    private static final Set<String> INCLUDED_ANNOTATIONS = Set
-            .of("jakarta.persistence.Id", "jakarta.persistence.Version");
+    private static final Set<String> INCLUDED_ANNOTATIONS = Set.of(
+            "jakarta.persistence.Id", "jakarta.persistence.Version",
+            "jakarta.persistence.OneToOne", "jakarta.persistence.ManyToOne",
+            "jakarta.persistence.OneToMany", "jakarta.persistence.ManyToMany");
 
     public ModelPlugin() {
         super();

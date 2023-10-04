@@ -5,8 +5,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Version;
+
+import java.util.List;
 
 @Endpoint
 public class AnnotationsEndpoint {
@@ -22,6 +28,18 @@ public class AnnotationsEndpoint {
 
         private int version;
 
+        @OneToOne
+        public NestedEntity oneToOne;
+
+        @OneToMany
+        public List<NestedEntity> oneToMany;
+
+        @ManyToOne
+        public NestedEntity manyToOne;
+
+        @ManyToMany
+        public List<NestedEntity> manyToMany;
+
         @Column(name = "test_column")
         public String name;
 
@@ -33,5 +51,9 @@ public class AnnotationsEndpoint {
         public void setVersion(int version) {
             this.version = version;
         }
+    }
+
+    public static class NestedEntity {
+        public String name;
     }
 }

@@ -368,6 +368,18 @@
               }
             ],
             "x-java-type": "java.lang.Long"
+          },
+          "nestedModelWithAnnotations" : {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/com.example.application.endpoints.TsFormEndpoint.FormEntity"
+              }
+            ],
+            "x-annotations": [
+              {
+                "name": "jakarta.persistence.OneToOne"
+              }
+            ]
           }
         }
       },

@@ -229,13 +229,13 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
   }
 
   override process(): readonly ts.Expression[] {
-    const schema = this[$schema];
+    const originalSchema = this[$originalSchema];
 
     let result = super.process();
 
     const modelOptionsProperties = [
-      this.#createValidatorsProperty(schema),
-      this.#createMetadataProperty(schema),
+      this.#createValidatorsProperty(originalSchema),
+      this.#createMetadataProperty(originalSchema),
     ].filter(Boolean) as PropertyAssignment[];
 
     if (modelOptionsProperties.length > 0) {
@@ -244,7 +244,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
       result = [...result, optionsObject];
     }
 
-    return [isNullableSchema(this[$originalSchema]) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
+    return [isNullableSchema(originalSchema) ? ts.factory.createTrue() : ts.factory.createFalse(), ...result];
   }
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {
