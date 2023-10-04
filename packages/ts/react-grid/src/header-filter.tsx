@@ -167,6 +167,7 @@ export function DateHeaderFilter(): ReactElement {
     <>
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DatePicker
+        value={filterValue}
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
@@ -189,6 +190,7 @@ export function TimeHeaderFilter(): ReactElement {
     <>
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <TimePicker
+        value={filterValue}
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
@@ -211,6 +213,7 @@ export function DateTimeHeaderFilter(): ReactElement {
     <>
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DateTimePicker
+        value={filterValue}
         datePlaceholder="Filter..."
         timePlaceholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {

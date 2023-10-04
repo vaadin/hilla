@@ -63,7 +63,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: NoHeaderFilter, // DateTimeHeaderFilter has a bug
+        headerRenderer: DateTimeHeaderFilter,
       };
     case 'string':
       return {
