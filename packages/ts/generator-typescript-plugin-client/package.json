@@ -51,14 +51,14 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/generator-typescript-core": "*"
+    "@hilla/generator-typescript-core": "~2.3.0-alpha7"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "*",
+    "@hilla/generator-typescript-utils": "~2.3.0-alpha7",
     "typescript": "5.1.6"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "*",
+    "@hilla/generator-typescript-core": "~2.3.0-alpha7",
     "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.7.1",
