@@ -1,5 +1,6 @@
 import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NumberModel as NumberModel_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
 import type FormEntityMetadata_1 from "./FormEntityMetadata.js";
+import FormEntityModel_1 from "./FormEntityModel.js";
 class FormEntityMetadataModel<T extends FormEntityMetadata_1 = FormEntityMetadata_1> extends ObjectModel_1<T> {
     static override createEmptyValue = makeObjectEmptyValueCreator_1(FormEntityMetadataModel);
     get withoutMetadata(): StringModel_1 {
@@ -19,6 +20,9 @@ class FormEntityMetadataModel<T extends FormEntityMetadata_1 = FormEntityMetadat
     }
     get withAll(): NumberModel_1 {
         return this[_getPropertyModel_1]("withAll", (parent, key) => new NumberModel_1(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.Id" }, { name: "jakarta.persistence.Version" }], javaType: "java.lang.Long" } }));
+    }
+    get nestedModelWithAnnotations(): FormEntityModel_1 {
+        return this[_getPropertyModel_1]("nestedModelWithAnnotations", (parent, key) => new FormEntityModel_1(parent, key, false, { meta: { annotations: [{ name: "jakarta.persistence.OneToOne" }] } }));
     }
 }
 export default FormEntityMetadataModel;

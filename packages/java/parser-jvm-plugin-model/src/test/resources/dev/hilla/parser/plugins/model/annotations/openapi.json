@@ -69,6 +69,78 @@
               }
             ]
           },
+          "oneToOne" : {
+            "nullable" : true,
+            "anyOf" : [
+              {
+                "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+              }
+            ],
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.OneToOne"
+              }
+            ]
+          },
+          "oneToMany" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.OneToMany"
+              }
+            ]
+          },
+          "manyToOne" : {
+            "nullable" : true,
+            "anyOf" : [
+              {
+                "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+              }
+            ],
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToOne"
+              }
+            ]
+          },
+          "manyToMany" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToMany"
+              }
+            ]
+          },
+          "name" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          }
+        }
+      },
+      "dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity" : {
+        "type" : "object",
+        "properties" : {
           "name" : {
             "type" : "string",
             "nullable" : true,
