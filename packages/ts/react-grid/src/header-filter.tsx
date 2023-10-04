@@ -62,10 +62,11 @@ function useSelectInitWorkaround(selectRef: RefObject<SelectElement>) {
 
 // extracted component (and type) to avoid code duplication
 type ComparationSelectionProps = {
+  value: Matcher;
   onMatcherChanged(matcher: Matcher): void;
 };
 
-function ComparationSelection({ onMatcherChanged }: ComparationSelectionProps): ReactElement {
+function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionProps): ReactElement {
   const select = useRef<SelectElement>(null);
 
   useSelectInitWorkaround(select);
@@ -73,13 +74,14 @@ function ComparationSelection({ onMatcherChanged }: ComparationSelectionProps): 
   return (
     <Select
       ref={select}
-      onValueChanged={({ detail: { value } }) => {
-        onMatcherChanged(value as Matcher);
+      value={value}
+      onValueChanged={({ detail }) => {
+        onMatcherChanged(detail.value as Matcher);
       }}
       renderer={() => (
-        <ListBox selected={0}>
+        <ListBox>
           <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
-            &gt; Greater than
+            &gt; Greater than1
           </Item>
           <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
             &lt; Less than
@@ -116,7 +118,7 @@ export function NumberHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <NumberField
         placeholder="Filter..."
         onInput={(e) => {
@@ -163,7 +165,7 @@ export function DateHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DatePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
@@ -185,7 +187,7 @@ export function TimeHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <TimePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
@@ -207,7 +209,7 @@ export function DateTimeHeaderFilter(): ReactElement {
 
   return (
     <>
-      <ComparationSelection onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DateTimePicker
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
