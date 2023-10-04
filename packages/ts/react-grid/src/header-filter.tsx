@@ -5,8 +5,24 @@ import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
-import css from './header-filter.module.css';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
+
+// TODO: Replace with more robust solution
+const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');
+autoGridFilterWithLessGreaterEqualsStyle.id = 'autoGridFilterWithLessGreaterEquals';
+autoGridFilterWithLessGreaterEqualsStyle.textContent = `
+.${autoGridFilterWithLessGreaterEqualsStyle.id} {
+  --vaadin-field-default-width: 2em;
+  margin-right: 3px;
+}
+.${autoGridFilterWithLessGreaterEqualsStyle.id} > vaadin-select-value-button {
+  --_lumo-text-field-overflow-mask-image: none !important;
+}
+
+.${autoGridFilterWithLessGreaterEqualsStyle.id}::part(toggle-button) {
+  display: none;
+}`;
+document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -82,7 +98,7 @@ export function NumberHeaderFilter(): ReactElement {
             </Item>
           </ListBox>
         )}
-        className={css.filterWithLessGreaterEquals}
+        className={autoGridFilterWithLessGreaterEqualsStyle.id}
         value={matcher}
       ></Select>
       <NumberField
