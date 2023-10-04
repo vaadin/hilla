@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-subtypes",
-  "version": "2.3.0-alpha7",
+  "version": "2.3.0-alpha9",
   "description": "A Hilla TypeScript Generator plugin to support JsonSubTypes",
   "main": "index.js",
   "type": "module",
