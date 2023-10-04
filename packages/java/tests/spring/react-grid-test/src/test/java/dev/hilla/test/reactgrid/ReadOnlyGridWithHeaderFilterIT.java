@@ -84,12 +84,12 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
     @Test
     public void localDateFilterWorks() {
-        // Default is greater_than
         assertRowCount(50);
         sortByColumn(BIRTH_DATE_COLUMN);
-        setHeaderFilter(BIRTH_DATE_COLUMN, null, "1999-04-30");
-        assertName(0, "Mark", "Young");
+
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.GREATER_THAN, "1999-04-30");
         assertRowCount(3);
+        assertName(0, "Mark", "Young");
 
         setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.LESS_THAN, null);
         assertRowCount(46);
@@ -103,12 +103,12 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
     @Test
     public void localTimeFilterWorks() {
-        // Default is greater_than
         assertRowCount(50);
         sortByColumn(SHIFT_START_COLUMN);
-        setHeaderFilter(SHIFT_START_COLUMN, null, "13:00");
-        assertName(0, "Uma", "Washington");
+
+        setHeaderFilter(SHIFT_START_COLUMN, Matcher.GREATER_THAN, "13:00");
         assertRowCount(22);
+        assertName(0, "Uma", "Washington");
 
         setHeaderFilter(SHIFT_START_COLUMN, Matcher.LESS_THAN, null);
         assertRowCount(27);
