@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { GridElement } from '@hilla/react-components/Grid.js';
+import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
@@ -28,7 +29,6 @@ import {
   personService,
   type Person,
 } from './test-models-and-services.js';
-import { GridColumn } from '@hilla/react-components/GridColumn.js';
 
 use(sinonChai);
 
