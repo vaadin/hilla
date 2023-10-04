@@ -22,6 +22,26 @@ public interface CrudService<T, ID> extends ListService<T> {
     T save(T value);
 
     /**
+     * Gets the object with the given id.
+     *
+     * @param id
+     *            the id of the object
+     * @return the object, or null if no object was found
+     */
+    T get(ID id);
+
+    /**
+     * Checks if an object with the given id exists.
+     *
+     * @param id
+     *            the id of the object
+     * @return {@code true} if the object exists, {@code false} otherwise
+     */
+    default boolean exists(ID id) {
+        return get(id) != null;
+    }
+
+    /**
      * Deletes the object with the given id.
      *
      * @param id

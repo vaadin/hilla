@@ -70,8 +70,19 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
-        Specification<T> spec = jpaFilterConverter.toSpec(filter, entityClass);
+        Specification<T> spec = toSpec(filter);
         return getRepository().findAll(spec, pageable).getContent();
+    }
+
+    /**
+     * Converts the given filter to a JPA specification.
+     *
+     * @param filter
+     *            the filter to convert
+     * @return a JPA specification
+     */
+    protected Specification<T> toSpec(@Nullable Filter filter) {
+        return jpaFilterConverter.toSpec(filter, entityClass);
     }
 
     @SuppressWarnings("unchecked")

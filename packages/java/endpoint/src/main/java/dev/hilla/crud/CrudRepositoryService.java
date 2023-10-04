@@ -2,6 +2,7 @@ package dev.hilla.crud;
 
 import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
+import dev.hilla.crud.filter.Filter;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
@@ -37,8 +38,29 @@ public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
     }
 
     @Override
+    public T get(ID id) {
+        return getRepository().findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean exists(ID id) {
+        return getRepository().existsById(id);
+    }
+
+    @Override
     public void delete(ID id) {
         getRepository().deleteById(id);
+    }
+
+    /**
+     * Counts the number of entities that match the given filter.
+     *
+     * @param filter
+     *            the filter, or {@code null} to use no filter
+     * @return
+     */
+    public long count(@Nullable Filter filter) {
+        return getRepository().count(toSpec(filter));
     }
 
 }
