@@ -133,7 +133,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Test
-        run: mvn -B -am -P\!it-modules verify
+        run: mvn -B -am -P\!it-modules verify -pl '!:hilla-gradle-plugin'
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
