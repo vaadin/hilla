@@ -9,7 +9,6 @@ import {
 import {
   BooleanHeaderFilter,
   DateHeaderFilter,
-  DateTimeHeaderFilter,
   NoHeaderFilter,
   NumberHeaderFilter,
   StringHeaderFilter,
@@ -63,7 +62,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: DateTimeHeaderFilter,
+        headerRenderer: DateHeaderFilter,
       };
     case 'string':
       return {

@@ -205,29 +205,6 @@ export function TimeHeaderFilter(): ReactElement {
   );
 }
 
-export function DateTimeHeaderFilter(): ReactElement {
-  const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
-  const [invalid, setInvalid] = useState(false);
-
-  return (
-    <>
-      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
-      <DatePicker
-        value={filterValue}
-        placeholder="Filter..."
-        onInvalidChanged={({ detail: { value } }) => {
-          setInvalid(value);
-        }}
-        onValueChanged={({ detail: { value } }) => {
-          if (!(invalid || value === filterValue)) {
-            updateFilter(matcher, value);
-          }
-        }}
-      />
-    </>
-  );
-}
-
 export function NoHeaderFilter(): ReactElement {
   return <></>;
 }
