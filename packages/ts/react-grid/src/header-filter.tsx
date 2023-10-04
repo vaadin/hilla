@@ -81,7 +81,7 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
       renderer={() => (
         <ListBox>
           <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
-            &gt; Greater than1
+            &gt; Greater than
           </Item>
           <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
             &lt; Less than
@@ -172,7 +172,7 @@ export function DateHeaderFilter(): ReactElement {
           setInvalid(value);
         }}
         onValueChanged={({ detail: { value } }) => {
-          if (!invalid) {
+          if (!(invalid || value === filterValue)) {
             updateFilter(matcher, value);
           }
         }}
@@ -194,7 +194,7 @@ export function TimeHeaderFilter(): ReactElement {
           setInvalid(value);
         }}
         onValueChanged={({ detail: { value } }) => {
-          if (!invalid) {
+          if (!(invalid || value === filterValue)) {
             updateFilter(matcher, value);
           }
         }}
@@ -211,12 +211,13 @@ export function DateTimeHeaderFilter(): ReactElement {
     <>
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DateTimePicker
-        placeholder="Filter..."
+        datePlaceholder="Filter..."
+        timePlaceholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
         onValueChanged={({ detail: { value } }) => {
-          if (!invalid) {
+          if (!(invalid || value === filterValue)) {
             updateFilter(matcher, value);
           }
         }}
