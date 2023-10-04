@@ -5,14 +5,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import io.github.classgraph.ClassInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,9 @@ public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     private final Config config;
 
+    private final SpringBootAppRootPackageFinder rootPackageFinder;
+    private final ClassGraph classGraph;
+
     public Parser() {
         try {
             var basicOpenAPIString = new String(Objects
@@ -36,6 +41,10 @@ public final class Parser {
             var openAPI = parseOpenAPIFile(basicOpenAPIString,
                     OpenAPIFileType.JSON, null);
             this.config = new Config(openAPI);
+            this.rootPackageFinder = new SpringBootAppRootPackageFinder();
+            classGraph = new ClassGraph().enableAnnotationInfo()
+                    .ignoreClassVisibility()
+                    .overrideClassLoaders(config.getClassLoader());
         } catch (IOException e) {
             throw new ParserException("Failed to parse openAPI specification",
                     e);
@@ -285,14 +294,22 @@ public final class Parser {
 
         var storage = new SharedStorage(config);
 
-        var classGraph = new ClassGraph().enableAnnotationInfo()
-                .ignoreClassVisibility()
-                .overrideClassLoaders(config.getClassLoader());
+        var buildDirectories = config.getClassPathElements().stream()
+                .filter(e -> !e.endsWith(".jar")).toList();
 
-        Collection<String> packages = config.exposedPackages;
+        Collection<String> packages = config.getExposedPackages();
 
         // Packages explicitly defined in pom.xml have priority
         if (packages != null && !packages.isEmpty()) {
+
+            // always include the root package of current module/project:
+            var rootPackage = rootPackageFinder
+                    .findRootPackage(buildDirectories);
+            if (rootPackage.isPresent()) {
+                packages = new LinkedHashSet<>(packages);
+                packages.add(rootPackage.get());
+            }
+
             logger.info("Search for endpoints in packages {}", packages);
             classGraph.acceptPackages(packages.toArray(String[]::new));
             classGraph.overrideClasspath(config.getClassPathElements());
@@ -300,9 +317,6 @@ public final class Parser {
         // If no packages are defined, then scan the whole classpath except
         // jars, which basically means scanning the build or target folder
         else {
-            var buildDirectories = config.getClassPathElements().stream()
-                    .filter(e -> !e.endsWith(".jar"))
-                    .collect(Collectors.toList());
             logger.info("Search for endpoints in directories {}",
                     buildDirectories);
             classGraph.overrideClasspath(buildDirectories);
@@ -481,5 +495,28 @@ public final class Parser {
             return plugins;
         }
 
+    }
+
+    public static class SpringBootAppRootPackageFinder {
+
+        public Optional<String> findRootPackage(List<String> buildDirectories) {
+
+            var currentModuleClassGraph = new ClassGraph()
+                    .enableAnnotationInfo().ignoreClassVisibility()
+                    .overrideClassLoaders(ClassLoader.getSystemClassLoader())
+                    .overrideClasspath(buildDirectories);
+
+            String springBootApplicationAnnotation = "org.springframework.boot.autoconfigure.SpringBootApplication";
+
+            try (var scanResult = currentModuleClassGraph.scan()) {
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(
+                        springBootApplicationAnnotation)) {
+                    return Optional
+                            .of(classInfo.loadClass().getPackage().getName());
+                }
+            }
+
+            return Optional.empty();
+        }
     }
 }
