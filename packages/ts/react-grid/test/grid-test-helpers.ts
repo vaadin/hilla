@@ -37,12 +37,17 @@ export function getGrid(result: RenderResult): Grid {
   return result.container.querySelector('vaadin-grid')!;
 }
 
-export async function nextFrame(): Promise<void> {
+async function nextFrame(): Promise<void> {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       resolve(undefined);
     });
   });
+}
+export async function reactRender(): Promise<void> {
+  await nextFrame();
+  await nextFrame();
+  await nextFrame();
 }
 
 export async function setActiveItem<T>(grid: Grid<T>, item: T | undefined): Promise<void> {
