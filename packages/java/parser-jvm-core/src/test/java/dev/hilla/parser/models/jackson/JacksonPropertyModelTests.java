@@ -50,9 +50,18 @@ public class JacksonPropertyModelTests {
             String name) {
         var expectedTypes = new HashSet<>(
                 JacksonPropertySharedTests.stringifiedTypes.get(name));
-        assertEquals(expectedTypes,
-                model.getAssociatedTypes().stream().map(Model::get)
-                        .map(Object::toString).collect(Collectors.toSet()));
+        assertEquals(normalize(expectedTypes),
+                normalize(model.getAssociatedTypes().stream().map(Model::get)
+                        .map(Object::toString).collect(Collectors.toSet())));
+    }
+
+    private Set<String> normalize(Set<String> set) {
+        Set<String> normalized = new HashSet<>();
+
+        for (String s : set) {
+            normalized.add(s.replace("$", "."));
+        }
+        return normalized;
     }
 
     @DisplayName("It should pass equality check")

@@ -85,7 +85,7 @@ export interface Order extends IdEntity {
   customer: Customer;
   notes: string;
   priority: number;
-  products: readonly Product[];
+  products: Product[];
   total?: number;
 }
 
@@ -127,9 +127,9 @@ export interface TestEntity {
   fieldNumber: number;
   fieldBoolean: boolean;
   fieldObject: Record<string, unknown>;
-  fieldArrayString: readonly string[];
-  fieldArrayModel: readonly IdEntity[];
-  fieldMatrixNumber: ReadonlyArray<readonly number[]>;
+  fieldArrayString: string[];
+  fieldArrayModel: IdEntity[];
+  fieldMatrixNumber: number[][];
   fieldEnum: RecordStatus;
   fieldAny: any;
 }

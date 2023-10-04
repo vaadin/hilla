@@ -22,7 +22,7 @@ export function ReadOnlyGridSinglePropertyFilter() {
           setFilter(propertyFilter);
         }}
       ></TextField>
-      <AutoGrid pageSize={10} service={PersonService} filter={filter} model={PersonModel} />
+      <AutoGrid pageSize={10} service={PersonService} filter={filter} model={PersonModel} noHeaderFilters/>
     </div>
     /* page size is defined only to make testing easier */
   );

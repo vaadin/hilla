@@ -2,9 +2,6 @@ package dev.hilla.test.reactgrid;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import java.time.LocalDateTime;
 
 @Entity
 public class Appointment extends AbstractEntity {

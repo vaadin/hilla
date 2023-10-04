@@ -17,7 +17,7 @@ export function AutoFormView() {
           <ExperimentalAutoForm
             service={AppointmentService}
             model={AppointmentModel}
-            onSubmit={({ item }) => {
+            afterSubmit={({ item }) => {
               setSubmitted(item);
             }}
           />

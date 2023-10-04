@@ -1,4 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
+import type { ButtonElement } from '@hilla/react-components/Button.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
 import { assert } from 'chai';
@@ -6,10 +7,11 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { ExperimentalAutoForm } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
-import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
+import { submit } from './form-test-utils.js';
 import {
   PersonModel,
   createService,
+  getItem,
   personData,
   personService,
   type HasLastFilter,
@@ -17,12 +19,6 @@ import {
 } from './test-models-and-services.js';
 
 use(sinonChai);
-
-const noSort: Sort = { orders: [] };
-
-async function getItem(service: CrudService<Person> & HasLastFilter, id: number) {
-  return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);
-}
 
 export async function nextFrame(): Promise<void> {
   return new Promise((resolve) => {
@@ -55,9 +51,14 @@ async function assertFormFieldValues(result: RenderResult, expected: Person | un
   await assertFormFieldValue(result, 'Email', person.email);
   await assertFormFieldValue(result, 'Some number', person.someNumber);
 }
-async function submit(result: RenderResult) {
-  const submitButton = await result.findByText('Submit');
-  submitButton.click();
+async function assertAllEnabled(result: RenderResult, enabled: boolean) {
+  expect(!(await getFormField(result, 'First name'))!.disabled).to.equal(enabled);
+  expect(!(await getFormField(result, 'Last name'))!.disabled).to.equal(enabled);
+  expect(!(await getFormField(result, 'Email'))!.disabled).to.equal(enabled);
+  expect(!(await getFormField(result, 'Some number'))!.disabled).to.equal(enabled);
+  result.container
+    .querySelectorAll('vaadin-button')
+    .forEach((button: ButtonElement) => expect(!button.disabled).to.equal(enabled));
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
@@ -120,7 +121,7 @@ describe('@hilla/react-grid', () => {
       const newItem = await getItem(service, 1);
       expect(newItem!.firstName).to.equal('foo');
     });
-    it('clears the form after a valid submit', async () => {
+    it('retains the form values a valid submit', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       const person = await getItem(service, 1);
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
@@ -128,27 +129,31 @@ describe('@hilla/react-grid', () => {
       await submit(result);
       await nextFrame();
       await nextFrame();
-      await assertFormFieldValues(result, undefined);
+      const newPerson: Person = { ...person! };
+      newPerson.firstName = 'bar';
+      await assertFormFieldValues(result, newPerson);
     });
-    it('clears the form after a valid submit when using onSubmit', async () => {
+    it('retains the form values after a valid submit when using afterSubmit', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
       const result = render(
-        <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       await setFormField(result, 'First name', 'baz');
       await submit(result);
       await nextFrame();
-      await assertFormFieldValues(result, undefined);
+      const newPerson: Person = { ...person! };
+      newPerson.firstName = 'baz';
+      await assertFormFieldValues(result, newPerson);
     });
-    it('calls onSubmit with the new item', async () => {
+    it('calls afterSubmit with the new item', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
 
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
       const result = render(
-        <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       await setFormField(result, 'First name', 'bag');
       await submit(result);
@@ -167,7 +172,7 @@ describe('@hilla/react-grid', () => {
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
       const result = render(
-        <ExperimentalAutoForm service={service} model={PersonModel} item={person} onSubmit={submitSpy} />,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       await submit(result);
       await nextFrame();
@@ -176,7 +181,7 @@ describe('@hilla/react-grid', () => {
       assert(submitSpy.notCalled);
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).not.to.be.null;
     });
-    it('calls onSubmitError and does not show error if the endpoint call fails', async () => {
+    it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
@@ -190,7 +195,7 @@ describe('@hilla/react-grid', () => {
           service={service}
           model={PersonModel}
           item={person}
-          onSubmit={submitSpy}
+          afterSubmit={submitSpy}
           onSubmitError={errorSpy}
         />,
       );
@@ -200,6 +205,20 @@ describe('@hilla/react-grid', () => {
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.be.null;
       assert(submitSpy.notCalled);
       assert(errorSpy.calledWith(sinon.match.hasNested('error.message', 'foobar')));
+    });
+    it('disables all fields and buttons when disabled', async () => {
+      const result = render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />);
+      await nextFrame();
+      await assertAllEnabled(result, false);
+    });
+    it('enables all fields and buttons when enabled', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled />);
+      await nextFrame();
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
+      await nextFrame();
+      await nextFrame();
+      await assertAllEnabled(result, true);
     });
   });
 });

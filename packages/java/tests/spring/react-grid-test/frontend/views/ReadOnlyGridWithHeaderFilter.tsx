@@ -9,7 +9,7 @@ import { useState } from 'react';
 export function ReadOnlyGridWithHeaderFilters() {
   const [model, setModel] = useState<DetachedModelConstructor<AbstractModel>[]>([PersonModel]);
   const [service, setService] = useState<CrudService<any>>(PersonService);
-  const [headerFilters, setHeaderFilters] = useState(true);
+  const [noHeaderFilters, setNoHeaderFilters] = useState(false);
   return (
     <>
       <Button
@@ -27,12 +27,12 @@ export function ReadOnlyGridWithHeaderFilters() {
       </Button>
       <Button
         onClick={(e) => {
-          setHeaderFilters(!headerFilters);
+          setNoHeaderFilters(!noHeaderFilters);
         }}
       >
         Toggle header filters
       </Button>
-      <AutoGrid pageSize={10} service={service} model={model[0]} headerFilters={headerFilters} />
+      <AutoGrid pageSize={10} service={service} model={model[0]} noHeaderFilters={noHeaderFilters} />
     </>
   );
   /* page size is defined only to make testing easier */

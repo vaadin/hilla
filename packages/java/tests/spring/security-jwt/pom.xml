@@ -71,7 +71,10 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>prepare-frontend</goal>
+                            <!-- For some reason there is "Connection reset by peer", "No buffer
+                            space available" and similar errors when running this test in dev mode
+                            (on a mac) -->
+                            <goal>build-frontend</goal>
                         </goals>
                     </execution>
                 </executions>
