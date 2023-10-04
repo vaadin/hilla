@@ -40,7 +40,7 @@
   },
   "homepage": "https://hilla.dev",
   "files": [
-    "*.{d.ts.map,d.ts,js.map,js,module.css}",
+    "*.{d.ts.map,d.ts,js.map,js}",
     "types/**"
   ],
   "publishConfig": {
