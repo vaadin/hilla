@@ -1,14 +1,22 @@
 /* eslint-disable sort-keys */
 import { assert, expect, use } from '@esm-bundle/chai';
 import { LitElement } from 'lit';
-// TODO: remove when the new version of eslint-config-vaadin is released.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
 import { Binder, type BinderConfiguration } from '../src/index.js';
-import { type Employee, EmployeeModel, type Order, OrderModel, type TestEntity, TestModel } from './TestModels.js';
+import {
+  type Employee,
+  EmployeeModel,
+  type Order,
+  OrderModel,
+  type TestEntity,
+  TestModel,
+  type Level1,
+  Level1Model,
+  Level2Model,
+} from './TestModels.js';
 
 use(sinonChai);
 
@@ -383,6 +391,43 @@ describe('@hilla/form', () => {
         const superNameNode = binder.for(binder.model.supervisor.fullName);
         binder.clear();
         assert.equal('', superNameNode.value);
+      });
+    });
+
+    describe('complex hierarchy', () => {
+      @customElement('lit-hierarchy-view')
+      class LitHierarchyView extends LitElement {
+        binder: Binder<Level1Model>;
+
+        constructor() {
+          super();
+          this.binder = new Binder(this, Level1Model);
+          const level1 = Level1Model.createEmptyValue();
+          const level2 = Level2Model.createEmptyValue();
+          level1.level2 = [level2];
+          this.binder.read(level1);
+        }
+      }
+
+      let litHierarchyView: LitHierarchyView;
+
+      beforeEach(() => {
+        litHierarchyView = document.createElement('lit-hierarchy-view') as LitHierarchyView;
+        document.body.appendChild(litHierarchyView);
+      });
+
+      afterEach(() => {
+        document.body.removeChild(litHierarchyView);
+      });
+
+      it('should create binder in complex hierarchy', async () => {
+        const { binder } = litHierarchyView;
+        await litHierarchyView.updateComplete;
+        const level3Nodes = [...binder.model.level2];
+        assert.lengthOf(level3Nodes, 1);
+        assert.isDefined(binder.for(level3Nodes[0].model.level3.level4.name4).parent?.defaultValue);
+        // Automatic node initialization should preserve pristine state
+        assert.isFalse(binder.dirty);
       });
     });
   });
