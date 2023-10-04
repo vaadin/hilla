@@ -113,17 +113,19 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             }
         } else if (isLocalDateTime(javaType)) {
             var path = root.<LocalDateTime> get(filter.getPropertyId());
-            var dateTimeValue = LocalDateTime.parse(value);
+            var dateValue = LocalDate.parse(value);
+            var minValue = LocalDateTime.of(dateValue, LocalTime.MIN);
+            var maxValue = LocalDateTime.of(dateValue, LocalTime.MAX);
             switch (filter.getMatcher()) {
             case EQUALS:
-                return criteriaBuilder.equal(path, dateTimeValue);
+                return criteriaBuilder.between(path, minValue, maxValue);
             case CONTAINS:
                 throw new IllegalArgumentException(
                         "A datetime cannot be filtered using contains");
             case GREATER_THAN:
-                return criteriaBuilder.greaterThan(path, dateTimeValue);
+                return criteriaBuilder.greaterThan(path, maxValue);
             case LESS_THAN:
-                return criteriaBuilder.lessThan(path, dateTimeValue);
+                return criteriaBuilder.lessThan(path, minValue);
             default:
                 break;
             }

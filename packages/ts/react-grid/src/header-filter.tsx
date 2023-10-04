@@ -212,10 +212,9 @@ export function DateTimeHeaderFilter(): ReactElement {
   return (
     <>
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
-      <DateTimePicker
+      <DatePicker
         value={filterValue}
-        datePlaceholder="Filter..."
-        timePlaceholder="Filter..."
+        placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
