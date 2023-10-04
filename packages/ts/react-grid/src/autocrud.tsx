@@ -9,6 +9,8 @@ import { ExperimentalAutoForm } from './autoform';
 import { AutoGrid } from './autogrid';
 import type { CrudService } from './crud';
 import { getProperties } from './property-info';
+import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
+import { Button } from '@hilla/react-components/Button.js';
 
 export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
@@ -31,24 +33,31 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
         value={{ service, properties: getProperties(model), refreshGrid: () => setRefreshTrigger(refreshTrigger + 1) }}
       >
         <HorizontalLayout>
-          <AutoGrid
-            refreshTrigger={refreshTrigger}
-            service={service}
-            model={model}
-            onActiveItemChanged={(e) => {
-              const activeItem = e.detail.value;
-              (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
-            }}
-            onSelectedItemsChanged={(e) => {
-              if (e.detail.value.length === 0) {
-                setItem(undefined);
-              } else {
-                const selectedItem = e.detail.value[0];
-                setItem({ ...selectedItem });
-              }
-            }}
-            customColumns={customColumns}
-          ></AutoGrid>
+          <VerticalLayout style={{ flex: 1 }}>
+            <HorizontalLayout style={{ width: '100%', justifyContent: 'space-between' }}>
+              <Button theme="primary" onClick={() => setItem({} as TItem)}>
+                + New
+              </Button>
+            </HorizontalLayout>
+            <AutoGrid
+              refreshTrigger={refreshTrigger}
+              service={service}
+              model={model}
+              onActiveItemChanged={(e) => {
+                const activeItem = e.detail.value;
+                (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
+              }}
+              onSelectedItemsChanged={(e) => {
+                if (e.detail.value.length === 0) {
+                  setItem(undefined);
+                } else {
+                  const selectedItem = e.detail.value[0];
+                  setItem({ ...selectedItem });
+                }
+              }}
+              customColumns={customColumns}
+            ></AutoGrid>
+          </VerticalLayout>
           <ExperimentalAutoForm
             disabled={!item}
             service={service}
