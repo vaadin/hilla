@@ -7,6 +7,7 @@ import { type ReactElement, type RefObject, useContext, useEffect, useRef, useSt
 import { ColumnContext } from './autogrid-column-context.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
+// TODO: Replace with more robust solution
 const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');
 autoGridFilterWithLessGreaterEqualsStyle.id = 'autoGridFilterWithLessGreaterEquals';
 autoGridFilterWithLessGreaterEqualsStyle.textContent = `
