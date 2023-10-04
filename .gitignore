@@ -50,3 +50,6 @@ packages/ts/*/*.tgz
 
 # temporary scripts from platform for preparations
 scripts/generator/src/
+
+# backup files from some editors
+*~

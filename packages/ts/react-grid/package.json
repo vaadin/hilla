@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-grid",
-  "version": "2.3.0-alpha6",
+  "version": "2.3.0-alpha9",
   "description": "Hilla grid utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -40,16 +40,16 @@
   },
   "homepage": "https://hilla.dev",
   "files": [
-    "*.{d.ts.map,d.ts,js.map,js,module.css}",
+    "*.{d.ts.map,d.ts,js.map,js}",
     "types/**"
   ],
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "*",
+    "@hilla/form": "~2.3.0-alpha7",
     "@hilla/react-components": "^2.2.0-beta1",
-    "@hilla/react-form": "*",
+    "@hilla/react-form": "~2.3.0-alpha7",
     "@vaadin/vaadin-lumo-styles": "^24.2.0-beta1"
   },
   "peerDependencies": {
