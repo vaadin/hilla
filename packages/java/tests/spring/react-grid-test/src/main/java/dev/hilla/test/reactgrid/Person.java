@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-public class Person extends AbstractEntity{
+public class Person extends AbstractEntity {
 
     private String firstName, lastName;
     private int luckyNumber;
