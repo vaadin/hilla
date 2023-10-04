@@ -4,7 +4,15 @@ import { render, type RenderResult } from '@testing-library/react';
 import sinonChai from 'sinon-chai';
 import { ExperimentalAutoCrud, type AutoCrudProps } from '../src/autocrud.js';
 import { getFormField, setFormField, submit } from './form-test-utils.js';
-import { getBodyCellContent, getGrid, isSelected, nextFrame, toggleRowSelected } from './grid-test-helpers.js';
+import {
+  getBodyCellContent,
+  getGrid,
+  getVisibleRowCount,
+  isSelected,
+  nextFrame,
+  toggleRowSelected,
+} from './grid-test-helpers.js';
+import { findConfirmDialog } from './test-confirm-dialog.js';
 import { PersonModel, personService, type Person } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -107,6 +115,65 @@ describe('@hilla/react-grid', () => {
       await submit(result);
       await nextFrame();
       expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('2');
+    });
+    it('shows a confirmation dialog before deleting', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = findConfirmDialog(cell);
+      expect(dialog?._getDialogText()).to.equal('Are you sure you want to delete the selected item?');
+      expect('Dove').to.equal(getBodyCellContent(grid, 1, 1).innerText);
+    });
+    it('deletes and refreshes grid after confirming', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = findConfirmDialog(cell)!;
+      dialog._getConfirmButton().click();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(1);
+    });
+    it('does not delete when not confirming', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
+      const cell = getBodyCellContent(grid, 1, 5);
+      (cell.querySelector('vaadin-button') as HTMLElement).click();
+      await nextFrame();
+      await nextFrame();
+      const dialog = findConfirmDialog(cell)!;
+      dialog._getCancelButton().click();
+      await nextFrame();
+      expect(getVisibleRowCount(grid)).to.equal(2);
+    });
+    it('does not render a delete button when noDelete', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} noDelete />);
+      const grid: GridElement<Person> = getGrid(result);
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+      const cell = getBodyCellContent(grid, 1, 5);
+      expect(cell).to.be.null;
     });
   });
 });
