@@ -1,5 +1,5 @@
 function getFormatRegex(format: Intl.DateTimeFormat) {
-  const sampleDate = new Date(1234, 5-1, 6);
+  const sampleDate = new Date(1234, 5 - 1, 6);
   const formattedSample = format.format(sampleDate);
   const pattern = formattedSample
     .replace('1234', '(?<year>\\d+)')
