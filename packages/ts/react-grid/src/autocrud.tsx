@@ -16,9 +16,10 @@ export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   noDelete?: boolean;
+  header?: string;
 }>;
 
-export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCrudProps<TItem>): JSX.Element {
+export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -33,7 +34,18 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
         value={{ service, properties: getProperties(model), refreshGrid: () => setRefreshTrigger(refreshTrigger + 1) }}
       >
         <VerticalLayout style={{ flex: 1 }}>
-          <HorizontalLayout style={{ width: '100%', justifyContent: 'space-between' }}>
+          <HorizontalLayout
+            style={{
+              width: '100%',
+              justifyContent: header ? 'space-between' : 'end',
+              paddingLeft: 'var(--lumo-space-m)',
+              paddingRight: 'var(--lumo-space-m)',
+              paddingBottom: 'var(--lumo-space-s)',
+              paddingTop: 'var(--lumo-space-s)',
+              alignItems: 'center',
+            }}
+          >
+            {header ? <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2> : <></>}
             <Button theme="primary" onClick={() => setItem({} as TItem)}>
               + New
             </Button>

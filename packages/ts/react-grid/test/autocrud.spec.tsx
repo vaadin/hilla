@@ -196,5 +196,9 @@ describe('@hilla/react-grid', () => {
       const cell = getBodyCellContent(grid, 1, 5);
       expect(cell).to.be.null;
     });
+    it('shows a header if requested', async () => {
+      const result = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} header="Hello crud" />);
+      await result.findByText('Hello crud');
+    });
   });
 });
