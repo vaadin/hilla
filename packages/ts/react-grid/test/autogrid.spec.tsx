@@ -33,19 +33,10 @@ import {
 
 use(sinonChai);
 
-export async function nextFrame(): Promise<void> {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      resolve(undefined);
-    });
-  });
-}
 
 async function assertColumns(result: RenderResult, ...ids: string[]) {
   const grid = getGrid(result);
-  await nextFrame();
-  await nextFrame();
-  await nextFrame();
+  await reactRender();
   const columns = grid.querySelectorAll('vaadin-grid-column');
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {

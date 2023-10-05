@@ -21,14 +21,6 @@ import {
 
 use(sinonChai);
 
-export async function nextFrame(): Promise<void> {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      resolve(undefined);
-    });
-  });
-}
-
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getFormField(result: RenderResult, label: string): Promise<TextFieldElement | undefined> {
   return result.queryByLabelText(label)?.parentElement as TextFieldElement;
@@ -38,7 +30,7 @@ async function setFormField(result: RenderResult, label: string, value: string) 
   const field = (await getFormField(result, label))!;
   field.value = value;
   field.dispatchEvent(new CustomEvent('input'));
-  await nextFrame();
+  await reactRender();
 }
 
 async function assertFormFieldValue(result: RenderResult, fieldLabel: string, expected: number | string) {
