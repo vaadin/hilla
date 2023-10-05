@@ -37,7 +37,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
           <HorizontalLayout
             style={{
               width: '100%',
-              justifyContent: 'space-between',
+              justifyContent: header ? 'space-between' : 'end',
               paddingLeft: 'var(--lumo-space-m)',
               paddingRight: 'var(--lumo-space-m)',
               paddingBottom: 'var(--lumo-space-s)',
@@ -45,7 +45,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
               alignItems: 'center',
             }}
           >
-            <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2>
+            {header ? <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2> : <></>}
             <Button theme="primary" onClick={() => setItem({} as TItem)}>
               + New
             </Button>
