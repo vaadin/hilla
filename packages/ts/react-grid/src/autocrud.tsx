@@ -32,13 +32,13 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
       <AutoCrudContext.Provider
         value={{ service, properties: getProperties(model), refreshGrid: () => setRefreshTrigger(refreshTrigger + 1) }}
       >
-        <HorizontalLayout>
-          <VerticalLayout style={{ flex: 1 }}>
-            <HorizontalLayout style={{ width: '100%', justifyContent: 'space-between' }}>
-              <Button theme="primary" onClick={() => setItem({} as TItem)}>
-                + New
-              </Button>
-            </HorizontalLayout>
+        <VerticalLayout style={{ flex: 1 }}>
+          <HorizontalLayout style={{ width: '100%', justifyContent: 'space-between' }}>
+            <Button theme="primary" onClick={() => setItem({} as TItem)}>
+              + New
+            </Button>
+          </HorizontalLayout>
+          <HorizontalLayout style={{ width: '100%' }}>
             <AutoGrid
               refreshTrigger={refreshTrigger}
               service={service}
@@ -57,19 +57,19 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
               }}
               customColumns={customColumns}
             ></AutoGrid>
-          </VerticalLayout>
-          <ExperimentalAutoForm
-            disabled={!item}
-            service={service}
-            model={model}
-            item={item}
-            afterSubmit={({ item: submittedItem }) => {
-              setItem(submittedItem);
-              // Trigger grid data refresh
-              setRefreshTrigger(refreshTrigger + 1);
-            }}
-          ></ExperimentalAutoForm>
-        </HorizontalLayout>
+            <ExperimentalAutoForm
+              disabled={!item}
+              service={service}
+              model={model}
+              item={item}
+              afterSubmit={({ item: submittedItem }) => {
+                setItem(submittedItem);
+                // Trigger grid data refresh
+                setRefreshTrigger(refreshTrigger + 1);
+              }}
+            ></ExperimentalAutoForm>
+          </HorizontalLayout>
+        </VerticalLayout>
       </AutoCrudContext.Provider>
     </>
   );
