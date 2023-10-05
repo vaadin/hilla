@@ -120,6 +120,13 @@ describe('@hilla/react-grid', () => {
       expect(grid.getAttribute('model')).to.be.null;
       expect(grid.getAttribute('service')).to.be.null;
     });
+    it('calls data provider list() only once for initial data', async () => {
+      const testService = personService();
+      expect(testService.callCount).to.equal(0);
+      render(<AutoGrid service={testService} model={PersonModel} />);
+      await reactRender();
+      expect(testService.callCount).to.equal(1);
+    });
     it('passes filter to the data provider', async () => {
       const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
       // eslint-disable-next-line
@@ -318,7 +325,7 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(_personService.lastFilter).to.eql(expectedFilter);
+        expect(_companyService.lastFilter).to.eql(expectedFilter);
       });
     });
     it('removes the filters when you clear the fields', async () => {
