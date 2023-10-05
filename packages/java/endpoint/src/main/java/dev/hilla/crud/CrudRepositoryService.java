@@ -1,5 +1,8 @@
 package dev.hilla.crud;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
 import dev.hilla.crud.filter.Filter;
@@ -37,9 +40,34 @@ public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
         return getRepository().save(value);
     }
 
+    /**
+     * Saves the given objects and returns the (potentially) updated objects.
+     * <p>
+     * The returned objects might have new ids or updated consistency versions.
+     *
+     * @param values
+     *            the objects to save
+     * @return the fresh objects
+     */
+    public List<T> saveAll(Iterable<T> values) {
+        List<T> saved = new ArrayList<>();
+        getRepository().saveAll(values).forEach(saved::add);
+        return saved;
+    }
+
     @Override
     public void delete(ID id) {
         getRepository().deleteById(id);
+    }
+
+    /**
+     * Deletes the objects with the given ids.
+     *
+     * @param ids
+     *            the ids of the objects to delete
+     */
+    public void deleteAll(Iterable<ID> ids) {
+        getRepository().deleteAllById(ids);
     }
 
 }
