@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-backbone",
-  "version": "2.1.11",
+  "version": "2.1.12",
   "description": "A Hilla TypeScript Generator plugin to generate basic code",
   "main": "index.js",
   "type": "module",

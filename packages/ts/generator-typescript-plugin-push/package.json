@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-push",
-  "version": "2.1.11",
+  "version": "2.1.12",
   "description": "A Hilla TypeScript Generator plugin to add push support",
   "main": "index.js",
   "type": "module",
