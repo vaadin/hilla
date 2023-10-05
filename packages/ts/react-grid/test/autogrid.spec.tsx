@@ -33,7 +33,6 @@ import {
 
 use(sinonChai);
 
-
 async function assertColumns(result: RenderResult, ...ids: string[]) {
   const grid = getGrid(result);
   await reactRender();
