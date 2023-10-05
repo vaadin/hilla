@@ -1,5 +1,4 @@
-import { DatePicker } from '@hilla/react-components/DatePicker.js';
-import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
+import { DatePicker, DatePickerElement, type DatePickerI18n } from '@hilla/react-components/DatePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
@@ -8,6 +7,7 @@ import { TextField, type TextFieldElement } from '@hilla/react-components/TextFi
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
+import { DateFormatter } from './date-formatter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
 // TODO: Replace with more robust solution
@@ -26,6 +26,15 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
   display: none;
 }`;
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
+
+// Create date picker I18N config based on the current browser locale
+const dateFormatter = new DateFormatter();
+
+const datePickerI18n: DatePickerI18n = {
+  ...new DatePickerElement().i18n,
+  formatDate: (date) => dateFormatter.format(date),
+  parseDate: (text) => dateFormatter.parse(text) ?? undefined,
+};
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -169,6 +178,7 @@ export function DateHeaderFilter(): ReactElement {
       <DatePicker
         value={filterValue}
         placeholder="Filter..."
+        i18n={datePickerI18n}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
