@@ -97,7 +97,7 @@ public class SecurityIT extends ChromeBrowserTest {
         getDriver().get(getRootURL() + "/" + path);
     }
 
-    // @Test
+    @Test
     public void menu_correct_for_anonymous() {
         open("");
         List<MenuItem> menuItems = getMenuItems();
@@ -109,7 +109,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertEquals(expectedItems, menuItems);
     }
 
-    // @Test
+    @Test
     public void menu_correct_for_user() {
         open("login");
         loginUser();
@@ -122,7 +122,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertEquals(expectedItems, menuItems);
     }
 
-    // @Test
+    @Test
     public void menu_correct_for_admin() {
         open("login");
         loginAdmin();
@@ -135,27 +135,27 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertEquals(expectedItems, menuItems);
     }
 
-    // @Test
+    @Test
     public void root_page_does_not_require_login() {
         open("");
         assertRootPageShown();
     }
 
-    // @Test
+    @Test
     public void navigate_to_private_view_prevented() {
         open("");
         navigateTo("private", false);
         assertLoginViewShown();
     }
 
-    // @Test
+    @Test
     public void navigate_to_admin_view_prevented() {
         open("");
         navigateTo("admin", false);
         assertLoginViewShown();
     }
 
-    // @Test
+    @Test
     public void redirect_to_private_view_after_login() {
         open("private");
         assertPathShown("login");
@@ -163,7 +163,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertPrivatePageShown(USER_FULLNAME);
     }
 
-    // @Test
+    @Test
     public void redirect_to_admin_view_after_login() {
         open("admin");
         assertPathShown("login");
@@ -171,7 +171,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertAdminPageShown(ADMIN_FULLNAME);
     }
 
-    // @Test
+    @Test
     public void private_page_logout_should_redirect_to_root() {
         open("login");
         loginUser();
@@ -180,7 +180,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertRootPageShown();
     }
 
-    // @Test
+    @Test
     public void redirect_to_resource_after_login() {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.nocache.txt";
@@ -191,7 +191,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertTrue(result.contains(contents));
     }
 
-    // @Test
+    @Test
     public void refresh_when_logged_in_stays_logged_in() {
         open("private");
         loginUser();
@@ -200,7 +200,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertPrivatePageShown(USER_FULLNAME);
     }
 
-    // @Test
+    @Test
     public void when_endpoint_class_is_proxied_and_not_annotated_then_anonymously_allowed_method_is_accessible() {
         open("proxied-service");
         var view = $("proxied-service-test-view").waitForFirst();
@@ -231,7 +231,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertLoginViewShown();
     }
 
-    // @Test
+    @Test
     public void access_restricted_to_admin() {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.nocache.txt";
@@ -251,7 +251,7 @@ public class SecurityIT extends ChromeBrowserTest {
         assertLoginViewShown();
     }
 
-    // @Test
+    @Test
     public void public_app_resources_available_for_all() {
         openResource("public/public.nocache.txt");
         String shouldBeTextFile = getDriver().getPageSource();
@@ -265,14 +265,14 @@ public class SecurityIT extends ChromeBrowserTest {
                 shouldBeTextFile.contains("Public document for all users"));
     }
 
-    // @Test
+    @Test
     public void reload_when_anonymous_session_expires() {
         open("");
         simulateNewServer();
         assertPublicEndpointReloadsPage();
     }
 
-    // @Test
+    @Test
     public void reload_when_user_session_expires() {
         open("login");
         loginUser();
