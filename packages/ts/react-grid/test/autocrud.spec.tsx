@@ -185,6 +185,7 @@ describe('@hilla/react-grid', () => {
       await nextFrame();
       await nextFrame();
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jerp');
+      expect(getVisibleRowCount(grid)).to.equal(3);
     });
     it('deletes and refreshes grid after confirming', async () => {
       const service = personService();
