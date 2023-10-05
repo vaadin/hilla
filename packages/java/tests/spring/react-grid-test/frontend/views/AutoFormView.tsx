@@ -1,10 +1,10 @@
 import { ExperimentalAutoForm } from '@hilla/react-grid';
-import Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment';
+import { useState } from 'react';
+import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel';
 import { AppointmentService } from 'Frontend/generated/endpoints';
-import { useState } from 'react';
 
-export function AutoFormView() {
+export function AutoFormView(): JSX.Element {
   const [submitted, setSubmitted] = useState<Appointment | undefined>(undefined);
   return (
     <>
