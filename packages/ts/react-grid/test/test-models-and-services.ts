@@ -218,7 +218,6 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
         newValue.version = currentValue.version + 1;
         data = data.map((item) => (item.id === newValue.id ? newValue : item));
       } else {
-        // newValue.id =
         newValue.id = data.map((item) => item.id).reduce((prev, curr) => Math.max(prev, curr)) + 1;
         newValue.version = 1;
         data = [...data, newValue];
