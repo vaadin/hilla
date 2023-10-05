@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -67,5 +68,28 @@ public class CrudRepositoryServiceJpaTest {
         Assert.assertTrue(testCrudRepositoryService.exists(object.getId()));
         Assert.assertFalse(
                 testCrudRepositoryService.exists(object.getId() + 10));
+    }
+
+    @Test
+    public void saveAll() {
+        TestObject o1 = new TestObject();
+        o1.setName("Hello");
+        TestObject o2 = new TestObject();
+        o2.setName("World");
+
+        List<TestObject> saved = testCrudRepositoryService
+                .saveAll(List.of(o1, o2));
+        Assert.assertEquals("World", saved.get(1).getName());
+        Assert.assertTrue(
+                testCrudRepositoryService.exists(saved.get(1).getId()));
+    }
+
+    @Test
+    public void deleteAll() {
+        testCrudRepositoryService.deleteAll(List.of(testObjects.get(3).getId(),
+                testObjects.get(4).getId()));
+        Assert.assertEquals(List.of("John", "Jeff", "Michael", "Lady"),
+                testCrudRepositoryService.list(Pageable.unpaged(), null)
+                        .stream().map(o -> o.getName()).toList());
     }
 }
