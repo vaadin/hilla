@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@hilla/form": "file:../../../../ts/form",
-    "@hilla/frontend": "2.3.0-alpha6",
+    "@hilla/frontend": "2.3.0-alpha9",
     "@hilla/generator-typescript-cli": "file:../../../../ts/generator-typescript-cli",
     "@hilla/generator-typescript-core": "file:../../../../ts/generator-typescript-core",
     "@hilla/generator-typescript-plugin-backbone": "file:../../../../ts/generator-typescript-plugin-backbone",
@@ -45,20 +45,21 @@
   },
   "vaadin": {
     "dependencies": {
-      "@hilla/frontend": "2.3.0-alpha6",
-      "@hilla/generator-typescript-cli": "2.3.0-alpha6",
-      "@hilla/generator-typescript-core": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-backbone": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-barrel": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-client": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-model": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-push": "2.3.0-alpha6",
-      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha6",
-      "@hilla/generator-typescript-utils": "2.3.0-alpha6",
-      "@hilla/react-auth": "2.3.0-alpha6",
+      "@hilla/form": "2.3.0-alpha9",
+      "@hilla/frontend": "2.3.0-alpha9",
+      "@hilla/generator-typescript-cli": "2.3.0-alpha9",
+      "@hilla/generator-typescript-core": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-backbone": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-barrel": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-client": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-model": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-push": "2.3.0-alpha9",
+      "@hilla/generator-typescript-plugin-subtypes": "2.3.0-alpha9",
+      "@hilla/generator-typescript-utils": "2.3.0-alpha9",
+      "@hilla/react-auth": "2.3.0-alpha9",
       "@hilla/react-components": "2.2.0-beta2",
-      "@hilla/react-form": "2.3.0-alpha6",
-      "@hilla/react-grid": "2.3.0-alpha6",
+      "@hilla/react-form": "2.3.0-alpha9",
+      "@hilla/react-grid": "2.3.0-alpha9",
       "@polymer/polymer": "3.5.1",
       "@vaadin/bundles": "24.2.0-beta2",
       "@vaadin/common-frontend": "0.0.18",
@@ -83,7 +84,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "3655b34f5d90d8cd113195b7a69ea930ef9e919a551ba9fcf736ee2d4b98f21f"
+    "hash": "c168466b01a08c2490c0fec03adf55387cf3a11570b4a82cfc2b3a846c9a3089"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
