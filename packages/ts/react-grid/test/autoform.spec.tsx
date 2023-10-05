@@ -15,7 +15,7 @@ import {
   getItem,
   personData,
   personService,
-  type HasLastFilter,
+  type HasTestInfo,
   type Person,
 } from './test-models-and-services.js';
 
@@ -103,7 +103,7 @@ describe('@hilla/react-grid', () => {
       await assertFormFieldValues(result, undefined);
     });
     it('submits a valid form', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
 
       const person = await getItem(service, 1);
 
@@ -115,7 +115,7 @@ describe('@hilla/react-grid', () => {
       expect(newItem!.firstName).to.equal('foo');
     });
     it('retains the form values a valid submit', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       await setFormField(result, 'First name', 'bar');
@@ -126,7 +126,7 @@ describe('@hilla/react-grid', () => {
       await assertFormFieldValues(result, newPerson);
     });
     it('retains the form values after a valid submit when using afterSubmit', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
       const result = render(
@@ -140,7 +140,7 @@ describe('@hilla/react-grid', () => {
       await assertFormFieldValues(result, newPerson);
     });
     it('calls afterSubmit with the new item', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
 
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
@@ -154,7 +154,7 @@ describe('@hilla/react-grid', () => {
       assert(submitSpy.calledWithMatch(sinon.match.hasNested('item.firstName', 'bag')));
     });
     it('shows an error if the endpoint call fails', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');
@@ -170,7 +170,7 @@ describe('@hilla/react-grid', () => {
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).not.to.be.null;
     });
     it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
-      const service: CrudService<Person> & HasLastFilter = createService<Person>(personData);
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
         throw new Error('foobar');

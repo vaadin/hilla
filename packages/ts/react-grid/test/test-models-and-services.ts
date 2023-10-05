@@ -168,14 +168,17 @@ type HasIdVersion = {
   version: number;
 };
 
-export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasLastFilter => {
+export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
   let _lastFilter: Filter | undefined;
   let data = initialData;
+  let _callCount = 0;
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
     async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
+      _callCount += 1;
+
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
         /* eslint-disable */
@@ -230,6 +233,9 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
     },
     get lastFilter() {
       return _lastFilter;
+    },
+    get callCount() {
+      return _callCount;
     },
   };
 };
@@ -287,19 +293,20 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
   },
 ];
 
-export type HasLastFilter = {
+export type HasTestInfo = {
   lastFilter: Filter | undefined;
+  callCount: number;
 };
 
-export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
-export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
-export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasLastFilter =>
+export const personService = (): CrudService<Person> & HasTestInfo => createService(personData);
+export const companyService = (): CrudService<Company> & HasTestInfo => createService(companyData);
+export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasTestInfo =>
   createService(columnRendererTestData);
 
 const noSort: Sort = { orders: [] };
 
 export async function getItem<T extends HasIdVersion>(
-  service: CrudService<T> & HasLastFilter,
+  service: CrudService<T> & HasTestInfo,
   id: number,
 ): Promise<T | undefined> {
   return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);

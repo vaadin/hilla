@@ -16,4 +16,10 @@ public class OrFilter implements Filter {
     public void setChildren(List<Filter> children) {
         this.children = children;
     }
+
+    @Override
+    public String toString() {
+        return "OrFilter [children=" + children + "]";
+    }
+
 }
