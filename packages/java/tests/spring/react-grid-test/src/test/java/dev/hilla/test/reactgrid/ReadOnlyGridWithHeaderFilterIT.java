@@ -94,11 +94,11 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         assertRowCount(3);
         assertName(0, "Mark", "Young");
 
-        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.LESS_THAN, null);
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.LESS_THAN, (String) null);
         assertRowCount(46);
         assertName(0, "Xander", "Hill");
 
-        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.EQUALS, null);
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.EQUALS, (String) null);
         assertRowCount(1);
         assertName(0, "Abigail", "Carter");
 
@@ -114,11 +114,11 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         assertRowCount(22);
         assertName(0, "Uma", "Washington");
 
-        setHeaderFilter(SHIFT_START_COLUMN, Matcher.LESS_THAN, null);
+        setHeaderFilter(SHIFT_START_COLUMN, Matcher.LESS_THAN, (String) null);
         assertRowCount(27);
         assertName(0, "Jason", "Lopez");
 
-        setHeaderFilter(SHIFT_START_COLUMN, Matcher.EQUALS, null);
+        setHeaderFilter(SHIFT_START_COLUMN, Matcher.EQUALS, (String) null);
         assertRowCount(1);
         assertName(0, "Samuel", "Turner");
 
