@@ -18,6 +18,7 @@ import {
   getHeaderRows,
   getSortOrder,
   getVisibleRowCount,
+  reactRender,
   sortGrid,
 } from './grid-test-helpers.js';
 import {
@@ -32,19 +33,9 @@ import {
 
 use(sinonChai);
 
-export async function nextFrame(): Promise<void> {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      resolve(undefined);
-    });
-  });
-}
-
 async function assertColumns(result: RenderResult, ...ids: string[]) {
   const grid = getGrid(result);
-  await nextFrame();
-  await nextFrame();
-  await nextFrame();
+  await reactRender();
   const columns = grid.querySelectorAll('vaadin-grid-column');
   expect(columns.length).to.equal(ids.length);
   for (let i = 0; i < ids.length; i++) {
@@ -79,16 +70,14 @@ describe('@hilla/react-grid', () => {
     it('sorts according to first column by default', async () => {
       const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
     });
     it('retains sorting when re-rendering', async () => {
       const result = render(<TestAutoGridNoHeaderFilters />);
       const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       sortGrid(grid, 'lastName', 'desc');
       expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
       result.rerender(<TestAutoGridNoHeaderFilters />);
@@ -97,10 +86,9 @@ describe('@hilla/react-grid', () => {
     it('creates sortable columns', async () => {
       const result = render(<TestAutoGridNoHeaderFilters />);
       const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       sortGrid(grid, 'firstName', 'desc');
-      await nextFrame();
+      await reactRender();
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
       expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
     });
@@ -108,8 +96,7 @@ describe('@hilla/react-grid', () => {
       const service = personService();
       const result = render(<TestAutoGridNoHeaderFilters service={service} />);
       const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       const dp = grid.dataProvider;
       expect(dp).to.not.be.undefined;
       result.rerender(<TestAutoGridNoHeaderFilters service={service} />);
@@ -118,9 +105,9 @@ describe('@hilla/react-grid', () => {
     });
     it('data provider provides data', async () => {
       const result = render(<TestAutoGridNoHeaderFilters />);
-      await nextFrame();
+      await reactRender();
       const grid = getGrid(result);
-      await nextFrame();
+      await reactRender();
       expect(getVisibleRowCount(grid)).to.equal(2);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
       expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
@@ -139,8 +126,7 @@ describe('@hilla/react-grid', () => {
       (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
       const result = render(<TestAutoGrid filter={filter} />);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       const grid = getGrid(result);
       expect(getVisibleRowCount(grid)).to.equal(1);
       expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
@@ -150,16 +136,14 @@ describe('@hilla/react-grid', () => {
     describe('header filters', () => {
       it('created for string columns', async () => {
         const result = render(<TestAutoGrid />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const cell = getHeaderCellContent(grid, 1, 0);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
       });
       it('created for number columns', async () => {
         const result = render(<TestAutoGrid />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const cell = getHeaderCellContent(grid, 1, 3);
         expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
@@ -167,13 +151,12 @@ describe('@hilla/react-grid', () => {
       it('filter when you type in the field for a string column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filter-value';
         firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -187,14 +170,13 @@ describe('@hilla/react-grid', () => {
       it('filter when you type in the field for a number column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const someNumberFilterField = getHeaderCellContent(grid, 1, 3).firstElementChild!
           .nextElementSibling as TextFieldElement;
         someNumberFilterField.value = '123';
         someNumberFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -207,8 +189,7 @@ describe('@hilla/react-grid', () => {
 
         const someNumberFilterSelect = someNumberFilterField.previousElementSibling as SelectElement;
         someNumberFilterSelect.value = Matcher.EQUALS;
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter2: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -222,13 +203,11 @@ describe('@hilla/react-grid', () => {
       it('filters for a boolean column', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid: GridElement = result.container.querySelector('vaadin-grid')!;
         const select = getHeaderCellContent(grid, 1, 4).firstElementChild as SelectElement;
         select.value = 'True';
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -240,8 +219,7 @@ describe('@hilla/react-grid', () => {
         expect(service.lastFilter).to.eql(expectedFilter);
 
         select.value = 'False';
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter2: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -255,8 +233,7 @@ describe('@hilla/react-grid', () => {
       it('combine filters (and) when you type in multiple fields', async () => {
         const service = personService();
         const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         firstNameFilterField.value = 'filterFirst';
@@ -265,7 +242,7 @@ describe('@hilla/react-grid', () => {
         const lastNameFilterField = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
         lastNameFilterField.value = 'filterLast';
         lastNameFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
+        await reactRender();
 
         const expectedFirstNameFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -289,15 +266,14 @@ describe('@hilla/react-grid', () => {
         const service = personService();
 
         const result = render(<AutoGrid service={service} model={PersonModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         expect(getHeaderRows(grid).length).to.equal(2);
 
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'Joh';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
+        await reactRender();
 
         const filter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -312,8 +288,7 @@ describe('@hilla/react-grid', () => {
         expect(service.lastFilter).to.eql(expectedFilter1);
 
         result.rerender(<AutoGrid service={service} model={PersonModel} noHeaderFilters></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         expect(getHeaderRows(grid).length).to.equal(1);
 
         const expectedFilter2: AndFilter = {
@@ -327,16 +302,14 @@ describe('@hilla/react-grid', () => {
         const _companyService = companyService();
 
         const result = render(<AutoGrid service={_personService} model={PersonModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         result.rerender(<AutoGrid service={_companyService} model={CompanyModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
+        await reactRender();
         const grid = getGrid(result);
         const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
         companyNameFilter.value = 'vaad';
         companyNameFilter.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
+        await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
           ...{ t: 'propertyString' },
@@ -351,8 +324,7 @@ describe('@hilla/react-grid', () => {
     it('removes the filters when you clear the fields', async () => {
       const service = personService();
       const result = render(<TestAutoGrid service={service} />);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       const grid = getGrid(result);
       const firstNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
       const lastNameFilter = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
@@ -360,7 +332,7 @@ describe('@hilla/react-grid', () => {
       lastNameFilter.value = 'filterLast';
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
-      await nextFrame();
+      await reactRender();
 
       const expectedFilter: AndFilter = {
         ...{ t: 'and' },
@@ -372,9 +344,7 @@ describe('@hilla/react-grid', () => {
       firstNameFilter.dispatchEvent(new CustomEvent('input'));
       lastNameFilter.value = '';
       lastNameFilter.dispatchEvent(new CustomEvent('input'));
-      await nextFrame();
-      await nextFrame();
-
+      await reactRender();
       expect(service.lastFilter).to.eql(expectedFilter);
     });
   });
@@ -403,8 +373,7 @@ describe('@hilla/react-grid', () => {
       const result = render(
         <TestAutoGrid customColumns={[<GridColumn autoWidth renderer={NameRenderer}></GridColumn>]} />,
       );
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       const grid = getGrid(result);
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
       expect(getBodyCellContent(grid, 0, 5).innerText).to.equal('Jane Love');
@@ -418,9 +387,7 @@ describe('@hilla/react-grid', () => {
       const result = render(
         <AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>,
       );
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       grid = result.container.querySelector('vaadin-grid')!;
     });
 

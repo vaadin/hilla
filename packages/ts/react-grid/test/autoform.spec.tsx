@@ -8,6 +8,7 @@ import sinonChai from 'sinon-chai';
 import { ExperimentalAutoForm } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import { submit } from './form-test-utils.js';
+import { reactRender } from './grid-test-helpers.js';
 import {
   PersonModel,
   createService,
@@ -20,14 +21,6 @@ import {
 
 use(sinonChai);
 
-export async function nextFrame(): Promise<void> {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      resolve(undefined);
-    });
-  });
-}
-
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getFormField(result: RenderResult, label: string): Promise<TextFieldElement | undefined> {
   return result.queryByLabelText(label)?.parentElement as TextFieldElement;
@@ -37,7 +30,7 @@ async function setFormField(result: RenderResult, label: string, value: string) 
   const field = (await getFormField(result, label))!;
   field.value = value;
   field.dispatchEvent(new CustomEvent('input'));
-  await nextFrame();
+  await reactRender();
 }
 
 async function assertFormFieldValue(result: RenderResult, fieldLabel: string, expected: number | string) {
@@ -117,7 +110,7 @@ describe('@hilla/react-grid', () => {
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       await setFormField(result, 'First name', 'foo');
       await submit(result);
-      await nextFrame();
+      await reactRender();
       const newItem = await getItem(service, 1);
       expect(newItem!.firstName).to.equal('foo');
     });
@@ -127,8 +120,7 @@ describe('@hilla/react-grid', () => {
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       await setFormField(result, 'First name', 'bar');
       await submit(result);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       const newPerson: Person = { ...person! };
       newPerson.firstName = 'bar';
       await assertFormFieldValues(result, newPerson);
@@ -142,7 +134,7 @@ describe('@hilla/react-grid', () => {
       );
       await setFormField(result, 'First name', 'baz');
       await submit(result);
-      await nextFrame();
+      await reactRender();
       const newPerson: Person = { ...person! };
       newPerson.firstName = 'baz';
       await assertFormFieldValues(result, newPerson);
@@ -158,9 +150,7 @@ describe('@hilla/react-grid', () => {
       await setFormField(result, 'First name', 'bag');
       await submit(result);
 
-      await nextFrame();
-      await nextFrame();
-
+      await reactRender();
       assert(submitSpy.calledWithMatch(sinon.match.hasNested('item.firstName', 'bag')));
     });
     it('shows an error if the endpoint call fails', async () => {
@@ -175,9 +165,7 @@ describe('@hilla/react-grid', () => {
         <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       await submit(result);
-      await nextFrame();
-      await nextFrame();
-
+      await reactRender();
       assert(submitSpy.notCalled);
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).not.to.be.null;
     });
@@ -200,7 +188,7 @@ describe('@hilla/react-grid', () => {
         />,
       );
       await submit(result);
-      await nextFrame();
+      await reactRender();
       // eslint-disable-next-line
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.be.null;
       assert(submitSpy.notCalled);
@@ -208,16 +196,15 @@ describe('@hilla/react-grid', () => {
     });
     it('disables all fields and buttons when disabled', async () => {
       const result = render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />);
-      await nextFrame();
+      await reactRender();
       await assertAllEnabled(result, false);
     });
     it('enables all fields and buttons when enabled', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled />);
-      await nextFrame();
+      await reactRender();
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
-      await nextFrame();
-      await nextFrame();
+      await reactRender();
       await assertAllEnabled(result, true);
     });
   });
