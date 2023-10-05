@@ -29,6 +29,9 @@ public class JpaFilterConverter {
      * @return a JPA filter specification for the given filter
      */
     public <T> Specification<T> toSpec(Filter rawFilter, Class<T> entity) {
+        if (rawFilter == null) {
+            return Specification.anyOf();
+        }
         if (rawFilter instanceof AndFilter filter) {
             return Specification.allOf(filter.getChildren().stream()
                     .map(f -> toSpec(f, entity)).toList());

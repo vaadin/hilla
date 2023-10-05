@@ -2,6 +2,7 @@ package dev.hilla.crud;
 
 import dev.hilla.EndpointExposed;
 import dev.hilla.Nullable;
+import dev.hilla.crud.filter.Filter;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
