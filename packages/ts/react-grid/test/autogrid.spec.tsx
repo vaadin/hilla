@@ -385,6 +385,18 @@ describe('@hilla/react-grid', () => {
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
       expect(getBodyCellContent(grid, 0, 5).innerText).to.equal('Jane Love');
     });
+    it('uses custom column options on top of the type defaults', async () => {
+      const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
+      const result = render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />);
+      await reactRender();
+      const grid = getGrid(result);
+      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+      const janeCell = getBodyCellContent(grid, 0, 0);
+      expect(janeCell.innerText).to.equal('JANE');
+      // The header filter was not overridden
+      const cell = getHeaderCellContent(grid, 1, 0);
+      expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+    });
   });
 
   describe('default renderers', () => {
