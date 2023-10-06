@@ -12,7 +12,8 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
-import { getColumnProps } from './autogrid-columns.js';
+import { getColumnOptions, type ColumnOptions } from './autogrid-columns.js';
+import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
@@ -31,6 +32,8 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
     noHeaderFilters?: boolean;
     refreshTrigger?: number;
     customColumns?: JSX.Element[];
+    columnOptions?: Record<string, ColumnOptions>;
+    rowNumbers?: boolean;
   }>;
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
@@ -92,7 +95,13 @@ function createDataProvider<TItem>(
 function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  options: { visibleColumns?: string[]; noHeaderFilters?: boolean; customColumns?: JSX.Element[] },
+  options: {
+    visibleColumns?: string[];
+    noHeaderFilters?: boolean;
+    customColumns?: JSX.Element[];
+    columnOptions?: Record<string, ColumnOptions>;
+    rowNumbers?: boolean;
+  },
 ) {
   const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
   const effectiveProperties = effectiveColumns
@@ -105,9 +114,12 @@ function useColumns(
 
   const autoColumns = effectiveProperties.map((propertyInfo) => {
     let column;
+
+    const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
+
     // Header renderer is effectively the header filter, which should only be
     // applied when header filters are enabled
-    const { headerRenderer, ...columnProps } = getColumnProps(propertyInfo);
+    const { headerRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
 
     if (!options.noHeaderFilters) {
       column = (
@@ -127,10 +139,14 @@ function useColumns(
       </ColumnContext.Provider>
     );
   });
+  let columns = autoColumns;
   if (options.customColumns) {
-    return [...autoColumns, ...options.customColumns];
+    columns = [...columns, ...options.customColumns];
   }
-  return autoColumns;
+  if (options.rowNumbers) {
+    columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
+  }
+  return columns;
 }
 
 export function AutoGrid<TItem>({
@@ -141,6 +157,8 @@ export function AutoGrid<TItem>({
   noHeaderFilters,
   refreshTrigger = 0,
   customColumns,
+  columnOptions,
+  rowNumbers,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
@@ -173,6 +191,8 @@ export function AutoGrid<TItem>({
     visibleColumns,
     noHeaderFilters,
     customColumns,
+    columnOptions,
+    rowNumbers,
   });
 
   useEffect(() => {

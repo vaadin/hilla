@@ -120,6 +120,13 @@ describe('@hilla/react-grid', () => {
       expect(grid.getAttribute('model')).to.be.null;
       expect(grid.getAttribute('service')).to.be.null;
     });
+    it('calls data provider list() only once for initial data', async () => {
+      const testService = personService();
+      expect(testService.callCount).to.equal(0);
+      render(<AutoGrid service={testService} model={PersonModel} />);
+      await reactRender();
+      expect(testService.callCount).to.equal(1);
+    });
     it('passes filter to the data provider', async () => {
       const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
       // eslint-disable-next-line
@@ -318,7 +325,7 @@ describe('@hilla/react-grid', () => {
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(_personService.lastFilter).to.eql(expectedFilter);
+        expect(_companyService.lastFilter).to.eql(expectedFilter);
       });
     });
     it('removes the filters when you clear the fields', async () => {
@@ -377,6 +384,25 @@ describe('@hilla/react-grid', () => {
       const grid = getGrid(result);
       await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
       expect(getBodyCellContent(grid, 0, 5).innerText).to.equal('Jane Love');
+    });
+    it('uses custom column options on top of the type defaults', async () => {
+      const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
+      const result = render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />);
+      await reactRender();
+      const grid = getGrid(result);
+      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+      const janeCell = getBodyCellContent(grid, 0, 0);
+      expect(janeCell.innerText).to.equal('JANE');
+      // The header filter was not overridden
+      const cell = getHeaderCellContent(grid, 1, 0);
+      expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+    });
+    it('renders row numbers if requested', async () => {
+      const result = render(<TestAutoGrid rowNumbers />);
+      await reactRender();
+      const grid = getGrid(result);
+      await assertColumns(result, '', 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('1');
     });
   });
 
