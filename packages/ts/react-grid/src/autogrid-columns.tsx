@@ -9,12 +9,10 @@ import {
 import { BooleanHeaderFilter, NoHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
 import type { PropertyInfo } from './property-info';
 
-type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
-  headerRenderer: React.ComponentType<Readonly<{ original: GridColumnElement }>>;
-};
+export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
-export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
+function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
     case 'number':
@@ -66,7 +64,18 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
     case undefined:
       return {
         autoWidth: true,
-        headerRenderer: NoHeaderFilter,
       };
   }
+}
+
+export function getColumnOptions(
+  propertyInfo: PropertyInfo,
+  customColumnOptions: ColumnOptions | undefined,
+): ColumnOptions {
+  const typeColumnOptions = getTypeColumnOptions(propertyInfo);
+  const columnOptions = customColumnOptions ? { ...typeColumnOptions, ...customColumnOptions } : typeColumnOptions;
+  if (!columnOptions.headerRenderer) {
+    console.error(`No header renderer defined for column ${propertyInfo.name}`);
+  }
+  return columnOptions;
 }
