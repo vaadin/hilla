@@ -17,14 +17,14 @@ INSERT INTO person (version, first_name, last_name, lucky_number, email_verified
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Quincy', 'Perez', 6, false, '1997-03-09', '11:30', '2023-09-27 11:14:02');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Rachel', 'Roberts', 4, true, '1988-09-02', '12:15', '2023-09-27 12:45:27');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Samuel', 'Turner', 123, true, '1994-10-29', '13:00', '2023-09-27 13:16:52');
-INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Tina', 'Phillips', 2, true, '1990-02-15', '14:45', '2023-09-27 14:47:18');
+INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Tina', 'Phillips', 2, true, '1990-02-15', '14:45', '2023-09-28 14:47:18');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Ulysses', 'Campbell', 8, true, '1990-05-15', '09:15', '2023-09-27 08:30:15');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Victor', 'Edwards', 5, true, '1985-09-28', '10:30', '2023-09-27 10:45:22');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Wendy', 'Green', 9, true, '1992-11-10', '11:45', '2023-09-27 12:20:59');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Xander', 'Hill', 123, true, '1980-03-22', '12:00', '2023-09-27 13:55:40');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Yasmine', 'Adams', 123, true, '1995-07-07', '13:15', '2023-09-27 15:10:17');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Zack', 'Baker', 123, true, '1987-12-18', '14:30', '2023-09-27 17:25:08');
-INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Abigail', 'Carter', 13, true, '1999-04-30', '15:45', '2023-09-27 19:40:37');
+INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Abigail', 'Carter', 13, true, '1999-04-30', '15:45', '2023-09-26 19:40:37');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Benjamin', 'Davis', 44, true, '1982-08-04', '16:00', '2023-09-27 21:55:49');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Catherine', 'Evans', 123, false, '1990-06-12', '17:15', '2023-09-27 01:05:23');
 INSERT INTO person (version, first_name, last_name, lucky_number, email_verified, birth_date, shift_start, appointment_time) VALUES (1, 'Dylan', 'Fisher', 1, true, '1983-02-25', '18:30', '2023-09-27 03:20:11');
@@ -96,7 +96,7 @@ INSERT INTO food_item (version, name) VALUES
 (1, 'Fish');
 
 -- Assigning food allergies to employees
-INSERT INTO employee_allergies (employee_id, allergies_id) VALUES 
+INSERT INTO employee_allergies (employee_id, allergies_id) VALUES
 (1, 1), (1, 2),
 (2, 3),
 (3, 4),

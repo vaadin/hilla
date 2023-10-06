@@ -1,13 +1,14 @@
 package dev.hilla.test.reactgrid;
 
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.function.Consumer;
 
 import dev.hilla.crud.filter.PropertyStringFilter.Matcher;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
@@ -21,6 +22,9 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     private static final int LAST_NAME_COLUMN = 1;
     private static final int LUCKY_NUMBER_COLUMN = 2;
     private static final int EMAIL_VERIFIED_COLUMN = 3;
+    private static final int BIRTH_DATE_COLUMN = 4;
+    private static final int SHIFT_START_COLUMN = 5;
+    private static final int APPOINTMENT_TIME_COLUMN = 6;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid-with-headerfilters";
@@ -81,6 +85,67 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     }
 
     @Test
+    public void localDateFilterWorks() {
+        assertRowCount(50);
+        sortByColumn(BIRTH_DATE_COLUMN);
+
+        // Default is greater_than
+        setHeaderFilter(BIRTH_DATE_COLUMN, null, "1999-04-30");
+        assertRowCount(3);
+        assertName(0, "Mark", "Young");
+
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.LESS_THAN, (String) null);
+        assertRowCount(46);
+        assertName(0, "Xander", "Hill");
+
+        setHeaderFilter(BIRTH_DATE_COLUMN, Matcher.EQUALS, (String) null);
+        assertRowCount(1);
+        assertName(0, "Abigail", "Carter");
+
+    }
+
+    @Test
+    public void localTimeFilterWorks() {
+        assertRowCount(50);
+        sortByColumn(SHIFT_START_COLUMN);
+
+        // Default is greater_than
+        setHeaderFilter(SHIFT_START_COLUMN, null, "13:00");
+        assertRowCount(22);
+        assertName(0, "Uma", "Washington");
+
+        setHeaderFilter(SHIFT_START_COLUMN, Matcher.LESS_THAN, (String) null);
+        assertRowCount(27);
+        assertName(0, "Jason", "Lopez");
+
+        setHeaderFilter(SHIFT_START_COLUMN, Matcher.EQUALS, (String) null);
+        assertRowCount(1);
+        assertName(0, "Samuel", "Turner");
+
+    }
+
+    @Test
+    public void localDateTimeFilterWorks() {
+        assertRowCount(50);
+        sortByColumn(APPOINTMENT_TIME_COLUMN);
+
+        // Default is greater_than
+        setHeaderFilter(APPOINTMENT_TIME_COLUMN, null, "2023-09-27");
+        assertRowCount(1);
+        assertName(0, "Tina", "Phillips");
+
+        setHeaderFilter(APPOINTMENT_TIME_COLUMN, Matcher.LESS_THAN,
+                (String) null);
+        assertRowCount(1);
+        assertName(0, "Abigail", "Carter");
+
+        setHeaderFilter(APPOINTMENT_TIME_COLUMN, Matcher.EQUALS, (String) null);
+        assertRowCount(48);
+        assertName(0, "Catherine", "Evans");
+
+    }
+
+    @Test
     public void numberFilterWithInvalidInputIgnored() {
         setHeaderFilter(LUCKY_NUMBER_COLUMN, null, "a");
         assertRowCount(50);
@@ -123,6 +188,10 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
             ifType(filterField, TextFieldElement.class,
                     e -> e.setValue(filter));
             ifType(filterField, NumberFieldElement.class,
+                    e -> e.setValue(filter));
+            ifType(filterField, DatePickerElement.class,
+                    e -> e.setDate(LocalDate.parse(filter)));
+            ifType(filterField, TimePickerElement.class,
                     e -> e.setValue(filter));
         }
     }
