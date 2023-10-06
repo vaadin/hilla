@@ -144,7 +144,7 @@ function useColumns(
     columns = [...columns, ...options.customColumns];
   }
   if (options.rowNumbers) {
-    columns = [<GridColumn width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
+    columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
   }
   return columns;
 }
