@@ -1,5 +1,9 @@
 package dev.hilla.crud;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -75,6 +79,56 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (isLocalDate(javaType)) {
+            var path = root.<LocalDate> get(filter.getPropertyId());
+            var dateValue = LocalDate.parse(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, dateValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A date cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, dateValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, dateValue);
+            default:
+                break;
+            }
+        } else if (isLocalTime(javaType)) {
+            var path = root.<LocalTime> get(filter.getPropertyId());
+            var timeValue = LocalTime.parse(value);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, timeValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A time cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, timeValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, timeValue);
+            default:
+                break;
+            }
+        } else if (isLocalDateTime(javaType)) {
+            var path = root.<LocalDateTime> get(filter.getPropertyId());
+            var dateValue = LocalDate.parse(value);
+            var minValue = LocalDateTime.of(dateValue, LocalTime.MIN);
+            var maxValue = LocalDateTime.of(dateValue, LocalTime.MAX);
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.between(path, minValue, maxValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A datetime cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, maxValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, minValue);
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -90,4 +144,15 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
         return javaType == boolean.class || javaType == Boolean.class;
     }
 
+    private boolean isLocalDate(Class<?> javaType) {
+        return javaType == java.time.LocalDate.class;
+    }
+
+    private boolean isLocalTime(Class<?> javaType) {
+        return javaType == java.time.LocalTime.class;
+    }
+
+    private boolean isLocalDateTime(Class<?> javaType) {
+        return javaType == java.time.LocalDateTime.class;
+    }
 }
