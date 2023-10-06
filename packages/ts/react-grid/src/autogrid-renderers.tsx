@@ -77,3 +77,7 @@ export function AutoGridDateTimeRenderer<TItem>({ item }: RendererOptions<TItem>
     : '';
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }
+
+export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TItem>): JSX.Element {
+  return <>{model.index + 1}</>;
+}

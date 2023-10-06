@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
@@ -45,12 +46,22 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         assertLastName(row, lastName);
     }
 
+    protected int getFirstNameColumn() {
+        return 0;
+    }
+
+    protected int getLastNameColumn() {
+        return 1;
+    }
+
     protected void assertFirstName(int row, String firstName) {
-        Assert.assertEquals(firstName, grid.getCell(row, 0).getText());
+        Assert.assertEquals(firstName,
+                grid.getCell(row, getFirstNameColumn()).getText());
     }
 
     protected void assertLastName(int row, String lastName) {
-        Assert.assertEquals(lastName, grid.getCell(row, 1).getText());
+        Assert.assertEquals(lastName,
+                grid.getCell(row, getLastNameColumn()).getText());
     }
 
     protected void sortByColumn(int i) {

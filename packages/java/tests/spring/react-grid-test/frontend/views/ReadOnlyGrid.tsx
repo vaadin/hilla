@@ -19,6 +19,7 @@ export function ReadOnlyGrid(): JSX.Element {
       service={PersonListOnlyService}
       model={PersonModel}
       columnOptions={{ luckyNumber: { renderer: LuckyNumberRenderer } }}
+      rowNumbers
     />
   );
   /* page size is defined only to make testing easier */

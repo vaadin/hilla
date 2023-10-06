@@ -5,31 +5,39 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.testbench.TestBenchElement;
 
 public class ReadOnlyGridIT extends AbstractGridTest {
 
-    private static final int LUCKY_NUMBER_COLUMN = 2;
+    private static final int LUCKY_NUMBER_COLUMN = 3;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid";
     }
 
+    protected int getFirstNameColumn() {
+        return super.getFirstNameColumn() + 1;
+    }
+
+    protected int getLastNameColumn() {
+        return super.getLastNameColumn() + 1;
+    }
+
     @Test
     public void dataShown() {
         Assert.assertEquals(8, grid.getLastVisibleRowIndex());
+        Assert.assertEquals("1", grid.getCell(0, 0).getText());
         assertName(0, "Abigail", "Carter");
+        Assert.assertEquals("9", grid.getCell(8, 0).getText());
         assertName(8, "Edward", "Gonzalez");
     }
 
     @Test
     public void sortingWorks() {
         assertName(0, "Abigail", "Carter");
-        sortByColumn(0);
+        sortByColumn(1);
         assertName(0, "Zack", "Baker");
-        sortByColumn(0);
+        sortByColumn(1);
         assertName(0, "Alice", "Johnson");
     }
 

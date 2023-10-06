@@ -397,6 +397,13 @@ describe('@hilla/react-grid', () => {
       const cell = getHeaderCellContent(grid, 1, 0);
       expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
     });
+    it('renders row numbers if requested', async () => {
+      const result = render(<TestAutoGrid rowNumbers />);
+      await reactRender();
+      const grid = getGrid(result);
+      await assertColumns(result, '', 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('1');
+    });
   });
 
   describe('default renderers', () => {
