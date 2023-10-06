@@ -6,6 +6,8 @@ import { ColumnContext } from './autogrid-column-context';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
+export const locale = undefined;
+
 export type RendererOptions<TItem> = {
   item: TItem;
   model: GridItemModel<TItem>;
@@ -22,7 +24,7 @@ export function AutoGridNumberRenderer<TItem>({ item }: RendererOptions<TItem>):
   const context = useContext(ColumnContext)!;
   const value = getColumnValue(context, item);
   const formatted = Number.isFinite(value)
-    ? new Intl.NumberFormat(undefined, {
+    ? new Intl.NumberFormat(locale, {
         maximumFractionDigits: 0,
       }).format(value)
     : '';
@@ -40,7 +42,7 @@ export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>)
 
 function tryFormatDateTime(value: string, options?: Intl.DateTimeFormatOptions): string {
   try {
-    const format = new Intl.DateTimeFormat(undefined, options);
+    const format = new Intl.DateTimeFormat(locale, options);
     return format.format(new Date(value));
   } catch (e) {
     return '';
