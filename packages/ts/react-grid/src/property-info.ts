@@ -10,7 +10,7 @@ import {
   ObjectModel,
 } from '@hilla/form';
 
-export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'object' | 'string' | 'time' | undefined;
+export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'string' | 'time' | undefined;
 
 const javaTypeMap: Record<string, PropertyType> = {
   'java.util.Date': 'date',
@@ -35,8 +35,6 @@ function determinePropertyType(model: AbstractModel): PropertyType {
     return 'number';
   } else if (constructor === BooleanModel) {
     return 'boolean';
-  } else if (model instanceof ObjectModel) {
-    return 'object';
   }
   return undefined;
 }
@@ -77,12 +75,10 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     const humanReadableName = _generateHeader(name);
     const type = determinePropertyType(propertyModel);
 
-    if (type === 'object') {
-      if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
-        // Expand sub properties
-        const subProps = getProperties(propertyModel.constructor as any);
-        return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
-      }
+    if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
+      // Expand sub properties
+      const subProps = getProperties(propertyModel.constructor as any);
+      return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
     }
 
     return {
@@ -100,6 +96,10 @@ export function includeProperty(propertyInfo: PropertyInfo): unknown {
     hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id') ||
     hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Version')
   ) {
+    return false;
+  }
+  if (!propertyInfo.type) {
+    // Do not render columns we do not know how to render
     return false;
   }
   return true;

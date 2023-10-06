@@ -8,7 +8,6 @@ import jakarta.persistence.OneToOne;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.hilla.test.reactgrid.AbstractEntity;
 
 @Entity
@@ -19,8 +18,7 @@ public class Employee extends AbstractEntity {
     @OneToOne
     private Address homeAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne
     private Department department;
 
     @ManyToMany
