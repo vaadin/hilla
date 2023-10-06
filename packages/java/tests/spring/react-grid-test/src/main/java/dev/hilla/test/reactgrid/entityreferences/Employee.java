@@ -18,7 +18,7 @@ public class Employee extends AbstractEntity {
     @OneToOne
     private Address homeAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Department department;
 
     @ManyToMany
