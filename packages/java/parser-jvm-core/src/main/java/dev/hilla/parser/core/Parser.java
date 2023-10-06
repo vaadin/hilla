@@ -1,18 +1,22 @@
 package dev.hilla.parser.core;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import io.github.classgraph.ClassInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +30,22 @@ import io.swagger.v3.oas.models.OpenAPI;
 public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     private final Config config;
+
+    private static final String ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE = """
+            Class `%s` is annotated with `%s` and `%s` annotation. %n
+            Classes annotated with `%s` must not contain any of access control annotations and %n
+            this exception is for preventing the application startup with misconfiguration. The class level access %n
+            control rules of the child class will be applied for the inherited methods of this class. If the access %n
+            control rules for an inherited method should not follow the rules of the child endpoint, that method %n
+            should be overridden and annotated with the desired access control annotations explicitly. %n
+            """
+            .stripIndent();
+
+    private static final Set<String> ACL_ANNOTATIONS = Set.of(
+            "jakarta.annotation.security.DenyAll",
+            "jakarta.annotation.security.PermitAll",
+            "jakarta.annotation.security.RolesAllowed",
+            "com.vaadin.flow.server.auth.AnonymousAllowed");
 
     public Parser() {
         try {
@@ -309,6 +329,7 @@ public final class Parser {
         }
 
         try (var scanResult = classGraph.scan()) {
+            validateEndpointExposedClassesForAclAnnotations(scanResult);
             var rootNode = new RootNode(new ScanResult(scanResult),
                     storage.getOpenAPI());
             var pluginManager = new PluginManager(
@@ -321,6 +342,47 @@ public final class Parser {
         logger.debug("JVM Parser finished successfully");
 
         return storage.getOpenAPI();
+    }
+
+    private void validateEndpointExposedClassesForAclAnnotations(
+            io.github.classgraph.ScanResult scanResult) {
+
+        Optional.ofNullable(config.getEndpointExposedAnnotationName())
+                .ifPresent(endpointExposedAnnotation -> scanResult
+                        .getClassesWithAnnotation(endpointExposedAnnotation)
+                        .forEach(classInfo -> {
+                            checkClassLevelAnnotation(classInfo);
+                            checkMethodLevelAnnotation(classInfo);
+                        }));
+    }
+
+    private void checkClassLevelAnnotation(ClassInfo classInfo) {
+        classInfo.getAnnotationInfo()
+                .forEach(annotationInfo -> throwIfAnnotationIsAclAnnotation(
+                        annotationInfo.getName(), classInfo));
+    }
+
+    private void checkMethodLevelAnnotation(ClassInfo classInfo) {
+        for (Method method : classInfo.loadClass().getMethods()) {
+            var annotations = method.getDeclaredAnnotations();
+            for (Annotation annotation : annotations) {
+                throwIfAnnotationIsAclAnnotation(
+                        annotation.annotationType().getName(), classInfo);
+            }
+        }
+    }
+
+    private void throwIfAnnotationIsAclAnnotation(String annotationName,
+            ClassInfo classInfo) {
+        var endpointExposedAnnotation = config
+                .getEndpointExposedAnnotationName();
+
+        if (ACL_ANNOTATIONS.contains(annotationName)) {
+            throw new ParserException(String.format(
+                    ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE,
+                    classInfo.getName(), endpointExposedAnnotation,
+                    annotationName, endpointExposedAnnotation));
+        }
     }
 
     /**
