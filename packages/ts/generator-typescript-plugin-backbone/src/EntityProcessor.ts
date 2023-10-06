@@ -153,7 +153,7 @@ export class EntityProcessor {
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
 
-    return imports.default.add(path, specifier, true);
+    return imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
   }
 
   #processTypeElements({ properties }: ObjectSchema): readonly TypeElement[] {
