@@ -102,6 +102,10 @@ export function includeProperty(propertyInfo: PropertyInfo): unknown {
   ) {
     return false;
   }
+  if (!propertyInfo.type) {
+    // Do not render columns we do not know how to render
+    return false;
+  }
   return true;
 }
 
