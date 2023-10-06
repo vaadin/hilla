@@ -25,7 +25,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
 
   const customColumns = [];
   if (!noDelete) {
-    customColumns.push(<GridColumn autoWidth renderer={DeleteButton}></GridColumn>);
+    customColumns.push(<GridColumn key="deletebutton" autoWidth renderer={DeleteButton}></GridColumn>);
   }
 
   return (

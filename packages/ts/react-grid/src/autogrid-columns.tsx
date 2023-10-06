@@ -64,6 +64,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
     case undefined:
       return {
         autoWidth: true,
+        headerRenderer: NoHeaderFilter,
       };
   }
 }

@@ -2,6 +2,7 @@ package dev.hilla.test.reactgrid;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -24,6 +25,11 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
             Object prop = grid.getProperty("_lastVisibleIndex");
             return prop != null;
         });
+    }
+
+    @After
+    public void checkBrowserLogs() {
+        checkLogsForErrors();
     }
 
     protected void assertColumns(String... expected) {
