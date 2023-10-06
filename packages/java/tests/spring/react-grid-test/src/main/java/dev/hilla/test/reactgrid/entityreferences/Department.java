@@ -6,6 +6,7 @@ import jakarta.persistence.OneToMany;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.hilla.test.reactgrid.AbstractEntity;
 
 @Entity
@@ -14,6 +15,7 @@ public class Department extends AbstractEntity {
     private String name;
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Employee> employees;
 
     public String getName() {
