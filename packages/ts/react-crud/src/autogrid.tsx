@@ -15,7 +15,7 @@ import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
-import type { ListService } from './crud';
+import type { CountService, ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
@@ -114,9 +114,9 @@ function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
   filter: MutableRefObject<FilterUnion | undefined>,
+  realSize: MutableRefObject<number>,
 ): GridDataProvider<TItem> {
   let first = true;
-
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
     const sort: Sort = {
@@ -136,21 +136,33 @@ function createDataProvider<TItem>(
       pageSize,
       sort,
     };
-
     const items = await service.list(req, filter.current);
-    let size;
-    if (items.length === pageSize) {
-      size = (pageNumber + 1) * pageSize + 1;
 
-      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
-      if (cacheSize !== undefined && size < cacheSize) {
-        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-        size = undefined;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if ((service as any).count) {
+      const countService: CountService<TItem> = service as any;
+
+      if (realSize.current < 0) {
+        realSize.current = await countService.count(filter.current);
       }
+      callback(items, realSize.current);
     } else {
-      size = pageNumber * pageSize + items.length;
+      let infiniteScrollingSize;
+      if (items.length === pageSize) {
+        infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
+
+        const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
+        if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
+          // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+          infiniteScrollingSize = undefined;
+        }
+      } else {
+        infiniteScrollingSize = pageNumber * pageSize + items.length;
+      }
+
+      callback(items, infiniteScrollingSize);
     }
-    callback(items, size);
+
     if (first) {
       // Workaround for https://github.com/vaadin/react-components/issues/129
       first = false;
@@ -305,13 +317,14 @@ export function AutoGrid<TItem>({
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
+    const dataProviderRealSize = useRef(-1);
 
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
-      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, dataProviderRealSize);
     }, 1);
   }, [model, service]);
 
@@ -320,6 +333,7 @@ export function AutoGrid<TItem>({
     const grid = ref.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
+        dataProviderRealSize.current = -1;
       grid.clearCache();
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);

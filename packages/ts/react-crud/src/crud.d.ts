@@ -9,3 +9,6 @@ export interface CrudService<T> extends ListService<T> {
 export interface ListService<T> {
   list(request: Pageable, filter: FilterUnion | undefined): Promise<T[]>;
 }
+export interface CountService<T> {
+  count(filter: Filter | undefined): Promise<number>;
+}
