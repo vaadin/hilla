@@ -33,11 +33,11 @@ public final class Parser {
 
     private static final String ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE = """
             Class `%s` is annotated with `%s` and `%s` annotation. %n
-            Classes annotated with `%s` should not contain any of access control annotations and %n
-            this exception is for preventing the confusion. The class level access control rules of the child class %n
-            will be applied for the inherited methods of this class. If the access control rules for an inherited %n
-            method should not follow the rules of the child endpoint, that method should be overridden and annotated %n
-            with the desired access control annotations explicitly.%n
+            Classes annotated with `%s` must not contain any of access control annotations and %n
+            this exception is for preventing the application startup with misconfiguration. The class level access %n
+            control rules of the child class will be applied for the inherited methods of this class. If the access %n
+            control rules for an inherited method should not follow the rules of the child endpoint, that method %n
+            should be overridden and annotated with the desired access control annotations explicitly. %n
             """
             .stripIndent();
 
