@@ -68,7 +68,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "~2.3.0-alpha7",
+    "@hilla/frontend": "~2.3.0-alpha9",
     "validator": "^13.11.0"
   },
   "peerDependencies": {

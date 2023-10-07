@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "~2.3.0-alpha7"
+    "@hilla/frontend": "~2.3.0-alpha9"
   },
   "peerDependencies": {
     "react": "^18",
