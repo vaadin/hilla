@@ -16,12 +16,17 @@
 package dev.hilla.internal;
 
 import java.io.File;
-
-import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import dev.hilla.engine.GeneratorException;
 import dev.hilla.engine.GeneratorProcessor;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
+import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
 /**
  * Starts the generation of TS files for endpoints.
@@ -30,6 +35,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
 
     private final String nodeCommand;
+    private boolean productionMode;
 
     /**
      * Create a task for generating OpenAPI spec.
@@ -43,14 +49,16 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      *
      * @param outputDirectory
      *            the output directory for generated TypeScript code.
-     *
+     * @param productionMode
+     *            {@code true} if building for production
      * @param nodeCommand
      *            a command to run NodeJS, either absolute path to the
      *            executable or PATH-related command
      */
     TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, String nodeCommand) {
+            File outputDirectory, boolean productionMode, String nodeCommand) {
         super(projectDirectory, buildDirectoryName, outputDirectory);
+        this.productionMode = productionMode;
         this.nodeCommand = nodeCommand;
     }
 
@@ -70,5 +78,27 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
             throw new ExecutionFailedException(
                     "Failed to run TypeScript endpoint generator", e);
         }
+        // This is a hack as Hilla does not have any other way to contribute to
+        // the generated vaadin.ts
+        try {
+            File vaadinTs = new File(outputDirectory,
+                    FrontendUtils.BOOTSTRAP_FILE_NAME);
+            if (!productionMode && vaadinTs.exists()) {
+                String current = IOUtils.toString(vaadinTs.toURI(),
+                        StandardCharsets.UTF_8);
+                current += """
+                        //@ts-ignore
+                        if (import.meta.env.DEV) {
+                            import("Frontend/generated/jar-resources/dev-tools-database.js");
+                        }
+                        """;
+                FileUtils.writeStringToFile(vaadinTs, current,
+                        StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            throw new ExecutionFailedException("Failed to update vaadin.ts", e);
+
+        }
+
     }
 }

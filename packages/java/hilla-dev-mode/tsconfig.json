@@ -1,0 +1,31 @@
+{
+    "_version": "9",
+    "compilerOptions": {
+      "sourceMap": true,
+      "jsx": "react-jsx",
+      "inlineSources": true,
+      "module": "esNext",
+      "target": "es2020",
+      "moduleResolution": "bundler",
+      "strict": true,
+      "skipLibCheck": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noImplicitAny": true,
+      "noImplicitThis": true,
+      "noUnusedLocals": false,
+      "noUnusedParameters": false,
+      "experimentalDecorators": true,
+      "useDefineForClassFields": false,
+      "baseUrl": "frontend",
+      "paths": {
+        "@vaadin/flow-frontend": ["generated/jar-resources"],
+        "@vaadin/flow-frontend/*": ["generated/jar-resources/*"],
+        "Frontend/*": ["*"]
+      },
+      "types": ["vite/client"]
+    },
+    "include": ["src/main/resources/META-INF/resources/frontend/**/*", "types.d.ts"],
+    "exclude": ["frontend/generated/jar-resources/**"]
+  }
+  
