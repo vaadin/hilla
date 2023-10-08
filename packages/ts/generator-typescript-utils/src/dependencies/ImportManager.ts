@@ -134,6 +134,10 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
     return id;
   }
 
+  delete(path: string): boolean {
+    return this.#map.delete(path);
+  }
+
   getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path)?.id;
   }

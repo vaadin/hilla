@@ -1,12 +1,6 @@
 import createSourceFile from '@hilla/generator-typescript-utils/createSourceFile.js';
-import ts, { type ClassDeclaration, type GetAccessorDeclaration } from 'typescript';
-
-function propertyNameToString(node: ts.PropertyName): string | null {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-    return node.text;
-  }
-  return null;
-}
+import ts from 'typescript';
+import { propertyNameToString } from './utils';
 
 export class ModelFixProcessor {
   readonly #source: ts.SourceFile;
