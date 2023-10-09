@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
@@ -17,18 +18,21 @@ import {
 } from '@hilla/form';
 import type { BinderNode } from '@hilla/form/BinderNode.js';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
+import type { VaadinWindow } from './types.js';
 
-const $wnd = window as any;
+declare const __VERSION__: string;
+
+const $wnd = window as VaadinWindow;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.2.0',
+  version: /* updated-by-script */ '2.3.0-alpha6',
 });
 
 function useUpdate() {
-  const [_, update] = useReducer((x) => ++x, 0);
+  const [_, update] = useReducer((x: number) => x + 1, 0);
   return update;
 }
 
@@ -69,7 +73,7 @@ export type UseFormResult<T, M extends AbstractModel<T>> = Readonly<{
   submit(): Promise<T | undefined>;
   reset(): void;
   clear(): void;
-  read(value: T | undefined | null): void;
+  read(value: T | null | undefined): void;
 }> &
   UseFormPartResult<T, M>;
 
