@@ -120,8 +120,8 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
     this.model = model;
     model[_binderNode] = this;
     this.validityStateValidator = new ValidityStateValidator<T>();
-    this.initializeValue();
     this[_validators] = model[_validators];
+    this.initializeValue();
   }
 
   /**
