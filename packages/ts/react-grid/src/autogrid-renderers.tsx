@@ -13,16 +13,19 @@ export type RendererOptions<TItem> = {
 };
 
 function getColumnValue<TItem>(context: ColumnContext, item: TItem): any {
+  const path = context.propertyInfo.name;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return (item as any)[context.propertyInfo.name];
+  return path.split('.').reduce<any>((obj, property) => (obj ? obj[property] : undefined), item);
 }
 
 export function AutoGridNumberRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
   const value = getColumnValue(context, item);
-  const formatted = new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 0,
-  }).format(value);
+  const formatted = Number.isFinite(value)
+    ? new Intl.NumberFormat(undefined, {
+        maximumFractionDigits: 0,
+      }).format(value)
+    : '';
   return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatted}</span>;
 }
 
