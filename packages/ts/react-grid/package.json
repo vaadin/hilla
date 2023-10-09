@@ -47,9 +47,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "~2.3",
+    "@hilla/form": "*",
     "@hilla/react-components": "^2.2.0-beta1",
-    "@hilla/react-form": "~2.3",
+    "@hilla/react-form": "*",
     "@vaadin/vaadin-lumo-styles": "^24.2.0-beta1"
   },
   "peerDependencies": {
