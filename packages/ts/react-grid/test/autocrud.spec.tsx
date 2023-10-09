@@ -1,178 +1,123 @@
 import { expect, use } from '@esm-bundle/chai';
-import type { GridElement } from '@hilla/react-components/Grid.js';
-import { render, type RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import chaiDom from 'chai-dom';
 import sinonChai from 'sinon-chai';
-import { ExperimentalAutoCrud, type AutoCrudProps } from '../src/autocrud.js';
-import { getFormField, setFormField, submit } from './form-test-utils.js';
-import {
-  getBodyCellContent,
-  getGrid,
-  getVisibleRowCount,
-  isSelected,
-  nextFrame,
-  toggleRowSelected,
-} from './grid-test-helpers.js';
-import { findConfirmDialog } from './test-confirm-dialog.js';
-import { PersonModel, personService, type Person } from './test-models-and-services.js';
+import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
+import ConfirmDialogController from './ConfirmDialogController.js';
+import { CrudController } from './CrudController.js';
+import { type Person, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
-
-function getForm(result: RenderResult): HTMLElement {
-  return getGrid(result).nextElementSibling as HTMLElement;
-}
+use(chaiDom);
 
 describe('@hilla/react-grid', () => {
-  function TestAutoCrud(customProps: Partial<AutoCrudProps<Person>>) {
-    return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...customProps} />;
-  }
   describe('Auto crud', () => {
-    it('shows a grid and a form', () => {
-      const result = render(<TestAutoCrud />);
-      const grid = getGrid(result);
-      const form = getForm(result);
-      expect(grid).not.to.be.undefined;
-      expect(form).not.to.be.undefined;
+    let user: ReturnType<(typeof userEvent)['setup']>;
+
+    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
+      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
+    }
+
+    beforeEach(() => {
+      user = userEvent.setup();
     });
+
+    it('shows a grid and a form', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      expect(grid.instance).not.to.be.undefined;
+      expect(form.instance).not.to.be.undefined;
+    });
+
     it('passes the selected item and populates the form', async () => {
-      const result = render(<TestAutoCrud />);
-      await nextFrame();
-      await nextFrame();
-      const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      toggleRowSelected(grid, 0);
-      await nextFrame();
-      expect((await getFormField(result, 'First name')).value).to.equal('Jane');
-      expect((await getFormField(result, 'Last name')).value).to.equal('Love');
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(0);
+      expect((await form.getField('First name')).value).to.equal('Jane');
+      expect((await form.getField('Last name')).value).to.equal('Love');
     });
+
     it('clears and disables the form when deselecting an item', async () => {
-      const result = render(<TestAutoCrud />);
-      const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      toggleRowSelected(grid, 1);
-      await nextFrame();
-      toggleRowSelected(grid, 1);
-      await nextFrame();
-      const firstName = await getFormField(result, 'First name');
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+      await grid.toggleRowSelected(1);
+      const firstName = await form.getField('First name');
       expect(firstName.value).to.equal('');
       expect(firstName.disabled).to.be.true;
 
-      const someNumber = await getFormField(result, 'Some number');
+      const someNumber = await form.getField('Some number');
       expect(someNumber.value).to.equal(0);
       expect(someNumber.disabled).to.be.true;
     });
+
     it('disables the form when nothing is selected', async () => {
-      const result = render(<TestAutoCrud />);
-      const field = await getFormField(result, 'First name');
+      const { form } = await CrudController.init(render(<TestAutoCrud />), user);
+      const field = await form.getField('First name');
       expect(field.disabled).to.be.true;
     });
+
     it('refreshes the grid when the form is submitted', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      toggleRowSelected(grid, 1);
-      await nextFrame();
-      await setFormField(result, 'First name', 'foo');
-      await nextFrame();
-      await submit(result);
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('foo');
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+
+      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'foo');
     });
+
     it('keeps the selection when the form is submitted', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      toggleRowSelected(grid, 1);
-      await nextFrame();
-      await setFormField(result, 'First name', 'newName');
-      await nextFrame();
-      await submit(result);
-      await nextFrame();
-      expect(isSelected(grid, 1)).to.be.true;
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+
+      await form.typeInField('First name', 'newName');
+      await form.submit();
+
+      expect(grid.isSelected(1)).to.be.true;
     });
+
     it('allows multiple subsequent edits', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      toggleRowSelected(grid, 1);
-      await nextFrame();
-      await setFormField(result, 'Last name', '1');
-      await nextFrame();
-      await submit(result);
-      await nextFrame();
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('1');
-      await setFormField(result, 'Last name', '2');
-      await nextFrame();
-      await submit(result);
-      await nextFrame();
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('2');
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+      await form.typeInField('Last name', '1');
+      await form.submit();
+      expect(grid.getBodyCellContent(1, 1)).to.have.text('1');
+      await form.typeInField('Last name', '2');
+      await form.submit();
+      expect(grid.getBodyCellContent(1, 1)).to.have.text('2');
     });
+
     it('shows a confirmation dialog before deleting', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      const cell = getBodyCellContent(grid, 1, 5);
-      (cell.querySelector('vaadin-button') as HTMLElement).click();
-      await nextFrame();
-      await nextFrame();
-      const dialog = findConfirmDialog(cell);
-      expect(dialog?._getDialogText()).to.equal('Are you sure you want to delete the selected item?');
-      expect('Dove').to.equal(getBodyCellContent(grid, 1, 1).innerText);
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      const cell = grid.getBodyCellContent(1, 5);
+      await user.click(cell.querySelector('vaadin-button')!);
+      const dialog = await ConfirmDialogController.init(cell, user);
+      expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', 'Dove');
     });
+
     it('deletes and refreshes grid after confirming', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      expect(getVisibleRowCount(grid)).to.equal(2);
-      const cell = getBodyCellContent(grid, 1, 5);
-      (cell.querySelector('vaadin-button') as HTMLElement).click();
-      await nextFrame();
-      await nextFrame();
-      const dialog = findConfirmDialog(cell)!;
-      dialog._getConfirmButton().click();
-      await nextFrame();
-      expect(getVisibleRowCount(grid)).to.equal(1);
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      expect(grid.getVisibleRowCount()).to.equal(2);
+      const cell = grid.getBodyCellContent(1, 5);
+      await user.click(cell.querySelector('vaadin-button')!);
+      const dialog = await ConfirmDialogController.init(cell, user);
+      await dialog.confirm();
+      expect(grid.getVisibleRowCount()).to.equal(1);
     });
+
     it('does not delete when not confirming', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      expect(getVisibleRowCount(grid)).to.equal(2);
-      const cell = getBodyCellContent(grid, 1, 5);
-      (cell.querySelector('vaadin-button') as HTMLElement).click();
-      await nextFrame();
-      await nextFrame();
-      const dialog = findConfirmDialog(cell)!;
-      dialog._getCancelButton().click();
-      await nextFrame();
-      expect(getVisibleRowCount(grid)).to.equal(2);
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      expect(grid.getVisibleRowCount()).to.equal(2);
+      const cell = grid.getBodyCellContent(1, 5);
+      await user.click(cell.querySelector('vaadin-button')!);
+      const dialog = await ConfirmDialogController.init(cell, user);
+      await dialog.cancel();
+      expect(grid.getVisibleRowCount()).to.equal(2);
     });
+
     it('does not render a delete button when noDelete', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} noDelete />);
-      const grid: GridElement<Person> = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      const cell = getBodyCellContent(grid, 1, 5);
+      const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
+      const cell = grid.getBodyCellContent(1, 5);
       expect(cell).to.be.null;
     });
   });

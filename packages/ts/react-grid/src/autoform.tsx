@@ -4,9 +4,9 @@ import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm } from '@hilla/react-form';
 import { useEffect, useState, type JSX } from 'react';
-import { AutoFormField } from './autoform-field';
-import type { CrudService } from './crud';
-import { getProperties, includeProperty } from './property-info';
+import { AutoFormField } from './autoform-field.js';
+import type { CrudService } from './crud.js';
+import { getProperties, includeProperty } from './property-info.js';
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -64,7 +64,7 @@ export function ExperimentalAutoForm<TItem>({
   }
 
   return (
-    <VerticalLayout theme="padding">
+    <VerticalLayout theme="padding" data-testid="form">
       {getProperties(model)
         .filter(includeProperty)
         .map((propertyInfo) => (

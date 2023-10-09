@@ -81,13 +81,9 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
 
 export function includeProperty(propertyInfo: PropertyInfo): unknown {
   // Exclude properties annotated with id and version
-  if (
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') ||
-    hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
-  ) {
-    return false;
-  }
-  return true;
+  return !(
+    hasAnnotation(propertyInfo, 'jakarta.persistence.Id') || hasAnnotation(propertyInfo, 'jakarta.persistence.Version')
+  );
 }
 
 export function getIdProperty(properties: PropertyInfo[]): PropertyInfo | undefined {

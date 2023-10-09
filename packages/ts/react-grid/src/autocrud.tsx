@@ -7,7 +7,7 @@ import { AutoCrudContext } from './autocrud-context';
 import DeleteButton from './autocrud-delete';
 import { ExperimentalAutoForm } from './autoform';
 import { AutoGrid } from './autogrid';
-import type { CrudService } from './crud';
+import type { CrudService } from './crud.js';
 import { getProperties } from './property-info';
 
 export type AutoCrudProps<TItem> = Readonly<{
@@ -22,7 +22,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
 
   const customColumns = [];
   if (!noDelete) {
-    customColumns.push(<GridColumn autoWidth renderer={DeleteButton}></GridColumn>);
+    customColumns.push(<GridColumn key="delete" autoWidth renderer={DeleteButton}></GridColumn>);
   }
 
   return (
@@ -32,6 +32,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
       >
         <HorizontalLayout>
           <AutoGrid
+            data-testid="grid"
             refreshTrigger={refreshTrigger}
             service={service}
             model={model}

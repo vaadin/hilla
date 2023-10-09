@@ -6,7 +6,7 @@ import {
   _getPropertyModel,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
-import type { CrudService } from '../src/crud';
+import type { CrudService } from '../src/crud.js';
 import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';

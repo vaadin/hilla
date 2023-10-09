@@ -10,17 +10,17 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useRef, useState, type JSX, type MutableRefObject } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { getColumnProps } from './autogrid-columns.js';
-import type { ListService } from './crud';
-import { HeaderSorter } from './header-sorter';
+import type { ListService } from './crud.js';
+import { HeaderSorter } from './header-sorter.js';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
-import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
-import type Filter from './types/dev/hilla/crud/filter/Filter';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import type Sort from './types/dev/hilla/mappedtypes/Sort';
-import Direction from './types/org/springframework/data/domain/Sort/Direction';
+import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
+import type Filter from './types/dev/hilla/crud/filter/Filter.js';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
+import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
+import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
 
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
@@ -43,7 +43,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
-  filter: React.MutableRefObject<Filter | undefined>,
+  filter: MutableRefObject<Filter | undefined>,
 ): GridDataProvider<TItem> {
   let first = true;
 

@@ -4,22 +4,16 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import chaiAsPromised from 'chai-as-promised';
 
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
-import { _generateHeader } from '../src/property-info.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import {
-  getBodyCellContent,
-  getGrid,
-  getHeaderCellContent,
-  getHeaderRows,
-  getSortOrder,
-  getVisibleRowCount,
-  sortGrid,
-} from './grid-test-helpers.js';
+import GridController from './GridController.js';
+import SelectController from './SelectController.js';
 import {
   ColumnRendererTestModel,
   CompanyModel,
@@ -29,8 +23,10 @@ import {
   personService,
   type Person,
 } from './test-models-and-services.js';
+import TextFieldController from './TextFieldController.js';
 
 use(sinonChai);
+use(chaiAsPromised);
 
 export async function nextFrame(): Promise<void> {
   return new Promise<void>((resolve) => {
@@ -40,15 +36,12 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-async function assertColumns(result: RenderResult, ...ids: string[]) {
-  const grid = getGrid(result);
-  await nextFrame();
-  await nextFrame();
-  await nextFrame();
-  const columns = grid.querySelectorAll('vaadin-grid-column');
-  expect(columns.length).to.equal(ids.length);
+async function assertColumns(grid: GridController, ...ids: string[]) {
+  const columns = await grid.getColumns();
+  expect(columns).to.have.length(ids.length);
+  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
+
   for (let i = 0; i < ids.length; i++) {
-    expect(getHeaderCellContent(grid, 0, i).innerText).to.equal(_generateHeader(ids[i]));
     if (ids[i] === '') {
       expect(columns[i].path).to.equal(undefined);
     } else {
@@ -58,421 +51,394 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
 }
 
 describe('@hilla/react-grid', () => {
-  function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
-    return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps}></AutoGrid>;
-  }
-  function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
-    return <AutoGrid service={personService()} model={PersonModel} {...customProps}></AutoGrid>;
-  }
-
   describe('Auto grid', () => {
-    it('creates columns based on model', async () => {
-      const result: RenderResult = render(<TestAutoGridNoHeaderFilters />);
-      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
-    });
-    it('can change model and recreate columns', async () => {
-      const result = render(<AutoGrid service={personService()} model={PersonModel}></AutoGrid>);
-      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
-      result.rerender(<AutoGrid service={companyService()} model={CompanyModel}></AutoGrid>);
-      await assertColumns(result, 'name', 'foundedDate');
-    });
-    it('sorts according to first column by default', async () => {
-      const result = render(<TestAutoGridNoHeaderFilters />);
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      await nextFrame();
-      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
-      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
-    });
-    it('retains sorting when re-rendering', async () => {
-      const result = render(<TestAutoGridNoHeaderFilters />);
-      const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-      await nextFrame();
-      await nextFrame();
-      sortGrid(grid, 'lastName', 'desc');
-      expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
-      result.rerender(<TestAutoGridNoHeaderFilters />);
-      expect(getSortOrder(grid)).to.eql({ path: 'lastName', direction: 'desc' });
-    });
-    it('creates sortable columns', async () => {
-      const result = render(<TestAutoGridNoHeaderFilters />);
-      const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      sortGrid(grid, 'firstName', 'desc');
-      await nextFrame();
-      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('John');
-      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Jane');
-    });
-    it('sets a data provider, but only once', async () => {
-      const service = personService();
-      const result = render(<TestAutoGridNoHeaderFilters service={service} />);
-      const grid = getGrid(result);
-      await nextFrame();
-      await nextFrame();
-      const dp = grid.dataProvider;
-      expect(dp).to.not.be.undefined;
-      result.rerender(<TestAutoGridNoHeaderFilters service={service} />);
-      const grid2 = getGrid(result);
-      expect(dp).to.equal(grid2.dataProvider);
-    });
-    it('data provider provides data', async () => {
-      const result = render(<TestAutoGridNoHeaderFilters />);
-      await nextFrame();
-      const grid = getGrid(result);
-      await nextFrame();
-      expect(getVisibleRowCount(grid)).to.equal(2);
-      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
-      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('John');
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('Dove');
-    });
-    it('does not pass its own parameters to the underlying grid', () => {
-      const result = render(<TestAutoGridNoHeaderFilters />);
-      const grid = getGrid(result);
-      expect(grid.getAttribute('model')).to.be.null;
-      expect(grid.getAttribute('service')).to.be.null;
-    });
-    it('passes filter to the data provider', async () => {
-      const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
-      // eslint-disable-next-line
-      (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
+    function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
+      return (
+        <AutoGrid service={personService()} model={PersonModel} noHeaderFilters data-testid="grid" {...customProps} />
+      );
+    }
+    function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
+      return <AutoGrid service={personService()} model={PersonModel} data-testid="grid" {...customProps} />;
+    }
 
-      const result = render(<TestAutoGrid filter={filter} />);
-      await nextFrame();
-      await nextFrame();
-      const grid = getGrid(result);
-      expect(getVisibleRowCount(grid)).to.equal(1);
-      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Jane');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('Love');
+    let user: ReturnType<(typeof userEvent)['setup']>;
+
+    beforeEach(() => {
+      user = userEvent.setup();
     });
 
-    describe('header filters', () => {
-      it('created for string columns', async () => {
-        const result = render(<TestAutoGrid />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const cell = getHeaderCellContent(grid, 1, 0);
-        expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+    describe('basics', () => {
+      it('creates columns based on model', async () => {
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
       });
-      it('created for number columns', async () => {
-        const result = render(<TestAutoGrid />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const cell = getHeaderCellContent(grid, 1, 3);
-        expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
+
+      it('can change model and recreate columns', async () => {
+        const result = render(<AutoGrid data-testid="grid" service={personService()} model={PersonModel} />);
+        await assertColumns(
+          await GridController.init(result, user),
+          'firstName',
+          'lastName',
+          'email',
+          'someNumber',
+          'vip',
+        );
+        result.rerender(<AutoGrid data-testid="grid" service={companyService()} model={CompanyModel} />);
+        await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
       });
-      it('filter when you type in the field for a string column', async () => {
+
+      it('sorts according to first column by default', async () => {
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
+        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'John');
+      });
+      it('retains sorting when re-rendering', async () => {
+        const result = render(<TestAutoGridNoHeaderFilters />);
+        let grid = await GridController.init(result, user);
+        await grid.sort('lastName', 'desc');
+        await expect(grid.getSortOrder()).to.eventually.be.deep.equal({ path: 'lastName', direction: 'desc' });
+        result.rerender(<TestAutoGridNoHeaderFilters />);
+        grid = await GridController.init(result, user);
+        await expect(grid.getSortOrder()).to.eventually.deep.equal({ path: 'lastName', direction: 'desc' });
+      });
+      it('creates sortable columns', async () => {
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        await grid.sort('firstName', 'desc');
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'John');
+        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jane');
+      });
+      it('sets a data provider, but only once', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
-        firstNameFilterField.value = 'filter-value';
-        firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
-
-        const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'filter-value',
-          propertyId: 'firstName',
-          matcher: Matcher.CONTAINS,
-        };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(service.lastFilter).to.eql(expectedFilter);
+        const result = render(<TestAutoGridNoHeaderFilters service={service} />);
+        let grid = await GridController.init(result, user);
+        const dp = grid.instance.dataProvider;
+        expect(dp).to.not.be.undefined;
+        result.rerender(<TestAutoGridNoHeaderFilters service={service} />);
+        grid = await GridController.init(result, user);
+        expect(dp).to.equal(grid.instance.dataProvider);
       });
-      it('filter when you type in the field for a number column', async () => {
-        const service = personService();
-        const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const someNumberFilterField = getHeaderCellContent(grid, 1, 3).firstElementChild!
-          .nextElementSibling as TextFieldElement;
-        someNumberFilterField.value = '123';
-        someNumberFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
 
-        const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: '123',
-          propertyId: 'someNumber',
-          matcher: Matcher.GREATER_THAN,
-        };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(service.lastFilter).to.eql(expectedFilter);
-
-        const someNumberFilterSelect = someNumberFilterField.previousElementSibling as SelectElement;
-        someNumberFilterSelect.value = Matcher.EQUALS;
-        await nextFrame();
-        await nextFrame();
-
-        const expectedPropertyFilter2: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: '123',
-          propertyId: 'someNumber',
-          matcher: Matcher.EQUALS,
-        };
-        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
-        expect(service.lastFilter).to.eql(expectedFilter2);
+      it('data provider provides data', async () => {
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        expect(grid.getVisibleRowCount()).to.equal(2);
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
+        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', 'Love');
+        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'John');
+        expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', 'Dove');
       });
-      it('filters for a boolean column', async () => {
-        const service = personService();
-        const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
-        const grid: GridElement = result.container.querySelector('vaadin-grid')!;
-        const select = getHeaderCellContent(grid, 1, 4).firstElementChild as SelectElement;
-        select.value = 'True';
-        await nextFrame();
-        await nextFrame();
 
-        const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'True',
-          propertyId: 'vip',
-          matcher: Matcher.EQUALS,
-        };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(service.lastFilter).to.eql(expectedFilter);
-
-        select.value = 'False';
-        await nextFrame();
-        await nextFrame();
-
-        const expectedPropertyFilter2: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'False',
-          propertyId: 'vip',
-          matcher: Matcher.EQUALS,
-        };
-        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
-        expect(service.lastFilter).to.eql(expectedFilter2);
+      it('does not pass its own parameters to the underlying grid', async () => {
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        expect(grid.instance.getAttribute('model')).to.be.null;
+        expect(grid.instance.getAttribute('service')).to.be.null;
       });
-      it('combine filters (and) when you type in multiple fields', async () => {
+
+      it('passes filter to the data provider', async () => {
+        const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
+        // @ts-expect-error: getting internal property
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        filter.t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
+
+        const grid = await GridController.init(render(<TestAutoGrid filter={filter} />), user);
+        expect(grid.getVisibleRowCount()).to.equal(1);
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
+        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', 'Love');
+      });
+
+      describe('header filters', () => {
+        it('created for string columns', async () => {
+          const grid = await GridController.init(render(<TestAutoGrid />), user);
+          const cell = grid.getHeaderCellContent(1, 0);
+          expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+        });
+
+        it('created for number columns', async () => {
+          const grid = await GridController.init(render(<TestAutoGrid />), user);
+          const cell = grid.getHeaderCellContent(1, 3);
+          expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
+        });
+
+        it('filter when you type in the field for a string column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).firstElementChild as TextFieldElement;
+          firstNameFilterField.value = 'filter-value';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+          await nextFrame();
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'filter-value',
+            propertyId: 'firstName',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
+
+        it('filter when you type in the field for a number column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const someNumberFilter = grid.getHeaderCellContent(1, 3);
+          const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
+            TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
+            SelectController.init(someNumberFilter, user),
+          ]);
+          await someNumberFilterField.type('123');
+
+          const expectedPropertyFilter: PropertyStringFilter & { t: string } = {
+            t: 'propertyString',
+            filterValue: '123',
+            propertyId: 'someNumber',
+            matcher: Matcher.GREATER_THAN,
+          };
+          const expectedFilter: AndFilter & { t: string } = { t: 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          await someNumberFieldSelect.select(Matcher.EQUALS);
+
+          const expectedPropertyFilter2: PropertyStringFilter & { t: string } = {
+            t: 'propertyString',
+            filterValue: '123',
+            propertyId: 'someNumber',
+            matcher: Matcher.EQUALS,
+          };
+
+          const expectedFilter2: AndFilter & { t: string } = { t: 'and', children: [expectedPropertyFilter2] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('filters for a boolean column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 4), user);
+          await controller.select('True');
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'True',
+            propertyId: 'vip',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          await controller.select('False');
+
+          const expectedPropertyFilter2: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'False',
+            propertyId: 'vip',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('combine filters (and) when you type in multiple fields', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const firstNameFilterField = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
+          await firstNameFilterField.type('filterFirst');
+          const lastNameFilterField = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 1), user);
+          await lastNameFilterField.type('filterLast');
+
+          const expectedFirstNameFilter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'filterFirst',
+            propertyId: 'firstName',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedLastNameFilter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'filterLast',
+            propertyId: 'lastName',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = {
+            ...{ t: 'and' },
+            children: [expectedFirstNameFilter, expectedLastNameFilter],
+          };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
+        it('removes filters if turning header filters off', async () => {
+          const service = personService();
+          const result = render(<TestAutoGrid service={service} model={PersonModel} />);
+          let grid = await GridController.init(result, user);
+          expect(grid.getHeaderRows().length).to.equal(2);
+
+          const companyNameFilter = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
+          await companyNameFilter.type('Joh');
+
+          const filter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'Joh',
+            matcher: Matcher.CONTAINS,
+            propertyId: 'firstName',
+          };
+          const expectedFilter1: AndFilter = {
+            ...{ t: 'and' },
+            children: [filter],
+          };
+          expect(service.lastFilter).to.deep.equal(expectedFilter1);
+
+          result.rerender(<AutoGrid data-testid="grid" service={service} model={PersonModel} noHeaderFilters />);
+          grid = await GridController.init(result, user);
+          expect(grid.getHeaderRows().length).to.equal(1);
+
+          const expectedFilter2: AndFilter = {
+            ...{ t: 'and' },
+            children: [],
+          };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('filters correctly after changing model', async () => {
+          const _personService = personService();
+          const _companyService = companyService();
+
+          const result = render(<AutoGrid data-testid="grid" service={_personService} model={PersonModel} />);
+          await GridController.init(result, user);
+          result.rerender(<AutoGrid data-testid="grid" service={_companyService} model={CompanyModel} />);
+          const grid = await GridController.init(result, user);
+
+          const companyNameFilter = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
+          await companyNameFilter.type('vaad');
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            ...{ t: 'propertyString' },
+            filterValue: 'vaad',
+            propertyId: 'name',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+          expect(_personService.lastFilter).to.deep.equal(expectedFilter);
+        });
+      });
+
+      it('removes the filters when you clear the fields', async () => {
         const service = personService();
-        const result = render(<TestAutoGrid service={service} />);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const firstNameFilterField = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
-        firstNameFilterField.value = 'filterFirst';
-        firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+        const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+        const [firstNameFilter, lastNameFilter] = await Promise.all([
+          TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user),
+          TextFieldController.initByParent(grid.getHeaderCellContent(1, 1), user),
+        ]);
+        await firstNameFilter.type('filterFirst');
+        await lastNameFilter.type('filterLast');
 
-        const lastNameFilterField = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
-        lastNameFilterField.value = 'filterLast';
-        lastNameFilterField.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
-
-        const expectedFirstNameFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'filterFirst',
-          propertyId: 'firstName',
-          matcher: Matcher.CONTAINS,
-        };
-        const expectedLastNameFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'filterLast',
-          propertyId: 'lastName',
-          matcher: Matcher.CONTAINS,
-        };
         const expectedFilter: AndFilter = {
-          ...{ t: 'and' },
-          children: [expectedFirstNameFilter, expectedLastNameFilter],
-        };
-        expect(service.lastFilter).to.eql(expectedFilter);
-      });
-      it('removes filters if turning header filters off', async () => {
-        const service = personService();
-
-        const result = render(<AutoGrid service={service} model={PersonModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        expect(getHeaderRows(grid).length).to.equal(2);
-
-        const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
-        companyNameFilter.value = 'Joh';
-        companyNameFilter.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
-
-        const filter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'Joh',
-          matcher: Matcher.CONTAINS,
-          propertyId: 'firstName',
-        };
-        const expectedFilter1: AndFilter = {
-          ...{ t: 'and' },
-          children: [filter],
-        };
-        expect(service.lastFilter).to.eql(expectedFilter1);
-
-        result.rerender(<AutoGrid service={service} model={PersonModel} noHeaderFilters></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
-        expect(getHeaderRows(grid).length).to.equal(1);
-
-        const expectedFilter2: AndFilter = {
           ...{ t: 'and' },
           children: [],
         };
-        expect(service.lastFilter).to.eql(expectedFilter2);
-      });
-      it('filters correctly after changing model', async () => {
-        const _personService = personService();
-        const _companyService = companyService();
+        expect(service.lastFilter).not.to.deep.equal(expectedFilter);
 
-        const result = render(<AutoGrid service={_personService} model={PersonModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
-        result.rerender(<AutoGrid service={_companyService} model={CompanyModel}></AutoGrid>);
-        await nextFrame();
-        await nextFrame();
-        const grid = getGrid(result);
-        const companyNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
-        companyNameFilter.value = 'vaad';
-        companyNameFilter.dispatchEvent(new CustomEvent('input'));
-        await nextFrame();
-
-        const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
-          filterValue: 'vaad',
-          propertyId: 'name',
-          matcher: Matcher.CONTAINS,
-        };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
-        expect(_personService.lastFilter).to.eql(expectedFilter);
+        await firstNameFilter.type('[Delete]');
+        await lastNameFilter.type('[Delete]');
+        expect(service.lastFilter).to.deep.equal(expectedFilter);
       });
     });
-    it('removes the filters when you clear the fields', async () => {
-      const service = personService();
-      const result = render(<TestAutoGrid service={service} />);
-      await nextFrame();
-      await nextFrame();
-      const grid = getGrid(result);
-      const firstNameFilter = getHeaderCellContent(grid, 1, 0).firstElementChild as TextFieldElement;
-      const lastNameFilter = getHeaderCellContent(grid, 1, 1).firstElementChild as TextFieldElement;
-      firstNameFilter.value = 'filterFirst';
-      lastNameFilter.value = 'filterLast';
-      firstNameFilter.dispatchEvent(new CustomEvent('input'));
-      lastNameFilter.dispatchEvent(new CustomEvent('input'));
-      await nextFrame();
 
-      const expectedFilter: AndFilter = {
-        ...{ t: 'and' },
-        children: [],
-      };
-      expect(service.lastFilter).not.to.eql(expectedFilter);
+    describe('customize columns', () => {
+      it('should only show configured columns in specified order', async () => {
+        const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['email', 'firstName']} />), user);
+        await assertColumns(grid, 'email', 'firstName');
+      });
 
-      firstNameFilter.value = '';
-      firstNameFilter.dispatchEvent(new CustomEvent('input'));
-      lastNameFilter.value = '';
-      lastNameFilter.dispatchEvent(new CustomEvent('input'));
-      await nextFrame();
-      await nextFrame();
+      it('should show columns that would be excluded by default', async () => {
+        const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['id', 'version']} />), user);
+        await assertColumns(grid, 'id', 'version');
+      });
 
-      expect(service.lastFilter).to.eql(expectedFilter);
-    });
-  });
-  describe('customize columns', () => {
-    it('should only show configured columns in specified order', async () => {
-      const result = render(<TestAutoGrid visibleColumns={['email', 'firstName']} />);
-      await assertColumns(result, 'email', 'firstName');
-    });
+      it('should ignore unknown columns', async () => {
+        const grid = await GridController.init(
+          render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />),
+          user,
+        );
+        await assertColumns(grid, 'email', 'firstName');
+      });
 
-    it('should show columns that would be excluded by default', async () => {
-      const result = render(<TestAutoGrid visibleColumns={['id', 'version']} />);
-      await assertColumns(result, 'id', 'version');
+      it('renders custom columns at the end', async () => {
+        const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
+          <span>
+            {item.firstName} {item.lastName}
+          </span>
+        );
+        const grid = await GridController.init(
+          render(<TestAutoGrid customColumns={[<GridColumn autoWidth renderer={NameRenderer}></GridColumn>]} />),
+          user,
+        );
+        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
+        expect(grid.getBodyCellContent(0, 5)).to.have.property('innerText', 'Jane Love');
+      });
     });
 
-    it('should ignore unknown columns', async () => {
-      const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
-      await assertColumns(result, 'email', 'firstName');
-    });
+    describe('default renderers', () => {
+      let grid: GridController;
 
-    it('renders custom columns at the end', async () => {
-      const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
-        <span>
-          {item.firstName} {item.lastName}
-        </span>
-      );
-      const result = render(
-        <TestAutoGrid customColumns={[<GridColumn autoWidth renderer={NameRenderer}></GridColumn>]} />,
-      );
-      await nextFrame();
-      await nextFrame();
-      const grid = getGrid(result);
-      await assertColumns(result, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
-      expect(getBodyCellContent(grid, 0, 5).innerText).to.equal('Jane Love');
-    });
-  });
+      beforeEach(async () => {
+        grid = await GridController.init(
+          render(
+            <AutoGrid
+              data-testid="grid"
+              service={columnRendererTestService()}
+              model={ColumnRendererTestModel}
+            ></AutoGrid>,
+          ),
+          user,
+        );
+      });
 
-  describe('default renderers', () => {
-    let grid: GridElement;
+      it('renders strings without formatting and with default alignment', () => {
+        expect(grid.getBodyCellContent(0, 0)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Hello World 1');
+        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Hello World 2');
+      });
 
-    beforeEach(async () => {
-      const result = render(
-        <AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>,
-      );
-      await nextFrame();
-      await nextFrame();
-      await nextFrame();
-      grid = result.container.querySelector('vaadin-grid')!;
-    });
+      it('renders numbers as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 1)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', '123,456');
+        expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', '-12');
+      });
 
-    it('renders strings without formatting and with default alignment', () => {
-      expect(getBodyCellContent(grid, 0, 0).style.textAlign).to.equal('');
-      expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('Hello World 1');
-      expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('Hello World 2');
-    });
+      it('renders booleans as icons', () => {
+        const vip = grid.getBodyCellContent(0, 2).querySelector('vaadin-icon')!;
+        expect(vip).to.have.attribute('icon', 'lumo:checkmark');
+        const notVip = grid.getBodyCellContent(1, 2).querySelector('vaadin-icon')!;
+        expect(notVip).to.have.attribute('icon', 'lumo:minus');
+      });
 
-    it('renders numbers as right aligned numbers', () => {
-      expect(getBodyCellContent(grid, 0, 1).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 1).innerText).to.equal('123,456');
-      expect(getBodyCellContent(grid, 1, 1).innerText).to.equal('-12');
-    });
+      it('renders java.util.Date as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 3)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 3)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 3)).to.have.text('5/14/2021');
+        expect(grid.getBodyCellContent(2, 3)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 3)).to.have.text('');
+      });
 
-    it('renders booleans as icons', () => {
-      const vip = getBodyCellContent(grid, 0, 2).querySelector('vaadin-icon')!;
-      expect(vip.icon).to.equal('lumo:checkmark');
-      const notVip = getBodyCellContent(grid, 1, 2).querySelector('vaadin-icon')!;
-      expect(notVip.icon).to.equal('lumo:minus');
-    });
+      it('renders java.time.LocalDate as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 4)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 4)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 4)).to.have.text('5/14/2021');
+        expect(grid.getBodyCellContent(2, 4)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 4)).to.have.text('');
+      });
 
-    it('renders java.util.Date as right aligned', () => {
-      expect(getBodyCellContent(grid, 0, 3).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 3).textContent).to.equal('5/13/2021');
-      expect(getBodyCellContent(grid, 1, 3).textContent).to.equal('5/14/2021');
-      expect(getBodyCellContent(grid, 2, 3).textContent).to.equal('');
-      expect(getBodyCellContent(grid, 3, 3).textContent).to.equal('');
-    });
+      it('renders java.time.LocalTime as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 5)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 5)).to.have.text('8:45 AM');
+        expect(grid.getBodyCellContent(1, 5)).to.have.text('8:45 PM');
+        expect(grid.getBodyCellContent(2, 5)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 5)).to.have.text('');
+      });
 
-    it('renders java.time.LocalDate as right aligned', () => {
-      expect(getBodyCellContent(grid, 0, 4).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 4).textContent).to.equal('5/13/2021');
-      expect(getBodyCellContent(grid, 1, 4).textContent).to.equal('5/14/2021');
-      expect(getBodyCellContent(grid, 2, 4).textContent).to.equal('');
-      expect(getBodyCellContent(grid, 3, 4).textContent).to.equal('');
-    });
-
-    it('renders java.time.LocalTime as right aligned', () => {
-      expect(getBodyCellContent(grid, 0, 5).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 5).textContent).to.equal('8:45 AM');
-      expect(getBodyCellContent(grid, 1, 5).textContent).to.equal('8:45 PM');
-      expect(getBodyCellContent(grid, 2, 5).textContent).to.equal('');
-      expect(getBodyCellContent(grid, 3, 5).textContent).to.equal('');
-    });
-
-    it('renders java.time.LocalDateTime as right aligned', () => {
-      expect(getBodyCellContent(grid, 0, 6).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 6).textContent).to.equal('5/13/2021, 8:45 AM');
-      expect(getBodyCellContent(grid, 1, 6).textContent).to.equal('5/14/2021, 8:45 PM');
-      expect(getBodyCellContent(grid, 2, 6).textContent).to.equal('');
-      expect(getBodyCellContent(grid, 3, 6).textContent).to.equal('');
+      it('renders java.time.LocalDateTime as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 6)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 6)).to.have.text('5/13/2021, 8:45 AM');
+        expect(grid.getBodyCellContent(1, 6)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(2, 6)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 6)).to.have.text('');
+      });
     });
   });
 });
