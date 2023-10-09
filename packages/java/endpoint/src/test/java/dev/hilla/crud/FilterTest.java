@@ -18,6 +18,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest()
 public class FilterTest {
@@ -113,13 +115,13 @@ public class FilterTest {
                 "True");
         List<TestObject> testObjects = executeFilter(filter);
 
-        Assert.assertEquals(1, testObjects.size());
+        assertEquals(1, testObjects.size());
         Assert.assertTrue(testObjects.get(0).getBooleanValue());
 
         filter = createBooleanFilter(Matcher.EQUALS, "False");
         testObjects = executeFilter(filter);
 
-        Assert.assertEquals(1, testObjects.size());
+        assertEquals(1, testObjects.size());
         Assert.assertFalse(testObjects.get(0).getBooleanValue());
     }
 
@@ -170,13 +172,88 @@ public class FilterTest {
         assertFilterResult(filter, "Johnny");
     }
 
+    @Test
+    public void nestedPropertyFilterString() {
+        setupNestedObjects();
+        PropertyStringFilter filter = createNestedPropertyFilter("name",
+                Matcher.CONTAINS, "42");
+        TestObject testObject = executeFilter(filter).get(0);
+        assertEquals("some name 1", testObject.getName());
+        assertEquals(42, testObject.getNestedObject().getLuckyNumber());
+    }
+
+    @Test
+    public void nestedPropertyFilterNumber() {
+        setupNestedObjects();
+        PropertyStringFilter filter = createNestedPropertyFilter("luckyNumber",
+                Matcher.EQUALS, "84");
+        TestObject testObject = executeFilter(filter).get(0);
+        assertEquals("some name 2", testObject.getName());
+        assertEquals(84, testObject.getNestedObject().getLuckyNumber());
+    }
+
+    @Test
+    public void nestedPropertyFilterNumberNoResult() {
+        setupNestedObjects();
+        PropertyStringFilter filter = createNestedPropertyFilter("luckyNumber",
+                Matcher.EQUALS, "85");
+        assertEquals(0, executeFilter(filter).size());
+    }
+
+    @Test
+    public void secondLevelNestedPropertyFilterString() {
+        setupSecondLevelNestedObjects();
+        PropertyStringFilter filter = createSecondLevelNestedPropertyFilter(
+                "name", Matcher.CONTAINS, "second level nested object 1");
+        TestObject testObject = executeFilter(filter).get(0);
+        assertEquals("some name 1", testObject.getName());
+        assertEquals(42, testObject.getNestedObject().getLuckyNumber());
+    }
+
+    @Test
+    public void secondLevelNestedPropertyFilterNumber() {
+        setupSecondLevelNestedObjects();
+        PropertyStringFilter filter = createSecondLevelNestedPropertyFilter(
+                "luckyNumber", Matcher.EQUALS, "2");
+        TestObject testObject = executeFilter(filter).get(0);
+        assertEquals("some name 2", testObject.getName());
+        assertEquals(84, testObject.getNestedObject().getLuckyNumber());
+    }
+
+    @Test
+    public void secondLevelNestedPropertyFilterNumberNoResult() {
+        setupSecondLevelNestedObjects();
+        PropertyStringFilter filter = createSecondLevelNestedPropertyFilter(
+                "luckyNumber", Matcher.EQUALS, "3");
+        assertEquals(0, executeFilter(filter).size());
+    }
+
+    private PropertyStringFilter createNestedPropertyFilter(String propertyId,
+            Matcher matcher, String filterValue) {
+        PropertyStringFilter filter = new PropertyStringFilter();
+        filter.setPropertyId("nestedObject." + propertyId);
+        filter.setFilterValue(filterValue);
+        filter.setMatcher(matcher);
+        return filter;
+    }
+
+    private PropertyStringFilter createSecondLevelNestedPropertyFilter(
+            String propertyId, Matcher matcher, String filterValue) {
+        PropertyStringFilter filter = new PropertyStringFilter();
+        filter.setPropertyId(
+                "nestedObject.secondLevelNestedObject." + propertyId);
+        filter.setFilterValue(filterValue);
+        filter.setMatcher(matcher);
+        return filter;
+    }
+
     private void assertFilterResult(Filter filter, String... expectedNames) {
         List<TestObject> result = executeFilter(filter);
         assertFilterResult(result, expectedNames);
     }
 
     private void assertFilterResult(List<TestObject> result, String... names) {
-        Assert.assertEquals(names.length, result.size());
+        assertEquals(names.length, result.size());
         Object[] actual = result.stream().map(o -> o.getName()).toArray();
         Assert.assertArrayEquals(names, actual);
     }
@@ -234,4 +311,55 @@ public class FilterTest {
         entityManager.persist(testObject);
         entityManager.flush();
     }
+
+    private void setupNestedObjects() {
+        NestedObject nestedObject1 = new NestedObject();
+        nestedObject1.setName("nested object 42");
+        nestedObject1.setLuckyNumber(42);
+        entityManager.persist(nestedObject1);
+        NestedObject nestedObject2 = new NestedObject();
+        nestedObject2.setName("nested object 84");
+        nestedObject2.setLuckyNumber(84);
+        entityManager.persist(nestedObject2);
+        TestObject testObject1 = new TestObject();
+        testObject1.setName("some name 1");
+        testObject1.setNestedObject(nestedObject1);
+        entityManager.persist(testObject1);
+        TestObject testObject2 = new TestObject();
+        testObject2.setName("some name 2");
+        testObject2.setNestedObject(nestedObject2);
+        entityManager.persist(testObject2);
+        entityManager.flush();
+    }
+
+    private void setupSecondLevelNestedObjects() {
+        SecondLevelNestedObject secondLevelNestedObject1 = new SecondLevelNestedObject();
+        secondLevelNestedObject1.setName("second level nested object 1");
+        secondLevelNestedObject1.setLuckyNumber(1);
+        entityManager.persist(secondLevelNestedObject1);
+        SecondLevelNestedObject secondLevelNestedObject2 = new SecondLevelNestedObject();
+        secondLevelNestedObject2.setName("second level nested object 2");
+        secondLevelNestedObject2.setLuckyNumber(2);
+        entityManager.persist(secondLevelNestedObject2);
+        NestedObject nestedObject1 = new NestedObject();
+        nestedObject1.setName("nested object 42");
+        nestedObject1.setLuckyNumber(42);
+        nestedObject1.setSecondLevelNestedObject(secondLevelNestedObject1);
+        entityManager.persist(nestedObject1);
+        NestedObject nestedObject2 = new NestedObject();
+        nestedObject2.setName("nested object 84");
+        nestedObject2.setLuckyNumber(84);
+        nestedObject2.setSecondLevelNestedObject(secondLevelNestedObject2);
+        entityManager.persist(nestedObject2);
+        TestObject testObject1 = new TestObject();
+        testObject1.setName("some name 1");
+        testObject1.setNestedObject(nestedObject1);
+        entityManager.persist(testObject1);
+        TestObject testObject2 = new TestObject();
+        testObject2.setName("some name 2");
+        testObject2.setNestedObject(nestedObject2);
+        entityManager.persist(testObject2);
+        entityManager.flush();
+    }
+
 }
