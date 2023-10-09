@@ -133,7 +133,7 @@ describe('@hilla/react-grid', () => {
       // eslint-disable-next-line
       (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
-      const result = render(<TestAutoGrid filter={filter} />);
+      const result = render(<TestAutoGrid experimentalFilter={filter} />);
       await reactRender();
       const grid = getGrid(result);
       expect(getVisibleRowCount(grid)).to.equal(1);

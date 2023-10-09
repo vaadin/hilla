@@ -27,7 +27,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: ListService<TItem>;
     model: DetachedModelConstructor<AbstractModel<TItem>>;
-    filter?: Filter;
+    experimentalFilter?: Filter;
     visibleColumns?: string[];
     noHeaderFilters?: boolean;
     refreshTrigger?: number;
@@ -152,7 +152,7 @@ function useColumns(
 export function AutoGrid<TItem>({
   service,
   model,
-  filter,
+  experimentalFilter,
   visibleColumns,
   noHeaderFilters,
   refreshTrigger = 0,
@@ -218,10 +218,10 @@ export function AutoGrid<TItem>({
     // Update the filtering, whenever the filter changes
     const grid = ref.current;
     if (grid) {
-      dataProviderFilter.current = filter ?? internalFilter;
+      dataProviderFilter.current = experimentalFilter ?? internalFilter;
       grid.clearCache();
     }
-  }, [filter, internalFilter, refreshTrigger]);
+  }, [experimentalFilter, internalFilter, refreshTrigger]);
 
   return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children}></Grid>;
 }
