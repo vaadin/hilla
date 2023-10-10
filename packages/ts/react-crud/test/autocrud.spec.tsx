@@ -21,7 +21,7 @@ function getForm(result: RenderResult): HTMLElement {
   return getGrid(result).nextElementSibling as HTMLElement;
 }
 
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   function TestAutoCrud(customProps: Partial<AutoCrudProps<Person>>) {
     return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...customProps} />;
   }

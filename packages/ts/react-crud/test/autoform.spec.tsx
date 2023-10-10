@@ -55,7 +55,7 @@ async function assertAllEnabled(result: RenderResult, enabled: boolean) {
 }
 
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
     it('renders fields for the properties in the form', async () => {
       const person: Person = {

@@ -48,7 +48,7 @@ async function assertColumns(result: RenderResult, ...ids: string[]) {
   }
 }
 
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
     return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps}></AutoGrid>;
   }
