@@ -10,9 +10,9 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { type JSX, useEffect, useRef, useState } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
-import { getColumnOptions, type ColumnOptions } from './autogrid-columns.js';
+import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
@@ -108,11 +108,11 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
-  const [sortState, setSortState] = useState<SortState | null>(
-    effectiveProperties.length > 0 ? { path: effectiveProperties[0].name, direction: 'asc' } : null,
+  const [sortState, setSortState] = useState<SortState>(
+    effectiveProperties.length > 0 ? { [effectiveProperties[0].name]: { direction: 'asc' } } : {},
   );
 
-  const autoColumns = effectiveProperties.map((propertyInfo) => {
+  let columns = effectiveProperties.map((propertyInfo) => {
     let column;
 
     const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
@@ -139,7 +139,6 @@ function useColumns(
       </ColumnContext.Provider>
     );
   });
-  let columns = autoColumns;
   if (options.customColumns) {
     columns = [...columns, ...options.customColumns];
   }
