@@ -7,8 +7,8 @@ import { TextField, type TextFieldElement } from '@hilla/react-components/TextFi
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import { useContext, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
-import { locale } from './autogrid-renderers.js';
 import { DateFormatter } from './date-formatter';
+import { defaultLocale } from './i18n.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
 // TODO: Replace with more robust solution
@@ -29,7 +29,7 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
 // Create date picker I18N config based on the current browser locale
-const dateFormatter = new DateFormatter(locale);
+const dateFormatter = new DateFormatter(defaultLocale);
 
 const datePickerI18n: DatePickerI18n = {
   ...new DatePickerElement().i18n,

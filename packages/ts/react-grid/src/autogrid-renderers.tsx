@@ -3,10 +3,9 @@ import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
 import { useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
+import { defaultLocale } from './i18n.js';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
-
-export const locale = undefined;
 
 export type RendererOptions<TItem> = {
   item: TItem;
@@ -24,7 +23,7 @@ export function AutoGridNumberRenderer<TItem>({ item }: RendererOptions<TItem>):
   const context = useContext(ColumnContext)!;
   const value = getColumnValue(context, item);
   const formatted = Number.isFinite(value)
-    ? new Intl.NumberFormat(locale, {
+    ? new Intl.NumberFormat(defaultLocale, {
         maximumFractionDigits: 0,
       }).format(value)
     : '';
@@ -42,7 +41,7 @@ export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>)
 
 function tryFormatDateTime(value: string, options?: Intl.DateTimeFormatOptions): string {
   try {
-    const format = new Intl.DateTimeFormat(locale, options);
+    const format = new Intl.DateTimeFormat(defaultLocale, options);
     return format.format(new Date(value));
   } catch (e) {
     return '';
