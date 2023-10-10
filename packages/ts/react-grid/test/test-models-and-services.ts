@@ -30,6 +30,13 @@ export interface Person extends HasIdVersion {
   vip: boolean;
 }
 
+export interface NestedTestValues {
+  string: string;
+  number: number;
+  boolean: boolean;
+  date?: string;
+}
+
 export interface ColumnRendererTestValues extends HasIdVersion {
   id: number;
   string: string;
@@ -39,6 +46,7 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   localDate?: string;
   localTime?: string;
   localDateTime?: string;
+  nested?: NestedTestValues;
 }
 
 export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
@@ -109,6 +117,29 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   }
 }
 
+export class NestedTestModel<T extends NestedTestValues = NestedTestValues> extends ObjectModel<T> {
+  declare static createEmptyValue: () => Company;
+
+  get string(): StringModel {
+    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get number(): NumberModel {
+    return this[_getPropertyModel]('number', (parent, key) => new NumberModel(parent, key, false));
+  }
+
+  get boolean(): BooleanModel {
+    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get date(): StringModel {
+    return this[_getPropertyModel](
+      'date',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
+    );
+  }
+}
+
 export class ColumnRendererTestModel<
   T extends ColumnRendererTestValues = ColumnRendererTestValues,
 > extends ObjectModel<T> {
@@ -161,6 +192,14 @@ export class ColumnRendererTestModel<
       (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
     );
   }
+
+  get nested(): NestedTestModel {
+    return this[_getPropertyModel](
+      'nested',
+      (parent, key) =>
+        new NestedTestModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.OneToOne' }] } }),
+    );
+  }
 }
 
 type HasIdVersion = {
@@ -168,14 +207,17 @@ type HasIdVersion = {
   version: number;
 };
 
-export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasLastFilter => {
+export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
   let _lastFilter: Filter | undefined;
   let data = initialData;
+  let _callCount = 0;
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
     async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
       _lastFilter = filter;
+      _callCount += 1;
+
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
         /* eslint-disable */
@@ -216,8 +258,12 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
       const newValue = { ...value };
       if (currentValue) {
         newValue.version = currentValue.version + 1;
+        data = data.map((item) => (item.id === newValue.id ? newValue : item));
+      } else {
+        newValue.id = data.map((item) => item.id).reduce((prev, curr) => Math.max(prev, curr)) + 1;
+        newValue.version = 1;
+        data = [...data, newValue];
       }
-      data = data.map((item) => (item.id === newValue.id ? newValue : item));
       return data.find((item) => item.id === newValue.id);
     },
     // eslint-disable-next-line
@@ -226,6 +272,9 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
     },
     get lastFilter() {
       return _lastFilter;
+    },
+    get callCount() {
+      return _callCount;
     },
   };
 };
@@ -251,6 +300,12 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     localDate: '2021-05-13',
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
+    nested: {
+      string: 'Nested string 1',
+      number: 123456,
+      boolean: true,
+      date: '2021-05-13T00:00:00',
+    },
   },
   {
     id: 2,
@@ -283,19 +338,20 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
   },
 ];
 
-export type HasLastFilter = {
+export type HasTestInfo = {
   lastFilter: Filter | undefined;
+  callCount: number;
 };
 
-export const personService = (): CrudService<Person> & HasLastFilter => createService(personData);
-export const companyService = (): CrudService<Company> & HasLastFilter => createService(companyData);
-export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasLastFilter =>
+export const personService = (): CrudService<Person> & HasTestInfo => createService(personData);
+export const companyService = (): CrudService<Company> & HasTestInfo => createService(companyData);
+export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasTestInfo =>
   createService(columnRendererTestData);
 
 const noSort: Sort = { orders: [] };
 
 export async function getItem<T extends HasIdVersion>(
-  service: CrudService<T> & HasLastFilter,
+  service: CrudService<T> & HasTestInfo,
   id: number,
 ): Promise<T | undefined> {
   return (await service.list({ pageNumber: 0, pageSize: 1000, sort: noSort }, undefined)).find((p) => p.id === id);

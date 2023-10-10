@@ -1,9 +1,14 @@
 package dev.hilla.test.reactgrid;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public abstract class AbstractGridTest extends ChromeBrowserTest {
@@ -22,17 +27,47 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         });
     }
 
+    @After
+    public void checkBrowserLogs() {
+        checkLogsForErrors();
+    }
+
+    protected void assertColumns(String... expected) {
+        List<String> actual = grid.getVisibleColumns().stream()
+                .map(column -> column.getHeaderCell().getText()).toList();
+        Assert.assertEquals(List.of(expected), actual);
+
+    }
+
+    protected void assertRow(int row, String... expected) {
+        GridTRElement tr = grid.getRow(row);
+        List<String> actual = grid.getVisibleColumns().stream()
+                .map(col -> tr.getCell(col).getText()).toList();
+
+        Assert.assertEquals(List.of(expected), actual);
+    }
+
     protected void assertName(int row, String firstName, String lastName) {
         assertFirstName(row, firstName);
         assertLastName(row, lastName);
     }
 
+    protected int getFirstNameColumn() {
+        return 0;
+    }
+
+    protected int getLastNameColumn() {
+        return 1;
+    }
+
     protected void assertFirstName(int row, String firstName) {
-        Assert.assertEquals(firstName, grid.getCell(row, 0).getText());
+        Assert.assertEquals(firstName,
+                grid.getCell(row, getFirstNameColumn()).getText());
     }
 
     protected void assertLastName(int row, String lastName) {
-        Assert.assertEquals(lastName, grid.getCell(row, 1).getText());
+        Assert.assertEquals(lastName,
+                grid.getCell(row, getLastNameColumn()).getText());
     }
 
     protected void sortByColumn(int i) {

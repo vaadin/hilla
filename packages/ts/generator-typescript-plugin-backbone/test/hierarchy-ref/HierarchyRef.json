@@ -1,0 +1,99 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "HierarchyRefEndpoint"
+    }
+  ],
+  "paths": {
+    "/HierarchyRefEndpoint/getHierarchyRef": {
+      "post": {
+        "tags": ["HierarchyRefEndpoint"],
+        "operationId": "HierarchyRefEndpoint_getHierarchyRef_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "child": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "nullable": false
+          }
+        }
+      }
+    }
+  }
+}

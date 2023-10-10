@@ -440,5 +440,30 @@ describe('@hilla/react-grid', () => {
         expect(grid.getBodyCellContent(3, 6)).to.have.text('');
       });
     });
+
+    it('renders nested strings without formatting and with default alignment', () => {
+      expect(getBodyCellContent(grid, 0, 7).style.textAlign).to.equal('');
+      expect(getBodyCellContent(grid, 0, 7).innerText).to.equal('Nested string 1');
+      expect(getBodyCellContent(grid, 1, 7).innerText).to.equal('');
+    });
+
+    it('renders nested numbers as right aligned numbers', () => {
+      expect(getBodyCellContent(grid, 0, 8).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 8).innerText).to.equal('123,456');
+      expect(getBodyCellContent(grid, 1, 8).innerText).to.equal('');
+    });
+
+    it('renders nested booleans as icons', () => {
+      const vip = getBodyCellContent(grid, 0, 9).querySelector('vaadin-icon')!;
+      expect(vip.icon).to.equal('lumo:checkmark');
+      const notVip = getBodyCellContent(grid, 1, 9).querySelector('vaadin-icon')!;
+      expect(notVip.icon).to.equal('lumo:minus');
+    });
+
+    it('renders java.util.Date as right aligned', () => {
+      expect(getBodyCellContent(grid, 0, 10).style.textAlign).to.equal('end');
+      expect(getBodyCellContent(grid, 0, 10).textContent).to.equal('5/13/2021');
+      expect(getBodyCellContent(grid, 1, 10).textContent).to.equal('');
+    });
   });
 });

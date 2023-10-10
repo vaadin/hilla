@@ -1,7 +1,9 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
+import { Button } from '@hilla/react-components/Button.js';
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
+import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useState, type JSX } from 'react';
 import { AutoCrudContext } from './autocrud-context';
 import DeleteButton from './autocrud-delete';
@@ -14,15 +16,16 @@ export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   noDelete?: boolean;
+  header?: string;
 }>;
 
-export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCrudProps<TItem>): JSX.Element {
+export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const customColumns = [];
   if (!noDelete) {
-    customColumns.push(<GridColumn key="delete" autoWidth renderer={DeleteButton}></GridColumn>);
+    customColumns.push(<GridColumn key="deletebutton" autoWidth renderer={DeleteButton}></GridColumn>);
   }
 
   return (
@@ -30,26 +33,43 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
       <AutoCrudContext.Provider
         value={{ service, properties: getProperties(model), refreshGrid: () => setRefreshTrigger(refreshTrigger + 1) }}
       >
-        <HorizontalLayout>
-          <AutoGrid
-            data-testid="grid"
-            refreshTrigger={refreshTrigger}
-            service={service}
-            model={model}
-            onActiveItemChanged={(e) => {
-              const activeItem = e.detail.value;
-              (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
+        <VerticalLayout style={{ flex: 1 }}>
+          <HorizontalLayout
+            style={{
+              width: '100%',
+              justifyContent: header ? 'space-between' : 'end',
+              paddingLeft: 'var(--lumo-space-m)',
+              paddingRight: 'var(--lumo-space-m)',
+              paddingBottom: 'var(--lumo-space-s)',
+              paddingTop: 'var(--lumo-space-s)',
+              alignItems: 'center',
             }}
-            onSelectedItemsChanged={(e) => {
-              if (e.detail.value.length === 0) {
-                setItem(undefined);
-              } else {
-                const selectedItem = e.detail.value[0];
-                setItem({ ...selectedItem });
-              }
-            }}
-            customColumns={customColumns}
-          ></AutoGrid>
+          >
+            {header ? <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2> : <></>}
+            <Button theme="primary" onClick={() => setItem({} as TItem)}>
+              + New
+            </Button>
+          </HorizontalLayout>
+          <HorizontalLayout style={{ width: '100%' }}>
+            <AutoGrid
+              data-testid="grid"
+              refreshTrigger={refreshTrigger}
+              service={service}
+              model={model}
+              onActiveItemChanged={(e) => {
+                const activeItem = e.detail.value;
+                (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
+              }}
+              onSelectedItemsChanged={(e) => {
+                if (e.detail.value.length === 0) {
+                  setItem(undefined);
+                } else {
+                  const selectedItem = e.detail.value[0];
+                  setItem({ ...selectedItem });
+                }
+              }}
+              customColumns={customColumns}
+            ></AutoGrid>
           <ExperimentalAutoForm
             disabled={!item}
             service={service}
@@ -61,7 +81,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
               setRefreshTrigger(refreshTrigger + 1);
             }}
           ></ExperimentalAutoForm>
-        </HorizontalLayout>
+        </HorizontalLayout></VerticalLayout>
       </AutoCrudContext.Provider>
     </>
   );

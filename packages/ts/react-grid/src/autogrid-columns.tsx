@@ -6,15 +6,20 @@ import {
   AutoGridNumberRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
-import { BooleanHeaderFilter, NoHeaderFilter, NumberHeaderFilter, StringHeaderFilter } from './header-filter';
+import {
+  BooleanHeaderFilter,
+  DateHeaderFilter,
+  NoHeaderFilter,
+  NumberHeaderFilter,
+  StringHeaderFilter,
+  TimeHeaderFilter,
+} from './header-filter';
 import type { PropertyInfo } from './property-info';
 
-type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
-  headerRenderer: React.ComponentType<Readonly<{ original: GridColumnElement }>>;
-};
+export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
-export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
+function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
     case 'number':
@@ -39,7 +44,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: DateHeaderFilter,
       };
     case 'time':
       return {
@@ -47,7 +52,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridTimeRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: TimeHeaderFilter,
       };
     case 'datetime':
       return {
@@ -55,7 +60,7 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: DateHeaderFilter,
       };
     case 'string':
       return {
@@ -68,4 +73,16 @@ export function getColumnProps(propertyInfo: PropertyInfo): ColumnOptions {
         headerRenderer: NoHeaderFilter,
       };
   }
+}
+
+export function getColumnOptions(
+  propertyInfo: PropertyInfo,
+  customColumnOptions: ColumnOptions | undefined,
+): ColumnOptions {
+  const typeColumnOptions = getTypeColumnOptions(propertyInfo);
+  const columnOptions = customColumnOptions ? { ...typeColumnOptions, ...customColumnOptions } : typeColumnOptions;
+  if (!columnOptions.headerRenderer) {
+    console.error(`No header renderer defined for column ${propertyInfo.name}`);
+  }
+  return columnOptions;
 }

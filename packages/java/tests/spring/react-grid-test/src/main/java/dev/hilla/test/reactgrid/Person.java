@@ -1,44 +1,22 @@
 package dev.hilla.test.reactgrid;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 
 @Entity
-public class Person {
-
-    @Id
-    private Long id;
-
-    @Version
-    private Long version;
+public class Person extends AbstractEntity {
 
     private String firstName, lastName;
     private int luckyNumber;
     private boolean emailVerified;
+    private Date joinedDate;
     private LocalDate birthDate;
     private LocalTime shiftStart;
     private LocalDateTime appointmentTime;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
 
     public String getFirstName() {
         return firstName;
@@ -70,6 +48,14 @@ public class Person {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public Date getJoinedDate() {
+        return joinedDate;
+    }
+
+    public void setJoinedDate(Date joinedDate) {
+        this.joinedDate = joinedDate;
     }
 
     public LocalDate getBirthDate() {

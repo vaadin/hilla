@@ -22,7 +22,7 @@ import org.springframework.data.repository.CrudRepository;
  */
 @EndpointExposed
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
-        implements ListService<T> {
+        implements ListService<T>, GetService<T, ID>, CountService {
 
     @Autowired
     private JpaFilterConverter jpaFilterConverter;
@@ -70,8 +70,41 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
-        Specification<T> spec = jpaFilterConverter.toSpec(filter, entityClass);
+        Specification<T> spec = toSpec(filter);
         return getRepository().findAll(spec, pageable).getContent();
+    }
+
+    @Override
+    public T get(ID id) {
+        return getRepository().findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean exists(ID id) {
+        return getRepository().existsById(id);
+    }
+
+    /**
+     * Counts the number of entities that match the given filter.
+     *
+     * @param filter
+     *            the filter, or {@code null} to use no filter
+     * @return
+     */
+    @Override
+    public long count(@Nullable Filter filter) {
+        return getRepository().count(toSpec(filter));
+    }
+
+    /**
+     * Converts the given filter to a JPA specification.
+     *
+     * @param filter
+     *            the filter to convert
+     * @return a JPA specification
+     */
+    protected Specification<T> toSpec(@Nullable Filter filter) {
+        return jpaFilterConverter.toSpec(filter, entityClass);
     }
 
     @SuppressWarnings("unchecked")

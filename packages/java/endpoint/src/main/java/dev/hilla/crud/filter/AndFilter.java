@@ -16,4 +16,9 @@ public class AndFilter implements Filter {
         this.children = children;
     }
 
+    @Override
+    public String toString() {
+        return "AndFilter [children=" + children + "]";
+    }
+
 }

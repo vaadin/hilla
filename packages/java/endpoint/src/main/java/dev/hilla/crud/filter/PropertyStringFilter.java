@@ -36,4 +36,11 @@ public class PropertyStringFilter implements Filter {
     public void setMatcher(Matcher type) {
         this.matcher = type;
     }
+
+    @Override
+    public String toString() {
+        return "PropertyStringFilter [propertyId=" + propertyId + ", matcher="
+                + matcher + ", filterValue=" + filterValue + "]";
+    }
+
 }
