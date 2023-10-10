@@ -238,6 +238,7 @@ export interface Level2 {
 }
 
 export interface Level1 {
+  anotherLevel2?: Array<string | undefined>;
   level2?: Array<Level2 | undefined>;
   name1?: string;
 }
@@ -273,6 +274,14 @@ export class Level2Model<T extends Level2 = Level2> extends ObjectModel<T> {
 
 export class Level1Model<T extends Level1 = Level1> extends ObjectModel<T> {
   declare static createEmptyValue: () => Level1;
+
+  get anotherLevel2(): ArrayModel<string, StringModel> {
+    return this[_getPropertyModel]('anotherLevel2', ArrayModel, [true, StringModel, [true]]) as ArrayModel<
+      string,
+      StringModel
+    >;
+  }
+
   get level2(): ArrayModel<Level2, Level2Model> {
     return this[_getPropertyModel]('level2', ArrayModel, [true, Level2Model, [true]]) as ArrayModel<
       Level2,
