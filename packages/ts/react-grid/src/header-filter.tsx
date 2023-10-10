@@ -5,9 +5,10 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import { DateFormatter } from './date-formatter';
+import { defaultLocale } from './i18n.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 
 // TODO: Replace with more robust solution
@@ -28,7 +29,7 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
 // Create date picker I18N config based on the current browser locale
-const dateFormatter = new DateFormatter();
+const dateFormatter = new DateFormatter(defaultLocale);
 
 const datePickerI18n: DatePickerI18n = {
   ...new DatePickerElement().i18n,
