@@ -1,7 +1,7 @@
 import type { VaadinWindow } from './vaadin.types.js';
 
 export * from './autogrid.js';
-export * from './crud.js';
+export type * from './crud.js';
 export * from './autoform.js';
 export * from './autocrud.js';
 
