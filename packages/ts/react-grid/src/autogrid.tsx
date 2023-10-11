@@ -139,13 +139,17 @@ function useColumns(
       </ColumnContext.Provider>
     );
   });
+
   let columns = autoColumns;
+
   if (options.customColumns) {
     columns = [...columns, ...options.customColumns];
   }
+
   if (options.rowNumbers) {
     columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
   }
+
   return columns;
 }
 

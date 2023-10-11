@@ -95,6 +95,55 @@ describe('@hilla/react-grid', () => {
       expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', 'Dove');
     });
 
+    it('can add a new item', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const { grid, form } = await CrudController.init(result, user);
+      const newButton = await result.findByText('+ New');
+      await user.click(newButton);
+      const [firstNameField, lastNameField, emailField, someNumberField] = await form.getFields(
+        'First name',
+        'Last name',
+        'Email',
+        'Some number',
+      );
+
+      expect(firstNameField.value).to.equal('');
+      expect(lastNameField.value).to.equal('');
+      expect(someNumberField.value).to.equal(0);
+      await firstNameField.type('Jeff');
+      await lastNameField.type('Lastname');
+      await emailField.type('first.last@domain.com');
+      await someNumberField.type('12');
+      await form.submit();
+      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jeff');
+    });
+
+    it('can update added item', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
+      const { grid, form } = await CrudController.init(result, user);
+      const newButton = await result.findByText('+ New');
+      await user.click(newButton);
+
+      const [firstNameField, lastNameField, emailField, someNumberField] = await form.getFields(
+        'First name',
+        'Last name',
+        'Email',
+        'Some number',
+      );
+
+      await firstNameField.type('Jeff');
+      await lastNameField.type('Lastname');
+      await emailField.type('first.last@domain.com');
+      await someNumberField.type('12');
+      await form.submit();
+      await firstNameField.type('Jerp');
+      await form.submit();
+      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jerp');
+      expect(grid.getVisibleRowCount()).to.equal(3);
+    });
+
     it('deletes and refreshes grid after confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
@@ -120,6 +169,7 @@ describe('@hilla/react-grid', () => {
       const cell = grid.getBodyCellContent(1, 5);
       expect(cell).to.be.null;
     });
+
     it('shows a header if requested', async () => {
       const result = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} header="Hello crud" />);
       await result.findByText('Hello crud');

@@ -8,7 +8,7 @@ import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import { DateFormatter } from './date-formatter';
-import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
+import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
 // TODO: Replace with more robust solution
 const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');

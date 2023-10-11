@@ -7,11 +7,11 @@ import {
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
 import type { CrudService } from '../src/crud.js';
-import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
-import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
-import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
-import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
+import type Filter from '../src/types/dev/hilla/crud/filter/Filter.js';
+import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
+import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
+import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 
 export interface Company extends HasIdVersion {
   id: number;

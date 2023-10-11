@@ -19,7 +19,7 @@ await build({
   },
   entryPoints: srcFiles.map((file) => new URL(file, root)).map(fileURLToPath),
   format: 'esm',
-  minify: true,
+  // minify: true,
   outdir: fileURLToPath(root),
   packages: 'external',
   sourcemap: 'linked',

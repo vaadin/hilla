@@ -1,5 +1,5 @@
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import type { RenderResult } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 import TextFieldController from './TextFieldController.js';
 
@@ -9,7 +9,9 @@ export default class FormController {
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<FormController> {
-    const form = await result.findByTestId('form');
+    const form = (await waitFor(
+      () => result.container.querySelector('vertical-layout[theme="padding"]')!,
+    )) as HTMLElement;
     return new FormController(form, result, user);
   }
 
@@ -21,6 +23,10 @@ export default class FormController {
 
   async getField(label: string): Promise<TextFieldController> {
     return TextFieldController.initByLabel(await this.#result.findByLabelText(label), this.#user);
+  }
+
+  async getFields(...labels: readonly string[]): Promise<readonly TextFieldController[]> {
+    return await Promise.all(labels.map(async (label) => await this.getField(label)));
   }
 
   async typeInField(label: string, value: string): Promise<void> {

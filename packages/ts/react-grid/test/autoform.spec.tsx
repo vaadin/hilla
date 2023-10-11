@@ -222,7 +222,7 @@ describe('@hilla/react-grid', () => {
     it('enables all fields and buttons when enabled', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled />);
-      await result.findByTestId('form');
+      await FormController.init(result, user);
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(result, user);
       await expect(form.areEnabled(LABELS)).to.eventually.be.true;

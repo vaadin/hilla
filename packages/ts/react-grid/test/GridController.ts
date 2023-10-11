@@ -15,7 +15,7 @@ export default class GridController {
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<GridController> {
-    const grid = (await result.findByTestId('grid')) as GridElement;
+    const grid = await waitFor(() => result.container.querySelector('vaadin-grid')!);
     await waitFor(() => grid.shadowRoot?.querySelector('tbody')?.children);
 
     return new GridController(grid, user);
@@ -67,7 +67,7 @@ export default class GridController {
 
   async getHeaderCellContents(): Promise<readonly string[]> {
     const cells = await this.getHeaderCells();
-    return cells.map((cell) => getCellContent(cell).innerText);
+    return cells.map((cell) => (getCellContent(cell) as HTMLElement).innerText);
   }
 
   generateColumnHeaders(paths: readonly string[]): readonly string[] {

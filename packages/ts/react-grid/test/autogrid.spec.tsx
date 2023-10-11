@@ -53,12 +53,10 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
 describe('@hilla/react-grid', () => {
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
-      return (
-        <AutoGrid service={personService()} model={PersonModel} noHeaderFilters data-testid="grid" {...customProps} />
-      );
+      return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;
     }
     function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
-      return <AutoGrid service={personService()} model={PersonModel} data-testid="grid" {...customProps} />;
+      return <AutoGrid service={personService()} model={PersonModel} {...customProps} />;
     }
 
     let user: ReturnType<(typeof userEvent)['setup']>;
@@ -74,7 +72,7 @@ describe('@hilla/react-grid', () => {
       });
 
       it('can change model and recreate columns', async () => {
-        const result = render(<AutoGrid data-testid="grid" service={personService()} model={PersonModel} />);
+        const result = render(<AutoGrid service={personService()} model={PersonModel} />);
         await assertColumns(
           await GridController.init(result, user),
           'firstName',
@@ -83,7 +81,7 @@ describe('@hilla/react-grid', () => {
           'someNumber',
           'vip',
         );
-        result.rerender(<AutoGrid data-testid="grid" service={companyService()} model={CompanyModel} />);
+        result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
       });
 
@@ -133,13 +131,20 @@ describe('@hilla/react-grid', () => {
         expect(grid.instance.getAttribute('service')).to.be.null;
       });
 
+      it('calls data provider list() only once for initial data', async () => {
+        const testService = personService();
+        expect(testService.callCount).to.equal(0);
+        await GridController.init(render(<AutoGrid service={testService} model={PersonModel} />), user);
+        expect(testService.callCount).to.equal(1);
+      });
+
       it('passes filter to the data provider', async () => {
         const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
         // @ts-expect-error: getting internal property
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         filter.t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
 
-        const grid = await GridController.init(render(<TestAutoGrid filter={filter} />), user);
+        const grid = await GridController.init(render(<TestAutoGrid experimentalFilter={filter} />), user);
         expect(grid.getVisibleRowCount()).to.equal(1);
         expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
         expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', 'Love');
@@ -283,7 +288,7 @@ describe('@hilla/react-grid', () => {
           };
           expect(service.lastFilter).to.deep.equal(expectedFilter1);
 
-          result.rerender(<AutoGrid data-testid="grid" service={service} model={PersonModel} noHeaderFilters />);
+          result.rerender(<AutoGrid service={service} model={PersonModel} noHeaderFilters />);
           grid = await GridController.init(result, user);
           expect(grid.getHeaderRows().length).to.equal(1);
 
@@ -298,9 +303,9 @@ describe('@hilla/react-grid', () => {
           const _personService = personService();
           const _companyService = companyService();
 
-          const result = render(<AutoGrid data-testid="grid" service={_personService} model={PersonModel} />);
+          const result = render(<AutoGrid service={_personService} model={PersonModel} />);
           await GridController.init(result, user);
-          result.rerender(<AutoGrid data-testid="grid" service={_companyService} model={CompanyModel} />);
+          result.rerender(<AutoGrid service={_companyService} model={CompanyModel} />);
           const grid = await GridController.init(result, user);
 
           const companyNameFilter = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
@@ -365,11 +370,35 @@ describe('@hilla/react-grid', () => {
           </span>
         );
         const grid = await GridController.init(
-          render(<TestAutoGrid customColumns={[<GridColumn autoWidth renderer={NameRenderer}></GridColumn>]} />),
+          render(
+            <TestAutoGrid
+              customColumns={[<GridColumn key="test-column" autoWidth renderer={NameRenderer}></GridColumn>]}
+            />,
+          ),
           user,
         );
         await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
         expect(grid.getBodyCellContent(0, 5)).to.have.property('innerText', 'Jane Love');
+      });
+
+      it('uses custom column options on top of the type defaults', async () => {
+        const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
+        const grid = await GridController.init(
+          render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />),
+          user,
+        );
+        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+        const janeCell = grid.getBodyCellContent(0, 0);
+        expect(janeCell).to.have.property('innerText', 'JANE');
+        // The header filter was not overridden
+        const cell = grid.getHeaderCellContent(1, 0);
+        expect(cell.firstElementChild).to.have.tagName('vaadin-text-field');
+      });
+
+      it('renders row numbers if requested', async () => {
+        const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
+        await assertColumns(grid, '', 'firstName', 'lastName', 'email', 'someNumber', 'vip');
+        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', '1');
       });
     });
 
@@ -378,13 +407,7 @@ describe('@hilla/react-grid', () => {
 
       beforeEach(async () => {
         grid = await GridController.init(
-          render(
-            <AutoGrid
-              data-testid="grid"
-              service={columnRendererTestService()}
-              model={ColumnRendererTestModel}
-            ></AutoGrid>,
-          ),
+          render(<AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>),
           user,
         );
       });
@@ -402,10 +425,8 @@ describe('@hilla/react-grid', () => {
       });
 
       it('renders booleans as icons', () => {
-        const vip = grid.getBodyCellContent(0, 2).querySelector('vaadin-icon')!;
-        expect(vip).to.have.attribute('icon', 'lumo:checkmark');
-        const notVip = grid.getBodyCellContent(1, 2).querySelector('vaadin-icon')!;
-        expect(notVip).to.have.attribute('icon', 'lumo:minus');
+        expect(grid.getBodyCellContent(0, 2).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 2).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
       it('renders java.util.Date as right aligned', () => {
@@ -439,31 +460,29 @@ describe('@hilla/react-grid', () => {
         expect(grid.getBodyCellContent(2, 6)).to.have.text('');
         expect(grid.getBodyCellContent(3, 6)).to.have.text('');
       });
-    });
 
-    it('renders nested strings without formatting and with default alignment', () => {
-      expect(getBodyCellContent(grid, 0, 7).style.textAlign).to.equal('');
-      expect(getBodyCellContent(grid, 0, 7).innerText).to.equal('Nested string 1');
-      expect(getBodyCellContent(grid, 1, 7).innerText).to.equal('');
-    });
+      it('renders nested strings without formatting and with default alignment', () => {
+        expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, 7)).to.have.property('innerText', 'Nested string 1');
+        expect(grid.getBodyCellContent(1, 7)).to.have.property('innerText', '');
+      });
 
-    it('renders nested numbers as right aligned numbers', () => {
-      expect(getBodyCellContent(grid, 0, 8).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 8).innerText).to.equal('123,456');
-      expect(getBodyCellContent(grid, 1, 8).innerText).to.equal('');
-    });
+      it('renders nested numbers as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 8)).to.have.property('innerText', '123,456');
+        expect(grid.getBodyCellContent(1, 8)).to.have.property('innerText', '');
+      });
 
-    it('renders nested booleans as icons', () => {
-      const vip = getBodyCellContent(grid, 0, 9).querySelector('vaadin-icon')!;
-      expect(vip.icon).to.equal('lumo:checkmark');
-      const notVip = getBodyCellContent(grid, 1, 9).querySelector('vaadin-icon')!;
-      expect(notVip.icon).to.equal('lumo:minus');
-    });
+      it('renders nested booleans as icons', () => {
+        expect(grid.getBodyCellContent(0, 9).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 9).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+      });
 
-    it('renders java.util.Date as right aligned', () => {
-      expect(getBodyCellContent(grid, 0, 10).style.textAlign).to.equal('end');
-      expect(getBodyCellContent(grid, 0, 10).textContent).to.equal('5/13/2021');
-      expect(getBodyCellContent(grid, 1, 10).textContent).to.equal('');
+      it('renders java.util.Date as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 10)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 10)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 10)).to.have.text('');
+      });
     });
   });
 });

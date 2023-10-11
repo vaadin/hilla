@@ -14,14 +14,7 @@ export function AutoFormField({ propertyInfo, form, disabled, ...other }: AutoFo
   if (propertyInfo.type === 'string' || propertyInfo.type === 'number') {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const model = form.model[propertyInfo.name];
-    return (
-      <TextField
-        disabled={disabled}
-        {...other}
-        {...form.field(model)}
-        label={propertyInfo.humanReadableName}
-      ></TextField>
-    );
+    return <TextField disabled={disabled} {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
   }
   return <></>;
 }
