@@ -56,7 +56,6 @@ export function ExperimentalAutoForm<TItem>({
       }
     } catch (error) {
       if (error instanceof ValidationError) {
-        console.error(error);
         // Handled automatically
         return;
       }
