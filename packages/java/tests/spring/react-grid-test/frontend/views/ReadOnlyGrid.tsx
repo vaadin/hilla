@@ -1,4 +1,4 @@
-import { AutoGrid } from '@hilla/react-grid';
+import { AutoGrid } from '@hilla/react-crud';
 import type Person from 'Frontend/generated/dev/hilla/test/reactgrid/Person';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
 import { PersonListOnlyService } from 'Frontend/generated/endpoints';

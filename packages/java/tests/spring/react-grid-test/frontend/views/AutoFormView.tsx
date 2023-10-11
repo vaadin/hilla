@@ -1,4 +1,4 @@
-import { ExperimentalAutoForm } from '@hilla/react-grid';
+import { ExperimentalAutoForm } from '@hilla/react-crud';
 import { useState } from 'react';
 import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel';

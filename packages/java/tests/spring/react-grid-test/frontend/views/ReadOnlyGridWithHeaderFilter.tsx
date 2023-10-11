@@ -1,6 +1,6 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
-import { AutoGrid, type CrudService } from '@hilla/react-grid';
+import { AutoGrid, type CrudService } from '@hilla/react-crud';
 import { useState } from 'react';
 import CompanyModel from 'Frontend/generated/dev/hilla/test/reactgrid/CompanyModel';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
