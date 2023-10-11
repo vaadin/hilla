@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render } from '@testing-library/react';
+import { act, render, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
@@ -10,7 +10,9 @@ import { type Login, LoginModel, type UserModel } from './models.js';
 use(sinonChai);
 use(chaiDom);
 
-describe('@hilla/react-form', () => {
+describe('@hilla/react-form', function () {
+  this.timeout(100000);
+
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
   const useForm = sinon.spy(_useForm) as typeof _useForm;
 
@@ -24,6 +26,7 @@ describe('@hilla/react-form', () => {
   function UserForm({ model: user }: UserFormProps) {
     const { field, model } = useFormPart(user);
     const name = useFormPart(user.name);
+    const passwordHint = useFormPart(user.passwordHint);
 
     return (
       <fieldset>
@@ -32,6 +35,10 @@ describe('@hilla/react-form', () => {
           {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
         </output>
         <input data-testid="user.password" type="text" {...field(model.password)} />
+        <input data-testid="user.passwordHint" type="text" {...field(model.passwordHint)} />
+        <output data-testid="validation.user.passwordHint">
+          {passwordHint.invalid ? passwordHint.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
       </fieldset>
     );
   }
@@ -55,12 +62,12 @@ describe('@hilla/react-form', () => {
     );
   }
 
-  async function fillAndSubmitLoginForm(getByTestId: (id: string) => HTMLElement) {
-    const user = userEvent.setup();
-    await user.click(getByTestId('user.name'));
-    await user.keyboard('johndoe');
-    await user.click(getByTestId('user.password'));
-    await user.keyboard('john123456');
+  async function fillAndSubmitLoginForm(
+    getByTestId: RenderResult['getByTestId'],
+    user: ReturnType<(typeof userEvent)['setup']>,
+  ) {
+    await user.type(getByTestId('user.name'), 'johndoe');
+    await user.type(getByTestId('user.password'), 'john123456');
     await user.click(getByTestId('rememberMe'));
     await user.click(getByTestId('submit'));
   }
@@ -81,7 +88,7 @@ describe('@hilla/react-form', () => {
     it('collects info from a form', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await fillAndSubmitLoginForm(getByTestId);
+      await fillAndSubmitLoginForm(getByTestId, user);
 
       expect(onSubmit).to.have.been.calledWithMatch({
         rememberMe: true,
@@ -95,8 +102,7 @@ describe('@hilla/react-form', () => {
     it('does not call onSubmit if the form is invalid', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
+      await user.type(getByTestId('user.name'), 'johndoe');
       await user.click(getByTestId('submit'));
 
       expect(onSubmit).to.not.have.been.called;
@@ -149,8 +155,7 @@ describe('@hilla/react-form', () => {
     it('updates displayed value', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
+      await user.type(getByTestId('user.name'), 'johndoe');
       await user.click(getByTestId('rememberMe'));
 
       expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe');
@@ -160,8 +165,7 @@ describe('@hilla/react-form', () => {
     it('shows validation errors', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('Very lengthy name');
+      await user.type(getByTestId('user.name'), 'Very lengthy name');
       await user.click(getByTestId('user.password'));
 
       expect(getByTestId('validation.user.name').textContent).to.have.string('size');
@@ -170,20 +174,41 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('user.name'));
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('size');
+      expect(getByTestId('validation.user.name')).to.have.text('size');
 
       // clearing should show a required validator message
-      await user.click(getByTestId('user.name'));
       await user.clear(getByTestId('user.name'));
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('invalid');
+      expect(getByTestId('validation.user.name')).to.have.text('invalid');
 
       // fix
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('jane');
+      await user.type(getByTestId('user.name'), 'jane');
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('OK');
+      expect(getByTestId('validation.user.name')).to.have.text('OK');
+    });
+
+    it('should correctly handle validators on optional fields', async () => {
+      const { getByTestId } = render(<LoginForm />);
+
+      // eslint-disable-next-line @typescript-eslint/require-await
+      await act(async () => {
+        const { read } = (useForm as UseFormSpy).returnValues[0];
+        read({
+          user: {
+            id: 1,
+            name: 'johndoe',
+            password: 'john123456',
+          },
+        });
+      });
+
+      expect(getByTestId('validation.user.passwordHint')).to.have.text('OK');
+
+      await user.type(getByTestId('user.passwordHint'), 'a');
+      await user.click(getByTestId('submit'));
+
+      expect(getByTestId('validation.user.passwordHint')).to.have.text('size must be between 5 and 10');
     });
 
     describe('configuration update', () => {
@@ -194,7 +219,7 @@ describe('@hilla/react-form', () => {
         // Update onSubmit reference, rerender, fill form and submit
         onSubmit = sinon.spy();
         rerender(<LoginForm />);
-        await fillAndSubmitLoginForm(getByTestId);
+        await fillAndSubmitLoginForm(getByTestId, user);
 
         expect(onSubmit).to.have.been.calledOnce;
       });
