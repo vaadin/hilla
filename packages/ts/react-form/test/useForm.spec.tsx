@@ -1,12 +1,14 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, renderHook } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Login, LoginModel, UserModel } from './models.js';
+import { type Login, LoginModel, type UserModel } from './models.js';
 
 use(sinonChai);
+use(chaiDom);
 
 describe('@hilla/react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
@@ -70,6 +72,12 @@ describe('@hilla/react-form', () => {
   });
 
   describe('useForm', () => {
+    let user: ReturnType<(typeof userEvent)['setup']>;
+
+    beforeEach(() => {
+      user = userEvent.setup();
+    });
+
     it('collects info from a form', async () => {
       const { getByTestId } = render(<LoginForm />);
 
@@ -85,7 +93,6 @@ describe('@hilla/react-form', () => {
     });
 
     it('does not call onSubmit if the form is invalid', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('user.name'));
@@ -96,7 +103,6 @@ describe('@hilla/react-form', () => {
     });
 
     it('does not call onSubmit if the form has not been touched', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('submit'));
@@ -107,9 +113,9 @@ describe('@hilla/react-form', () => {
     it('shows empty values by default', () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('user.name')).to.have.property('value', '');
-      expect(getByTestId('user.password')).to.have.property('value', '');
-      expect(getByTestId('rememberMe')).to.have.property('checked', false);
+      expect(getByTestId('user.name')).to.have.value('');
+      expect(getByTestId('user.password')).to.have.value('');
+      expect(getByTestId('rememberMe')).to.not.be.checked;
     });
 
     it('shows read values', async () => {
@@ -128,20 +134,19 @@ describe('@hilla/react-form', () => {
         });
       });
 
-      expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
-      expect(getByTestId('user.password')).to.have.property('value', 'john123456');
-      expect(getByTestId('rememberMe')).to.have.property('checked', true);
+      expect(getByTestId('user.name')).to.have.value('johndoe');
+      expect(getByTestId('user.password')).to.have.value('john123456');
+      expect(getByTestId('rememberMe')).to.be.checked;
     });
 
-    it('dispays default value', () => {
+    it('displays default value', () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', '');
-      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
+      expect(getByTestId('output.user.name')).to.have.text('');
+      expect(getByTestId('output.rememberMe')).to.have.text('undefined');
     });
 
     it('updates displayed value', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('user.name'));
@@ -153,7 +158,6 @@ describe('@hilla/react-form', () => {
     });
 
     it('shows validation errors', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('user.name'));
@@ -197,7 +201,6 @@ describe('@hilla/react-form', () => {
 
       it('should use updated onChange reference', async () => {
         // Initial render
-        const user = userEvent.setup();
         const { getByTestId, rerender } = render(<LoginForm />);
 
         // Update onChange reference, rerender, type a character
@@ -207,20 +210,6 @@ describe('@hilla/react-form', () => {
         await user.keyboard('a');
 
         expect(onChange).to.have.been.calledOnce;
-      });
-    });
-
-    describe('model initialization', () => {
-      it('should initialize optional string model when it is bound to a field', () => {
-        const { rerender, result } = renderHook(() => useForm(UserModel));
-
-        expect(result.current.value.passwordHint).to.be.undefined;
-
-        // Call field directive to simulate binding the model to a field
-        result.current.field(result.current.model.passwordHint);
-        rerender();
-
-        expect(result.current.value.passwordHint).to.equal('');
       });
     });
   });

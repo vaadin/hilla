@@ -40,7 +40,8 @@ export class UserModel<T extends User = User> extends ObjectModel<T> {
   get passwordHint(): StringModel {
     return this[_getPropertyModel](
       'passwordHint',
-      (parent, key) => new StringModel(parent, key, true /* should be optional */),
+      (parent, key) =>
+        new StringModel(parent, key, true /* should be optional */, { validators: [new Size({ max: 10 })] }),
     );
   }
 }
