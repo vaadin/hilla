@@ -368,8 +368,21 @@ describe('@hilla/react-crud', () => {
     });
 
     it('should ignore unknown columns', async () => {
-      const result = render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />);
-      await assertColumns(result, 'email', 'firstName');
+      const result = render(
+        <AutoGrid
+          service={columnRendererTestService()}
+          model={ColumnRendererTestModel}
+          visibleColumns={[
+            // @ts-expect-error TS2322: Type '"foo"' is not assignable to type 'ColumnNames<ColumnRendererTestValues>'
+            'foo',
+            'localDate',
+            // @ts-expect-error TS2322: Type '"nested.localDate"' is not assignable to type 'ColumnNames<ColumnRendererTestValues>'
+            'nested.localDate',
+            'nested.number',
+          ]}
+        />,
+      );
+      await assertColumns(result, 'localDate', 'nested.number');
     });
 
     it('renders custom columns at the end', async () => {

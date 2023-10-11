@@ -16,10 +16,10 @@ import {
 } from './header-filter';
 import type { PropertyInfo } from './property-info';
 
-export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
+export type ColumnProps = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
-function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
+function getTypeColumnProps(propertyInfo: PropertyInfo): ColumnProps {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
     case 'number':
@@ -75,14 +75,11 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
   }
 }
 
-export function getColumnOptions(
-  propertyInfo: PropertyInfo,
-  customColumnOptions: ColumnOptions | undefined,
-): ColumnOptions {
-  const typeColumnOptions = getTypeColumnOptions(propertyInfo);
-  const columnOptions = customColumnOptions ? { ...typeColumnOptions, ...customColumnOptions } : typeColumnOptions;
-  if (!columnOptions.headerRenderer) {
+export function getColumnProps(propertyInfo: PropertyInfo, customColumnProps: ColumnProps | undefined): ColumnProps {
+  const typeColumnProps = getTypeColumnProps(propertyInfo);
+  const columnProps = customColumnProps ? { ...typeColumnProps, ...customColumnProps } : typeColumnProps;
+  if (!columnProps.headerRenderer) {
     console.error(`No header renderer defined for column ${propertyInfo.name}`);
   }
-  return columnOptions;
+  return columnProps;
 }

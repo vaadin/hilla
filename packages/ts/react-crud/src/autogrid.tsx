@@ -12,7 +12,7 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
-import { getColumnOptions, type ColumnOptions } from './autogrid-columns.js';
+import { getColumnProps, type ColumnProps } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
@@ -23,16 +23,63 @@ import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStr
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 
+type AllPropertyNames<TItem> = string & keyof TItem;
+
+type UnsupportedColumnDataTypes = unknown[];
+
+type SupportedPropertyNames<TItem> = Exclude<
+  {
+    [Key in AllPropertyNames<TItem>]: TItem[Key] extends UnsupportedColumnDataTypes ? never : Key;
+  }[AllPropertyNames<TItem>],
+  undefined
+>;
+
+type NestedPropertyNames<TItem> = Exclude<
+  {
+    [Key in SupportedPropertyNames<TItem>]: TItem[Key] extends object | undefined ? Key : never;
+  }[SupportedPropertyNames<TItem>],
+  undefined
+>;
+
+type DirectPropertyNames<TItem> = Exclude<SupportedPropertyNames<TItem>, NestedPropertyNames<TItem>>;
+
+type PrependPath<P extends string, K extends string> = `${P}.${K}`;
+
+type PathsL1<TItem, P extends string> = {
+  [Key in DirectPropertyNames<TItem>]: PrependPath<P, Key>;
+}[DirectPropertyNames<TItem>];
+type PathsL2<TItem, P extends string> =
+  | {
+      [Key in DirectPropertyNames<TItem>]: PrependPath<P, Key>;
+    }[DirectPropertyNames<TItem>]
+  | {
+      [Key in NestedPropertyNames<TItem>]: PathsL1<Exclude<TItem[Key], undefined>, PrependPath<P, Key>>;
+    }[NestedPropertyNames<TItem>];
+
+type PropertyPaths<TItem> =
+  | {
+      [Key in DirectPropertyNames<TItem>]: Key;
+    }[DirectPropertyNames<TItem>]
+  | {
+      [Key in NestedPropertyNames<TItem>]: PathsL2<Exclude<TItem[Key], undefined>, Key>;
+    }[NestedPropertyNames<TItem>];
+
+export type ColumnNames<TItem> = PropertyPaths<TItem>;
+
+export type ColumnOptions<TItem> = {
+  readonly [Key in PropertyPaths<TItem>]?: ColumnProps;
+};
+
 export type AutoGridProps<TItem> = GridProps<TItem> &
   Readonly<{
     service: ListService<TItem>;
     model: DetachedModelConstructor<AbstractModel<TItem>>;
     experimentalFilter?: Filter;
-    visibleColumns?: string[];
+    visibleColumns?: ReadonlyArray<ColumnNames<TItem>>;
     noHeaderFilters?: boolean;
     refreshTrigger?: number;
     customColumns?: JSX.Element[];
-    columnOptions?: Record<string, ColumnOptions>;
+    columnOptions?: ColumnOptions<TItem>;
     rowNumbers?: boolean;
   }>;
 
@@ -96,10 +143,10 @@ function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   options: {
-    visibleColumns?: string[];
+    visibleColumns?: readonly string[];
     noHeaderFilters?: boolean;
     customColumns?: JSX.Element[];
-    columnOptions?: Record<string, ColumnOptions>;
+    columnOptions?: Readonly<Partial<Record<string, ColumnProps>>>;
     rowNumbers?: boolean;
   },
 ) {
@@ -115,11 +162,11 @@ function useColumns(
   const autoColumns = effectiveProperties.map((propertyInfo) => {
     let column;
 
-    const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
+    const customColumnProps = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
 
     // Header renderer is effectively the header filter, which should only be
     // applied when header filters are enabled
-    const { headerRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
+    const { headerRenderer, ...columnProps } = getColumnProps(propertyInfo, customColumnProps);
 
     if (!options.noHeaderFilters) {
       column = (
@@ -188,7 +235,7 @@ export function AutoGrid<TItem>({
 
   const properties = getProperties(model);
   const children = useColumns(properties, setHeaderPropertyFilter, {
-    visibleColumns,
+    visibleColumns: visibleColumns as unknown as readonly string[],
     noHeaderFilters,
     customColumns,
     columnOptions,
