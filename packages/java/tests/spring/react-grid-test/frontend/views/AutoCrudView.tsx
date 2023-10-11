@@ -1,4 +1,4 @@
-import { ExperimentalAutoCrud } from '@hilla/react-grid';
+import { ExperimentalAutoCrud } from '@hilla/react-crud';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
 import { PersonService } from 'Frontend/generated/endpoints';
 

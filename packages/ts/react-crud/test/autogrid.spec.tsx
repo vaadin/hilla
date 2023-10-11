@@ -1,12 +1,9 @@
 import { expect, use } from '@esm-bundle/chai';
-import type { GridElement } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import type { SelectElement } from '@hilla/react-components/Select.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
-import { render, type RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
-
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
@@ -16,12 +13,12 @@ import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
   ColumnRendererTestModel,
-  CompanyModel,
-  PersonModel,
   columnRendererTestService,
+  CompanyModel,
   companyService,
-  personService,
   type Person,
+  PersonModel,
+  personService,
 } from './test-models-and-services.js';
 import TextFieldController from './TextFieldController.js';
 
@@ -50,7 +47,7 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
   }
 }
 
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
       return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;

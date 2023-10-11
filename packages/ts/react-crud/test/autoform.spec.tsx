@@ -21,7 +21,7 @@ use(sinonChai);
 use(chaiAsPromised);
 
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
     const LABELS = ['First name', 'Last name', 'Email', 'Some number'] as const;
     const KEYS = ['firstName', 'lastName', 'email', 'someNumber'] as ReadonlyArray<keyof Person>;

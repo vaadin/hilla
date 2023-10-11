@@ -429,6 +429,15 @@ describe('@hilla/form', () => {
         // Automatic node initialization should preserve pristine state
         assert.isFalse(binder.dirty);
       });
+
+      it('should render arrays after initialization', () => {
+        const { binder } = litHierarchyView;
+        binder.for(binder.model.anotherLevel2).appendItem();
+        const anotherLevel3Nodes = [...binder.model.anotherLevel2];
+        assert.lengthOf(anotherLevel3Nodes, 1);
+        assert.equal(anotherLevel3Nodes[0].name, 'anotherLevel2.0');
+        assert.isFalse(anotherLevel3Nodes[0].required);
+      });
     });
   });
 });

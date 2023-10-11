@@ -11,7 +11,7 @@ import { type Person, PersonModel, personService } from './test-models-and-servi
 use(sinonChai);
 use(chaiDom);
 
-describe('@hilla/react-grid', () => {
+describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
