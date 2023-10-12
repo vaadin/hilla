@@ -1,8 +1,8 @@
 import type { GridElement } from '@hilla/react-components/Grid.js';
-import type { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
+import type { GridSorterDirection, GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import type { RenderResult } from '@testing-library/react';
 import type { Grid } from '@vaadin/grid';
-import type { SortState } from '../src/autogrid-column-context.js';
+import type Direction from '../types/org/springframework/data/domain/Sort/Direction';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
 
@@ -44,6 +44,7 @@ async function nextFrame(): Promise<void> {
     });
   });
 }
+
 export async function reactRender(): Promise<void> {
   await nextFrame();
   await nextFrame();
@@ -56,9 +57,11 @@ export async function setActiveItem<T>(grid: Grid<T>, item: T | undefined): Prom
   await nextFrame();
   await nextFrame();
 }
+
 export function toggleRowSelected(grid: Grid, row: number): void {
   getBodyCellContent(grid, row, 0).click();
 }
+
 export function isSelected(grid: Grid, row: number): boolean {
   return getBodyRow(grid, row).part.contains('selected-row');
 }
@@ -70,10 +73,18 @@ export const sortGrid = (grid: GridElement, path: string, direction: GridSorterD
   }
   sorter.direction = direction;
 };
-export const getSortOrder = (grid: GridElement): SortState | undefined => {
-  const sorter = Array.from(grid.querySelectorAll('vaadin-grid-sorter')).find((gridSorter) => !!gridSorter.direction);
-  if (sorter) {
-    return { path: sorter.path!, direction: sorter.direction! };
-  }
-  return undefined;
+
+interface GridSorterWithOrder extends GridSorterElement {
+  _order: number;
+}
+
+type SortOrder = Array<{ property: string; direction: Direction }>;
+
+export const getSortOrder = (grid: GridElement): SortOrder => {
+  const sorters = Array.from(grid.querySelectorAll('vaadin-grid-sorter')) as any as GridSorterWithOrder[];
+  const activeSorters = sorters.filter((gridSorter) => !!gridSorter.direction).sort((a, b) => a._order - b._order);
+  return activeSorters.map((gridSorter) => {
+    const { direction, path } = gridSorter;
+    return { property: path!, direction: direction!.toUpperCase() as Direction };
+  });
 };
