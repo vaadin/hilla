@@ -208,6 +208,13 @@ describe('@hilla/react-crud', () => {
           { property: 'firstName', direction: Direction.ASC },
           { property: 'lastName', direction: Direction.DESC },
         ]);
+
+        sortGrid(grid, 'lastName', null);
+        await reactRender();
+        expect(service.lastSort).to.eql({
+          orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
+        });
+        expect(getSortOrder(grid)).to.eql([{ property: 'firstName', direction: Direction.ASC }]);
       });
     });
 
