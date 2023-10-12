@@ -208,6 +208,7 @@ type HasIdVersion = {
 };
 
 export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
+  let _lastSort: Sort | undefined;
   let _lastFilter: Filter | undefined;
   let data = initialData;
   let _callCount = 0;
@@ -215,6 +216,7 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
     async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
+      _lastSort = request.sort;
       _lastFilter = filter;
       _callCount += 1;
 
@@ -269,6 +271,9 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
     // eslint-disable-next-line
     async delete(id: any): Promise<void> {
       data = data.filter((item) => item.id !== id);
+    },
+    get lastSort() {
+      return _lastSort;
     },
     get lastFilter() {
       return _lastFilter;
@@ -339,6 +344,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
 ];
 
 export type HasTestInfo = {
+  lastSort: Sort | undefined;
   lastFilter: Filter | undefined;
   callCount: number;
 };
