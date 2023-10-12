@@ -62,7 +62,7 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('First name', 'foo');
       await form.submit();
 
-      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'foo');
+      expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('foo');
     });
 
     it('keeps the selection when the form is submitted', async () => {
@@ -92,7 +92,7 @@ describe('@hilla/react-crud', () => {
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
-      expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', 'Dove');
+      expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
     });
 
     it('can add a new item', async () => {
@@ -116,7 +116,7 @@ describe('@hilla/react-crud', () => {
       await emailField.type('first.last@domain.com');
       await someNumberField.type('12');
       await form.submit();
-      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jeff');
+      expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jeff');
     });
 
     it('can update added item', async () => {
@@ -140,7 +140,7 @@ describe('@hilla/react-crud', () => {
       await form.submit();
       await firstNameField.type('Jerp');
       await form.submit();
-      expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jerp');
+      expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
       expect(grid.getVisibleRowCount()).to.equal(3);
     });
 

@@ -84,8 +84,8 @@ describe('@hilla/react-crud', () => {
 
       it('sorts according to first column by default', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
-        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'John');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
+        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('John');
       });
       it('retains sorting when re-rendering', async () => {
         const result = render(<TestAutoGridNoHeaderFilters />);
@@ -99,8 +99,8 @@ describe('@hilla/react-crud', () => {
       it('creates sortable columns', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
         await grid.sort('firstName', 'desc');
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'John');
-        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Jane');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('John');
+        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jane');
       });
       it('sets a data provider, but only once', async () => {
         const service = personService();
@@ -116,10 +116,10 @@ describe('@hilla/react-crud', () => {
       it('data provider provides data', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
         expect(grid.getVisibleRowCount()).to.equal(2);
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
-        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', 'Love');
-        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'John');
-        expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', 'Dove');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
+        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
+        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('John');
+        expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
       });
 
       it('does not pass its own parameters to the underlying grid', async () => {
@@ -143,8 +143,8 @@ describe('@hilla/react-crud', () => {
 
         const grid = await GridController.init(render(<TestAutoGrid experimentalFilter={filter} />), user);
         expect(grid.getVisibleRowCount()).to.equal(1);
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Jane');
-        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', 'Love');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
+        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
       });
 
       describe('header filters', () => {
@@ -375,7 +375,7 @@ describe('@hilla/react-crud', () => {
           user,
         );
         await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip', '');
-        expect(grid.getBodyCellContent(0, 5)).to.have.property('innerText', 'Jane Love');
+        expect(grid.getBodyCellContent(0, 5)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -386,7 +386,7 @@ describe('@hilla/react-crud', () => {
         );
         await assertColumns(grid, 'firstName', 'lastName', 'email', 'someNumber', 'vip');
         const janeCell = grid.getBodyCellContent(0, 0);
-        expect(janeCell).to.have.property('innerText', 'JANE');
+        expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
         const cell = grid.getHeaderCellContent(1, 0);
         expect(cell.firstElementChild).to.have.tagName('vaadin-text-field');
@@ -395,7 +395,7 @@ describe('@hilla/react-crud', () => {
       it('renders row numbers if requested', async () => {
         const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
         await assertColumns(grid, '', 'firstName', 'lastName', 'email', 'someNumber', 'vip');
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', '1');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
     });
 
@@ -411,14 +411,14 @@ describe('@hilla/react-crud', () => {
 
       it('renders strings without formatting and with default alignment', () => {
         expect(grid.getBodyCellContent(0, 0)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 0)).to.have.property('innerText', 'Hello World 1');
-        expect(grid.getBodyCellContent(1, 0)).to.have.property('innerText', 'Hello World 2');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Hello World 1');
+        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Hello World 2');
       });
 
       it('renders numbers as right aligned numbers', () => {
         expect(grid.getBodyCellContent(0, 1)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 1)).to.have.property('innerText', '123,456');
-        expect(grid.getBodyCellContent(1, 1)).to.have.property('innerText', '-12');
+        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('-12');
       });
 
       it('renders booleans as icons', () => {
@@ -460,14 +460,14 @@ describe('@hilla/react-crud', () => {
 
       it('renders nested strings without formatting and with default alignment', () => {
         expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 7)).to.have.property('innerText', 'Nested string 1');
-        expect(grid.getBodyCellContent(1, 7)).to.have.property('innerText', '');
+        expect(grid.getBodyCellContent(0, 7)).to.have.rendered.text('Nested string 1');
+        expect(grid.getBodyCellContent(1, 7)).to.have.rendered.text('');
       });
 
       it('renders nested numbers as right aligned numbers', () => {
         expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 8)).to.have.property('innerText', '123,456');
-        expect(grid.getBodyCellContent(1, 8)).to.have.property('innerText', '');
+        expect(grid.getBodyCellContent(0, 8)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, 8)).to.have.rendered.text('');
       });
 
       it('renders nested booleans as icons', () => {
