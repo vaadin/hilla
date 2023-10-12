@@ -139,9 +139,12 @@ describe('@hilla/react-crud', () => {
       expect(testService.callCount).to.equal(1);
     });
     it('passes filter to the data provider', async () => {
-      const filter: PropertyStringFilter = { filterValue: 'Jan', matcher: Matcher.CONTAINS, propertyId: 'firstName' };
-      // eslint-disable-next-line
-      (filter as any).t = 'propertyString'; // Workaround for https://github.com/vaadin/hilla/issues/438
+      const filter: PropertyStringFilter = {
+        '@type': 'propertyString',
+        filterValue: 'Jan',
+        matcher: Matcher.CONTAINS,
+        propertyId: 'firstName',
+      };
 
       const result = render(<TestAutoGrid experimentalFilter={filter} />);
       await reactRender();
@@ -244,12 +247,12 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'filter-value',
           propertyId: 'firstName',
           matcher: Matcher.CONTAINS,
         };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
         expect(service.lastFilter).to.eql(expectedFilter);
       });
       it('filter when you type in the field for a number column', async () => {
@@ -264,12 +267,12 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: '123',
           propertyId: 'someNumber',
           matcher: Matcher.GREATER_THAN,
         };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
         expect(service.lastFilter).to.eql(expectedFilter);
 
         const someNumberFilterSelect = someNumberFilterField.previousElementSibling as SelectElement;
@@ -277,12 +280,12 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedPropertyFilter2: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: '123',
           propertyId: 'someNumber',
           matcher: Matcher.EQUALS,
         };
-        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
+        const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
         expect(service.lastFilter).to.eql(expectedFilter2);
       });
       it('filters for a boolean column', async () => {
@@ -295,24 +298,24 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'True',
           propertyId: 'vip',
           matcher: Matcher.EQUALS,
         };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
         expect(service.lastFilter).to.eql(expectedFilter);
 
         select.value = 'False';
         await reactRender();
 
         const expectedPropertyFilter2: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'False',
           propertyId: 'vip',
           matcher: Matcher.EQUALS,
         };
-        const expectedFilter2: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter2] };
+        const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
         expect(service.lastFilter).to.eql(expectedFilter2);
       });
       it('combine filters (and) when you type in multiple fields', async () => {
@@ -330,19 +333,19 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedFirstNameFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'filterFirst',
           propertyId: 'firstName',
           matcher: Matcher.CONTAINS,
         };
         const expectedLastNameFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'filterLast',
           propertyId: 'lastName',
           matcher: Matcher.CONTAINS,
         };
         const expectedFilter: AndFilter = {
-          ...{ t: 'and' },
+          '@type': 'and',
           children: [expectedFirstNameFilter, expectedLastNameFilter],
         };
         expect(service.lastFilter).to.eql(expectedFilter);
@@ -361,13 +364,13 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const filter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'Joh',
           matcher: Matcher.CONTAINS,
           propertyId: 'firstName',
         };
         const expectedFilter1: AndFilter = {
-          ...{ t: 'and' },
+          '@type': 'and',
           children: [filter],
         };
         expect(service.lastFilter).to.eql(expectedFilter1);
@@ -377,7 +380,7 @@ describe('@hilla/react-crud', () => {
         expect(getHeaderRows(grid).length).to.equal(1);
 
         const expectedFilter2: AndFilter = {
-          ...{ t: 'and' },
+          '@type': 'and',
           children: [],
         };
         expect(service.lastFilter).to.eql(expectedFilter2);
@@ -397,12 +400,12 @@ describe('@hilla/react-crud', () => {
         await reactRender();
 
         const expectedPropertyFilter: PropertyStringFilter = {
-          ...{ t: 'propertyString' },
+          '@type': 'propertyString',
           filterValue: 'vaad',
           propertyId: 'name',
           matcher: Matcher.CONTAINS,
         };
-        const expectedFilter: AndFilter = { ...{ t: 'and' }, children: [expectedPropertyFilter] };
+        const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
         expect(_companyService.lastFilter).to.eql(expectedFilter);
       });
     });
@@ -420,7 +423,7 @@ describe('@hilla/react-crud', () => {
       await reactRender();
 
       const expectedFilter: AndFilter = {
-        ...{ t: 'and' },
+        '@type': 'and',
         children: [],
       };
       expect(service.lastFilter).not.to.eql(expectedFilter);

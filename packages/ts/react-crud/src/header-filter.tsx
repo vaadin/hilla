@@ -47,12 +47,11 @@ function useFilterState(initialMatcher: Matcher) {
     setMatcher(newMatcher);
 
     const filter = {
+      '@type': 'propertyString',
       propertyId: context.propertyInfo.name,
       filterValue: newFilterValue,
       matcher: newMatcher,
     };
-    // eslint-disable-next-line
-    (filter as any).t = 'propertyString';
     context.setPropertyFilter(filter);
   }
 

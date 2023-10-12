@@ -1,12 +1,12 @@
 import { TextField } from '@hilla/react-components/TextField.js';
 import { AutoGrid } from '@hilla/react-crud';
-import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter';
+import FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
 import { PersonService } from 'Frontend/generated/endpoints';
 import { useState } from 'react';
 
 export function ReadOnlyGridSinglePropertyFilter() {
-  const [filter, setFilter] = useState<Filter | undefined>(undefined);
+  const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
   return (
     <div>
       <TextField
@@ -14,7 +14,7 @@ export function ReadOnlyGridSinglePropertyFilter() {
         label="Search for first name"
         onValueChanged={(e: any) => {
           const propertyFilter: any = {
-            t: 'propertyString',
+            '@type': 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
             filterValue: e.detail.value,

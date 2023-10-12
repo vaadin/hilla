@@ -18,7 +18,7 @@ import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
-import type Filter from './types/dev/hilla/crud/filter/Filter';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
@@ -50,7 +50,7 @@ interface AutoGridOwnProps<TItem> {
    * **NOTE:** This is considered an experimental feature and the API may change
    * in the future.
    */
-  experimentalFilter?: Filter;
+  experimentalFilter?: FilterUnion;
   /**
    * Allows to customize which columns to show and in which order. This must be
    * an array of property names that are defined in the model. Nested properties
@@ -99,7 +99,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
-  filter: React.MutableRefObject<Filter | undefined>,
+  filter: React.MutableRefObject<FilterUnion | undefined>,
 ): GridDataProvider<TItem> {
   let first = true;
 
@@ -227,7 +227,7 @@ export function AutoGrid<TItem>({
   rowNumbers,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
-  const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ t: 'and' }, children: [] });
+  const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ '@type': 'and' }, children: [] });
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -264,12 +264,12 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Remove all filtering if header filters are removed
     if (noHeaderFilters) {
-      setInternalFilter({ ...{ t: 'and' }, children: [] });
+      setInternalFilter({ ...{ '@type': 'and' }, children: [] });
     }
   }, [noHeaderFilters]);
 
   const ref = useRef<GridElement<TItem>>(null);
-  const dataProviderFilter = useRef<Filter | undefined>(undefined);
+  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
 
   useEffect(() => {
     // Sets the data provider, should be done only once

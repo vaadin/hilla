@@ -7,8 +7,8 @@ import {
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
 import type { CrudService } from '../src/crud';
-import type Filter from '../src/types/dev/hilla/crud/filter/Filter';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter';
+import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
 import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
@@ -209,33 +209,30 @@ type HasIdVersion = {
 
 export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
   let _lastSort: Sort | undefined;
-  let _lastFilter: Filter | undefined;
+  let _lastFilter: FilterUnion | undefined;
   let data = initialData;
   let _callCount = 0;
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
-    async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
+    async list(request: Pageable, filter: FilterUnion | undefined): Promise<T[]> {
       _lastSort = request.sort;
       _lastFilter = filter;
       _callCount += 1;
 
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
-        /* eslint-disable */
-        if (filter && (filter as any).t === 'propertyString') {
-          const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
+        if (filter && filter['@type'] === 'propertyString') {
           filteredData = data.filter((item) => {
-            const propertyValue = (item as any)[propertyFilter.propertyId];
-            if (propertyFilter.matcher === 'CONTAINS') {
-              return propertyValue.includes(propertyFilter.filterValue);
+            const propertyValue = (item as Record<string, any>)[filter.propertyId];
+            if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
+              return propertyValue.includes(filter.filterValue);
             }
-            return propertyValue === propertyFilter.filterValue;
+            return propertyValue === filter.filterValue;
           });
         } else {
           filteredData = data;
         }
-        /* eslint-enable */
       }
 
       if (request.sort.orders.length === 1) {
@@ -345,7 +342,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
 
 export type HasTestInfo = {
   lastSort: Sort | undefined;
-  lastFilter: Filter | undefined;
+  lastFilter: FilterUnion | undefined;
   callCount: number;
 };
 
