@@ -1,8 +1,8 @@
 import { TextField } from '@hilla/react-components/TextField.js';
 import { AutoGrid } from '@hilla/react-crud';
-import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter';
-import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
-import { PersonService } from 'Frontend/generated/endpoints';
+import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter.js';
+import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
+import { PersonService } from 'Frontend/generated/endpoints.js';
 import { useState } from 'react';
 
 export function ReadOnlyGridOrFilter() {

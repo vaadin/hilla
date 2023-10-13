@@ -4,13 +4,13 @@ import type { GridElement } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { useState, type JSX } from 'react';
-import { AutoCrudContext } from './autocrud-context';
-import DeleteButton from './autocrud-delete';
-import { ExperimentalAutoForm } from './autoform';
-import { AutoGrid } from './autogrid';
-import type { CrudService } from './crud';
-import { getProperties } from './property-info';
+import { type JSX, useState } from 'react';
+import { AutoCrudContext } from './autocrud-context.js';
+import DeleteButton from './autocrud-delete.js';
+import { defaultItem, ExperimentalAutoForm } from './autoform.js';
+import { AutoGrid } from './autogrid.js';
+import type { CrudService } from './crud.js';
+import { getProperties } from './property-info.js';
 
 export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
@@ -20,7 +20,7 @@ export type AutoCrudProps<TItem> = Readonly<{
 }>;
 
 export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }: AutoCrudProps<TItem>): JSX.Element {
-  const [item, setItem] = useState<TItem | undefined>(undefined);
+  const [item, setItem] = useState<TItem | typeof defaultItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const customColumns = [];
@@ -46,7 +46,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
             }}
           >
             {header ? <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2> : <></>}
-            <Button theme="primary" onClick={() => setItem({} as TItem)}>
+            <Button theme="primary" onClick={() => setItem(defaultItem)}>
               + New
             </Button>
           </HorizontalLayout>
@@ -79,7 +79,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
                 // Trigger grid data refresh
                 setRefreshTrigger(refreshTrigger + 1);
               }}
-            ></ExperimentalAutoForm>
+            />
           </HorizontalLayout>
         </VerticalLayout>
       </AutoCrudContext.Provider>

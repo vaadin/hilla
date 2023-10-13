@@ -7,7 +7,6 @@ import {
   type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
-  ObjectModel,
 } from '@hilla/form';
 
 export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'string' | 'time' | undefined;

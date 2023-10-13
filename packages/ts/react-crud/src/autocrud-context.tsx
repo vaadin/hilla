@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-import type { CrudService } from './crud';
-import type { PropertyInfo } from './property-info';
+import type { CrudService } from './crud.js';
+import type { PropertyInfo } from './property-info.js';
 
 export interface AutoCrudContextType<TItem> {
   service: CrudService<TItem>;

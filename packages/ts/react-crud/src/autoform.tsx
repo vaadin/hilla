@@ -1,12 +1,14 @@
-import { ValidationError, type AbstractModel, type DetachedModelConstructor } from '@hilla/form';
+import { type AbstractModel, type DetachedModelConstructor, ValidationError } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm } from '@hilla/react-form';
-import { useEffect, useState, type JSX } from 'react';
-import { AutoFormField } from './autoform-field';
-import type { CrudService } from './crud';
-import { getProperties, includeProperty } from './property-info';
+import { type JSX, useEffect, useState } from 'react';
+import { AutoFormField } from './autoform-field.js';
+import type { CrudService } from './crud.js';
+import { getProperties, includeProperty } from './property-info.js';
+
+export const defaultItem = Symbol();
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -14,10 +16,11 @@ type SubmitErrorEvent = {
 type SubmitEvent<TItem> = {
   item: TItem;
 };
+
 export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
-  item?: TItem;
+  item?: TItem | typeof defaultItem;
   disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
@@ -36,14 +39,16 @@ export function ExperimentalAutoForm<TItem>({
   });
   const [formError, setFormError] = useState('');
   useEffect(() => {
-    form.read(item);
+    if (item !== defaultItem) {
+      form.read(item);
+    }
   }, [item]);
 
   async function submitButtonClicked(): Promise<void> {
     try {
       setFormError('');
       const newItem = await form.submit();
-      if (!newItem) {
+      if (newItem === undefined) {
         // If update returns an empty object, then no update was performed
         throw new Error('generic error');
       } else if (afterSubmit) {
@@ -68,12 +73,7 @@ export function ExperimentalAutoForm<TItem>({
       {getProperties(model)
         .filter(includeProperty)
         .map((propertyInfo) => (
-          <AutoFormField
-            key={propertyInfo.name}
-            propertyInfo={propertyInfo}
-            form={form}
-            disabled={disabled}
-          ></AutoFormField>
+          <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
         ))}
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
