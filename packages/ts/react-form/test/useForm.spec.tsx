@@ -10,9 +10,7 @@ import { type Login, LoginModel, type UserModel } from './models.js';
 use(sinonChai);
 use(chaiDom);
 
-describe('@hilla/react-form', function () {
-  this.timeout(100000);
-
+describe('@hilla/react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
   const useForm = sinon.spy(_useForm) as typeof _useForm;
 
