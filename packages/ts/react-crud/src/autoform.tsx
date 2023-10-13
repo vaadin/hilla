@@ -1,7 +1,7 @@
 import { type AbstractModel, type DetachedModelConstructor, ValidationError } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { VerticalLayout, type VerticalLayoutProps } from '@hilla/react-components/VerticalLayout.js';
+import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm } from '@hilla/react-form';
 import { type JSX, useEffect, useState } from 'react';
 import { AutoFormField } from './autoform-field.js';

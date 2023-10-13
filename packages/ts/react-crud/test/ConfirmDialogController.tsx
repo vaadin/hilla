@@ -1,5 +1,4 @@
 import type { ConfirmDialogElement } from '@hilla/react-components/ConfirmDialog.js';
-import type { RenderResult } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 
