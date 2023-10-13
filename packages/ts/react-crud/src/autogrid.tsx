@@ -193,8 +193,6 @@ function useColumns(
     );
   });
 
-  let columns = autoColumns;
-
   if (options.customColumns) {
     columns = [...columns, ...options.customColumns];
   }

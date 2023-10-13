@@ -5,13 +5,13 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
-import type { CrudService } from '../crud';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
+import type { CrudService } from '../src/crud.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import type Sort from '../types/dev/hilla/mappedtypes/Sort';
-import Direction from '../types/org/springframework/data/domain/Sort/Direction';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
+import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -87,25 +87,45 @@ describe('@hilla/react-crud', () => {
       });
 
       it('sorts according to first column by default', async () => {
-        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
-        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('John');
+        const service = personService();
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters service={service} />), user);
+
+        const expectedSort: Sort = { orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }] };
+        expect(service.lastSort).to.deep.equal(expectedSort);
+        await expect(grid.getSortOrder()).to.eventually.deep.equal([
+          { property: 'firstName', direction: Direction.ASC },
+        ]);
       });
+
       it('retains sorting when re-rendering', async () => {
         const result = render(<TestAutoGridNoHeaderFilters />);
-        let grid = await GridController.init(result, user);
+        const grid = await GridController.init(result, user);
+
         await grid.sort('lastName', 'desc');
-        await expect(grid.getSortOrder()).to.eventually.be.deep.equal({ path: 'lastName', direction: 'desc' });
+        await expect(grid.getSortOrder()).to.eventually.deep.equal([
+          { property: 'lastName', direction: Direction.DESC },
+        ]);
+
         result.rerender(<TestAutoGridNoHeaderFilters />);
-        grid = await GridController.init(result, user);
-        await expect(grid.getSortOrder()).to.eventually.deep.equal({ path: 'lastName', direction: 'desc' });
+        await expect(grid.getSortOrder()).to.eventually.deep.equal([
+          { property: 'lastName', direction: Direction.DESC },
+        ]);
       });
+
       it('creates sortable columns', async () => {
-        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
+        const service = personService();
+        const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters service={service} />), user);
         await grid.sort('firstName', 'desc');
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('John');
-        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jane');
+
+        const expectedSort: Sort = {
+          orders: [{ property: 'firstName', direction: Direction.DESC, ignoreCase: false }],
+        };
+        expect(service.lastSort).to.deep.equal(expectedSort);
+        await expect(grid.getSortOrder()).to.eventually.deep.equal([
+          { property: 'firstName', direction: Direction.DESC },
+        ]);
       });
+
       it('sets a data provider, but only once', async () => {
         const service = personService();
         const result = render(<TestAutoGridNoHeaderFilters service={service} />);
@@ -152,71 +172,76 @@ describe('@hilla/react-crud', () => {
       });
 
       describe('multi-sort', () => {
-      let grid: GridElement;
-      let service: CrudService<Person> & HasTestInfo;
+        let grid: GridController;
+        let service: CrudService<Person> & HasTestInfo;
 
-      function TestAutoGridWithMultiSort(customProps: Partial<AutoGridProps<Person>>) {
-        return (
-          <AutoGrid
-            service={personService()}
-            model={PersonModel}
-            noHeaderFilters
-            multiSort
-            multiSortPriority="append"
-            {...customProps}
-          ></AutoGrid>
-        );
-      }
+        function TestAutoGridWithMultiSort(customProps: Partial<AutoGridProps<Person>>) {
+          return (
+            <AutoGrid
+              service={personService()}
+              model={PersonModel}
+              noHeaderFilters
+              multiSort
+              multiSortPriority="append"
+              {...customProps}
+            ></AutoGrid>
+          );
+        }
 
-      beforeEach(async () => {
-        service = personService();
-        const result = render(<TestAutoGridWithMultiSort service={service} />);
-        await reactRender();
-        grid = getGrid(result);
+        beforeEach(async () => {
+          service = personService();
+          grid = await GridController.init(render(<TestAutoGridWithMultiSort service={service} />), user);
+        });
+
+        it('sorts according to first column by default', async () => {
+          expect(service.lastSort).to.deep.equal({
+            orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
+          });
+
+          await expect(grid.getSortOrder()).to.eventually.deep.equal([
+            { property: 'firstName', direction: Direction.ASC },
+          ]);
+        });
+
+        it('sorts by multiple columns', async () => {
+          await grid.sort('lastName', 'asc');
+          expect(service.lastSort).to.deep.equal({
+            orders: [
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
+              { property: 'lastName', direction: Direction.ASC, ignoreCase: false },
+            ],
+          });
+
+          await expect(grid.getSortOrder()).to.eventually.deep.equal([
+            { property: 'firstName', direction: Direction.ASC },
+            { property: 'lastName', direction: Direction.ASC },
+          ]);
+
+          await grid.sort('lastName', 'desc');
+          expect(service.lastSort).to.deep.equal({
+            orders: [
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
+              { property: 'lastName', direction: Direction.DESC, ignoreCase: false },
+            ],
+          });
+
+          await expect(grid.getSortOrder()).to.eventually.deep.equal([
+            { property: 'firstName', direction: Direction.ASC },
+            { property: 'lastName', direction: Direction.DESC },
+          ]);
+
+          await grid.sort('lastName', null);
+          expect(service.lastSort).to.deep.equal({
+            orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
+          });
+
+          await expect(grid.getSortOrder()).to.eventually.deep.equal([
+            { property: 'firstName', direction: Direction.ASC },
+          ]);
+        });
       });
 
-      it('sorts according to first column by default', () => {
-        expect(service.lastSort).to.eql({
-          orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
-        });
-        expect(getSortOrder(grid)).to.eql([{ property: 'firstName', direction: Direction.ASC }]);
-      });
-
-      it('sorts by multiple columns', async () => {
-        sortGrid(grid, 'lastName', 'asc');
-        await reactRender();
-        expect(service.lastSort).to.eql({
-          orders: [
-            { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
-            { property: 'lastName', direction: Direction.ASC, ignoreCase: false },
-          ],
-        });
-        expect(getSortOrder(grid)).to.eql([
-          { property: 'firstName', direction: Direction.ASC },
-          { property: 'lastName', direction: Direction.ASC },
-        ]);
-
-        sortGrid(grid, 'lastName', 'desc');
-        await reactRender();
-        expect(service.lastSort).to.eql({
-          orders: [
-            { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
-            { property: 'lastName', direction: Direction.DESC, ignoreCase: false },
-          ],
-        });
-        expect(getSortOrder(grid)).to.eql([
-          { property: 'firstName', direction: Direction.ASC },
-          { property: 'lastName', direction: Direction.DESC },
-        ]);
-
-        sortGrid(grid, 'lastName', null);
-        await reactRender();
-        expect(service.lastSort).to.eql({
-          orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
-        });
-        expect(getSortOrder(grid)).to.eql([{ property: 'firstName', direction: Direction.ASC }]);
-      });
-    });describe('header filters', () => {
+      describe('header filters', () => {
         it('created for string columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 0);

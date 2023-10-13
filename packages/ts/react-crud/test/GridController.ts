@@ -1,14 +1,16 @@
 import type { GridElement } from '@hilla/react-components/Grid.js';
 import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import type { GridSorterElement, GridSorterDirection } from '@hilla/react-components/GridSorter.js';
+import type { GridSorterDirection, GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import { type RenderResult, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
-import type { SortState } from '../src/autogrid-column-context.js';
+import type Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
 import type { Person } from './test-models-and-services.js';
 
 export type IndexedHTMLTableRowElement = HTMLTableRowElement & { index: number };
+
+export type SortOrder = Array<{ property: string; direction: Direction }>;
 
 export default class GridController {
   readonly instance: GridElement<Person>;
@@ -110,14 +112,17 @@ export default class GridController {
     sorter.direction = direction;
   }
 
-  async getSortOrder(): Promise<SortState | undefined> {
-    const sorter = (await this.#getSorter()).find((gridSorter) => !!gridSorter.direction);
+  async getSortOrder(): Promise<SortOrder | undefined> {
+    const sorters = Array.from(await waitFor(() => this.instance.querySelectorAll('vaadin-grid-sorter')!));
+    const activeSorters = sorters
+      .filter((gridSorter) => !!gridSorter.direction)
+      // @ts-expect-error: accessing internal property
+      .sort((a, b) => a._order - b._order);
 
-    if (sorter) {
-      return { path: sorter.path!, direction: sorter.direction! };
-    }
-
-    return undefined;
+    return activeSorters.map((gridSorter) => {
+      const { direction, path } = gridSorter;
+      return { property: path!, direction: direction?.toUpperCase() as Direction };
+    });
   }
 
   async #getSorter(): Promise<readonly GridSorterElement[]> {
