@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 
 @Entity
 public class Person extends AbstractEntity {
@@ -12,6 +13,7 @@ public class Person extends AbstractEntity {
     private String firstName, lastName;
     private int luckyNumber;
     private boolean emailVerified;
+    private Date joinedDate;
     private LocalDate birthDate;
     private LocalTime shiftStart;
     private LocalDateTime appointmentTime;
@@ -46,6 +48,14 @@ public class Person extends AbstractEntity {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public Date getJoinedDate() {
+        return joinedDate;
+    }
+
+    public void setJoinedDate(Date joinedDate) {
+        this.joinedDate = joinedDate;
     }
 
     public LocalDate getBirthDate() {

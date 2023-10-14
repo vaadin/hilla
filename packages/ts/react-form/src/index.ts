@@ -29,7 +29,7 @@ $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
 $wnd.Vaadin.registrations.push({
   is: '@hilla/react-form',
-  version: /* updated-by-script */ '2.3.0-alpha6',
+  version: __VERSION__,
 });
 
 function useUpdate() {
@@ -127,58 +127,59 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 
     return ((model: AbstractModel) => {
       const n = getBinderNode(model);
-      n.initializeValue(true);
 
-      const fieldState: FieldState = registry.get(model) ?? {
-        element: undefined,
-        errorMessage: '',
-        invalid: false,
-        markVisited: () => {
-          n.visited = true;
-        },
-        ref(element: HTMLElement | null) {
-          if (!element) {
-            fieldState.element?.removeEventListener('change', fieldState.updateValue);
-            fieldState.element?.removeEventListener('input', fieldState.updateValue);
-            fieldState.element?.removeEventListener('blur', fieldState.markVisited);
-            fieldState.strategy?.removeEventListeners();
-            fieldState.element = undefined;
-            fieldState.strategy = undefined;
-            return;
-          }
+      let fieldState = registry.get(model);
 
-          if (!isFieldElement(element)) {
-            throw new TypeError(`Element '${element.localName}' is not a form element`);
-          }
-
-          if (fieldState.element !== element) {
-            fieldState.element = element;
-            fieldState.element.addEventListener('change', fieldState.updateValue);
-            fieldState.element.addEventListener('input', fieldState.updateValue);
-            fieldState.element.addEventListener('blur', fieldState.markVisited);
-            fieldState.strategy = getDefaultFieldStrategy(element, model);
-          }
-        },
-        required: false,
-        strategy: undefined,
-        updateValue: () => {
-          if (fieldState.strategy) {
-            // Remove invalid flag, so that .checkValidity() in Vaadin Components
-            // does not interfere with errors from Hilla.
-            fieldState.strategy.invalid = false;
-            // When bad input is detected, skip reading new value in binder state
-            fieldState.strategy.checkValidity();
-            if (!fieldState.strategy.validity.badInput) {
-              fieldState.value = fieldState.strategy.value;
+      if (!fieldState) {
+        fieldState = {
+          element: undefined,
+          errorMessage: '',
+          invalid: false,
+          markVisited() {
+            n.visited = true;
+          },
+          ref(element: HTMLElement | null) {
+            if (!element) {
+              fieldState!.element?.removeEventListener('change', fieldState!.updateValue);
+              fieldState!.element?.removeEventListener('input', fieldState!.updateValue);
+              fieldState!.element?.removeEventListener('blur', fieldState!.markVisited);
+              fieldState!.strategy?.removeEventListeners();
+              fieldState!.element = undefined;
+              fieldState!.strategy = undefined;
+              return;
             }
-            n[_validity] = fieldState.strategy.validity;
-            n.value = convertFieldValue(model, fieldState.value);
-          }
-        },
-        value: undefined,
-      };
 
-      if (!registry.has(model)) {
+            if (!isFieldElement(element)) {
+              throw new TypeError(`Element '${element.localName}' is not a form element`);
+            }
+
+            if (fieldState!.element !== element) {
+              fieldState!.element = element;
+              fieldState!.element.addEventListener('change', fieldState!.updateValue);
+              fieldState!.element.addEventListener('input', fieldState!.updateValue);
+              fieldState!.element.addEventListener('blur', fieldState!.markVisited);
+              fieldState!.strategy = getDefaultFieldStrategy(element, model);
+            }
+          },
+          required: false,
+          strategy: undefined,
+          updateValue() {
+            if (fieldState!.strategy) {
+              // Remove invalid flag, so that .checkValidity() in Vaadin Components
+              // does not interfere with errors from Hilla.
+              fieldState!.strategy.invalid = false;
+              // When bad input is detected, skip reading new value in binder state
+              fieldState!.strategy.checkValidity();
+              if (!fieldState!.strategy.validity.badInput) {
+                fieldState!.value = fieldState!.strategy.value;
+              }
+              n[_validity] = fieldState!.strategy.validity;
+              n.value = convertFieldValue(model, fieldState!.value);
+            }
+          },
+          value: undefined,
+        };
+
         registry.set(model, fieldState);
       }
 

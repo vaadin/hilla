@@ -1,8 +1,10 @@
 package dev.hilla.crud;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -16,8 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
-    private PropertyStringFilter filter;
-    private Class<?> javaType;
+    private final PropertyStringFilter filter;
+    private final Class<?> javaType;
 
     public PropertyStringFilterSpecification(PropertyStringFilter filter,
             Class<?> javaType) {
@@ -29,7 +31,7 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query,
             CriteriaBuilder criteriaBuilder) {
         String value = filter.getFilterValue();
-        Path<String> propertyPath = root.get(filter.getPropertyId());
+        Path<String> propertyPath = getPath(filter.getPropertyId(), root);
         if (javaType == String.class) {
             Expression<String> expr = criteriaBuilder.lower(propertyPath);
             switch (filter.getMatcher()) {
@@ -76,6 +78,23 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             case LESS_THAN:
                 throw new IllegalArgumentException(
                         "A boolean cannot be filtered using less than");
+            default:
+                break;
+            }
+        } else if (isDate(javaType)) {
+            var path = root.<Date> get(filter.getPropertyId());
+            var dateValue = Date.from(LocalDate.parse(value)
+                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(path, dateValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "A date cannot be filtered using contains");
+            case GREATER_THAN:
+                return criteriaBuilder.greaterThan(path, dateValue);
+            case LESS_THAN:
+                return criteriaBuilder.lessThan(path, dateValue);
             default:
                 break;
             }
@@ -140,8 +159,23 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
                 || javaType == long.class || javaType == Long.class;
     }
 
+    private Path<String> getPath(String propertyId, Root<T> root) {
+        String[] parts = propertyId.split("\\.");
+        Path<String> path = root.get(parts[0]);
+        int i = 1;
+        while (i < parts.length) {
+            path = path.get(parts[i]);
+            i++;
+        }
+        return path;
+    }
+
     private boolean isBoolean(Class<?> javaType) {
         return javaType == boolean.class || javaType == Boolean.class;
+    }
+
+    private boolean isDate(Class<?> javaType) {
+        return javaType == java.util.Date.class;
     }
 
     private boolean isLocalDate(Class<?> javaType) {

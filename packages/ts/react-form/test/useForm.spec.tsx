@@ -1,12 +1,14 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, renderHook } from '@testing-library/react';
+import { act, render, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Login, LoginModel, UserModel } from './models.js';
+import { type Login, LoginModel, type UserModel } from './models.js';
 
 use(sinonChai);
+use(chaiDom);
 
 describe('@hilla/react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
@@ -22,6 +24,7 @@ describe('@hilla/react-form', () => {
   function UserForm({ model: user }: UserFormProps) {
     const { field, model } = useFormPart(user);
     const name = useFormPart(user.name);
+    const passwordHint = useFormPart(user.passwordHint);
 
     return (
       <fieldset>
@@ -30,6 +33,10 @@ describe('@hilla/react-form', () => {
           {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
         </output>
         <input data-testid="user.password" type="text" {...field(model.password)} />
+        <input data-testid="user.passwordHint" type="text" {...field(model.passwordHint)} />
+        <output data-testid="validation.user.passwordHint">
+          {passwordHint.invalid ? passwordHint.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
       </fieldset>
     );
   }
@@ -53,12 +60,12 @@ describe('@hilla/react-form', () => {
     );
   }
 
-  async function fillAndSubmitLoginForm(getByTestId: (id: string) => HTMLElement) {
-    const user = userEvent.setup();
-    await user.click(getByTestId('user.name'));
-    await user.keyboard('johndoe');
-    await user.click(getByTestId('user.password'));
-    await user.keyboard('john123456');
+  async function fillAndSubmitLoginForm(
+    getByTestId: RenderResult['getByTestId'],
+    user: ReturnType<(typeof userEvent)['setup']>,
+  ) {
+    await user.type(getByTestId('user.name'), 'johndoe');
+    await user.type(getByTestId('user.password'), 'john123456');
     await user.click(getByTestId('rememberMe'));
     await user.click(getByTestId('submit'));
   }
@@ -70,10 +77,16 @@ describe('@hilla/react-form', () => {
   });
 
   describe('useForm', () => {
+    let user: ReturnType<(typeof userEvent)['setup']>;
+
+    beforeEach(() => {
+      user = userEvent.setup();
+    });
+
     it('collects info from a form', async () => {
       const { getByTestId } = render(<LoginForm />);
 
-      await fillAndSubmitLoginForm(getByTestId);
+      await fillAndSubmitLoginForm(getByTestId, user);
 
       expect(onSubmit).to.have.been.calledWithMatch({
         rememberMe: true,
@@ -85,18 +98,15 @@ describe('@hilla/react-form', () => {
     });
 
     it('does not call onSubmit if the form is invalid', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
+      await user.type(getByTestId('user.name'), 'johndoe');
       await user.click(getByTestId('submit'));
 
       expect(onSubmit).to.not.have.been.called;
     });
 
     it('does not call onSubmit if the form has not been touched', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('submit'));
@@ -107,9 +117,9 @@ describe('@hilla/react-form', () => {
     it('shows empty values by default', () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('user.name')).to.have.property('value', '');
-      expect(getByTestId('user.password')).to.have.property('value', '');
-      expect(getByTestId('rememberMe')).to.have.property('checked', false);
+      expect(getByTestId('user.name')).to.have.value('');
+      expect(getByTestId('user.password')).to.have.value('');
+      expect(getByTestId('rememberMe')).to.not.be.checked;
     });
 
     it('shows read values', async () => {
@@ -128,58 +138,75 @@ describe('@hilla/react-form', () => {
         });
       });
 
-      expect(getByTestId('user.name')).to.have.property('value', 'johndoe');
-      expect(getByTestId('user.password')).to.have.property('value', 'john123456');
-      expect(getByTestId('rememberMe')).to.have.property('checked', true);
+      expect(getByTestId('user.name')).to.have.value('johndoe');
+      expect(getByTestId('user.password')).to.have.value('john123456');
+      expect(getByTestId('rememberMe')).to.be.checked;
     });
 
-    it('dispays default value', () => {
+    it('displays default value', () => {
       const { getByTestId } = render(<LoginForm />);
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', '');
-      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'undefined');
+      expect(getByTestId('output.user.name')).to.have.text('');
+      expect(getByTestId('output.rememberMe')).to.have.text('undefined');
     });
 
     it('updates displayed value', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('johndoe');
+      await user.type(getByTestId('user.name'), 'johndoe');
       await user.click(getByTestId('rememberMe'));
 
-      expect(getByTestId('output.user.name')).to.have.property('textContent', 'johndoe');
-      expect(getByTestId('output.rememberMe')).to.have.property('textContent', 'true');
+      expect(getByTestId('output.user.name')).to.have.text('johndoe');
+      expect(getByTestId('output.rememberMe')).to.have.text('true');
     });
 
     it('shows validation errors', async () => {
-      const user = userEvent.setup();
       const { getByTestId } = render(<LoginForm />);
 
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('Very lengthy name');
+      await user.type(getByTestId('user.name'), 'Very lengthy name');
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('size');
+      expect(getByTestId('validation.user.name')).to.contain.text('size');
 
       // clicking around should not hide the message
       await user.click(getByTestId('user.name'));
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('size');
+      expect(getByTestId('validation.user.name')).to.contain.text('size');
 
       // clearing should show a required validator message
-      await user.click(getByTestId('user.name'));
       await user.clear(getByTestId('user.name'));
       await user.click(getByTestId('user.password'));
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('invalid');
+      expect(getByTestId('validation.user.name')).to.contain.text('invalid');
 
       // fix
-      await user.click(getByTestId('user.name'));
-      await user.keyboard('jane');
+      await user.type(getByTestId('user.name'), 'jane');
 
-      expect(getByTestId('validation.user.name').textContent).to.have.string('OK');
+      expect(getByTestId('validation.user.name')).to.contain.text('OK');
+    });
+
+    it('should correctly handle validators on optional fields', async () => {
+      const { getByTestId } = render(<LoginForm />);
+
+      // eslint-disable-next-line @typescript-eslint/require-await
+      await act(async () => {
+        const { read } = (useForm as UseFormSpy).returnValues[0];
+        read({
+          user: {
+            id: 1,
+            name: 'johndoe',
+            password: 'john123456',
+          },
+        });
+      });
+
+      expect(getByTestId('validation.user.passwordHint')).to.have.text('OK');
+
+      await user.type(getByTestId('user.passwordHint'), 'a');
+      await user.click(getByTestId('submit'));
+
+      expect(getByTestId('validation.user.passwordHint')).to.have.text('OK');
     });
 
     describe('configuration update', () => {
@@ -190,14 +217,13 @@ describe('@hilla/react-form', () => {
         // Update onSubmit reference, rerender, fill form and submit
         onSubmit = sinon.spy();
         rerender(<LoginForm />);
-        await fillAndSubmitLoginForm(getByTestId);
+        await fillAndSubmitLoginForm(getByTestId, user);
 
         expect(onSubmit).to.have.been.calledOnce;
       });
 
       it('should use updated onChange reference', async () => {
         // Initial render
-        const user = userEvent.setup();
         const { getByTestId, rerender } = render(<LoginForm />);
 
         // Update onChange reference, rerender, type a character
@@ -207,20 +233,6 @@ describe('@hilla/react-form', () => {
         await user.keyboard('a');
 
         expect(onChange).to.have.been.calledOnce;
-      });
-    });
-
-    describe('model initialization', () => {
-      it('should initialize optional string model when it is bound to a field', () => {
-        const { rerender, result } = renderHook(() => useForm(UserModel));
-
-        expect(result.current.value.passwordHint).to.be.undefined;
-
-        // Call field directive to simulate binding the model to a field
-        result.current.field(result.current.model.passwordHint);
-        rerender();
-
-        expect(result.current.value.passwordHint).to.equal('');
       });
     });
   });
