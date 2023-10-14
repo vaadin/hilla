@@ -17,7 +17,7 @@
     "@hilla/react-auth": "file:../../../../ts/react-auth",
     "@hilla/react-components": "2.1.0-alpha9",
     "@hilla/react-form": "file:../../../../ts/react-form",
-    "@hilla/react-grid": "file:../../../../ts/react-grid",
+    "@hilla/react-crud": "file:../../../../ts/react-crud",
     "@polymer/polymer": "3.5.1",
     "@vaadin-component-factory/vcf-nav": "1.1.0",
     "@vaadin/bundles": "24.1.0-alpha9",

@@ -1,8 +1,8 @@
 import { TextField } from '@hilla/react-components/TextField.js';
-import { AutoGrid } from '@hilla/react-grid';
-import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter';
-import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel';
-import { PersonService } from 'Frontend/generated/endpoints';
+import { AutoGrid } from '@hilla/react-crud';
+import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter.js';
+import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
+import { PersonService } from 'Frontend/generated/endpoints.js';
 import { useState } from 'react';
 
 export function ReadOnlyGridOrFilter() {
@@ -30,7 +30,7 @@ export function ReadOnlyGridOrFilter() {
           setFilter({ t: 'or', children: [firstNameFilter, lasttNameFilter] });
         }}
       ></TextField>
-      <AutoGrid pageSize={10} service={PersonService} model={PersonModel} filter={filter} noHeaderFilters />
+      <AutoGrid pageSize={10} service={PersonService} model={PersonModel} experimentalFilter={filter} noHeaderFilters />
     </div>
     /* page size is defined only to make testing easier */
   );

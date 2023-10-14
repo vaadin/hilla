@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +21,9 @@ public class TestObject {
     private LocalTime localTime;
     private LocalDateTime localDateTime;
     private Boolean booleanValue;
+
+    @OneToOne
+    private NestedObject nestedObject;
 
     public Integer getId() {
         return id;
@@ -67,5 +71,13 @@ public class TestObject {
 
     public void setBooleanValue(Boolean aBoolean) {
         this.booleanValue = aBoolean;
+    }
+
+    public NestedObject getNestedObject() {
+        return nestedObject;
+    }
+
+    public void setNestedObject(NestedObject nestedObject) {
+        this.nestedObject = nestedObject;
     }
 }
