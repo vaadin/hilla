@@ -5,7 +5,7 @@ import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel
 import { PersonService } from 'Frontend/generated/endpoints.js';
 import { useState } from 'react';
 
-export function ReadOnlyGridSinglePropertyFilter() {
+export function ReadOnlyGridSinglePropertyFilter(): JSX.Element {
   const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
   return (
     <div>
