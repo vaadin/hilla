@@ -12,12 +12,12 @@ export function ReadOnlyGridSinglePropertyFilter(): JSX.Element {
       <TextField
         id="filter"
         label="Search for first name"
-        onValueChanged={(e: any) => {
-          const propertyFilter: any = {
+        onValueChanged={({ detail: { value } }) => {
+          const propertyFilter = {
             '@type': 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
-            filterValue: e.detail.value,
+            filterValue: value,
           };
           setFilter(propertyFilter);
         }}
