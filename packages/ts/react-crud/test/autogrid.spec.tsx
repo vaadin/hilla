@@ -56,6 +56,7 @@ describe('@hilla/react-crud', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
       return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;
     }
+
     function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
       return <AutoGrid service={personService()} model={PersonModel} {...customProps} />;
     }
@@ -484,6 +485,19 @@ describe('@hilla/react-crud', () => {
         // The header filter was not overridden
         const cell = grid.getHeaderCellContent(1, 0);
         expect(cell.firstElementChild).to.have.tagName('vaadin-text-field');
+      });
+
+      it('respects the header setting from custom column options', async () => {
+        // With header filters
+        let result = render(<TestAutoGrid columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
+        let grid = await GridController.init(result, user);
+        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
+
+        // Without header filters
+        result.unmount();
+        result = render(<TestAutoGrid noHeaderFilters columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
+        grid = await GridController.init(result, user);
+        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
       });
 
       it('renders row numbers if requested', async () => {
