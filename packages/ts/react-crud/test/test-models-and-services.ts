@@ -6,12 +6,12 @@ import {
   _getPropertyModel,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
-import type { CrudService } from '../src/crud';
-import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion';
-import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
-import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable';
-import type Sort from '../src/types/dev/hilla/mappedtypes/Sort';
-import Direction from '../src/types/org/springframework/data/domain/Sort/Direction';
+import type { CrudService } from '../src/crud.js';
+import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
+import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
+import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 
 export interface Company extends HasIdVersion {
   id: number;

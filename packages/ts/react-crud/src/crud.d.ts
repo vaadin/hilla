@@ -1,4 +1,4 @@
-import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type Pageable from './types/dev/hilla/mappedtypes/Pageable';
 
 export interface CrudService<T> extends ListService<T> {
