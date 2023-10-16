@@ -9,9 +9,21 @@ import {
   type ModelMetadata,
 } from '@hilla/form';
 
-export type PropertyType = 'boolean' | 'date' | 'datetime' | 'number' | 'string' | 'time' | undefined;
+export type PropertyType = 'boolean' | 'date' | 'datetime' | 'decimal' | 'integer' | 'string' | 'time' | undefined;
 
 const javaTypeMap: Record<string, PropertyType> = {
+  byte: 'integer',
+  'java.lang.Byte': 'integer',
+  short: 'integer',
+  'java.lang.Short': 'integer',
+  int: 'integer',
+  'java.lang.Integer': 'integer',
+  long: 'integer',
+  'java.lang.Long': 'integer',
+  float: 'decimal',
+  'java.lang.Float': 'decimal',
+  double: 'decimal',
+  'java.lang.Double': 'decimal',
   'java.util.Date': 'date',
   'java.time.LocalDate': 'date',
   'java.time.LocalTime': 'time',
@@ -31,7 +43,7 @@ function determinePropertyType(model: AbstractModel): PropertyType {
   if (constructor === StringModel) {
     return 'string';
   } else if (constructor === NumberModel) {
-    return 'number';
+    return 'decimal';
   } else if (constructor === BooleanModel) {
     return 'boolean';
   }

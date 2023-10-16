@@ -19,8 +19,8 @@ export default class TextFieldController {
     child: HTMLElement,
     user: ReturnType<(typeof userEvent)['setup']>,
   ): Promise<TextFieldController> {
-    const instance = await waitFor(() => child.closest('vaadin-text-field')!);
-    return new TextFieldController(instance, user);
+    const instance = await waitFor(() => child.parentElement!);
+    return new TextFieldController(instance as TextFieldElement, user);
   }
 
   private constructor(instance: TextFieldElement, user: ReturnType<(typeof userEvent)['setup']>) {
