@@ -15,13 +15,13 @@ export function ReadOnlyGridOrFilter(): JSX.Element {
         style={{ width: '20em' }}
         label="Search for first or last name"
         onValueChanged={({ detail: { value } }) => {
-          const firstNameFilter: any = {
+          const firstNameFilter = {
             '@type': 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
             filterValue: value,
           };
-          const lasttNameFilter: any = {
+          const lasttNameFilter = {
             '@type': 'propertyString',
             propertyId: 'lastName',
             matcher: 'CONTAINS',
