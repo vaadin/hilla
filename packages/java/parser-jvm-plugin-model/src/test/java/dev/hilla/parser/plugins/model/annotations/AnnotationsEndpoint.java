@@ -2,6 +2,7 @@ package dev.hilla.parser.plugins.model.annotations;
 
 import dev.hilla.parser.plugins.model.Endpoint;
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,6 +40,9 @@ public class AnnotationsEndpoint {
 
         @ManyToMany
         public List<NestedEntity> manyToMany;
+
+        @ManyToMany(fetch = FetchType.EAGER)
+        public List<NestedEntity> manyToManyWithFetchType;
 
         @Column(name = "test_column")
         public String name;

@@ -59,13 +59,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private static Annotation convertAnnotation(
             AnnotationInfoModel annotation) {
-        var attributes = annotation.getParameters().stream()
-                .filter(Predicate.not(AnnotationParameterModel::isDefault))
-                .collect(Collectors.toMap(AnnotationParameterModel::getName,
-                        AnnotationParameterModel::getValue));
-
-        return new Annotation(annotation.getName(),
-                !attributes.isEmpty() ? attributes : null);
+        return new Annotation(annotation.getName(), null);
     }
 
     private static String extractSimpleName(String fullyQualifiedName) {
