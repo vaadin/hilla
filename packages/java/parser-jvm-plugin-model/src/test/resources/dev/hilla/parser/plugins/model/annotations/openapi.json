@@ -131,6 +131,24 @@
               }
             ]
           },
+          "manyToManyWithFetchType" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/dev.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToMany"
+              }
+            ]
+          },
           "name" : {
             "type" : "string",
             "nullable" : true,
