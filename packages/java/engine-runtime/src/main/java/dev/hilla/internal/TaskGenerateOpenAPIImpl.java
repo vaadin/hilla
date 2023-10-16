@@ -25,11 +25,17 @@ import dev.hilla.engine.ParserProcessor;
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
  */
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(TaskGenerateOpenAPIImpl.class);
 
     private final ClassLoader classLoader;
 
@@ -69,7 +75,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                     classLoader);
             processor.process();
         } catch (ParserException e) {
-            throw new ExecutionFailedException("Java code parsing failed", e);
+            // Make sure the exception is printed in the logs
+            LOGGER.error("Java code parsing failed", e);
+            throw new ExecutionFailedException("Java code parsing failed");
         }
     }
 }
