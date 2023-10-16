@@ -9,7 +9,7 @@ import { useContext, useEffect, useRef, useState, type ReactElement, type RefObj
 import { ColumnContext } from './autogrid-column-context.js';
 import { DateFormatter } from './date-formatter';
 import { defaultLocale } from './i18n.js';
-import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
+import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
 // TODO: Replace with more robust solution
 const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');

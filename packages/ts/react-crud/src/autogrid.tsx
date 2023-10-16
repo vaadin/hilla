@@ -10,18 +10,18 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { type JSX, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX, type MutableRefObject } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
-import type AndFilter from './types/dev/hilla/crud/filter/AndFilter';
-import type Filter from './types/dev/hilla/crud/filter/Filter';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import type Sort from './types/dev/hilla/mappedtypes/Sort';
-import Direction from './types/org/springframework/data/domain/Sort/Direction';
+import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
+import type Filter from './types/dev/hilla/crud/filter/Filter.js';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
+import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
+import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
 
 interface AutoGridOwnProps<TItem> {
   /**
@@ -99,7 +99,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
-  filter: React.MutableRefObject<Filter | undefined>,
+  filter: MutableRefObject<Filter | undefined>,
 ): GridDataProvider<TItem> {
   let first = true;
 
@@ -192,12 +192,15 @@ function useColumns(
       </ColumnContext.Provider>
     );
   });
+
   if (options.customColumns) {
     columns = [...columns, ...options.customColumns];
   }
+
   if (options.rowNumbers) {
     columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
   }
+
   return columns;
 }
 
