@@ -230,7 +230,7 @@ export function AutoGrid<TItem>({
   rowNumbers,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
-  const [internalFilter, setInternalFilter] = useState<AndFilter>({ ...{ '@type': 'and' }, children: [] });
+  const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -267,7 +267,7 @@ export function AutoGrid<TItem>({
   useEffect(() => {
     // Remove all filtering if header filters are removed
     if (noHeaderFilters) {
-      setInternalFilter({ ...{ '@type': 'and' }, children: [] });
+      setInternalFilter({ '@type': 'and', children: [] });
     }
   }, [noHeaderFilters]);
 

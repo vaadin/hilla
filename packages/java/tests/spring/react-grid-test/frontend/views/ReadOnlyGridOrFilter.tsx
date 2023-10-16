@@ -1,11 +1,11 @@
 import { TextField } from '@hilla/react-components/TextField.js';
 import { AutoGrid } from '@hilla/react-crud';
-import FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion.js';
+import { useState } from 'react';
+import type FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion.js';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
-import { useState } from 'react';
 
-export function ReadOnlyGridOrFilter() {
+export function ReadOnlyGridOrFilter(): JSX.Element {
   const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
 
   return (
@@ -14,18 +14,18 @@ export function ReadOnlyGridOrFilter() {
         id="filter"
         style={{ width: '20em' }}
         label="Search for first or last name"
-        onValueChanged={(e: any) => {
+        onValueChanged={({ detail: { value } }) => {
           const firstNameFilter: any = {
             '@type': 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
-            filterValue: e.detail.value,
+            filterValue: value,
           };
           const lasttNameFilter: any = {
             '@type': 'propertyString',
             propertyId: 'lastName',
             matcher: 'CONTAINS',
-            filterValue: e.detail.value,
+            filterValue: value,
           };
           setFilter({ '@type': 'or', children: [firstNameFilter, lasttNameFilter] });
         }}
