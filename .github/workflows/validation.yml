@@ -264,7 +264,7 @@ jobs:
           - os: windows-latest
     runs-on: ${{ matrix.os }}
     env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
     steps:
       - name: Checkout Project Code
