@@ -104,6 +104,7 @@ public class Hotswapper {
             try {
                 Class<?> cls = Class.forName(changedClass);
                 if (cls.getAnnotation(Endpoint.class) != null
+                        || cls.getAnnotation(BrowserCallable.class) != null
                         || cls.getAnnotation(EndpointExposed.class) != null) {
                     getLogger().debug(
                             "An endpoint annotation has been added to the class "
