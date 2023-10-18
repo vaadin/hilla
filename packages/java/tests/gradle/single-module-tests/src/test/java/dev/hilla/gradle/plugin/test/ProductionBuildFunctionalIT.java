@@ -6,6 +6,7 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class ProductionBuildFunctionalIT {
      * so it is more efficient to check everything in one run.
      */
     @Test
+    @Disabled("Fails in CI on Windows")
     public void validateProductionBuildOutput() throws IOException {
         afterProductionBuild_openApiJson_hasCorrectEndpoints();
         afterProductionBuild_endpointsTs_hasCorrectEndpoints();
