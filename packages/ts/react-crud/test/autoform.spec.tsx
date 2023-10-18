@@ -23,13 +23,14 @@ use(chaiAsPromised);
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
 describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
-    const LABELS = ['First name', 'Last name', 'Email', 'Some number'] as const;
-    const KEYS = ['firstName', 'lastName', 'email', 'someNumber'] as ReadonlyArray<keyof Person>;
+    const LABELS = ['First name', 'Last name', 'Email', 'Some integer', 'Some decimal'] as const;
+    const KEYS = ['firstName', 'lastName', 'email', 'someInteger', 'someDecimal'] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
       email: '',
-      someNumber: 0,
+      someInteger: 0,
+      someDecimal: 0,
       id: -1,
       version: -1,
       vip: false,
@@ -39,7 +40,7 @@ describe('@hilla/react-crud', () => {
     function getExpectedValues(person: Person) {
       return (Object.entries(person) as ReadonlyArray<[keyof Person, Person[keyof Person]]>)
         .filter(([key]) => KEYS.includes(key))
-        .map(([, value]) => value);
+        .map(([, value]) => value.toString());
     }
 
     beforeEach(() => {
@@ -53,7 +54,8 @@ describe('@hilla/react-crud', () => {
         firstName: 'first',
         lastName: 'last',
         email: 'first.last@domain.com',
-        someNumber: 24451,
+        someInteger: 24451,
+        someDecimal: 24.451,
         vip: false,
       };
 
@@ -63,6 +65,16 @@ describe('@hilla/react-crud', () => {
       );
 
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+
+      const fields = await form.getFields(...LABELS);
+      const tagNames = fields.map((field) => field.instance.localName);
+      expect(tagNames).to.eql([
+        'vaadin-text-field',
+        'vaadin-text-field',
+        'vaadin-text-field',
+        'vaadin-integer-field',
+        'vaadin-number-field',
+      ]);
     });
 
     it('works without an item', async () => {
@@ -113,16 +125,24 @@ describe('@hilla/react-crud', () => {
 
     it('submits a valid form', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-      const person = await getItem(service, 1);
+      const saveSpy = sinon.spy(service, 'save');
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />),
         user,
       );
-      await form.typeInField('First name', 'foo');
+      await form.typeInField('First name', 'Joe');
+      await form.typeInField('Last name', 'Quinby');
+      await form.typeInField('Some integer', '12');
+      await form.typeInField('Some decimal', '0.12');
       await form.submit();
-      const newItem = await getItem(service, 1);
-      expect(newItem?.firstName).to.equal('foo');
+
+      expect(saveSpy).to.have.been.calledOnce;
+      const newItem = saveSpy.getCall(0).args[0];
+      expect(newItem.firstName).to.equal('Joe');
+      expect(newItem.lastName).to.equal('Quinby');
+      expect(newItem.someInteger).to.equal(12);
+      expect(newItem.someDecimal).to.equal(0.12);
     });
 
     it('retains the form values a valid submit', async () => {

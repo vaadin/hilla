@@ -1,4 +1,4 @@
-import type { GridColumnElement, GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,
@@ -22,7 +22,8 @@ export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
-    case 'number':
+    case 'integer':
+    case 'decimal':
       return {
         autoWidth: true,
         textAlign: 'end',
