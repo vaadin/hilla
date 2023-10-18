@@ -29,6 +29,10 @@ export default class FormController {
     return await Promise.all(labels.map(async (label) => await this.getField(label)));
   }
 
+  getButton(label: string): HTMLElement | null {
+    return this.#result.queryByText(label);
+  }
+
   async typeInField(label: string, value: string): Promise<void> {
     const field = await this.#result.findByLabelText(label);
     await this.#user.dblClick(field);
@@ -36,8 +40,13 @@ export default class FormController {
   }
 
   async submit(): Promise<void> {
-    const btn = await this.#result.findByText('Submit');
-    await this.#user.click(btn);
+    const btn = this.getButton('Submit');
+    await this.#user.click(btn!);
+  }
+
+  async discard(): Promise<void> {
+    const btn = this.getButton('Discard');
+    await this.#user.click(btn!);
   }
 
   async getValues(labels: readonly string[]): Promise<readonly unknown[]> {
