@@ -1,5 +1,7 @@
 package dev.hilla.test.reactgrid;
 
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,8 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     public void validDataSubmitted() {
         getTextField("name").setValue("John Doe");
         getTextField("doctor").setValue("Evil");
+        getIntegerField("age").setValue("54");
+        getNumberField("rating").setValue("7.8");
         submit();
 
         waitUntil(driver -> {
@@ -61,4 +65,11 @@ public class AutoFormViewIT extends ChromeBrowserTest {
         return $(TextFieldElement.class).attribute("name", name).first();
     }
 
+    private IntegerFieldElement getIntegerField(String name) {
+        return $(IntegerFieldElement.class).attribute("name", name).first();
+    }
+
+    private NumberFieldElement getNumberField(String name) {
+        return $(NumberFieldElement.class).attribute("name", name).first();
+    }
 }
