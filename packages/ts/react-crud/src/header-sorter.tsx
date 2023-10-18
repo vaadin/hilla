@@ -6,6 +6,7 @@ export function HeaderSorter(): ReactElement {
   const context = useContext(ColumnContext)!;
   const sorterState = context.sortState[context.propertyInfo.name];
   const direction = sorterState?.direction ?? null;
+  const headerLabel = context.customColumnOptions?.header ?? context.propertyInfo.humanReadableName;
 
   return (
     <GridSorter
@@ -18,7 +19,7 @@ export function HeaderSorter(): ReactElement {
         });
       }}
     >
-      {context.propertyInfo.humanReadableName}
+      {headerLabel}
     </GridSorter>
   );
 }
