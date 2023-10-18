@@ -57,7 +57,7 @@ jobs:
       - name: Build TypeScript
         run: npm run build:nocache
       - name: Build Java
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl '!:hilla-gradle-plugin'
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Save Workspace
         run: |
           tar cf workspace.tar -C ~/ $( \

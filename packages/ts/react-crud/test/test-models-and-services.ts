@@ -26,7 +26,8 @@ export interface Person extends HasIdVersion {
   firstName: string;
   lastName: string;
   email: string;
-  someNumber: number;
+  someInteger: number;
+  someDecimal: number;
   vip: boolean;
 }
 
@@ -80,8 +81,18 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
     return this[_getPropertyModel]('email', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get someNumber(): NumberModel {
-    return this[_getPropertyModel]('someNumber', (parent, key) => new NumberModel(parent, key, false));
+  get someInteger(): NumberModel {
+    return this[_getPropertyModel](
+      'someInteger',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+
+  get someDecimal(): NumberModel {
+    return this[_getPropertyModel](
+      'someDecimal',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'float' } }),
+    );
   }
 
   get vip(): BooleanModel {
@@ -285,8 +296,26 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
 };
 
 export const personData: Person[] = [
-  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: -12, vip: true },
-  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 123456, vip: false },
+  {
+    id: 1,
+    version: 1,
+    firstName: 'John',
+    lastName: 'Dove',
+    email: 'john@example.com',
+    someInteger: -12,
+    someDecimal: 0.12,
+    vip: true,
+  },
+  {
+    id: 2,
+    version: 1,
+    firstName: 'Jane',
+    lastName: 'Love',
+    email: 'jane@example.com',
+    someInteger: 123456,
+    someDecimal: 123.456,
+    vip: false,
+  },
 ];
 
 export const companyData: Company[] = [
