@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * A filter that requires at least one of its children to pass.
  */
-public class OrFilter implements Filter {
+public class OrFilter extends Filter {
 
     private List<Filter> children;
 
