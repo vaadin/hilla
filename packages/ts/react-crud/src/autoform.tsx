@@ -78,8 +78,14 @@ export function ExperimentalAutoForm<TItem>({
           <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
         ))}
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
-      <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
+      <HorizontalLayout theme="spacing" style={{ marginTop: 'var(--lumo-space-m)', alignSelf: 'flex-end' }}>
+        {form.dirty ? (
+          <Button theme="tertiary" onClick={() => form.reset()}>
+            Discard
+          </Button>
+        ) : null}
         <Button
+          theme="primary"
           disabled={disabled}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}

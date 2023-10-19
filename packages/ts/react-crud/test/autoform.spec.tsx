@@ -247,5 +247,37 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(result, user);
       await expect(form.areEnabled(LABELS)).to.eventually.be.true;
     });
+
+    describe('discard button', () => {
+      it('does not show a discard button if the form is not dirty', async () => {
+        const form = await FormController.init(
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
+          user,
+        );
+        expect(form.getButton('Discard')).to.be.null;
+      });
+
+      it('does show a discard button if the form is dirty', async () => {
+        const form = await FormController.init(
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
+          user,
+        );
+        await form.typeInField('First name', 'foo');
+        expect(form.getButton('Discard')).to.exist;
+      });
+
+      it('resets the form when clicking the discard button', async () => {
+        const form = await FormController.init(
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
+          user,
+        );
+        await form.typeInField('First name', 'foo');
+        expect(form.getButton('Discard')).to.exist;
+
+        await form.discard();
+        await expect(form.getValues(['First name'])).to.eventually.eql(['']);
+        expect(form.getButton('Discard')).to.be.null;
+      });
+    });
   });
 });
