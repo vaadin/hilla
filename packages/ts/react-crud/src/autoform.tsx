@@ -40,8 +40,8 @@ export function ExperimentalAutoForm<TItem>({
   const [formError, setFormError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
-    setIsEditing(item !== emptyItem);
-    if (item !== emptyItem) {
+    setIsEditing(item !== undefined && item !== null && item !== emptyItem);
+    if (item !== undefined && item !== null && item !== emptyItem) {
       form.read(item);
     } else {
       form.clear();
