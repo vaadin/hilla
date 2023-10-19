@@ -6,15 +6,18 @@ import GridController from './GridController.js';
 export class CrudController {
   readonly grid: GridController;
   readonly form: FormController;
+  readonly newButton: HTMLElement;
 
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<CrudController> {
     const [grid, form] = await Promise.all([GridController.init(result, user), FormController.init(result, user)]);
+    const newButton = await result.findByText('+ New');
 
-    return new CrudController(grid, form);
+    return new CrudController(grid, form, newButton);
   }
 
-  private constructor(grid: GridController, form: FormController) {
+  private constructor(grid: GridController, form: FormController, newButton: HTMLElement) {
     this.grid = grid;
     this.form = form;
+    this.newButton = newButton;
   }
 }
