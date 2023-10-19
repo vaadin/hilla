@@ -186,7 +186,7 @@ function useColumns(
     return (
       <ColumnContext.Provider
         key={propertyInfo.name}
-        value={{ propertyInfo, setPropertyFilter, sortState, setSortState }}
+        value={{ propertyInfo, setPropertyFilter, sortState, setSortState, customColumnOptions }}
       >
         {column}
       </ColumnContext.Provider>

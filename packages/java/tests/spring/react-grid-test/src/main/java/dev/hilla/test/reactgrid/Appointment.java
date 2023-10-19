@@ -11,6 +11,8 @@ public class Appointment extends AbstractEntity {
     @NotBlank
     private String doctor;
     private boolean sendInvoice;
+    private int age;
+    private float rating;
 
     public String getName() {
         return name;
@@ -34,5 +36,21 @@ public class Appointment extends AbstractEntity {
 
     public void setSendInvoice(boolean sendInvoice) {
         this.sendInvoice = sendInvoice;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public float getRating() {
+        return rating;
+    }
+
+    public void setRating(float rating) {
+        this.rating = rating;
     }
 }
