@@ -292,6 +292,26 @@ describe('@hilla/react-crud', () => {
       expect(submitButton!.disabled).to.be.false;
     });
 
+    it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
+      const service = personService();
+      console.log('when creating new submit button is enabled at the beginning');
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.false;
+    });
+
+    it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
+      const service = personService();
+      console.log('when creating new submit button is enabled at the beginning');
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.false;
+    });
+
     it('when editing, submit button remains disabled before any changes', async () => {
       const service = personService();
       const person = await getItem(service, 1);
