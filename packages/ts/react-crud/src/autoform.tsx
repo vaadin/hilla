@@ -8,7 +8,7 @@ import { AutoFormField } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty } from './property-info.js';
 
-export const defaultItem = Symbol();
+export const emptyItem = Symbol();
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -20,7 +20,7 @@ type SubmitEvent<TItem> = {
 export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
-  item?: TItem | typeof defaultItem;
+  item?: TItem | typeof emptyItem;
   disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
@@ -39,8 +39,10 @@ export function ExperimentalAutoForm<TItem>({
   });
   const [formError, setFormError] = useState('');
   useEffect(() => {
-    if (item !== defaultItem) {
+    if (item !== emptyItem) {
       form.read(item);
+    } else {
+      form.clear();
     }
   }, [item]);
 
