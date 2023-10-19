@@ -10,12 +10,13 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX, type MutableRefObject } from 'react';
-import { ColumnContext, type SortState } from './autogrid-column-context.js';
+import { type JSX, type MutableRefObject, useEffect, useRef, useState } from 'react';
+import { ColumnContext, GeneralColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
+import { LocaleFormatter } from './locale-formatter.js';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
@@ -85,6 +86,11 @@ interface AutoGridOwnProps<TItem> {
    * grid.
    */
   rowNumbers?: boolean;
+  /**
+   * The i18n locale that will be used for formatting dates and numbers. If not
+   * set, the browser default locale will be used.
+   */
+  locale?: string;
 }
 
 export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<TItem>>;
@@ -228,9 +234,11 @@ export function AutoGrid<TItem>({
   customColumns,
   columnOptions,
   rowNumbers,
+  locale,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const formatter = new LocaleFormatter(locale);
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -292,5 +300,9 @@ export function AutoGrid<TItem>({
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);
 
-  return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children}></Grid>;
+  return (
+    <GeneralColumnContext.Provider value={{ formatter }}>
+      <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children} />
+    </GeneralColumnContext.Provider>
+  );
 }
