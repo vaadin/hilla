@@ -70,7 +70,19 @@ describe('@hilla/react-crud', () => {
     describe('basics', () => {
       it('creates columns based on model', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+        );
       });
 
       it('can change model and recreate columns', async () => {
@@ -79,10 +91,14 @@ describe('@hilla/react-crud', () => {
           await GridController.init(result, user),
           'firstName',
           'lastName',
+          'gender',
           'email',
           'someInteger',
           'someDecimal',
           'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -472,8 +488,21 @@ describe('@hilla/react-crud', () => {
           ),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip', '');
-        expect(grid.getBodyCellContent(0, 6)).to.have.rendered.text('Jane Love');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+          '',
+        );
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -482,7 +511,19 @@ describe('@hilla/react-crud', () => {
           render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+        );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
@@ -505,7 +546,20 @@ describe('@hilla/react-crud', () => {
 
       it('renders row numbers if requested', async () => {
         const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
-        await assertColumns(grid, '', 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          '',
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+        );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
     });

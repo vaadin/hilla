@@ -15,6 +15,7 @@ import {
   personData,
   PersonModel,
   personService,
+  Gender,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -23,17 +24,39 @@ use(chaiAsPromised);
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
 describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
-    const LABELS = ['First name', 'Last name', 'Email', 'Some integer', 'Some decimal'] as const;
-    const KEYS = ['firstName', 'lastName', 'email', 'someInteger', 'someDecimal'] as ReadonlyArray<keyof Person>;
+    const LABELS = [
+      'First name',
+      'Last name',
+      'Gender',
+      'Email',
+      'Some integer',
+      'Some decimal',
+      'Birth date',
+      'Shift start',
+    ] as const;
+    const KEYS = [
+      'firstName',
+      'lastName',
+      'gender',
+      'email',
+      'someInteger',
+      'someDecimal',
+      'birthDate',
+      'shiftStart',
+      'appointmentTime',
+    ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
+      gender: Gender.MALE,
       email: '',
       someInteger: 0,
       someDecimal: 0,
       id: -1,
       version: -1,
       vip: false,
+      birthDate: '1999-12-31',
+      shiftStart: '08:30',
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -53,10 +76,13 @@ describe('@hilla/react-crud', () => {
         version: 1,
         firstName: 'first',
         lastName: 'last',
+        gender: Gender.FEMALE,
         email: 'first.last@domain.com',
         someInteger: 24451,
         someDecimal: 24.451,
         vip: false,
+        birthDate: '1999-12-31',
+        shiftStart: '08:30',
       };
 
       const form = await FormController.init(
@@ -71,9 +97,13 @@ describe('@hilla/react-crud', () => {
       expect(tagNames).to.eql([
         'vaadin-text-field',
         'vaadin-text-field',
+        'vaadin-select',
         'vaadin-text-field',
         'vaadin-integer-field',
         'vaadin-number-field',
+        'vaadin-checkbox',
+        'vaadin-date-picker',
+        'vaadin-time-picker',
       ]);
     });
 

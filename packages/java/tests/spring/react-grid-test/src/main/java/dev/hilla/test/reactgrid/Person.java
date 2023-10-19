@@ -10,7 +10,12 @@ import java.util.Date;
 @Entity
 public class Person extends AbstractEntity {
 
+    public enum Gender {
+        MALE, FEMALE, NON_BINARY
+    }
+
     private String firstName, lastName;
+    private Gender gender;
     private int luckyNumber;
     private boolean emailVerified;
     private Date joinedDate;
@@ -32,6 +37,14 @@ public class Person extends AbstractEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public int getLuckyNumber() {
