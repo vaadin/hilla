@@ -28,11 +28,17 @@ import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Starts the generation of TS files for endpoints.
  */
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(TaskGenerateEndpointImpl.class);
 
     private final String nodeCommand;
     private boolean productionMode;
@@ -75,8 +81,10 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
                     nodeCommand);
             processor.process();
         } catch (GeneratorException e) {
+            // Make sure the exception is printed in the logs
+            LOGGER.error("Failed to run TypeScript endpoint generator", e);
             throw new ExecutionFailedException(
-                    "Failed to run TypeScript endpoint generator", e);
+                    "Failed to run TypeScript endpoint generator");
         }
         // This is a hack as Hilla does not have any other way to contribute to
         // the generated vaadin.ts
