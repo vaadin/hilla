@@ -7,6 +7,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
+import { setDefaultLocale } from '../src/i18n';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
@@ -52,6 +53,10 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
 }
 
 describe('@hilla/react-crud', () => {
+  before(() => {
+    setDefaultLocale('en-US');
+  });
+
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
       return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;
