@@ -9,6 +9,7 @@ import { useContext, useEffect, useRef, useState, type ReactElement, type RefObj
 import { ColumnContext } from './autogrid-column-context.js';
 import { DateFormatter } from './date-formatter';
 import { defaultLocale } from './i18n.js';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
 // TODO: Replace with more robust solution
@@ -46,13 +47,12 @@ function useFilterState(initialMatcher: Matcher) {
     setFilterValue(newFilterValue);
     setMatcher(newMatcher);
 
-    const filter = {
+    const filter: FilterUnion = {
+      '@type': 'propertyString',
       propertyId: context.propertyInfo.name,
       filterValue: newFilterValue,
       matcher: newMatcher,
     };
-    // eslint-disable-next-line
-    (filter as any).t = 'propertyString';
     context.setPropertyFilter(filter);
   }
 
