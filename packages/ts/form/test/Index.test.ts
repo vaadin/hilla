@@ -14,7 +14,7 @@
  * the License.
  */
 import { assert } from '@esm-bundle/chai';
-import type { VaadinWindow } from '../src/types.js';
+import type { VaadinWindow } from './types.js';
 
 describe('@hilla/form', () => {
   describe('Index', () => {
