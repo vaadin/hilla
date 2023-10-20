@@ -1,5 +1,5 @@
 import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 export const LocaleContext = createContext(navigator.language);
 
@@ -102,5 +102,6 @@ export class LocaleFormatter {
 }
 
 export function useLocaleFormatter(): LocaleFormatter {
-  return new LocaleFormatter(useContext(LocaleContext));
+  const locale = useContext(LocaleContext);
+  return useMemo(() => new LocaleFormatter(locale), [locale]);
 }

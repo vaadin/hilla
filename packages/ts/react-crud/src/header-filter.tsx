@@ -1,11 +1,11 @@
-import { DatePicker, DatePickerElement } from '@hilla/react-components/DatePicker.js';
+import { DatePicker, DatePickerElement, type DatePickerI18n } from '@hilla/react-components/DatePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
+import { type ReactElement, type RefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import { useLocaleFormatter } from './locale.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
@@ -29,6 +29,23 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
 const datePickerI18n = new DatePickerElement().i18n;
+
+function useDatePickerI18n(): DatePickerI18n {
+  const formatter = useLocaleFormatter();
+
+  return useMemo(
+    () => ({
+      ...datePickerI18n,
+      formatDate(value) {
+        return formatter.formatDate(value);
+      },
+      parseDate(value) {
+        return formatter.parse(value);
+      },
+    }),
+    [formatter],
+  );
+}
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -162,7 +179,7 @@ export function BooleanHeaderFilter(): ReactElement {
 }
 
 export function DateHeaderFilter(): ReactElement {
-  const formatter = useLocaleFormatter();
+  const i18n = useDatePickerI18n();
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
 
@@ -172,15 +189,7 @@ export function DateHeaderFilter(): ReactElement {
       <DatePicker
         value={filterValue}
         placeholder="Filter..."
-        i18n={{
-          ...datePickerI18n,
-          formatDate(value) {
-            return formatter.formatDate(value);
-          },
-          parseDate(value) {
-            return formatter.parse(value);
-          },
-        }}
+        i18n={i18n}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
