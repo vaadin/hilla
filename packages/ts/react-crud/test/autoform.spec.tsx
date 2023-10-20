@@ -201,6 +201,7 @@ describe('@hilla/react-crud', () => {
         <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       const form = await FormController.init(result, user);
+      await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(submitSpy).to.have.not.been.called;
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.not.be.null;
@@ -225,6 +226,7 @@ describe('@hilla/react-crud', () => {
         />,
       );
       const form = await FormController.init(result, user);
+      await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.be.null;
       expect(submitSpy).to.have.not.been.called;
@@ -254,7 +256,7 @@ describe('@hilla/react-crud', () => {
           render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
         );
-        expect(form.getButton('Discard')).to.be.null;
+        await expect(form.findButton('Discard')).to.eventually.be.rejected;
       });
 
       it('does show a discard button if the form is dirty', async () => {
@@ -263,7 +265,7 @@ describe('@hilla/react-crud', () => {
           user,
         );
         await form.typeInField('First name', 'foo');
-        expect(form.getButton('Discard')).to.exist;
+        await expect(form.findButton('Discard')).to.eventually.exist;
       });
 
       it('resets the form when clicking the discard button', async () => {
@@ -272,12 +274,63 @@ describe('@hilla/react-crud', () => {
           user,
         );
         await form.typeInField('First name', 'foo');
-        expect(form.getButton('Discard')).to.exist;
+        await expect(form.findButton('Discard')).to.eventually.exist;
 
         await form.discard();
         await expect(form.getValues(['First name'])).to.eventually.eql(['']);
-        expect(form.getButton('Discard')).to.be.null;
+        await expect(form.findButton('Discard')).to.eventually.be.rejected;
       });
+    });
+
+    it('when creating new, submit button is enabled at the beginning', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.false;
+    });
+
+    it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.false;
+    });
+
+    it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
+      const service = personService();
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.false;
+    });
+
+    it('when editing, submit button remains disabled before any changes', async () => {
+      const service = personService();
+      const person = await getItem(service, 1);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(result, user);
+
+      const submitButton = await form.findButton('Submit');
+      expect(submitButton!.disabled).to.be.true;
+    });
+
+    it('when editing, submit button becomes disabled again when the form is reset', async () => {
+      const service = personService();
+      const person = await getItem(service, 1);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(result, user);
+      const submitButton = await form.findButton('Submit');
+
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      expect(submitButton!.disabled).to.be.false;
+
+      await form.discard();
+      expect(submitButton!.disabled).to.be.true;
     });
   });
 });
