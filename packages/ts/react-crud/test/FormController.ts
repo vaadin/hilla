@@ -29,8 +29,8 @@ export default class FormController {
     return await Promise.all(labels.map(async (label) => await this.getField(label)));
   }
 
-  async findButton(label: string): Promise<HTMLInputElement | null> {
-    return (await this.#result.findByText(label)) as HTMLInputElement | null;
+  async findButton(label: string): Promise<HTMLButtonElement | null> {
+    return (await this.#result.findByText(label)) as HTMLButtonElement;
   }
 
   async typeInField(label: string, value: string): Promise<void> {

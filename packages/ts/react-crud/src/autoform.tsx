@@ -70,9 +70,7 @@ export function ExperimentalAutoForm<TItem>({
     }
   }
 
-  function isEditMode(): boolean {
-    return item !== undefined && item !== null && item !== emptyItem;
-  }
+  const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
   return (
     <VerticalLayout theme="padding">
@@ -90,7 +88,7 @@ export function ExperimentalAutoForm<TItem>({
         ) : null}
         <Button
           theme="primary"
-          disabled={!!disabled || (isEditMode() && !form.dirty)}
+          disabled={!!disabled || (isEditMode && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}
         >
