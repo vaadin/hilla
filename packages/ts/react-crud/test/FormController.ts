@@ -41,12 +41,12 @@ export default class FormController {
 
   async submit(): Promise<void> {
     const btn = await this.findButton('Submit');
-    await this.#user.click(btn!);
+    await this.#user.click(btn);
   }
 
   async discard(): Promise<void> {
     const btn = await this.findButton('Discard');
-    await this.#user.click(btn!);
+    await this.#user.click(btn);
   }
 
   async getValues(labels: readonly string[]): Promise<readonly unknown[]> {
