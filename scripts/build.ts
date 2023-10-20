@@ -22,7 +22,6 @@ await build({
   inject: [fileURLToPath(new URL('./register.js', scriptsDir))],
   entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map(fileURLToPath),
   format: 'esm',
-  // minify: true,
   outdir: fileURLToPath(packageRoot),
   packages: 'external',
   sourcemap: 'linked',
