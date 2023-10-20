@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { type DateObject, LocaleFormatter } from '../src/locale-formatter.js';
+import { type DateObject, DateFormatter } from '../src/date-formatter';
 
 describe('DateFormatter', () => {
   const testCases = [
@@ -44,26 +44,27 @@ describe('DateFormatter', () => {
 
     testCases.forEach((testCase) => {
       const { locale, iso, input, output } = testCase;
-      const formatter = new LocaleFormatter(locale);
+      const formatter = new DateFormatter(locale);
 
       const parsedDate = formatter.parse(input);
-      expect(parsedDate, `Failed to parse date in ${locale}: ${input}`).to.not.be.undefined;
+      expect(parsedDate, `Failed to parse date in ${locale}: ${input}`).to.not.be.null;
       const parsedIso = toIso(parsedDate!);
       expect(parsedIso, `Parsing date in locale ${locale} returned wrong result`).to.equal(iso);
 
-      const formattedDate = formatter.formatDate(fromIso(iso));
+      const formattedDate = formatter.format(fromIso(iso));
       expect(formattedDate, `Formatting date in locale ${locale} returned wrong result`).to.equal(output);
     });
   });
 
   it('should return null when parsing invalid dates', () => {
-    const formatter = new LocaleFormatter('en-US');
-    expect(formatter.parse('')).to.be.undefined;
-    expect(formatter.parse('23')).to.be.undefined;
-    expect(formatter.parse('11/23')).to.be.undefined;
-    expect(formatter.parse('11/32/2020')).to.be.undefined;
-    expect(formatter.parse('23/23/2020')).to.be.undefined;
-    expect(formatter.parse('0/23/2020')).to.be.undefined;
-    expect(formatter.parse('11/0/2020')).to.be.undefined;
+    const formatter = new DateFormatter('en-US');
+
+    expect(formatter.parse('')).to.be.null;
+    expect(formatter.parse('23')).to.be.null;
+    expect(formatter.parse('11/23')).to.be.null;
+    expect(formatter.parse('11/32/2020')).to.be.null;
+    expect(formatter.parse('23/23/2020')).to.be.null;
+    expect(formatter.parse('0/23/2020')).to.be.null;
+    expect(formatter.parse('11/0/2020')).to.be.null;
   });
 });

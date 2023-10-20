@@ -515,9 +515,7 @@ describe('@hilla/react-crud', () => {
 
       beforeEach(async () => {
         grid = await GridController.init(
-          render(
-            <AutoGrid locale="en-US" service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>,
-          ),
+          render(<AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>),
           user,
         );
       });

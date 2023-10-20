@@ -6,8 +6,9 @@ import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import { useContext, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
-import { ColumnContext, GeneralColumnContext } from './autogrid-column-context.js';
-import { LocaleFormatter } from './locale-formatter.js';
+import { ColumnContext } from './autogrid-column-context.js';
+import { DateFormatter } from './date-formatter';
+import { defaultLocale } from './i18n.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
@@ -28,7 +29,14 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
 }`;
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
-const datePickerI18n = new DatePickerElement().i18n;
+// Create date picker I18N config based on the current browser locale
+const dateFormatter = new DateFormatter(defaultLocale);
+
+const datePickerI18n: DatePickerI18n = {
+  ...new DatePickerElement().i18n,
+  formatDate: (date) => dateFormatter.format(date),
+  parseDate: (text) => dateFormatter.parse(text) ?? undefined,
+};
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -162,7 +170,6 @@ export function BooleanHeaderFilter(): ReactElement {
 }
 
 export function DateHeaderFilter(): ReactElement {
-  const { formatter } = useContext(GeneralColumnContext)!;
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
 
@@ -172,15 +179,7 @@ export function DateHeaderFilter(): ReactElement {
       <DatePicker
         value={filterValue}
         placeholder="Filter..."
-        i18n={{
-          ...datePickerI18n,
-          formatDate(value) {
-            return formatter.formatDate(value);
-          },
-          parseDate(value) {
-            return formatter.parse(value);
-          },
-        }}
+        i18n={datePickerI18n}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
