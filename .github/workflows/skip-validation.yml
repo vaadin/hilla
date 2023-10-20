@@ -8,12 +8,14 @@ on:
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
+      - 'scripts/generator/templates/**/*.md'
   pull_request_target:
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
+      - 'scripts/generator/templates/**/*.md'
 
 jobs:
   test-all:
