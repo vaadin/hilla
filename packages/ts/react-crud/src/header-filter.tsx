@@ -1,13 +1,13 @@
-import { DatePicker, DatePickerElement, type DatePickerI18n } from '@hilla/react-components/DatePicker.js';
+import { DatePicker, DatePickerElement } from '@hilla/react-components/DatePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { useContext, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
-import { ColumnContext, GeneralColumnContext } from './autogrid-column-context.js';
-import { LocaleFormatter } from './locale-formatter.js';
+import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
+import { ColumnContext } from './autogrid-column-context.js';
+import { useLocaleFormatter } from './locale.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
@@ -162,7 +162,7 @@ export function BooleanHeaderFilter(): ReactElement {
 }
 
 export function DateHeaderFilter(): ReactElement {
-  const { formatter } = useContext(GeneralColumnContext)!;
+  const formatter = useLocaleFormatter();
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
 

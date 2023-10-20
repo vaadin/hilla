@@ -1,4 +1,7 @@
 import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
+import { createContext, useContext } from 'react';
+
+export const LocaleContext = createContext(navigator.language);
 
 function getFormatRegex(format: Intl.DateTimeFormat) {
   const sampleDate = new Date(1234, 5 - 1, 6);
@@ -11,12 +14,6 @@ function getFormatRegex(format: Intl.DateTimeFormat) {
     .replace('6', '(?<day>\\d+)');
 
   return new RegExp(pattern, 'u');
-}
-
-export interface DateObject {
-  year: number;
-  month: number;
-  day: number;
 }
 
 function tryFormatDate(formatter: Intl.DateTimeFormat, value?: string): string {
@@ -102,4 +99,8 @@ export class LocaleFormatter {
 
     return { year, month, day };
   }
+}
+
+export function useLocaleFormatter(): LocaleFormatter {
+  return new LocaleFormatter(useContext(LocaleContext));
 }

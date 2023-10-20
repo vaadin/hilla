@@ -1,10 +1,11 @@
 import type { GridItemModel } from '@hilla/react-components/Grid.js';
 import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
-import { type JSX, type CSSProperties, useContext } from 'react';
-import { ColumnContext, GeneralColumnContext } from './autogrid-column-context';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
+import { type CSSProperties, type JSX, useContext } from 'react';
+import { ColumnContext } from './autogrid-column-context';
+import { useLocaleFormatter } from './locale.js';
 
 export type RendererOptions<TItem> = {
   item: TItem;
@@ -21,7 +22,7 @@ function getColumnValue<TItem>(context: ColumnContext, item: TItem): any {
 const fontVariantStyle: CSSProperties = { fontVariantNumeric: 'tabular-nums' };
 
 export function AutoGridNumberRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
-  const { formatter } = useContext(GeneralColumnContext)!;
+  const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
   return <span style={fontVariantStyle}>{formatter.formatNumber(getColumnValue(context, item))}</span>;
 }
@@ -36,19 +37,19 @@ export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>)
 }
 
 export function AutoGridDateRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
-  const { formatter } = useContext(GeneralColumnContext)!;
+  const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
   return <span style={fontVariantStyle}>{formatter.formatDate(getColumnValue(context, item))}</span>;
 }
 
 export function AutoGridTimeRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
-  const { formatter } = useContext(GeneralColumnContext)!;
+  const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
   return <span style={fontVariantStyle}>{formatter.formatLocalTime(getColumnValue(context, item))}</span>;
 }
 
 export function AutoGridDateTimeRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
-  const { formatter } = useContext(GeneralColumnContext)!;
+  const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
   return <span style={fontVariantStyle}>{formatter.formatLocalDateTime(getColumnValue(context, item))}</span>;
 }

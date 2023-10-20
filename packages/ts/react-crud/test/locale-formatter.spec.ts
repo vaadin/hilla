@@ -1,5 +1,6 @@
 import { expect } from '@esm-bundle/chai';
-import { type DateObject, LocaleFormatter } from '../src/locale-formatter.js';
+import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
+import { LocaleFormatter } from '../src/locale.js';
 
 describe('DateFormatter', () => {
   const testCases = [
@@ -30,14 +31,14 @@ describe('DateFormatter', () => {
   ];
 
   it('should format and parse dates', () => {
-    function toIso(dateObject: DateObject) {
-      const day = dateObject.day.toString().padStart(2, '0');
-      const month = (dateObject.month + 1).toString().padStart(2, '0');
-      const year = dateObject.year.toString().padStart(4, '0');
+    function toIso(date: DatePickerDate) {
+      const day = date.day.toString().padStart(2, '0');
+      const month = (date.month + 1).toString().padStart(2, '0');
+      const year = date.year.toString().padStart(4, '0');
       return `${year}-${month}-${day}`;
     }
 
-    function fromIso(iso: string): DateObject {
+    function fromIso(iso: string): DatePickerDate {
       const [year, month, day] = iso.split('-').map(Number);
       return { year, month: month - 1, day };
     }

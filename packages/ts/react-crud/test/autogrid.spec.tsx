@@ -7,6 +7,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
+import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
@@ -516,7 +517,9 @@ describe('@hilla/react-crud', () => {
       beforeEach(async () => {
         grid = await GridController.init(
           render(
-            <AutoGrid locale="en-US" service={columnRendererTestService()} model={ColumnRendererTestModel}></AutoGrid>,
+            <LocaleContext.Provider value="en-US">
+              <AutoGrid service={columnRendererTestService()} model={ColumnRendererTestModel} />,
+            </LocaleContext.Provider>,
           ),
           user,
         );
