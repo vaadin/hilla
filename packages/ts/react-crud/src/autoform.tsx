@@ -38,10 +38,8 @@ export function ExperimentalAutoForm<TItem>({
     onSubmit: async (formItem) => service.save(formItem),
   });
   const [formError, setFormError] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
-    setIsEditing(item !== undefined && item !== null && item !== emptyItem);
-    if (item !== undefined && item !== null && item !== emptyItem) {
+    if (item !== emptyItem) {
       form.read(item);
     } else {
       form.clear();
@@ -72,6 +70,10 @@ export function ExperimentalAutoForm<TItem>({
     }
   }
 
+  function isEditMode(): boolean {
+    return item !== undefined && item !== null && item !== emptyItem;
+  }
+
   return (
     <VerticalLayout theme="padding">
       {getProperties(model)
@@ -88,7 +90,7 @@ export function ExperimentalAutoForm<TItem>({
         ) : null}
         <Button
           theme="primary"
-          disabled={disabled || (isEditing && !form.dirty)}
+          disabled={!!disabled || (isEditMode() && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}
         >

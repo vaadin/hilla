@@ -284,7 +284,6 @@ describe('@hilla/react-crud', () => {
 
     it('when creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      console.log('when creating new submit button is enabled at the beginning');
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(result, user);
 
@@ -294,7 +293,6 @@ describe('@hilla/react-crud', () => {
 
     it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      console.log('when creating new submit button is enabled at the beginning');
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null} />);
       const form = await FormController.init(result, user);
 
@@ -304,7 +302,6 @@ describe('@hilla/react-crud', () => {
 
     it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      console.log('when creating new submit button is enabled at the beginning');
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
       const form = await FormController.init(result, user);
 
