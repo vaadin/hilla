@@ -5,10 +5,9 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { useContext, useEffect, useRef, useState, type ReactElement, type RefObject } from 'react';
+import { type ReactElement, type RefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
-import { DateFormatter } from './date-formatter';
-import { defaultLocale } from './i18n.js';
+import { useLocaleFormatter } from './locale.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 
@@ -29,14 +28,24 @@ autoGridFilterWithLessGreaterEqualsStyle.textContent = `
 }`;
 document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
 
-// Create date picker I18N config based on the current browser locale
-const dateFormatter = new DateFormatter(defaultLocale);
+const datePickerI18n = new DatePickerElement().i18n;
 
-const datePickerI18n: DatePickerI18n = {
-  ...new DatePickerElement().i18n,
-  formatDate: (date) => dateFormatter.format(date),
-  parseDate: (text) => dateFormatter.parse(text) ?? undefined,
-};
+function useDatePickerI18n(): DatePickerI18n {
+  const formatter = useLocaleFormatter();
+
+  return useMemo(
+    () => ({
+      ...datePickerI18n,
+      formatDate(value) {
+        return formatter.formatDate(value);
+      },
+      parseDate(value) {
+        return formatter.parse(value);
+      },
+    }),
+    [formatter],
+  );
+}
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -170,6 +179,7 @@ export function BooleanHeaderFilter(): ReactElement {
 }
 
 export function DateHeaderFilter(): ReactElement {
+  const i18n = useDatePickerI18n();
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
 
@@ -179,7 +189,7 @@ export function DateHeaderFilter(): ReactElement {
       <DatePicker
         value={filterValue}
         placeholder="Filter..."
-        i18n={datePickerI18n}
+        i18n={i18n}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}

@@ -10,7 +10,7 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { useEffect, useRef, useState, type JSX, type MutableRefObject } from 'react';
+import { type JSX, type MutableRefObject, useEffect, useRef, useState } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
@@ -292,5 +292,9 @@ export function AutoGrid<TItem>({
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);
 
-  return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children}></Grid>;
+  return (
+    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref}>
+      {children}
+    </Grid>
+  );
 }
