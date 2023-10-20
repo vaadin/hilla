@@ -288,7 +288,7 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
-      expect(submitButton!.disabled).to.be.false;
+      expect(submitButton.disabled).to.be.false;
     });
 
     it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
@@ -297,7 +297,7 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
-      expect(submitButton!.disabled).to.be.false;
+      expect(submitButton.disabled).to.be.false;
     });
 
     it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
@@ -306,7 +306,7 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
-      expect(submitButton!.disabled).to.be.false;
+      expect(submitButton.disabled).to.be.false;
     });
 
     it('when editing, submit button remains disabled before any changes', async () => {
@@ -316,7 +316,7 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
-      expect(submitButton!.disabled).to.be.true;
+      expect(submitButton.disabled).to.be.true;
     });
 
     it('when editing, submit button becomes disabled again when the form is reset', async () => {
@@ -327,10 +327,10 @@ describe('@hilla/react-crud', () => {
       const submitButton = await form.findButton('Submit');
 
       await form.typeInField('First name', 'J'); // to enable the submit button
-      expect(submitButton!.disabled).to.be.false;
+      expect(submitButton.disabled).to.be.false;
 
       await form.discard();
-      expect(submitButton!.disabled).to.be.true;
+      expect(submitButton.disabled).to.be.true;
     });
   });
 });
