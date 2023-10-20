@@ -292,5 +292,9 @@ export function AutoGrid<TItem>({
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);
 
-  return <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref} children={children} />;
+  return (
+    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref}>
+      {children}
+    </Grid>
+  );
 }
