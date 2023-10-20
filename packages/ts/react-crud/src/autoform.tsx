@@ -29,7 +29,7 @@ export type AutoFormProps<TItem> = Readonly<{
 export function ExperimentalAutoForm<TItem>({
   service,
   model,
-  item,
+  item = emptyItem,
   onSubmitError,
   afterSubmit,
   disabled,
@@ -70,6 +70,8 @@ export function ExperimentalAutoForm<TItem>({
     }
   }
 
+  const isEditMode = item !== undefined && item !== null && item !== emptyItem;
+
   return (
     <VerticalLayout theme="padding">
       {getProperties(model)
@@ -86,7 +88,7 @@ export function ExperimentalAutoForm<TItem>({
         ) : null}
         <Button
           theme="primary"
-          disabled={disabled}
+          disabled={!!disabled || (isEditMode && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}
         >
