@@ -65,7 +65,7 @@ public class ProductionBuildFunctionalIT {
         } catch (IOException e) {
             fail(e);
         }
-        runGradleCommand("-Philla.productionMode=true build");
+        runGradleCommand("--info -Philla.productionMode=true build");
     }
 
     private void runGradleCommand(String executable) {
