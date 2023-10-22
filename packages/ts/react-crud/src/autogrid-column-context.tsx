@@ -10,12 +10,12 @@ export interface SorterState {
 
 export type SortState = Record<string, SorterState | undefined>;
 
-export type ColumnContext = {
+export type ColumnContext = Readonly<{
   propertyInfo: PropertyInfo;
   setPropertyFilter(propertyFilter: PropertyStringFilter): void;
   sortState: SortState;
   setSortState: Dispatch<SetStateAction<SortState>>;
   customColumnOptions?: ColumnOptions;
-};
+}>;
 
 export const ColumnContext = createContext<ColumnContext | null>(null);

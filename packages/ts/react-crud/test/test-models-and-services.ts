@@ -7,8 +7,8 @@ import {
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
 import type { CrudService } from '../src/crud.js';
-import type Filter from '../src/types/dev/hilla/crud/filter/Filter.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
+import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
 import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
@@ -26,7 +26,8 @@ export interface Person extends HasIdVersion {
   firstName: string;
   lastName: string;
   email: string;
-  someNumber: number;
+  someInteger: number;
+  someDecimal: number;
   vip: boolean;
 }
 
@@ -80,8 +81,18 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
     return this[_getPropertyModel]('email', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get someNumber(): NumberModel {
-    return this[_getPropertyModel]('someNumber', (parent, key) => new NumberModel(parent, key, false));
+  get someInteger(): NumberModel {
+    return this[_getPropertyModel](
+      'someInteger',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+
+  get someDecimal(): NumberModel {
+    return this[_getPropertyModel](
+      'someDecimal',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'float' } }),
+    );
   }
 
   get vip(): BooleanModel {
@@ -209,33 +220,30 @@ type HasIdVersion = {
 
 export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
   let _lastSort: Sort | undefined;
-  let _lastFilter: Filter | undefined;
+  let _lastFilter: FilterUnion | undefined;
   let data = initialData;
   let _callCount = 0;
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
-    async list(request: Pageable, filter: Filter | undefined): Promise<T[]> {
+    async list(request: Pageable, filter: FilterUnion | undefined): Promise<T[]> {
       _lastSort = request.sort;
       _lastFilter = filter;
       _callCount += 1;
 
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
-        /* eslint-disable */
-        if (filter && (filter as any).t === 'propertyString') {
-          const propertyFilter: PropertyStringFilter = filter as PropertyStringFilter;
+        if (filter && filter['@type'] === 'propertyString') {
           filteredData = data.filter((item) => {
-            const propertyValue = (item as any)[propertyFilter.propertyId];
-            if (propertyFilter.matcher === 'CONTAINS') {
-              return propertyValue.includes(propertyFilter.filterValue);
+            const propertyValue = (item as Record<string, any>)[filter.propertyId];
+            if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
+              return propertyValue.includes(filter.filterValue);
             }
-            return propertyValue === propertyFilter.filterValue;
+            return propertyValue === filter.filterValue;
           });
         } else {
           filteredData = data;
         }
-        /* eslint-enable */
       }
 
       if (request.sort.orders.length === 1) {
@@ -285,8 +293,26 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
 };
 
 export const personData: Person[] = [
-  { id: 1, version: 1, firstName: 'John', lastName: 'Dove', email: 'john@example.com', someNumber: -12, vip: true },
-  { id: 2, version: 1, firstName: 'Jane', lastName: 'Love', email: 'jane@example.com', someNumber: 123456, vip: false },
+  {
+    id: 1,
+    version: 1,
+    firstName: 'John',
+    lastName: 'Dove',
+    email: 'john@example.com',
+    someInteger: -12,
+    someDecimal: 0.12,
+    vip: true,
+  },
+  {
+    id: 2,
+    version: 1,
+    firstName: 'Jane',
+    lastName: 'Love',
+    email: 'jane@example.com',
+    someInteger: 123456,
+    someDecimal: 123.456,
+    vip: false,
+  },
 ];
 
 export const companyData: Company[] = [
@@ -345,7 +371,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
 
 export type HasTestInfo = {
   lastSort: Sort | undefined;
-  lastFilter: Filter | undefined;
+  lastFilter: FilterUnion | undefined;
   callCount: number;
 };
 

@@ -4,7 +4,7 @@ package dev.hilla.crud.filter;
  * A filter for a given property that matches a string value using the given
  * matcher.
  */
-public class PropertyStringFilter implements Filter {
+public class PropertyStringFilter extends Filter {
     public enum Matcher {
         EQUALS, CONTAINS, LESS_THAN, GREATER_THAN;
     }

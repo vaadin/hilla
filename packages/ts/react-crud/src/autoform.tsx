@@ -8,7 +8,7 @@ import { AutoFormField } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty } from './property-info.js';
 
-export const defaultItem = Symbol();
+export const emptyItem = Symbol();
 
 type SubmitErrorEvent = {
   error: unknown;
@@ -20,7 +20,7 @@ type SubmitEvent<TItem> = {
 export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
-  item?: TItem | typeof defaultItem;
+  item?: TItem | typeof emptyItem;
   disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
@@ -29,7 +29,7 @@ export type AutoFormProps<TItem> = Readonly<{
 export function ExperimentalAutoForm<TItem>({
   service,
   model,
-  item,
+  item = emptyItem,
   onSubmitError,
   afterSubmit,
   disabled,
@@ -39,8 +39,10 @@ export function ExperimentalAutoForm<TItem>({
   });
   const [formError, setFormError] = useState('');
   useEffect(() => {
-    if (item !== defaultItem) {
+    if (item !== emptyItem) {
       form.read(item);
+    } else {
+      form.clear();
     }
   }, [item]);
 
@@ -68,6 +70,8 @@ export function ExperimentalAutoForm<TItem>({
     }
   }
 
+  const isEditMode = item !== undefined && item !== null && item !== emptyItem;
+
   return (
     <VerticalLayout theme="padding">
       {getProperties(model)
@@ -76,9 +80,15 @@ export function ExperimentalAutoForm<TItem>({
           <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
         ))}
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
-      <HorizontalLayout style={{ marginTop: 'var(--lumo-space-m)' }}>
+      <HorizontalLayout theme="spacing" style={{ marginTop: 'var(--lumo-space-m)', alignSelf: 'flex-end' }}>
+        {form.dirty ? (
+          <Button theme="tertiary" onClick={() => form.reset()}>
+            Discard
+          </Button>
+        ) : null}
         <Button
-          disabled={disabled}
+          theme="primary"
+          disabled={!!disabled || (isEditMode && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={submitButtonClicked}
         >

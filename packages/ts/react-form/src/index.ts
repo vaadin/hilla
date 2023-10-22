@@ -14,23 +14,15 @@ import {
   hasFromString,
   isFieldElement,
   type Validator,
-  type ValueError,
   type Value,
+  type ValueError,
 } from '@hilla/form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
-import type { VaadinWindow } from './types.js';
 
-declare const __VERSION__: string;
-
-const $wnd = window as VaadinWindow;
-
-$wnd.Vaadin ??= {};
-$wnd.Vaadin.registrations ??= [];
-$wnd.Vaadin.registrations.push({
-  is: '@hilla/react-form',
-  version: __VERSION__,
-});
+// @ts-expect-error: esbuild injection
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+__REGISTER__();
 
 function useUpdate() {
   const [_, update] = useReducer((x: number) => x + 1, 0);
