@@ -15,7 +15,7 @@
     "clean:build": "nx run-many -t clean:build --all --output-style stream",
     "check": "nx run-many -t lint,typecheck --all --output-style stream",
     "build": "sh ./scripts/prepare.sh && nx run-many -t build --all --output-style stream",
-    "build:nocache": "sh ./scripts/prepare.sh && nx run-many -t build --all --output-style stream --skip-nx-cache",
+    "build:nocache": "npm run build",
     "lint": "nx run-many -t lint --all --output-style stream",
     "lint:fix": "nx run-many -t lint:fix --all --output-style stream",
     "test": "nx run-many -t test --all --output-style stream",
