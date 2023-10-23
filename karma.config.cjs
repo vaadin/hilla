@@ -1,11 +1,13 @@
 const { parseArgs } = require('node:util');
-const { basename, join } = require('node:path');
+const { basename, join, resolve } = require('node:path');
 const { readFileSync } = require('node:fs');
+const { readFile } = require('node:fs/promises');
 const karmaChromeLauncher = require('karma-chrome-launcher');
 const karmaCoverage = require('karma-coverage');
 const karmaMocha = require('karma-mocha');
 const karmaSpecReporter = require('karma-spec-reporter');
 const karmaVite = require('karma-vite');
+const MagicString = require('magic-string');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -18,6 +20,28 @@ function loadMockConfig() {
     console.log(`No mock files found for ${basename(cwd)}. Skipping...`);
     return {};
   }
+}
+
+function loadRegisterJs() {
+  return {
+    enforce: 'pre',
+    name: 'vite-hilla-register',
+    async transform(code) {
+      if (code.includes('__REGISTER__()') && !code.includes('function __REGISTER__')) {
+        const registerCode = await readFile(resolve(cwd, '../../../scripts/register.js'), 'utf8').then((c) =>
+          c.replace('export', ''),
+        );
+
+        const _code = new MagicString(code);
+        _code.prepend(registerCode);
+
+        return {
+          code: _code.toString(),
+          map: _code.generateMap(),
+        };
+      }
+    },
+  };
 }
 
 const {
@@ -51,7 +75,7 @@ module.exports = (config) => {
 
     browserNoActivityTimeout: isCI ? 30000 : 0,
 
-    browsers: ['ChromeHeadlessNoSandbox'],
+    browsers: ['ChromeHeadless'],
 
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
@@ -90,6 +114,7 @@ module.exports = (config) => {
         cacheDir: '.vite',
         esbuild: {
           define: {
+            __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
             __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
           },
           tsconfigRaw: {
@@ -100,6 +125,7 @@ module.exports = (config) => {
             },
           },
         },
+        plugins: [loadRegisterJs()],
         resolve: {
           alias: Object.entries(mocks).map(([find, file]) => {
             const replacement = join(cwd, `test/mocks/${file}`);

@@ -1,12 +1,12 @@
 import { TextField } from '@hilla/react-components/TextField.js';
 import { AutoGrid } from '@hilla/react-crud';
-import Filter from 'Frontend/generated/dev/hilla/crud/filter/Filter.js';
+import { useState } from 'react';
+import type FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion.js';
 import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
-import { useState } from 'react';
 
-export function ReadOnlyGridOrFilter() {
-  const [filter, setFilter] = useState<Filter | undefined>(undefined);
+export function ReadOnlyGridOrFilter(): JSX.Element {
+  const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
 
   return (
     <div>
@@ -14,20 +14,20 @@ export function ReadOnlyGridOrFilter() {
         id="filter"
         style={{ width: '20em' }}
         label="Search for first or last name"
-        onValueChanged={(e: any) => {
-          const firstNameFilter: any = {
-            t: 'propertyString',
+        onValueChanged={({ detail: { value } }) => {
+          const firstNameFilter = {
+            '@type': 'propertyString',
             propertyId: 'firstName',
             matcher: 'CONTAINS',
-            filterValue: e.detail.value,
+            filterValue: value,
           };
-          const lasttNameFilter: any = {
-            t: 'propertyString',
+          const lasttNameFilter = {
+            '@type': 'propertyString',
             propertyId: 'lastName',
             matcher: 'CONTAINS',
-            filterValue: e.detail.value,
+            filterValue: value,
           };
-          setFilter({ t: 'or', children: [firstNameFilter, lasttNameFilter] });
+          setFilter({ '@type': 'or', children: [firstNameFilter, lasttNameFilter] });
         }}
       ></TextField>
       <AutoGrid pageSize={10} service={PersonService} model={PersonModel} experimentalFilter={filter} noHeaderFilters />
