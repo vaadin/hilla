@@ -1,13 +1,12 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
-import type { GridElement } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { type JSX, useState } from 'react';
 import { AutoCrudContext } from './autocrud-context.js';
 import DeleteButton from './autocrud-delete.js';
-import { defaultItem, ExperimentalAutoForm } from './autoform.js';
+import { emptyItem, ExperimentalAutoForm } from './autoform.js';
 import { AutoGrid } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { getProperties } from './property-info.js';
@@ -20,7 +19,7 @@ export type AutoCrudProps<TItem> = Readonly<{
 }>;
 
 export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }: AutoCrudProps<TItem>): JSX.Element {
-  const [item, setItem] = useState<TItem | typeof defaultItem | undefined>(undefined);
+  const [item, setItem] = useState<TItem | typeof emptyItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const customColumns = [];
@@ -46,7 +45,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
             }}
           >
             {header ? <h2 style={{ fontSize: 'var(--lumo-font-size-l)' }}>{header}</h2> : <></>}
-            <Button theme="primary" onClick={() => setItem(defaultItem)}>
+            <Button theme="primary" onClick={() => setItem(emptyItem)}>
               + New
             </Button>
           </HorizontalLayout>
@@ -55,17 +54,10 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete, header }
               refreshTrigger={refreshTrigger}
               service={service}
               model={model}
+              selectedItems={item && item !== emptyItem ? [item] : []}
               onActiveItemChanged={(e) => {
                 const activeItem = e.detail.value;
-                (e.target as GridElement).selectedItems = activeItem ? [activeItem] : [];
-              }}
-              onSelectedItemsChanged={(e) => {
-                if (e.detail.value.length === 0) {
-                  setItem(undefined);
-                } else {
-                  const selectedItem = e.detail.value[0];
-                  setItem({ ...selectedItem });
-                }
+                setItem(activeItem ?? undefined);
               }}
               customColumns={customColumns}
             ></AutoGrid>
