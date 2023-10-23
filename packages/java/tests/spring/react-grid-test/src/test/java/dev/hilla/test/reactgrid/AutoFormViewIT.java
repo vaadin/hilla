@@ -58,7 +58,14 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     }
 
     private void submit() {
-        $(ButtonElement.class).first().click();
+        var submitButton = $(ButtonElement.class).all().stream()
+                .filter(button -> button.getText().equals("Submit"))
+                .findFirst();
+        if (submitButton.isPresent()) {
+            submitButton.get().click();
+        } else {
+            Assert.fail("Submit button not found");
+        }
     }
 
     private TextFieldElement getTextField(String name) {

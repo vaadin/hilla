@@ -52,6 +52,7 @@
     "karma-spec-reporter": "^0.0.36",
     "karma-vite": "^1.0.4",
     "lint-staged": "^14.0.1",
+    "magic-string": "^0.30.5",
     "meow": "^12.1.1",
     "micromatch": "^4.0.5",
     "mocha": "^10.2.0",
