@@ -3,7 +3,8 @@ import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,
   AutoGridDateTimeRenderer,
-  AutoGridNumberRenderer,
+  AutoGridDecimalRenderer,
+  AutoGridIntegerRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
 import {
@@ -23,12 +24,19 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
     case 'integer':
+      return {
+        autoWidth: true,
+        textAlign: 'end',
+        flexGrow: 0,
+        renderer: AutoGridIntegerRenderer,
+        headerRenderer: NumberHeaderFilter,
+      };
     case 'decimal':
       return {
         autoWidth: true,
         textAlign: 'end',
         flexGrow: 0,
-        renderer: AutoGridNumberRenderer,
+        renderer: AutoGridDecimalRenderer,
         headerRenderer: NumberHeaderFilter,
       };
     case 'boolean':

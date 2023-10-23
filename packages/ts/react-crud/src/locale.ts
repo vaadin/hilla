@@ -28,7 +28,8 @@ export class LocaleFormatter {
   readonly #date: Intl.DateTimeFormat;
   readonly #localTime: Intl.DateTimeFormat;
   readonly #localDateTime: Intl.DateTimeFormat;
-  readonly #number: Intl.NumberFormat;
+  readonly #integer: Intl.NumberFormat;
+  readonly #decimal: Intl.NumberFormat;
   readonly #parsePattern: RegExp;
 
   constructor(locale?: string) {
@@ -47,8 +48,13 @@ export class LocaleFormatter {
       minute: 'numeric',
     });
 
-    this.#number = new Intl.NumberFormat(locale, {
+    this.#integer = new Intl.NumberFormat(locale, {
       maximumFractionDigits: 0,
+    });
+
+    this.#decimal = new Intl.NumberFormat(locale, {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
     });
 
     this.#parsePattern = getFormatRegex(this.#date);
@@ -77,8 +83,12 @@ export class LocaleFormatter {
     return tryFormatDate(this.#localDateTime, value);
   }
 
-  formatNumber(value?: number): string {
-    return value && Number.isFinite(value) ? this.#number.format(value) : '';
+  formatInteger(value?: number): string {
+    return value && Number.isFinite(value) ? this.#integer.format(value) : '';
+  }
+
+  formatDecimal(value?: number): string {
+    return value && Number.isFinite(value) ? this.#decimal.format(value) : '';
   }
 
   parse(dateString: string): DatePickerDate | undefined {
