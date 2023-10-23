@@ -14,13 +14,13 @@ import {
   StringHeaderFilter,
   TimeHeaderFilter,
 } from './header-filter';
-import type { PropertyInfo } from './property-info';
+import { hasAnnotation, type PropertyInfo } from './property-info';
 
 export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
-  // eslint-disable-next-line default-case
+  const filterable = hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Column');
   switch (propertyInfo.type) {
     case 'number':
       return {
@@ -28,7 +28,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridNumberRenderer,
-        headerRenderer: NumberHeaderFilter,
+        headerRenderer: filterable ? NumberHeaderFilter : NoHeaderFilter,
       };
     case 'boolean':
       return {
@@ -36,7 +36,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridBooleanRenderer,
-        headerRenderer: BooleanHeaderFilter,
+        headerRenderer: filterable ? BooleanHeaderFilter : NoHeaderFilter,
       };
     case 'date':
       return {
@@ -44,7 +44,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateRenderer,
-        headerRenderer: DateHeaderFilter,
+        headerRenderer: filterable ? DateHeaderFilter : NoHeaderFilter,
       };
     case 'time':
       return {
@@ -52,7 +52,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridTimeRenderer,
-        headerRenderer: TimeHeaderFilter,
+        headerRenderer: filterable ? TimeHeaderFilter : NoHeaderFilter,
       };
     case 'datetime':
       return {
@@ -60,14 +60,14 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: DateHeaderFilter,
+        headerRenderer: filterable ? DateHeaderFilter : NoHeaderFilter,
       };
     case 'string':
       return {
         autoWidth: true,
-        headerRenderer: StringHeaderFilter,
+        headerRenderer: filterable ? StringHeaderFilter : NoHeaderFilter,
       };
-    case undefined:
+    default:
       return {
         autoWidth: true,
         headerRenderer: NoHeaderFilter,

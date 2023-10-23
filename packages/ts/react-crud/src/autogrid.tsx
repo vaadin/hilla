@@ -16,7 +16,7 @@ import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getIdProperty, getProperties, hasAnnotation, includeProperty, type PropertyInfo } from './property-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type Filter from './types/dev/hilla/crud/filter/Filter.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
@@ -161,8 +161,11 @@ function useColumns(
     .map((name) => properties.find((prop) => prop.name === name))
     .filter(Boolean) as PropertyInfo[];
 
+  const sortableProperties = effectiveProperties.filter((propertyInfo) =>
+    hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Column'),
+  );
   const [sortState, setSortState] = useState<SortState>(
-    effectiveProperties.length > 0 ? { [effectiveProperties[0].name]: { direction: 'asc' } } : {},
+    sortableProperties.length > 0 ? { [sortableProperties[0].name]: { direction: 'asc' } } : {},
   );
 
   let columns = effectiveProperties.map((propertyInfo) => {
