@@ -41,7 +41,8 @@ export interface NestedTestValues {
 export interface ColumnRendererTestValues extends HasIdVersion {
   id: number;
   string: string;
-  number: number;
+  integer: number;
+  decimal: number;
   boolean: boolean;
   date?: string;
   localDate?: string;
@@ -136,7 +137,10 @@ export class NestedTestModel<T extends NestedTestValues = NestedTestValues> exte
   }
 
   get number(): NumberModel {
-    return this[_getPropertyModel]('number', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel](
+      'number',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
   }
 
   get boolean(): BooleanModel {
@@ -168,8 +172,18 @@ export class ColumnRendererTestModel<
     return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get number(): NumberModel {
-    return this[_getPropertyModel]('number', (parent, key) => new NumberModel(parent, key, false));
+  get integer(): NumberModel {
+    return this[_getPropertyModel](
+      'integer',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+
+  get decimal(): NumberModel {
+    return this[_getPropertyModel](
+      'decimal',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'float' } }),
+    );
   }
 
   get boolean(): BooleanModel {
@@ -325,7 +339,8 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     id: 1,
     version: 1,
     string: 'Hello World 1',
-    number: 123456,
+    integer: 123456,
+    decimal: 123.456,
     boolean: true,
     date: '2021-05-13T00:00:00',
     localDate: '2021-05-13',
@@ -342,7 +357,8 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     id: 2,
     version: 1,
     string: 'Hello World 2',
-    number: -12,
+    integer: -12,
+    decimal: -0.12,
     boolean: false,
     date: '2021-05-14T00:00:00',
     localDate: '2021-05-14',
@@ -353,14 +369,16 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     id: 3,
     version: 1,
     string: 'Hello World 3',
-    number: -12,
+    integer: 123456,
+    decimal: 123.4,
     boolean: false,
   },
   {
     id: 4,
     version: 1,
     string: 'Hello World 4',
-    number: -12,
+    integer: -12,
+    decimal: -12,
     boolean: false,
     date: 'foo',
     localDate: 'foo',
