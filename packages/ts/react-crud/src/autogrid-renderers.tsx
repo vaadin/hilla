@@ -21,10 +21,16 @@ function getColumnValue<TItem>(context: ColumnContext, item: TItem): any {
 
 const fontVariantStyle: CSSProperties = { fontVariantNumeric: 'tabular-nums' };
 
-export function AutoGridNumberRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
+export function AutoGridIntegerRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
   const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
-  return <span style={fontVariantStyle}>{formatter.formatNumber(getColumnValue(context, item))}</span>;
+  return <span style={fontVariantStyle}>{formatter.formatInteger(getColumnValue(context, item))}</span>;
+}
+
+export function AutoGridDecimalRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
+  const formatter = useLocaleFormatter();
+  const context = useContext(ColumnContext)!;
+  return <span style={fontVariantStyle}>{formatter.formatDecimal(getColumnValue(context, item))}</span>;
 }
 
 export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
