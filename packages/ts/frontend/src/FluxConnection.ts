@@ -43,7 +43,7 @@ export class FluxConnection extends EventTarget {
         `Push support in Hilla is not enabled. Enable it in the debug window or by adding com.vaadin.experimental.hillaPush=true to vaadin-featureflags.properties`,
       );
     }
-    this.connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/, ''));
+    this.connectWebsocket(connectPrefix.replace(/connect$/, ''));
   }
 
   private connectWebsocket(prefix: string) {
@@ -78,8 +78,10 @@ export class FluxConnection extends EventTarget {
         console.error('error in push communication', response);
       },
     };
+    const pushUrl = 'HILLA/push';
+    const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : prefix + '/') + pushUrl;
     this.socket = atmosphere.subscribe!({
-      url: `${prefix}/HILLA/push`,
+      url: url,
       transport: 'websocket',
       fallbackTransport: 'long-polling',
       contentType: 'application/json; charset=UTF-8',
