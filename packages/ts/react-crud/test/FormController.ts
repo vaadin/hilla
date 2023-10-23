@@ -1,7 +1,12 @@
 import type { RenderResult } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
-import TextFieldController from './TextFieldController.js';
+import { FormFieldController } from './FormFieldController.js';
+
+export type FormElement = HTMLElement & {
+  value: unknown;
+  disabled: boolean;
+};
 
 export default class FormController {
   readonly instance: HTMLElement;
@@ -21,22 +26,20 @@ export default class FormController {
     this.#user = user;
   }
 
-  async getField(label: string): Promise<TextFieldController> {
-    return TextFieldController.initByLabel(await this.#result.findByLabelText(label), this.#user);
+  getFieldController(): FormFieldController {
+    return new FormFieldController(this.#result, this.#user);
   }
 
-  async getFields(...labels: readonly string[]): Promise<readonly TextFieldController[]> {
-    return await Promise.all(labels.map(async (label) => await this.getField(label)));
+  async getField(testId: string): Promise<FormElement> {
+    return (await this.#result.findByTestId(testId)) as FormElement;
   }
 
-  async findButton(label: string): Promise<HTMLButtonElement> {
-    return (await this.#result.findByText(label)) as HTMLButtonElement;
+  async getFields(...testIds: readonly string[]): Promise<readonly FormElement[]> {
+    return await Promise.all(testIds.map(async (testId) => await this.getField(testId)));
   }
 
-  async typeInField(label: string, value: string): Promise<void> {
-    const field = await this.#result.findByLabelText(label);
-    await this.#user.dblClick(field);
-    await this.#user.keyboard(value);
+  async findButton(text: string): Promise<HTMLButtonElement> {
+    return (await this.#result.findByText(text)) as HTMLButtonElement;
   }
 
   async submit(): Promise<void> {
@@ -49,13 +52,13 @@ export default class FormController {
     await this.#user.click(btn);
   }
 
-  async getValues(labels: readonly string[]): Promise<readonly unknown[]> {
+  async getValues(...labels: readonly string[]): Promise<readonly unknown[]> {
     return await Promise.all(labels.map(async (label) => await this.getField(label))).then((fields) =>
       fields.map((field) => field.value),
     );
   }
 
-  async areEnabled(labels: readonly string[]): Promise<boolean> {
+  async areEnabled(...labels: readonly string[]): Promise<boolean> {
     return await Promise.all(labels.map(async (label) => await this.getField(label))).then((fields) =>
       fields.every((field) => !field.disabled),
     );

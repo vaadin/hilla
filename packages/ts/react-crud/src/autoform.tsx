@@ -3,8 +3,8 @@ import { Button } from '@hilla/react-components/Button.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm } from '@hilla/react-form';
-import { type JSX, useEffect, useState } from 'react';
-import { AutoFormField } from './autoform-field.js';
+import { type ComponentType, type JSX, useEffect, useState } from 'react';
+import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty } from './property-info.js';
 
@@ -17,14 +17,24 @@ type SubmitEvent<TItem> = {
   item: TItem;
 };
 
+export type AutoFormFieldRendererProps = AutoFormFieldProps &
+  Readonly<{
+    field: ComponentType<AutoFormFieldProps>;
+  }>;
+
 export type AutoFormProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   item?: TItem | typeof emptyItem;
   disabled?: boolean;
+  fieldRenderer?: ComponentType<AutoFormFieldRendererProps>;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
+
+function IdentityRenderer({ field: Field, ...props }: AutoFormFieldRendererProps) {
+  return <Field {...props} />;
+}
 
 export function ExperimentalAutoForm<TItem>({
   service,
@@ -33,6 +43,7 @@ export function ExperimentalAutoForm<TItem>({
   onSubmitError,
   afterSubmit,
   disabled,
+  fieldRenderer: FieldRenderer,
 }: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -76,9 +87,19 @@ export function ExperimentalAutoForm<TItem>({
     <VerticalLayout theme="padding">
       {getProperties(model)
         .filter(includeProperty)
-        .map((propertyInfo) => (
-          <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-        ))}
+        .map((propertyInfo) =>
+          FieldRenderer ? (
+            <FieldRenderer
+              field={AutoFormField}
+              key={propertyInfo.name}
+              propertyInfo={propertyInfo}
+              form={form}
+              disabled={disabled}
+            />
+          ) : (
+            <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+          ),
+        )}
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       <HorizontalLayout theme="spacing" style={{ marginTop: 'var(--lumo-space-m)', alignSelf: 'flex-end' }}>
         {form.dirty ? (

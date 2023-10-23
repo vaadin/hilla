@@ -1,70 +1,102 @@
 import { type EnumModel, _enum } from '@hilla/form';
-import { Checkbox } from '@hilla/react-components/Checkbox.js';
-import { DatePicker } from '@hilla/react-components/DatePicker.js';
-import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
-import { IntegerField } from '@hilla/react-components/IntegerField.js';
-import { NumberField } from '@hilla/react-components/NumberField.js';
-import { Select } from '@hilla/react-components/Select.js';
-import { TextField } from '@hilla/react-components/TextField.js';
-import { TimePicker } from '@hilla/react-components/TimePicker.js';
+import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
+import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
+import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
+import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
+import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
+import { Select, type SelectProps } from '@hilla/react-components/Select.js';
+import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
+import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
 import type { PropertyInfo } from './property-info.js';
 
-interface AutoFormFieldProps {
+export type SharedFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
   form: UseFormResult<any>;
-  disabled?: boolean;
-}
+}>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return form.model[propertyInfo.name];
 }
 
-function AutoFormTextField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;
+
+function AutoFormTextField({ propertyInfo, form, ...other }: AutoFormTextFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <TextField disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the typing issue
+  return <TextField {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormIntegerField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormIntegerFieldProps = IntegerFieldProps & SharedFieldProps;
+
+function AutoFormIntegerField({ propertyInfo, form, ...other }: AutoFormIntegerFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <IntegerField disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <IntegerField {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormDecimalField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormNumberFieldProps = NumberFieldProps & SharedFieldProps;
+
+function AutoFormDecimalField({ propertyInfo, form, ...other }: AutoFormNumberFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <NumberField disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <NumberField {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormDateField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
+
+function AutoFormDateField({ propertyInfo, form, ...other }: AutoFormDateFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <DatePicker disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <DatePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormTimeField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
+
+function AutoFormTimeField({ propertyInfo, form, ...other }: AutoFormTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <TimePicker disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <TimePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormDateTimeField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
+
+function AutoFormDateTimeField({ propertyInfo, form, ...other }: AutoFormDateTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <DateTimePicker disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <DateTimePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-function AutoFormEnumField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
+
+function AutoFormEnumField({ propertyInfo, form, ...other }: AutoFormEnumFieldProps) {
   const model = getPropertyModel(form, propertyInfo) as EnumModel;
   const options = Object.keys(model[_enum]).map((value) => ({
     label: value,
     value,
   }));
-  return <Select disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} items={options} />;
+  return <Select {...other} {...form.field(model)} label={propertyInfo.humanReadableName} items={options} />;
 }
 
-function AutoFormBooleanField({ propertyInfo, form, disabled }: AutoFormFieldProps) {
+type AutoFormBooleanFieldProps = CheckboxProps & SharedFieldProps;
+
+function AutoFormBooleanField({ propertyInfo, form, ...other }: AutoFormBooleanFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  return <Checkbox disabled={disabled} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <Checkbox {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
+
+export type AutoFormFieldProps = CheckboxProps &
+  DatePickerProps &
+  DateTimePickerProps &
+  IntegerFieldProps &
+  NumberFieldProps &
+  SelectProps &
+  SharedFieldProps &
+  TextFieldProps &
+  TimePickerProps;
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   switch (props.propertyInfo.type) {
