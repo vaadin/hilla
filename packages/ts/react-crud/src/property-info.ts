@@ -65,7 +65,7 @@ export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): 
 
   for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
     // the choice of putting parent properties at the beginning is deliberate, `push` could be used instead
-    propertyIds.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)));
+    propertyIds.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)).filter((p) => p !== 'new'));
   }
 
   return propertyIds;
