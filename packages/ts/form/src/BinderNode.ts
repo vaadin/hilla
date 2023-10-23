@@ -387,7 +387,7 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
   }
 
   private *getChildBinderNodes(): Generator<BinderNode<unknown, AbstractModel<unknown>>> {
-    if (this.value === undefined) {
+    if (this.value === undefined || this.defaultValue === undefined) {
       // Undefined value cannot have child properties and items.
       return;
     }
@@ -400,12 +400,10 @@ export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
       // non-optional fields plus those optional fields whose values were set
       // from initial `binder.read()` or `binder.clear()` or by using a
       // binder node (e.g., form binding) for a nested field.
-      if (this.defaultValue) {
-        for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
-          const childModel = getter.call(this.model);
-          if (childModel instanceof AbstractModel && childModel[_key] in (this.defaultValue as Record<never, never>)) {
-            yield getBinderNode(childModel);
-          }
+      for (const [, getter] of ObjectModel.getOwnAndParentGetters(this.model)) {
+        const childModel = getter.call(this.model);
+        if (childModel instanceof AbstractModel && childModel[_key] in (this.defaultValue as Record<never, never>)) {
+          yield getBinderNode(childModel);
         }
       }
     } else if (this.model instanceof ArrayModel) {

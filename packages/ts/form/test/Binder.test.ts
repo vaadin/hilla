@@ -432,11 +432,22 @@ describe('@hilla/form', () => {
 
       it('should render arrays after initialization', async () => {
         const { binder } = litHierarchyView;
+        await litHierarchyView.updateComplete;
         binder.for(binder.model.anotherLevel2).appendItem();
+        await litHierarchyView.updateComplete;
         const anotherLevel3Nodes = [...binder.model.anotherLevel2];
         assert.lengthOf(anotherLevel3Nodes, 1);
         assert.equal(anotherLevel3Nodes[0].name, 'anotherLevel2.0');
         assert.isFalse(anotherLevel3Nodes[0].required);
+      });
+
+      it('should clear with optional array', async () => {
+        const { binder } = litHierarchyView;
+        await litHierarchyView.updateComplete;
+        binder.for(binder.model.level2).appendItem();
+        await litHierarchyView.updateComplete;
+        binder.clear();
+        assert.isUndefined(binder.value.level2);
       });
     });
   });
