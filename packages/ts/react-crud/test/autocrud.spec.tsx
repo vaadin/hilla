@@ -96,10 +96,10 @@ describe('@hilla/react-crud', () => {
     });
 
     it('can add a new item', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const { grid, form } = await CrudController.init(result, user);
-      const newButton = await result.findByText('+ New');
+      const { grid, form, newButton } = await CrudController.init(
+        render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />),
+        user,
+      );
       await user.click(newButton);
       const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
         'First name',
@@ -123,10 +123,10 @@ describe('@hilla/react-crud', () => {
     });
 
     it('can update added item', async () => {
-      const service = personService();
-      const result = render(<ExperimentalAutoCrud service={service} model={PersonModel} />);
-      const { grid, form } = await CrudController.init(result, user);
-      const newButton = await result.findByText('+ New');
+      const { grid, form, newButton } = await CrudController.init(
+        render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />),
+        user,
+      );
       await user.click(newButton);
 
       const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
@@ -147,6 +147,22 @@ describe('@hilla/react-crud', () => {
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
       expect(grid.getVisibleRowCount()).to.equal(3);
+    });
+
+    it('updates grid and form when creating a new item after selecting an existing item', async () => {
+      const { grid, form, newButton } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(0);
+      expect((await form.getField('First name')).value).to.equal('Jane');
+      expect((await form.getField('Last name')).value).to.equal('Love');
+
+      await user.click(newButton);
+
+      // form should be cleared
+      expect((await form.getField('First name')).value).to.equal('');
+      expect((await form.getField('Last name')).value).to.equal('');
+
+      // grid selection should reset
+      expect(grid.isSelected(0)).to.be.false;
     });
 
     it('deletes and refreshes grid after confirming', async () => {
