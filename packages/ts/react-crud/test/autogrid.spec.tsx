@@ -541,6 +541,8 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(0, 2)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, 2)).to.have.rendered.text('123.46');
         expect(grid.getBodyCellContent(1, 2)).to.have.rendered.text('-0.12');
+        expect(grid.getBodyCellContent(2, 2)).to.have.rendered.text('123.40');
+        expect(grid.getBodyCellContent(3, 2)).to.have.rendered.text('-12.00');
       });
 
       it('renders booleans as icons', () => {
