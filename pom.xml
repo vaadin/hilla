@@ -77,12 +77,12 @@
     <swagger.core.version>2.2.16</swagger.core.version>
     <swagger.models.version>2.2.16</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson.version>2.15.2</jackson.version>
+    <jackson.version>2.15.3</jackson.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.2.0.rc2</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <spring.boot.version>3.1.4</spring.boot.version>
+    <spring.boot.version>3.1.5</spring.boot.version>
     <testbench.version>9.1.0.rc2</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
