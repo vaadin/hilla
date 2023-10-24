@@ -290,9 +290,9 @@ jobs:
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
       - name: Test gradle-plugin's functional tests
-        run: ./packages/java/gradle-plugin/gradlew -p packages/java/gradle-plugin functionalTest
+        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
-        run: ./packages/java/tests/gradle/single-module-tests/gradlew -p packages/java/tests/gradle/single-module-tests test
+        run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v3
         if: ${{ failure() || success() }}
         with:

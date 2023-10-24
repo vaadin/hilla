@@ -1,21 +1,21 @@
 package dev.hilla.gradle.plugin.test;
 
 
-import dev.hilla.engine.commandrunner.GradleRunner;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.io.FileUtils;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import dev.hilla.engine.commandrunner.GradleRunner;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 
 /**
  * These tests are semantically unit tests, but since a production build
@@ -32,7 +32,6 @@ public class ProductionBuildFunctionalIT {
      * so it is more efficient to check everything in one run.
      */
     @Test
-    @Disabled("Fails in CI on Windows")
     public void validateProductionBuildOutput() throws IOException {
         afterProductionBuild_openApiJson_hasCorrectEndpoints();
         afterProductionBuild_endpointsTs_hasCorrectEndpoints();
@@ -67,7 +66,7 @@ public class ProductionBuildFunctionalIT {
         } catch (IOException e) {
             fail(e);
         }
-        runGradleCommand("-Philla.productionMode=true build");
+        runGradleCommand("--info -Philla.productionMode=true build");
     }
 
     private void runGradleCommand(String executable) {
