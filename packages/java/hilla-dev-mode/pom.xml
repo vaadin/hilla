@@ -11,12 +11,10 @@
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dev.hilla</groupId>
-    <artifactId>hilla-dev</artifactId>
+    <artifactId>hilla-dev-mode</artifactId>
     <packaging>jar</packaging>
-    <name>Hilla Platform Development Dependencies</name>
-    <description>Hilla Platform Development Dependencies</description>
-    <version>2.4-SNAPSHOT</version>
+    <name>Hilla development mode</name>
+    <description>Hilla features that are only available during development</description>
     <url>https://hilla.dev</url>
 
     <properties>
@@ -25,32 +23,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev-server</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla-dev-mode</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.hotswapagent</groupId>
+            <artifactId>hotswap-agent</artifactId>
+            <version>1.4.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <plugin>
-                <groupId>io.reformanda.semper</groupId>
-                <artifactId>dependencyversion-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <executions>
-                    <execution>
-                        <id>set-all</id>
-                        <goals>
-                            <goal>set-version</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -65,6 +45,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>
