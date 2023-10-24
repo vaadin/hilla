@@ -20,6 +20,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NX_SKIP_NX_CACHE: true
 
     steps:
       - name: Check Secrets
