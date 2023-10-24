@@ -32,6 +32,8 @@ jobs:
     name: Build Java and npm for other tasks
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      NX_SKIP_NX_CACHE: true
 
     steps:
       - uses: actions-cool/check-user-permission@main
@@ -57,7 +59,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build TypeScript
-        run: npm run build:nocache
+        run: npm run build
       - name: Build Java
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Save Workspace
