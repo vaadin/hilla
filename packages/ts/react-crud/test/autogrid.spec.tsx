@@ -531,26 +531,26 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Hello World 2');
       });
 
-      it('renders numbers as right aligned numbers', () => {
+      it('renders integers as right aligned numbers', () => {
         expect(grid.getBodyCellContent(0, 1)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('123,456');
         expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('-12');
       });
 
+      it('renders decimals as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 2)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 2)).to.have.rendered.text('123.46');
+        expect(grid.getBodyCellContent(1, 2)).to.have.rendered.text('-0.12');
+        expect(grid.getBodyCellContent(2, 2)).to.have.rendered.text('123.40');
+        expect(grid.getBodyCellContent(3, 2)).to.have.rendered.text('-12.00');
+      });
+
       it('renders booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 2).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 2).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+        expect(grid.getBodyCellContent(0, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
       it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 3)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 3)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 3)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, 3)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 3)).to.have.text('');
-      });
-
-      it('renders java.time.LocalDate as right aligned', () => {
         expect(grid.getBodyCellContent(0, 4)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, 4)).to.have.text('5/13/2021');
         expect(grid.getBodyCellContent(1, 4)).to.have.text('5/14/2021');
@@ -558,43 +558,51 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(3, 4)).to.have.text('');
       });
 
-      it('renders java.time.LocalTime as right aligned', () => {
+      it('renders java.time.LocalDate as right aligned', () => {
         expect(grid.getBodyCellContent(0, 5)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 5)).to.have.text('8:45 AM');
-        expect(grid.getBodyCellContent(1, 5)).to.have.text('8:45 PM');
+        expect(grid.getBodyCellContent(0, 5)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 5)).to.have.text('5/14/2021');
         expect(grid.getBodyCellContent(2, 5)).to.have.text('');
         expect(grid.getBodyCellContent(3, 5)).to.have.text('');
       });
 
-      it('renders java.time.LocalDateTime as right aligned', () => {
+      it('renders java.time.LocalTime as right aligned', () => {
         expect(grid.getBodyCellContent(0, 6)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 6)).to.have.text('5/13/2021, 8:45 AM');
-        expect(grid.getBodyCellContent(1, 6)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(0, 6)).to.have.text('8:45 AM');
+        expect(grid.getBodyCellContent(1, 6)).to.have.text('8:45 PM');
         expect(grid.getBodyCellContent(2, 6)).to.have.text('');
         expect(grid.getBodyCellContent(3, 6)).to.have.text('');
       });
 
-      it('renders nested strings without formatting and with default alignment', () => {
-        expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 7)).to.have.rendered.text('Nested string 1');
-        expect(grid.getBodyCellContent(1, 7)).to.have.rendered.text('');
+      it('renders java.time.LocalDateTime as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 7)).to.have.text('5/13/2021, 8:45 AM');
+        expect(grid.getBodyCellContent(1, 7)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(2, 7)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 7)).to.have.text('');
       });
 
-      it('renders nested numbers as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 8)).to.have.rendered.text('123,456');
+      it('renders nested strings without formatting and with default alignment', () => {
+        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, 8)).to.have.rendered.text('Nested string 1');
         expect(grid.getBodyCellContent(1, 8)).to.have.rendered.text('');
       });
 
+      it('renders nested numbers as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, 9)).to.have.rendered.text('');
+      });
+
       it('renders nested booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 9).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 9).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+        expect(grid.getBodyCellContent(0, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
       it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 10)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 10)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 10)).to.have.text('');
+        expect(grid.getBodyCellContent(0, 11)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 11)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 11)).to.have.text('');
       });
     });
   });
