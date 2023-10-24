@@ -1,6 +1,7 @@
 package dev.hilla;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.slf4j.LoggerFactory;
  * classes are updated.
  */
 public class Hotswapper {
+
+    private static boolean inUse;
 
     private static Logger getLogger() {
         return LoggerFactory.getLogger(Hotswapper.class);
@@ -34,6 +37,12 @@ public class Hotswapper {
                 return;
             }
             if (affectsEndpoints(changedClasses)) {
+                if (getLogger().isDebugEnabled()) {
+                    String changed = List.of(changedClasses).toString();
+                    String operation = redefined ? "updated" : "added";
+                    getLogger().debug("Regenerating endpoints because "
+                            + changed + " were " + operation);
+                }
                 EndpointCodeGenerator.getInstance().update();
             }
         } catch (IOException e) {
@@ -72,6 +81,9 @@ public class Hotswapper {
                 || changedClass.startsWith("org.apache.tomcat.")
                 || changedClass.startsWith("org.hotswap.")
                 || changedClass.startsWith("jakarta.")
+                || changedClass.startsWith("io.gprc.")
+                || changedClass.startsWith("io.netty.")
+                || changedClass.startsWith("com.google.gson.")
                 || changedClass.startsWith("nonapi.io.github.classgraph.")
                 || changedClass.startsWith("jdk.") || changedClass.equals(
                         "com.vaadin.base.devserver.viteproxy.ViteWebsocketProxy");
@@ -117,5 +129,13 @@ public class Hotswapper {
             }
         }
         return false;
+    }
+
+    public static void markInUse() {
+        Hotswapper.inUse = true;
+    }
+
+    public static boolean isInUse() {
+        return inUse;
     }
 }

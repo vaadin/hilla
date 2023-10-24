@@ -17,6 +17,7 @@
 package dev.hilla.internal.hotswap;
 
 import dev.hilla.EndpointCodeGenerator;
+import dev.hilla.Hotswapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +44,7 @@ public class HotSwapConfiguration {
             @Autowired EndpointHotSwapService endpointHotSwapService,
             @Autowired HotSwapConfigurationProperties configurationProperties) {
         return new HotSwapServiceInitializer(endpointHotSwapService,
-                configurationProperties.isEnabled());
+                configurationProperties.isEnabled() && !Hotswapper.isInUse());
     }
 
     @Bean

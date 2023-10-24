@@ -17,6 +17,7 @@ public class Person extends AbstractEntity {
     private String firstName, lastName;
     private Gender gender;
     private int luckyNumber;
+    private float averageGrade;
     private boolean emailVerified;
     private Date joinedDate;
     private LocalDate birthDate;
@@ -53,6 +54,14 @@ public class Person extends AbstractEntity {
 
     public void setLuckyNumber(int luckyNumber) {
         this.luckyNumber = luckyNumber;
+    }
+
+    public float getAverageGrade() {
+        return averageGrade;
+    }
+
+    public void setAverageGrade(float averageGrade) {
+        this.averageGrade = averageGrade;
     }
 
     public boolean isEmailVerified() {
