@@ -1,6 +1,7 @@
 package dev.hilla;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -36,9 +37,12 @@ public class Hotswapper {
                 return;
             }
             if (affectsEndpoints(changedClasses)) {
-                getLogger().debug(
-                        "Regenerating endpoints because " + changedClasses[0]
-                                + " was " + (redefined ? "updated" : "added"));
+                if (getLogger().isDebugEnabled()) {
+                    String changed = List.of(changedClasses).toString();
+                    String operation = redefined ? "updated" : "added";
+                    getLogger().debug("Regenerating endpoints because "
+                            + changed + " were " + operation);
+                }
                 EndpointCodeGenerator.getInstance().update();
             }
         } catch (IOException e) {
