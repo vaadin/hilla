@@ -82,7 +82,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          'appointmentTime',
+          // 'appointmentTime',
         );
       });
 
@@ -99,7 +99,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          'appointmentTime',
+          // 'appointmentTime',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -271,7 +271,7 @@ describe('@hilla/react-crud', () => {
 
         it('created for number columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
-          const cell = grid.getHeaderCellContent(1, 3);
+          const cell = grid.getHeaderCellContent(1, 4);
           expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
         });
 
@@ -297,7 +297,7 @@ describe('@hilla/react-crud', () => {
         it('filter when you type in the field for a number column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const someNumberFilter = grid.getHeaderCellContent(1, 3);
+          const someNumberFilter = grid.getHeaderCellContent(1, 4);
           const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
             TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
             SelectController.init(someNumberFilter, user),
@@ -329,7 +329,7 @@ describe('@hilla/react-crud', () => {
         it('filters for a boolean column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const controller = await SelectController.init(grid.getHeaderCellContent(1, 5), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 6), user);
           await controller.select('True');
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -500,7 +500,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          'appointmentTime',
+          // 'appointmentTime',
           '',
         );
         expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
@@ -523,7 +523,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          'appointmentTime',
+          // 'appointmentTime',
         );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
@@ -559,7 +559,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          'appointmentTime',
+          // 'appointmentTime',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });

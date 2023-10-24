@@ -32,10 +32,6 @@ export type AutoFormProps<TItem> = Readonly<{
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
 }>;
 
-function IdentityRenderer({ field: Field, ...props }: AutoFormFieldRendererProps) {
-  return <Field {...props} />;
-}
-
 export function ExperimentalAutoForm<TItem>({
   service,
   model,

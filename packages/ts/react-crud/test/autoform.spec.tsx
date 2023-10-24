@@ -45,7 +45,6 @@ describe('@hilla/react-crud', () => {
       'vip',
       'birthDate',
       'shiftStart',
-      'appointmentTime',
     ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
@@ -57,8 +56,8 @@ describe('@hilla/react-crud', () => {
       id: -1,
       version: -1,
       vip: false,
-      birthDate: '1999-12-31',
-      shiftStart: '08:30',
+      birthDate: '',
+      shiftStart: '',
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -102,7 +101,7 @@ describe('@hilla/react-crud', () => {
 
       await expect(form.getValues(...TEST_IDS)).to.eventually.be.deep.equal(getExpectedValues(person));
 
-      const fields = await form.getFields(...TEST_IDS);
+      const fields = await form.getFieldsByTestIds(...TEST_IDS);
       const tagNames = fields.map((field) => field.localName);
       expect(tagNames).to.eql([
         'vaadin-text-field',
