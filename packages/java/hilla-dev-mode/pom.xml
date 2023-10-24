@@ -23,6 +23,20 @@
 
     <dependencies>
         <dependency>
+            <groupId>dev.hilla</groupId>
+            <artifactId>endpoint</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.hotswapagent</groupId>
             <artifactId>hotswap-agent</artifactId>
             <version>1.4.1</version>
@@ -60,6 +74,10 @@
                     <failOnError>false</failOnError>
                     <quiet>true</quiet>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>dev.hilla</groupId>
+                <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
