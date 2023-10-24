@@ -39,7 +39,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
     private final String buildDirectoryName;
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final File outputDirectory;
+    protected final File outputDirectory;
     private final File projectDirectory;
     private EngineConfiguration engineConfiguration;
 
