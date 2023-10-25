@@ -69,7 +69,6 @@
     <swagger.models.version>2.2.11</swagger.models.version>
     <swagger.parser.v3.version>2.1.12</swagger.parser.v3.version>
     <jackson.version>2.15.3</jackson.version>
-    <jackson.databind.version>2.15.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.1-SNAPSHOT</flow.version>
