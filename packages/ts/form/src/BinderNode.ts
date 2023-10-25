@@ -420,12 +420,12 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   }
 
   *#getChildBinderNodes(): Generator<BinderNode, void, void> {
-    if (this.value === undefined) {
+    if (this.value === undefined || this.defaultValue === undefined) {
       // Undefined value cannot have child properties and items.
       return;
     }
 
-    if (this.#isObject() && this.defaultValue !== undefined) {
+    if (this.#isObject()) {
       for (const [, getter] of getObjectModelOwnAndParentGetters(this.model)) {
         const childModel = getter.call(this.model);
         // We need to skip all non-initialised optional fields here in order
