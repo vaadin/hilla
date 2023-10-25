@@ -1,15 +1,18 @@
 import { GridSorter } from '@hilla/react-components/GridSorter.js';
 import { useContext, type ReactElement } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
-import { hasAnnotation } from './property-info.js';
 
-export function HeaderSorter(): ReactElement | undefined {
+type HeaderSorterProps = {
+  canSort: boolean;
+};
+
+export function HeaderSorter({ canSort }: HeaderSorterProps): ReactElement | undefined {
   const context = useContext(ColumnContext)!;
   const sorterState = context.sortState[context.propertyInfo.name];
   const direction = sorterState?.direction ?? null;
   const headerLabel = context.customColumnOptions?.header ?? context.propertyInfo.humanReadableName;
 
-  return hasAnnotation(context.propertyInfo.meta, 'jakarta.persistence.Column') ? (
+  return canSort ? (
     <GridSorter
       path={context.propertyInfo.name}
       direction={direction}

@@ -44,6 +44,7 @@ export interface PropertyInfo {
   humanReadableName: string;
   type: PropertyType;
   meta: ModelMetadata;
+  searchable: boolean;
 }
 
 export function hasAnnotation(meta: ModelMetadata, annotationName: string): boolean {
@@ -71,7 +72,10 @@ export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): 
   return propertyIds;
 };
 
-export const getProperties = (model: DetachedModelConstructor<AbstractModel>): PropertyInfo[] => {
+export const getProperties = (
+  model: DetachedModelConstructor<AbstractModel>,
+  searchables: string[],
+): PropertyInfo[] => {
   const propertyIds = getPropertyIds(model);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const modelInstance: any = createDetachedModel(model);

@@ -36,7 +36,7 @@ public final class ModelPlugin extends AbstractPlugin<PluginConfiguration> {
 
     // Include-list of annotations that should be added to the schema
     private static final Set<String> INCLUDED_ANNOTATIONS = Set.of(
-            "jakarta.persistence.Id", "jakarta.persistence.Version", "jakarta.persistence.Column",
+            "jakarta.persistence.Id", "jakarta.persistence.Version",
             "jakarta.persistence.OneToOne", "jakarta.persistence.ManyToOne",
             "jakarta.persistence.OneToMany", "jakarta.persistence.ManyToMany");
 

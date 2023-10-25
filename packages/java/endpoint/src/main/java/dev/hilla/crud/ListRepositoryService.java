@@ -1,6 +1,8 @@
 package dev.hilla.crud;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -23,6 +25,9 @@ import org.springframework.data.repository.CrudRepository;
 @EndpointExposed
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Autowired
     private JpaFilterConverter jpaFilterConverter;
@@ -57,6 +62,13 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
         if (repository == null) {
             repository = resolveRepository();
         }
+    }
+
+    public List<String> getSingularAttributes() {
+        var metamodel = entityManager.getMetamodel();
+        var entity = metamodel.entity(entityClass);
+        return entity.getSingularAttributes().stream().map(a -> a.getName())
+                .toList();
     }
 
     /**
