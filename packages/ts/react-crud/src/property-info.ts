@@ -79,6 +79,8 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
     propertyIds
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       .map((name) => [name, modelInstance[name]])
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      .filter(([, m]) => m?.[_meta])
       .flatMap(([name, m]) => {
         const propertyModel = m as AbstractModel;
         const meta = propertyModel[_meta];
