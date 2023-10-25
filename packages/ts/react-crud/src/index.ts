@@ -1,3 +1,6 @@
+// eslint-disable-next-line import/no-unassigned-import
+import './styles.css';
+
 export * from './autogrid.js';
 export type * from './crud.js';
 export * from './autoform.js';
