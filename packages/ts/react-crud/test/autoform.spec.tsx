@@ -61,7 +61,7 @@ describe('@hilla/react-crud', function () {
       };
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel} item={person}/>),
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} item={person} />),
         user,
       );
 
@@ -80,7 +80,7 @@ describe('@hilla/react-crud', function () {
 
     it('works without an item', async () => {
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel}/>),
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
         user,
       );
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
@@ -91,7 +91,7 @@ describe('@hilla/react-crud', function () {
       const person = (await getItem(service, 2))!;
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}/>),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
         user,
       );
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
@@ -102,11 +102,11 @@ describe('@hilla/react-crud', function () {
       const person1 = (await getItem(service, 2))!;
       const person2 = (await getItem(service, 1))!;
 
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person1}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person1} />);
       let form = await FormController.init(result, user);
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person1));
 
-      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={person2}/>);
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={person2} />);
       form = await FormController.init(result, user);
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person2));
     });
@@ -115,11 +115,11 @@ describe('@hilla/react-crud', function () {
       const service = personService();
       const person = (await getItem(service, 2))!;
 
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       let form = await FormController.init(result, user);
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
 
-      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined}/>);
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
       form = await FormController.init(result, user);
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
@@ -129,7 +129,7 @@ describe('@hilla/react-crud', function () {
       const saveSpy = sinon.spy(service, 'save');
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined}/>),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />),
         user,
       );
       await form.typeInField('First name', 'Joe');
@@ -150,12 +150,12 @@ describe('@hilla/react-crud', function () {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}/>),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
         user,
       );
       await form.typeInField('First name', 'bar');
       await form.submit();
-      const newPerson: Person = {...person!};
+      const newPerson: Person = { ...person! };
       newPerson.firstName = 'bar';
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
@@ -165,12 +165,12 @@ describe('@hilla/react-crud', function () {
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy}/>),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />),
         user,
       );
       await form.typeInField('First name', 'baz');
       await form.submit();
-      const newPerson: Person = {...person!};
+      const newPerson: Person = { ...person! };
       newPerson.firstName = 'baz';
       await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
@@ -181,7 +181,7 @@ describe('@hilla/react-crud', function () {
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy}/>),
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />),
         user,
       );
       await form.typeInField('First name', 'bag');
@@ -199,7 +199,7 @@ describe('@hilla/react-crud', function () {
       const submitSpy = sinon.spy();
 
       const result = render(
-        <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy}/>,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
       const form = await FormController.init(result, user);
       await form.typeInField('First name', 'J'); // to enable the submit button
@@ -236,7 +236,7 @@ describe('@hilla/react-crud', function () {
 
     it('disables all fields and buttons when disabled', async () => {
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled/>),
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />),
         user,
       );
       await expect(form.areEnabled(LABELS)).to.eventually.be.false;
@@ -244,9 +244,9 @@ describe('@hilla/react-crud', function () {
 
     it('enables all fields and buttons when enabled', async () => {
       const service = personService();
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled />);
       await FormController.init(result, user);
-      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel}/>);
+      result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(result, user);
       await expect(form.areEnabled(LABELS)).to.eventually.be.true;
     });
@@ -254,7 +254,7 @@ describe('@hilla/react-crud', function () {
     describe('discard button', () => {
       it('does not show a discard button if the form is not dirty', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel}/>),
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
         );
         await expect(form.findButton('Discard')).to.eventually.be.rejected;
@@ -262,7 +262,7 @@ describe('@hilla/react-crud', function () {
 
       it('does show a discard button if the form is dirty', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel}/>),
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
         );
         await form.typeInField('First name', 'foo');
@@ -271,7 +271,7 @@ describe('@hilla/react-crud', function () {
 
       it('resets the form when clicking the discard button', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel}/>),
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
         );
         await form.typeInField('First name', 'foo');
@@ -285,7 +285,7 @@ describe('@hilla/react-crud', function () {
 
     it('when creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
@@ -294,7 +294,7 @@ describe('@hilla/react-crud', function () {
 
     it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null} />);
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
@@ -303,7 +303,7 @@ describe('@hilla/react-crud', function () {
 
     it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
@@ -313,7 +313,7 @@ describe('@hilla/react-crud', function () {
     it('when editing, submit button remains disabled before any changes', async () => {
       const service = personService();
       const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       const form = await FormController.init(result, user);
 
       const submitButton = await form.findButton('Submit');
@@ -323,7 +323,7 @@ describe('@hilla/react-crud', function () {
     it('when editing, submit button becomes disabled again when the form is reset', async () => {
       const service = personService();
       const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}/>);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       const form = await FormController.init(result, user);
       const submitButton = await form.findButton('Submit');
 
@@ -337,19 +337,7 @@ describe('@hilla/react-crud', function () {
     it('custom layout is applied when customFormLayout property is defined', async () => {
       const service = personService();
       const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person}
-                                                 // customFormLayout={{
-                                                    /*template:[
-                                                      [{property: "firstName", colSpan: 2}, { property: "lastName", colSpan: 2}, {property: "email", colSpan: 2}],
-                                                      [{property: "someInteger", colSpan: 4}, {property: "someDecimal", colSpan: 2}]
-                                                    ]*/
-                                                    /*template:[
-                                                      ["firstName", "lastName", "email"],
-                                                      ["someInteger"],
-                                                      ["someDecimal"]
-                                                    ]*/
-                                                  //}}
-                                        />);
+      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       const form = await FormController.init(result, user);
       const submitButton = await form.findButton('Submit');
 
