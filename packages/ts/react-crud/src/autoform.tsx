@@ -73,14 +73,16 @@ export function ExperimentalAutoForm<TItem>({
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
   return (
-    <VerticalLayout theme="padding">
-      {getProperties(model)
-        .filter(includeProperty)
-        .map((propertyInfo) => (
-          <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-        ))}
-      {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
-      <HorizontalLayout theme="spacing" style={{ marginTop: 'var(--lumo-space-m)', alignSelf: 'flex-end' }}>
+    <VerticalLayout className="auto-form" data-testid="auto-form">
+      <VerticalLayout className="auto-form-fields">
+        {getProperties(model)
+          .filter(includeProperty)
+          .map((propertyInfo) => (
+            <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+          ))}
+        {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
+      </VerticalLayout>
+      <HorizontalLayout className="auto-form-toolbar" theme="spacing">
         {form.dirty ? (
           <Button theme="tertiary" onClick={() => form.reset()}>
             Discard
