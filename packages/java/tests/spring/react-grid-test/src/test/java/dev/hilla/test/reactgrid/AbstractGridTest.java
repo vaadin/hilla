@@ -40,6 +40,7 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     }
 
     protected void assertRow(int row, String... expected) {
+        waitUntil(_driver -> grid.getRowCount() > 0);
         GridTRElement tr = grid.getRow(row);
         List<String> actual = grid.getVisibleColumns().stream()
                 .map(col -> tr.getCell(col).getText()).toList();
