@@ -9,7 +9,7 @@ import com.vaadin.testbench.TestBenchElement;
 
 public class ReadOnlyGridIT extends AbstractGridTest {
 
-    private static final int LUCKY_NUMBER_COLUMN = 3;
+    private static final int LUCKY_NUMBER_COLUMN = 4;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid";

@@ -20,12 +20,12 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
 
     private static final int FIRST_NAME_COLUMN = 0;
     private static final int LAST_NAME_COLUMN = 1;
-    private static final int LUCKY_NUMBER_COLUMN = 2;
-    private static final int EMAIL_VERIFIED_COLUMN = 4;
-    private static final int JOINED_DATE_COLUMN = 5;
-    private static final int BIRTH_DATE_COLUMN = 6;
-    private static final int SHIFT_START_COLUMN = 7;
-    private static final int APPOINTMENT_TIME_COLUMN = 8;
+    private static final int LUCKY_NUMBER_COLUMN = 3;
+    private static final int EMAIL_VERIFIED_COLUMN = 5;
+    private static final int JOINED_DATE_COLUMN = 6;
+    private static final int BIRTH_DATE_COLUMN = 7;
+    private static final int SHIFT_START_COLUMN = 8;
+    private static final int APPOINTMENT_TIME_COLUMN = 9;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid-with-headerfilters";
