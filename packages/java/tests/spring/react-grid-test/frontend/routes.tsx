@@ -7,6 +7,7 @@ import { ReadOnlyGrid } from './views/ReadOnlyGrid.js';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
+import AutoFormCustomLayoutView from "Frontend/views/AutoFormCustomLayoutView";
 
 export const routes = [
   {
@@ -36,6 +37,10 @@ export const routes = [
       {
         path: '/auto-form',
         element: <AutoFormView />,
+      },
+      {
+        path: '/auto-form-custom-layout',
+        element: <AutoFormCustomLayoutView />,
       },
       {
         path: '/auto-crud',

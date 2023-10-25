@@ -148,7 +148,7 @@ export function ExperimentalAutoForm<TItem>({
     const fieldsByPropertyName = new Map<string, JSX.Element>();
     getProperties(model)
       .filter(includeProperty)
-      .map((propertyInfo) => (
+      .forEach((propertyInfo) => (
         fieldsByPropertyName.set(propertyInfo.name,
           <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
         )
@@ -158,7 +158,7 @@ export function ExperimentalAutoForm<TItem>({
     if (customFormLayout.responsiveSteps == null) {
       responsiveSteps = createGenericResponsiveSteps(customFormLayout);
     } else {
-        responsiveSteps = customFormLayout.responsiveSteps;
+      responsiveSteps = customFormLayout.responsiveSteps;
     }
 
     let weightedTemplate: FieldColSpan[][];
@@ -177,9 +177,9 @@ export function ExperimentalAutoForm<TItem>({
 
     const spannedFields : JSX.Element[] = [];
     weightedTemplate.forEach((row : FieldColSpan[]) => {
-      row.forEach((fieldName : FieldColSpan) => {
-        const field = fieldsByPropertyName.get(fieldName.property)!;
-        const spannedField = React.cloneElement(field, { colspan: fieldName.colSpan });
+      row.forEach((fieldColSpan : FieldColSpan) => {
+        const field = fieldsByPropertyName.get(fieldColSpan.property)!;
+        const spannedField = React.cloneElement(field, { colspan: fieldColSpan.colSpan });
         spannedFields.push(spannedField);
       });
     });
