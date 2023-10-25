@@ -3,20 +3,21 @@ import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 import TextFieldController from './TextFieldController.js';
 
+type FormQueries = Pick<RenderResult, 'findByLabelText' | 'findByTestId' | 'findByText'>;
+
 export default class FormController {
   readonly instance: HTMLElement;
-  readonly #result: RenderResult;
+  readonly #result: FormQueries;
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
-  static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<FormController> {
-    const form = (await waitFor(
-      () => result.container.querySelector('vertical-layout[theme="padding"]')!,
-    )) as HTMLElement;
+  static async init(result: FormQueries, user: ReturnType<(typeof userEvent)['setup']>): Promise<FormController> {
+    const form = await waitFor(async () => result.findByTestId('auto-form'));
+
     return new FormController(form, result, user);
   }
 
-  private constructor(form: HTMLElement, result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>) {
-    this.instance = form;
+  private constructor(instance: HTMLElement, result: FormQueries, user: ReturnType<(typeof userEvent)['setup']>) {
+    this.instance = instance;
     this.#result = result;
     this.#user = user;
   }
