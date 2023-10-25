@@ -7,7 +7,7 @@ import React, { type JSX, useEffect, useState } from 'react';
 import { AutoFormField } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty } from './property-info.js';
-import {FormLayout} from "@hilla/react-components/FormLayout";
+import { FormLayout } from '@hilla/react-components/FormLayout';
 
 export const emptyItem = Symbol();
 
@@ -107,40 +107,48 @@ export function ExperimentalAutoForm<TItem>({
     );
   }
 
-  function findColumnCount(responsiveSteps: { minWidth: string; columns: number; }[]) : number {
-    return responsiveSteps.map((step) => {
-      let minWidthNum : number;
-      if (step.minWidth.includes('px')) {
-        minWidthNum = parseInt(step.minWidth.substring(0, step.minWidth.length - 2));
-      } else {
-        minWidthNum = parseInt(step.minWidth);
-      }
-      return {minWidth: minWidthNum, columns: step.columns};
-    }).
-    filter(({minWidth}) => {
-      return minWidth <= window.innerWidth;
-    }).reduce((maxStep, step) => {
-      if (step.minWidth > maxStep.minWidth) {
-        return step;
-      } else {
-        return maxStep;
-      }
-    }, {minWidth: 0, columns: 1}).columns;
+  function findColumnCount(responsiveSteps: { minWidth: string; columns: number }[]): number {
+    return responsiveSteps
+      .map((step) => {
+        let minWidthNum: number;
+        if (step.minWidth.includes('px')) {
+          minWidthNum = parseInt(step.minWidth.substring(0, step.minWidth.length - 2));
+        } else {
+          minWidthNum = parseInt(step.minWidth);
+        }
+        return { minWidth: minWidthNum, columns: step.columns };
+      })
+      .filter(({ minWidth }) => {
+        return minWidth <= window.innerWidth;
+      })
+      .reduce(
+        (maxStep, step) => {
+          if (step.minWidth > maxStep.minWidth) {
+            return step;
+          } else {
+            return maxStep;
+          }
+        },
+        { minWidth: 0, columns: 1 },
+      ).columns;
   }
 
-  function createGenericResponsiveSteps(customFormLayout: AutoFormLayoutProps): { minWidth: string; columns: number }[] {
-    function gcd(a: number, b: number) : number {
+  function createGenericResponsiveSteps(
+    customFormLayout: AutoFormLayoutProps,
+  ): { minWidth: string; columns: number }[] {
+    function gcd(a: number, b: number): number {
       return a > 0 ? gcd(b % a, a) : b;
     }
-    const lcm = (a: number, b: number) => a * b / gcd(a, b);
+    const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
 
-    const minNeededColumns = customFormLayout.template.map((row) => row.length)
+    const minNeededColumns = customFormLayout.template
+      .map((row) => row.length)
       .filter((value, index, array) => array.indexOf(value) === index)
       .reduce(lcm);
 
     return [
       { minWidth: '0', columns: 1 },
-      { minWidth: '800px', columns: minNeededColumns }
+      { minWidth: '800px', columns: minNeededColumns },
     ];
   }
 
@@ -148,13 +156,14 @@ export function ExperimentalAutoForm<TItem>({
     const fieldsByPropertyName = new Map<string, JSX.Element>();
     getProperties(model)
       .filter(includeProperty)
-      .forEach((propertyInfo) => (
-        fieldsByPropertyName.set(propertyInfo.name,
-          <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-        )
-      ));
+      .forEach((propertyInfo) =>
+        fieldsByPropertyName.set(
+          propertyInfo.name,
+          <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />,
+        ),
+      );
 
-    let responsiveSteps : { minWidth: string; columns: number }[];
+    let responsiveSteps: { minWidth: string; columns: number }[];
     if (customFormLayout.responsiveSteps == null) {
       responsiveSteps = createGenericResponsiveSteps(customFormLayout);
     } else {
@@ -168,16 +177,16 @@ export function ExperimentalAutoForm<TItem>({
         const rowSize = row.length;
         const colSpan = Math.ceil(columnCount / rowSize);
         return row.map((property) => {
-          return ({property, colSpan: colSpan});
+          return { property, colSpan: colSpan };
         });
       });
     } else {
       weightedTemplate = customFormLayout.template as FieldColSpan[][];
     }
 
-    const spannedFields : JSX.Element[] = [];
-    weightedTemplate.forEach((row : FieldColSpan[]) => {
-      row.forEach((fieldColSpan : FieldColSpan) => {
+    const spannedFields: JSX.Element[] = [];
+    weightedTemplate.forEach((row: FieldColSpan[]) => {
+      row.forEach((fieldColSpan: FieldColSpan) => {
         const field = fieldsByPropertyName.get(fieldColSpan.property)!;
         const spannedField = React.cloneElement(field, { colspan: fieldColSpan.colSpan });
         spannedFields.push(spannedField);
@@ -186,9 +195,7 @@ export function ExperimentalAutoForm<TItem>({
 
     return (
       <section className="flex flex-col p-m gap-m">
-        <FormLayout responsiveSteps={responsiveSteps}>
-          {spannedFields}
-        </FormLayout>
+        <FormLayout responsiveSteps={responsiveSteps}>{spannedFields}</FormLayout>
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
         {createFormActions(isEditMode, disabled)}
       </section>
@@ -205,7 +212,7 @@ export function ExperimentalAutoForm<TItem>({
         {getProperties(model)
           .filter(includeProperty)
           .map((propertyInfo) => (
-              <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+            <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
           ))}
       </FormLayout>
       {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
