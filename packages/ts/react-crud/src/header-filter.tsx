@@ -93,7 +93,7 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
           </Item>
         </ListBox>
       )}
-      className="autoGridFilterWithLessGreaterEquals"
+      className="auto-grid-comparation-selection"
     ></Select>
   );
 }
