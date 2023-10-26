@@ -1,7 +1,6 @@
 import { type EnumModel, _enum } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
-import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
 import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
@@ -62,14 +61,6 @@ function AutoFormTimeField({ propertyInfo, form, ...other }: AutoFormTimeFieldPr
   return <TimePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
-type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
-
-function AutoFormDateTimeField({ propertyInfo, form, ...other }: AutoFormDateTimeFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
-  return <DateTimePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
-}
-
 type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
 
 function AutoFormEnumField({ propertyInfo, form, ...other }: AutoFormEnumFieldProps) {
@@ -91,7 +82,6 @@ function AutoFormBooleanField({ propertyInfo, form, ...other }: AutoFormBooleanF
 
 export type AutoFormFieldProps = CheckboxProps &
   DatePickerProps &
-  DateTimePickerProps &
   IntegerFieldProps &
   NumberFieldProps &
   SelectProps &
