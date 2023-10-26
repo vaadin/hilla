@@ -1,5 +1,5 @@
 {
   "extension": ["ts", "mts", "cts", "js", "mjs", "cjs"],
-  "import": "tsx",
+  "loader": "tsx",
   "exit": true
 }
