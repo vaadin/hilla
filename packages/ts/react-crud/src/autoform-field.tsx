@@ -9,6 +9,7 @@ import { TextField, type TextFieldProps } from '@hilla/react-components/TextFiel
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
+import { useDatePickerI18n } from './locale.js';
 import type { PropertyInfo } from './property-info.js';
 
 export type SharedFieldProps = Readonly<{
@@ -99,6 +100,8 @@ export type AutoFormFieldProps = CheckboxProps &
   TimePickerProps;
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
+  const i18n = useDatePickerI18n();
+
   switch (props.propertyInfo.type) {
     case 'string':
       return <AutoFormTextField {...props}></AutoFormTextField>;
@@ -107,7 +110,7 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
     case 'decimal':
       return <AutoFormDecimalField {...props}></AutoFormDecimalField>;
     case 'date':
-      return <AutoFormDateField {...props}></AutoFormDateField>;
+      return <AutoFormDateField i18n={i18n} {...props}></AutoFormDateField>;
     case 'time':
       return <AutoFormTimeField {...props}></AutoFormTimeField>;
     case 'datetime':
