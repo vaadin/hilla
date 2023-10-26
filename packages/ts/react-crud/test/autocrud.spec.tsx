@@ -205,6 +205,22 @@ describe('@hilla/react-crud', () => {
       expect(grid.getVisibleRowCount()).to.equal(1);
     });
 
+    it('clears and disables the form when deleting the currently edited item', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      // Select item
+      await grid.toggleRowSelected(0);
+      // Delete item
+      const cell = grid.getBodyCellContent(0, 6);
+      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await user.click(deleteButton);
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      await dialog.confirm();
+      // Form should be cleared and disabled
+      const field = await form.getField('First name');
+      expect(field.disabled).to.be.true;
+      expect(field.value).to.be.empty;
+    });
+
     it('does not delete when not confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
