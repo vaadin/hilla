@@ -202,11 +202,18 @@ describe('@hilla/react-crud', () => {
       expect(grid.getVisibleRowCount()).to.equal(2);
     });
 
-    it('does not render a delete button when noDelete', async () => {
+    it('does render a delete button without noDelete', async () => {
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
+      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
+      expect(deleteButton).to.exist;
+    });
+
+    it('does not render a delete button with noDelete', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
       const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const button = cell.querySelector('vaadin-button');
-      expect(button).to.be.null;
+      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
+      expect(deleteButton).to.be.null;
     });
 
     describe('mobile layout', () => {
