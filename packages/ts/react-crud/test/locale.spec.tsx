@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
-import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 import { render } from '@testing-library/react';
+import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 
 describe('@hilla/react-crud', () => {
   describe('LocaleFormatter', () => {
