@@ -14,17 +14,16 @@ import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 
 export interface Company extends HasIdVersion {
-  id: number;
-  version: number;
   name: string;
   foundedDate: string;
 }
 
-export interface Person extends HasIdVersion {
-  id: number;
-  version: number;
+export interface Named {
   firstName: string;
   lastName: string;
+}
+
+export interface Person extends HasIdVersion, Named {
   email: string;
   someInteger: number;
   someDecimal: number;
@@ -39,7 +38,6 @@ export interface NestedTestValues {
 }
 
 export interface ColumnRendererTestValues extends HasIdVersion {
-  id: number;
   string: string;
   integer: number;
   decimal: number;
@@ -51,7 +49,19 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   nested?: NestedTestValues;
 }
 
-export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
+export class NamedModel<T extends Named = Named> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(NamedModel);
+
+  get firstName(): StringModel {
+    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get lastName(): StringModel {
+    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
+  }
+}
+
+export class PersonModel<T extends Person = Person> extends NamedModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
   get id(): NumberModel {
@@ -68,14 +78,6 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
       (parent, key) =>
         new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
     );
-  }
-
-  get firstName(): StringModel {
-    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get lastName(): StringModel {
-    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
   }
 
   get email(): StringModel {

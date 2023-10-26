@@ -7,6 +7,7 @@ import {
   type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
+  ObjectModel,
 } from '@hilla/form';
 
 export type PropertyType = 'boolean' | 'date' | 'datetime' | 'decimal' | 'integer' | 'string' | 'time' | undefined;
@@ -71,34 +72,47 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): string[] =>
-  Object.keys(Object.getOwnPropertyDescriptors(model.prototype)).filter((p) => p !== 'constructor');
+export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): string[] => {
+  const propertyIds: string[] = [];
+
+  for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
+    // parent properties are added at the beginning
+    propertyIds.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)).filter((p) => p !== 'new'));
+  }
+
+  return propertyIds;
+};
 
 export const getProperties = (model: DetachedModelConstructor<AbstractModel>): PropertyInfo[] => {
   const propertyIds = getPropertyIds(model);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const modelInstance: any = createDetachedModel(model);
-  return propertyIds.flatMap((name) => {
-    // eslint-disable-next-line
-    const propertyModel = modelInstance[name] as AbstractModel;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const meta = propertyModel[_meta];
-    const humanReadableName = _generateHeader(name);
-    const type = determinePropertyType(propertyModel);
+  return (
+    propertyIds
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      .map((name) => [name, modelInstance[name]])
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      .filter(([, m]) => m?.[_meta])
+      .flatMap(([name, m]) => {
+        const propertyModel = m as AbstractModel;
+        const meta = propertyModel[_meta];
+        const humanReadableName = _generateHeader(name);
+        const type = determinePropertyType(propertyModel);
 
-    if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
-      // Expand sub properties
-      const subProps = getProperties(propertyModel.constructor as any);
-      return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
-    }
+        if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
+          // Expand sub properties
+          const subProps = getProperties(propertyModel.constructor as any);
+          return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
+        }
 
-    return {
-      name,
-      humanReadableName,
-      type,
-      meta,
-    };
-  });
+        return {
+          name,
+          humanReadableName,
+          type,
+          meta,
+        };
+      })
+  );
 };
 
 export function includeProperty(propertyInfo: PropertyInfo): unknown {
