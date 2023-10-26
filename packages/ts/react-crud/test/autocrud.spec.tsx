@@ -32,26 +32,26 @@ describe('@hilla/react-crud', () => {
     it('passes the selected item and populates the form', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(0);
-      expect((await form.getFieldByLabel('First name')).value).to.equal('Jane');
-      expect((await form.getFieldByLabel('Last name')).value).to.equal('Love');
+      expect((await form.getField('First name')).value).to.equal('Jane');
+      expect((await form.getField('Last name')).value).to.equal('Love');
     });
 
     it('clears and disables the form when deselecting an item', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(1);
       await grid.toggleRowSelected(1);
-      const firstName = await form.getFieldByLabel('First name');
+      const firstName = await form.getField('First name');
       expect(firstName.value).to.equal('');
       expect(firstName.disabled).to.be.true;
 
-      const someInteger = await form.getFieldByLabel('Some integer');
+      const someInteger = await form.getField('Some integer');
       expect(someInteger.value).to.equal('0');
       expect(someInteger.disabled).to.be.true;
     });
 
     it('disables the form when nothing is selected', async () => {
       const { form } = await CrudController.init(render(<TestAutoCrud />), user);
-      const field = await form.getFieldByLabel('First name');
+      const field = await form.getField('First name');
       expect(field.disabled).to.be.true;
     });
 
@@ -101,7 +101,7 @@ describe('@hilla/react-crud', () => {
         user,
       );
       await user.click(newButton);
-      const [firstNameField, lastNameField, someIntegerField, someDecimalField] = await form.getFieldsByLabels(
+      const [firstNameField, lastNameField, someIntegerField, someDecimalField] = await form.getFields(
         'First name',
         'Last name',
         'Some integer',
@@ -143,14 +143,14 @@ describe('@hilla/react-crud', () => {
     it('updates grid and form when creating a new item after selecting an existing item', async () => {
       const { grid, form, newButton } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(0);
-      expect((await form.getFieldByLabel('First name')).value).to.equal('Jane');
-      expect((await form.getFieldByLabel('Last name')).value).to.equal('Love');
+      expect((await form.getField('First name')).value).to.equal('Jane');
+      expect((await form.getField('Last name')).value).to.equal('Love');
 
       await user.click(newButton);
 
       // form should be cleared
-      expect((await form.getFieldByLabel('First name')).value).to.equal('');
-      expect((await form.getFieldByLabel('Last name')).value).to.equal('');
+      expect((await form.getField('First name')).value).to.equal('');
+      expect((await form.getField('Last name')).value).to.equal('');
 
       // grid selection should reset
       expect(grid.isSelected(0)).to.be.false;
