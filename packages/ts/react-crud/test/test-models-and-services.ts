@@ -136,15 +136,6 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
       (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
     );
   }
-
-  /*
-  get appointmentTime(): StringModel {
-    return this[_getPropertyModel](
-      'appointmentTime',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
-    );
-  }
-  */
 }
 
 export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {

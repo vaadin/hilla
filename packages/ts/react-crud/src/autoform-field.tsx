@@ -111,7 +111,7 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
     case 'time':
       return <AutoFormTimeField {...props}></AutoFormTimeField>;
     case 'datetime':
-      return null; // waiting for new RC release <AutoFormDateTimeField {...props}></AutoFormDateTimeField>;
+      return null; // TODO: waiting for new react-components release
     case 'enum':
       return <AutoFormEnumField {...props}></AutoFormEnumField>;
     case 'boolean':

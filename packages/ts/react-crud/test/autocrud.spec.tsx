@@ -101,8 +101,12 @@ describe('@hilla/react-crud', () => {
         user,
       );
       await user.click(newButton);
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] =
-        await form.getFieldsByLabels('First name', 'Last name', 'Email', 'Some integer', 'Some decimal');
+      const [firstNameField, lastNameField, someIntegerField, someDecimalField] = await form.getFieldsByLabels(
+        'First name',
+        'Last name',
+        'Some integer',
+        'Some decimal',
+      );
 
       expect(firstNameField.value).to.equal('');
       expect(lastNameField.value).to.equal('');
@@ -123,9 +127,6 @@ describe('@hilla/react-crud', () => {
         user,
       );
       await user.click(newButton);
-
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] =
-        await form.getFieldsByLabels('First name', 'Last name', 'Email', 'Some integer', 'Some decimal');
 
       await form.typeInField('First name', 'Jeff');
       await form.typeInField('Last name', 'Lastname');
