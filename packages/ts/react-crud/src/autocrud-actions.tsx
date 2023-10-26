@@ -14,9 +14,11 @@ export default function AutoCrudActions({ item }: GridBodyReactRendererProps<any
       <Button theme="tertiary small icon" aria-label="Edit" onClick={() => context.editItem(item)}>
         <Icon icon="lumo:edit" />
       </Button>
-      <Button theme="tertiary small error icon" aria-label="Delete" onClick={() => context.deleteItem(item)}>
-        <Icon icon="lumo:cross" />
-      </Button>
+      {!context.noDelete && (
+        <Button theme="tertiary small error icon" aria-label="Delete" onClick={() => context.deleteItem(item)}>
+          <Icon icon="lumo:cross" />
+        </Button>
+      )}
     </span>
   );
 }

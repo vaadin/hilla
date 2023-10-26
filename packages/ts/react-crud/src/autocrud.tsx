@@ -24,13 +24,6 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
-  const customColumns = [];
-  if (!noDelete) {
-    customColumns.push(
-      <GridColumn key="actions-column" width="90px" flexGrow={0} frozenToEnd renderer={AutoCrudActions}></GridColumn>,
-    );
-  }
-
   function refreshGrid() {
     setRefreshTrigger(refreshTrigger + 1);
   }
@@ -64,6 +57,10 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
     setItem(undefined);
   }
 
+  const customColumns = [
+    <GridColumn key="actions-column" width="90px" flexGrow={0} frozenToEnd renderer={AutoCrudActions}></GridColumn>,
+  ];
+
   const autoForm = (
     <ExperimentalAutoForm
       disabled={!item}
@@ -83,7 +80,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
 
   return (
     <>
-      <AutoCrudContext.Provider value={{ editItem, deleteItem }}>
+      <AutoCrudContext.Provider value={{ noDelete, editItem, deleteItem }}>
         <div className="auto-crud">
           <div className="auto-crud-main">
             <AutoGrid
