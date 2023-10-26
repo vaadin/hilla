@@ -8,6 +8,22 @@
   flex-direction: column;
 }
 
+.auto-crud-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 var(--lumo-space-xs);
+  display: flex;
+  gap: var(--lumo-space-xs);
+  align-items: center;
+}
+
+.auto-crud-actions vaadin-button {
+  margin: 0;
+}
+
 .auto-crud-toolbar {
   display: flex;
   flex-shrink: 0;
