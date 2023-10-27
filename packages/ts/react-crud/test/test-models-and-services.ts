@@ -1,9 +1,12 @@
 import {
   BooleanModel,
+  EnumModel,
   NumberModel,
   ObjectModel,
   StringModel,
+  _enum,
   _getPropertyModel,
+  makeEnumEmptyValueCreator,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
 import type { CrudService } from '../src/crud.js';
@@ -14,21 +17,29 @@ import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 
 export interface Company extends HasIdVersion {
-  id: number;
-  version: number;
   name: string;
   foundedDate: string;
 }
 
-export interface Person extends HasIdVersion {
-  id: number;
-  version: number;
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  NON_BINARY = 'NON_BINARY',
+}
+
+export interface Named {
   firstName: string;
   lastName: string;
+}
+
+export interface Person extends HasIdVersion, Named {
+  gender: Gender;
   email: string;
   someInteger: number;
   someDecimal: number;
   vip: boolean;
+  birthDate: string;
+  shiftStart: string;
 }
 
 export interface NestedTestValues {
@@ -39,7 +50,6 @@ export interface NestedTestValues {
 }
 
 export interface ColumnRendererTestValues extends HasIdVersion {
-  id: number;
   string: string;
   integer: number;
   decimal: number;
@@ -51,7 +61,24 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   nested?: NestedTestValues;
 }
 
-export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
+class GenderModel extends EnumModel<typeof Gender> {
+  static override createEmptyValue = makeEnumEmptyValueCreator(GenderModel);
+  readonly [_enum] = Gender;
+}
+
+export class NamedModel<T extends Named = Named> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(NamedModel);
+
+  get firstName(): StringModel {
+    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get lastName(): StringModel {
+    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
+  }
+}
+
+export class PersonModel<T extends Person = Person> extends NamedModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
 
   get id(): NumberModel {
@@ -70,12 +97,8 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
     );
   }
 
-  get firstName(): StringModel {
-    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get lastName(): StringModel {
-    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
+  get gender(): GenderModel {
+    return this[_getPropertyModel]('gender', (parent, key) => new GenderModel(parent, key, false));
   }
 
   get email(): StringModel {
@@ -98,6 +121,20 @@ export class PersonModel<T extends Person = Person> extends ObjectModel<T> {
 
   get vip(): BooleanModel {
     return this[_getPropertyModel]('vip', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get birthDate(): StringModel {
+    return this[_getPropertyModel](
+      'birthDate',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
+    );
+  }
+
+  get shiftStart(): StringModel {
+    return this[_getPropertyModel](
+      'shiftStart',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
+    );
   }
 }
 
@@ -312,20 +349,26 @@ export const personData: Person[] = [
     version: 1,
     firstName: 'John',
     lastName: 'Dove',
+    gender: Gender.MALE,
     email: 'john@example.com',
     someInteger: -12,
     someDecimal: 0.12,
     vip: true,
+    birthDate: '1999-12-31',
+    shiftStart: '08:30',
   },
   {
     id: 2,
     version: 1,
     firstName: 'Jane',
     lastName: 'Love',
+    gender: Gender.FEMALE,
     email: 'jane@example.com',
     someInteger: 123456,
     someDecimal: 123.456,
     vip: false,
+    birthDate: '1999-12-31',
+    shiftStart: '08:30',
   },
 ];
 

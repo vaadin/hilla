@@ -1,4 +1,4 @@
-import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
+import { DatePickerElement, type DatePickerDate, type DatePickerI18n } from '@hilla/react-components/DatePicker.js';
 import { createContext, useContext, useMemo } from 'react';
 
 export const LocaleContext = createContext(navigator.language);
@@ -114,4 +114,23 @@ export class LocaleFormatter {
 export function useLocaleFormatter(): LocaleFormatter {
   const locale = useContext(LocaleContext);
   return useMemo(() => new LocaleFormatter(locale), [locale]);
+}
+
+const datePickerI18n = new DatePickerElement().i18n;
+
+export function useDatePickerI18n(): DatePickerI18n {
+  const formatter = useLocaleFormatter();
+
+  return useMemo(
+    () => ({
+      ...datePickerI18n,
+      formatDate(value) {
+        return formatter.formatDate(value);
+      },
+      parseDate(value) {
+        return formatter.parse(value);
+      },
+    }),
+    [formatter],
+  );
 }

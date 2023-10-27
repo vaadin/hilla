@@ -15,6 +15,7 @@ import {
   personData,
   PersonModel,
   personService,
+  Gender,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -23,17 +24,40 @@ use(chaiAsPromised);
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
 describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
-    const LABELS = ['First name', 'Last name', 'Email', 'Some integer', 'Some decimal'] as const;
-    const KEYS = ['firstName', 'lastName', 'email', 'someInteger', 'someDecimal'] as ReadonlyArray<keyof Person>;
+    const LABELS = [
+      'First name',
+      'Last name',
+      'Gender',
+      'Email',
+      'Some integer',
+      'Some decimal',
+      'Vip',
+      'Birth date',
+      'Shift start',
+    ] as const;
+    const KEYS = [
+      'firstName',
+      'lastName',
+      'gender',
+      'email',
+      'someInteger',
+      'someDecimal',
+      'vip',
+      'birthDate',
+      'shiftStart',
+    ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
+      gender: Gender.MALE,
       email: '',
       someInteger: 0,
       someDecimal: 0,
       id: -1,
       version: -1,
       vip: false,
+      birthDate: '',
+      shiftStart: '',
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -53,10 +77,13 @@ describe('@hilla/react-crud', () => {
         version: 1,
         firstName: 'first',
         lastName: 'last',
+        gender: Gender.FEMALE,
         email: 'first.last@domain.com',
         someInteger: 24451,
         someDecimal: 24.451,
         vip: false,
+        birthDate: '1999-12-31',
+        shiftStart: '08:30',
       };
 
       const form = await FormController.init(
@@ -64,16 +91,20 @@ describe('@hilla/react-crud', () => {
         user,
       );
 
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
 
       const fields = await form.getFields(...LABELS);
-      const tagNames = fields.map((field) => field.instance.localName);
+      const tagNames = fields.map((field) => field.localName);
       expect(tagNames).to.eql([
         'vaadin-text-field',
         'vaadin-text-field',
+        'vaadin-select',
         'vaadin-text-field',
         'vaadin-integer-field',
         'vaadin-number-field',
+        'vaadin-checkbox',
+        'vaadin-date-picker',
+        'vaadin-time-picker',
       ]);
     });
 
@@ -82,7 +113,7 @@ describe('@hilla/react-crud', () => {
         render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
         user,
       );
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
     it('uses values from an item', async () => {
@@ -93,7 +124,7 @@ describe('@hilla/react-crud', () => {
         render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
         user,
       );
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
     });
 
     it('updates values when changing item', async () => {
@@ -103,11 +134,11 @@ describe('@hilla/react-crud', () => {
 
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person1} />);
       let form = await FormController.init(result, user);
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person1));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person1));
 
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={person2} />);
       form = await FormController.init(result, user);
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person2));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person2));
     });
 
     it('clears the form when setting the item to undefined', async () => {
@@ -116,11 +147,11 @@ describe('@hilla/react-crud', () => {
 
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
       let form = await FormController.init(result, user);
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
 
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
       form = await FormController.init(result, user);
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
     it('submits a valid form', async () => {
@@ -156,7 +187,7 @@ describe('@hilla/react-crud', () => {
       await form.submit();
       const newPerson: Person = { ...person! };
       newPerson.firstName = 'bar';
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
     it('retains the form values after a valid submit when using afterSubmit', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
@@ -171,7 +202,7 @@ describe('@hilla/react-crud', () => {
       await form.submit();
       const newPerson: Person = { ...person! };
       newPerson.firstName = 'baz';
-      await expect(form.getValues(LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
 
     it('calls afterSubmit with the new item', async () => {
@@ -238,7 +269,7 @@ describe('@hilla/react-crud', () => {
         render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />),
         user,
       );
-      await expect(form.areEnabled(LABELS)).to.eventually.be.false;
+      await expect(form.areEnabled(...LABELS)).to.eventually.be.false;
     });
 
     it('enables all fields and buttons when enabled', async () => {
@@ -247,7 +278,7 @@ describe('@hilla/react-crud', () => {
       await FormController.init(result, user);
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(result, user);
-      await expect(form.areEnabled(LABELS)).to.eventually.be.true;
+      await expect(form.areEnabled(...LABELS)).to.eventually.be.true;
     });
 
     describe('discard button', () => {
@@ -277,7 +308,7 @@ describe('@hilla/react-crud', () => {
         await expect(form.findButton('Discard')).to.eventually.exist;
 
         await form.discard();
-        await expect(form.getValues(['First name'])).to.eventually.eql(['']);
+        await expect(form.getValues('First name')).to.eventually.eql(['']);
         await expect(form.findButton('Discard')).to.eventually.be.rejected;
       });
     });
