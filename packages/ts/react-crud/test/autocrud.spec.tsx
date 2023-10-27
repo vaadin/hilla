@@ -1,12 +1,18 @@
 import { expect, use } from '@esm-bundle/chai';
-import { render } from '@testing-library/react';
+import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
+import type { Viewport } from 'karma-viewport/dist/adapter/viewport';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
+import FormController from './FormController';
+import GridController from './GridController';
 import { type Person, PersonModel, personService } from './test-models-and-services.js';
+
+declare const viewport: Viewport;
 
 use(sinonChai);
 use(chaiDom);
@@ -15,13 +21,22 @@ describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
-      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
-    }
+    before(() => {
+      // Desktop resolution
+      viewport.set(1024, 768);
+    });
+
+    after(() => {
+      viewport.reset();
+    });
 
     beforeEach(() => {
       user = userEvent.setup();
     });
+
+    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
+      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
+    }
 
     it('shows a grid and a form', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
@@ -183,9 +198,93 @@ describe('@hilla/react-crud', () => {
       expect(button).to.be.null;
     });
 
-    it('shows a header if requested', async () => {
-      const result = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} header="Hello crud" />);
-      await result.findByText('Hello crud');
+    describe('mobile layout', () => {
+      let saveSpy: sinon.SinonSpy;
+      let result: RenderResult;
+
+      before(() => {
+        // iPhone 13 Pro resolution
+        viewport.set(390, 844);
+      });
+
+      beforeEach(() => {
+        const service = personService();
+        saveSpy = sinon.spy(service, 'save');
+        result = render(<TestAutoCrud service={service} />);
+      });
+
+      afterEach(() => {
+        // cleanup dangling overlay
+        const overlay = document.querySelector('vaadin-dialog-overlay');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
+
+      async function getOverlay() {
+        return screen.findByRole('dialog');
+      }
+
+      async function getOverlayForm() {
+        const overlay = await getOverlay();
+        return FormController.init(within(overlay), user);
+      }
+
+      it('opens the form in a dialog when selecting an item', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await getOverlayForm();
+        expect(form.instance).to.exist;
+        expect((await form.getField('First name')).value).to.equal('Jane');
+        expect((await form.getField('Last name')).value).to.equal('Love');
+      });
+
+      it('opens the form in a dialog when creating a new item', async () => {
+        const newButton = await result.findByText('+ New');
+        newButton.click();
+
+        const form = await getOverlayForm();
+        expect(form.instance).to.exist;
+        expect((await form.getField('First name')).value).to.equal('');
+        expect((await form.getField('Last name')).value).to.equal('');
+      });
+
+      it('closes the dialog when clicking close button', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const dialogOverlay = await getOverlay();
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+
+        // dialog is closed
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // grid selection is cleared
+        expect(grid.isSelected(0)).to.be.false;
+
+        // does not save
+        expect(saveSpy).not.to.have.been.called;
+      });
+
+      it('closes the dialog when clicking submit button', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await getOverlayForm();
+        await form.typeInField('First name', 'J'); // to enable the submit button
+        await form.submit();
+
+        // dialog is closed
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // grid selection is cleared
+        expect(grid.isSelected(0)).to.be.false;
+
+        // saves
+        expect(saveSpy).to.have.been.called;
+      });
     });
   });
 });
