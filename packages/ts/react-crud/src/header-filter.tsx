@@ -13,23 +13,6 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
 
-// TODO: Replace with more robust solution
-const autoGridFilterWithLessGreaterEqualsStyle = document.createElement('style');
-autoGridFilterWithLessGreaterEqualsStyle.id = 'autoGridFilterWithLessGreaterEquals';
-autoGridFilterWithLessGreaterEqualsStyle.textContent = `
-.${autoGridFilterWithLessGreaterEqualsStyle.id} {
-  --vaadin-field-default-width: 2em;
-  margin-right: 3px;
-}
-.${autoGridFilterWithLessGreaterEqualsStyle.id} > vaadin-select-value-button {
-  --_lumo-text-field-overflow-mask-image: none !important;
-}
-
-.${autoGridFilterWithLessGreaterEqualsStyle.id}::part(toggle-button) {
-  display: none;
-}`;
-document.head.appendChild(autoGridFilterWithLessGreaterEqualsStyle);
-
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
   const [matcher, setMatcher] = useState(initialMatcher);
@@ -93,7 +76,7 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
           </Item>
         </ListBox>
       )}
-      className={autoGridFilterWithLessGreaterEqualsStyle.id}
+      className="auto-grid-comparation-selection"
     ></Select>
   );
 }
