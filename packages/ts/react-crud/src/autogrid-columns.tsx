@@ -11,6 +11,7 @@ import {
 import {
   BooleanHeaderFilter,
   DateHeaderFilter,
+  EnumHeaderFilter,
   NoHeaderFilter,
   NumberHeaderFilter,
   StringHeaderFilter,
@@ -76,7 +77,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
       return {
         autoWidth: true,
         renderer: AutoGridEnumRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerRenderer: EnumHeaderFilter,
       };
     case 'string':
       return {

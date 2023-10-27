@@ -144,6 +144,57 @@ public class FilterTest {
         executeFilter(filter);
     }
 
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterEnumPropertyUsingContains() {
+        setupEnums();
+        PropertyStringFilter filter = createFilter("enumValue",
+                Matcher.CONTAINS, TestEnum.TEST1.name());
+        executeFilter(filter);
+    }
+
+    @Test
+    public void filterEnumPropertyUsingEquals() {
+        setupEnums();
+
+        PropertyStringFilter filter = createFilter("enumValue", Matcher.EQUALS,
+                TestEnum.TEST1.name());
+        List<TestObject> testObjects = executeFilter(filter);
+
+        assertEquals(1, testObjects.size());
+        Assert.assertEquals(TestEnum.TEST1, testObjects.get(0).getEnumValue());
+
+        filter = createFilter("enumValue", Matcher.EQUALS,
+                TestEnum.TEST2.name());
+        testObjects = executeFilter(filter);
+
+        assertEquals(1, testObjects.size());
+        Assert.assertEquals(TestEnum.TEST2, testObjects.get(0).getEnumValue());
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterEnumPropertyUsingLessThan() {
+        setupBooleans();
+        PropertyStringFilter filter = createFilter("enumValue",
+                Matcher.LESS_THAN, TestEnum.TEST1.name());
+        executeFilter(filter);
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterEnumPropertyUsingGreaterThan() {
+        setupBooleans();
+        PropertyStringFilter filter = createFilter("enumValue",
+                Matcher.GREATER_THAN, TestEnum.TEST1.name());
+        executeFilter(filter);
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterUnknownEnumValue() {
+        setupBooleans();
+        PropertyStringFilter filter = createFilter("enumValue", Matcher.EQUALS,
+                "FOO");
+        executeFilter(filter);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void filterNonExistingProperty() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
@@ -287,6 +338,16 @@ public class FilterTest {
         entityManager.persist(testObject);
         testObject = new TestObject();
         testObject.setBooleanValue(false);
+        entityManager.persist(testObject);
+        entityManager.flush();
+    }
+
+    private void setupEnums() {
+        TestObject testObject = new TestObject();
+        testObject.setEnumValue(TestEnum.TEST1);
+        entityManager.persist(testObject);
+        testObject = new TestObject();
+        testObject.setEnumValue(TestEnum.TEST2);
         entityManager.persist(testObject);
         entityManager.flush();
     }

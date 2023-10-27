@@ -148,6 +148,24 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (javaType.isEnum()) {
+            Enum<?> enumValue = parseEnumValue(javaType, value);
+
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(propertyPath, enumValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using contains");
+            case GREATER_THAN:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using greater than");
+            case LESS_THAN:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using less than");
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -188,5 +206,10 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isLocalDateTime(Class<?> javaType) {
         return javaType == java.time.LocalDateTime.class;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Enum<?> parseEnumValue(Class<?> enumClass, String value) {
+        return Enum.valueOf((Class<Enum>) enumClass, value);
     }
 }

@@ -20,6 +20,7 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  Gender,
   type HasTestInfo,
   type Person,
   PersonModel,
@@ -345,6 +346,33 @@ describe('@hilla/react-crud', () => {
             '@type': 'propertyString',
             filterValue: 'False',
             propertyId: 'vip',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('filters for an enum column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 2), user);
+          await controller.select(Gender.MALE);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.MALE,
+            propertyId: 'gender',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          await controller.select(Gender.FEMALE);
+
+          const expectedPropertyFilter2: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.FEMALE,
+            propertyId: 'gender',
             matcher: Matcher.EQUALS,
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };

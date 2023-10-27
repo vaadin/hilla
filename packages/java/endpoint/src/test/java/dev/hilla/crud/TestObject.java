@@ -21,6 +21,7 @@ public class TestObject {
     private LocalTime localTime;
     private LocalDateTime localDateTime;
     private Boolean booleanValue;
+    private TestEnum enumValue;
 
     @OneToOne
     private NestedObject nestedObject;
@@ -71,6 +72,14 @@ public class TestObject {
 
     public void setBooleanValue(Boolean aBoolean) {
         this.booleanValue = aBoolean;
+    }
+
+    public TestEnum getEnumValue() {
+        return enumValue;
+    }
+
+    public void setEnumValue(TestEnum testEnum) {
+        this.enumValue = testEnum;
     }
 
     public NestedObject getNestedObject() {
