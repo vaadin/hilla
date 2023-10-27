@@ -7,8 +7,8 @@ import sinonChai from 'sinon-chai';
 import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
-import FormController from './FormController';
-import GridController from './GridController';
+import FormController from './FormController.js';
+import GridController from './GridController.js';
 import { type Person, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);

@@ -5,11 +5,14 @@ import { type JSX, useState } from 'react';
 import { AutoCrudContext } from './autocrud-context.js';
 import DeleteButton from './autocrud-delete.js';
 import { AutoCrudDialog } from './autocrud-dialog';
+import css from './autocrud.obj.css';
 import { emptyItem, ExperimentalAutoForm } from './autoform.js';
 import { AutoGrid } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { getProperties } from './property-info.js';
+
+document.adoptedStyleSheets.unshift(css);
 
 export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
@@ -52,7 +55,13 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
   return (
     <>
       <AutoCrudContext.Provider
-        value={{ service, properties: getProperties(model), refreshGrid: () => setRefreshTrigger(refreshTrigger + 1) }}
+        value={{
+          service,
+          properties: getProperties(model),
+          refreshGrid() {
+            setRefreshTrigger(refreshTrigger + 1);
+          },
+        }}
       >
         <div className="auto-crud">
           <div className="auto-crud-main">
