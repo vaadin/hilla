@@ -149,7 +149,8 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
                 break;
             }
         } else if (javaType.isEnum()) {
-            Enum<?> enumValue = parseEnumValue(javaType, value);
+            var enumValue = Enum.valueOf(javaType.asSubclass(Enum.class),
+                    value);
 
             switch (filter.getMatcher()) {
             case EQUALS:
@@ -206,10 +207,5 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isLocalDateTime(Class<?> javaType) {
         return javaType == java.time.LocalDateTime.class;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Enum<?> parseEnumValue(Class<?> enumClass, String value) {
-        return Enum.valueOf((Class<Enum>) enumClass, value);
     }
 }
