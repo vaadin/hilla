@@ -2,14 +2,17 @@ import { expect, use } from '@esm-bundle/chai';
 import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
+import type { Viewport } from 'karma-viewport/dist/adapter/viewport';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
-import FormController from './FormController.js';
-import GridController from './GridController.js';
+import FormController from './FormController';
+import GridController from './GridController';
 import { type Person, PersonModel, personService } from './test-models-and-services.js';
+
+declare const viewport: Viewport;
 
 use(sinonChai);
 use(chaiDom);
@@ -17,21 +20,14 @@ use(chaiDom);
 describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
-    let matchMediaStub: sinon.SinonStub;
 
     before(() => {
-      matchMediaStub = sinon.stub(window, 'matchMedia');
-      matchMediaStub.returns({
-        matches: false,
-        addListener: () => {},
-        removeListener: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      });
+      // Desktop resolution
+      viewport.set(1024, 768);
     });
 
     after(() => {
-      matchMediaStub.restore();
+      viewport.reset();
     });
 
     beforeEach(() => {
@@ -207,13 +203,8 @@ describe('@hilla/react-crud', () => {
       let result: RenderResult;
 
       before(() => {
-        matchMediaStub.returns({
-          matches: true,
-          addListener: () => {},
-          removeListener: () => {},
-          addEventListener: () => {},
-          removeEventListener: () => {},
-        });
+        // iPhone 13 Pro resolution
+        viewport.set(390, 844);
       });
 
       beforeEach(() => {

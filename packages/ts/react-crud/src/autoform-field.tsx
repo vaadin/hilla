@@ -1,4 +1,4 @@
-import { type EnumModel, _enum } from '@hilla/form';
+import { _enum, type EnumModel } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
@@ -10,6 +10,7 @@ import type { UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
 import { useDatePickerI18n } from './locale.js';
 import type { PropertyInfo } from './property-info.js';
+import { convertToTitleCase } from './util.js';
 
 export type SharedFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
@@ -67,7 +68,7 @@ type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
 function AutoFormEnumField({ propertyInfo, form, ...other }: AutoFormEnumFieldProps) {
   const model = getPropertyModel(form, propertyInfo) as EnumModel;
   const options = Object.keys(model[_enum]).map((value) => ({
-    label: value,
+    label: convertToTitleCase(value),
     value,
   }));
   return <Select {...other} {...form.field(model)} label={propertyInfo.humanReadableName} items={options} />;
