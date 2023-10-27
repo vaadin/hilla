@@ -56,9 +56,9 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   #validationRequest?: Promise<void>;
 
-  #config?: BinderRootConfiguration<Value<M>>;
+  readonly #config?: BinderRootConfiguration<Value<M>>;
 
-  #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
+  readonly #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
 
   readonly #context: unknown = this;
 
