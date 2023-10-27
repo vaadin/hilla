@@ -69,6 +69,7 @@ export interface PropertyInfo {
   humanReadableName: string;
   type: PropertyType;
   meta: ModelMetadata;
+  model: AbstractModel;
 }
 
 export function hasAnnotation(meta: ModelMetadata, annotationName: string): boolean {
@@ -123,6 +124,7 @@ export const getProperties = (model: DetachedModelConstructor<AbstractModel>): P
           humanReadableName,
           type,
           meta,
+          model: propertyModel,
         };
       })
   );

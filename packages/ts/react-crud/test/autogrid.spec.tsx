@@ -20,6 +20,7 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  Gender,
   type HasTestInfo,
   type Person,
   PersonModel,
@@ -351,6 +352,33 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
         });
 
+        it('filters for an enum column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 2), user);
+          await controller.select(Gender.MALE);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.MALE,
+            propertyId: 'gender',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          await controller.select(Gender.FEMALE);
+
+          const expectedPropertyFilter2: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.FEMALE,
+            propertyId: 'gender',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
         it('combine filters (and) when you type in multiple fields', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
@@ -599,15 +627,14 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(1, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
-      it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 4)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 4)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 4)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, 4)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 4)).to.have.text('');
+      it('renders enum values as title case', () => {
+        expect(grid.getBodyCellContent(0, 4)).to.have.rendered.text('Male');
+        expect(grid.getBodyCellContent(1, 4)).to.have.rendered.text('Female');
+        expect(grid.getBodyCellContent(2, 4)).to.have.rendered.text('Non Binary');
+        expect(grid.getBodyCellContent(3, 4)).to.have.rendered.text('');
       });
 
-      it('renders java.time.LocalDate as right aligned', () => {
+      it('renders java.util.Date as right aligned', () => {
         expect(grid.getBodyCellContent(0, 5)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, 5)).to.have.text('5/13/2021');
         expect(grid.getBodyCellContent(1, 5)).to.have.text('5/14/2021');
@@ -615,43 +642,51 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(3, 5)).to.have.text('');
       });
 
-      it('renders java.time.LocalTime as right aligned', () => {
+      it('renders java.time.LocalDate as right aligned', () => {
         expect(grid.getBodyCellContent(0, 6)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 6)).to.have.text('8:45 AM');
-        expect(grid.getBodyCellContent(1, 6)).to.have.text('8:45 PM');
+        expect(grid.getBodyCellContent(0, 6)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 6)).to.have.text('5/14/2021');
         expect(grid.getBodyCellContent(2, 6)).to.have.text('');
         expect(grid.getBodyCellContent(3, 6)).to.have.text('');
       });
 
-      it('renders java.time.LocalDateTime as right aligned', () => {
+      it('renders java.time.LocalTime as right aligned', () => {
         expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 7)).to.have.text('5/13/2021, 8:45 AM');
-        expect(grid.getBodyCellContent(1, 7)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(0, 7)).to.have.text('8:45 AM');
+        expect(grid.getBodyCellContent(1, 7)).to.have.text('8:45 PM');
         expect(grid.getBodyCellContent(2, 7)).to.have.text('');
         expect(grid.getBodyCellContent(3, 7)).to.have.text('');
       });
 
-      it('renders nested strings without formatting and with default alignment', () => {
-        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 8)).to.have.rendered.text('Nested string 1');
-        expect(grid.getBodyCellContent(1, 8)).to.have.rendered.text('');
+      it('renders java.time.LocalDateTime as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 8)).to.have.text('5/13/2021, 8:45 AM');
+        expect(grid.getBodyCellContent(1, 8)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(2, 8)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 8)).to.have.text('');
       });
 
-      it('renders nested numbers as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('123,456');
+      it('renders nested strings without formatting and with default alignment', () => {
+        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Nested string 1');
         expect(grid.getBodyCellContent(1, 9)).to.have.rendered.text('');
       });
 
+      it('renders nested numbers as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 10)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, 10)).to.have.rendered.text('');
+      });
+
       it('renders nested booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+        expect(grid.getBodyCellContent(0, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
       it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 11)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 11)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 11)).to.have.text('');
+        expect(grid.getBodyCellContent(0, 12)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 12)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 12)).to.have.text('');
       });
     });
   });

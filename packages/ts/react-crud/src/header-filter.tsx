@@ -1,3 +1,4 @@
+import { _enum, type EnumModel } from '@hilla/form';
 import { DatePicker } from '@hilla/react-components/DatePicker.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
@@ -5,11 +6,12 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ReactElement, type RefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import { convertToTitleCase } from './util';
 
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
@@ -110,6 +112,32 @@ export function NumberHeaderFilter(): ReactElement {
         }}
       />
     </>
+  );
+}
+
+export function EnumHeaderFilter(): ReactElement {
+  const { filterValue, updateFilter } = useFilterState(Matcher.EQUALS);
+  const context = useContext(ColumnContext)!;
+  const model = context.propertyInfo.model as EnumModel;
+  const options = [
+    {
+      value: '',
+      label: '',
+    },
+    ...Object.keys(model[_enum]).map((value) => ({
+      label: convertToTitleCase(value),
+      value,
+    })),
+  ];
+  return (
+    <Select
+      items={options}
+      value={filterValue}
+      onValueChanged={(e) => {
+        const newFilterValue = e.detail.value;
+        updateFilter(Matcher.EQUALS, newFilterValue);
+      }}
+    />
   );
 }
 

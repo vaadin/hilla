@@ -54,6 +54,7 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   integer: number;
   decimal: number;
   boolean: boolean;
+  enum?: Gender;
   date?: string;
   localDate?: string;
   localTime?: string;
@@ -227,6 +228,10 @@ export class ColumnRendererTestModel<
     return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
   }
 
+  get enum(): GenderModel {
+    return this[_getPropertyModel]('enum', (parent, key) => new GenderModel(parent, key, false));
+  }
+
   get date(): StringModel {
     return this[_getPropertyModel](
       'date',
@@ -385,6 +390,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: 123456,
     decimal: 123.456,
     boolean: true,
+    enum: Gender.MALE,
     date: '2021-05-13T00:00:00',
     localDate: '2021-05-13',
     localTime: '08:45:00',
@@ -403,6 +409,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: -12,
     decimal: -0.12,
     boolean: false,
+    enum: Gender.FEMALE,
     date: '2021-05-14T00:00:00',
     localDate: '2021-05-14',
     localTime: '20:45:00',
@@ -412,6 +419,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     id: 3,
     version: 1,
     string: 'Hello World 3',
+    enum: Gender.NON_BINARY,
     integer: 123456,
     decimal: 123.4,
     boolean: false,
