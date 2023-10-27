@@ -48,9 +48,10 @@ function AutoFormDecimalField({ propertyInfo, form, ...other }: AutoFormNumberFi
 type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
 
 function AutoFormDateField({ propertyInfo, form, ...other }: AutoFormDateFieldProps) {
+  const i18n = useDatePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
   // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
-  return <DatePicker {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
+  return <DatePicker i18n={i18n} {...other} {...form.field(model)} label={propertyInfo.humanReadableName} />;
 }
 
 type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
@@ -90,8 +91,6 @@ export type AutoFormFieldProps = CheckboxProps &
   TimePickerProps;
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
-  const i18n = useDatePickerI18n();
-
   switch (props.propertyInfo.type) {
     case 'string':
       return <AutoFormTextField {...props}></AutoFormTextField>;
@@ -100,7 +99,7 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
     case 'decimal':
       return <AutoFormDecimalField {...props}></AutoFormDecimalField>;
     case 'date':
-      return <AutoFormDateField i18n={i18n} {...props}></AutoFormDateField>;
+      return <AutoFormDateField {...props}></AutoFormDateField>;
     case 'time':
       return <AutoFormTimeField {...props}></AutoFormTimeField>;
     case 'enum':

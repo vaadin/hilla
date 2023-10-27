@@ -8,7 +8,7 @@ import {
   type DetachedModelConstructor,
   type ModelMetadata,
   _enum,
-  type EnumModel,
+  EnumModel,
   ObjectModel,
 } from '@hilla/form';
 
@@ -50,18 +50,14 @@ function determinePropertyType(model: AbstractModel): PropertyType {
     return propertyType;
   }
 
-  // Otherwise detect by model constructor
-  const { constructor } = model;
-  if (constructor === StringModel) {
+  // Otherwise detect by model instance
+  if (model instanceof StringModel) {
     return 'string';
-  } else if (constructor === NumberModel) {
+  } else if (model instanceof NumberModel) {
     return 'decimal';
-  } else if (constructor === BooleanModel) {
+  } else if (model instanceof BooleanModel) {
     return 'boolean';
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if ((model as EnumModel)[_enum]) {
+  } else if (model instanceof EnumModel) {
     return 'enum';
   }
 
