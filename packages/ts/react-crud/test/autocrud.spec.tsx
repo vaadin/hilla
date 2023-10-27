@@ -88,7 +88,7 @@ describe('@hilla/react-crud', () => {
 
     it('shows a confirmation dialog before deleting', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
@@ -101,10 +101,9 @@ describe('@hilla/react-crud', () => {
         user,
       );
       await user.click(newButton);
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
+      const [firstNameField, lastNameField, someIntegerField, someDecimalField] = await form.getFields(
         'First name',
         'Last name',
-        'Email',
         'Some integer',
         'Some decimal',
       );
@@ -113,11 +112,11 @@ describe('@hilla/react-crud', () => {
       expect(lastNameField.value).to.equal('');
       expect(someIntegerField.value).to.equal('0');
       expect(someDecimalField.value).to.equal('0');
-      await firstNameField.type('Jeff');
-      await lastNameField.type('Lastname');
-      await emailField.type('first.last@domain.com');
-      await someIntegerField.type('12');
-      await someDecimalField.type('12.345');
+      await form.typeInField('First name', 'Jeff');
+      await form.typeInField('Last name', 'Lastname');
+      await form.typeInField('Email', 'first.last@domain.com');
+      await form.typeInField('Some integer', '12');
+      await form.typeInField('Some decimal', '12.345');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jeff');
     });
@@ -129,21 +128,13 @@ describe('@hilla/react-crud', () => {
       );
       await user.click(newButton);
 
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
-        'First name',
-        'Last name',
-        'Email',
-        'Some integer',
-        'Some decimal',
-      );
-
-      await firstNameField.type('Jeff');
-      await lastNameField.type('Lastname');
-      await emailField.type('first.last@domain.com');
-      await someIntegerField.type('12');
-      await someDecimalField.type('12.345');
+      await form.typeInField('First name', 'Jeff');
+      await form.typeInField('Last name', 'Lastname');
+      await form.typeInField('Email', 'first.last@domain.com');
+      await form.typeInField('Some integer', '12');
+      await form.typeInField('Some decimal', '12.345');
       await form.submit();
-      await firstNameField.type('Jerp');
+      await form.typeInField('First name', 'Jerp');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
       expect(grid.getVisibleRowCount()).to.equal(3);
@@ -168,7 +159,7 @@ describe('@hilla/react-crud', () => {
     it('deletes and refreshes grid after confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       await dialog.confirm();
@@ -178,7 +169,7 @@ describe('@hilla/react-crud', () => {
     it('does not delete when not confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       await dialog.cancel();
@@ -187,8 +178,9 @@ describe('@hilla/react-crud', () => {
 
     it('does not render a delete button when noDelete', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
-      const cell = grid.getBodyCellContent(1, 6);
-      expect(cell).to.be.null;
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
+      const button = cell.querySelector('vaadin-button');
+      expect(button).to.be.null;
     });
 
     it('shows a header if requested', async () => {

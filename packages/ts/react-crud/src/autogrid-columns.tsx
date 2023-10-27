@@ -76,7 +76,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         autoWidth: true,
         headerRenderer: StringHeaderFilter,
       };
-    case undefined:
+    default:
       return {
         autoWidth: true,
         headerRenderer: NoHeaderFilter,

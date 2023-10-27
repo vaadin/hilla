@@ -71,7 +71,18 @@ describe('@hilla/react-crud', () => {
     describe('basics', () => {
       it('creates columns based on model', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
       });
 
       it('can change model and recreate columns', async () => {
@@ -80,10 +91,13 @@ describe('@hilla/react-crud', () => {
           await GridController.init(result, user),
           'firstName',
           'lastName',
+          'gender',
           'email',
           'someInteger',
           'someDecimal',
           'vip',
+          'birthDate',
+          'shiftStart',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -255,7 +269,7 @@ describe('@hilla/react-crud', () => {
 
         it('created for number columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
-          const cell = grid.getHeaderCellContent(1, 3);
+          const cell = grid.getHeaderCellContent(1, 4);
           expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
         });
 
@@ -281,7 +295,7 @@ describe('@hilla/react-crud', () => {
         it('filter when you type in the field for a number column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const someNumberFilter = grid.getHeaderCellContent(1, 3);
+          const someNumberFilter = grid.getHeaderCellContent(1, 4);
           const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
             TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
             SelectController.init(someNumberFilter, user),
@@ -313,7 +327,7 @@ describe('@hilla/react-crud', () => {
         it('filters for a boolean column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const controller = await SelectController.init(grid.getHeaderCellContent(1, 5), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 6), user);
           await controller.select('True');
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -473,8 +487,20 @@ describe('@hilla/react-crud', () => {
           ),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip', '');
-        expect(grid.getBodyCellContent(0, 6)).to.have.rendered.text('Jane Love');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          '',
+        );
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -483,7 +509,18 @@ describe('@hilla/react-crud', () => {
           render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
@@ -506,7 +543,19 @@ describe('@hilla/react-crud', () => {
 
       it('renders row numbers if requested', async () => {
         const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
-        await assertColumns(grid, '', 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          '',
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
     });

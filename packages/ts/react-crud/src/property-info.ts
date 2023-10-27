@@ -7,10 +7,21 @@ import {
   type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
+  _enum,
+  EnumModel,
   ObjectModel,
 } from '@hilla/form';
 
-export type PropertyType = 'boolean' | 'date' | 'datetime' | 'decimal' | 'integer' | 'string' | 'time' | undefined;
+export type PropertyType =
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'decimal'
+  | 'enum'
+  | 'integer'
+  | 'string'
+  | 'time'
+  | undefined;
 
 const javaTypeMap: Record<string, PropertyType> = {
   byte: 'integer',
@@ -39,15 +50,17 @@ function determinePropertyType(model: AbstractModel): PropertyType {
     return propertyType;
   }
 
-  // Otherwise detect by model constructor
-  const { constructor } = model;
-  if (constructor === StringModel) {
+  // Otherwise detect by model instance
+  if (model instanceof StringModel) {
     return 'string';
-  } else if (constructor === NumberModel) {
+  } else if (model instanceof NumberModel) {
     return 'decimal';
-  } else if (constructor === BooleanModel) {
+  } else if (model instanceof BooleanModel) {
     return 'boolean';
+  } else if (model instanceof EnumModel) {
+    return 'enum';
   }
+
   return undefined;
 }
 
