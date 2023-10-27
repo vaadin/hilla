@@ -7,6 +7,7 @@ const karmaCoverage = require('karma-coverage');
 const karmaMocha = require('karma-mocha');
 const karmaSpecReporter = require('karma-spec-reporter');
 const karmaVite = require('karma-vite');
+const karmaViewport = require('karma-viewport');
 const MagicString = require('magic-string');
 
 // The current package, one of the packages in the `packages` dir
@@ -70,7 +71,7 @@ module.exports = (config) => {
   config.set({
     basePath: cwd,
 
-    plugins: [karmaVite, karmaMocha, karmaChromeLauncher, karmaCoverage, karmaSpecReporter],
+    plugins: [karmaVite, karmaMocha, karmaChromeLauncher, karmaCoverage, karmaSpecReporter, karmaViewport],
     middleware: ['vite'],
 
     browserNoActivityTimeout: isCI ? 30000 : 0,
@@ -84,7 +85,7 @@ module.exports = (config) => {
       },
     },
 
-    frameworks: ['mocha', 'vite'],
+    frameworks: ['mocha', 'vite', 'viewport'],
 
     files: [
       {
