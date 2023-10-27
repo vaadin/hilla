@@ -196,7 +196,7 @@ describe('@hilla/react-crud', () => {
       // Select item
       await grid.toggleRowSelected(0);
       // Delete item
-      const cell = grid.getBodyCellContent(0, 6);
+      const cell = grid.getBodyCellContent(0, (await grid.getColumns()).length - 1);
       const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
