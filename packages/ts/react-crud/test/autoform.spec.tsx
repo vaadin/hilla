@@ -1,4 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
+import type { SelectElement } from '@hilla/react-components/Select.js';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
@@ -362,6 +363,31 @@ describe('@hilla/react-crud', () => {
 
       await form.discard();
       expect(submitButton.disabled).to.be.true;
+    });
+
+    describe('AutoFormEnumField', () => {
+      it('formats enum values using title case', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
+        const form = await FormController.init(result, user);
+        const select = (await form.getField('Gender')) as SelectElement;
+
+        expect(select.items).to.eql([
+          {
+            label: 'Male',
+            value: 'MALE',
+          },
+          {
+            label: 'Female',
+            value: 'FEMALE',
+          },
+          {
+            label: 'Non Binary',
+            value: 'NON_BINARY',
+          },
+        ]);
+      });
     });
   });
 });

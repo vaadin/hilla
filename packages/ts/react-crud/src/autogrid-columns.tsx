@@ -4,6 +4,7 @@ import {
   AutoGridDateRenderer,
   AutoGridDateTimeRenderer,
   AutoGridDecimalRenderer,
+  AutoGridEnumRenderer,
   AutoGridIntegerRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
@@ -70,6 +71,12 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
         headerRenderer: DateHeaderFilter,
+      };
+    case 'enum':
+      return {
+        autoWidth: true,
+        renderer: AutoGridEnumRenderer,
+        headerRenderer: NoHeaderFilter,
       };
     case 'string':
       return {
