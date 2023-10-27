@@ -46,7 +46,6 @@ export interface NestedTestValues {
   string: string;
   number: number;
   boolean: boolean;
-  date?: string;
 }
 
 export interface ColumnRendererTestValues extends HasIdVersion {
@@ -54,7 +53,6 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   integer: number;
   decimal: number;
   boolean: boolean;
-  date?: string;
   localDate?: string;
   localTime?: string;
   localDateTime?: string;
@@ -183,13 +181,6 @@ export class NestedTestModel<T extends NestedTestValues = NestedTestValues> exte
   get boolean(): BooleanModel {
     return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
   }
-
-  get date(): StringModel {
-    return this[_getPropertyModel](
-      'date',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
-    );
-  }
 }
 
 export class ColumnRendererTestModel<
@@ -225,13 +216,6 @@ export class ColumnRendererTestModel<
 
   get boolean(): BooleanModel {
     return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
-  }
-
-  get date(): StringModel {
-    return this[_getPropertyModel](
-      'date',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
-    );
   }
 
   get localDate(): StringModel {
@@ -385,7 +369,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: 123456,
     decimal: 123.456,
     boolean: true,
-    date: '2021-05-13T00:00:00',
     localDate: '2021-05-13',
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
@@ -393,7 +376,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
       string: 'Nested string 1',
       number: 123456,
       boolean: true,
-      date: '2021-05-13T00:00:00',
     },
   },
   {
@@ -403,7 +385,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: -12,
     decimal: -0.12,
     boolean: false,
-    date: '2021-05-14T00:00:00',
     localDate: '2021-05-14',
     localTime: '20:45:00',
     localDateTime: '2021-05-14T20:45:00',
@@ -423,7 +404,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: -12,
     decimal: -12,
     boolean: false,
-    date: 'foo',
     localDate: 'foo',
     localTime: 'foo',
     localDateTime: 'foo',
