@@ -1,3 +1,4 @@
+import type { FormLayoutElement } from '@hilla/react-components/FormLayout';
 import type { RenderResult } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
@@ -8,20 +9,22 @@ export type FormElement = HTMLElement & {
   checked?: boolean;
 };
 
-type FormQueries = Pick<RenderResult, 'findByLabelText' | 'findByTestId' | 'findByText'>;
-
 export default class FormController {
-  readonly instance: HTMLElement;
-  readonly #result: FormQueries;
+  readonly instance: FormLayoutElement;
+  readonly #result: RenderResult;
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
-  static async init(result: FormQueries, user: ReturnType<(typeof userEvent)['setup']>): Promise<FormController> {
-    const form = await waitFor(async () => result.findByTestId('auto-form'));
+  static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<FormController> {
+    const form = await waitFor(() => result.container.querySelector('vaadin-form-layout')!);
 
     return new FormController(form, result, user);
   }
 
-  private constructor(instance: HTMLElement, result: FormQueries, user: ReturnType<(typeof userEvent)['setup']>) {
+  private constructor(
+    instance: FormLayoutElement,
+    result: RenderResult,
+    user: ReturnType<(typeof userEvent)['setup']>,
+  ) {
     this.instance = instance;
     this.#result = result;
     this.#user = user;
