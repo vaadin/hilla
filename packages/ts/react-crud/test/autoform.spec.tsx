@@ -570,7 +570,7 @@ describe('@hilla/react-crud', () => {
       await expectTextFieldColSpan(form, 'Some decimal', '1');
     });
 
-    it('customLayoutRenderer is undefined, the default two-column form layout is used', async () => {
+    it('customLayoutRenderer is defined as a function that renders the fields in a vertical manner, VerticalLayout is used instead of FormLayout', async () => {
       viewport.set('screen-1440-900');
       const service = personService();
       const person = await getItem(service, 1);
