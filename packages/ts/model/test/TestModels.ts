@@ -1,3 +1,5 @@
+/* eslint prefer-arrow-callback: [ "error", { "allowUnboundThis": true } ] */
+/* eslint-disable @typescript-eslint/no-invalid-this */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
@@ -12,6 +14,17 @@ import {
   toObject,
   type IModel,
   _value,
+  type ValueGetter,
+  type ModelMetadata,
+  type ModelOwner,
+  _name,
+  _owner,
+  detachedModelOwner,
+  _key,
+  _members,
+  _meta,
+  _optional,
+  type TypeModel,
 } from '../src';
 
 interface Named {
@@ -67,6 +80,50 @@ interface Container {
   item: BarItem | FooItem;
 }
 
+interface Employee extends Named {
+  supervisor?: Employee;
+}
+
+interface Commentable {
+  comments?: string[];
+}
+
+// Class based models with static properties
+
+/*
+type ModelClass<T = unknown> = IModel<T> & {
+  new(...rest: any[]): {};
+};
+
+type ModelClassWithProperty<M extends ModelClass, K extends keyof any, V = unknown> = M & Readonly<Record<K, V>>;
+
+function staticGetterMixin<M extends ModelClass, K extends keyof any, V = unknown>(superClass: ModelClass, key: K, valueGetter: (this: M) => V): ModelClassWithProperty<M, K, V> {
+  return class extends superClass {
+    static get[key](): V {
+      return valueGetter.call(this as M);
+    }
+  } as ModelClassWithProperty<M, K, V>;
+}
+
+class AModel {
+  static readonly [_name]: string = '';
+  static readonly [_owner]: IModel<unknown> | ModelOwner = detachedModelOwner;
+  static readonly [_key]: keyof any = 'model'
+  static readonly [_value]: unknown = undefined;
+  static readonly [_meta]: ModelMetadata = {};
+  static readonly [_optional]: boolean = false;
+}
+
+class StringClassModel extends staticGetterMixin(AModel, _value, () => '') {}
+class NamedClassModel extends staticGetterMixin(AModel, _value, () => ({} as Named)) {
+  static override readonly name = StringClassModel;
+}
+
+class EmployeeClassModel extends NamedClassModel {
+  static readonly supervisor = EmployeeClassModel;
+}
+*/
+
 // Simple
 
 const NamedModel = m
@@ -75,7 +132,7 @@ const NamedModel = m
   .meta({
     jvmType: 'com.example.application.Named',
   })
-  .property('name', StringModel)
+  .property('name', () => StringModel)
   .build();
 
 // Inheritance
@@ -83,15 +140,16 @@ const NamedModel = m
 const AddressModel = m
   .from(NamedModel, toObject<Address>)
   .name('Address')
-  .property('street', StringModel)
-  .property('premise', StringModel)
-  .property('city', StringModel)
-  .property('postalcode', StringModel)
-  .property('country', m.optional(StringModel))
+  .property('street', () => StringModel)
+  .property('premise', () => StringModel)
+  .property('city', () => StringModel)
+  .property('postalCode', () => StringModel)
+  .property('country', () => m.optional(StringModel))
   .build();
 
 getValue(AddressModel).name;
 getValue(AddressModel).postalCode;
+getValue(AddressModel.postalCode);
 getValue(AddressModel.country)?.length;
 
 // Composition
@@ -99,28 +157,50 @@ getValue(AddressModel.country)?.length;
 const CustomerModel = m
   .from(NamedModel, toObject<Customer>)
   .name('Customer')
-  .property('subscriptionActive', BooleanModel)
-  .property('subscriptionTier', NumberModel)
-  .property('address', AddressModel)
+  .property('subscriptionActive', () => BooleanModel)
+  .property('subscriptionTier', () => NumberModel)
+  .property('address', () => AddressModel)
   .build();
+
+// Self reference
+
+const EmployeeModel = m
+  .from(NamedModel, toObject<Employee>)
+  .name('Employee')
+  .property('supervisor', function modelGetter() {
+    return m.optional(this);
+  })
+  .build();
+
+EmployeeModel.supervisor.supervisor.supervisor.name;
 
 // Array
 
 const OrderRowModel = m
   .from(ObjectModel, toObject<OrderRow>)
   .name('OrderRow')
-  .property('product', StringModel)
-  .property('qty', NumberModel)
+  .property('product', () => StringModel)
+  .property('qty', () => NumberModel)
   .build();
 
 const OrderModel = m
   .from(ObjectModel, toObject<Order>)
   .name('Order')
-  .property('notes', m.optional(StringModel))
-  .property('discountCodes', m.array(StringModel))
-  .property('rows', m.array(OrderRowModel))
-  .property('customer', m.optional(CustomerModel))
-  .property('address', m.optional(AddressModel))
+  .property('notes', () => m.optional(StringModel))
+  .property('discountCodes', () => m.array(StringModel))
+  .property('rows', () => m.array(OrderRowModel))
+  .property('customer', () => m.optional(CustomerModel))
+  .property('address', () => m.optional(AddressModel))
+  .build();
+
+const CommentableModel: TypeModel<Commentable> = m
+  .from(ObjectModel, toObject<Commentable>)
+  .name('Commentable')
+  .property('comments', () => {
+    const array = m.array(StringModel);
+    const optional = m.optional(array);
+    return optional;
+  })
   .build();
 
 // Enum
@@ -128,7 +208,7 @@ const OrderModel = m
 const AccountModel = m
   .from(NamedModel, toObject<Account>)
   .name('Account')
-  .property('type', m.enum(AccountType))
+  .property('type', () => m.enum(AccountType))
   .build();
 
 const t: AccountType = AccountModel.type[_value];
@@ -138,19 +218,19 @@ const t: AccountType = AccountModel.type[_value];
 const FooItemModel = m
   .from(ObjectModel, toObject<FooItem>)
   .name('FooItem')
-  .property('foo', StringModel)
+  .property('foo', () => StringModel)
   .build();
 
 const BarItemModel = m
   .from(ObjectModel, toObject<BarItem>)
   .name('BarItem')
-  .property('bar', NumberModel)
+  .property('bar', () => NumberModel)
   .build();
 
 const ContainerModel = m
   .from(ObjectModel, toObject<Container>)
   .name('Container')
-  .property('item', m.union(FooItemModel, BarItemModel))
+  .property('item', () => m.union(FooItemModel, BarItemModel))
   .build();
 
 const containerItem: BarItem | FooItem = ContainerModel.item[_value];

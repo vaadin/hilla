@@ -1,35 +1,37 @@
-import { BaseModelBuilder } from './BaseModelBuilder.js';
+import { expect } from 'chai';
+import { CoreModelBuilder } from './CoreModelBuilder.js';
 import { AbstractModel, _optional, type IModel, type Value, _value } from './Model.js';
 import { isModel } from './utils.js';
 
-export const PrimitiveModel = BaseModelBuilder.from(AbstractModel, () => undefined as unknown)
+export const PrimitiveModel = CoreModelBuilder.from(AbstractModel, () => undefined as unknown)
   .name('primitive')
   .build();
 
-export const StringModel = BaseModelBuilder.from(PrimitiveModel, () => '')
+export const StringModel = CoreModelBuilder.from(PrimitiveModel, () => '')
   .name('string')
   .build();
 
-export const NumberModel = BaseModelBuilder.from(PrimitiveModel, () => 0)
+export const NumberModel = CoreModelBuilder.from(PrimitiveModel, () => 0)
   .name('number')
   .build();
 
-export const BooleanModel = BaseModelBuilder.from(PrimitiveModel, () => false)
+export const BooleanModel = CoreModelBuilder.from(PrimitiveModel, () => false)
   .name('boolean')
   .build();
 
 // Optional
 
-export type IModelOfOptional<M extends IModel> = Omit<M, typeof _value> & {
-  [_value]: Value<M> | undefined;
+export interface IOptionalModel<T> extends IModel<T | undefined> {
   [_optional]: true;
-};
+}
+
+export type OptionalModel<M extends IModel> = IOptionalModel<Value<M>> & Omit<M, typeof _value>;
 
 // Object
 
-export const emptyObject: Record<never, never> = {};
+export const emptyObject: object = {};
 
-export const ObjectModel = BaseModelBuilder.from(AbstractModel, () => emptyObject)
+export const ObjectModel = CoreModelBuilder.from(AbstractModel, () => emptyObject)
   .name('Object')
   .build();
 
@@ -52,11 +54,11 @@ export function toObject<T>(this: typeof ObjectModel): T {
 
 export const _itemModel = Symbol('itemModel');
 
-export interface IArrayModel<T> extends IModel<T[]> {
-  [_itemModel]: IModel<T>;
+export interface IArrayModel<MItem extends IModel = IModel> extends IModel<Array<Value<MItem>>> {
+  [_itemModel]: MItem;
 }
 
-export const ArrayModel: IArrayModel<unknown> = BaseModelBuilder.from(AbstractModel, () => [] as unknown[])
+export const ArrayModel: IArrayModel = CoreModelBuilder.from(AbstractModel, () => [] as unknown[])
   .name('Array')
   .define(_itemModel, AbstractModel)
   .build();
@@ -77,7 +79,7 @@ export function toEnum<E extends typeof Enum = typeof Enum>(this: typeof EnumMod
   return firstValue;
 }
 
-export const EnumModel = BaseModelBuilder.from(AbstractModel)
+export const EnumModel = CoreModelBuilder.from(AbstractModel)
   .define(_enum, {} as Enum)
   .build();
 
@@ -88,3 +90,18 @@ export const _members = Symbol('members');
 export interface IUnionModel<MM extends readonly [IModel, ...IModel[]]> extends IModel<Value<MM[number]>> {
   [_members]: MM;
 }
+
+// All together now
+
+export type TypeModel<T> = IModel<T> &
+  (T extends typeof Enum
+    ? IEnumModel<T>
+    : T extends Array<infer I>
+    ? IArrayModel<TypeModel<I>>
+    : T extends object
+    ? {
+        readonly [Key in string & keyof T]-?: TypeModel<T[Key]>;
+      }
+    : undefined extends T
+    ? OptionalModel<TypeModel<Exclude<T, undefined>>>
+    : unknown);

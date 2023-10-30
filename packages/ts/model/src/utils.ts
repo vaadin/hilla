@@ -16,3 +16,38 @@ export function isModel<M extends IModel = IModel>(maybeModel: unknown, modelTyp
 export function getValue<M extends IModel>(model: M): Value<M> {
   return model[_value] as Value<M>;
 }
+
+export type ValueGetter<T, M extends IModel = IModel> = (this: M) => T;
+
+export type ModelWithProperty<M extends IModel, K extends keyof any, V = unknown> = M & { readonly [Key in K]: V };
+
+export type ModelPropertyDescriptor<M extends IModel, V = unknown> = Readonly<{
+  enumerable: boolean
+} & ({ get(this: M): V } | { value: V })>;
+
+export class ModelBuilderUtil<T, M extends IModel<T>> {
+  #superModel: IModel;
+
+  #descriptorMap: Record<
+    keyof any,
+    ModelPropertyDescriptor<M, unknown>
+  > = {};
+
+  constructor(superModel: IModel, valueGetter: ValueGetter<T, M>) {
+    this.#superModel = superModel;
+    this.#descriptorMap[_value] = {
+      enumerable: false,
+      get() {
+        return valueGetter.call(this);
+      },
+    };
+  }
+
+  create(): M {
+    return Object.create(this.#superModel, this.#descriptorMap);
+  }
+
+  defineProperty<K extends keyof any, V>(key: K, descriptor: ModelPropertyDescriptor<M, V>): void {
+    this.#descriptorMap[key] = descriptor;
+  }
+}
