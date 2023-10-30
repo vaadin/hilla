@@ -27,7 +27,7 @@ interface FieldColSpan {
   colSpan: number;
 }
 
-type AutoFormLayoutProps = Readonly<{
+export type AutoFormLayoutProps = Readonly<{
   template: FieldColSpan[][] | string[][];
   responsiveSteps?: Array<{ minWidth: string; columns: number }>;
 }>;

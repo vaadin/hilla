@@ -7,9 +7,10 @@ import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
+import type { ComponentType } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
+import { type AutoFormLayoutProps, type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import FormController from './FormController.js';
 import {
@@ -72,12 +73,33 @@ describe('@hilla/react-crud', () => {
         .map(([, value]) => value.toString());
     }
 
-    async function expectTextFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
+    async function expectFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
       const formElement = await form.getField(fieldName);
       if (expectedColSpan === null) {
         return expect(formElement).to.not.have.attribute('colspan');
       }
       return expect(formElement).to.have.attribute('colspan', expectedColSpan);
+    }
+
+    async function populatePersonForm(
+      personId: number,
+      customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
+      screenSize?: string,
+    ): Promise<FormController> {
+      if (screenSize) {
+        viewport.set(screenSize);
+      }
+      const service = personService();
+      const person = await getItem(service, personId);
+      const result = render(
+        <ExperimentalAutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          customLayoutRenderer={customLayoutRenderer}
+        />,
+      );
+      return await FormController.init(user, result.container);
     }
 
     beforeEach(() => {
@@ -360,20 +382,14 @@ describe('@hilla/react-crud', () => {
     });
 
     it('when editing, submit button remains disabled before any changes', async () => {
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      const form = await FormController.init(user, result.container);
+      const form = await populatePersonForm(1);
 
       const submitButton = await form.findButton('Submit');
       expect(submitButton.disabled).to.be.true;
     });
 
     it('when editing, submit button becomes disabled again when the form is reset', async () => {
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      const form = await FormController.init(user, result.container);
+      const form = await populatePersonForm(1);
       const submitButton = await form.findButton('Submit');
 
       await form.typeInField('First name', 'J'); // to enable the submit button
@@ -384,213 +400,163 @@ describe('@hilla/react-crud', () => {
     });
 
     it('customLayoutRenderer is not defined, default two-column form layout is used', async () => {
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      const form = await FormController.init(user, result.container);
+      const form = await populatePersonForm(1);
       expect(form.instance.responsiveSteps).to.have.length(3);
       expect(form.instance.responsiveSteps).to.be.deep.equal([
         { minWidth: 0, columns: 1, labelsPosition: 'top' },
         { minWidth: '20em', columns: 1 },
         { minWidth: '40em', columns: 2 },
       ]);
-      await expectTextFieldColSpan(form, 'First name', null);
-      await expectTextFieldColSpan(form, 'Last name', null);
-      await expectTextFieldColSpan(form, 'Email', null);
-      await expectTextFieldColSpan(form, 'Some integer', null);
-      await expectTextFieldColSpan(form, 'Some decimal', null);
+      await expectFieldColSpan(form, 'First name', null);
+      await expectFieldColSpan(form, 'Last name', null);
+      await expectFieldColSpan(form, 'Email', null);
+      await expectFieldColSpan(form, 'Some integer', null);
+      await expectFieldColSpan(form, 'Some decimal', null);
     });
 
     it('customLayoutRenderer is defined by string[][], number of columns and colspan is based on template rows', async () => {
-      viewport.set('screen-1440-900');
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={{
-            template: [
-              ['firstName', 'lastName', 'email'],
-              ['someInteger', 'someDecimal'],
-            ],
-          }}
-        />,
+      const form = await populatePersonForm(
+        1,
+        {
+          template: [
+            ['firstName', 'lastName', 'email'],
+            ['someInteger', 'someDecimal'],
+          ],
+        },
+        'screen-1440-900',
       );
-      const form = await FormController.init(user, result.container);
       expect(form.instance.responsiveSteps).to.have.length(2);
       expect(form.instance.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 6 },
       ]);
-      await expectTextFieldColSpan(form, 'First name', '2');
-      await expectTextFieldColSpan(form, 'Last name', '2');
-      await expectTextFieldColSpan(form, 'Email', '2');
-      await expectTextFieldColSpan(form, 'Some integer', '3');
-      await expectTextFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'First name', '2');
+      await expectFieldColSpan(form, 'Last name', '2');
+      await expectFieldColSpan(form, 'Email', '2');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
     });
 
     it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan is based on responsive steps', async () => {
-      viewport.set('screen-1440-900');
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={{
-            responsiveSteps: [
-              { minWidth: '0', columns: 1 },
-              { minWidth: '800px', columns: 2 },
-              { minWidth: '1200px', columns: 3 },
-            ],
-            template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
-          }}
-        />,
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1440-900',
       );
-      const form = await FormController.init(user, result.container);
       expect(form.instance.responsiveSteps).to.have.length(3);
       expect(form.instance.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 2 },
         { minWidth: '1200px', columns: 3 },
       ]);
-      await expectTextFieldColSpan(form, 'First name', '1');
-      await expectTextFieldColSpan(form, 'Last name', '1');
-      await expectTextFieldColSpan(form, 'Email', '1');
-      await expectTextFieldColSpan(form, 'Some integer', '3');
-      await expectTextFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
     });
 
     it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan respects the screen size', async () => {
-      viewport.set('screen-1024-768');
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={{
-            responsiveSteps: [
-              { minWidth: '0', columns: 1 },
-              { minWidth: '800px', columns: 2 },
-              { minWidth: '1200px', columns: 3 },
-            ],
-            template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
-          }}
-        />,
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1024-768',
       );
-      const form = await FormController.init(user, result.container);
 
-      await expectTextFieldColSpan(form, 'First name', '1');
-      await expectTextFieldColSpan(form, 'Last name', '1');
-      await expectTextFieldColSpan(form, 'Email', '1');
-      await expectTextFieldColSpan(form, 'Some integer', '2');
-      await expectTextFieldColSpan(form, 'Some decimal', '2');
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '2');
+      await expectFieldColSpan(form, 'Some decimal', '2');
     });
 
     it('customLayoutRenderer is defined by FieldColSpan[][], number of columns is based on template rows and colspan is based on each FieldColSpan', async () => {
-      viewport.set('screen-1440-900');
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={{
-            template: [
-              [
-                { property: 'firstName', colSpan: 1 },
-                { property: 'lastName', colSpan: 1 },
-                { property: 'email', colSpan: 1 },
-              ],
-              [
-                { property: 'someInteger', colSpan: 2 },
-                { property: 'someDecimal', colSpan: 2 },
-              ],
+      const form = await populatePersonForm(
+        1,
+        {
+          template: [
+            [
+              { property: 'firstName', colSpan: 1 },
+              { property: 'lastName', colSpan: 1 },
+              { property: 'email', colSpan: 1 },
             ],
-          }}
-        />,
+            [
+              { property: 'someInteger', colSpan: 2 },
+              { property: 'someDecimal', colSpan: 2 },
+            ],
+          ],
+        },
+        'screen-1440-900',
       );
-      const form = await FormController.init(user, result.container);
       expect(form.instance.responsiveSteps).to.have.length(2);
       expect(form.instance.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 6 },
       ]);
-      await expectTextFieldColSpan(form, 'First name', '1');
-      await expectTextFieldColSpan(form, 'Last name', '1');
-      await expectTextFieldColSpan(form, 'Email', '1');
-      await expectTextFieldColSpan(form, 'Some integer', '2');
-      await expectTextFieldColSpan(form, 'Some decimal', '2');
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '2');
+      await expectFieldColSpan(form, 'Some decimal', '2');
     });
 
     it('customLayoutRenderer is defined by FieldColSpan[][] and responsiveSteps, number of columns is based on responsiveSteps and colspan is based on each FieldColSpan', async () => {
-      viewport.set('screen-1440-900');
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={{
-            responsiveSteps: [
-              { minWidth: '0', columns: 1 },
-              { minWidth: '800px', columns: 2 },
-              { minWidth: '1200px', columns: 3 },
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [
+            [
+              { property: 'firstName', colSpan: 1 },
+              { property: 'lastName', colSpan: 1 },
+              { property: 'email', colSpan: 1 },
             ],
-            template: [
-              [
-                { property: 'firstName', colSpan: 1 },
-                { property: 'lastName', colSpan: 1 },
-                { property: 'email', colSpan: 1 },
-              ],
-              [
-                { property: 'someInteger', colSpan: 2 },
-                { property: 'someDecimal', colSpan: 1 },
-              ],
+            [
+              { property: 'someInteger', colSpan: 2 },
+              { property: 'someDecimal', colSpan: 1 },
             ],
-          }}
-        />,
+          ],
+        },
+        'screen-1440-900',
       );
-      const form = await FormController.init(user, result.container);
       expect(form.instance.responsiveSteps).to.have.length(3);
       expect(form.instance.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 2 },
         { minWidth: '1200px', columns: 3 },
       ]);
-      await expectTextFieldColSpan(form, 'First name', '1');
-      await expectTextFieldColSpan(form, 'Last name', '1');
-      await expectTextFieldColSpan(form, 'Email', '1');
-      await expectTextFieldColSpan(form, 'Some integer', '2');
-      await expectTextFieldColSpan(form, 'Some decimal', '1');
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '2');
+      await expectFieldColSpan(form, 'Some decimal', '1');
     });
 
     it('customLayoutRenderer is defined as a function that renders the fields in a vertical manner, VerticalLayout is used instead of FormLayout', async () => {
-      viewport.set('screen-1440-900');
-      const service = personService();
-      const person = await getItem(service, 1);
-
       function MyCustomLayoutRenderer({ children, form }: AutoFormLayoutRendererProps<PersonModel>) {
         return <VerticalLayout>{children}</VerticalLayout>;
       }
-      const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          customLayoutRenderer={MyCustomLayoutRenderer}
-        />,
-      );
-      const form = await FormController.init(user, result.container);
+      const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
       expect(form.instance).to.not.exist;
-      const layout = await waitFor(() => result.container.querySelector('vaadin-vertical-layout')!);
+      const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
       expect(layout).to.exist;
     });
 
