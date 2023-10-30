@@ -49,15 +49,10 @@ type CustomFormLayoutProps = Readonly<{
 
 function findColumnCount(responsiveSteps: Array<{ minWidth: string; columns: number }>): number {
   return responsiveSteps
-    .map((step: { minWidth: string; columns: number }) => {
-      let minWidthNum: number;
-      if (Number.isNaN(step.minWidth)) {
-        minWidthNum = parseInt(step.minWidth.substring(0, step.minWidth.length - 2), 10); // get rid of 'px', 'em', etc.
-      } else {
-        minWidthNum = parseInt(step.minWidth, 10);
-      }
-      return { minWidth: minWidthNum, columns: step.columns };
-    })
+    .map((step: { minWidth: string; columns: number }) => ({
+      minWidth: parseInt(step.minWidth, 10),
+      columns: step.columns,
+    }))
     .filter(({ minWidth }) => minWidth <= window.innerWidth)
     .reduce(
       (maxStep, step) => {
