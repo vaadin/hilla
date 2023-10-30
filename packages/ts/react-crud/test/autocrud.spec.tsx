@@ -221,14 +221,6 @@ describe('@hilla/react-crud', () => {
         }
       });
 
-      // async function getOverlay() {
-      //   return screen.findByRole('dialog');
-      // }
-      //
-      // async function getOverlayForm() {
-      //   return FormController.init(user);
-      // }
-
       it('opens the form in a dialog when selecting an item', async () => {
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
