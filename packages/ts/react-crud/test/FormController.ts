@@ -1,6 +1,5 @@
 import type { FormLayoutElement } from '@hilla/react-components/FormLayout';
-import { screen } from '@testing-library/react';
-import { waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 
 export type FormElement = HTMLElement & {
