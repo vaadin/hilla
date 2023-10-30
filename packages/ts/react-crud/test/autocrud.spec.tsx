@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, type RenderResult, screen, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
 import type { Viewport } from 'karma-viewport/dist/adapter/viewport';
@@ -221,20 +221,19 @@ describe('@hilla/react-crud', () => {
         }
       });
 
-      async function getOverlay() {
-        return screen.findByRole('dialog');
-      }
-
-      async function getOverlayForm() {
-        const overlay = await getOverlay();
-        return FormController.init(within(overlay), user);
-      }
+      // async function getOverlay() {
+      //   return screen.findByRole('dialog');
+      // }
+      //
+      // async function getOverlayForm() {
+      //   return FormController.init(user);
+      // }
 
       it('opens the form in a dialog when selecting an item', async () => {
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
-        const form = await getOverlayForm();
+        const form = await FormController.init(user);
         expect(form.instance).to.exist;
         expect((await form.getField('First name')).value).to.equal('Jane');
         expect((await form.getField('Last name')).value).to.equal('Love');
@@ -242,9 +241,9 @@ describe('@hilla/react-crud', () => {
 
       it('opens the form in a dialog when creating a new item', async () => {
         const newButton = await result.findByText('+ New');
-        newButton.click();
+        await user.click(newButton);
 
-        const form = await getOverlayForm();
+        const form = await FormController.init(user);
         expect(form.instance).to.exist;
         expect((await form.getField('First name')).value).to.equal('');
         expect((await form.getField('Last name')).value).to.equal('');
@@ -254,7 +253,7 @@ describe('@hilla/react-crud', () => {
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
-        const dialogOverlay = await getOverlay();
+        const dialogOverlay = await screen.findByRole('dialog');
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
 
@@ -272,7 +271,7 @@ describe('@hilla/react-crud', () => {
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
-        const form = await getOverlayForm();
+        const form = await FormController.init(user);
         await form.typeInField('First name', 'J'); // to enable the submit button
         await form.submit();
 

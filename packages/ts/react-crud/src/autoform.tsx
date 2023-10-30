@@ -1,8 +1,7 @@
-import { type AbstractModel, type DetachedModelConstructor, ValidationError } from '@hilla/form';
+import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
@@ -33,14 +32,14 @@ type AutoFormLayoutProps = Readonly<{
   responsiveSteps?: Array<{ minWidth: string; columns: number }>;
 }>;
 
-export type AutoFormProps<TItem, M extends AbstractModel = AbstractModel> = Readonly<{
-  service: CrudService<TItem>;
-  model: DetachedModelConstructor<AbstractModel<TItem>>;
-  item?: TItem | typeof emptyItem;
+export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
+  service: CrudService<Value<M>>;
+  model: DetachedModelConstructor<M>;
+  item?: Value<M> | typeof emptyItem | null;
   disabled?: boolean;
   customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
   onSubmitError?({ error }: SubmitErrorEvent): void;
-  afterSubmit?({ item }: SubmitEvent<TItem>): void;
+  afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
 }>;
 
 type CustomFormLayoutProps = Readonly<{
@@ -126,7 +125,7 @@ function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Ele
   return <FormLayout responsiveSteps={responsiveSteps}>{spannedFields}</FormLayout>;
 }
 
-export function ExperimentalAutoForm<TItem>({
+export function ExperimentalAutoForm<M extends AbstractModel>({
   service,
   model,
   item = emptyItem,
@@ -134,7 +133,7 @@ export function ExperimentalAutoForm<TItem>({
   afterSubmit,
   disabled,
   customLayoutRenderer: CustomLayoutRenderer,
-}: AutoFormProps<TItem>): JSX.Element {
+}: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
