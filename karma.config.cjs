@@ -9,6 +9,8 @@ const karmaSpecReporter = require('karma-spec-reporter');
 const karmaVite = require('karma-vite');
 const karmaViewport = require('karma-viewport');
 const MagicString = require('magic-string');
+const postcss = require('postcss');
+const cssnanoPlugin = require('cssnano');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -23,6 +25,8 @@ function loadMockConfig() {
   }
 }
 
+// This plugin adds "__REGISTER__()" function definition everywhere where it finds
+// the call for that function. It is necessary for a correct code for tests.
 function loadRegisterJs() {
   return {
     enforce: 'pre',
@@ -39,6 +43,37 @@ function loadRegisterJs() {
         return {
           code: _code.toString(),
           map: _code.generateMap(),
+        };
+      }
+    },
+  };
+}
+
+const cssTransformer = postcss([cssnanoPlugin()]);
+
+// This plugin transforms CSS to Constructible CSSStyleSheet for easy
+// installation it to the document styles.
+function constructCss() {
+  let css = new Map();
+
+  return {
+    enforce: 'post',
+    name: 'vite-construct-css',
+    async load(id) {
+      if (id.endsWith('.obj.css')) {
+        const content = await readFile(id, 'utf8');
+        css.set(id, content);
+        return {
+          code: '',
+        }
+      }
+    },
+    async transform(_, id) {
+      if (id.endsWith('.obj.css')) {
+        const { content } = await cssTransformer.process(css.get(id));
+
+        return {
+          code: `const css = new CSSStyleSheet();css.replaceSync(${JSON.stringify(content)});export default css;`,
         };
       }
     },
@@ -126,7 +161,7 @@ module.exports = (config) => {
             },
           },
         },
-        plugins: [loadRegisterJs()],
+        plugins: [loadRegisterJs(), constructCss()],
         resolve: {
           alias: Object.entries(mocks).map(([find, file]) => {
             const replacement = join(cwd, `test/mocks/${file}`);

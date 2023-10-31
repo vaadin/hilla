@@ -1,0 +1,12 @@
+.auto-grid-comparation-selection {
+  --vaadin-field-default-width: 2em;
+  margin-right: 3px;
+}
+
+.auto-grid-comparation-selection > vaadin-select-value-button {
+  --_lumo-text-field-overflow-mask-image: none !important;
+}
+
+.auto-grid-comparation-selection::part(toggle-button) {
+  display: none;
+}
