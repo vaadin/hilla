@@ -20,7 +20,7 @@
     "build": "concurrently npm:build:*",
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
-    "build:copy": "cd src && copyfiles **/*.d.ts .. && copyfiles *.css ..",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "karma start ../../../karma.config.cjs --port 9879",
@@ -48,9 +48,9 @@
   },
   "dependencies": {
     "@hilla/form": "2.3.0-beta1",
-    "@hilla/react-components": "2.2.0-rc1",
+    "@hilla/react-components": "2.2.1",
     "@hilla/react-form": "2.3.0-beta1",
-    "@vaadin/vaadin-lumo-styles": "24.2.0-rc1"
+    "@vaadin/vaadin-lumo-styles": "24.2.1"
   },
   "peerDependencies": {
     "react": "^18"
@@ -69,6 +69,7 @@
     "@types/validator": "^13.11.2",
     "chai-as-promised": "^7.1.1",
     "chai-dom": "^1.11.0",
+    "karma-viewport": "^1.0.9",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
     "typescript": "5.1.6"
