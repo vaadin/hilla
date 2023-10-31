@@ -82,7 +82,7 @@ export class PushProcessor {
     return lastTypeName.text === initParameterTypeName;
   }
 
-  #removeInitImport = (importStatement: ts.ImportDeclaration): ts.Statement | undefined => {
+  #removeInitImport(importStatement: ts.ImportDeclaration): ts.Statement | undefined {
     const namedImports = importStatement.importClause?.namedBindings;
     if (namedImports && ts.isNamedImports(namedImports)) {
       const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
@@ -104,7 +104,7 @@ export class PushProcessor {
     }
 
     return undefined;
-  };
+  }
 
   /**
    * Replace returned `Promise<Array<T>>` by the `Subscription<T>` type
