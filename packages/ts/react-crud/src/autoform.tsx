@@ -22,10 +22,10 @@ export type AutoFormLayoutRendererProps<M extends AbstractModel> = Readonly<{
   children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
 }>;
 
-interface FieldColSpan {
+type FieldColSpan = Readonly<{
   property: string;
   colSpan: number;
-}
+}>;
 
 export type AutoFormLayoutProps = Readonly<{
   template: FieldColSpan[][] | string[][];
