@@ -407,6 +407,7 @@ describe('@hilla/react-crud', () => {
         { minWidth: '20em', columns: 1 },
         { minWidth: '40em', columns: 2 },
       ]);
+      expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
       await expectFieldColSpan(form, 'First name', null);
       await expectFieldColSpan(form, 'Last name', null);
       await expectFieldColSpan(form, 'Email', null);
@@ -421,6 +422,7 @@ describe('@hilla/react-crud', () => {
           template: [
             ['firstName', 'lastName', 'email'],
             ['someInteger', 'someDecimal'],
+            ['id', 'version'],
           ],
         },
         'screen-1440-900',
@@ -435,6 +437,8 @@ describe('@hilla/react-crud', () => {
       await expectFieldColSpan(form, 'Email', '2');
       await expectFieldColSpan(form, 'Some integer', '3');
       await expectFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'Id', '3');
+      await expectFieldColSpan(form, 'Version', '3');
     });
 
     it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan is based on responsive steps', async () => {
@@ -498,6 +502,10 @@ describe('@hilla/react-crud', () => {
               { property: 'someInteger', colSpan: 2 },
               { property: 'someDecimal', colSpan: 2 },
             ],
+            [
+              { property: 'id', colSpan: 2 },
+              { property: 'version', colSpan: 2 },
+            ],
           ],
         },
         'screen-1440-900',
@@ -512,6 +520,8 @@ describe('@hilla/react-crud', () => {
       await expectFieldColSpan(form, 'Email', '1');
       await expectFieldColSpan(form, 'Some integer', '2');
       await expectFieldColSpan(form, 'Some decimal', '2');
+      await expectFieldColSpan(form, 'Id', '2');
+      await expectFieldColSpan(form, 'Version', '2');
     });
 
     it('customLayoutRenderer is defined by FieldColSpan[][] and responsiveSteps, number of columns is based on responsiveSteps and colspan is based on each FieldColSpan', async () => {

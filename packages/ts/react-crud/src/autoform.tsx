@@ -167,19 +167,23 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
-  const fields = getProperties(model)
-    .filter(includeProperty)
-    .map((propertyInfo) => (
+  let layout: JSX.Element;
+  if (CustomLayoutRenderer === undefined) {
+    const fields = getProperties(model)
+      .filter(includeProperty)
+      .map((propertyInfo) => (
+        <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+      ));
+    layout = <FormLayout>{fields}</FormLayout>;
+  } else {
+    const fields = getProperties(model).map((propertyInfo) => (
       <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
     ));
-
-  let layout: JSX.Element;
-  if (typeof CustomLayoutRenderer === 'function') {
-    layout = <CustomLayoutRenderer form={form}>{fields}</CustomLayoutRenderer>;
-  } else if (CustomLayoutRenderer !== undefined) {
-    layout = <CustomFormLayout customFormLayout={CustomLayoutRenderer}>{fields}</CustomFormLayout>;
-  } else {
-    layout = <FormLayout>{fields}</FormLayout>;
+    if (typeof CustomLayoutRenderer === 'function') {
+      layout = <CustomLayoutRenderer form={form}>{fields}</CustomLayoutRenderer>;
+    } else {
+      layout = <CustomFormLayout customFormLayout={CustomLayoutRenderer}>{fields}</CustomFormLayout>;
+    }
   }
 
   return (
