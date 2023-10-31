@@ -109,16 +109,15 @@ function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Ele
   weightedTemplate.forEach((row: FieldColSpan[]) => {
     row.forEach((fieldColSpan: FieldColSpan) => {
       const fieldProps = fieldsByPropertyName.get(fieldColSpan.property)!;
-      const spannedField = // React.cloneElement(field, { colspan: fieldColSpan.colSpan });
-        (
-          <AutoFormField
-            key={fieldProps.name}
-            propertyInfo={fieldProps.propertyInfo}
-            form={fieldProps.form}
-            disabled={fieldProps.disabled}
-            colSpan={fieldColSpan.colSpan}
-          />
-        );
+      const spannedField = (
+        <AutoFormField
+          key={fieldProps.name}
+          propertyInfo={fieldProps.propertyInfo}
+          form={fieldProps.form}
+          disabled={fieldProps.disabled}
+          colSpan={fieldColSpan.colSpan}
+        />
+      );
       spannedFields.push(spannedField);
     });
   });
