@@ -494,17 +494,17 @@ describe('@hilla/react-crud', () => {
         {
           template: [
             [
-              { property: 'firstName', colSpan: 1 },
-              { property: 'lastName', colSpan: 1 },
-              { property: 'email', colSpan: 1 },
+              { property: 'firstName', colSpan: 2 },
+              { property: 'lastName', colSpan: 2 },
+              { property: 'email', colSpan: 2 },
             ],
             [
-              { property: 'someInteger', colSpan: 2 },
-              { property: 'someDecimal', colSpan: 2 },
+              { property: 'someInteger', colSpan: 3 },
+              { property: 'someDecimal', colSpan: 3 },
             ],
             [
-              { property: 'id', colSpan: 2 },
-              { property: 'version', colSpan: 2 },
+              { property: 'id', colSpan: 3 },
+              { property: 'version', colSpan: 3 },
             ],
           ],
         },
@@ -515,13 +515,13 @@ describe('@hilla/react-crud', () => {
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 6 },
       ]);
-      await expectFieldColSpan(form, 'First name', '1');
-      await expectFieldColSpan(form, 'Last name', '1');
-      await expectFieldColSpan(form, 'Email', '1');
-      await expectFieldColSpan(form, 'Some integer', '2');
-      await expectFieldColSpan(form, 'Some decimal', '2');
-      await expectFieldColSpan(form, 'Id', '2');
-      await expectFieldColSpan(form, 'Version', '2');
+      await expectFieldColSpan(form, 'First name', '2');
+      await expectFieldColSpan(form, 'Last name', '2');
+      await expectFieldColSpan(form, 'Email', '2');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'Id', '3');
+      await expectFieldColSpan(form, 'Version', '3');
     });
 
     it('customLayoutRenderer is defined by FieldColSpan[][] and responsiveSteps, number of columns is based on responsiveSteps and colspan is based on each FieldColSpan', async () => {

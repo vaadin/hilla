@@ -73,10 +73,7 @@ function createGenericResponsiveSteps(
   }
   const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
 
-  const minNeededColumns = customFormLayout.template
-    .map((row) => row.length)
-    .filter((value, index, array) => array.indexOf(value) === index)
-    .reduce(lcm);
+  const minNeededColumns = customFormLayout.template.map((row) => row.length).reduce(lcm);
 
   return [
     { minWidth: '0', columns: 1 },
@@ -86,8 +83,8 @@ function createGenericResponsiveSteps(
 
 function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Element {
   const { customFormLayout, children } = customFormLayoutProps;
-  const fieldsByPropertyName = new Map<string, JSX.Element>();
-  children.forEach((field) => fieldsByPropertyName.set(field.props.propertyInfo.name, field));
+  const fieldsByPropertyName = new Map<string, AutoFormFieldProps>();
+  children.forEach((field) => fieldsByPropertyName.set(field.props.propertyInfo.name, field.props));
 
   let responsiveSteps: Array<{ minWidth: string; columns: number }>;
   if (customFormLayout.responsiveSteps == null) {
@@ -111,8 +108,17 @@ function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Ele
   const spannedFields: JSX.Element[] = [];
   weightedTemplate.forEach((row: FieldColSpan[]) => {
     row.forEach((fieldColSpan: FieldColSpan) => {
-      const field = fieldsByPropertyName.get(fieldColSpan.property)!;
-      const spannedField = React.cloneElement(field, { colspan: fieldColSpan.colSpan });
+      const fieldProps = fieldsByPropertyName.get(fieldColSpan.property)!;
+      const spannedField = // React.cloneElement(field, { colspan: fieldColSpan.colSpan });
+        (
+          <AutoFormField
+            key={fieldProps.name}
+            propertyInfo={fieldProps.propertyInfo}
+            form={fieldProps.form}
+            disabled={fieldProps.disabled}
+            colSpan={fieldColSpan.colSpan}
+          />
+        );
       spannedFields.push(spannedField);
     });
   });
