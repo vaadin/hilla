@@ -2,7 +2,7 @@ import { type AbstractModel, type DetachedModelConstructor, ValidationError } fr
 import { Button } from '@hilla/react-components/Button.js';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { useForm } from '@hilla/react-form';
+import { useForm, type FieldDirectiveResult } from '@hilla/react-form';
 import { type JSX, useEffect, useState } from 'react';
 import { AutoFormField } from './autoform-field.js';
 import type { CrudService } from './crud.js';
@@ -24,6 +24,7 @@ export type AutoFormProps<TItem> = Readonly<{
   disabled?: boolean;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<TItem>): void;
+  customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>;
 }>;
 
 export function ExperimentalAutoForm<TItem>({
@@ -33,6 +34,7 @@ export function ExperimentalAutoForm<TItem>({
   onSubmitError,
   afterSubmit,
   disabled,
+  customFields,
 }: AutoFormProps<TItem>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -77,9 +79,18 @@ export function ExperimentalAutoForm<TItem>({
       <VerticalLayout className="auto-form-fields">
         {getProperties(model)
           .filter(includeProperty)
-          .map((propertyInfo) => (
-            <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-          ))}
+          .map((propertyInfo) => {
+            const customField = customFields?.[propertyInfo.name];
+
+            if (customField) {
+              // @ts-expect-error: model needs access by name
+              const fieldModel = form.model[propertyInfo.name] as AbstractModel<TItem>;
+              return customField({ field: form.field(fieldModel) });
+            }
+            return (
+              <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+            );
+          })}
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       </VerticalLayout>
       <HorizontalLayout className="auto-form-toolbar" theme="spacing">

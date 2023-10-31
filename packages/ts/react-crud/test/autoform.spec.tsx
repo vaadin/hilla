@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import type { SelectElement } from '@hilla/react-components/Select.js';
+import { TextArea } from '@hilla/react-components/TextArea.js';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
@@ -387,6 +388,49 @@ describe('@hilla/react-crud', () => {
             value: 'NON_BINARY',
           },
         ]);
+      });
+    });
+
+    describe('Custom field', () => {
+      it('renders a custom field instead of the default one', async () => {
+        const testLabel = 'Last names';
+        const testValue = 'Maxwell\nSmart';
+
+        const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+        service.save = async (item: Person): Promise<Person | undefined> => {
+          expect(item.lastName).to.equal(testValue);
+          return Promise.resolve(item);
+        };
+
+        const result = await FormController.init(
+          render(
+            <ExperimentalAutoForm
+              service={service}
+              model={PersonModel}
+              customFields={{
+                lastName: ({ field }) => <TextArea {...field} label={testLabel} />,
+              }}
+            />,
+          ),
+          user,
+        );
+
+        const fields = await result.getFields(...LABELS.map((label) => (label === 'Last name' ? testLabel : label)));
+        const tagNames = fields.map((field) => field.localName);
+        expect(tagNames).to.eql([
+          'vaadin-text-field',
+          'vaadin-text-area',
+          'vaadin-select',
+          'vaadin-text-field',
+          'vaadin-integer-field',
+          'vaadin-number-field',
+          'vaadin-checkbox',
+          'vaadin-date-picker',
+          'vaadin-time-picker',
+        ]);
+
+        await result.typeInField(testLabel, testValue);
+        await result.submit();
       });
     });
   });
