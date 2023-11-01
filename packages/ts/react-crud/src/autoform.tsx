@@ -111,7 +111,7 @@ function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Ele
       const fieldProps = fieldsByPropertyName.get(fieldColSpan.property)!;
       const spannedField = (
         <AutoFormField
-          key={fieldProps.name}
+          key={fieldProps.propertyInfo.name}
           propertyInfo={fieldProps.propertyInfo}
           form={fieldProps.form}
           disabled={fieldProps.disabled}

@@ -85,6 +85,7 @@ describe('@hilla/react-crud', () => {
       personId: number,
       customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
       screenSize?: string,
+      disabled?: boolean,
     ): Promise<FormController> {
       if (screenSize) {
         viewport.set(screenSize);
@@ -97,6 +98,7 @@ describe('@hilla/react-crud', () => {
           model={PersonModel}
           item={person}
           customLayoutRenderer={customLayoutRenderer}
+          disabled={disabled}
         />,
       );
       return await FormController.init(user, result.container);
@@ -486,6 +488,24 @@ describe('@hilla/react-crud', () => {
       await expectFieldColSpan(form, 'Email', '1');
       await expectFieldColSpan(form, 'Some integer', '2');
       await expectFieldColSpan(form, 'Some decimal', '2');
+    });
+
+    it('customLayoutRenderer is defined by string[][] and form is disabled, rendered fields are disabled properly', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1024-768',
+        true,
+      );
+
+      expect(await form.getField('First name')).to.have.attribute('disabled');
     });
 
     it('customLayoutRenderer is defined by FieldColSpan[][], number of columns is based on template rows and colspan is based on each FieldColSpan', async () => {
