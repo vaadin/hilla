@@ -1,10 +1,10 @@
-import { type AbstractModel, type DetachedModelConstructor, ValidationError } from '@hilla/form';
+import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
+import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { useForm } from '@hilla/react-form';
-import { type JSX, useEffect, useState } from 'react';
-import { AutoFormField } from './autoform-field.js';
+import { useForm, type UseFormResult } from '@hilla/react-form';
+import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
+import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty } from './property-info.js';
 
@@ -17,23 +17,124 @@ type SubmitEvent<TItem> = {
   item: TItem;
 };
 
-export type AutoFormProps<TItem> = Readonly<{
-  service: CrudService<TItem>;
-  model: DetachedModelConstructor<AbstractModel<TItem>>;
-  item?: TItem | typeof emptyItem;
-  disabled?: boolean;
-  onSubmitError?({ error }: SubmitErrorEvent): void;
-  afterSubmit?({ item }: SubmitEvent<TItem>): void;
+export type AutoFormLayoutRendererProps<M extends AbstractModel> = Readonly<{
+  form: UseFormResult<M>;
+  children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
 }>;
 
-export function ExperimentalAutoForm<TItem>({
+type FieldColSpan = Readonly<{
+  property: string;
+  colSpan: number;
+}>;
+
+export type AutoFormLayoutProps = Readonly<{
+  template: FieldColSpan[][] | string[][];
+  responsiveSteps?: Array<{ minWidth: string; columns: number }>;
+}>;
+
+export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
+  service: CrudService<Value<M>>;
+  model: DetachedModelConstructor<M>;
+  item?: Value<M> | typeof emptyItem | null;
+  disabled?: boolean;
+  customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
+  onSubmitError?({ error }: SubmitErrorEvent): void;
+  afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
+}>;
+
+type CustomFormLayoutProps = Readonly<{
+  customFormLayout: AutoFormLayoutProps;
+  children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
+}>;
+
+function findColumnCount(responsiveSteps: Array<{ minWidth: string; columns: number }>): number {
+  return responsiveSteps
+    .map((step: { minWidth: string; columns: number }) => ({
+      minWidth: parseInt(step.minWidth, 10),
+      columns: step.columns,
+    }))
+    .filter(({ minWidth }) => minWidth <= window.innerWidth)
+    .reduce(
+      (maxStep, step) => {
+        if (step.minWidth > maxStep.minWidth) {
+          return step;
+        }
+        return maxStep;
+      },
+      { minWidth: 0, columns: 1 },
+    ).columns;
+}
+
+function createGenericResponsiveSteps(
+  customFormLayout: AutoFormLayoutProps,
+): Array<{ minWidth: string; columns: number }> {
+  function gcd(a: number, b: number): number {
+    return a > 0 ? gcd(b % a, a) : b;
+  }
+  const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
+
+  const minNeededColumns = customFormLayout.template.map((row) => row.length).reduce(lcm);
+
+  return [
+    { minWidth: '0', columns: 1 },
+    { minWidth: '800px', columns: minNeededColumns },
+  ];
+}
+
+function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Element {
+  const { customFormLayout, children } = customFormLayoutProps;
+  const fieldsByPropertyName = new Map<string, AutoFormFieldProps>();
+  children.forEach((field) => fieldsByPropertyName.set(field.props.propertyInfo.name, field.props));
+
+  let responsiveSteps: Array<{ minWidth: string; columns: number }>;
+  if (customFormLayout.responsiveSteps == null) {
+    responsiveSteps = createGenericResponsiveSteps(customFormLayout);
+  } else {
+    ({ responsiveSteps } = customFormLayout);
+  }
+
+  let weightedTemplate: FieldColSpan[][];
+  if (typeof customFormLayout.template[0][0] === 'string') {
+    const columnCount = findColumnCount(responsiveSteps);
+    weightedTemplate = (customFormLayout.template as string[][]).map((row) => {
+      const rowSize = row.length;
+      const colSpan = Math.ceil(columnCount / rowSize);
+      return row.map((property) => ({ property, colSpan }));
+    });
+  } else {
+    weightedTemplate = customFormLayout.template as FieldColSpan[][];
+  }
+
+  const spannedFields: JSX.Element[] = [];
+  weightedTemplate.forEach((row: FieldColSpan[]) => {
+    row.forEach((fieldColSpan: FieldColSpan) => {
+      const fieldProps = fieldsByPropertyName.get(fieldColSpan.property)!;
+      const spannedField = // React.cloneElement(field, { colspan: fieldColSpan.colSpan });
+        (
+          <AutoFormField
+            key={fieldProps.name}
+            propertyInfo={fieldProps.propertyInfo}
+            form={fieldProps.form}
+            disabled={fieldProps.disabled}
+            colSpan={fieldColSpan.colSpan}
+          />
+        );
+      spannedFields.push(spannedField);
+    });
+  });
+
+  return <FormLayout responsiveSteps={responsiveSteps}>{spannedFields}</FormLayout>;
+}
+
+export function ExperimentalAutoForm<M extends AbstractModel>({
   service,
   model,
   item = emptyItem,
   onSubmitError,
   afterSubmit,
   disabled,
-}: AutoFormProps<TItem>): JSX.Element {
+  customLayoutRenderer: CustomLayoutRenderer,
+}: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
@@ -72,16 +173,29 @@ export function ExperimentalAutoForm<TItem>({
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
+  let layout: JSX.Element;
+  if (CustomLayoutRenderer === undefined) {
+    const fields = getProperties(model)
+      .filter(includeProperty)
+      .map((propertyInfo) => (
+        <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+      ));
+    layout = <FormLayout>{fields}</FormLayout>;
+  } else {
+    const fields = getProperties(model).map((propertyInfo) => (
+      <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
+    ));
+    if (typeof CustomLayoutRenderer === 'function') {
+      layout = <CustomLayoutRenderer form={form}>{fields}</CustomLayoutRenderer>;
+    } else {
+      layout = <CustomFormLayout customFormLayout={CustomLayoutRenderer}>{fields}</CustomFormLayout>;
+    }
+  }
+
   return (
-    <VerticalLayout className="auto-form" data-testid="auto-form">
-      <VerticalLayout className="auto-form-fields">
-        {getProperties(model)
-          .filter(includeProperty)
-          .map((propertyInfo) => (
-            <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-          ))}
-        {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
-      </VerticalLayout>
+    <section className="flex flex-col p-m gap-m">
+      {layout}
+      {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       <HorizontalLayout className="auto-form-toolbar" theme="spacing">
         {form.dirty ? (
           <Button theme="tertiary" onClick={() => form.reset()}>
@@ -97,6 +211,6 @@ export function ExperimentalAutoForm<TItem>({
           Submit
         </Button>
       </HorizontalLayout>
-    </VerticalLayout>
+    </section>
   );
 }

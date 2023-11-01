@@ -14,6 +14,7 @@ import { convertToTitleCase } from './util.js';
 
 export type SharedFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
+  colSpan?: number;
   form: UseFormResult<any>;
 }>;
 
