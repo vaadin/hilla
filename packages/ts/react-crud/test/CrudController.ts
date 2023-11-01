@@ -9,7 +9,10 @@ export class CrudController {
   readonly newButton: HTMLElement;
 
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<CrudController> {
-    const [grid, form] = await Promise.all([GridController.init(result, user), FormController.init(result, user)]);
+    const [grid, form] = await Promise.all([
+      GridController.init(result, user),
+      FormController.init(user, result.container),
+    ]);
     const newButton = await result.findByText('+ New');
 
     return new CrudController(grid, form, newButton);

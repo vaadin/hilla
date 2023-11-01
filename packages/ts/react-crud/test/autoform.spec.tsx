@@ -1,11 +1,16 @@
+// eslint-disable-next-line
+/// <reference types="karma-viewport" />
+
 import { expect, use } from '@esm-bundle/chai';
 import type { SelectElement } from '@hilla/react-components/Select.js';
-import { render } from '@testing-library/react';
+import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
+import type { ComponentType } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { ExperimentalAutoForm } from '../src/autoform.js';
+import { type AutoFormLayoutProps, type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import FormController from './FormController.js';
 import {
@@ -68,8 +73,43 @@ describe('@hilla/react-crud', () => {
         .map(([, value]) => value.toString());
     }
 
+    async function expectFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
+      const formElement = await form.getField(fieldName);
+      if (expectedColSpan === null) {
+        return expect(formElement).to.not.have.attribute('colspan');
+      }
+      return expect(formElement).to.have.attribute('colspan', expectedColSpan);
+    }
+
+    async function populatePersonForm(
+      personId: number,
+      customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
+      screenSize?: string,
+      disabled?: boolean,
+    ): Promise<FormController> {
+      if (screenSize) {
+        viewport.set(screenSize);
+      }
+      const service = personService();
+      const person = await getItem(service, personId);
+      const result = render(
+        <ExperimentalAutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          customLayoutRenderer={customLayoutRenderer}
+          disabled={disabled}
+        />,
+      );
+      return await FormController.init(user, result.container);
+    }
+
     beforeEach(() => {
       user = userEvent.setup();
+    });
+
+    afterEach(() => {
+      viewport.reset();
     });
 
     it('renders fields for the properties in the form', async () => {
@@ -88,8 +128,8 @@ describe('@hilla/react-crud', () => {
       };
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel} item={person} />),
         user,
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} item={person} />).container,
       );
 
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
@@ -111,8 +151,8 @@ describe('@hilla/react-crud', () => {
 
     it('works without an item', async () => {
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
         user,
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} />).container,
       );
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
@@ -122,8 +162,8 @@ describe('@hilla/react-crud', () => {
       const person = (await getItem(service, 2))!;
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
         user,
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />).container,
       );
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
     });
@@ -134,11 +174,11 @@ describe('@hilla/react-crud', () => {
       const person2 = (await getItem(service, 1))!;
 
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person1} />);
-      let form = await FormController.init(result, user);
+      let form = await FormController.init(user, result.container);
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person1));
 
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={person2} />);
-      form = await FormController.init(result, user);
+      form = await FormController.init(user, result.container);
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person2));
     });
 
@@ -147,11 +187,11 @@ describe('@hilla/react-crud', () => {
       const person = (await getItem(service, 2))!;
 
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      let form = await FormController.init(result, user);
+      let form = await FormController.init(user, result.container);
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
 
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
-      form = await FormController.init(result, user);
+      form = await FormController.init(user, result.container);
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
@@ -160,8 +200,8 @@ describe('@hilla/react-crud', () => {
       const saveSpy = sinon.spy(service, 'save');
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />),
         user,
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />).container,
       );
       await form.typeInField('First name', 'Joe');
       await form.typeInField('Last name', 'Quinby');
@@ -181,8 +221,8 @@ describe('@hilla/react-crud', () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />),
         user,
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />).container,
       );
       await form.typeInField('First name', 'bar');
       await form.submit();
@@ -196,8 +236,9 @@ describe('@hilla/react-crud', () => {
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />),
         user,
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />)
+          .container,
       );
       await form.typeInField('First name', 'baz');
       await form.submit();
@@ -212,8 +253,9 @@ describe('@hilla/react-crud', () => {
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />),
         user,
+        render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />)
+          .container,
       );
       await form.typeInField('First name', 'bag');
       await form.submit();
@@ -232,7 +274,7 @@ describe('@hilla/react-crud', () => {
       const result = render(
         <ExperimentalAutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />,
       );
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(submitSpy).to.have.not.been.called;
@@ -257,7 +299,7 @@ describe('@hilla/react-crud', () => {
           onSubmitError={errorSpy}
         />,
       );
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.be.null;
@@ -267,8 +309,8 @@ describe('@hilla/react-crud', () => {
 
     it('disables all fields and buttons when disabled', async () => {
       const form = await FormController.init(
-        render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />),
         user,
+        render(<ExperimentalAutoForm service={personService()} model={PersonModel} disabled />).container,
       );
       await expect(form.areEnabled(...LABELS)).to.eventually.be.false;
     });
@@ -276,25 +318,25 @@ describe('@hilla/react-crud', () => {
     it('enables all fields and buttons when enabled', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} disabled />);
-      await FormController.init(result, user);
+      await FormController.init(user, result.container);
       result.rerender(<ExperimentalAutoForm service={service} model={PersonModel} />);
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
       await expect(form.areEnabled(...LABELS)).to.eventually.be.true;
     });
 
     describe('discard button', () => {
       it('does not show a discard button if the form is not dirty', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />).container,
         );
         await expect(form.findButton('Discard')).to.eventually.be.rejected;
       });
 
       it('does show a discard button if the form is dirty', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />).container,
         );
         await form.typeInField('First name', 'foo');
         await expect(form.findButton('Discard')).to.eventually.exist;
@@ -302,8 +344,8 @@ describe('@hilla/react-crud', () => {
 
       it('resets the form when clicking the discard button', async () => {
         const form = await FormController.init(
-          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />),
           user,
+          render(<ExperimentalAutoForm service={personService()} model={PersonModel} />).container,
         );
         await form.typeInField('First name', 'foo');
         await expect(form.findButton('Discard')).to.eventually.exist;
@@ -317,7 +359,7 @@ describe('@hilla/react-crud', () => {
     it('when creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} />);
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
 
       const submitButton = await form.findButton('Submit');
       expect(submitButton.disabled).to.be.false;
@@ -326,7 +368,7 @@ describe('@hilla/react-crud', () => {
     it('passing null interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={null} />);
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
 
       const submitButton = await form.findButton('Submit');
       expect(submitButton.disabled).to.be.false;
@@ -335,27 +377,21 @@ describe('@hilla/react-crud', () => {
     it('passing undefined interprets as creating new, submit button is enabled at the beginning', async () => {
       const service = personService();
       const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={undefined} />);
-      const form = await FormController.init(result, user);
+      const form = await FormController.init(user, result.container);
 
       const submitButton = await form.findButton('Submit');
       expect(submitButton.disabled).to.be.false;
     });
 
     it('when editing, submit button remains disabled before any changes', async () => {
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      const form = await FormController.init(result, user);
+      const form = await populatePersonForm(1);
 
       const submitButton = await form.findButton('Submit');
       expect(submitButton.disabled).to.be.true;
     });
 
     it('when editing, submit button becomes disabled again when the form is reset', async () => {
-      const service = personService();
-      const person = await getItem(service, 1);
-      const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-      const form = await FormController.init(result, user);
+      const form = await populatePersonForm(1);
       const submitButton = await form.findButton('Submit');
 
       await form.typeInField('First name', 'J'); // to enable the submit button
@@ -365,12 +401,201 @@ describe('@hilla/react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
+    it('customLayoutRenderer is not defined, default two-column form layout is used', async () => {
+      const form = await populatePersonForm(1);
+      expect(form.instance.responsiveSteps).to.have.length(3);
+      expect(form.instance.responsiveSteps).to.be.deep.equal([
+        { minWidth: 0, columns: 1, labelsPosition: 'top' },
+        { minWidth: '20em', columns: 1 },
+        { minWidth: '40em', columns: 2 },
+      ]);
+      expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
+      await expectFieldColSpan(form, 'First name', null);
+      await expectFieldColSpan(form, 'Last name', null);
+      await expectFieldColSpan(form, 'Email', null);
+      await expectFieldColSpan(form, 'Some integer', null);
+      await expectFieldColSpan(form, 'Some decimal', null);
+    });
+
+    it('customLayoutRenderer is defined by string[][], number of columns and colspan is based on template rows', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          template: [
+            ['firstName', 'lastName', 'email'],
+            ['someInteger', 'someDecimal'],
+            ['id', 'version'],
+          ],
+        },
+        'screen-1440-900',
+      );
+      expect(form.instance.responsiveSteps).to.have.length(2);
+      expect(form.instance.responsiveSteps).to.be.deep.equal([
+        { minWidth: '0', columns: 1 },
+        { minWidth: '800px', columns: 6 },
+      ]);
+      await expectFieldColSpan(form, 'First name', '2');
+      await expectFieldColSpan(form, 'Last name', '2');
+      await expectFieldColSpan(form, 'Email', '2');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'Id', '3');
+      await expectFieldColSpan(form, 'Version', '3');
+    });
+
+    it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan is based on responsive steps', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1440-900',
+      );
+      expect(form.instance.responsiveSteps).to.have.length(3);
+      expect(form.instance.responsiveSteps).to.be.deep.equal([
+        { minWidth: '0', columns: 1 },
+        { minWidth: '800px', columns: 2 },
+        { minWidth: '1200px', columns: 3 },
+      ]);
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
+    });
+
+    it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan respects the screen size', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1024-768',
+      );
+
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '2');
+      await expectFieldColSpan(form, 'Some decimal', '2');
+    });
+
+    it('customLayoutRenderer is defined by string[][] and form is disabled, rendered fields are disabled properly', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
+        },
+        'screen-1024-768',
+        true,
+      );
+
+      expect(await form.getField('First name')).to.have.attribute('disabled');
+    });
+
+    it('customLayoutRenderer is defined by FieldColSpan[][], number of columns is based on template rows and colspan is based on each FieldColSpan', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          template: [
+            [
+              { property: 'firstName', colSpan: 2 },
+              { property: 'lastName', colSpan: 2 },
+              { property: 'email', colSpan: 2 },
+            ],
+            [
+              { property: 'someInteger', colSpan: 3 },
+              { property: 'someDecimal', colSpan: 3 },
+            ],
+            [
+              { property: 'id', colSpan: 3 },
+              { property: 'version', colSpan: 3 },
+            ],
+          ],
+        },
+        'screen-1440-900',
+      );
+      expect(form.instance.responsiveSteps).to.have.length(2);
+      expect(form.instance.responsiveSteps).to.be.deep.equal([
+        { minWidth: '0', columns: 1 },
+        { minWidth: '800px', columns: 6 },
+      ]);
+      await expectFieldColSpan(form, 'First name', '2');
+      await expectFieldColSpan(form, 'Last name', '2');
+      await expectFieldColSpan(form, 'Email', '2');
+      await expectFieldColSpan(form, 'Some integer', '3');
+      await expectFieldColSpan(form, 'Some decimal', '3');
+      await expectFieldColSpan(form, 'Id', '3');
+      await expectFieldColSpan(form, 'Version', '3');
+    });
+
+    it('customLayoutRenderer is defined by FieldColSpan[][] and responsiveSteps, number of columns is based on responsiveSteps and colspan is based on each FieldColSpan', async () => {
+      const form = await populatePersonForm(
+        1,
+        {
+          responsiveSteps: [
+            { minWidth: '0', columns: 1 },
+            { minWidth: '800px', columns: 2 },
+            { minWidth: '1200px', columns: 3 },
+          ],
+          template: [
+            [
+              { property: 'firstName', colSpan: 1 },
+              { property: 'lastName', colSpan: 1 },
+              { property: 'email', colSpan: 1 },
+            ],
+            [
+              { property: 'someInteger', colSpan: 2 },
+              { property: 'someDecimal', colSpan: 1 },
+            ],
+          ],
+        },
+        'screen-1440-900',
+      );
+      expect(form.instance.responsiveSteps).to.have.length(3);
+      expect(form.instance.responsiveSteps).to.be.deep.equal([
+        { minWidth: '0', columns: 1 },
+        { minWidth: '800px', columns: 2 },
+        { minWidth: '1200px', columns: 3 },
+      ]);
+      await expectFieldColSpan(form, 'First name', '1');
+      await expectFieldColSpan(form, 'Last name', '1');
+      await expectFieldColSpan(form, 'Email', '1');
+      await expectFieldColSpan(form, 'Some integer', '2');
+      await expectFieldColSpan(form, 'Some decimal', '1');
+    });
+
+    it('customLayoutRenderer is defined as a function that renders the fields in a vertical manner, VerticalLayout is used instead of FormLayout', async () => {
+      function MyCustomLayoutRenderer({ children, form }: AutoFormLayoutRendererProps<PersonModel>) {
+        return <VerticalLayout>{children}</VerticalLayout>;
+      }
+      const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
+      expect(form.instance).to.not.exist;
+      const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
+      expect(layout).to.exist;
+    });
+
     describe('AutoFormEnumField', () => {
       it('formats enum values using title case', async () => {
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(<ExperimentalAutoForm service={service} model={PersonModel} item={person} />);
-        const form = await FormController.init(result, user);
+        const form = await FormController.init(user, result.container);
         const select = (await form.getField('Gender')) as SelectElement;
 
         expect(select.items).to.eql([

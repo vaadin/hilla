@@ -181,5 +181,40 @@ module.exports = (config) => {
         },
       },
     },
+
+    // Viewport configuration
+    viewport: {
+      breakpoints: [
+        {
+          name: "mobile-portrait-320-480",
+          size: {
+            width: 320,
+            height: 480
+          }
+        },
+        {
+          name: "screen-1024-768",
+          size: {
+            width: 1024,
+            height: 768
+          }
+        },
+        {
+          name: "screen-1440-900",
+          size: {
+            width: 1440,
+            height: 900
+          }
+        },
+        {
+          name: "screen-1980-1024",
+          size: {
+            width: 1980,
+            height: 1024
+          }
+        },
+
+      ]
+    }
   });
 };
