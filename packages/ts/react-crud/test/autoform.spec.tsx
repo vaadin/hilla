@@ -3,11 +3,14 @@
 
 import { expect, use } from '@esm-bundle/chai';
 import type { SelectElement } from '@hilla/react-components/Select.js';
+import { TextArea } from '@hilla/react-components/TextArea.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
+import type { FieldDirectiveResult } from '@hilla/react-form';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import type { ComponentType } from 'react';
+import type { JSX } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type AutoFormLayoutProps, type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
@@ -86,6 +89,7 @@ describe('@hilla/react-crud', () => {
       customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
       screenSize?: string,
       disabled?: boolean,
+      customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>,
     ): Promise<FormController> {
       if (screenSize) {
         viewport.set(screenSize);
@@ -97,8 +101,9 @@ describe('@hilla/react-crud', () => {
           service={service}
           model={PersonModel}
           item={person}
-          customLayoutRenderer={customLayoutRenderer}
           disabled={disabled}
+          customLayoutRenderer={customLayoutRenderer}
+          customFields={customFields}
         />,
       );
       return await FormController.init(user, result.container);
@@ -612,6 +617,49 @@ describe('@hilla/react-crud', () => {
             value: 'NON_BINARY',
           },
         ]);
+      });
+    });
+
+    describe('Custom field', () => {
+      it('renders a custom field instead of the default one', async () => {
+        const testLabel = 'Last names';
+        const testValue = 'Maxwell\nSmart';
+
+        const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+        service.save = async (item: Person): Promise<Person | undefined> => {
+          expect(item.lastName).to.equal(testValue);
+          return Promise.resolve(item);
+        };
+
+        const result = await FormController.init(
+          user,
+          render(
+            <ExperimentalAutoForm
+              service={service}
+              model={PersonModel}
+              customFields={{
+                lastName: ({ field }) => <TextArea {...field} label={testLabel} />,
+              }}
+            />,
+          ).container,
+        );
+
+        const fields = await result.getFields(...LABELS.map((label) => (label === 'Last name' ? testLabel : label)));
+        const tagNames = fields.map((field) => field.localName);
+        expect(tagNames).to.eql([
+          'vaadin-text-field',
+          'vaadin-text-area',
+          'vaadin-select',
+          'vaadin-text-field',
+          'vaadin-integer-field',
+          'vaadin-number-field',
+          'vaadin-checkbox',
+          'vaadin-date-picker',
+          'vaadin-time-picker',
+        ]);
+
+        await result.typeInField(testLabel, testValue);
+        await result.submit();
       });
     });
   });
