@@ -48,9 +48,9 @@
   },
   "dependencies": {
     "@hilla/form": "2.4.0-alpha6",
-    "@hilla/react-components": "2.2.1",
+    "@hilla/react-components": "2.3.0-alpha8",
     "@hilla/react-form": "2.4.0-alpha6",
-    "@vaadin/vaadin-lumo-styles": "24.2.2"
+    "@vaadin/vaadin-lumo-styles": "24.3.0-alpha8"
   },
   "peerDependencies": {
     "react": "^18"
@@ -72,6 +72,6 @@
     "karma-viewport": "^1.0.9",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.1.6"
+    "typescript": "5.2.2"
   }
 }
