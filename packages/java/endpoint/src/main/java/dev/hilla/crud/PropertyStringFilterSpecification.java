@@ -174,8 +174,9 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isNumber(Class<?> javaType) {
         return javaType == int.class || javaType == Integer.class
-                || javaType == double.class || javaType == Double.class
-                || javaType == long.class || javaType == Long.class;
+                || javaType == long.class || javaType == Long.class
+                || javaType == float.class || javaType == Float.class
+                || javaType == double.class || javaType == Double.class;
     }
 
     private Path<String> getPath(String propertyId, Root<T> root) {
