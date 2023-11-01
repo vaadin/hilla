@@ -31,7 +31,6 @@ public class TestObject {
     private Double nullableDoubleValue;
     private TestEnum enumValue;
 
-
     @OneToOne
     private NestedObject nestedObject;
 
@@ -146,7 +145,7 @@ public class TestObject {
     public void setNullableDoubleValue(Double nullableDoubleValue) {
         this.nullableDoubleValue = nullableDoubleValue;
     }
-  
+
     public TestEnum getEnumValue() {
         return enumValue;
     }
