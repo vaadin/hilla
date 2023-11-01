@@ -2,11 +2,11 @@ import { type AbstractModel, type DetachedModelConstructor, ValidationError, typ
 import { Button } from '@hilla/react-components/Button.js';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { useForm, type UseFormResult } from '@hilla/react-form';
+import { useForm, type UseFormResult, type FieldDirectiveResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
 import type { CrudService } from './crud.js';
-import { getProperties, includeProperty } from './property-info.js';
+import { getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 
 export const emptyItem = Symbol();
 
@@ -38,6 +38,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
   item?: Value<M> | typeof emptyItem | null;
   disabled?: boolean;
   customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
+  customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
 }>;
@@ -134,6 +135,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   afterSubmit,
   disabled,
   customLayoutRenderer: CustomLayoutRenderer,
+  customFields,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -173,18 +175,22 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
+  function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
+    const customField = customFields?.[propertyInfo.name];
+    if (customField) {
+      // @ts-expect-error: model needs access by name
+      const fieldModel = form.model[propertyInfo.name] as AbstractModel<TItem>;
+      return customField({ field: form.field(fieldModel) });
+    }
+    return <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />;
+  }
+
   let layout: JSX.Element;
   if (CustomLayoutRenderer === undefined) {
-    const fields = getProperties(model)
-      .filter(includeProperty)
-      .map((propertyInfo) => (
-        <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-      ));
+    const fields = getProperties(model).filter(includeProperty).map(createAutoFormField);
     layout = <FormLayout>{fields}</FormLayout>;
   } else {
-    const fields = getProperties(model).map((propertyInfo) => (
-      <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />
-    ));
+    const fields = getProperties(model).map(createAutoFormField);
     if (typeof CustomLayoutRenderer === 'function') {
       layout = <CustomLayoutRenderer form={form}>{fields}</CustomLayoutRenderer>;
     } else {
