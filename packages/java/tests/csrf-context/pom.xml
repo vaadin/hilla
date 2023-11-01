@@ -27,9 +27,9 @@
   <dependencies>
     <!-- Project dependencies -->
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-dev-server</artifactId>
-      <version>${flow.version}</version>
+      <groupId>dev.hilla</groupId>
+      <artifactId>hilla-dev</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
