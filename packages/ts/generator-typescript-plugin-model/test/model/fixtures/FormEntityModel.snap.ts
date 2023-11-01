@@ -42,7 +42,7 @@ class FormEntityModel<T extends FormEntity_1 = FormEntity_1> extends FormEntityI
     get nonnullTypes(): FormNonnullTypesModel_1 {
         return this[_getPropertyModel_1]("nonnullTypes", (parent, key) => new FormNonnullTypesModel_1(parent, key, false));
     }
-    get unknownModel(): ObjectModel_1<unknown> {
+    get unknownModel(): ObjectModel_1 {
         return this[_getPropertyModel_1]("unknownModel", (parent, key) => new ObjectModel_1(parent, key, true));
     }
 }
