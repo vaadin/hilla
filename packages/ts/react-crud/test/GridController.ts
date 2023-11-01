@@ -33,6 +33,11 @@ export default class GridController {
     return physicalItems.find((item) => item.index === row);
   }
 
+  async findColumnIndexByHeaderText(text: string): Promise<number> {
+    const headers = await this.getHeaderCellContents();
+    return headers.indexOf(text);
+  }
+
   getBodyCellContent(row: number, col: number): HTMLElement {
     const physicalRow = this.getBodyRow(row);
     const cells = getRowCells(physicalRow) as readonly HTMLElement[];

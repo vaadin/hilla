@@ -158,10 +158,12 @@ describe('@hilla/react-crud', () => {
       it('data provider provides data', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
         expect(grid.getVisibleRowCount()).to.equal(2);
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
-        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
-        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('John');
-        expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
+        const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
+        const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
+        expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
+        expect(grid.getBodyCellContent(0, lastNameColumnIndex)).to.have.rendered.text('Love');
+        expect(grid.getBodyCellContent(1, firstNameColumnIndex)).to.have.rendered.text('John');
+        expect(grid.getBodyCellContent(1, lastNameColumnIndex)).to.have.rendered.text('Dove');
       });
 
       it('does not pass its own parameters to the underlying grid', async () => {
@@ -187,8 +189,10 @@ describe('@hilla/react-crud', () => {
 
         const grid = await GridController.init(render(<TestAutoGrid experimentalFilter={filter} />), user);
         expect(grid.getVisibleRowCount()).to.equal(1);
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane');
-        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
+        const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
+        const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
+        expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
+        expect(grid.getBodyCellContent(0, lastNameColumnIndex)).to.have.rendered.text('Love');
       });
 
       describe('multi-sort', () => {
@@ -602,91 +606,116 @@ describe('@hilla/react-crud', () => {
         );
       });
 
-      it('renders strings without formatting and with default alignment', () => {
-        expect(grid.getBodyCellContent(0, 0)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Hello World 1');
-        expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Hello World 2');
+      it('renders strings without formatting and with default alignment', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('String');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('Hello World 1');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('Hello World 2');
       });
 
-      it('renders integers as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 1)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('123,456');
-        expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('-12');
+      it('renders integers as right aligned numbers', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Integer');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('-12');
       });
 
-      it('renders decimals as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 2)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 2)).to.have.rendered.text('123.46');
-        expect(grid.getBodyCellContent(1, 2)).to.have.rendered.text('-0.12');
-        expect(grid.getBodyCellContent(2, 2)).to.have.rendered.text('123.40');
-        expect(grid.getBodyCellContent(3, 2)).to.have.rendered.text('-12.00');
+      it('renders decimals as right aligned numbers', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Decimal');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('123.46');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('-0.12');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.rendered.text('123.40');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.rendered.text('-12.00');
       });
 
-      it('renders booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+      it('renders booleans as icons', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Boolean');
+        expect(grid.getBodyCellContent(0, columnIndex).querySelector('vaadin-icon')).to.have.attribute(
+          'icon',
+          'lumo:checkmark',
+        );
+        expect(grid.getBodyCellContent(1, columnIndex).querySelector('vaadin-icon')).to.have.attribute(
+          'icon',
+          'lumo:minus',
+        );
       });
 
-      it('renders enum values as title case', () => {
-        expect(grid.getBodyCellContent(0, 4)).to.have.rendered.text('Male');
-        expect(grid.getBodyCellContent(1, 4)).to.have.rendered.text('Female');
-        expect(grid.getBodyCellContent(2, 4)).to.have.rendered.text('Non Binary');
-        expect(grid.getBodyCellContent(3, 4)).to.have.rendered.text('');
+      it('renders enum values as title case', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Enum');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('Male');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('Female');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.rendered.text('Non Binary');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.rendered.text('');
       });
 
-      it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 5)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 5)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 5)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, 5)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 5)).to.have.text('');
+      it('renders java.util.Date as right aligned', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Date');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('5/14/2021');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.text('');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.text('');
       });
 
-      it('renders java.time.LocalDate as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 6)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 6)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 6)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, 6)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 6)).to.have.text('');
+      it('renders java.time.LocalDate as right aligned', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Local date');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('5/14/2021');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.text('');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.text('');
       });
 
-      it('renders java.time.LocalTime as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 7)).to.have.text('8:45 AM');
-        expect(grid.getBodyCellContent(1, 7)).to.have.text('8:45 PM');
-        expect(grid.getBodyCellContent(2, 7)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 7)).to.have.text('');
+      it('renders java.time.LocalTime as right aligned', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Local time');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('8:45 AM');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('8:45 PM');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.text('');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.text('');
       });
 
-      it('renders java.time.LocalDateTime as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 8)).to.have.text('5/13/2021, 8:45 AM');
-        expect(grid.getBodyCellContent(1, 8)).to.have.text('5/14/2021, 8:45 PM');
-        expect(grid.getBodyCellContent(2, 8)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 8)).to.have.text('');
+      it('renders java.time.LocalDateTime as right aligned', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Local date time');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021, 8:45 AM');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(2, columnIndex)).to.have.text('');
+        expect(grid.getBodyCellContent(3, columnIndex)).to.have.text('');
       });
 
-      it('renders nested strings without formatting and with default alignment', () => {
-        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Nested string 1');
-        expect(grid.getBodyCellContent(1, 9)).to.have.rendered.text('');
+      it('renders nested strings without formatting and with default alignment', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Nested string');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('Nested string 1');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('');
       });
 
-      it('renders nested numbers as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 10)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('123,456');
-        expect(grid.getBodyCellContent(1, 10)).to.have.rendered.text('');
+      it('renders nested numbers as right aligned numbers', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Nested number');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('');
       });
 
-      it('renders nested booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+      it('renders nested booleans as icons', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Nested boolean');
+        expect(grid.getBodyCellContent(0, columnIndex).querySelector('vaadin-icon')).to.have.attribute(
+          'icon',
+          'lumo:checkmark',
+        );
+        expect(grid.getBodyCellContent(1, columnIndex).querySelector('vaadin-icon')).to.have.attribute(
+          'icon',
+          'lumo:minus',
+        );
       });
 
-      it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 12)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 12)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 12)).to.have.text('');
+      it('renders java.util.Date as right aligned', async () => {
+        const columnIndex = await grid.findColumnIndexByHeaderText('Nested date');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('');
       });
     });
   });

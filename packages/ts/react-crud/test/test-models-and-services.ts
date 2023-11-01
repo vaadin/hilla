@@ -43,10 +43,10 @@ export interface Person extends HasIdVersion, Named {
 }
 
 export interface NestedTestValues {
-  string: string;
-  number: number;
-  boolean: boolean;
-  date?: string;
+  nestedString: string;
+  nestedNumber: number;
+  nestedBoolean: boolean;
+  nestedDate?: string;
 }
 
 export interface ColumnRendererTestValues extends HasIdVersion {
@@ -170,24 +170,24 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
 export class NestedTestModel<T extends NestedTestValues = NestedTestValues> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
-  get string(): StringModel {
-    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
+  get nestedString(): StringModel {
+    return this[_getPropertyModel]('nestedString', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get number(): NumberModel {
+  get nestedNumber(): NumberModel {
     return this[_getPropertyModel](
-      'number',
+      'nestedNumber',
       (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
     );
   }
 
-  get boolean(): BooleanModel {
-    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  get nestedBoolean(): BooleanModel {
+    return this[_getPropertyModel]('nestedBoolean', (parent, key) => new BooleanModel(parent, key, false));
   }
 
-  get date(): StringModel {
+  get nestedDate(): StringModel {
     return this[_getPropertyModel](
-      'date',
+      'nestedDate',
       (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
     );
   }
@@ -396,10 +396,10 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
     nested: {
-      string: 'Nested string 1',
-      number: 123456,
-      boolean: true,
-      date: '2021-05-13T00:00:00',
+      nestedString: 'Nested string 1',
+      nestedNumber: 123456,
+      nestedBoolean: true,
+      nestedDate: '2021-05-13T00:00:00',
     },
   },
   {
