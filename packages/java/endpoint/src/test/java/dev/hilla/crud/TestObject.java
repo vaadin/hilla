@@ -29,6 +29,8 @@ public class TestObject {
     private Float nullableFloatValue;
     private double doubleValue;
     private Double nullableDoubleValue;
+    private TestEnum enumValue;
+
 
     @OneToOne
     private NestedObject nestedObject;
@@ -143,6 +145,14 @@ public class TestObject {
 
     public void setNullableDoubleValue(Double nullableDoubleValue) {
         this.nullableDoubleValue = nullableDoubleValue;
+    }
+  
+    public TestEnum getEnumValue() {
+        return enumValue;
+    }
+
+    public void setEnumValue(TestEnum testEnum) {
+        this.enumValue = testEnum;
     }
 
     public NestedObject getNestedObject() {

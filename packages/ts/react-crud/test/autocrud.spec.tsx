@@ -1,11 +1,16 @@
+// eslint-disable-next-line
+/// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { render } from '@testing-library/react';
+import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
+import FormController from './FormController';
+import GridController from './GridController';
 import { type Person, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -15,13 +20,22 @@ describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
-      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
-    }
+    before(() => {
+      // Desktop resolution
+      viewport.set(1024, 768);
+    });
+
+    after(() => {
+      viewport.reset();
+    });
 
     beforeEach(() => {
       user = userEvent.setup();
     });
+
+    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
+      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
+    }
 
     it('shows a grid and a form', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
@@ -88,7 +102,7 @@ describe('@hilla/react-crud', () => {
 
     it('shows a confirmation dialog before deleting', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
@@ -101,10 +115,9 @@ describe('@hilla/react-crud', () => {
         user,
       );
       await user.click(newButton);
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
+      const [firstNameField, lastNameField, someIntegerField, someDecimalField] = await form.getFields(
         'First name',
         'Last name',
-        'Email',
         'Some integer',
         'Some decimal',
       );
@@ -113,11 +126,11 @@ describe('@hilla/react-crud', () => {
       expect(lastNameField.value).to.equal('');
       expect(someIntegerField.value).to.equal('0');
       expect(someDecimalField.value).to.equal('0');
-      await firstNameField.type('Jeff');
-      await lastNameField.type('Lastname');
-      await emailField.type('first.last@domain.com');
-      await someIntegerField.type('12');
-      await someDecimalField.type('12.345');
+      await form.typeInField('First name', 'Jeff');
+      await form.typeInField('Last name', 'Lastname');
+      await form.typeInField('Email', 'first.last@domain.com');
+      await form.typeInField('Some integer', '12');
+      await form.typeInField('Some decimal', '12.345');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jeff');
     });
@@ -129,21 +142,13 @@ describe('@hilla/react-crud', () => {
       );
       await user.click(newButton);
 
-      const [firstNameField, lastNameField, emailField, someIntegerField, someDecimalField] = await form.getFields(
-        'First name',
-        'Last name',
-        'Email',
-        'Some integer',
-        'Some decimal',
-      );
-
-      await firstNameField.type('Jeff');
-      await lastNameField.type('Lastname');
-      await emailField.type('first.last@domain.com');
-      await someIntegerField.type('12');
-      await someDecimalField.type('12.345');
+      await form.typeInField('First name', 'Jeff');
+      await form.typeInField('Last name', 'Lastname');
+      await form.typeInField('Email', 'first.last@domain.com');
+      await form.typeInField('Some integer', '12');
+      await form.typeInField('Some decimal', '12.345');
       await form.submit();
-      await firstNameField.type('Jerp');
+      await form.typeInField('First name', 'Jerp');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
       expect(grid.getVisibleRowCount()).to.equal(3);
@@ -168,7 +173,7 @@ describe('@hilla/react-crud', () => {
     it('deletes and refreshes grid after confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       await dialog.confirm();
@@ -178,7 +183,7 @@ describe('@hilla/react-crud', () => {
     it('does not delete when not confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, 6);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
       await user.click(cell.querySelector('vaadin-button')!);
       const dialog = await ConfirmDialogController.init(cell, user);
       await dialog.cancel();
@@ -187,13 +192,89 @@ describe('@hilla/react-crud', () => {
 
     it('does not render a delete button when noDelete', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
-      const cell = grid.getBodyCellContent(1, 6);
-      expect(cell).to.be.null;
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
+      const button = cell.querySelector('vaadin-button');
+      expect(button).to.be.null;
     });
 
-    it('shows a header if requested', async () => {
-      const result = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} header="Hello crud" />);
-      await result.findByText('Hello crud');
+    describe('mobile layout', () => {
+      let saveSpy: sinon.SinonSpy;
+      let result: RenderResult;
+
+      before(() => {
+        // iPhone 13 Pro resolution
+        viewport.set(390, 844);
+      });
+
+      beforeEach(() => {
+        const service = personService();
+        saveSpy = sinon.spy(service, 'save');
+        result = render(<TestAutoCrud service={service} />);
+      });
+
+      afterEach(() => {
+        // cleanup dangling overlay
+        const overlay = document.querySelector('vaadin-dialog-overlay');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
+
+      it('opens the form in a dialog when selecting an item', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await FormController.init(user);
+        expect(form.instance).to.exist;
+        expect((await form.getField('First name')).value).to.equal('Jane');
+        expect((await form.getField('Last name')).value).to.equal('Love');
+      });
+
+      it('opens the form in a dialog when creating a new item', async () => {
+        const newButton = await result.findByText('+ New');
+        await user.click(newButton);
+
+        const form = await FormController.init(user);
+        expect(form.instance).to.exist;
+        expect((await form.getField('First name')).value).to.equal('');
+        expect((await form.getField('Last name')).value).to.equal('');
+      });
+
+      it('closes the dialog when clicking close button', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const dialogOverlay = await screen.findByRole('dialog');
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+
+        // dialog is closed
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // grid selection is cleared
+        expect(grid.isSelected(0)).to.be.false;
+
+        // does not save
+        expect(saveSpy).not.to.have.been.called;
+      });
+
+      it('closes the dialog when clicking submit button', async () => {
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await FormController.init(user);
+        await form.typeInField('First name', 'J'); // to enable the submit button
+        await form.submit();
+
+        // dialog is closed
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // grid selection is cleared
+        expect(grid.isSelected(0)).to.be.false;
+
+        // saves
+        expect(saveSpy).to.have.been.called;
+      });
     });
   });
 });

@@ -6,6 +6,7 @@ import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 import { type CSSProperties, type JSX, useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
 import { useLocaleFormatter } from './locale.js';
+import { convertToTitleCase } from './util';
 
 export type RendererOptions<TItem> = {
   item: TItem;
@@ -31,6 +32,12 @@ export function AutoGridDecimalRenderer<TItem>({ item }: RendererOptions<TItem>)
   const formatter = useLocaleFormatter();
   const context = useContext(ColumnContext)!;
   return <span style={fontVariantStyle}>{formatter.formatDecimal(getColumnValue(context, item))}</span>;
+}
+
+export function AutoGridEnumRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
+  const context = useContext(ColumnContext)!;
+  const value = getColumnValue(context, item) || '';
+  return <span>{convertToTitleCase(value)}</span>;
 }
 
 export function AutoGridBooleanRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {

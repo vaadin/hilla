@@ -20,6 +20,7 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  Gender,
   type HasTestInfo,
   type Person,
   PersonModel,
@@ -71,7 +72,18 @@ describe('@hilla/react-crud', () => {
     describe('basics', () => {
       it('creates columns based on model', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
       });
 
       it('can change model and recreate columns', async () => {
@@ -80,10 +92,13 @@ describe('@hilla/react-crud', () => {
           await GridController.init(result, user),
           'firstName',
           'lastName',
+          'gender',
           'email',
           'someInteger',
           'someDecimal',
           'vip',
+          'birthDate',
+          'shiftStart',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -255,7 +270,7 @@ describe('@hilla/react-crud', () => {
 
         it('created for number columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
-          const cell = grid.getHeaderCellContent(1, 3);
+          const cell = grid.getHeaderCellContent(1, 4);
           expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
         });
 
@@ -281,7 +296,7 @@ describe('@hilla/react-crud', () => {
         it('filter when you type in the field for a number column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const someNumberFilter = grid.getHeaderCellContent(1, 3);
+          const someNumberFilter = grid.getHeaderCellContent(1, 4);
           const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
             TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
             SelectController.init(someNumberFilter, user),
@@ -313,7 +328,7 @@ describe('@hilla/react-crud', () => {
         it('filters for a boolean column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-          const controller = await SelectController.init(grid.getHeaderCellContent(1, 5), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 6), user);
           await controller.select('True');
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -331,6 +346,33 @@ describe('@hilla/react-crud', () => {
             '@type': 'propertyString',
             filterValue: 'False',
             propertyId: 'vip',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('filters for an enum column', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 2), user);
+          await controller.select(Gender.MALE);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.MALE,
+            propertyId: 'gender',
+            matcher: Matcher.EQUALS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          await controller.select(Gender.FEMALE);
+
+          const expectedPropertyFilter2: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: Gender.FEMALE,
+            propertyId: 'gender',
             matcher: Matcher.EQUALS,
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
@@ -473,8 +515,20 @@ describe('@hilla/react-crud', () => {
           ),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip', '');
-        expect(grid.getBodyCellContent(0, 6)).to.have.rendered.text('Jane Love');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          '',
+        );
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -483,7 +537,18 @@ describe('@hilla/react-crud', () => {
           render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />),
           user,
         );
-        await assertColumns(grid, 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
@@ -506,7 +571,19 @@ describe('@hilla/react-crud', () => {
 
       it('renders row numbers if requested', async () => {
         const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
-        await assertColumns(grid, '', 'firstName', 'lastName', 'email', 'someInteger', 'someDecimal', 'vip');
+        await assertColumns(
+          grid,
+          '',
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
     });
@@ -550,15 +627,14 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(1, 3).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
-      it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 4)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 4)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 4)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, 4)).to.have.text('');
-        expect(grid.getBodyCellContent(3, 4)).to.have.text('');
+      it('renders enum values as title case', () => {
+        expect(grid.getBodyCellContent(0, 4)).to.have.rendered.text('Male');
+        expect(grid.getBodyCellContent(1, 4)).to.have.rendered.text('Female');
+        expect(grid.getBodyCellContent(2, 4)).to.have.rendered.text('Non Binary');
+        expect(grid.getBodyCellContent(3, 4)).to.have.rendered.text('');
       });
 
-      it('renders java.time.LocalDate as right aligned', () => {
+      it('renders java.util.Date as right aligned', () => {
         expect(grid.getBodyCellContent(0, 5)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, 5)).to.have.text('5/13/2021');
         expect(grid.getBodyCellContent(1, 5)).to.have.text('5/14/2021');
@@ -566,43 +642,51 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(3, 5)).to.have.text('');
       });
 
-      it('renders java.time.LocalTime as right aligned', () => {
+      it('renders java.time.LocalDate as right aligned', () => {
         expect(grid.getBodyCellContent(0, 6)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 6)).to.have.text('8:45 AM');
-        expect(grid.getBodyCellContent(1, 6)).to.have.text('8:45 PM');
+        expect(grid.getBodyCellContent(0, 6)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 6)).to.have.text('5/14/2021');
         expect(grid.getBodyCellContent(2, 6)).to.have.text('');
         expect(grid.getBodyCellContent(3, 6)).to.have.text('');
       });
 
-      it('renders java.time.LocalDateTime as right aligned', () => {
+      it('renders java.time.LocalTime as right aligned', () => {
         expect(grid.getBodyCellContent(0, 7)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 7)).to.have.text('5/13/2021, 8:45 AM');
-        expect(grid.getBodyCellContent(1, 7)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(0, 7)).to.have.text('8:45 AM');
+        expect(grid.getBodyCellContent(1, 7)).to.have.text('8:45 PM');
         expect(grid.getBodyCellContent(2, 7)).to.have.text('');
         expect(grid.getBodyCellContent(3, 7)).to.have.text('');
       });
 
-      it('renders nested strings without formatting and with default alignment', () => {
-        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'start');
-        expect(grid.getBodyCellContent(0, 8)).to.have.rendered.text('Nested string 1');
-        expect(grid.getBodyCellContent(1, 8)).to.have.rendered.text('');
+      it('renders java.time.LocalDateTime as right aligned', () => {
+        expect(grid.getBodyCellContent(0, 8)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 8)).to.have.text('5/13/2021, 8:45 AM');
+        expect(grid.getBodyCellContent(1, 8)).to.have.text('5/14/2021, 8:45 PM');
+        expect(grid.getBodyCellContent(2, 8)).to.have.text('');
+        expect(grid.getBodyCellContent(3, 8)).to.have.text('');
       });
 
-      it('renders nested numbers as right aligned numbers', () => {
-        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('123,456');
+      it('renders nested strings without formatting and with default alignment', () => {
+        expect(grid.getBodyCellContent(0, 9)).to.have.style('text-align', 'start');
+        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Nested string 1');
         expect(grid.getBodyCellContent(1, 9)).to.have.rendered.text('');
       });
 
+      it('renders nested numbers as right aligned numbers', () => {
+        expect(grid.getBodyCellContent(0, 10)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('123,456');
+        expect(grid.getBodyCellContent(1, 10)).to.have.rendered.text('');
+      });
+
       it('renders nested booleans as icons', () => {
-        expect(grid.getBodyCellContent(0, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
-        expect(grid.getBodyCellContent(1, 10).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
+        expect(grid.getBodyCellContent(0, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:checkmark');
+        expect(grid.getBodyCellContent(1, 11).querySelector('vaadin-icon')).to.have.attribute('icon', 'lumo:minus');
       });
 
       it('renders java.util.Date as right aligned', () => {
-        expect(grid.getBodyCellContent(0, 11)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, 11)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, 11)).to.have.text('');
+        expect(grid.getBodyCellContent(0, 12)).to.have.style('text-align', 'end');
+        expect(grid.getBodyCellContent(0, 12)).to.have.text('5/13/2021');
+        expect(grid.getBodyCellContent(1, 12)).to.have.text('');
       });
     });
   });

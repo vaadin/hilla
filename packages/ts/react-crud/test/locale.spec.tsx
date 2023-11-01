@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
-import { LocaleFormatter } from '../src/locale.js';
+import { render } from '@testing-library/react';
+import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 
 describe('@hilla/react-crud', () => {
   describe('LocaleFormatter', () => {
@@ -67,6 +68,31 @@ describe('@hilla/react-crud', () => {
       expect(formatter.parse('23/23/2020')).to.be.undefined;
       expect(formatter.parse('0/23/2020')).to.be.undefined;
       expect(formatter.parse('11/0/2020')).to.be.undefined;
+    });
+  });
+
+  describe('useDatePickerI18n', () => {
+    const dateAsString = '5/7/2020';
+    const dateAsObject = { year: 2020, month: 4, day: 7 };
+
+    function I18nTestComponent() {
+      const i18n = useDatePickerI18n();
+      const formatted = i18n.formatDate(dateAsObject);
+      const parsed = i18n.parseDate(dateAsString);
+
+      return (
+        <>
+          <div>{formatted}</div>
+          <div>{JSON.stringify(parsed)}</div>
+        </>
+      );
+    }
+
+    it('uses "formatDate" and "parse" correctly', () => {
+      const { getByText } = render(<I18nTestComponent />);
+      expect(getByText(dateAsString)).to.exist;
+      const json = JSON.stringify(dateAsObject);
+      expect(getByText(json)).to.exist;
     });
   });
 });
