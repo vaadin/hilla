@@ -14,6 +14,7 @@ import { type JSX, type MutableRefObject, useEffect, useRef, useState } from 're
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
+import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
@@ -22,6 +23,8 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
 import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
+
+document.adoptedStyleSheets.unshift(css);
 
 interface AutoGridOwnProps<TItem> {
   /**

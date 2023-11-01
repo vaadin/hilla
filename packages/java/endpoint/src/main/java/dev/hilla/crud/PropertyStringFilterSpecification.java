@@ -129,6 +129,25 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             default:
                 break;
             }
+        } else if (javaType.isEnum()) {
+            var enumValue = Enum.valueOf(javaType.asSubclass(Enum.class),
+                    value);
+
+            switch (filter.getMatcher()) {
+            case EQUALS:
+                return criteriaBuilder.equal(propertyPath, enumValue);
+            case CONTAINS:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using contains");
+            case GREATER_THAN:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using greater than");
+            case LESS_THAN:
+                throw new IllegalArgumentException(
+                        "An enum cannot be filtered using less than");
+            default:
+                break;
+            }
         }
         throw new IllegalArgumentException("No implementation for " + javaType
                 + " using " + filter.getMatcher() + ".");
@@ -136,8 +155,9 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isNumber(Class<?> javaType) {
         return javaType == int.class || javaType == Integer.class
-                || javaType == double.class || javaType == Double.class
-                || javaType == long.class || javaType == Long.class;
+                || javaType == long.class || javaType == Long.class
+                || javaType == float.class || javaType == Float.class
+                || javaType == double.class || javaType == Double.class;
     }
 
     private Path<String> getPath(String propertyId, Root<T> root) {

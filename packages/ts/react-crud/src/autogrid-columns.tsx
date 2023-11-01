@@ -4,12 +4,14 @@ import {
   AutoGridDateRenderer,
   AutoGridDateTimeRenderer,
   AutoGridDecimalRenderer,
+  AutoGridEnumRenderer,
   AutoGridIntegerRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
 import {
   BooleanHeaderFilter,
   DateHeaderFilter,
+  EnumHeaderFilter,
   NoHeaderFilter,
   NumberHeaderFilter,
   StringHeaderFilter,
@@ -70,6 +72,12 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
         headerRenderer: DateHeaderFilter,
+      };
+    case 'enum':
+      return {
+        autoWidth: true,
+        renderer: AutoGridEnumRenderer,
+        headerRenderer: EnumHeaderFilter,
       };
     case 'string':
       return {

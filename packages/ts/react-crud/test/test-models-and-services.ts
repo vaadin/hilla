@@ -43,9 +43,10 @@ export interface Person extends HasIdVersion, Named {
 }
 
 export interface NestedTestValues {
-  string: string;
-  number: number;
-  boolean: boolean;
+  nestedString: string;
+  nestedNumber: number;
+  nestedBoolean: boolean;
+  nestedDate?: string;
 }
 
 export interface ColumnRendererTestValues extends HasIdVersion {
@@ -53,6 +54,7 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   integer: number;
   decimal: number;
   boolean: boolean;
+  enum?: Gender;
   localDate?: string;
   localTime?: string;
   localDateTime?: string;
@@ -167,19 +169,26 @@ export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
 export class NestedTestModel<T extends NestedTestValues = NestedTestValues> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 
-  get string(): StringModel {
-    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
+  get nestedString(): StringModel {
+    return this[_getPropertyModel]('nestedString', (parent, key) => new StringModel(parent, key, false));
   }
 
-  get number(): NumberModel {
+  get nestedNumber(): NumberModel {
     return this[_getPropertyModel](
-      'number',
+      'nestedNumber',
       (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
     );
   }
 
-  get boolean(): BooleanModel {
-    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  get nestedBoolean(): BooleanModel {
+    return this[_getPropertyModel]('nestedBoolean', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get nestedDate(): StringModel {
+    return this[_getPropertyModel](
+      'nestedDate',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
+    );
   }
 }
 
@@ -216,6 +225,10 @@ export class ColumnRendererTestModel<
 
   get boolean(): BooleanModel {
     return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
+  }
+
+  get enum(): GenderModel {
+    return this[_getPropertyModel]('enum', (parent, key) => new GenderModel(parent, key, false));
   }
 
   get localDate(): StringModel {
@@ -369,13 +382,15 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: 123456,
     decimal: 123.456,
     boolean: true,
+    enum: Gender.MALE,
     localDate: '2021-05-13',
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
     nested: {
-      string: 'Nested string 1',
-      number: 123456,
-      boolean: true,
+      nestedString: 'Nested string 1',
+      nestedNumber: 123456,
+      nestedBoolean: true,
+      nestedDate: '2021-05-13',
     },
   },
   {
@@ -385,6 +400,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: -12,
     decimal: -0.12,
     boolean: false,
+    enum: Gender.FEMALE,
     localDate: '2021-05-14',
     localTime: '20:45:00',
     localDateTime: '2021-05-14T20:45:00',
@@ -393,6 +409,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     id: 3,
     version: 1,
     string: 'Hello World 3',
+    enum: Gender.NON_BINARY,
     integer: 123456,
     decimal: 123.4,
     boolean: false,
