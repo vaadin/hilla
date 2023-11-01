@@ -21,6 +21,14 @@ public class TestObject {
     private LocalTime localTime;
     private LocalDateTime localDateTime;
     private Boolean booleanValue;
+    private int intValue;
+    private Integer nullableIntValue;
+    private long longValue;
+    private Long nullableLongValue;
+    private float floatValue;
+    private Float nullableFloatValue;
+    private double doubleValue;
+    private Double nullableDoubleValue;
     private TestEnum enumValue;
 
     @OneToOne
@@ -72,6 +80,70 @@ public class TestObject {
 
     public void setBooleanValue(Boolean aBoolean) {
         this.booleanValue = aBoolean;
+    }
+
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public void setIntValue(int intValue) {
+        this.intValue = intValue;
+    }
+
+    public Integer getNullableIntValue() {
+        return nullableIntValue;
+    }
+
+    public void setNullableIntValue(Integer nullableIntValue) {
+        this.nullableIntValue = nullableIntValue;
+    }
+
+    public long getLongValue() {
+        return longValue;
+    }
+
+    public void setLongValue(long longValue) {
+        this.longValue = longValue;
+    }
+
+    public Long getNullableLongValue() {
+        return nullableLongValue;
+    }
+
+    public void setNullableLongValue(Long nullableLongValue) {
+        this.nullableLongValue = nullableLongValue;
+    }
+
+    public float getFloatValue() {
+        return floatValue;
+    }
+
+    public void setFloatValue(float floatValue) {
+        this.floatValue = floatValue;
+    }
+
+    public Float getNullableFloatValue() {
+        return nullableFloatValue;
+    }
+
+    public void setNullableFloatValue(Float nullableFloatValue) {
+        this.nullableFloatValue = nullableFloatValue;
+    }
+
+    public double getDoubleValue() {
+        return doubleValue;
+    }
+
+    public void setDoubleValue(double doubleValue) {
+        this.doubleValue = doubleValue;
+    }
+
+    public Double getNullableDoubleValue() {
+        return nullableDoubleValue;
+    }
+
+    public void setNullableDoubleValue(Double nullableDoubleValue) {
+        this.nullableDoubleValue = nullableDoubleValue;
     }
 
     public TestEnum getEnumValue() {

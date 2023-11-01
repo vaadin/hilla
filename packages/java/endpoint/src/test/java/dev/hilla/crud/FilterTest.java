@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest()
@@ -38,7 +39,7 @@ public class FilterTest {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createFilter("name", Matcher.CONTAINS,
                 "Jo");
-        assertFilterResult(filter, "John", "Johnny", "Josh");
+        assertFilteredNames(filter, "John", "Johnny", "Josh");
     }
 
     @Test
@@ -46,7 +47,7 @@ public class FilterTest {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createFilter("name", Matcher.EQUALS,
                 "John");
-        assertFilterResult(filter, "John");
+        assertFilteredNames(filter, "John");
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
@@ -65,41 +66,149 @@ public class FilterTest {
         executeFilter(filter);
     }
 
-    @Test(expected = InvalidDataAccessApiUsageException.class)
+    @Test
     public void filterNumberPropertyUsingContains() {
-        setupNames("Jack", "John", "Johnny", "Polly", "Josh");
-        PropertyStringFilter filter = createFilter("id", Matcher.CONTAINS, "2");
-        executeFilter(filter);
+        setupNumbers();
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("intValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("nullableIntValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("longValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("nullableLongValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("floatValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("nullableFloatValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("doubleValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            PropertyStringFilter filter = createFilter("nullableDoubleValue",
+                    Matcher.CONTAINS, "2");
+            executeFilter(filter);
+        });
     }
 
     @Test
     public void filterNumberPropertyUsingEquals() {
-        List<TestObject> created = setupNames("Jack", "John", "Johnny", "Polly",
-                "Josh");
-        Integer johnId = created.get(1).getId();
-        PropertyStringFilter filter = createFilter("id", Matcher.EQUALS,
-                johnId + "");
-        assertFilterResult(filter, "John");
+        List<TestObject> created = setupNumbers();
+
+        PropertyStringFilter filter = createFilter("intValue", Matcher.EQUALS,
+                "4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("nullableIntValue", Matcher.EQUALS, "4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("longValue", Matcher.EQUALS, "4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("nullableLongValue", Matcher.EQUALS, "4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("floatValue", Matcher.EQUALS, "0.4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("nullableFloatValue", Matcher.EQUALS, "0.4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("doubleValue", Matcher.EQUALS, "0.4");
+        assertFilterResult(filter, List.of(created.get(4)));
+
+        filter = createFilter("nullableDoubleValue", Matcher.EQUALS, "0.4");
+        assertFilterResult(filter, List.of(created.get(4)));
     }
 
     @Test
     public void filterNumberPropertyUsingLessThan() {
-        List<TestObject> created = setupNames("Jack", "John", "Johnny", "Polly",
-                "Josh");
-        Integer johnnyId = created.get(2).getId();
-        PropertyStringFilter filter = createFilter("id", Matcher.LESS_THAN,
-                johnnyId + "");
-        assertFilterResult(filter, "Jack", "John");
+        List<TestObject> created = setupNumbers();
+
+        PropertyStringFilter filter = createFilter("intValue",
+                Matcher.LESS_THAN, "4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("nullableIntValue", Matcher.LESS_THAN, "4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("longValue", Matcher.LESS_THAN, "4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("nullableLongValue", Matcher.LESS_THAN, "4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("floatValue", Matcher.LESS_THAN, "0.4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("nullableFloatValue", Matcher.LESS_THAN, "0.4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("doubleValue", Matcher.LESS_THAN, "0.4");
+        assertFilterResult(filter, created.subList(0, 4));
+
+        filter = createFilter("nullableDoubleValue", Matcher.LESS_THAN, "0.4");
+        assertFilterResult(filter, created.subList(0, 4));
     }
 
     @Test
     public void filterNumberPropertyUsingGreaterThan() {
-        List<TestObject> created = setupNames("Jack", "John", "Johnny", "Polly",
-                "Josh");
-        Integer johnnyId = created.get(2).getId();
-        PropertyStringFilter filter = createFilter("id", Matcher.GREATER_THAN,
-                johnnyId + "");
-        assertFilterResult(filter, "Polly", "Josh");
+        List<TestObject> created = setupNumbers();
+
+        PropertyStringFilter filter = createFilter("intValue",
+                Matcher.GREATER_THAN, "4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("nullableIntValue", Matcher.GREATER_THAN, "4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("longValue", Matcher.GREATER_THAN, "4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("nullableLongValue", Matcher.GREATER_THAN, "4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("floatValue", Matcher.GREATER_THAN, "0.4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("nullableFloatValue", Matcher.GREATER_THAN,
+                "0.4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("doubleValue", Matcher.GREATER_THAN, "0.4");
+        assertFilterResult(filter, created.subList(5, 10));
+
+        filter = createFilter("nullableDoubleValue", Matcher.GREATER_THAN,
+                "0.4");
+        assertFilterResult(filter, created.subList(5, 10));
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
@@ -198,10 +307,9 @@ public class FilterTest {
     @Test(expected = IllegalArgumentException.class)
     public void filterNonExistingProperty() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
-        PropertyStringFilter filter = createFilter("name", Matcher.EQUALS,
+        PropertyStringFilter filter = createFilter("foo", Matcher.EQUALS,
                 "John");
-        filter.setPropertyId("foo");
-        assertFilterResult(filter, "John");
+        executeFilter(filter);
     }
 
     @Test
@@ -213,7 +321,7 @@ public class FilterTest {
                 "Polly");
         OrFilter filter = new OrFilter();
         filter.setChildren(List.of(filter1, filter2));
-        assertFilterResult(filter, "John", "Polly");
+        assertFilteredNames(filter, "John", "Polly");
     }
 
     @Test
@@ -225,7 +333,7 @@ public class FilterTest {
                 "nny");
         AndFilter filter = new AndFilter();
         filter.setChildren(List.of(filter1, filter2));
-        assertFilterResult(filter, "Johnny");
+        assertFilteredNames(filter, "Johnny");
     }
 
     @Test
@@ -304,15 +412,16 @@ public class FilterTest {
         return filter;
     }
 
-    private void assertFilterResult(Filter filter, String... expectedNames) {
+    private void assertFilteredNames(Filter filter, String... expectedNames) {
         List<TestObject> result = executeFilter(filter);
-        assertFilterResult(result, expectedNames);
+        assertEquals(expectedNames.length, result.size());
+        Object[] actual = result.stream().map(TestObject::getName).toArray();
+        Assert.assertArrayEquals(expectedNames, actual);
     }
 
-    private void assertFilterResult(List<TestObject> result, String... names) {
-        assertEquals(names.length, result.size());
-        Object[] actual = result.stream().map(o -> o.getName()).toArray();
-        Assert.assertArrayEquals(names, actual);
+    private void assertFilterResult(Filter filter, List<TestObject> result) {
+        List<TestObject> actual = executeFilter(filter);
+        assertEquals(result, actual);
     }
 
     private List<TestObject> executeFilter(Filter filter) {
@@ -340,6 +449,25 @@ public class FilterTest {
         testObject.setBooleanValue(false);
         entityManager.persist(testObject);
         entityManager.flush();
+    }
+
+    private List<TestObject> setupNumbers() {
+        List<TestObject> created = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            TestObject testObject = new TestObject();
+            testObject.setIntValue(i);
+            testObject.setNullableIntValue(i);
+            testObject.setLongValue(i);
+            testObject.setNullableLongValue((long) i);
+            testObject.setFloatValue((float) i / 10);
+            testObject.setNullableFloatValue((float) i / 10);
+            testObject.setDoubleValue((double) i / 10);
+            testObject.setNullableDoubleValue((double) i / 10);
+            entityManager.persist(testObject);
+            created.add(testObject);
+        }
+        entityManager.flush();
+        return created;
     }
 
     private void setupEnums() {
