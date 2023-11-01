@@ -60,7 +60,6 @@ type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;
 
 function AutoFormTextField({ propertyInfo, form, options, label, ...other }: AutoFormTextFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the typing issue
   return <TextField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -68,7 +67,6 @@ type AutoFormIntegerFieldProps = IntegerFieldProps & SharedFieldProps;
 
 function AutoFormIntegerField({ propertyInfo, form, label, ...other }: AutoFormIntegerFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <IntegerField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -76,7 +74,6 @@ type AutoFormNumberFieldProps = NumberFieldProps & SharedFieldProps;
 
 function AutoFormDecimalField({ propertyInfo, form, label, ...other }: AutoFormNumberFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <NumberField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -85,7 +82,6 @@ type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
 function AutoFormDateField({ propertyInfo, form, label, ...other }: AutoFormDateFieldProps) {
   const i18n = useDatePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <DatePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
 }
 
@@ -93,7 +89,6 @@ type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
 
 function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <TimePicker {...other} {...form.field(model)} label={label} />;
 }
 
@@ -112,7 +107,6 @@ type AutoFormBooleanFieldProps = CheckboxProps & SharedFieldProps;
 
 function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormBooleanFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <Checkbox {...other} {...form.field(model)} label={label} />;
 }
 

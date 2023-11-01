@@ -81,16 +81,17 @@
     <jackson.version>2.15.3</jackson.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.2.3</flow.version>
+    <flow.version>24.3.0.alpha6</flow.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <spring.boot.version>3.1.5</spring.boot.version>
+    <spring.boot.version>3.2.0-RC2</spring.boot.version>
     <testbench.version>9.1.0</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
     <jaxb.version>4.0.1</jaxb.version>
-    <github.javaparser.core.version>3.25.5</github.javaparser.core.version>
+    <github.javaparser.core.version>3.25.6</github.javaparser.core.version>
+    <jetty.version>12.0.3</jetty.version>
   </properties>
 
   <organization>
@@ -130,6 +131,11 @@
       </snapshots>
     </repository>
     <repository>
+        <id>repository.spring.milestone</id>
+        <name>Spring Milestone Repository</name>
+        <url>https://repo.spring.io/milestone</url>
+    </repository>
+    <repository>
       <id>vaadin-addons</id>
       <url>https://maven.vaadin.com/vaadin-addons</url>
       <snapshots>
@@ -154,6 +160,11 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+        <id>repository.spring.milestone</id>
+        <name>Spring Milestone Repository</name>
+        <url>https://repo.spring.io/milestone</url>
     </pluginRepository>
   </pluginRepositories>
 
