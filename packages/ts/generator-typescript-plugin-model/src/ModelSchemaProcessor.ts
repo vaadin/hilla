@@ -210,9 +210,7 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
   }
 
   protected override [$processUnknown](schema: Schema): TypeReferenceNode {
-    return ts.factory.createTypeReferenceNode(this.#id[$processUnknown](schema), [
-      ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-    ]);
+    return ts.factory.createTypeReferenceNode(this.#id[$processUnknown](schema));
   }
 }
 
