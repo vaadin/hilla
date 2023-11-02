@@ -1,5 +1,5 @@
 import type { FormLayoutElement } from '@hilla/react-components/FormLayout';
-import { screen, waitFor } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 
 export type FormElement = HTMLElement & {
@@ -29,7 +29,11 @@ export default class FormController {
   }
 
   async getField(label: string): Promise<FormElement> {
-    return (await screen.findByLabelText(label)).parentElement as FormElement;
+    return (await within(this.instance).findByLabelText(label)).parentElement as FormElement;
+  }
+
+  queryField(label: string): FormElement | undefined {
+    return within(this.instance).queryByLabelText(label)?.parentElement as FormElement | undefined;
   }
 
   async getFields(...labels: readonly string[]): Promise<readonly FormElement[]> {
@@ -37,11 +41,11 @@ export default class FormController {
   }
 
   async findButton(text: string): Promise<HTMLButtonElement> {
-    return await screen.findByText(text);
+    return await within(this.instance).findByText(text);
   }
 
   async typeInField(label: string, value: string): Promise<void> {
-    const field = await screen.findByLabelText(label);
+    const field = await within(this.instance).findByLabelText(label);
     await this.#user.dblClick(field);
     await this.#user.keyboard(value);
   }

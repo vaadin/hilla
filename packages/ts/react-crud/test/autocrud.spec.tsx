@@ -311,5 +311,41 @@ describe('@hilla/react-crud', () => {
         expect(saveSpy).to.have.been.called;
       });
     });
+
+    describe('customize grid', () => {
+      it('allows passing custom grid props', async () => {
+        const { grid } = await CrudController.init(
+          render(
+            <ExperimentalAutoCrud
+              service={personService()}
+              model={PersonModel}
+              gridProps={{ visibleColumns: ['firstName', 'lastName'] }}
+            />,
+          ),
+          user,
+        );
+
+        await expect(grid.getHeaderCellContents()).to.eventually.eql(['First name', 'Last name', '']);
+      });
+    });
+
+    describe('customize form', () => {
+      it('allows passing custom form props', async () => {
+        const { form } = await CrudController.init(
+          render(
+            <ExperimentalAutoCrud
+              service={personService()}
+              model={PersonModel}
+              formProps={{ customLayoutRenderer: { template: [['firstName', 'lastName']] } }}
+            />,
+          ),
+          user,
+        );
+
+        expect(form.queryField('First name')).to.exist;
+        expect(form.queryField('Last name')).to.exist;
+        expect(form.queryField('Email')).not.to.exist;
+      });
+    });
   });
 });
