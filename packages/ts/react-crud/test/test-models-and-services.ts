@@ -55,7 +55,6 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   decimal: number;
   boolean: boolean;
   enum?: Gender;
-  date?: string;
   localDate?: string;
   localTime?: string;
   localDateTime?: string;
@@ -188,7 +187,7 @@ export class NestedTestModel<T extends NestedTestValues = NestedTestValues> exte
   get nestedDate(): StringModel {
     return this[_getPropertyModel](
       'nestedDate',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
     );
   }
 }
@@ -230,13 +229,6 @@ export class ColumnRendererTestModel<
 
   get enum(): GenderModel {
     return this[_getPropertyModel]('enum', (parent, key) => new GenderModel(parent, key, false));
-  }
-
-  get date(): StringModel {
-    return this[_getPropertyModel](
-      'date',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.util.Date' } }),
-    );
   }
 
   get localDate(): StringModel {
@@ -391,7 +383,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     decimal: 123.456,
     boolean: true,
     enum: Gender.MALE,
-    date: '2021-05-13T00:00:00',
     localDate: '2021-05-13',
     localTime: '08:45:00',
     localDateTime: '2021-05-13T08:45:00',
@@ -399,7 +390,7 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
       nestedString: 'Nested string 1',
       nestedNumber: 123456,
       nestedBoolean: true,
-      nestedDate: '2021-05-13T00:00:00',
+      nestedDate: '2021-05-13',
     },
   },
   {
@@ -410,7 +401,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     decimal: -0.12,
     boolean: false,
     enum: Gender.FEMALE,
-    date: '2021-05-14T00:00:00',
     localDate: '2021-05-14',
     localTime: '20:45:00',
     localDateTime: '2021-05-14T20:45:00',
@@ -431,7 +421,6 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     integer: -12,
     decimal: -12,
     boolean: false,
-    date: 'foo',
     localDate: 'foo',
     localTime: 'foo',
     localDateTime: 'foo',

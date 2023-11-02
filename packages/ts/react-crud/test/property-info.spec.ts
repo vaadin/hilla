@@ -40,7 +40,6 @@ describe('@hilla/react-crud', () => {
       expect(getPropertyType(NumberModel, 'double')).to.equal('decimal');
       expect(getPropertyType(NumberModel, 'java.lang.Double')).to.equal('decimal');
 
-      expect(getPropertyType(StringModel, 'java.util.Date')).to.equal('date');
       expect(getPropertyType(StringModel, 'java.time.LocalDate')).to.equal('date');
       expect(getPropertyType(StringModel, 'java.time.LocalTime')).to.equal('time');
       expect(getPropertyType(StringModel, 'java.time.LocalDateTime')).to.equal('datetime');

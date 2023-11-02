@@ -23,10 +23,9 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     private static final int GENDER_COLUMN = 2;
     private static final int LUCKY_NUMBER_COLUMN = 3;
     private static final int EMAIL_VERIFIED_COLUMN = 5;
-    private static final int JOINED_DATE_COLUMN = 6;
-    private static final int BIRTH_DATE_COLUMN = 7;
-    private static final int SHIFT_START_COLUMN = 8;
-    private static final int APPOINTMENT_TIME_COLUMN = 9;
+    private static final int BIRTH_DATE_COLUMN = 6;
+    private static final int SHIFT_START_COLUMN = 7;
+    private static final int APPOINTMENT_TIME_COLUMN = 8;
 
     protected String getTestPath() {
         return getRootURL() + "/readonly-grid-with-headerfilters";
@@ -100,25 +99,6 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         setEnumHeaderFilter(GENDER_COLUMN, "");
         assertRowCount(50);
         assertName(0, "Abigail", "Carter");
-    }
-
-    @Test
-    public void dateFilterWorks() {
-        assertRowCount(50);
-        sortByColumn(JOINED_DATE_COLUMN);
-
-        // Default is greater_than
-        setHeaderFilter(JOINED_DATE_COLUMN, null, "2020-01-01");
-        assertRowCount(40);
-        assertName(0, "Nathan", "Perez");
-
-        setHeaderFilter(JOINED_DATE_COLUMN, Matcher.LESS_THAN, (String) null);
-        assertRowCount(10);
-        assertName(0, "Xander", "Zane");
-
-        setHeaderFilter(JOINED_DATE_COLUMN, Matcher.EQUALS, "2016-10-30");
-        assertRowCount(1);
-        assertName(0, "Rebecca", "Taylor");
     }
 
     @Test

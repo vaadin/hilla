@@ -1,10 +1,8 @@
 package dev.hilla.crud;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -78,23 +76,6 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             case LESS_THAN:
                 throw new IllegalArgumentException(
                         "A boolean cannot be filtered using less than");
-            default:
-                break;
-            }
-        } else if (isDate(javaType)) {
-            var path = root.<Date> get(filter.getPropertyId());
-            var dateValue = Date.from(LocalDate.parse(value)
-                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
-            switch (filter.getMatcher()) {
-            case EQUALS:
-                return criteriaBuilder.equal(path, dateValue);
-            case CONTAINS:
-                throw new IllegalArgumentException(
-                        "A date cannot be filtered using contains");
-            case GREATER_THAN:
-                return criteriaBuilder.greaterThan(path, dateValue);
-            case LESS_THAN:
-                return criteriaBuilder.lessThan(path, dateValue);
             default:
                 break;
             }
@@ -192,10 +173,6 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private boolean isBoolean(Class<?> javaType) {
         return javaType == boolean.class || javaType == Boolean.class;
-    }
-
-    private boolean isDate(Class<?> javaType) {
-        return javaType == java.util.Date.class;
     }
 
     private boolean isLocalDate(Class<?> javaType) {
