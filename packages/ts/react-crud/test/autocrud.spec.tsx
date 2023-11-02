@@ -20,17 +20,14 @@ describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    before(() => {
+    beforeEach(() => {
       // Desktop resolution
       viewport.set(1024, 768);
+      user = userEvent.setup();
     });
 
     after(() => {
       viewport.reset();
-    });
-
-    beforeEach(() => {
-      user = userEvent.setup();
     });
 
     function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
@@ -236,12 +233,10 @@ describe('@hilla/react-crud', () => {
       let saveSpy: sinon.SinonSpy;
       let result: RenderResult;
 
-      before(() => {
+      beforeEach(() => {
         // iPhone 13 Pro resolution
         viewport.set(390, 844);
-      });
 
-      beforeEach(() => {
         const service = personService();
         saveSpy = sinon.spy(service, 'save');
         result = render(<TestAutoCrud service={service} />);

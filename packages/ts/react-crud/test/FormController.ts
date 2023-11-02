@@ -9,21 +9,19 @@ export type FormElement = HTMLElement & {
 };
 
 export default class FormController {
-  readonly instance: FormLayoutElement;
+  readonly instance: HTMLElement;
+  readonly formLayout: FormLayoutElement;
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
   readonly renderResult: HTMLElement;
 
   static async init(user: ReturnType<(typeof userEvent)['setup']>, source = document.body): Promise<FormController> {
-    const form = await waitFor(() => source.querySelector('vaadin-form-layout')!);
+    const form = await waitFor(() => within(source).getByTestId('auto-form'));
     return new FormController(form, source, user);
   }
 
-  private constructor(
-    instance: FormLayoutElement,
-    renderResult: HTMLElement,
-    user: ReturnType<(typeof userEvent)['setup']>,
-  ) {
+  private constructor(instance: HTMLElement, renderResult: HTMLElement, user: ReturnType<(typeof userEvent)['setup']>) {
     this.instance = instance;
+    this.formLayout = instance.querySelector('vaadin-form-layout')!;
     this.renderResult = renderResult;
     this.#user = user;
   }
