@@ -5,6 +5,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 /**
  * Empty class that adds <code>@hilla/form</code> npm package dependency.
  */
-@NpmPackage(value = "@hilla/form", version = "2.4.0-alpha2")
+@NpmPackage(value = "@hilla/form", version = "2.4.0-alpha3")
 public class HillaForm {
 }
