@@ -2,7 +2,8 @@ import { type AbstractModel, type DetachedModelConstructor, ValidationError, typ
 import { Button } from '@hilla/react-components/Button.js';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
-import { useForm, type UseFormResult, type FieldDirectiveResult } from '@hilla/react-form';
+import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
+import { type FieldDirectiveResult, useForm, type UseFormResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
 import type { CrudService } from './crud.js';
@@ -72,6 +73,7 @@ function createGenericResponsiveSteps(
   function gcd(a: number, b: number): number {
     return a > 0 ? gcd(b % a, a) : b;
   }
+
   const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
 
   const minNeededColumns = customFormLayout.template.map((row) => row.length).reduce(lcm);
@@ -198,9 +200,11 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   }
 
   return (
-    <section className="flex flex-col p-m gap-m">
-      {layout}
-      {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
+    <VerticalLayout className="auto-form" theme="spacing">
+      <VerticalLayout className="auto-form-fields">
+        {layout}
+        {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
+      </VerticalLayout>
       <HorizontalLayout className="auto-form-toolbar" theme="spacing">
         {form.dirty ? (
           <Button theme="tertiary" onClick={() => form.reset()}>
@@ -216,6 +220,6 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
           Submit
         </Button>
       </HorizontalLayout>
-    </section>
+    </VerticalLayout>
   );
 }
