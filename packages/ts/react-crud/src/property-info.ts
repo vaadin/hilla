@@ -36,7 +36,6 @@ const javaTypeMap: Record<string, PropertyType> = {
   'java.lang.Float': 'decimal',
   double: 'decimal',
   'java.lang.Double': 'decimal',
-  'java.util.Date': 'date',
   'java.time.LocalDate': 'date',
   'java.time.LocalTime': 'time',
   'java.time.LocalDateTime': 'datetime',

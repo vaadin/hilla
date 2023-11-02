@@ -649,15 +649,6 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(3, columnIndex)).to.have.rendered.text('');
       });
 
-      it('renders java.util.Date as right aligned', async () => {
-        const columnIndex = await grid.findColumnIndexByHeaderText('Date');
-        expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
-        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
-        expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('5/14/2021');
-        expect(grid.getBodyCellContent(2, columnIndex)).to.have.text('');
-        expect(grid.getBodyCellContent(3, columnIndex)).to.have.text('');
-      });
-
       it('renders java.time.LocalDate as right aligned', async () => {
         const columnIndex = await grid.findColumnIndexByHeaderText('Local date');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
