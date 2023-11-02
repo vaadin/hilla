@@ -662,5 +662,20 @@ describe('@hilla/react-crud', () => {
         await result.submit();
       });
     });
+
+    describe('Field Options', () => {
+      it('renders custom label from field options instead of the default one', async () => {
+        const result = render(
+          <ExperimentalAutoForm
+            service={personService()}
+            model={PersonModel}
+            fieldOptions={{ firstName: { label: 'Employee First Name' } }}
+          />,
+        );
+        const form = await FormController.init(user, result.container);
+        expect(await form.getField('Employee First Name')).to.exist;
+        await expect(form.getField('First name')).to.eventually.be.rejected;
+      });
+    });
   });
 });

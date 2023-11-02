@@ -4,7 +4,7 @@ import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { useForm, type UseFormResult, type FieldDirectiveResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
-import { AutoFormField, type AutoFormFieldProps } from './autoform-field.js';
+import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 
@@ -39,6 +39,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
   disabled?: boolean;
   customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
   customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>;
+  fieldOptions?: Record<string, FieldOptions>;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
 }>;
@@ -135,6 +136,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   disabled,
   customLayoutRenderer: CustomLayoutRenderer,
   customFields,
+  fieldOptions,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -176,12 +178,21 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
 
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
     const customField = customFields?.[propertyInfo.name];
+    const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name];
     if (customField) {
       // @ts-expect-error: model needs access by name
       const fieldModel = form.model[propertyInfo.name] as AbstractModel<TItem>;
       return customField({ field: form.field(fieldModel) });
     }
-    return <AutoFormField key={propertyInfo.name} propertyInfo={propertyInfo} form={form} disabled={disabled} />;
+    return (
+      <AutoFormField
+        key={propertyInfo.name}
+        propertyInfo={propertyInfo}
+        form={form}
+        disabled={disabled}
+        options={fieldOptionsForProperty}
+      />
+    );
   }
 
   let layout: JSX.Element;

@@ -16,6 +16,11 @@ export type SharedFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
   colSpan?: number;
   form: UseFormResult<any>;
+  options?: FieldOptions;
+}>;
+
+export type FieldOptions = Readonly<{
+  label?: string;
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
@@ -93,6 +98,9 @@ export type AutoFormFieldProps = CheckboxProps &
   TimePickerProps;
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
+  if (props.options?.label) {
+    props.propertyInfo.humanReadableName = props.options.label;
+  }
   switch (props.propertyInfo.type) {
     case 'string':
       return <AutoFormTextField {...props}></AutoFormTextField>;
