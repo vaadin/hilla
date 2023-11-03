@@ -3,7 +3,7 @@ import { Button } from '@hilla/react-components/Button.js';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { type FieldDirectiveResult, useForm, type UseFormResult } from '@hilla/react-form';
+import { useForm, type UseFormResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import type { CrudService } from './crud.js';
@@ -39,7 +39,6 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
   item?: Value<M> | typeof emptyItem | null;
   disabled?: boolean;
   customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
-  customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>;
   fieldOptions?: Record<string, FieldOptions>;
   onSubmitError?({ error }: SubmitErrorEvent): void;
   afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
@@ -137,7 +136,6 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   afterSubmit,
   disabled,
   customLayoutRenderer: CustomLayoutRenderer,
-  customFields,
   fieldOptions,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
@@ -179,13 +177,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
-    const customField = customFields?.[propertyInfo.name];
     const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name];
-    if (customField) {
-      // @ts-expect-error: model needs access by name
-      const fieldModel = form.model[propertyInfo.name] as AbstractModel<TItem>;
-      return customField({ field: form.field(fieldModel) });
-    }
     return (
       <AutoFormField
         key={propertyInfo.name}
