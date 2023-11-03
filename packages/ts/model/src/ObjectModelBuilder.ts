@@ -2,7 +2,7 @@ import { CoreModelBuilder } from './CoreModelBuilder.js';
 import type { TypeModel } from './coreModels.js';
 import { _key, _meta, _name, _owner, _value, type IModel, type Value } from './Model.js';
 import type { ModelMetadata } from './ModelMetadata.js';
-import { ModelBuilderUtil, getValue, type ValueExtractor, type ModelWithProperty } from './utils.js';
+import { ModelBuilderUtil, getValue, type ValueExtractor, type ModelWithProperty, isModel } from './utils.js';
 
 export type TemplateModelKeys<T, M extends IModel = IModel> = T extends unknown[]
   ? never
@@ -46,7 +46,7 @@ export class ObjectModelBuilder<T, M extends IModel<T>> {
 
   property<K extends string & keyof T, MValue extends IModel<T[K]>>(
     key: K,
-    valueExtractor: ValueExtractor<MValue, TypeModel<T>>,
+    valueModel: MValue | ValueExtractor<MValue, TypeModel<T>>,
     options: {
       meta?: ModelMetadata;
     } = {},
@@ -59,7 +59,8 @@ export class ObjectModelBuilder<T, M extends IModel<T>> {
         }
 
         const attachedModelRecord = attachedModelRecordCache.get(this)!;
-        attachedModelRecord[key] ??= CoreModelBuilder.from(valueExtractor(this))
+        const detachedValueModel: MValue = isModel(valueModel) ? valueModel : valueModel(this);
+        attachedModelRecord[key] ??= CoreModelBuilder.from(detachedValueModel)
           .define(_owner, this)
           .define(_key, key)
           .define(_meta, options.meta)

@@ -14,7 +14,6 @@ import {
   toObject,
   type IModel,
   _value,
-  type ValueGetter,
   type ModelMetadata,
   type ModelOwner,
   _name,
@@ -132,7 +131,7 @@ const NamedModel = m
   .meta({
     jvmType: 'com.example.application.Named',
   })
-  .property('name', () => StringModel)
+  .property('name', StringModel)
   .build();
 
 // Inheritance
@@ -140,11 +139,11 @@ const NamedModel = m
 const AddressModel = m
   .from(NamedModel, toObject<Address>)
   .name('Address')
-  .property('street', () => StringModel)
-  .property('premise', () => StringModel)
-  .property('city', () => StringModel)
-  .property('postalCode', () => StringModel)
-  .property('country', () => StringModel)
+  .property('street', StringModel)
+  .property('premise', StringModel)
+  .property('city', StringModel)
+  .property('postalCode', StringModel)
+  .property('country', StringModel)
   .build();
 
 const address = getValue(AddressModel);
@@ -157,9 +156,9 @@ getValue(AddressModel.country).length;
 const CustomerModel = m
   .from(NamedModel, toObject<Customer>)
   .name('Customer')
-  .property('subscriptionActive', () => BooleanModel)
-  .property('subscriptionTier', () => NumberModel)
-  .property('address', () => AddressModel)
+  .property('subscriptionActive', BooleanModel)
+  .property('subscriptionTier', NumberModel)
+  .property('address', AddressModel)
   .build();
 
 // Self reference
@@ -177,18 +176,18 @@ EmployeeModel.supervisor.supervisor.supervisor.name;
 const OrderRowModel = m
   .from(ObjectModel, toObject<OrderRow>)
   .name('OrderRow')
-  .property('product', () => StringModel)
-  .property('qty', () => NumberModel)
+  .property('product', StringModel)
+  .property('qty', NumberModel)
   .build();
 
 const OrderModel = m
   .from(ObjectModel, toObject<Order>)
   .name('Order')
-  .property('notes', () => m.optional(StringModel))
-  .property('discountCodes', () => m.array(StringModel))
-  .property('rows', () => m.array(OrderRowModel))
-  .property('customer', () => m.optional(CustomerModel))
-  .property('address', () => m.optional(AddressModel))
+  .property('notes', m.optional(StringModel))
+  .property('discountCodes', m.array(StringModel))
+  .property('rows', m.array(OrderRowModel))
+  .property('customer', m.optional(CustomerModel))
+  .property('address', m.optional(AddressModel))
   .build();
 
 const CommentableModel: TypeModel<Commentable> = m
@@ -206,7 +205,7 @@ const CommentableModel: TypeModel<Commentable> = m
 const AccountModel = m
   .from(NamedModel, toObject<Account>)
   .name('Account')
-  .property('type', () => m.enum(AccountType))
+  .property('type', m.enum(AccountType))
   .build();
 
 const t: AccountType = AccountModel.type[_value];
@@ -216,19 +215,19 @@ const t: AccountType = AccountModel.type[_value];
 const FooItemModel = m
   .from(ObjectModel, toObject<FooItem>)
   .name('FooItem')
-  .property('foo', () => StringModel)
+  .property('foo', StringModel)
   .build();
 
 const BarItemModel = m
   .from(ObjectModel, toObject<BarItem>)
   .name('BarItem')
-  .property('bar', () => NumberModel)
+  .property('bar', NumberModel)
   .build();
 
 const ContainerModel = m
   .from(ObjectModel, toObject<Container>)
   .name('Container')
-  .property('item', () => m.union(FooItemModel, BarItemModel))
+  .property('item', m.union(FooItemModel, BarItemModel))
   .build();
 
 const containerItem: BarItem | FooItem = ContainerModel.item[_value];
