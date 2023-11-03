@@ -408,8 +408,8 @@ describe('@hilla/react-crud', () => {
 
     it('customLayoutRenderer is not defined, default two-column form layout is used', async () => {
       const form = await populatePersonForm(1);
-      expect(form.instance.responsiveSteps).to.have.length(3);
-      expect(form.instance.responsiveSteps).to.be.deep.equal([
+      expect(form.formLayout.responsiveSteps).to.have.length(3);
+      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
         { minWidth: 0, columns: 1, labelsPosition: 'top' },
         { minWidth: '20em', columns: 1 },
         { minWidth: '40em', columns: 2 },
@@ -434,8 +434,8 @@ describe('@hilla/react-crud', () => {
         },
         'screen-1440-900',
       );
-      expect(form.instance.responsiveSteps).to.have.length(2);
-      expect(form.instance.responsiveSteps).to.be.deep.equal([
+      expect(form.formLayout.responsiveSteps).to.have.length(2);
+      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 6 },
       ]);
@@ -461,8 +461,8 @@ describe('@hilla/react-crud', () => {
         },
         'screen-1440-900',
       );
-      expect(form.instance.responsiveSteps).to.have.length(3);
-      expect(form.instance.responsiveSteps).to.be.deep.equal([
+      expect(form.formLayout.responsiveSteps).to.have.length(3);
+      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 2 },
         { minWidth: '1200px', columns: 3 },
@@ -535,8 +535,8 @@ describe('@hilla/react-crud', () => {
         },
         'screen-1440-900',
       );
-      expect(form.instance.responsiveSteps).to.have.length(2);
-      expect(form.instance.responsiveSteps).to.be.deep.equal([
+      expect(form.formLayout.responsiveSteps).to.have.length(2);
+      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 6 },
       ]);
@@ -572,8 +572,8 @@ describe('@hilla/react-crud', () => {
         },
         'screen-1440-900',
       );
-      expect(form.instance.responsiveSteps).to.have.length(3);
-      expect(form.instance.responsiveSteps).to.be.deep.equal([
+      expect(form.formLayout.responsiveSteps).to.have.length(3);
+      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
         { minWidth: '0', columns: 1 },
         { minWidth: '800px', columns: 2 },
         { minWidth: '1200px', columns: 3 },
@@ -590,7 +590,7 @@ describe('@hilla/react-crud', () => {
         return <VerticalLayout>{children}</VerticalLayout>;
       }
       const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
-      expect(form.instance).to.not.exist;
+      expect(form.formLayout).to.not.exist;
       const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
       expect(layout).to.exist;
     });

@@ -7,21 +7,39 @@ import AutoCrudActions from './autocrud-actions';
 import { AutoCrudContext } from './autocrud-context.js';
 import { AutoCrudDialog } from './autocrud-dialog';
 import css from './autocrud.obj.css';
-import { emptyItem, ExperimentalAutoForm } from './autoform.js';
-import { AutoGrid } from './autogrid.js';
+import { type AutoFormProps, emptyItem, ExperimentalAutoForm } from './autoform.js';
+import { AutoGrid, type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { getIdProperty, getProperties } from './property-info.js';
 
 document.adoptedStyleSheets.unshift(css);
 
+export type AutoCrudFormProps<TItem> = Omit<
+  Partial<AutoFormProps<AbstractModel<TItem>>>,
+  'afterSubmit' | 'disabled' | 'item' | 'model' | 'service'
+>;
+
+export type AutoCrudGridProps<TItem> = Omit<
+  Partial<AutoGridProps<TItem>>,
+  'customColumns' | 'model' | 'onActiveItemChanged' | 'refreshTrigger' | 'selectedItems' | 'service'
+>;
+
 export type AutoCrudProps<TItem> = Readonly<{
   service: CrudService<TItem>;
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   noDelete?: boolean;
+  formProps?: AutoCrudFormProps<TItem>;
+  gridProps?: AutoCrudGridProps<TItem>;
 }>;
 
-export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCrudProps<TItem>): JSX.Element {
+export function ExperimentalAutoCrud<TItem>({
+  service,
+  model,
+  noDelete,
+  formProps,
+  gridProps,
+}: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | typeof emptyItem | undefined>(undefined);
   const [pendingItemToDelete, setPendingItemToDelete] = useState<TItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -66,6 +84,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
 
   const autoForm = (
     <ExperimentalAutoForm
+      {...formProps}
       disabled={!item}
       service={service}
       model={model}
@@ -87,6 +106,7 @@ export function ExperimentalAutoCrud<TItem>({ service, model, noDelete }: AutoCr
         <div className="auto-crud">
           <div className="auto-crud-main">
             <AutoGrid
+              {...gridProps}
               refreshTrigger={refreshTrigger}
               service={service}
               model={model}
