@@ -6,7 +6,7 @@ import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import type { FieldDirectiveResult } from '@hilla/react-form';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import type { ComponentType } from 'react';
@@ -589,6 +589,7 @@ describe('@hilla/react-crud', () => {
       function MyCustomLayoutRenderer({ children, form }: AutoFormLayoutRendererProps<PersonModel>) {
         return <VerticalLayout>{children}</VerticalLayout>;
       }
+
       const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
       expect(form.instance).to.not.exist;
       const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
@@ -638,7 +639,7 @@ describe('@hilla/react-crud', () => {
               service={service}
               model={PersonModel}
               customFields={{
-                lastName: ({ field }) => <TextArea {...field} label={testLabel} />,
+                lastName: ({ field }) => <TextArea key={field.name} {...field} label={testLabel} />,
               }}
             />,
           ).container,
@@ -669,12 +670,14 @@ describe('@hilla/react-crud', () => {
           <ExperimentalAutoForm
             service={personService()}
             model={PersonModel}
-            fieldOptions={{ firstName: { label: 'Employee First Name' } }}
+            fieldOptions={{ firstName: { label: 'Employee First Name' }, lastName: { label: 'Employee Last Name' } }}
           />,
         );
         const form = await FormController.init(user, result.container);
-        expect(await form.getField('Employee First Name')).to.exist;
-        await expect(form.getField('First name')).to.eventually.be.rejected;
+        expect(within(result.container).queryByLabelText('Employee First Name')).to.exist;
+        expect(within(result.container).queryByLabelText('First name')).to.not.exist;
+        expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
+        expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
       });
     });
   });
