@@ -20,17 +20,14 @@ describe('@hilla/react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    before(() => {
+    beforeEach(() => {
       // Desktop resolution
       viewport.set(1024, 768);
+      user = userEvent.setup();
     });
 
     after(() => {
       viewport.reset();
-    });
-
-    beforeEach(() => {
-      user = userEvent.setup();
     });
 
     function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
@@ -236,12 +233,10 @@ describe('@hilla/react-crud', () => {
       let saveSpy: sinon.SinonSpy;
       let result: RenderResult;
 
-      before(() => {
+      beforeEach(() => {
         // iPhone 13 Pro resolution
         viewport.set(390, 844);
-      });
 
-      beforeEach(() => {
         const service = personService();
         saveSpy = sinon.spy(service, 'save');
         result = render(<TestAutoCrud service={service} />);
@@ -309,6 +304,42 @@ describe('@hilla/react-crud', () => {
 
         // saves
         expect(saveSpy).to.have.been.called;
+      });
+    });
+
+    describe('customize grid', () => {
+      it('allows passing custom grid props', async () => {
+        const { grid } = await CrudController.init(
+          render(
+            <ExperimentalAutoCrud
+              service={personService()}
+              model={PersonModel}
+              gridProps={{ visibleColumns: ['firstName', 'lastName'] }}
+            />,
+          ),
+          user,
+        );
+
+        await expect(grid.getHeaderCellContents()).to.eventually.eql(['First name', 'Last name', '']);
+      });
+    });
+
+    describe('customize form', () => {
+      it('allows passing custom form props', async () => {
+        const { form } = await CrudController.init(
+          render(
+            <ExperimentalAutoCrud
+              service={personService()}
+              model={PersonModel}
+              formProps={{ customLayoutRenderer: { template: [['firstName', 'lastName']] } }}
+            />,
+          ),
+          user,
+        );
+
+        expect(form.queryField('First name')).to.exist;
+        expect(form.queryField('Last name')).to.exist;
+        expect(form.queryField('Email')).not.to.exist;
       });
     });
   });
