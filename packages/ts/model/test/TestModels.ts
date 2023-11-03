@@ -166,7 +166,7 @@ const CustomerModel = m
 const EmployeeModel = m
   .from(NamedModel, toObject<Employee>)
   .name('Employee')
-  .property('supervisor', (self) => m.optional(self))
+  .property('supervisor', m.optional)
   .build();
 
 EmployeeModel.supervisor.supervisor.supervisor.name;

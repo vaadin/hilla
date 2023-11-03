@@ -29,7 +29,7 @@ export class CoreModelBuilder<T, M extends IModel<T>> implements ICoreModelBuild
 
   static from<MSuper extends IModel, T extends Value<MSuper> = Value<MSuper>>(
     superModel: MSuper,
-    valueExtractor?: ValueExtractor<T, IModel<T>>,
+    valueExtractor?: ValueExtractor<T, IModel<T> & MSuper>,
   ): ICoreModelBuilder<T, IModel<T>> {
     return new CoreModelBuilder(superModel, valueExtractor ?? (() => superModel[_value]));
   }
