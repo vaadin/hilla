@@ -21,15 +21,9 @@
   <dependencies>
     <!-- Project dependencies -->
     <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-dev-server</artifactId>
-      <version>${flow.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.github.javaparser</groupId>
-          <artifactId>javaparser-core</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>dev.hilla</groupId>
+      <artifactId>hilla-dev</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
