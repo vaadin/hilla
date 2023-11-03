@@ -6,7 +6,7 @@ function createExcludeCallback(command) {
   return (files) => {
     const matched = micromatch.not(files, excludePatterns);
 
-    return matched.length > 0 ? [`${command} ${matched.join(' ')}`] : [];
+    return matched.length > 0 ? [`${command} ${matched.map((filename) => `"${filename}"`).join(' ')}`] : [];
   };
 }
 
