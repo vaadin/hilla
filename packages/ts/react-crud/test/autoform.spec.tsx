@@ -618,7 +618,7 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('Field Options', () => {
-      it('renders a custom field instead of the default one', async () => {
+      it('renders a custom field from field options instead of the default one', async () => {
         const testLabel = 'Last names';
         const testValue = 'Maxwell\nSmart';
 
@@ -635,7 +635,10 @@ describe('@hilla/react-crud', () => {
               service={service}
               model={PersonModel}
               fieldOptions={{
-                lastName: { renderer: ({ field }) => <TextArea key={field.name} {...field} label={testLabel} /> },
+                lastName: {
+                  label: testLabel,
+                  renderer: ({ field, label }) => <TextArea key={field.name} {...field} label={label} />,
+                },
               }}
             />,
           ).container,
