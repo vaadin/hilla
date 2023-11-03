@@ -36,7 +36,7 @@ interface Address extends Named {
   premise: string;
   city: string;
   postalCode: string;
-  country?: string;
+  country: string;
 }
 
 interface Customer extends Named {
@@ -144,13 +144,13 @@ const AddressModel = m
   .property('premise', () => StringModel)
   .property('city', () => StringModel)
   .property('postalCode', () => StringModel)
-  .property('country', () => m.optional(StringModel))
+  .property('country', () => StringModel)
   .build();
 
-getValue(AddressModel).name;
+const address = getValue(AddressModel);
 getValue(AddressModel).postalCode;
 getValue(AddressModel.postalCode);
-getValue(AddressModel.country)?.length;
+getValue(AddressModel.country).length;
 
 // Composition
 
@@ -167,9 +167,7 @@ const CustomerModel = m
 const EmployeeModel = m
   .from(NamedModel, toObject<Employee>)
   .name('Employee')
-  .property('supervisor', function modelGetter() {
-    return m.optional(this);
-  })
+  .property('supervisor', (self) => m.optional(self))
   .build();
 
 EmployeeModel.supervisor.supervisor.supervisor.name;
@@ -250,7 +248,7 @@ for (const key in CustomerModel.address) {
 }
 
 console.log('\n');
-console.log('Empty value: CustomerModel', CustomerModel[_value]);
+console.log('Empty value for CustomerModel:', CustomerModel[_value]);
 
 console.log('\n');
 console.log('AddressModel.street\n', String(AddressModel.street));

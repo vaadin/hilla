@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { CoreModelBuilder } from './CoreModelBuilder.js';
 import { AbstractModel, _optional, type IModel, type Value, _value } from './Model.js';
 import { isModel } from './utils.js';
@@ -35,13 +34,13 @@ export const ObjectModel = CoreModelBuilder.from(AbstractModel, () => emptyObjec
   .name('Object')
   .build();
 
-export function toObject<T>(this: typeof ObjectModel): T {
+export function toObject<T>(consistentSelf: typeof ObjectModel): T {
   const obj: Record<string, unknown> = {};
-  const proto = Object.getPrototypeOf(this);
+  const proto = Object.getPrototypeOf(consistentSelf);
   if (isModel(proto, ObjectModel)) {
-    Object.assign(obj, toObject.call(proto));
+    Object.assign(obj, toObject(proto));
   }
-  const properties = this as unknown as Record<string, IModel>;
+  const properties = consistentSelf as unknown as Record<string, IModel>;
   for (const [key, value] of Object.entries(properties)) {
     if (!value[_optional]) {
       obj[key] = value[_value];
@@ -73,8 +72,8 @@ export interface IEnumModel<E extends typeof Enum = typeof Enum> extends IModel<
   [_enum]: E;
 }
 
-export function toEnum<E extends typeof Enum = typeof Enum>(this: typeof EnumModel): E[keyof E] {
-  const enumObject = this[_enum];
+export function toEnum<E extends typeof Enum = typeof Enum>(consistentSelf: typeof EnumModel): E[keyof E] {
+  const enumObject = consistentSelf[_enum];
   const firstValue = Object.values(enumObject)[0] as unknown as E[keyof E];
   return firstValue;
 }
@@ -94,8 +93,8 @@ export interface IUnionModel<MM extends readonly [IModel, ...IModel[]]> extends 
 // All together now
 
 export type TypeModel<T> = IModel<T> &
-  (T extends typeof Enum
-    ? IEnumModel<T>
+  (T extends Enum
+    ? IEnumModel<T & typeof Enum>
     : T extends Array<infer I>
     ? IArrayModel<TypeModel<I>>
     : T extends object

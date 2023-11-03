@@ -7,10 +7,16 @@ export const _meta = Symbol('meta');
 export const _value = Symbol('value');
 export const _optional = Symbol('optional');
 
+/**
+ * The model hierarchy root type
+ */
 export interface ModelOwner {
   model?: IModel;
 }
 
+/**
+ * The defaut container for detached models
+ */
 export const detachedModelOwner: ModelOwner = {
   model: undefined,
 };
@@ -20,13 +26,39 @@ Object.defineProperty(detachedModelOwner, 'toString', {
   value: () => ':detached:',
 });
 
+/**
+ * The base interface for Hilla data models
+ */
 export interface IModel<T = unknown> {
-  [_name]: string;
-  [_owner]: IModel | ModelOwner;
-  [_key]: keyof any;
-  [_value]: T;
-  [_meta]: ModelMetadata;
-  [_optional]: boolean;
+  /**
+   * String name for debug output
+   */
+  readonly [_name]: string;
+
+  /**
+   * Container model or hierarchy root
+   */
+  readonly [_owner]: IModel | ModelOwner;
+
+  /**
+   * The key in the container (property name for object, or index number for arrays).
+   */
+  readonly [_key]: keyof any;
+
+  /**
+   * Value getter and type marker
+   */
+  readonly [_value]: T;
+
+  /**
+   * Optional marker
+   */
+  readonly [_optional]: boolean;
+
+  /**
+   * Other metadata (validation rules, JVM type and annotations, etc) in JSON-like structure
+   */
+  readonly [_meta]: ModelMetadata;
 }
 
 export type Value<M extends IModel> = M extends IModel<infer T> ? T : never;

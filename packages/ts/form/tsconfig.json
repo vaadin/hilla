@@ -4,6 +4,6 @@
     "experimentalDecorators": true,
     "target": "es2022"
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "../model/src/NewModels.ts", "../model/src/ModelOwner.ts", "../model/src/ModelMetadata.ts", "../model/src/Model.ts", "../model/src/m.ts"],
   "exclude": ["test/**/*.snap.ts"]
 }
