@@ -43,9 +43,18 @@ describe('@hilla/react-crud', () => {
       expect(form.instance).not.to.be.undefined;
     });
 
-    it('passes the selected item and populates the form', async () => {
+    it('edits an item when selecting a grid row', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(0);
+      expect((await form.getField('First name')).value).to.equal('Jane');
+      expect((await form.getField('Last name')).value).to.equal('Love');
+    });
+
+    it('edits an item when clicking the edit button in the actions column', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      const cell = grid.getBodyCellContent(0, (await grid.getColumns()).length - 1);
+      const editButton = await within(cell).findByRole('button', { name: 'Edit' });
+      await user.click(editButton);
       expect((await form.getField('First name')).value).to.equal('Jane');
       expect((await form.getField('Last name')).value).to.equal('Love');
     });
@@ -98,15 +107,6 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('Last name', '2');
       await form.submit();
       expect(grid.getBodyCellContent(1, 1)).to.have.text('2');
-    });
-
-    it('shows a confirmation dialog before deleting', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      await user.click(cell.querySelector('vaadin-button')!);
-      const dialog = await ConfirmDialogController.init(cell, user);
-      expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
-      expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
     });
 
     it('can add a new item', async () => {
@@ -170,31 +170,66 @@ describe('@hilla/react-crud', () => {
       expect(grid.isSelected(0)).to.be.false;
     });
 
+    it('shows a confirmation dialog before deleting', async () => {
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
+      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await user.click(deleteButton);
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
+    });
+
     it('deletes and refreshes grid after confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
       const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      await user.click(cell.querySelector('vaadin-button')!);
-      const dialog = await ConfirmDialogController.init(cell, user);
+      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await user.click(deleteButton);
+      const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.confirm();
       expect(grid.getVisibleRowCount()).to.equal(1);
+    });
+
+    it('clears and disables the form when deleting the currently edited item', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      // Select item
+      await grid.toggleRowSelected(0);
+      // Delete item
+      const cell = grid.getBodyCellContent(0, (await grid.getColumns()).length - 1);
+      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await user.click(deleteButton);
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      await dialog.confirm();
+      // Form should be cleared and disabled
+      const field = await form.getField('First name');
+      expect(field.disabled).to.be.true;
+      expect(field.value).to.be.empty;
     });
 
     it('does not delete when not confirming', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
       const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      await user.click(cell.querySelector('vaadin-button')!);
-      const dialog = await ConfirmDialogController.init(cell, user);
+      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await user.click(deleteButton);
+      const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.cancel();
       expect(grid.getVisibleRowCount()).to.equal(2);
     });
 
-    it('does not render a delete button when noDelete', async () => {
+    it('does render a delete button without noDelete', async () => {
+      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
+      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
+      expect(deleteButton).to.exist;
+    });
+
+    it('does not render a delete button with noDelete', async () => {
       const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
       const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const button = cell.querySelector('vaadin-button');
-      expect(button).to.be.null;
+      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
+      expect(deleteButton).to.be.null;
     });
 
     describe('mobile layout', () => {

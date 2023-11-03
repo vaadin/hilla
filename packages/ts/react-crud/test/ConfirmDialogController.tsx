@@ -7,10 +7,10 @@ export default class ConfirmDialogController {
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
   static async init(
-    cell: HTMLElement,
+    container: HTMLElement,
     user: ReturnType<(typeof userEvent)['setup']>,
   ): Promise<ConfirmDialogController> {
-    const dialog = (await waitFor(() => cell.querySelector('vaadin-confirm-dialog')))!;
+    const dialog = (await waitFor(() => container.querySelector('vaadin-confirm-dialog')))!;
     return new ConfirmDialogController(dialog, user);
   }
 
