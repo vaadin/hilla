@@ -673,7 +673,7 @@ describe('@hilla/react-crud', () => {
             fieldOptions={{ firstName: { label: 'Employee First Name' }, lastName: { label: 'Employee Last Name' } }}
           />,
         );
-        const form = await FormController.init(user, result.container);
+
         expect(within(result.container).queryByLabelText('Employee First Name')).to.exist;
         expect(within(result.container).queryByLabelText('First name')).to.not.exist;
         expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
