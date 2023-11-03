@@ -618,7 +618,7 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('Field Options', () => {
-      it('renders a custom field from field options instead of the default one', async () => {
+      it('renders custom field from field options instead of the default one', async () => {
         const testLabel = 'Last names';
         const testValue = 'Maxwell\nSmart';
 

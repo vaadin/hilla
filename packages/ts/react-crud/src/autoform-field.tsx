@@ -6,8 +6,7 @@ import { NumberField, type NumberFieldProps } from '@hilla/react-components/Numb
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
-import type { UseFormResult } from '@hilla/react-form';
-import type { FieldDirectiveResult } from '@hilla/react-form';
+import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
 import { useDatePickerI18n } from './locale.js';
 import type { PropertyInfo } from './property-info.js';
