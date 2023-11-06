@@ -682,7 +682,7 @@ describe('@hilla/react-crud', () => {
     });
 
     it('renders with custom id, class name and style property on top most element', () => {
-      const newRender = render(
+      const { container } = render(
         <ExperimentalAutoForm
           service={personService()}
           model={PersonModel}
@@ -690,14 +690,14 @@ describe('@hilla/react-crud', () => {
           className="custom-auto-form"
           style={{ backgroundColor: 'blue' }}
         />,
-      ).container;
+      );
 
-      const autoFormElement = newRender.children[0];
+      const autoFormElement = container.firstElementChild as HTMLElement;
 
       expect(autoFormElement).to.exist;
-      expect(autoFormElement.id).to.be.deep.equal('my-id');
-      expect((autoFormElement as HTMLElement).style.backgroundColor).to.be.deep.equal('blue');
-      expect(autoFormElement.className).to.deep.include('custom-auto-form');
+      expect(autoFormElement.id).to.equal('my-id');
+      expect(autoFormElement.style.backgroundColor).to.equal('blue');
+      expect(autoFormElement.className).to.include('custom-auto-form');
     });
   });
 });
