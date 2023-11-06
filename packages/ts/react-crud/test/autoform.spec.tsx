@@ -5,12 +5,10 @@ import { expect, use } from '@esm-bundle/chai';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import type { FieldDirectiveResult } from '@hilla/react-form';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import type { ComponentType } from 'react';
-import type { JSX } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type AutoFormLayoutProps, type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
@@ -89,7 +87,6 @@ describe('@hilla/react-crud', () => {
       customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
       screenSize?: string,
       disabled?: boolean,
-      customFields?: Record<string, (props: { field: FieldDirectiveResult }) => JSX.Element>,
     ): Promise<FormController> {
       if (screenSize) {
         viewport.set(screenSize);
@@ -103,7 +100,6 @@ describe('@hilla/react-crud', () => {
           item={person}
           disabled={disabled}
           customLayoutRenderer={customLayoutRenderer}
-          customFields={customFields}
         />,
       );
       return await FormController.init(user, result.container);
@@ -589,6 +585,7 @@ describe('@hilla/react-crud', () => {
       function MyCustomLayoutRenderer({ children, form }: AutoFormLayoutRendererProps<PersonModel>) {
         return <VerticalLayout>{children}</VerticalLayout>;
       }
+
       const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
       expect(form.formLayout).to.not.exist;
       const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
@@ -620,8 +617,8 @@ describe('@hilla/react-crud', () => {
       });
     });
 
-    describe('Custom field', () => {
-      it('renders a custom field instead of the default one', async () => {
+    describe('Field Options', () => {
+      it('renders custom field from field options instead of the default one', async () => {
         const testLabel = 'Last names';
         const testValue = 'Maxwell\nSmart';
 
@@ -637,8 +634,11 @@ describe('@hilla/react-crud', () => {
             <ExperimentalAutoForm
               service={service}
               model={PersonModel}
-              customFields={{
-                lastName: ({ field }) => <TextArea {...field} label={testLabel} />,
+              fieldOptions={{
+                lastName: {
+                  label: testLabel,
+                  renderer: ({ field, label }) => <TextArea key={field.name} {...field} label={label} />,
+                },
               }}
             />,
           ).container,
@@ -660,6 +660,24 @@ describe('@hilla/react-crud', () => {
 
         await result.typeInField(testLabel, testValue);
         await result.submit();
+      });
+
+      it('renders custom label from field options instead of the default one', () => {
+        const result = render(
+          <ExperimentalAutoForm
+            service={personService()}
+            model={PersonModel}
+            fieldOptions={{
+              firstName: { label: 'Employee First Name' },
+              lastName: { label: 'Employee Last Name' },
+            }}
+          />,
+        );
+
+        expect(within(result.container).queryByLabelText('Employee First Name')).to.exist;
+        expect(within(result.container).queryByLabelText('First name')).to.not.exist;
+        expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
+        expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
       });
     });
   });
