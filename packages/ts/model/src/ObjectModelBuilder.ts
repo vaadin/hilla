@@ -1,5 +1,6 @@
+import exp from 'constants';
 import { CoreModelBuilder } from './CoreModelBuilder.js';
-import type { TypeModel } from './coreModels.js';
+import { ObjectModel, toObject, type TypeModel } from './coreModels.js';
 import { _key, _meta, _name, _owner, _value, type IModel, type Value } from './Model.js';
 import type { ModelMetadata } from './ModelMetadata.js';
 import { ModelBuilderUtil, getValue, type ValueExtractor, type ModelWithProperty, isModel } from './utils.js';
@@ -21,7 +22,7 @@ type Copy<T> = {
 
 const attachedModelRecordCache = new WeakMap<IModel, Record<keyof any, IModel | undefined>>();
 
-export class ObjectModelBuilder<T, M extends IModel<T>> {
+export class ObjectSubtypeModelBuilder<T, M extends IModel<T>> {
   #modelBuilderUtil: ModelBuilderUtil<T, M>;
 
   protected constructor(superModel: IModel, valueExtractor: ValueExtractor<T, M>) {
@@ -32,15 +33,11 @@ export class ObjectModelBuilder<T, M extends IModel<T>> {
     return this.#modelBuilderUtil.create();
   }
 
-  build(this: ObjectModelBuilder<T, TypeModel<T>>): TypeModel<T> {
+  build(this: ObjectSubtypeModelBuilder<T, TypeModel<T>>): TypeModel<T> {
     return this.#modelBuilderUtil.create();
   }
 
-  name(name: string): ObjectModelBuilder<T, M> {
-    return this.#define(_name, name);
-  }
-
-  meta(meta: ModelMetadata = {}): ObjectModelBuilder<T, M> {
+  meta(meta: ModelMetadata = {}): ObjectSubtypeModelBuilder<T, M> {
     return this.#define(_meta, meta);
   }
 
@@ -50,7 +47,7 @@ export class ObjectModelBuilder<T, M extends IModel<T>> {
     options: {
       meta?: ModelMetadata;
     } = {},
-  ): ObjectModelBuilder<T, ModelWithProperty<M, K, MValue>> {
+  ): ObjectSubtypeModelBuilder<T, ModelWithProperty<M, K, MValue>> {
     this.#modelBuilderUtil.defineProperty(key, {
       enumerable: true,
       get(this: M & TypeModel<T>): MValue {
@@ -68,18 +65,39 @@ export class ObjectModelBuilder<T, M extends IModel<T>> {
         return attachedModelRecord[key] as MValue;
       },
     });
-    return this as unknown as ObjectModelBuilder<T, ModelWithProperty<M, K, MValue>>;
+    return this as unknown as ObjectSubtypeModelBuilder<T, ModelWithProperty<M, K, MValue>>;
   }
 
-  #define<K extends keyof any, V>(key: K, value: V): ObjectModelBuilder<T, ModelWithProperty<M, K, V>> {
+  #define<K extends keyof any, V>(key: K, value: V): ObjectSubtypeModelBuilder<T, ModelWithProperty<M, K, V>> {
     this.#modelBuilderUtil.defineProperty(key, { enumerable: false, value });
-    return this as ObjectModelBuilder<T, ModelWithProperty<M, K, V>>;
+    return this as ObjectSubtypeModelBuilder<T, ModelWithProperty<M, K, V>>;
   }
 
-  static from<MSuper extends IModel, T extends Value<MSuper> = Value<MSuper>>(
+  static object<MSuper extends IModel, T extends Value<MSuper>>(
     superModel: MSuper,
-    valueExtractor: ValueExtractor<T, IModel<T> & MSuper>,
-  ): ObjectModelBuilder<T, TemplateModel<T, MSuper>> {
-    return new ObjectModelBuilder(superModel, valueExtractor) as any;
+    valueExtractor: ValueExtractor<T, IModel<T>>,
+    name: string,
+  ): ObjectSubtypeModelBuilder<T, TemplateModel<T, MSuper>> {
+    return new ObjectSubtypeModelBuilder<T, TemplateModel<T, MSuper>>(superModel, valueExtractor).#define(_name, name);
+  }
+}
+
+export class ObjectModelBuilder<MSuper extends IModel<object>> {
+  #superModel: MSuper;
+
+  private constructor(superModel: MSuper) {
+    this.#superModel = superModel;
+  }
+
+  object<T extends Value<MSuper>>(name: string): ObjectSubtypeModelBuilder<T, TemplateModel<T, MSuper>> {
+    return ObjectSubtypeModelBuilder.object(this.#superModel, toObject<T>, name);
+  }
+
+  static object<T extends object>(name: string): ObjectSubtypeModelBuilder<T, TemplateModel<T, typeof ObjectModel>> {
+    return ObjectSubtypeModelBuilder.object(ObjectModel, toObject<T>, name);
+  }
+
+  static extend<MSuper extends IModel<object>>(superModel: MSuper): ObjectModelBuilder<MSuper> {
+    return new ObjectModelBuilder<MSuper>(superModel);
   }
 }

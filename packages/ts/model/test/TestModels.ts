@@ -126,8 +126,7 @@ class EmployeeClassModel extends NamedClassModel {
 // Simple
 
 const NamedModel = m
-  .from(ObjectModel, toObject<Named>)
-  .name('Named')
+  .object<Named>('Named')
   .meta({
     jvmType: 'com.example.application.Named',
   })
@@ -137,8 +136,8 @@ const NamedModel = m
 // Inheritance
 
 const AddressModel = m
-  .from(NamedModel, toObject<Address>)
-  .name('Address')
+  .extend(NamedModel)
+  .object<Address>('Address')
   .property('street', StringModel)
   .property('premise', StringModel)
   .property('city', StringModel)
@@ -154,8 +153,8 @@ getValue(AddressModel.country).length;
 // Composition
 
 const CustomerModel = m
-  .from(NamedModel, toObject<Customer>)
-  .name('Customer')
+  .extend(NamedModel)
+  .object<Customer>('Customer')
   .property('subscriptionActive', BooleanModel)
   .property('subscriptionTier', NumberModel)
   .property('address', AddressModel)
@@ -163,26 +162,20 @@ const CustomerModel = m
 
 // Self reference
 
-const EmployeeModel = m
-  .from(NamedModel, toObject<Employee>)
-  .name('Employee')
-  .property('supervisor', m.optional)
-  .build();
+const EmployeeModel = m.extend(NamedModel).object<Employee>('Employee').property('supervisor', m.optional).build();
 
 EmployeeModel.supervisor.supervisor.supervisor.name;
 
 // Array
 
 const OrderRowModel = m
-  .from(ObjectModel, toObject<OrderRow>)
-  .name('OrderRow')
+  .object<OrderRow>('OrderRow')
   .property('product', StringModel)
   .property('qty', NumberModel)
   .build();
 
 const OrderModel = m
-  .from(ObjectModel, toObject<Order>)
-  .name('Order')
+  .object<Order>('Order')
   .property('notes', m.optional(StringModel))
   .property('discountCodes', m.array(StringModel))
   .property('rows', m.array(OrderRowModel))
@@ -191,8 +184,7 @@ const OrderModel = m
   .build();
 
 const CommentableModel: TypeModel<Commentable> = m
-  .from(ObjectModel, toObject<Commentable>)
-  .name('Commentable')
+  .object<Commentable>('Commentable')
   .property('comments', () => {
     const array = m.array(StringModel);
     const optional = m.optional(array);
@@ -203,32 +195,20 @@ const CommentableModel: TypeModel<Commentable> = m
 // Enum
 
 const AccountModel = m
-  .from(NamedModel, toObject<Account>)
-  .name('Account')
-  .property('type', m.enum(AccountType))
+  .extend(NamedModel)
+  .object<Account>('Account')
+  .property('type', m.enum(AccountType, 'Account'))
   .build();
 
 const t: AccountType = AccountModel.type[_value];
 
 // Union
 
-const FooItemModel = m
-  .from(ObjectModel, toObject<FooItem>)
-  .name('FooItem')
-  .property('foo', StringModel)
-  .build();
+const FooItemModel = m.object<FooItem>('FooItem').property('foo', StringModel).build();
 
-const BarItemModel = m
-  .from(ObjectModel, toObject<BarItem>)
-  .name('BarItem')
-  .property('bar', NumberModel)
-  .build();
+const BarItemModel = m.object<BarItem>('BarItem').property('bar', NumberModel).build();
 
-const ContainerModel = m
-  .from(ObjectModel, toObject<Container>)
-  .name('Container')
-  .property('item', m.union(FooItemModel, BarItemModel))
-  .build();
+const ContainerModel = m.object<Container>('Container').property('item', m.union(FooItemModel, BarItemModel)).build();
 
 const containerItem: BarItem | FooItem = ContainerModel.item[_value];
 

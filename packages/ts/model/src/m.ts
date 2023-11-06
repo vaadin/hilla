@@ -28,9 +28,10 @@ export class m<T, M extends IModel<T>> extends ObjectModelBuilder<T, M> {
       .build();
   }
 
-  static enum<E extends typeof Enum = typeof Enum>(enumObject: E): IEnumModel<E> {
+  static enum<E extends typeof Enum = typeof Enum>(enumObject: E, name: string): IEnumModel<E> {
     return CoreModelBuilder.from(EnumModel, toEnum<E>)
       .define(_enum, enumObject)
+      .name(`enum ${name}`)
       .build();
   }
 
