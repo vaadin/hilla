@@ -199,16 +199,12 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   }
 
   function deleteItem() {
-    if (!item || item === emptyItem) {
-      return;
-    }
     setShowDeleteDialog(true);
   }
 
   async function confirmDelete() {
-    if (!item || item === emptyItem) {
-      return;
-    }
+    // At this point, item can not be null or emptyItem
+    const deletedItem = item as Value<M>;
     try {
       const properties = getProperties(model);
       const idProperty = getIdProperty(properties)!;
@@ -216,7 +212,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
       const id = (item as any)[idProperty.name];
       await service.delete(id);
       if (afterDelete) {
-        afterDelete({ item });
+        afterDelete({ item: deletedItem });
       }
     } catch (error) {
       if (onDeleteError) {
