@@ -342,5 +342,24 @@ describe('@hilla/react-crud', () => {
         expect(form.queryField('Email')).not.to.exist;
       });
     });
+
+    it('renders with custom id, class name and style property on top most element', () => {
+      const newRender = render(
+        <ExperimentalAutoCrud
+          service={personService()}
+          model={PersonModel}
+          id="my-id"
+          className="custom-auto-crud"
+          style={{ backgroundColor: 'blue' }}
+        />,
+      ).container;
+
+      const autoCrudElement = newRender.children[0];
+
+      expect(autoCrudElement).to.exist;
+      expect(autoCrudElement.id).to.be.deep.equal('my-id');
+      expect((autoCrudElement as HTMLElement).style.backgroundColor).to.be.deep.equal('blue');
+      expect(autoCrudElement.className).to.deep.include('custom-auto-crud');
+    });
   });
 });

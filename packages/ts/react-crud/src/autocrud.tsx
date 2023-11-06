@@ -12,7 +12,7 @@ import { AutoGrid, type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { getIdProperty, getProperties } from './property-info.js';
-import type { ComponentStyleProps } from './shared/types';
+import type { ComponentStyleProps } from './util';
 
 document.adoptedStyleSheets.unshift(css);
 

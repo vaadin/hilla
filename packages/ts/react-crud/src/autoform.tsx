@@ -8,7 +8,7 @@ import React, { type ComponentType, type JSX, type ReactElement, useEffect, useS
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty, type PropertyInfo } from './property-info.js';
-import type { ComponentStyleProps } from './shared/types';
+import type { ComponentStyleProps } from './util';
 
 export const emptyItem = Symbol();
 
