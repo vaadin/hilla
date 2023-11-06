@@ -344,7 +344,7 @@ describe('@hilla/react-crud', () => {
     });
 
     it('renders with custom id, class name and style property on top most element', () => {
-      const newRender = render(
+      const { container } = render(
         <ExperimentalAutoCrud
           service={personService()}
           model={PersonModel}
@@ -352,14 +352,14 @@ describe('@hilla/react-crud', () => {
           className="custom-auto-crud"
           style={{ backgroundColor: 'blue' }}
         />,
-      ).container;
+      );
 
-      const autoCrudElement = newRender.children[0];
+      const autoCrudElement = container.firstElementChild as HTMLElement;
 
       expect(autoCrudElement).to.exist;
-      expect(autoCrudElement.id).to.be.deep.equal('my-id');
-      expect((autoCrudElement as HTMLElement).style.backgroundColor).to.be.deep.equal('blue');
-      expect(autoCrudElement.className).to.deep.include('custom-auto-crud');
+      expect(autoCrudElement.id).to.equal('my-id');
+      expect(autoCrudElement.style.backgroundColor).to.equal('blue');
+      expect(autoCrudElement.className).to.include('custom-auto-crud');
     });
   });
 });
