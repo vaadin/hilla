@@ -1,5 +1,6 @@
 .auto-crud {
   display: flex;
+  overflow: hidden;
 }
 
 .auto-crud-main {
@@ -47,6 +48,8 @@
   width: 40%;
   border: solid 1px var(--lumo-contrast-20pct);
   border-left-width: 0;
+  box-shadow: var(--lumo-box-shadow-s);
+  z-index: 1;
 }
 
 .auto-crud .auto-form-fields,
