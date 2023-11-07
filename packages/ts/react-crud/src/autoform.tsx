@@ -208,13 +208,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   }
 
   return (
-    <VerticalLayout
-      className={`auto-form ${className}`}
-      id={id}
-      style={style}
-      theme="spacing"
-      data-testid="auto-form"
-    >
+    <VerticalLayout className={`auto-form ${className}`} id={id} style={style} theme="spacing" data-testid="auto-form">
       <VerticalLayout className="auto-form-fields">
         {layout}
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
