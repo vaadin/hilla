@@ -680,5 +680,24 @@ describe('@hilla/react-crud', () => {
         expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
       });
     });
+
+    it('renders with custom id, class name and style property on top most element', () => {
+      const { container } = render(
+        <ExperimentalAutoForm
+          service={personService()}
+          model={PersonModel}
+          id="my-id"
+          className="custom-auto-form"
+          style={{ backgroundColor: 'blue' }}
+        />,
+      );
+
+      const autoFormElement = container.firstElementChild as HTMLElement;
+
+      expect(autoFormElement).to.exist;
+      expect(autoFormElement.id).to.equal('my-id');
+      expect(autoFormElement.style.backgroundColor).to.equal('blue');
+      expect(autoFormElement.className).to.include('custom-auto-form');
+    });
   });
 });

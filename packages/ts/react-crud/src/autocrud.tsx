@@ -12,6 +12,7 @@ import { AutoGrid, type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { getIdProperty, getProperties } from './property-info.js';
+import type { ComponentStyleProps } from './util';
 
 document.adoptedStyleSheets.unshift(css);
 
@@ -25,13 +26,14 @@ export type AutoCrudGridProps<TItem> = Omit<
   'customColumns' | 'model' | 'onActiveItemChanged' | 'refreshTrigger' | 'selectedItems' | 'service'
 >;
 
-export type AutoCrudProps<TItem> = Readonly<{
-  service: CrudService<TItem>;
-  model: DetachedModelConstructor<AbstractModel<TItem>>;
-  noDelete?: boolean;
-  formProps?: AutoCrudFormProps<TItem>;
-  gridProps?: AutoCrudGridProps<TItem>;
-}>;
+export type AutoCrudProps<TItem> = ComponentStyleProps &
+  Readonly<{
+    service: CrudService<TItem>;
+    model: DetachedModelConstructor<AbstractModel<TItem>>;
+    noDelete?: boolean;
+    formProps?: AutoCrudFormProps<TItem>;
+    gridProps?: AutoCrudGridProps<TItem>;
+  }>;
 
 export function ExperimentalAutoCrud<TItem>({
   service,
@@ -39,6 +41,9 @@ export function ExperimentalAutoCrud<TItem>({
   noDelete,
   formProps,
   gridProps,
+  style,
+  id,
+  className,
 }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | typeof emptyItem | undefined>(undefined);
   const [pendingItemToDelete, setPendingItemToDelete] = useState<TItem | undefined>(undefined);
@@ -103,7 +108,7 @@ export function ExperimentalAutoCrud<TItem>({
   return (
     <>
       <AutoCrudContext.Provider value={{ noDelete, editItem, deleteItem }}>
-        <div className="auto-crud">
+        <div className={`auto-crud ${className}`} id={id} style={style}>
           <div className="auto-crud-main">
             <AutoGrid
               {...gridProps}

@@ -8,6 +8,7 @@ import React, { type ComponentType, type JSX, type ReactElement, useEffect, useS
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import type { CrudService } from './crud.js';
 import { getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import type { ComponentStyleProps } from './util';
 
 export const emptyItem = Symbol();
 
@@ -33,16 +34,17 @@ export type AutoFormLayoutProps = Readonly<{
   responsiveSteps?: Array<{ minWidth: string; columns: number }>;
 }>;
 
-export type AutoFormProps<M extends AbstractModel = AbstractModel> = Readonly<{
-  service: CrudService<Value<M>>;
-  model: DetachedModelConstructor<M>;
-  item?: Value<M> | typeof emptyItem | null;
-  disabled?: boolean;
-  customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
-  fieldOptions?: Record<string, FieldOptions>;
-  onSubmitError?({ error }: SubmitErrorEvent): void;
-  afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
-}>;
+export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentStyleProps &
+  Readonly<{
+    service: CrudService<Value<M>>;
+    model: DetachedModelConstructor<M>;
+    item?: Value<M> | typeof emptyItem | null;
+    disabled?: boolean;
+    customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
+    fieldOptions?: Record<string, FieldOptions>;
+    onSubmitError?({ error }: SubmitErrorEvent): void;
+    afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
+  }>;
 
 type CustomFormLayoutProps = Readonly<{
   customFormLayout: AutoFormLayoutProps;
@@ -137,6 +139,9 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   disabled,
   customLayoutRenderer: CustomLayoutRenderer,
   fieldOptions,
+  style,
+  id,
+  className,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
@@ -203,7 +208,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   }
 
   return (
-    <VerticalLayout className="auto-form" theme="spacing" data-testid="auto-form">
+    <VerticalLayout className={`auto-form ${className}`} id={id} style={style} theme="spacing" data-testid="auto-form">
       <VerticalLayout className="auto-form-fields">
         {layout}
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
