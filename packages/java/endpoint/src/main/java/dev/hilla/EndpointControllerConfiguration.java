@@ -49,7 +49,7 @@ public class EndpointControllerConfiguration {
      * Initializes the endpoint configuration.
      *
      * @param endpointProperties
-     *            Vaadin ednpoint properties
+     *            Hilla endpoint properties
      */
     public EndpointControllerConfiguration(
             EndpointProperties endpointProperties) {
