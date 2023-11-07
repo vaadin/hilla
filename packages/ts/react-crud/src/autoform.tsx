@@ -1,14 +1,17 @@
 import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
+import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
-import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
 import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
+import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
-import { getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
 import type { ComponentStyleProps } from './util';
+
+document.adoptedStyleSheets.unshift(css);
 
 export const emptyItem = Symbol();
 
@@ -16,6 +19,12 @@ type SubmitErrorEvent = {
   error: unknown;
 };
 type SubmitEvent<TItem> = {
+  item: TItem;
+};
+type DeleteErrorEvent = {
+  error: unknown;
+};
+type DeleteEvent<TItem> = {
   item: TItem;
 };
 
@@ -42,8 +51,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     disabled?: boolean;
     customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
     fieldOptions?: Record<string, FieldOptions>;
+    deleteButtonVisible?: boolean;
     onSubmitError?({ error }: SubmitErrorEvent): void;
     afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
+    onDeleteError?({ error }: DeleteErrorEvent): void;
+    afterDelete?({ item }: DeleteEvent<Value<M>>): void;
   }>;
 
 type CustomFormLayoutProps = Readonly<{
@@ -142,11 +154,18 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   style,
   id,
   className,
+  deleteButtonVisible,
+  afterDelete,
+  onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
   const [formError, setFormError] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const isEditMode = item !== undefined && item !== null && item !== emptyItem;
+
   useEffect(() => {
     if (item !== emptyItem) {
       form.read(item);
@@ -155,7 +174,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
     }
   }, [item]);
 
-  async function submitButtonClicked(): Promise<void> {
+  async function handleSubmit(): Promise<void> {
     try {
       setFormError('');
       const newItem = await form.submit();
@@ -179,7 +198,34 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
     }
   }
 
-  const isEditMode = item !== undefined && item !== null && item !== emptyItem;
+  function deleteItem() {
+    setShowDeleteDialog(true);
+  }
+
+  async function confirmDelete() {
+    // At this point, item can not be null or emptyItem
+    const deletedItem = item as Value<M>;
+    try {
+      const properties = getProperties(model);
+      const idProperty = getIdProperty(properties)!;
+      // eslint-disable-next-line
+      const id = (item as any)[idProperty.name];
+      await service.delete(id);
+      if (afterDelete) {
+        afterDelete({ item: deletedItem });
+      }
+    } catch (error) {
+      if (onDeleteError) {
+        onDeleteError({ error });
+      }
+    } finally {
+      setShowDeleteDialog(false);
+    }
+  }
+
+  function cancelDelete() {
+    setShowDeleteDialog(false);
+  }
 
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
     const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name];
@@ -208,26 +254,44 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   }
 
   return (
-    <VerticalLayout className={`auto-form ${className}`} id={id} style={style} theme="spacing" data-testid="auto-form">
+    <div className={`auto-form ${className}`} id={id} style={style} data-testid="auto-form">
       <VerticalLayout className="auto-form-fields">
         {layout}
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       </VerticalLayout>
-      <HorizontalLayout className="auto-form-toolbar" theme="spacing">
+      <div className="auto-form-toolbar">
+        <Button
+          theme="primary"
+          disabled={!!disabled || (isEditMode && !form.dirty)}
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={handleSubmit}
+        >
+          Submit
+        </Button>
         {form.dirty ? (
           <Button theme="tertiary" onClick={() => form.reset()}>
             Discard
           </Button>
         ) : null}
-        <Button
-          theme="primary"
-          disabled={!!disabled || (isEditMode && !form.dirty)}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={submitButtonClicked}
+        {deleteButtonVisible && isEditMode && (
+          <Button className="auto-form-delete-button" theme="tertiary error" onClick={deleteItem}>
+            Delete...
+          </Button>
+        )}
+      </div>
+      {showDeleteDialog && (
+        <ConfirmDialog
+          opened
+          header="Delete item"
+          confirmTheme="error"
+          cancelButtonVisible
+          // eslint-disable-next-line
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
         >
-          Submit
-        </Button>
-      </HorizontalLayout>
-    </VerticalLayout>
+          Are you sure you want to delete the selected item?
+        </ConfirmDialog>
+      )}
+    </div>
   );
 }

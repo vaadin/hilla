@@ -60,8 +60,6 @@
 .auto-crud .auto-form-toolbar,
 .auto-crud-dialog .auto-form-toolbar {
   flex: 0 0 auto;
-  display: flex;
-  justify-content: flex-end;
   padding: var(--lumo-space-s) var(--lumo-space-m);
   background-color: var(--lumo-contrast-5pct);
   border-top: 1px solid var(--lumo-contrast-10pct);

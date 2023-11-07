@@ -11,8 +11,14 @@ import chaiAsPromised from 'chai-as-promised';
 import type { ComponentType } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoFormLayoutProps, type AutoFormLayoutRendererProps, ExperimentalAutoForm } from '../src/autoform.js';
+import {
+  type AutoFormLayoutProps,
+  type AutoFormLayoutRendererProps,
+  emptyItem,
+  ExperimentalAutoForm,
+} from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
+import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
   createService,
@@ -590,6 +596,123 @@ describe('@hilla/react-crud', () => {
       expect(form.formLayout).to.not.exist;
       const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
       expect(layout).to.exist;
+    });
+
+    describe('Delete button', () => {
+      let service: CrudService<Person> & HasTestInfo;
+      let person: Person;
+      let deleteStub: sinon.SinonStub;
+      let afterDeleteSpy: sinon.SinonSpy;
+      let onDeleteErrorSpy: sinon.SinonSpy;
+
+      beforeEach(async () => {
+        service = personService();
+        person = (await getItem(service, 2))!;
+        deleteStub = sinon.stub(service, 'delete');
+        deleteStub.returns(Promise.resolve());
+        afterDeleteSpy = sinon.spy();
+        onDeleteErrorSpy = sinon.spy();
+      });
+
+      afterEach(() => {
+        // cleanup dangling overlay
+        const overlay = document.querySelector('vaadin-confirm-dialog-overlay');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
+
+      async function renderForm(item: Person | typeof emptyItem | null, enableDelete: boolean) {
+        return FormController.init(
+          user,
+          render(
+            <ExperimentalAutoForm
+              service={service}
+              model={PersonModel}
+              item={item}
+              deleteButtonVisible={enableDelete}
+              afterDelete={afterDeleteSpy}
+              onDeleteError={onDeleteErrorSpy}
+            />,
+          ).container,
+        );
+      }
+
+      it('does not show a delete button by default', async () => {
+        const form = await renderForm(person, false);
+
+        expect(form.queryButton('Delete...')).to.not.exist;
+      });
+
+      it('does show a delete button if delete button is enabled', async () => {
+        const form = await renderForm(person, true);
+
+        expect(form.queryButton('Delete...')).to.exist;
+      });
+
+      it('does not show a delete button if nothing is edited', async () => {
+        const form = await renderForm(null, true);
+
+        expect(form.queryButton('Delete...')).to.not.exist;
+      });
+
+      it('does not show a delete button if a new item is edited', async () => {
+        const form = await renderForm(emptyItem, true);
+
+        expect(form.queryButton('Delete...')).to.not.exist;
+      });
+
+      it('does shows confirmation dialog before deleting', async () => {
+        const form = await renderForm(person, true);
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      });
+
+      it('deletes item and calls success callback after confirming', async () => {
+        const form = await renderForm(person, true);
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(afterDeleteSpy).to.have.been.calledOnce;
+        expect(onDeleteErrorSpy).to.not.have.been.called;
+      });
+
+      it('does not delete item nor call callbacks after canceling', async () => {
+        const form = await renderForm(person, true);
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.cancel();
+
+        expect(deleteStub).to.not.have.been.called;
+        expect(afterDeleteSpy).to.not.have.been.called;
+        expect(onDeleteErrorSpy).to.not.have.been.called;
+      });
+
+      it('calls error callback if delete fails', async () => {
+        const error = new Error('Delete failed');
+        deleteStub.returns(Promise.reject(error));
+
+        const form = await renderForm(person, true);
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(afterDeleteSpy).to.not.have.been.called;
+        expect(onDeleteErrorSpy).to.have.been.calledOnce;
+        expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
+      });
     });
 
     describe('AutoFormEnumField', () => {
