@@ -63,7 +63,7 @@ export function ExperimentalAutoCrud<TItem>({
       service={service}
       model={model}
       item={item}
-      withDeleteButton={!noDelete}
+      deleteButtonVisible={!noDelete}
       afterSubmit={({ item: submittedItem }) => {
         if (fullScreen) {
           setItem(undefined);

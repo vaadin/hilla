@@ -51,7 +51,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     disabled?: boolean;
     customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
     fieldOptions?: Record<string, FieldOptions>;
-    withDeleteButton?: boolean;
+    deleteButtonVisible?: boolean;
     onSubmitError?({ error }: SubmitErrorEvent): void;
     afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
     onDeleteError?({ error }: DeleteErrorEvent): void;
@@ -154,7 +154,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   style,
   id,
   className,
-  withDeleteButton,
+  deleteButtonVisible,
   afterDelete,
   onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
@@ -273,7 +273,7 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
             Discard
           </Button>
         ) : null}
-        {withDeleteButton && isEditMode && (
+        {deleteButtonVisible && isEditMode && (
           <Button className="auto-form-delete-button" theme="tertiary error" onClick={deleteItem}>
             Delete...
           </Button>

@@ -630,7 +630,7 @@ describe('@hilla/react-crud', () => {
               service={service}
               model={PersonModel}
               item={item}
-              withDeleteButton={enableDelete}
+              deleteButtonVisible={enableDelete}
               afterDelete={afterDeleteSpy}
               onDeleteError={onDeleteErrorSpy}
             />,
