@@ -339,23 +339,34 @@ describe('@hilla/react-crud', () => {
       });
     });
 
-    it('renders with custom id, class name and style property on top most element', () => {
-      const { container } = render(
-        <ExperimentalAutoCrud
-          service={personService()}
-          model={PersonModel}
-          id="my-id"
-          className="custom-auto-crud"
-          style={{ backgroundColor: 'blue' }}
-        />,
-      );
+    describe('customize style props', () => {
+      it('renders properly without custom id, class name and style property', () => {
+        const { container } = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />);
+        const autoCrudElement = container.firstElementChild as HTMLElement;
 
-      const autoCrudElement = container.firstElementChild as HTMLElement;
+        expect(autoCrudElement).to.exist;
+        expect(autoCrudElement.id).to.equal('');
+        expect(autoCrudElement.className.trim()).to.equal('auto-crud');
+        expect(autoCrudElement.getAttribute('style')).to.equal(null);
+      });
 
-      expect(autoCrudElement).to.exist;
-      expect(autoCrudElement.id).to.equal('my-id');
-      expect(autoCrudElement.style.backgroundColor).to.equal('blue');
-      expect(autoCrudElement.className).to.include('custom-auto-crud');
+      it('renders with custom id, class name and style property on top most element', () => {
+        const { container } = render(
+          <ExperimentalAutoCrud
+            service={personService()}
+            model={PersonModel}
+            id="my-id"
+            className="custom-auto-crud"
+            style={{ backgroundColor: 'blue' }}
+          />,
+        );
+        const autoCrudElement = container.firstElementChild as HTMLElement;
+
+        expect(autoCrudElement).to.exist;
+        expect(autoCrudElement.id).to.equal('my-id');
+        expect(autoCrudElement.className.trim()).to.equal('auto-crud custom-auto-crud');
+        expect(autoCrudElement.getAttribute('style')).to.equal('background-color: blue;');
+      });
     });
   });
 });
