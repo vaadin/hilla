@@ -319,7 +319,7 @@ describe('@hilla/frontend', () => {
     it('by default it should use the default url', () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
-      expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('HILLA/push');
+      expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('/HILLA/push');
     });
 
     it('should use a custom prefix when connecting', () => {

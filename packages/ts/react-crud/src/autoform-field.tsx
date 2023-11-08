@@ -20,7 +20,26 @@ export type SharedFieldProps = Readonly<{
 }>;
 
 export type FieldOptions = Readonly<{
+  /**
+   * The label to show for the field. If not specified, a human-readable label
+   * is generated from the property name.
+   */
   label?: string;
+  /**
+   * Allows to specify a custom renderer for the field, for example to render a
+   * custom type of field or apply an additional layout around the field. The
+   * renderer receives field props that must be applied to the custom field
+   * component in order to connect it to the form.
+   *
+   * Example:
+   * ```tsx
+   * {
+   *   renderer: ({ field, label }) => (
+   *     <TextArea {...field} label={label} />
+   *   )
+   * }
+   * ```
+   */
   renderer?(props: { field: FieldDirectiveResult; label: string }): JSX.Element;
 }>;
 
