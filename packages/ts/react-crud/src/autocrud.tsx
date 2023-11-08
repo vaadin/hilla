@@ -44,7 +44,7 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
      * to customize which columns to show and in which order.
      *
      * By default, the form shows fields for all properties of the model which
-     * have a type that is supported. Use the `formProps.customLayoutRenderer`
+     * have a type that is supported. Use the `formProps.visibleFields`
      * option to customize which fields to show and in which order.
      */
     model: DetachedModelConstructor<AbstractModel<TItem>>;
