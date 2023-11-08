@@ -1,5 +1,6 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
+import { SplitLayout } from '@hilla/react-components/SplitLayout';
 import { type JSX, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog';
 import css from './autocrud.obj.css';
@@ -103,6 +104,27 @@ export function ExperimentalAutoCrud<TItem>({
     setItem(undefined);
   }
 
+  const mainSection = (
+    <div className="auto-crud-main">
+      <AutoGrid
+        {...gridProps}
+        refreshTrigger={refreshTrigger}
+        service={service}
+        model={model}
+        selectedItems={item && item !== emptyItem ? [item] : []}
+        onActiveItemChanged={(e) => {
+          const activeItem = e.detail.value;
+          setItem(activeItem ?? undefined);
+        }}
+      ></AutoGrid>
+      <div className="auto-crud-toolbar">
+        <Button theme="primary" onClick={() => setItem(emptyItem)}>
+          + New
+        </Button>
+      </div>
+    </div>
+  );
+
   const autoForm = (
     <ExperimentalAutoForm
       {...formProps}
@@ -128,31 +150,18 @@ export function ExperimentalAutoCrud<TItem>({
 
   return (
     <div className={`auto-crud ${className}`} id={id} style={style}>
-      <div className="auto-crud-main">
-        <AutoGrid
-          {...gridProps}
-          refreshTrigger={refreshTrigger}
-          service={service}
-          model={model}
-          selectedItems={item && item !== emptyItem ? [item] : []}
-          onActiveItemChanged={(e) => {
-            const activeItem = e.detail.value;
-            setItem(activeItem ?? undefined);
-          }}
-        ></AutoGrid>
-        <div className="auto-crud-toolbar">
-          <Button theme="primary" onClick={() => setItem(emptyItem)}>
-            + New
-          </Button>
-        </div>
-      </div>
-
       {fullScreen ? (
-        <AutoCrudDialog opened={!!item} onClose={handleCancel}>
-          {autoForm}
-        </AutoCrudDialog>
+        <>
+          {mainSection}
+          <AutoCrudDialog opened={!!item} onClose={handleCancel}>
+            {autoForm}
+          </AutoCrudDialog>
+        </>
       ) : (
-        autoForm
+        <SplitLayout theme="small">
+          {mainSection}
+          {autoForm}
+        </SplitLayout>
       )}
     </div>
   );
