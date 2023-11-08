@@ -401,31 +401,43 @@ describe('@hilla/react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
-    it('layoutRenderer is not defined, default two-column form layout is used', async () => {
-      const form = await populatePersonForm(1);
-      expect(form.formLayout.responsiveSteps).to.have.length(3);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: 0, columns: 1, labelsPosition: 'top' },
-        { minWidth: '20em', columns: 1 },
-        { minWidth: '40em', columns: 2 },
-      ]);
-      expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
-      await expectFieldColSpan(form, 'First name', null);
-      await expectFieldColSpan(form, 'Last name', null);
-      await expectFieldColSpan(form, 'Email', null);
-      await expectFieldColSpan(form, 'Some integer', null);
-      await expectFieldColSpan(form, 'Some decimal', null);
+    describe('layoutRenderer', () => {
+      it('uses default two-column form layout if layoutRenderer is not defined', async () => {
+        const form = await populatePersonForm(1);
+        expect(form.formLayout.responsiveSteps).to.have.length(3);
+        expect(form.formLayout.responsiveSteps).to.be.deep.equal([
+          { minWidth: 0, columns: 1, labelsPosition: 'top' },
+          { minWidth: '20em', columns: 1 },
+          { minWidth: '40em', columns: 2 },
+        ]);
+        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
+        await expectFieldColSpan(form, 'First name', null);
+        await expectFieldColSpan(form, 'Last name', null);
+        await expectFieldColSpan(form, 'Email', null);
+        await expectFieldColSpan(form, 'Some integer', null);
+        await expectFieldColSpan(form, 'Some decimal', null);
+      });
+
+      it('uses layoutRenderer if defined, instead of the default FormLayout', async () => {
+        function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
+          return <VerticalLayout>{children}</VerticalLayout>;
+        }
+
+        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, 'screen-1440-900');
+        expect(form.formLayout).to.not.exist;
+        const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
+        expect(layout).to.exist;
+      });
     });
 
-    it('layoutRenderer is defined as a function that renders the fields in a vertical manner, VerticalLayout is used instead of FormLayout', async () => {
-      function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
-        return <VerticalLayout>{children}</VerticalLayout>;
-      }
-
-      const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, 'screen-1440-900');
-      expect(form.formLayout).to.not.exist;
-      const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
-      expect(layout).to.exist;
+    describe('visibleFields', () => {
+      it('renders the form according to visibleFields if defined', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id', 'dummy'] });
+        const fields = await form.getFields('First name', 'Last name', 'Id');
+        const tagNames = fields.map((field) => field.localName);
+        expect(tagNames).to.eql(['vaadin-text-field', 'vaadin-text-field', 'vaadin-number-field']);
+        expect(form.queryField('Dummy')).to.be.undefined;
+      });
     });
 
     describe('Delete button', () => {
@@ -631,6 +643,43 @@ describe('@hilla/react-crud', () => {
         expect(within(result.container).queryByLabelText('First name')).to.not.exist;
         expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
         expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
+      });
+
+      it('passes colspan to fields', async () => {
+        const result = await FormController.init(
+          user,
+          render(
+            <ExperimentalAutoForm
+              service={personService()}
+              model={PersonModel}
+              fieldOptions={{
+                firstName: { colspan: 2 },
+                lastName: { colspan: 3 },
+                email: { colspan: 4 },
+                someInteger: { colspan: 5 },
+                someDecimal: { colspan: 6 },
+              }}
+            />,
+          ).container,
+        );
+
+        await expectFieldColSpan(result, 'First name', '2');
+        await expectFieldColSpan(result, 'Last name', '3');
+        await expectFieldColSpan(result, 'Email', '4');
+        await expectFieldColSpan(result, 'Some integer', '5');
+        await expectFieldColSpan(result, 'Some decimal', '6');
+      });
+    });
+
+    describe('formLayoutProps', () => {
+      it('passes responsiveSteps to FormLayout', async () => {
+        const form = await populatePersonForm(1, {
+          formLayoutProps: {
+            responsiveSteps: [{ minWidth: 0, columns: 1, labelsPosition: 'top' }],
+          },
+        });
+        expect(form.formLayout.responsiveSteps).to.have.length(1);
+        expect(form.formLayout.responsiveSteps).to.be.deep.equal([{ minWidth: 0, columns: 1, labelsPosition: 'top' }]);
       });
     });
 
