@@ -4,6 +4,10 @@
   border: solid 1px var(--lumo-contrast-20pct);
 }
 
+.auto-crud vaadin-split-layout {
+  flex: 1 1 100%;
+}
+
 .auto-crud vaadin-split-layout::part(splitter) {
   border-top: solid 1px var(--lumo-contrast-20pct);
   border-left: solid 1px var(--lumo-contrast-20pct);
