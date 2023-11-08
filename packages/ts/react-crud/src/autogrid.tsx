@@ -214,7 +214,7 @@ function useColumns(
  *
  * Example usage:
  * ```tsx
- * import { AutoGrid } from '@hilla/react-grid';
+ * import { AutoGrid } from '@hilla/react-crud';
  * import PersonService from 'Frontend/generated/endpoints';
  * import PersonModel from 'Frontend/generated/com/example/application/Person';
  *
