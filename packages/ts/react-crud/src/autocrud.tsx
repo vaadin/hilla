@@ -149,7 +149,7 @@ export function ExperimentalAutoCrud<TItem>({
   );
 
   return (
-    <div className={`auto-crud ${className}`} id={id} style={style}>
+    <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
       {fullScreen ? (
         <>
           {mainSection}
