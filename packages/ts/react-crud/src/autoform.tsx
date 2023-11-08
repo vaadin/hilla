@@ -33,16 +33,6 @@ export type AutoFormLayoutRendererProps<M extends AbstractModel> = Readonly<{
   children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
 }>;
 
-type FieldColSpan = Readonly<{
-  property: string;
-  colSpan: number;
-}>;
-
-export type AutoFormLayoutProps = Readonly<{
-  template: FieldColSpan[][] | string[][];
-  responsiveSteps?: Array<{ minWidth: string; columns: number }>;
-}>;
-
 export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentStyleProps &
   Readonly<{
     /**
