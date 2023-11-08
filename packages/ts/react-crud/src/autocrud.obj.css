@@ -1,28 +1,27 @@
 .auto-crud {
   display: flex;
   overflow: hidden;
+  border: solid 1px var(--lumo-contrast-20pct);
+}
+
+.auto-crud vaadin-split-layout {
+  flex: 1 1 100%;
+}
+
+.auto-crud vaadin-split-layout::part(splitter) {
+  border-top: solid 1px var(--lumo-contrast-20pct);
+  border-left: solid 1px var(--lumo-contrast-20pct);
 }
 
 .auto-crud-main {
   flex: 1 1 100%;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
 }
 
-.auto-crud-actions {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0 var(--lumo-space-xs);
-  display: flex;
-  gap: var(--lumo-space-xs);
-  align-items: center;
-}
-
-.auto-crud-actions vaadin-button {
-  margin: 0;
+.auto-crud-main vaadin-grid {
+  border: none;
 }
 
 .auto-crud-toolbar {
@@ -33,8 +32,7 @@
 
   padding: var(--lumo-space-s) var(--lumo-space-m);
   background-color: var(--lumo-contrast-5pct);
-  border: 1px solid var(--lumo-contrast-10pct);
-  border-top: none;
+  border-top: solid 1px var(--lumo-contrast-10pct);
 }
 
 .auto-crud .auto-form,
@@ -46,10 +44,19 @@
 
 .auto-crud .auto-form {
   width: 40%;
-  border: solid 1px var(--lumo-contrast-20pct);
-  border-left-width: 0;
-  box-shadow: var(--lumo-box-shadow-s);
+  min-width: 300px;
+}
+
+/* Move box shadow and required z-index modification into pseudo-element
+   as it otherwise messes with the drag handle of the split layout */
+.auto-crud .auto-form::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
   z-index: 1;
+  box-shadow: var(--lumo-box-shadow-s);
 }
 
 .auto-crud .auto-form-fields,
