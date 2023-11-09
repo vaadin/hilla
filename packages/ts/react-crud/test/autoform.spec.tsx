@@ -576,14 +576,8 @@ describe('@hilla/react-crud', () => {
 
     describe('Field Options', () => {
       it('renders custom field from field options instead of the default one', async () => {
-        const testLabel = 'Last names';
-        const testValue = 'Maxwell\nSmart';
-
-        const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-        service.save = async (item: Person): Promise<Person | undefined> => {
-          expect(item.lastName).to.equal(testValue);
-          return Promise.resolve(item);
-        };
+        const service = personService();
+        const saveSpy = sinon.spy(service, 'save');
 
         const result = await FormController.init(
           user,
@@ -593,30 +587,65 @@ describe('@hilla/react-crud', () => {
               model={PersonModel}
               fieldOptions={{
                 lastName: {
-                  label: testLabel,
-                  renderer: ({ field, label }) => <TextArea key={field.name} {...field} label={label} />,
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
                 },
               }}
             />,
           ).container,
         );
 
-        const fields = await result.getFields(...LABELS.map((label) => (label === 'Last name' ? testLabel : label)));
-        const tagNames = fields.map((field) => field.localName);
-        expect(tagNames).to.eql([
-          'vaadin-text-field',
-          'vaadin-text-area',
-          'vaadin-select',
-          'vaadin-text-field',
-          'vaadin-integer-field',
-          'vaadin-number-field',
-          'vaadin-checkbox',
-          'vaadin-date-picker',
-          'vaadin-time-picker',
-        ]);
+        const field = await result.getField('Custom last name');
+        expect(field.localName).to.equal('vaadin-text-area');
 
-        await result.typeInField(testLabel, testValue);
+        await result.typeInField('Custom last name', 'Maxwell\nSmart');
         await result.submit();
+
+        expect(saveSpy).to.have.been.calledOnce;
+        expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+      });
+
+      it('disables custom field from field options when form is disabled', async () => {
+        const result = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={personService()}
+              model={PersonModel}
+              disabled
+              fieldOptions={{
+                lastName: {
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                },
+              }}
+            />,
+          ).container,
+        );
+
+        const field = await result.getField('Last name');
+        expect(field.disabled).to.be.true;
+      });
+
+      it('allows setting a custom label on a custom field from field options', async () => {
+        const result = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={personService()}
+              model={PersonModel}
+              disabled
+              fieldOptions={{
+                lastName: {
+                  label: 'This should not be used',
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
+                },
+              }}
+            />,
+          ).container,
+        );
+
+        const field = result.queryField('Custom last name');
+        expect(field).to.exist;
       });
 
       it('renders custom label from field options instead of the default one', () => {
