@@ -47,15 +47,6 @@ describe('@hilla/react-crud', () => {
       expect((await form.getField('Last name')).value).to.equal('Love');
     });
 
-    it('edits an item when clicking the edit button in the actions column', async () => {
-      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(0, (await grid.getColumns()).length - 1);
-      const editButton = await within(cell).findByRole('button', { name: 'Edit' });
-      await user.click(editButton);
-      expect((await form.getField('First name')).value).to.equal('Jane');
-      expect((await form.getField('Last name')).value).to.equal('Love');
-    });
-
     it('clears and disables the form when deselecting an item', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(1);
@@ -167,34 +158,39 @@ describe('@hilla/react-crud', () => {
       expect(grid.isSelected(0)).to.be.false;
     });
 
+    it('shows a delete button in the form', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+      const deleteButton = await form.findButton('Delete...');
+      expect(deleteButton).to.exist;
+    });
+
     it('shows a confirmation dialog before deleting', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+      const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
-      expect(grid.getBodyCellContent(1, 1)).to.have.rendered.text('Dove');
     });
 
-    it('deletes and refreshes grid after confirming', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+    it('refreshes grid after confirming delete', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await grid.toggleRowSelected(1);
+      const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.confirm();
       expect(grid.getVisibleRowCount()).to.equal(1);
     });
 
-    it('clears and disables the form when deleting the currently edited item', async () => {
+    it('clears and disables the form after confirming delete', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       // Select item
       await grid.toggleRowSelected(0);
       // Delete item
-      const cell = grid.getBodyCellContent(0, (await grid.getColumns()).length - 1);
-      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.confirm();
@@ -204,11 +200,11 @@ describe('@hilla/react-crud', () => {
       expect(field.value).to.be.empty;
     });
 
-    it('does not delete when not confirming', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
+    it('does not refresh grid when not confirming delete', async () => {
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.getVisibleRowCount()).to.equal(2);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const deleteButton = await within(cell).findByRole('button', { name: 'Delete' });
+      await grid.toggleRowSelected(1);
+      const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.cancel();
@@ -216,17 +212,17 @@ describe('@hilla/react-crud', () => {
     });
 
     it('does render a delete button without noDelete', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud />), user);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+      await grid.toggleRowSelected(1);
+      const deleteButton = form.queryButton('Delete...');
       expect(deleteButton).to.exist;
     });
 
     it('does not render a delete button with noDelete', async () => {
-      const { grid } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
-      const cell = grid.getBodyCellContent(1, (await grid.getColumns()).length - 1);
-      const deleteButton = within(cell).queryByRole('button', { name: 'Delete' });
-      expect(deleteButton).to.be.null;
+      const { grid, form } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
+      await grid.toggleRowSelected(1);
+      const deleteButton = form.queryButton('Delete...');
+      expect(deleteButton).to.not.exist;
     });
 
     describe('mobile layout', () => {
@@ -320,7 +316,7 @@ describe('@hilla/react-crud', () => {
           user,
         );
 
-        await expect(grid.getHeaderCellContents()).to.eventually.eql(['First name', 'Last name', '']);
+        await expect(grid.getHeaderCellContents()).to.eventually.eql(['First name', 'Last name']);
       });
     });
 
@@ -331,7 +327,7 @@ describe('@hilla/react-crud', () => {
             <ExperimentalAutoCrud
               service={personService()}
               model={PersonModel}
-              formProps={{ customLayoutRenderer: { template: [['firstName', 'lastName']] } }}
+              formProps={{ visibleFields: ['firstName', 'lastName'] }}
             />,
           ),
           user,
@@ -340,6 +336,36 @@ describe('@hilla/react-crud', () => {
         expect(form.queryField('First name')).to.exist;
         expect(form.queryField('Last name')).to.exist;
         expect(form.queryField('Email')).not.to.exist;
+      });
+    });
+
+    describe('customize style props', () => {
+      it('renders properly without custom id, class name and style property', () => {
+        const { container } = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />);
+        const autoCrudElement = container.firstElementChild as HTMLElement;
+
+        expect(autoCrudElement).to.exist;
+        expect(autoCrudElement.id).to.equal('');
+        expect(autoCrudElement.className.trim()).to.equal('auto-crud');
+        expect(autoCrudElement.getAttribute('style')).to.equal(null);
+      });
+
+      it('renders with custom id, class name and style property on top most element', () => {
+        const { container } = render(
+          <ExperimentalAutoCrud
+            service={personService()}
+            model={PersonModel}
+            id="my-id"
+            className="custom-auto-crud"
+            style={{ backgroundColor: 'blue' }}
+          />,
+        );
+        const autoCrudElement = container.firstElementChild as HTMLElement;
+
+        expect(autoCrudElement).to.exist;
+        expect(autoCrudElement.id).to.equal('my-id');
+        expect(autoCrudElement.className.trim()).to.equal('auto-crud custom-auto-crud');
+        expect(autoCrudElement.getAttribute('style')).to.equal('background-color: blue;');
       });
     });
   });

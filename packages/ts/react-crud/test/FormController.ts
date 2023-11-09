@@ -39,7 +39,11 @@ export default class FormController {
   }
 
   async findButton(text: string): Promise<HTMLButtonElement> {
-    return await within(this.instance).findByText(text);
+    return await within(this.instance).findByRole('button', { name: text });
+  }
+
+  queryButton(text: string): HTMLButtonElement | null {
+    return within(this.instance).queryByRole('button', { name: text });
   }
 
   async typeInField(label: string, value: string): Promise<void> {

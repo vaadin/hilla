@@ -41,7 +41,7 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string) {
     super();
-    this.#connectWebsocket(connectPrefix.replace('/connect', '').replace(/^connect/u, ''));
+    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''));
   }
 
   /**
@@ -98,6 +98,8 @@ export class FluxConnection extends EventTarget {
 
   #connectWebsocket(prefix: string) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
+    const pushUrl = 'HILLA/push';
+    const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
     this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
@@ -138,7 +140,7 @@ export class FluxConnection extends EventTarget {
       timeout: -1,
       trackMessageLength: true,
       transport: 'websocket',
-      url: prefix ? `${prefix}/HILLA/push` : 'HILLA/push',
+      url,
     } satisfies Atmosphere.Request);
   }
 

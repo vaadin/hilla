@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import dev.hilla.EndpointProperties;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereFramework;
@@ -30,6 +31,20 @@ import jakarta.servlet.ServletException;
 @Configuration
 public class PushConfigurer {
 
+    private static final String HILLA_PUSH_PATH = "/HILLA/push";
+
+    private final EndpointProperties endpointProperties;
+
+    /**
+     * Initializes the configuration for reactive endpoints.
+     *
+     * @param endpointProperties
+     *            Hilla endpoint properties
+     */
+    public PushConfigurer(EndpointProperties endpointProperties) {
+        this.endpointProperties = endpointProperties;
+    }
+
     @Bean
     PushEndpoint pushEndpoint() {
         return new PushEndpoint();
@@ -48,9 +63,10 @@ public class PushConfigurer {
     @Bean
     ServletRegistrationBean<AtmosphereServlet> atmosphereServlet(
             PushEndpoint pushEndpoint) {
+        final String hillaPushPath = getHillaPushPath();
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet();
         ServletRegistrationBean<AtmosphereServlet> registration = new ServletRegistrationBean<>(
-                atmosphereServlet, "/HILLA/push");
+                atmosphereServlet, hillaPushPath);
 
         List<AtmosphereInterceptor> interceptors = Arrays.asList(
                 new AtmosphereResourceLifecycleInterceptor(),
@@ -58,11 +74,11 @@ public class PushConfigurer {
                 new SuspendTrackerInterceptor());
         AtmosphereFramework fw = atmosphereServlet.framework();
         fw.setDefaultBroadcasterClassName(SimpleBroadcaster.class.getName());
-        fw.addAtmosphereHandler("/HILLA/push", pushEndpoint, interceptors);
+        fw.addAtmosphereHandler(hillaPushPath, pushEndpoint, interceptors);
 
         // Override the global mapping set by Flow
         registration.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH,
-                "/HILLA/push");
+                hillaPushPath);
         registration.setLoadOnStartup(0);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
@@ -77,6 +93,20 @@ public class PushConfigurer {
             onStartup(Collections.<Class<?>> emptySet(), servletContext);
         }
 
+    }
+
+    /**
+     * Prepends the endpoint prefix URL from endpoint properties (ignoring the
+     * "/connect" suffix, which is only applied to regular endpoints).
+     *
+     * @return path with prefix prepended
+     */
+    private String getHillaPushPath() {
+        var prefix = endpointProperties.getEndpointPrefix()
+                .replaceFirst("(^|\\/)connect$", "");
+        prefix = prefix.startsWith("/") ? prefix.substring(1) : prefix;
+        return prefix.isEmpty() ? HILLA_PUSH_PATH
+                : "/" + prefix + HILLA_PUSH_PATH;
     }
 
 }

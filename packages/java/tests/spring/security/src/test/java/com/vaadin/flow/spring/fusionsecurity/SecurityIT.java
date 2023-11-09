@@ -53,7 +53,9 @@ public class SecurityIT extends ChromeBrowserTest {
                             + "load resource: the server responded with "
                             + "a status of 401")
                     || msg.contains("expected \"200 OK\" response, but got 401")
-                    || msg.contains("webpack-internal://");
+                    || msg.contains("webpack-internal://")
+                    || msg.contains("BalanceEndpoint.getBalanceUpdates([])")
+                            && msg.contains("Access denied");
         });
     }
 
@@ -279,6 +281,19 @@ public class SecurityIT extends ChromeBrowserTest {
         simulateNewServer();
         navigateTo("private", false);
         assertLoginViewShown();
+    }
+
+    @Test
+    public void private_page_reactive_endpoint_works() {
+        open("login");
+        loginUser();
+        navigateTo("private");
+        waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
+                .exists());
+        waitUntil(driver -> !$("output").id("balanceUpdates").getText()
+                .isEmpty());
+        String balanceUpdates = $("output").id("balanceUpdates").getText();
+        Assert.assertEquals("10000", balanceUpdates);
     }
 
     protected void navigateTo(String path) {

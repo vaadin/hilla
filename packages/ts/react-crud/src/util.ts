@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 export function convertToTitleCase(inputString: string): string {
   // Convert underscores to spaces
   const stringWithSpaces = inputString.replace(/_/gu, ' ');
@@ -9,3 +11,9 @@ export function convertToTitleCase(inputString: string): string {
   // Join the title case words with spaces
   return titleCaseWords.join(' ');
 }
+
+export type ComponentStyleProps = Readonly<{
+  id?: string;
+  style?: CSSProperties;
+  className?: string;
+}>;

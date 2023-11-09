@@ -1,0 +1,17 @@
+.auto-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-m);
+}
+
+.auto-form-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row-reverse;
+  gap: var(--lumo-space-xs) var(--lumo-space-s);
+  align-items: center;
+}
+
+.auto-form-delete-button {
+  margin-right: auto;
+}
