@@ -4,12 +4,12 @@ import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
-import React, { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
+import { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
-import type { ComponentStyleProps } from './util';
+import type { ComponentStyleProps } from './util.js';
 
 document.adoptedStyleSheets.unshift(css);
 
@@ -33,16 +33,6 @@ export type AutoFormLayoutRendererProps<M extends AbstractModel> = Readonly<{
   children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
 }>;
 
-type FieldColSpan = Readonly<{
-  property: string;
-  colSpan: number;
-}>;
-
-export type AutoFormLayoutProps = Readonly<{
-  template: FieldColSpan[][] | string[][];
-  responsiveSteps?: Array<{ minWidth: string; columns: number }>;
-}>;
-
 export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentStyleProps &
   Readonly<{
     /**
@@ -59,8 +49,8 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * used with a service that handles `Person` instances.
      *
      * By default, the form shows fields for all properties of the model which
-     * have a type that is supported. Use the `customLayoutRenderer` option to
-     * customize which fields to show and how to layout them.
+     * have a type that is supported. Use the `visibleFields` option to customize
+     * which fields to show and in which order.
      */
     model: DetachedModelConstructor<M>;
     /**
@@ -78,11 +68,24 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     disabled?: boolean;
     /**
-     * Allows to customize the layout of the form, either by specifying rows of
-     * fields, or by providing a custom renderer. Please check the component's
-     * documentation for details.
+     * Allows to customize the layout of the form by providing a custom renderer.
+     * Check the component documentation for details.
      */
-    customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<M>>;
+    layoutRenderer?: ComponentType<AutoFormLayoutRendererProps<M>>;
+    /**
+     * Defines the fields to show in the form, and in which order. This takes
+     * an array of property names. Properties that are not included in this
+     * array will not be shown in the form, and properties that are included,
+     * but don't exist in the model, will be ignored.
+     */
+    visibleFields?: string[];
+    /**
+     * Allows to customize the FormLayout used by default. This is especially useful
+     * to define the `responsiveSteps`. See the
+     * {@link https://hilla.dev/docs/react/components/form-layout | FormLayout documentation}
+     * for details.
+     */
+    formLayoutProps?: ComponentStyleProps & Pick<Parameters<typeof FormLayout>[0], 'responsiveSteps'>;
     /**
      * Allows to customize individual fields of the form. This takes an object
      * where the keys are property names, and the values are options for the
@@ -123,90 +126,6 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     afterDelete?({ item }: DeleteEvent<Value<M>>): void;
   }>;
 
-type CustomFormLayoutProps = Readonly<{
-  customFormLayout: AutoFormLayoutProps;
-  children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
-}>;
-
-function findColumnCount(responsiveSteps: Array<{ minWidth: string; columns: number }>): number {
-  return responsiveSteps
-    .map((step: { minWidth: string; columns: number }) => ({
-      minWidth: parseInt(step.minWidth, 10),
-      columns: step.columns,
-    }))
-    .filter(({ minWidth }) => minWidth <= window.innerWidth)
-    .reduce(
-      (maxStep, step) => {
-        if (step.minWidth > maxStep.minWidth) {
-          return step;
-        }
-        return maxStep;
-      },
-      { minWidth: 0, columns: 1 },
-    ).columns;
-}
-
-function createGenericResponsiveSteps(
-  customFormLayout: AutoFormLayoutProps,
-): Array<{ minWidth: string; columns: number }> {
-  function gcd(a: number, b: number): number {
-    return a > 0 ? gcd(b % a, a) : b;
-  }
-
-  const lcm = (a: number, b: number) => (a * b) / gcd(a, b);
-
-  const minNeededColumns = customFormLayout.template.map((row) => row.length).reduce(lcm);
-
-  return [
-    { minWidth: '0', columns: 1 },
-    { minWidth: '800px', columns: minNeededColumns },
-  ];
-}
-
-function CustomFormLayout(customFormLayoutProps: CustomFormLayoutProps): JSX.Element {
-  const { customFormLayout, children } = customFormLayoutProps;
-  const fieldsByPropertyName = new Map<string, AutoFormFieldProps>();
-  children.forEach((field) => fieldsByPropertyName.set(field.props.propertyInfo.name, field.props));
-
-  let responsiveSteps: Array<{ minWidth: string; columns: number }>;
-  if (customFormLayout.responsiveSteps == null) {
-    responsiveSteps = createGenericResponsiveSteps(customFormLayout);
-  } else {
-    ({ responsiveSteps } = customFormLayout);
-  }
-
-  let weightedTemplate: FieldColSpan[][];
-  if (typeof customFormLayout.template[0][0] === 'string') {
-    const columnCount = findColumnCount(responsiveSteps);
-    weightedTemplate = (customFormLayout.template as string[][]).map((row) => {
-      const rowSize = row.length;
-      const colSpan = Math.ceil(columnCount / rowSize);
-      return row.map((property) => ({ property, colSpan }));
-    });
-  } else {
-    weightedTemplate = customFormLayout.template as FieldColSpan[][];
-  }
-
-  const spannedFields: JSX.Element[] = [];
-  weightedTemplate.forEach((row: FieldColSpan[]) => {
-    row.forEach((fieldColSpan: FieldColSpan) => {
-      const fieldProps = fieldsByPropertyName.get(fieldColSpan.property)!;
-      const spannedField = (
-        <AutoFormField
-          key={fieldProps.propertyInfo.name}
-          propertyInfo={fieldProps.propertyInfo}
-          form={fieldProps.form}
-          disabled={fieldProps.disabled}
-          colSpan={fieldColSpan.colSpan}
-        />
-      );
-      spannedFields.push(spannedField);
-    });
-  });
-
-  return <FormLayout responsiveSteps={responsiveSteps}>{spannedFields}</FormLayout>;
-}
-
 /**
  * Auto Form is a component that automatically generates a form for editing,
  * updating and deleting items from a backend service.
@@ -233,7 +152,9 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
   onSubmitError,
   afterSubmit,
   disabled,
-  customLayoutRenderer: CustomLayoutRenderer,
+  layoutRenderer: LayoutRenderer,
+  visibleFields,
+  formLayoutProps,
   fieldOptions,
   style,
   id,
@@ -313,6 +234,9 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
 
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
     const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name];
+    const colspanValue = fieldOptionsForProperty?.colspan;
+    const colspan = colspanValue ? { colspan: colspanValue } : {};
+
     return (
       <AutoFormField
         key={propertyInfo.name}
@@ -320,22 +244,27 @@ export function ExperimentalAutoForm<M extends AbstractModel>({
         form={form}
         disabled={disabled}
         options={fieldOptionsForProperty}
+        {...colspan}
       />
     );
   }
 
-  let layout: JSX.Element;
-  if (CustomLayoutRenderer === undefined) {
-    const fields = getProperties(model).filter(includeProperty).map(createAutoFormField);
-    layout = <FormLayout>{fields}</FormLayout>;
-  } else {
-    const fields = getProperties(model).map(createAutoFormField);
-    if (typeof CustomLayoutRenderer === 'function') {
-      layout = <CustomLayoutRenderer form={form}>{fields}</CustomLayoutRenderer>;
-    } else {
-      layout = <CustomFormLayout customFormLayout={CustomLayoutRenderer}>{fields}</CustomFormLayout>;
-    }
-  }
+  const defaultProperties = getProperties(model);
+
+  const visibleProperties = visibleFields
+    ? visibleFields.reduce<PropertyInfo[]>((foundProperties, propertyName) => {
+        const maybeProperty = defaultProperties.find((p) => p.name === propertyName);
+        return maybeProperty ? [...foundProperties, maybeProperty] : foundProperties;
+      }, [])
+    : defaultProperties.filter(includeProperty);
+
+  const fields = visibleProperties.map(createAutoFormField);
+
+  const layout = LayoutRenderer ? (
+    <LayoutRenderer form={form}>{fields}</LayoutRenderer>
+  ) : (
+    <FormLayout {...formLayoutProps}>{fields}</FormLayout>
+  );
 
   return (
     <div className={`auto-form ${className ?? ''}`} id={id} style={style} data-testid="auto-form">
