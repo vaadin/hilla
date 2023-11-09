@@ -404,7 +404,6 @@ describe('@hilla/react-crud', () => {
     describe('layoutRenderer', () => {
       it('uses default two-column form layout if layoutRenderer is not defined', async () => {
         const form = await populatePersonForm(1);
-        expect(form.formLayout.responsiveSteps).to.have.length(3);
         expect(form.formLayout.responsiveSteps).to.be.deep.equal([
           { minWidth: 0, columns: 1, labelsPosition: 'top' },
           { minWidth: '20em', columns: 1 },
@@ -437,6 +436,8 @@ describe('@hilla/react-crud', () => {
         const tagNames = fields.map((field) => field.localName);
         expect(tagNames).to.eql(['vaadin-text-field', 'vaadin-text-field', 'vaadin-number-field']);
         expect(form.queryField('Dummy')).to.be.undefined;
+        const genderField = form.queryField('Gender');
+        expect(genderField).to.be.undefined;
       });
     });
 
