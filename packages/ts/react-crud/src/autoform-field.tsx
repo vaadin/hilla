@@ -41,6 +41,12 @@ export type FieldOptions = Readonly<{
    * ```
    */
   renderer?(props: { field: FieldDirectiveResult; label: string }): JSX.Element;
+  /**
+   * The number of columns to span. This value is passed to the underlying
+   * FormLayout, unless a custom layout is used. In that case, the value is
+   * ignored.
+   */
+  colspan?: number;
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {

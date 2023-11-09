@@ -8,12 +8,11 @@ import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
-import type { ComponentType } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import {
-  type AutoFormLayoutProps,
   type AutoFormLayoutRendererProps,
+  type AutoFormProps,
   emptyItem,
   ExperimentalAutoForm,
 } from '../src/autoform.js';
@@ -90,7 +89,7 @@ describe('@hilla/react-crud', () => {
 
     async function populatePersonForm(
       personId: number,
-      customLayoutRenderer?: AutoFormLayoutProps | ComponentType<AutoFormLayoutRendererProps<PersonModel>>,
+      formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
       screenSize?: string,
       disabled?: boolean,
     ): Promise<FormController> {
@@ -100,13 +99,7 @@ describe('@hilla/react-crud', () => {
       const service = personService();
       const person = await getItem(service, personId);
       const result = render(
-        <ExperimentalAutoForm
-          service={service}
-          model={PersonModel}
-          item={person}
-          disabled={disabled}
-          customLayoutRenderer={customLayoutRenderer}
-        />,
+        <ExperimentalAutoForm service={service} model={PersonModel} item={person} disabled={disabled} {...formProps} />,
       );
       return await FormController.init(user, result.container);
     }
@@ -408,194 +401,44 @@ describe('@hilla/react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
-    it('customLayoutRenderer is not defined, default two-column form layout is used', async () => {
-      const form = await populatePersonForm(1);
-      expect(form.formLayout.responsiveSteps).to.have.length(3);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: 0, columns: 1, labelsPosition: 'top' },
-        { minWidth: '20em', columns: 1 },
-        { minWidth: '40em', columns: 2 },
-      ]);
-      expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
-      await expectFieldColSpan(form, 'First name', null);
-      await expectFieldColSpan(form, 'Last name', null);
-      await expectFieldColSpan(form, 'Email', null);
-      await expectFieldColSpan(form, 'Some integer', null);
-      await expectFieldColSpan(form, 'Some decimal', null);
+    describe('layoutRenderer', () => {
+      it('uses default two-column form layout if layoutRenderer is not defined', async () => {
+        const form = await populatePersonForm(1);
+        expect(form.formLayout.responsiveSteps).to.be.deep.equal([
+          { minWidth: 0, columns: 1, labelsPosition: 'top' },
+          { minWidth: '20em', columns: 1 },
+          { minWidth: '40em', columns: 2 },
+        ]);
+        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
+        await expectFieldColSpan(form, 'First name', null);
+        await expectFieldColSpan(form, 'Last name', null);
+        await expectFieldColSpan(form, 'Email', null);
+        await expectFieldColSpan(form, 'Some integer', null);
+        await expectFieldColSpan(form, 'Some decimal', null);
+      });
+
+      it('uses layoutRenderer if defined, instead of the default FormLayout', async () => {
+        function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
+          return <VerticalLayout>{children}</VerticalLayout>;
+        }
+
+        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, 'screen-1440-900');
+        expect(form.formLayout).to.not.exist;
+        const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
+        expect(layout).to.exist;
+      });
     });
 
-    it('customLayoutRenderer is defined by string[][], number of columns and colspan is based on template rows', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          template: [
-            ['firstName', 'lastName', 'email'],
-            ['someInteger', 'someDecimal'],
-            ['id', 'version'],
-          ],
-        },
-        'screen-1440-900',
-      );
-      expect(form.formLayout.responsiveSteps).to.have.length(2);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: '0', columns: 1 },
-        { minWidth: '800px', columns: 6 },
-      ]);
-      await expectFieldColSpan(form, 'First name', '2');
-      await expectFieldColSpan(form, 'Last name', '2');
-      await expectFieldColSpan(form, 'Email', '2');
-      await expectFieldColSpan(form, 'Some integer', '3');
-      await expectFieldColSpan(form, 'Some decimal', '3');
-      await expectFieldColSpan(form, 'Id', '3');
-      await expectFieldColSpan(form, 'Version', '3');
-    });
-
-    it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan is based on responsive steps', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          responsiveSteps: [
-            { minWidth: '0', columns: 1 },
-            { minWidth: '800px', columns: 2 },
-            { minWidth: '1200px', columns: 3 },
-          ],
-          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
-        },
-        'screen-1440-900',
-      );
-      expect(form.formLayout.responsiveSteps).to.have.length(3);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: '0', columns: 1 },
-        { minWidth: '800px', columns: 2 },
-        { minWidth: '1200px', columns: 3 },
-      ]);
-      await expectFieldColSpan(form, 'First name', '1');
-      await expectFieldColSpan(form, 'Last name', '1');
-      await expectFieldColSpan(form, 'Email', '1');
-      await expectFieldColSpan(form, 'Some integer', '3');
-      await expectFieldColSpan(form, 'Some decimal', '3');
-    });
-
-    it('customLayoutRenderer is defined by string[][] and custom responsiveSteps, number of columns and colspan respects the screen size', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          responsiveSteps: [
-            { minWidth: '0', columns: 1 },
-            { minWidth: '800px', columns: 2 },
-            { minWidth: '1200px', columns: 3 },
-          ],
-          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
-        },
-        'screen-1024-768',
-      );
-
-      await expectFieldColSpan(form, 'First name', '1');
-      await expectFieldColSpan(form, 'Last name', '1');
-      await expectFieldColSpan(form, 'Email', '1');
-      await expectFieldColSpan(form, 'Some integer', '2');
-      await expectFieldColSpan(form, 'Some decimal', '2');
-    });
-
-    it('customLayoutRenderer is defined by string[][] and form is disabled, rendered fields are disabled properly', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          responsiveSteps: [
-            { minWidth: '0', columns: 1 },
-            { minWidth: '800px', columns: 2 },
-            { minWidth: '1200px', columns: 3 },
-          ],
-          template: [['firstName', 'lastName', 'email'], ['someInteger'], ['someDecimal']],
-        },
-        'screen-1024-768',
-        true,
-      );
-
-      expect(await form.getField('First name')).to.have.attribute('disabled');
-    });
-
-    it('customLayoutRenderer is defined by FieldColSpan[][], number of columns is based on template rows and colspan is based on each FieldColSpan', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          template: [
-            [
-              { property: 'firstName', colSpan: 2 },
-              { property: 'lastName', colSpan: 2 },
-              { property: 'email', colSpan: 2 },
-            ],
-            [
-              { property: 'someInteger', colSpan: 3 },
-              { property: 'someDecimal', colSpan: 3 },
-            ],
-            [
-              { property: 'id', colSpan: 3 },
-              { property: 'version', colSpan: 3 },
-            ],
-          ],
-        },
-        'screen-1440-900',
-      );
-      expect(form.formLayout.responsiveSteps).to.have.length(2);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: '0', columns: 1 },
-        { minWidth: '800px', columns: 6 },
-      ]);
-      await expectFieldColSpan(form, 'First name', '2');
-      await expectFieldColSpan(form, 'Last name', '2');
-      await expectFieldColSpan(form, 'Email', '2');
-      await expectFieldColSpan(form, 'Some integer', '3');
-      await expectFieldColSpan(form, 'Some decimal', '3');
-      await expectFieldColSpan(form, 'Id', '3');
-      await expectFieldColSpan(form, 'Version', '3');
-    });
-
-    it('customLayoutRenderer is defined by FieldColSpan[][] and responsiveSteps, number of columns is based on responsiveSteps and colspan is based on each FieldColSpan', async () => {
-      const form = await populatePersonForm(
-        1,
-        {
-          responsiveSteps: [
-            { minWidth: '0', columns: 1 },
-            { minWidth: '800px', columns: 2 },
-            { minWidth: '1200px', columns: 3 },
-          ],
-          template: [
-            [
-              { property: 'firstName', colSpan: 1 },
-              { property: 'lastName', colSpan: 1 },
-              { property: 'email', colSpan: 1 },
-            ],
-            [
-              { property: 'someInteger', colSpan: 2 },
-              { property: 'someDecimal', colSpan: 1 },
-            ],
-          ],
-        },
-        'screen-1440-900',
-      );
-      expect(form.formLayout.responsiveSteps).to.have.length(3);
-      expect(form.formLayout.responsiveSteps).to.be.deep.equal([
-        { minWidth: '0', columns: 1 },
-        { minWidth: '800px', columns: 2 },
-        { minWidth: '1200px', columns: 3 },
-      ]);
-      await expectFieldColSpan(form, 'First name', '1');
-      await expectFieldColSpan(form, 'Last name', '1');
-      await expectFieldColSpan(form, 'Email', '1');
-      await expectFieldColSpan(form, 'Some integer', '2');
-      await expectFieldColSpan(form, 'Some decimal', '1');
-    });
-
-    it('customLayoutRenderer is defined as a function that renders the fields in a vertical manner, VerticalLayout is used instead of FormLayout', async () => {
-      function MyCustomLayoutRenderer({ children, form }: AutoFormLayoutRendererProps<PersonModel>) {
-        return <VerticalLayout>{children}</VerticalLayout>;
-      }
-
-      const form = await populatePersonForm(1, MyCustomLayoutRenderer, 'screen-1440-900');
-      expect(form.formLayout).to.not.exist;
-      const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
-      expect(layout).to.exist;
+    describe('visibleFields', () => {
+      it('renders the form according to visibleFields if defined', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id', 'dummy'] });
+        const fields = await form.getFields('First name', 'Last name', 'Id');
+        const tagNames = fields.map((field) => field.localName);
+        expect(tagNames).to.eql(['vaadin-text-field', 'vaadin-text-field', 'vaadin-number-field']);
+        expect(form.queryField('Dummy')).to.be.undefined;
+        const genderField = form.queryField('Gender');
+        expect(genderField).to.be.undefined;
+      });
     });
 
     describe('Delete button', () => {
@@ -801,6 +644,43 @@ describe('@hilla/react-crud', () => {
         expect(within(result.container).queryByLabelText('First name')).to.not.exist;
         expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
         expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
+      });
+
+      it('passes colspan to fields', async () => {
+        const result = await FormController.init(
+          user,
+          render(
+            <ExperimentalAutoForm
+              service={personService()}
+              model={PersonModel}
+              fieldOptions={{
+                firstName: { colspan: 2 },
+                lastName: { colspan: 3 },
+                email: { colspan: 4 },
+                someInteger: { colspan: 5 },
+                someDecimal: { colspan: 6 },
+              }}
+            />,
+          ).container,
+        );
+
+        await expectFieldColSpan(result, 'First name', '2');
+        await expectFieldColSpan(result, 'Last name', '3');
+        await expectFieldColSpan(result, 'Email', '4');
+        await expectFieldColSpan(result, 'Some integer', '5');
+        await expectFieldColSpan(result, 'Some decimal', '6');
+      });
+    });
+
+    describe('formLayoutProps', () => {
+      it('passes responsiveSteps to FormLayout', async () => {
+        const form = await populatePersonForm(1, {
+          formLayoutProps: {
+            responsiveSteps: [{ minWidth: 0, columns: 1, labelsPosition: 'top' }],
+          },
+        });
+        expect(form.formLayout.responsiveSteps).to.have.length(1);
+        expect(form.formLayout.responsiveSteps).to.be.deep.equal([{ minWidth: 0, columns: 1, labelsPosition: 'top' }]);
       });
     });
 

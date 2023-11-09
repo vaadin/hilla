@@ -327,7 +327,7 @@ describe('@hilla/react-crud', () => {
             <ExperimentalAutoCrud
               service={personService()}
               model={PersonModel}
-              formProps={{ customLayoutRenderer: { template: [['firstName', 'lastName']] } }}
+              formProps={{ visibleFields: ['firstName', 'lastName'] }}
             />,
           ),
           user,
