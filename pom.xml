@@ -82,6 +82,7 @@
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.3.0.alpha6</flow.version>
+    <copilot.version>24.3.0.alpha7</copilot.version>
     <slf4j.version>2.0.7</slf4j.version>
     <spring.boot.version>3.2.0-RC2</spring.boot.version>
     <testbench.version>9.1.0</testbench.version>
