@@ -50,7 +50,7 @@
     "@hilla/form": "2.4.0-alpha5",
     "@hilla/react-components": "2.2.1",
     "@hilla/react-form": "2.4.0-alpha5",
-    "@vaadin/vaadin-lumo-styles": "24.2.1"
+    "@vaadin/vaadin-lumo-styles": "24.2.2"
   },
   "peerDependencies": {
     "react": "^18"

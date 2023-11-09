@@ -2,7 +2,7 @@ webpack.config.js
 webpack.generated.js
 vite.config.ts
 vite.generated.ts
-*/**/*/tsconfig.json
+*/**/tsconfig.json
 types.d.ts
 **/frontend/generated/*
 **/error-screenshots/*
