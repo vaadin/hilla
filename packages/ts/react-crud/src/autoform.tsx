@@ -145,7 +145,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
  * />
  * ```
  */
-export function ExperimentalAutoForm<M extends AbstractModel>({
+export function AutoForm<M extends AbstractModel>({
   service,
   model,
   item = emptyItem,

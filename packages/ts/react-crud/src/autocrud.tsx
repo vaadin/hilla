@@ -4,7 +4,7 @@ import { SplitLayout } from '@hilla/react-components/SplitLayout';
 import { type JSX, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog';
 import css from './autocrud.obj.css';
-import { type AutoFormProps, emptyItem, ExperimentalAutoForm } from './autoform.js';
+import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
 import { AutoGrid, type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
@@ -78,7 +78,7 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
  * <AutoCrud service={PersonService} model={PersonModel} />
  * ```
  */
-export function ExperimentalAutoCrud<TItem>({
+export function AutoCrud<TItem>({
   service,
   model,
   noDelete,
@@ -126,7 +126,7 @@ export function ExperimentalAutoCrud<TItem>({
   );
 
   const autoForm = (
-    <ExperimentalAutoForm
+    <AutoForm
       {...formProps}
       disabled={!item}
       service={service}

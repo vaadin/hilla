@@ -1,4 +1,4 @@
-import { ExperimentalAutoForm } from '@hilla/react-crud';
+import { AutoForm } from '@hilla/react-crud';
 import { useState } from 'react';
 import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment.js';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel.js';
@@ -14,7 +14,7 @@ export function AutoFormView(): JSX.Element {
         <>
           <h1>Make a new appointment</h1>
           <br />
-          <ExperimentalAutoForm
+          <AutoForm
             service={AppointmentService}
             model={AppointmentModel}
             afterSubmit={({ item }) => {

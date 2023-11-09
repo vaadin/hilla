@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoCrudProps, ExperimentalAutoCrud } from '../src/autocrud.js';
+import { type AutoCrudProps, AutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
@@ -31,7 +31,7 @@ describe('@hilla/react-crud', () => {
     });
 
     function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
-      return <ExperimentalAutoCrud service={personService()} model={PersonModel} {...props} />;
+      return <AutoCrud service={personService()} model={PersonModel} {...props} />;
     }
 
     it('shows a grid and a form', async () => {
@@ -99,7 +99,7 @@ describe('@hilla/react-crud', () => {
 
     it('can add a new item', async () => {
       const { grid, form, newButton } = await CrudController.init(
-        render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />),
+        render(<AutoCrud service={personService()} model={PersonModel} />),
         user,
       );
       await user.click(newButton);
@@ -125,7 +125,7 @@ describe('@hilla/react-crud', () => {
 
     it('can update added item', async () => {
       const { grid, form, newButton } = await CrudController.init(
-        render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />),
+        render(<AutoCrud service={personService()} model={PersonModel} />),
         user,
       );
       await user.click(newButton);
@@ -307,7 +307,7 @@ describe('@hilla/react-crud', () => {
       it('allows passing custom grid props', async () => {
         const { grid } = await CrudController.init(
           render(
-            <ExperimentalAutoCrud
+            <AutoCrud
               service={personService()}
               model={PersonModel}
               gridProps={{ visibleColumns: ['firstName', 'lastName'] }}
@@ -324,7 +324,7 @@ describe('@hilla/react-crud', () => {
       it('allows passing custom form props', async () => {
         const { form } = await CrudController.init(
           render(
-            <ExperimentalAutoCrud
+            <AutoCrud
               service={personService()}
               model={PersonModel}
               formProps={{ visibleFields: ['firstName', 'lastName'] }}
@@ -341,7 +341,7 @@ describe('@hilla/react-crud', () => {
 
     describe('customize style props', () => {
       it('renders properly without custom id, class name and style property', () => {
-        const { container } = render(<ExperimentalAutoCrud service={personService()} model={PersonModel} />);
+        const { container } = render(<AutoCrud service={personService()} model={PersonModel} />);
         const autoCrudElement = container.firstElementChild as HTMLElement;
 
         expect(autoCrudElement).to.exist;
@@ -352,7 +352,7 @@ describe('@hilla/react-crud', () => {
 
       it('renders with custom id, class name and style property on top most element', () => {
         const { container } = render(
-          <ExperimentalAutoCrud
+          <AutoCrud
             service={personService()}
             model={PersonModel}
             id="my-id"
