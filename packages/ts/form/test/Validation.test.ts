@@ -10,7 +10,6 @@ import sinonChai from 'sinon-chai';
 // API to test
 import {
   Binder,
-  BinderRoot,
   field,
   type InterpolateMessageCallback,
   NotBlank,
@@ -810,10 +809,10 @@ describe('@hilla/form', () => {
         const callback: InterpolateMessageCallback<any> = (_message, _validator, _binderNode) =>
           // Interpolates all error messages as 'custom message'
           'custom message';
-        BinderRoot.interpolateMessageCallback = sinon.spy(callback);
+        Binder.interpolateMessageCallback = sinon.spy(callback);
 
         const errors = await testMessageBinder.validate();
-        expect(BinderRoot.interpolateMessageCallback).to.be.called;
+        expect(Binder.interpolateMessageCallback).to.be.called;
         expect(errors).to.have.lengthOf.at.least(1);
         for (const [i, error] of errors.entries()) {
           expect(error.message).to.equal('custom message', `errors[${i}]`);
@@ -829,10 +828,10 @@ describe('@hilla/form', () => {
           }
           return message;
         };
-        BinderRoot.interpolateMessageCallback = sinon.spy(callback);
+        Binder.interpolateMessageCallback = sinon.spy(callback);
 
         const errors = await testMessageBinder.validate();
-        expect(BinderRoot.interpolateMessageCallback).to.be.called;
+        expect(Binder.interpolateMessageCallback).to.be.called;
         const error = errors.find((e) => e.validator instanceof NotBlank);
         expect(error?.message).to.equal('must *NOT BE* blank');
       });
@@ -843,10 +842,10 @@ describe('@hilla/form', () => {
           expect(binderNode).to.have.property('model');
           return `[value: ${String(binderNode.value)}] ${message}`;
         };
-        BinderRoot.interpolateMessageCallback = sinon.spy(callback);
+        Binder.interpolateMessageCallback = sinon.spy(callback);
 
         const errors = await testMessageBinder.validate();
-        expect(BinderRoot.interpolateMessageCallback).to.be.called;
+        expect(Binder.interpolateMessageCallback).to.be.called;
         const error = errors.find((e) => e.validator instanceof Size);
         expect(error?.message ?? '').to.include('[value: 123]');
       });
