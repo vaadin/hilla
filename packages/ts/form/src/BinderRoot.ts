@@ -9,12 +9,13 @@ import {
 } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import {
-  createDetachedModel,
   _parent,
   type AbstractModel,
+  createDetachedModel,
   type DetachedModelConstructor,
   type Value,
 } from './Models.js';
+import type { ClassStaticProperties } from './types.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -62,8 +63,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   readonly #context: unknown = this;
 
-  // @ts-expect-error: too generic for TS
-  declare readonly ['constructor']: typeof BinderRoot<M>;
+  declare readonly ['constructor']: ClassStaticProperties<typeof BinderRoot<M>>;
 
   /**
    *
