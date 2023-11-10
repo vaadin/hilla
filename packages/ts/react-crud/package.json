@@ -31,6 +31,15 @@
   "exports": {
     ".": {
       "default": "./index.js"
+    },
+    "./autogrid.obj.js": {
+      "default": "./autogrid.obj.js"
+    },
+    "./autoform.obj.js": {
+      "default": "./autoform.obj.js"
+    },
+    "./autocrud.obj.js": {
+      "default": "./autocrud.obj.js"
     }
   },
   "author": "Vaadin Ltd",

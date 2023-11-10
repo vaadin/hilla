@@ -8,9 +8,9 @@ import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
 import { AutoGrid, type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
-import type { ComponentStyleProps } from './util';
+import { type ComponentStyleProps, registerStylesheet } from './util';
 
-document.adoptedStyleSheets.unshift(css);
+registerStylesheet(css);
 
 export type AutoCrudFormProps<TItem> = Omit<
   Partial<AutoFormProps<AbstractModel<TItem>>>,
