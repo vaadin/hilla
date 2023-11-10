@@ -12,6 +12,9 @@ import type { Value } from './Models.js';
  * @typeParam M - Type of the model that describes the structure of the value
  */
 export class Binder<M extends AbstractModel> extends BinderRoot<M> {
+  // @ts-expect-error: too generic for TS
+  declare readonly ['constructor']: typeof Binder<M>;
+
   context: Element;
 
   /**

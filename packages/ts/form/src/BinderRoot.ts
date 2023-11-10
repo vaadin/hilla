@@ -62,6 +62,9 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   readonly #context: unknown = this;
 
+  // @ts-expect-error: too generic for TS
+  declare readonly ['constructor']: typeof BinderRoot<M>;
+
   /**
    *
    * @param Model - The constructor (the class reference) of the form model. The Binder instantiates the top-level model
@@ -255,7 +258,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
       return modelValidations.get(validator)!;
     }
 
-    const promise = runValidator(model, validator, BinderRoot.interpolateMessageCallback);
+    const promise = runValidator(model, validator, this.constructor.interpolateMessageCallback);
     modelValidations.set(validator, promise);
     const valueErrors = await promise;
 

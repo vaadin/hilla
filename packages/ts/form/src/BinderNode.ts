@@ -113,7 +113,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * instances.
  */
 export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
-  declare readonly ['constructor']: typeof BinderNode;
+  declare readonly ['constructor']: typeof BinderNode<M>;
   readonly model: M;
   /**
    * The validity state read from the bound element, if any. Represents the
