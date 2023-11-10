@@ -29,6 +29,7 @@ import {
   type ModelValue,
   ObjectModel,
 } from './Models.js';
+import type { ClassStaticProperties } from './util.js';
 import type { Validator, ValueError } from './Validation.js';
 import { ValidityStateValidator } from './Validators.js';
 import { _validity } from './Validity.js';
@@ -96,6 +97,7 @@ export const CHANGED = new Event('binder-node-changed');
  * instances.
  */
 export class BinderNode<T, M extends AbstractModel<T>> extends EventTarget {
+  declare readonly ['constructor']: ClassStaticProperties<typeof BinderNode<T, M>>;
   readonly model: M;
 
   /**

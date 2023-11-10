@@ -2,6 +2,7 @@ import { EndpointValidationError, type ValidationErrorData } from '@hilla/fronte
 import { BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import { _parent, type AbstractModel, type HasValue, type ModelConstructor } from './Models.js';
+import type { ClassStaticProperties } from './util.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -59,6 +60,8 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
   private [_validations] = new Map<AbstractModel<any>, Map<Validator<any>, Promise<ReadonlyArray<ValueError<any>>>>>();
 
   #context: any = this;
+
+  declare readonly ['constructor']: ClassStaticProperties<typeof BinderRoot<T, M>>;
 
   /**
    *
@@ -244,7 +247,7 @@ export class BinderRoot<T, M extends AbstractModel<T>> extends BinderNode<T, M> 
       return modelValidations.get(validator)!;
     }
 
-    const promise = runValidator(model, validator, BinderRoot.interpolateMessageCallback);
+    const promise = runValidator(model, validator, this.constructor.interpolateMessageCallback);
     modelValidations.set(validator, promise);
     const valueErrors = await promise;
 

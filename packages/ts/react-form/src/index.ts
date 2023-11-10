@@ -234,7 +234,7 @@ export function useForm<T, M extends AbstractModel<T>>(
   }, [binder]);
 
   return {
-    ...getFormPart(binder),
+    ...getFormPart<T, M>(binder),
     clear: binder.clear.bind(binder),
     field,
     read: binder.read.bind(binder),
