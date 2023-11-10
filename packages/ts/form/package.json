@@ -48,6 +48,9 @@
     "./Models.js": {
       "default": "./Models.js"
     },
+    "./types.js": {
+      "types": "./types.d.ts"
+    },
     "./Validation.js": {
       "default": "./Validation.js"
     },

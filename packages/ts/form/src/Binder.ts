@@ -1,7 +1,6 @@
 import type { LitElement } from 'lit';
-import { BinderRoot, type BinderConfiguration } from './BinderRoot.js';
-import type { AbstractModel, DetachedModelConstructor } from './Models.js';
-import type { Value } from './Models.js';
+import { type BinderConfiguration, BinderRoot } from './BinderRoot.js';
+import type { AbstractModel, DetachedModelConstructor, Value } from './Models.js';
 
 /**
  * A Binder controls all aspects of a single form.
@@ -12,6 +11,8 @@ import type { Value } from './Models.js';
  * @typeParam M - Type of the model that describes the structure of the value
  */
 export class Binder<M extends AbstractModel> extends BinderRoot<M> {
+  declare readonly ['constructor']: Omit<typeof Binder<M>, 'constructor'>;
+
   context: Element;
 
   /**
