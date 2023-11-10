@@ -19,6 +19,8 @@ export type SharedFieldProps = Readonly<{
   options?: FieldOptions;
 }>;
 
+type CustomFormFieldProps = FieldDirectiveResult & Readonly<{ label?: string; disabled?: boolean }>;
+
 export type FieldOptions = Readonly<{
   /**
    * The label to show for the field. If not specified, a human-readable label
@@ -40,7 +42,7 @@ export type FieldOptions = Readonly<{
    * }
    * ```
    */
-  renderer?(props: { field: FieldDirectiveResult; label: string }): JSX.Element;
+  renderer?(props: { field: CustomFormFieldProps }): JSX.Element;
   /**
    * The number of columns to span. This value is passed to the underlying
    * FormLayout, unless a custom layout is used. In that case, the value is
@@ -127,7 +129,8 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   const { form, propertyInfo, options } = props;
   const label = options?.label ?? propertyInfo.humanReadableName;
   if (options?.renderer) {
-    return options.renderer({ field: form.field(getPropertyModel(form, propertyInfo)), label });
+    const customFieldProps = { ...form.field(getPropertyModel(form, propertyInfo)), disabled: props.disabled, label };
+    return options.renderer({ field: customFieldProps });
   }
   switch (props.propertyInfo.type) {
     case 'string':
