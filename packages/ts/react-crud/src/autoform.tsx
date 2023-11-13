@@ -223,9 +223,14 @@ export function AutoForm<M extends AbstractModel>({
         afterDelete({ item: deletedItem });
       }
     } catch (error) {
-      if (onDeleteError && error instanceof EndpointError) {
-        onDeleteError({ error });
+      if (error instanceof EndpointError) {
+        if (onDeleteError) {
+          onDeleteError({ error });
+        } else {
+          setFormError(error.message);
+        }
       }
+      throw error;
     } finally {
       setShowDeleteDialog(false);
     }
