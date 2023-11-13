@@ -195,12 +195,14 @@ export function AutoForm<M extends AbstractModel>({
         // Handled automatically
         return;
       }
-      const genericError = 'Something went wrong, please check all your values';
-      if (onSubmitError && error instanceof EndpointError) {
-        onSubmitError({ error });
-      } else {
-        setFormError(genericError);
+      if (error instanceof EndpointError) {
+        if (onSubmitError) {
+          onSubmitError({ error });
+        } else {
+          setFormError(error.message);
+        }
       }
+      throw error;
     }
   }
 
