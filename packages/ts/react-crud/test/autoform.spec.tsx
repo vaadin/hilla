@@ -272,6 +272,30 @@ describe('@hilla/react-crud', () => {
       expect(result.queryByText('foobar')).to.not.be.null;
     });
 
+    it('shows a predefined error message when the service returns no entity after saving', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      service.save = async (item: Person): Promise<Person | undefined> => {
+        return Promise.resolve(undefined);
+      };
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+      const submitSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          afterSubmit={submitSpy}
+          onSubmitError={errorSpy}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(submitSpy).to.have.not.been.called;
+      expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'No update performed'));
+    });
+
     it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
