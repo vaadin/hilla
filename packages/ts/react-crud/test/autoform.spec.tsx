@@ -274,9 +274,7 @@ describe('@hilla/react-crud', () => {
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-      service.save = async (item: Person): Promise<Person | undefined> => {
-        return Promise.resolve(undefined);
-      };
+      service.save = async (item: Person): Promise<Person | undefined> => Promise.resolve(undefined);
       const person = await getItem(service, 1);
       const errorSpy = sinon.spy();
       const submitSpy = sinon.spy();
