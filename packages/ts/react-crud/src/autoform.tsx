@@ -79,7 +79,10 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * Example using pre-rendered fields:
      * ```tsx
      * <AutoForm layoutRenderer={({ children }) =>
-     *   <VerticalLayout>{children}</VerticalLayout>
+     *   <VerticalLayout>
+     *     {children}
+     *     <p>All data is collected anonymously.</p>
+     *   </VerticalLayout>
      * } />
      * ```
      *
