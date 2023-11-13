@@ -40,7 +40,7 @@ function isPackageJsonOrLockFile(path) {
  */
 async function updateFilesWithPR(paths){
   const originalBranchName = (await exec('git rev-parse --abbrev-ref HEAD')).stdout.trim();
-  const branchName = `chore/${originalBranchName}/update-package-lock-json-${Date.now()}`;
+  const branchName = `chore/${originalBranchName}/update-package-lock-json`;
 
   const title = `chore: update package[-lock].json`;
   const titleForPR = `${title} (${originalBranchName})`;
@@ -51,8 +51,13 @@ async function updateFilesWithPR(paths){
       await exec(`git add "${path}"`);
     }
     await exec(`git commit -m "${title}"`);
-    await exec(`git push origin HEAD:${branchName}`);
-    await createPR(titleForPR, branchName, originalBranchName);
+    if ((await exec(`git ls-remote --heads origin ${branchName}`)).stdout.length) {
+      console.log(`Remote branch ${branchName} exists, force pushing to update.`);
+      await exec(`git push --force origin HEAD:${branchName}`);
+    } else {
+      await exec(`git push origin HEAD:${branchName}`);
+      await createPR(titleForPR, branchName, originalBranchName);
+    }
   } finally {
     await exec(`git checkout ${originalBranchName}`);
     await exec(`git branch -D ${branchName}`);
