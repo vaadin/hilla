@@ -67,9 +67,10 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
     }
 
     const message =
-      errorJson?.message ?? errorText.length > 0
+      errorJson?.message ??
+      (errorText.length > 0
         ? errorText
-        : `expected "200 OK" response, but got ${response.status} ${response.statusText}`;
+        : `expected "200 OK" response, but got ${response.status} ${response.statusText}`);
     const type = errorJson?.type;
 
     if (errorJson?.validationErrorData) {
