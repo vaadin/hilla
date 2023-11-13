@@ -68,8 +68,33 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     disabled?: boolean;
     /**
-     * Allows to customize the layout of the form by providing a custom renderer.
-     * Check the component documentation for details.
+     * Allows to customize the layout of the form by providing a custom
+     * renderer. The renderer receives the form instance and the pre-rendered
+     * fields as props. The renderer can either reuse the pre-rendered fields in
+     * the custom layout, or render custom fields and connect them to the form
+     * manually.
+     *
+     * Check the component documentation for details and examples.
+     *
+     * Example using pre-rendered fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ children }) =>
+     *   <VerticalLayout>
+     *     {children}
+     *     <p>All data is collected anonymously.</p>
+     *   </VerticalLayout>
+     * } />
+     * ```
+     *
+     * Example rendering custom fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ form }) =>
+     *   <VerticalLayout>
+     *     <TextField {...form.field(form.model.name)} />
+     *     ...
+     *   </VerticalLayout>
+     * } />
+     * ```
      */
     layoutRenderer?: ComponentType<AutoFormLayoutRendererProps<M>>;
     /**
