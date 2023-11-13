@@ -1,4 +1,5 @@
 import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
+import { EndpointError } from '@hilla/frontend';
 import { Button } from '@hilla/react-components/Button.js';
 import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
@@ -16,13 +17,13 @@ document.adoptedStyleSheets.unshift(css);
 export const emptyItem = Symbol();
 
 type SubmitErrorEvent = {
-  error: unknown;
+  error: EndpointError;
 };
 type SubmitEvent<TItem> = {
   item: TItem;
 };
 type DeleteErrorEvent = {
-  error: unknown;
+  error: EndpointError;
 };
 type DeleteEvent<TItem> = {
   item: TItem;
@@ -185,7 +186,7 @@ export function AutoForm<M extends AbstractModel>({
       const newItem = await form.submit();
       if (newItem === undefined) {
         // If update returns an empty object, then no update was performed
-        throw new Error('generic error');
+        throw new EndpointError('No update performed');
       } else if (afterSubmit) {
         afterSubmit({ item: newItem });
       }
@@ -195,7 +196,7 @@ export function AutoForm<M extends AbstractModel>({
         return;
       }
       const genericError = 'Something went wrong, please check all your values';
-      if (onSubmitError) {
+      if (onSubmitError && error instanceof EndpointError) {
         onSubmitError({ error });
       } else {
         setFormError(genericError);
@@ -220,7 +221,7 @@ export function AutoForm<M extends AbstractModel>({
         afterDelete({ item: deletedItem });
       }
     } catch (error) {
-      if (onDeleteError) {
+      if (onDeleteError && error instanceof EndpointError) {
         onDeleteError({ error });
       }
     } finally {
