@@ -16,16 +16,16 @@ document.adoptedStyleSheets.unshift(css);
 
 export const emptyItem = Symbol();
 
-type SubmitErrorEvent = {
+export type SubmitErrorEvent = {
   error: EndpointError;
 };
-type SubmitEvent<TItem> = {
+export type SubmitEvent<TItem> = {
   item: TItem;
 };
-type DeleteErrorEvent = {
+export type DeleteErrorEvent = {
   error: EndpointError;
 };
-type DeleteEvent<TItem> = {
+export type DeleteEvent<TItem> = {
   item: TItem;
 };
 
