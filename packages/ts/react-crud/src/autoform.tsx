@@ -1,4 +1,5 @@
 import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
+import { EndpointError } from '@hilla/frontend';
 import { Button } from '@hilla/react-components/Button.js';
 import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
@@ -16,13 +17,13 @@ document.adoptedStyleSheets.unshift(css);
 export const emptyItem = Symbol();
 
 export type SubmitErrorEvent = {
-  error: unknown;
+  error: EndpointError;
 };
 export type SubmitEvent<TItem> = {
   item: TItem;
 };
 export type DeleteErrorEvent = {
-  error: unknown;
+  error: EndpointError;
 };
 export type DeleteEvent<TItem> = {
   item: TItem;
@@ -68,8 +69,33 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     disabled?: boolean;
     /**
-     * Allows to customize the layout of the form by providing a custom renderer.
-     * Check the component documentation for details.
+     * Allows to customize the layout of the form by providing a custom
+     * renderer. The renderer receives the form instance and the pre-rendered
+     * fields as props. The renderer can either reuse the pre-rendered fields in
+     * the custom layout, or render custom fields and connect them to the form
+     * manually.
+     *
+     * Check the component documentation for details and examples.
+     *
+     * Example using pre-rendered fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ children }) =>
+     *   <VerticalLayout>
+     *     {children}
+     *     <p>All data is collected anonymously.</p>
+     *   </VerticalLayout>
+     * } />
+     * ```
+     *
+     * Example rendering custom fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ form }) =>
+     *   <VerticalLayout>
+     *     <TextField {...form.field(form.model.name)} />
+     *     ...
+     *   </VerticalLayout>
+     * } />
+     * ```
      */
     layoutRenderer?: ComponentType<AutoFormLayoutRendererProps<M>>;
     /**
@@ -185,7 +211,7 @@ export function AutoForm<M extends AbstractModel>({
       const newItem = await form.submit();
       if (newItem === undefined) {
         // If update returns an empty object, then no update was performed
-        throw new Error('generic error');
+        throw new EndpointError('No update performed');
       } else if (afterSubmit) {
         afterSubmit({ item: newItem });
       }
@@ -194,12 +220,14 @@ export function AutoForm<M extends AbstractModel>({
         // Handled automatically
         return;
       }
-      const genericError = 'Something went wrong, please check all your values';
-      if (onSubmitError) {
-        onSubmitError({ error });
-      } else {
-        setFormError(genericError);
+      if (error instanceof EndpointError) {
+        if (onSubmitError) {
+          onSubmitError({ error });
+        } else {
+          setFormError(error.message);
+        }
       }
+      throw error;
     }
   }
 
@@ -220,9 +248,14 @@ export function AutoForm<M extends AbstractModel>({
         afterDelete({ item: deletedItem });
       }
     } catch (error) {
-      if (onDeleteError) {
-        onDeleteError({ error });
+      if (error instanceof EndpointError) {
+        if (onDeleteError) {
+          onDeleteError({ error });
+        } else {
+          setFormError(error.message);
+        }
       }
+      throw error;
     } finally {
       setShowDeleteDialog(false);
     }
