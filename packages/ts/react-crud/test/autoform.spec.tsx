@@ -2,6 +2,7 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
+import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
@@ -28,7 +29,6 @@ import {
 use(sinonChai);
 use(chaiAsPromised);
 
-const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please check all your values';
 describe('@hilla/react-crud', () => {
   describe('Auto form', () => {
     const LABELS = [
@@ -259,7 +259,7 @@ describe('@hilla/react-crud', () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
-        throw new Error('foobar');
+        throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
@@ -269,14 +269,36 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(submitSpy).to.have.not.been.called;
-      expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.not.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+    });
+
+    it('shows a predefined error message when the service returns no entity after saving', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      service.save = async (item: Person): Promise<Person | undefined> => Promise.resolve(undefined);
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+      const submitSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          afterSubmit={submitSpy}
+          onSubmitError={errorSpy}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(submitSpy).to.have.not.been.called;
+      expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'No update performed'));
     });
 
     it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (item: Person): Promise<Person | undefined> => {
-        throw new Error('foobar');
+        throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
       const errorSpy = sinon.spy();
@@ -293,7 +315,7 @@ describe('@hilla/react-crud', () => {
       const form = await FormController.init(user, result.container);
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
-      expect(result.queryByText(DEFAULT_ERROR_MESSAGE)).to.be.null;
+      expect(result.queryByText('foobar')).to.be.null;
       expect(submitSpy).to.have.not.been.called;
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'foobar'));
     });
@@ -532,7 +554,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('calls error callback if delete fails', async () => {
-        const error = new Error('Delete failed');
+        const error = new EndpointError('Delete failed');
         deleteStub.returns(Promise.reject(error));
 
         const form = await renderForm(person, true);
