@@ -11,6 +11,8 @@ import type { AbstractModel, ModelConstructor } from './Models.js';
  * @typeParam M - Type of the model that describes the structure of the value
  */
 export class Binder<T, M extends AbstractModel<T>> extends BinderRoot<T, M> {
+  declare readonly ['constructor']: Omit<typeof Binder<T, M>, 'constructor'>;
+
   context: Element;
 
   /**
