@@ -59,7 +59,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * with values from the item's properties. In order to create a new item,
      * either pass `null`, or leave this prop as undefined.
      *
-     * Use the `afterSubmit` callback to get notified when the item has been
+     * Use the `onSubmitSuccess` callback to get notified when the item has been
      * saved.
      */
     item?: Value<M> | typeof emptyItem | null;
@@ -123,7 +123,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * default. If enabled, the delete button will only be shown when editing
      * an existing item, which means that `item` is not null.
      *
-     * Use the `afterDelete` callback to get notified when the item has been
+     * Use the `onDeleteSuccess` callback to get notified when the item has been
      * deleted.
      *
      * NOTE: This only hides the button, it does not prevent from calling the
@@ -144,7 +144,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * A callback that will be called after the form has been successfully
      * submitted and the item has been saved.
      */
-    afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
+    onSubmitSuccess?({ item }: SubmitEvent<Value<M>>): void;
     /**
      * A callback that will be called if an unexpected error occurs while
      * deleting an item.
@@ -154,7 +154,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * A callback that will be called after the form has been successfully
      * deleted.
      */
-    afterDelete?({ item }: DeleteEvent<Value<M>>): void;
+    onDeleteSuccess?({ item }: DeleteEvent<Value<M>>): void;
   }>;
 
 /**
@@ -170,7 +170,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
  * <AutoForm
  *   service={PersonService}
  *   model={PersonModel}
- *   afterSubmit={({ item }) => {
+ *   onSubmitSuccess={({ item }) => {
  *     console.log('Submitted item:', item);
  *   }}
  * />
@@ -181,7 +181,7 @@ export function AutoForm<M extends AbstractModel>({
   model,
   item = emptyItem,
   onSubmitError,
-  afterSubmit,
+  onSubmitSuccess,
   disabled,
   layoutRenderer: LayoutRenderer,
   visibleFields,
@@ -191,7 +191,7 @@ export function AutoForm<M extends AbstractModel>({
   id,
   className,
   deleteButtonVisible,
-  afterDelete,
+  onDeleteSuccess,
   onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
@@ -217,8 +217,8 @@ export function AutoForm<M extends AbstractModel>({
       if (newItem === undefined) {
         // If update returns an empty object, then no update was performed
         throw new EndpointError('No update performed');
-      } else if (afterSubmit) {
-        afterSubmit({ item: newItem });
+      } else if (onSubmitSuccess) {
+        onSubmitSuccess({ item: newItem });
       }
     } catch (error) {
       if (error instanceof ValidationError) {
@@ -250,8 +250,8 @@ export function AutoForm<M extends AbstractModel>({
       // eslint-disable-next-line
       const id = (item as any)[idProperty.name];
       await service.delete(id);
-      if (afterDelete) {
-        afterDelete({ item: deletedItem });
+      if (onDeleteSuccess) {
+        onDeleteSuccess({ item: deletedItem });
       }
     } catch (error) {
       if (error instanceof EndpointError) {
