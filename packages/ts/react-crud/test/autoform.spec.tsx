@@ -2,6 +2,7 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
+import { ValidationError } from '@hilla/form';
 import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
@@ -258,7 +259,7 @@ describe('@hilla/react-crud', () => {
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
-      service.save = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (_item: Person): Promise<Person | undefined> => {
         throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
@@ -270,6 +271,44 @@ describe('@hilla/react-crud', () => {
       await form.submit();
       expect(submitSpy).to.have.not.been.called;
       expect(result.queryByText('foobar')).to.not.be.null;
+    });
+
+    it("doesn't call the submit error handler on validation errors", async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        throw new ValidationError([]);
+      };
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} onSubmitError={errorSpy} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(errorSpy).to.have.not.been.called;
+    });
+
+    it('rethrows unknown errors without calling error handler', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        throw new Error('foobar');
+      };
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} onSubmitError={errorSpy} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+
+      try {
+        await form.submit();
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect((error as Error).message).to.equal('foobar');
+      }
+      expect(errorSpy).to.have.not.been.called;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
@@ -297,7 +336,7 @@ describe('@hilla/react-crud', () => {
     it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
-      service.save = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (_item: Person): Promise<Person | undefined> => {
         throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
