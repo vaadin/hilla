@@ -125,6 +125,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      *
      * Use the `afterDelete` callback to get notified when the item has been
      * deleted.
+     *
+     * NOTE: This only hides the button, it does not prevent from calling the
+     * delete method on the service. To completely disable deleting, you must
+     * override the `delete` method in the backend Java service to either throw
+     * an exception or annotate it with `@DenyAll` to prevent access.
      */
     deleteButtonVisible?: boolean;
     /**
