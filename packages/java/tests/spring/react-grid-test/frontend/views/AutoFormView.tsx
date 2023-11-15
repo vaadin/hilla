@@ -34,9 +34,9 @@ export function AutoFormView(): JSX.Element {
           <AutoForm
             service={AppointmentService}
             model={AppointmentModel}
-            afterSubmit={handleSubmit}
+            onSubmitSuccess={handleSubmit}
             onSubmitError={handleSubmitError}
-            afterDelete={handleDelete}
+            onDeleteSuccess={handleDelete}
             onDeleteError={handleDeleteError}
           />
         </>
