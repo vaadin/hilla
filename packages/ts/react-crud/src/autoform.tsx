@@ -231,8 +231,9 @@ export function AutoForm<M extends AbstractModel>({
         } else {
           setFormError(error.message);
         }
+      } else {
+        throw error;
       }
-      throw error;
     }
   }
 
@@ -259,8 +260,9 @@ export function AutoForm<M extends AbstractModel>({
         } else {
           setFormError(error.message);
         }
+      } else {
+        throw error;
       }
-      throw error;
     } finally {
       setShowDeleteDialog(false);
     }
