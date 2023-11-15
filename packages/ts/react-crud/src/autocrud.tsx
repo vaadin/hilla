@@ -14,7 +14,7 @@ document.adoptedStyleSheets.unshift(css);
 
 export type AutoCrudFormProps<TItem> = Omit<
   Partial<AutoFormProps<AbstractModel<TItem>>>,
-  'afterDelete' | 'afterSubmit' | 'disabled' | 'item' | 'model' | 'service'
+  'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
 >;
 
 export type AutoCrudGridProps<TItem> = Omit<
@@ -127,7 +127,7 @@ export function AutoCrud<TItem>({
       service={service}
       model={model}
       item={item}
-      afterSubmit={({ item: submittedItem }) => {
+      onSubmitSuccess={({ item: submittedItem }) => {
         if (fullScreen) {
           setItem(undefined);
         } else {
@@ -135,7 +135,7 @@ export function AutoCrud<TItem>({
         }
         refreshGrid();
       }}
-      afterDelete={() => {
+      onDeleteSuccess={() => {
         setItem(undefined);
         refreshGrid();
       }}
