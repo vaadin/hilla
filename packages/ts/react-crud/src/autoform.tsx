@@ -16,16 +16,16 @@ document.adoptedStyleSheets.unshift(css);
 
 export const emptyItem = Symbol();
 
-type SubmitErrorEvent = {
+export type SubmitErrorEvent = {
   error: EndpointError;
 };
-type SubmitEvent<TItem> = {
+export type SubmitEvent<TItem> = {
   item: TItem;
 };
-type DeleteErrorEvent = {
+export type DeleteErrorEvent = {
   error: EndpointError;
 };
-type DeleteEvent<TItem> = {
+export type DeleteEvent<TItem> = {
   item: TItem;
 };
 
@@ -226,8 +226,9 @@ export function AutoForm<M extends AbstractModel>({
         } else {
           setFormError(error.message);
         }
+      } else {
+        throw error;
       }
-      throw error;
     }
   }
 
@@ -254,8 +255,9 @@ export function AutoForm<M extends AbstractModel>({
         } else {
           setFormError(error.message);
         }
+      } else {
+        throw error;
       }
-      throw error;
     } finally {
       setShowDeleteDialog(false);
     }

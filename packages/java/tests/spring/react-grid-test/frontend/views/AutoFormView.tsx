@@ -1,4 +1,4 @@
-import { AutoForm } from '@hilla/react-crud';
+import { AutoForm, DeleteErrorEvent, DeleteEvent, SubmitErrorEvent, SubmitEvent } from '@hilla/react-crud';
 import { useState } from 'react';
 import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment.js';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel.js';
@@ -6,6 +6,23 @@ import { AppointmentService } from 'Frontend/generated/endpoints.js';
 
 export function AutoFormView(): JSX.Element {
   const [submitted, setSubmitted] = useState<Appointment | undefined>(undefined);
+
+  function handleSubmit({ item }: SubmitEvent<Appointment>) {
+    setSubmitted(item);
+  }
+
+  function handleSubmitError({ error }: SubmitErrorEvent) {
+    console.error('Error submitting form', error);
+  }
+
+  function handleDelete({ item }: DeleteEvent<Appointment>) {
+    setSubmitted(undefined);
+  }
+
+  function handleDeleteError({ error }: DeleteErrorEvent) {
+    console.error('Error deleting appointment', error);
+  }
+
   return (
     <>
       {submitted ? (
@@ -17,9 +34,10 @@ export function AutoFormView(): JSX.Element {
           <AutoForm
             service={AppointmentService}
             model={AppointmentModel}
-            afterSubmit={({ item }) => {
-              setSubmitted(item);
-            }}
+            afterSubmit={handleSubmit}
+            onSubmitError={handleSubmitError}
+            afterDelete={handleDelete}
+            onDeleteError={handleDeleteError}
           />
         </>
       )}
