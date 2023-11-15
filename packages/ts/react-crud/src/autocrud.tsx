@@ -14,7 +14,7 @@ document.adoptedStyleSheets.unshift(css);
 
 export type AutoCrudFormProps<TItem> = Omit<
   Partial<AutoFormProps<AbstractModel<TItem>>>,
-  'onDeleteSuccess' | 'onSubmitSuccess' | 'disabled' | 'item' | 'model' | 'service'
+  'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
 >;
 
 export type AutoCrudGridProps<TItem> = Omit<
