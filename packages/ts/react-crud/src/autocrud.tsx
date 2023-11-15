@@ -14,7 +14,7 @@ document.adoptedStyleSheets.unshift(css);
 
 export type AutoCrudFormProps<TItem> = Omit<
   Partial<AutoFormProps<AbstractModel<TItem>>>,
-  'afterSubmit' | 'disabled' | 'item' | 'model' | 'service'
+  'afterDelete' | 'afterSubmit' | 'disabled' | 'item' | 'model' | 'service'
 >;
 
 export type AutoCrudGridProps<TItem> = Omit<
@@ -49,11 +49,6 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
      */
     model: DetachedModelConstructor<AbstractModel<TItem>>;
     /**
-     * Allows to disable the delete functionality, which means that no delete
-     * button is shown in the form.
-     */
-    noDelete?: boolean;
-    /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
     formProps?: AutoCrudFormProps<TItem>;
@@ -81,7 +76,6 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
 export function AutoCrud<TItem>({
   service,
   model,
-  noDelete,
   formProps,
   gridProps,
   style,
@@ -127,12 +121,12 @@ export function AutoCrud<TItem>({
 
   const autoForm = (
     <AutoForm
+      deleteButtonVisible={true}
       {...formProps}
       disabled={!item}
       service={service}
       model={model}
       item={item}
-      deleteButtonVisible={!noDelete}
       afterSubmit={({ item: submittedItem }) => {
         if (fullScreen) {
           setItem(undefined);
