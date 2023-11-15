@@ -197,7 +197,23 @@ function useColumns(
   });
 
   if (options.customColumns) {
-    columns = [...columns, ...options.customColumns];
+    const columnMap = new Map<string, JSX.Element>();
+    columns.forEach((column) => {
+      const { key } = column;
+      if (key) {
+        columnMap.set(key, column);
+      }
+    });
+    options.customColumns.forEach((customColumn) => {
+      const { key } = customColumn;
+      if (key) {
+        columnMap.set(key, customColumn);
+      }
+    });
+    columns = Array(columns.length + options.customColumns.length).fill(null);
+    effectiveColumns.forEach((key, index) => {
+      columns[index] = columnMap.get(key)!;
+    });
   }
 
   if (options.rowNumbers) {
