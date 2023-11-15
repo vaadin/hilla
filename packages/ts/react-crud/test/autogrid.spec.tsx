@@ -506,7 +506,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('renders custom columns at the specified index by visibleColumns', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
+        const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
           <span>
             {item.firstName} {item.lastName}
           </span>
@@ -515,42 +515,25 @@ describe('@hilla/react-crud', () => {
           render(
             <TestAutoGrid
               visibleColumns={[
-                'firstName',
-                'lastName',
+                'fullName',
                 'gender',
                 'email',
-                'test-column',
-                'someInteger',
-                'someDecimal',
-                'another-test-column',
+                'another-custom-column',
                 'vip',
                 'birthDate',
                 'shiftStart',
               ]}
               customColumns={[
-                <GridColumn key="test-column" autoWidth renderer={NameRenderer}></GridColumn>,
-                <GridColumn key="another-test-column" autoWidth renderer={NameRenderer}></GridColumn>,
+                <GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn key="another-custom-column" autoWidth renderer={FullNameRenderer}></GridColumn>,
               ]}
             />,
           ),
           user,
         );
-        await assertColumns(
-          grid,
-          'firstName',
-          'lastName',
-          'gender',
-          'email',
-          '',
-          'someInteger',
-          'someDecimal',
-          '',
-          'vip',
-          'birthDate',
-          'shiftStart',
-        );
-        expect(grid.getBodyCellContent(0, 4)).to.have.rendered.text('Jane Love');
-        expect(grid.getBodyCellContent(0, 7)).to.have.rendered.text('Jane Love');
+        await assertColumns(grid, '', 'gender', 'email', '', 'vip', 'birthDate', 'shiftStart');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 3)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
