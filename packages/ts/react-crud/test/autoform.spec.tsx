@@ -2,6 +2,7 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
+import { ValidationError } from '@hilla/form';
 import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
@@ -225,14 +226,14 @@ describe('@hilla/react-crud', () => {
       newPerson.firstName = 'bar';
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
-    it('retains the form values after a valid submit when using afterSubmit', async () => {
+    it('retains the form values after a valid submit when using onSubmitSuccess', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
         user,
-        render(<AutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />).container,
+        render(<AutoForm service={service} model={PersonModel} item={person} onSubmitSuccess={submitSpy} />).container,
       );
       await form.typeInField('First name', 'baz');
       await form.submit();
@@ -241,14 +242,14 @@ describe('@hilla/react-crud', () => {
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
     });
 
-    it('calls afterSubmit with the new item', async () => {
+    it('calls onSubmitSuccess with the new item', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
 
       const form = await FormController.init(
         user,
-        render(<AutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />).container,
+        render(<AutoForm service={service} model={PersonModel} item={person} onSubmitSuccess={submitSpy} />).container,
       );
       await form.typeInField('First name', 'bag');
       await form.submit();
@@ -258,18 +259,58 @@ describe('@hilla/react-crud', () => {
     it('shows an error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
-      service.save = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (_item: Person): Promise<Person | undefined> => {
         throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
 
-      const result = render(<AutoForm service={service} model={PersonModel} item={person} afterSubmit={submitSpy} />);
+      const result = render(
+        <AutoForm service={service} model={PersonModel} item={person} onSubmitSuccess={submitSpy} />,
+      );
       const form = await FormController.init(user, result.container);
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(submitSpy).to.have.not.been.called;
       expect(result.queryByText('foobar')).to.not.be.null;
+    });
+
+    it("doesn't call the submit error handler on validation errors", async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        throw new ValidationError([]);
+      };
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} onSubmitError={errorSpy} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(errorSpy).to.have.not.been.called;
+    });
+
+    it('rethrows unknown errors without calling error handler', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        throw new Error('foobar');
+      };
+      const person = await getItem(service, 1);
+      const errorSpy = sinon.spy();
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} onSubmitError={errorSpy} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+
+      try {
+        await form.submit();
+      } catch (error) {
+        expect(error).to.be.an.instanceOf(Error);
+        expect((error as Error).message).to.equal('foobar');
+      }
+      expect(errorSpy).to.have.not.been.called;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
@@ -283,7 +324,7 @@ describe('@hilla/react-crud', () => {
           service={service}
           model={PersonModel}
           item={person}
-          afterSubmit={submitSpy}
+          onSubmitSuccess={submitSpy}
           onSubmitError={errorSpy}
         />,
       );
@@ -294,10 +335,10 @@ describe('@hilla/react-crud', () => {
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'No update performed'));
     });
 
-    it('calls afterSubmitError and does not show error if the endpoint call fails', async () => {
+    it('calls onSubmitSuccessError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
-      service.save = async (item: Person): Promise<Person | undefined> => {
+      service.save = async (_item: Person): Promise<Person | undefined> => {
         throw new EndpointError('foobar');
       };
       const person = await getItem(service, 1);
@@ -308,7 +349,7 @@ describe('@hilla/react-crud', () => {
           service={service}
           model={PersonModel}
           item={person}
-          afterSubmit={submitSpy}
+          onSubmitSuccess={submitSpy}
           onSubmitError={errorSpy}
         />,
       );
@@ -458,7 +499,7 @@ describe('@hilla/react-crud', () => {
       let service: CrudService<Person> & HasTestInfo;
       let person: Person;
       let deleteStub: sinon.SinonStub;
-      let afterDeleteSpy: sinon.SinonSpy;
+      let onDeleteSuccessSpy: sinon.SinonSpy;
       let onDeleteErrorSpy: sinon.SinonSpy;
 
       beforeEach(async () => {
@@ -466,7 +507,7 @@ describe('@hilla/react-crud', () => {
         person = (await getItem(service, 2))!;
         deleteStub = sinon.stub(service, 'delete');
         deleteStub.returns(Promise.resolve());
-        afterDeleteSpy = sinon.spy();
+        onDeleteSuccessSpy = sinon.spy();
         onDeleteErrorSpy = sinon.spy();
       });
 
@@ -487,7 +528,7 @@ describe('@hilla/react-crud', () => {
               model={PersonModel}
               item={item}
               deleteButtonVisible={enableDelete}
-              afterDelete={afterDeleteSpy}
+              onDeleteSuccess={onDeleteSuccessSpy}
               onDeleteError={onDeleteErrorSpy}
             />,
           ).container,
@@ -536,7 +577,7 @@ describe('@hilla/react-crud', () => {
         await dialog.confirm();
 
         expect(deleteStub).to.have.been.calledOnce;
-        expect(afterDeleteSpy).to.have.been.calledOnce;
+        expect(onDeleteSuccessSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.not.have.been.called;
       });
 
@@ -549,7 +590,7 @@ describe('@hilla/react-crud', () => {
         await dialog.cancel();
 
         expect(deleteStub).to.not.have.been.called;
-        expect(afterDeleteSpy).to.not.have.been.called;
+        expect(onDeleteSuccessSpy).to.not.have.been.called;
         expect(onDeleteErrorSpy).to.not.have.been.called;
       });
 
@@ -565,7 +606,7 @@ describe('@hilla/react-crud', () => {
         await dialog.confirm();
 
         expect(deleteStub).to.have.been.calledOnce;
-        expect(afterDeleteSpy).to.not.have.been.called;
+        expect(onDeleteSuccessSpy).to.not.have.been.called;
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
