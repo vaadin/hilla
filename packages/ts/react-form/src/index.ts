@@ -163,7 +163,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               // When bad input is detected, skip reading new value in binder state
               fieldState!.strategy.checkValidity();
               n[_validity] = fieldState!.strategy.validity;
-              n.value = convertFieldValue(model, fieldState?.strategy.value);
+              n.value = convertFieldValue(model, fieldState!.strategy.value);
             }
           },
         };
