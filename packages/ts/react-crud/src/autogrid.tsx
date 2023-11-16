@@ -10,10 +10,20 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { type JSX, type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ComponentType,
+  type Dispatch,
+  type JSX,
+  type MutableRefObject,
+  type SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
-import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
+import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { CountService, ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
@@ -99,6 +109,20 @@ interface AutoGridOwnProps<TItem> {
    * grid.
    */
   rowNumbers?: boolean;
+  /**
+   * When enabled, shows the total count of records in the grid footer.
+   */
+  totalCount?: boolean;
+  /**
+   * When enabled, shows the visible record count in the grid footer.
+   * if totalCount is also enabled, it will show both totalCount and recordCount
+   */
+  recordCount?: boolean;
+  /**
+   * Allows to customize the grid footer with a custom renderer component for
+   *  the total count and record count.
+   */
+  footerCountRenderer?: ComponentType<{ itemCountHolder: AutoGridItemCountHolder }>;
 }
 
 export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<TItem>>;
@@ -110,11 +134,20 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
+export type AutoGridItemCountHolder = {
+  totalCount: boolean | undefined;
+  recordCount: boolean | undefined;
+  totalItemCount: number;
+  filteredItemCount: number;
+  setTotalItemCount: Dispatch<SetStateAction<number>>;
+  setFilteredItemCount: Dispatch<SetStateAction<number>>;
+};
+
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
   filter: MutableRefObject<FilterUnion | undefined>,
-  realSize: MutableRefObject<number>,
+  itemCountHolder: AutoGridItemCountHolder,
 ): GridDataProvider<TItem> {
   let first = true;
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -142,10 +175,18 @@ function createDataProvider<TItem>(
     if ((service as any).count) {
       const countService: CountService<TItem> = service as any;
 
-      if (realSize.current < 0) {
-        realSize.current = await countService.count(filter.current);
+      if (itemCountHolder.totalCount && itemCountHolder.totalItemCount < 0) {
+        const resultTotalSize = await countService.count(undefined);
+        itemCountHolder.setTotalItemCount(resultTotalSize);
       }
-      callback(items, realSize.current);
+
+      let realSize = itemCountHolder.filteredItemCount;
+      if (realSize < 0) {
+        realSize = await countService.count(filter.current);
+        itemCountHolder.setFilteredItemCount(realSize);
+      }
+
+      callback(items, realSize);
     } else {
       let infiniteScrollingSize;
       if (items.length === pageSize) {
@@ -159,6 +200,7 @@ function createDataProvider<TItem>(
       } else {
         infiniteScrollingSize = pageNumber * pageSize + items.length;
       }
+      itemCountHolder.setFilteredItemCount(infiniteScrollingSize ?? -1);
 
       callback(items, infiniteScrollingSize);
     }
@@ -174,12 +216,24 @@ function createDataProvider<TItem>(
 function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  options: {
+  {
+    columnOptions,
+    customColumns,
+    footerCountRenderer,
+    itemCountHolder,
+    noHeaderFilters,
+    rowNumbers,
+    visibleColumns,
+  }: {
     visibleColumns?: string[];
     noHeaderFilters?: boolean;
     customColumns?: JSX.Element[];
     columnOptions?: Record<string, ColumnOptions>;
     rowNumbers?: boolean;
+    itemCountHolder: AutoGridItemCountHolder;
+    footerCountRenderer?: ComponentType<{
+      itemCountHolder: AutoGridItemCountHolder;
+    }>;
   },
 ) {
   const [sortState, setSortState] = useState<SortState>(
@@ -189,13 +243,13 @@ function useColumns(
   let columns = properties.map((propertyInfo) => {
     let column;
 
-    const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
+    const customColumnOptions = columnOptions ? columnOptions[propertyInfo.name] : undefined;
 
     // Header renderer is effectively the header filter, which should only be
     // applied when header filters are enabled
     const { headerRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
 
-    if (!options.noHeaderFilters) {
+    if (!noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn path={propertyInfo.name} headerRenderer={headerRenderer} {...columnProps}></GridColumn>
@@ -220,9 +274,9 @@ function useColumns(
     );
   });
 
-  if (options.customColumns) {
-    if (options.visibleColumns) {
-      const columnMap = [...columns, ...options.customColumns].reduce((map, column) => {
+  if (customColumns) {
+    if (visibleColumns) {
+      const columnMap = [...columns, ...customColumns].reduce((map, column) => {
         const { key } = column;
         if (key) {
           map.set(key, column);
@@ -230,17 +284,21 @@ function useColumns(
         return map;
       }, new Map<string, JSX.Element>());
 
-      columns = options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
+      columns = visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
     } else {
-      columns = [...columns, ...options.customColumns];
+      columns = [...columns, ...customColumns];
     }
   }
 
-  if (options.rowNumbers) {
+  if (rowNumbers) {
     columns = [
       <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
       ...columns,
     ];
+  }
+
+  if (itemCountHolder.totalCount ?? itemCountHolder.recordCount) {
+    columns = AutoGridFooterItemCountRenderer(itemCountHolder, columns, footerCountRenderer);
   }
 
   return columns;
@@ -271,9 +329,14 @@ export function AutoGrid<TItem>({
   customColumns,
   columnOptions,
   rowNumbers,
+  totalCount,
+  recordCount,
+  footerCountRenderer,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const [totalItemCount, setTotalItemCount] = useState(-1);
+  const [filteredItemCount, setFilteredItemCount] = useState(-1);
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -298,7 +361,16 @@ export function AutoGrid<TItem>({
     }
   };
 
-  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
+  const recordCountHolder: AutoGridItemCountHolder = {
+    totalCount,
+    recordCount,
+    totalItemCount,
+    filteredItemCount,
+    setTotalItemCount,
+    setFilteredItemCount,
+  };
+
+  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
@@ -306,6 +378,8 @@ export function AutoGrid<TItem>({
     customColumns,
     columnOptions,
     rowNumbers,
+    itemCountHolder: recordCountHolder,
+    footerCountRenderer,
   });
 
   useEffect(() => {
@@ -317,14 +391,13 @@ export function AutoGrid<TItem>({
 
   const ref = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
-    const dataProviderRealSize = useRef(-1);
 
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = ref.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
-      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, dataProviderRealSize);
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, recordCountHolder);
     }, 1);
   }, [model, service]);
 
@@ -333,7 +406,7 @@ export function AutoGrid<TItem>({
     const grid = ref.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
-        dataProviderRealSize.current = -1;
+      recordCountHolder.setFilteredItemCount(-1);
       grid.clearCache();
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);

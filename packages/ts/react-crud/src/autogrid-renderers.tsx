@@ -1,9 +1,11 @@
 import type { GridItemModel } from '@hilla/react-components/Grid.js';
 import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
+import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup';
 import { Icon } from '@hilla/react-components/Icon.js';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
-import { type CSSProperties, type JSX, useContext } from 'react';
+import { type ComponentType, type CSSProperties, type JSX, useContext } from 'react';
+import type { AutoGridItemCountHolder } from './autogrid';
 import { ColumnContext } from './autogrid-column-context';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
@@ -69,4 +71,38 @@ export function AutoGridDateTimeRenderer<TItem>({ item }: RendererOptions<TItem>
 
 export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TItem>): JSX.Element {
   return <>{model.index + 1}</>;
+}
+
+export function AutoGridFooterItemCountRenderer(
+  itemCountHolder: AutoGridItemCountHolder,
+  columns: JSX.Element[],
+  footerCountRenderer?: ComponentType<{ itemCountHolder: AutoGridItemCountHolder }>,
+): JSX.Element[] {
+  let newColumns: JSX.Element[] = columns;
+  if (footerCountRenderer) {
+    const FooterRenderer = footerCountRenderer;
+    newColumns = [
+      <GridColumnGroup key="grid-footer" footerRenderer={() => <FooterRenderer itemCountHolder={itemCountHolder} />}>
+        {columns}
+      </GridColumnGroup>,
+    ];
+  } else {
+    let filterCountText: string | undefined;
+    if (itemCountHolder.recordCount && itemCountHolder.filteredItemCount >= 0) {
+      filterCountText =
+        itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0
+          ? `Showing: ${itemCountHolder.filteredItemCount} (${itemCountHolder.totalItemCount})`
+          : `Showing: ${itemCountHolder.filteredItemCount}`;
+    } else if (itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0) {
+      filterCountText = `Total: ${itemCountHolder.totalItemCount}`;
+    }
+    if (filterCountText) {
+      newColumns = [
+        <GridColumnGroup key="grid-footer" footerRenderer={() => <p>{filterCountText}</p>}>
+          {columns}
+        </GridColumnGroup>,
+      ];
+    }
+  }
+  return newColumns;
 }
