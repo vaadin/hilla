@@ -1,4 +1,5 @@
 import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
+import { EndpointError } from '@hilla/frontend';
 import { Button } from '@hilla/react-components/Button.js';
 import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
@@ -15,16 +16,16 @@ registerStylesheet(css);
 
 export const emptyItem = Symbol();
 
-type SubmitErrorEvent = {
-  error: unknown;
+export type SubmitErrorEvent = {
+  error: EndpointError;
 };
-type SubmitEvent<TItem> = {
+export type SubmitEvent<TItem> = {
   item: TItem;
 };
-type DeleteErrorEvent = {
-  error: unknown;
+export type DeleteErrorEvent = {
+  error: EndpointError;
 };
-type DeleteEvent<TItem> = {
+export type DeleteEvent<TItem> = {
   item: TItem;
 };
 
@@ -58,7 +59,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * with values from the item's properties. In order to create a new item,
      * either pass `null`, or leave this prop as undefined.
      *
-     * Use the `afterSubmit` callback to get notified when the item has been
+     * Use the `onSubmitSuccess` callback to get notified when the item has been
      * saved.
      */
     item?: Value<M> | typeof emptyItem | null;
@@ -68,8 +69,33 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     disabled?: boolean;
     /**
-     * Allows to customize the layout of the form by providing a custom renderer.
-     * Check the component documentation for details.
+     * Allows to customize the layout of the form by providing a custom
+     * renderer. The renderer receives the form instance and the pre-rendered
+     * fields as props. The renderer can either reuse the pre-rendered fields in
+     * the custom layout, or render custom fields and connect them to the form
+     * manually.
+     *
+     * Check the component documentation for details and examples.
+     *
+     * Example using pre-rendered fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ children }) =>
+     *   <VerticalLayout>
+     *     {children}
+     *     <p>All data is collected anonymously.</p>
+     *   </VerticalLayout>
+     * } />
+     * ```
+     *
+     * Example rendering custom fields:
+     * ```tsx
+     * <AutoForm layoutRenderer={({ form }) =>
+     *   <VerticalLayout>
+     *     <TextField {...form.field(form.model.name)} />
+     *     ...
+     *   </VerticalLayout>
+     * } />
+     * ```
      */
     layoutRenderer?: ComponentType<AutoFormLayoutRendererProps<M>>;
     /**
@@ -97,8 +123,13 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * default. If enabled, the delete button will only be shown when editing
      * an existing item, which means that `item` is not null.
      *
-     * Use the `afterDelete` callback to get notified when the item has been
+     * Use the `onDeleteSuccess` callback to get notified when the item has been
      * deleted.
+     *
+     * NOTE: This only hides the button, it does not prevent from calling the
+     * delete method on the service. To completely disable deleting, you must
+     * override the `delete` method in the backend Java service to either throw
+     * an exception or annotate it with `@DenyAll` to prevent access.
      */
     deleteButtonVisible?: boolean;
     /**
@@ -113,7 +144,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * A callback that will be called after the form has been successfully
      * submitted and the item has been saved.
      */
-    afterSubmit?({ item }: SubmitEvent<Value<M>>): void;
+    onSubmitSuccess?({ item }: SubmitEvent<Value<M>>): void;
     /**
      * A callback that will be called if an unexpected error occurs while
      * deleting an item.
@@ -123,7 +154,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * A callback that will be called after the form has been successfully
      * deleted.
      */
-    afterDelete?({ item }: DeleteEvent<Value<M>>): void;
+    onDeleteSuccess?({ item }: DeleteEvent<Value<M>>): void;
   }>;
 
 /**
@@ -139,7 +170,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
  * <AutoForm
  *   service={PersonService}
  *   model={PersonModel}
- *   afterSubmit={({ item }) => {
+ *   onSubmitSuccess={({ item }) => {
  *     console.log('Submitted item:', item);
  *   }}
  * />
@@ -150,7 +181,7 @@ export function AutoForm<M extends AbstractModel>({
   model,
   item = emptyItem,
   onSubmitError,
-  afterSubmit,
+  onSubmitSuccess,
   disabled,
   layoutRenderer: LayoutRenderer,
   visibleFields,
@@ -160,7 +191,7 @@ export function AutoForm<M extends AbstractModel>({
   id,
   className,
   deleteButtonVisible,
-  afterDelete,
+  onDeleteSuccess,
   onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
   const form = useForm(model, {
@@ -185,20 +216,23 @@ export function AutoForm<M extends AbstractModel>({
       const newItem = await form.submit();
       if (newItem === undefined) {
         // If update returns an empty object, then no update was performed
-        throw new Error('generic error');
-      } else if (afterSubmit) {
-        afterSubmit({ item: newItem });
+        throw new EndpointError('No update performed');
+      } else if (onSubmitSuccess) {
+        onSubmitSuccess({ item: newItem });
       }
     } catch (error) {
       if (error instanceof ValidationError) {
         // Handled automatically
         return;
       }
-      const genericError = 'Something went wrong, please check all your values';
-      if (onSubmitError) {
-        onSubmitError({ error });
+      if (error instanceof EndpointError) {
+        if (onSubmitError) {
+          onSubmitError({ error });
+        } else {
+          setFormError(error.message);
+        }
       } else {
-        setFormError(genericError);
+        throw error;
       }
     }
   }
@@ -216,12 +250,18 @@ export function AutoForm<M extends AbstractModel>({
       // eslint-disable-next-line
       const id = (item as any)[idProperty.name];
       await service.delete(id);
-      if (afterDelete) {
-        afterDelete({ item: deletedItem });
+      if (onDeleteSuccess) {
+        onDeleteSuccess({ item: deletedItem });
       }
     } catch (error) {
-      if (onDeleteError) {
-        onDeleteError({ error });
+      if (error instanceof EndpointError) {
+        if (onDeleteError) {
+          onDeleteError({ error });
+        } else {
+          setFormError(error.message);
+        }
+      } else {
+        throw error;
       }
     } finally {
       setShowDeleteDialog(false);

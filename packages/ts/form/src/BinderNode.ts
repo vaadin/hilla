@@ -29,6 +29,7 @@ import {
   ObjectModel,
   type Value,
 } from './Models.js';
+import type { ClassStaticProperties } from './types.js';
 import type { Validator, ValueError } from './Validation.js';
 import { ValidityStateValidator } from './Validators.js';
 import { _validity } from './Validity.js';
@@ -113,7 +114,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * instances.
  */
 export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
-  declare readonly ['constructor']: typeof BinderNode;
+  declare readonly ['constructor']: ClassStaticProperties<typeof BinderNode<M>>;
   readonly model: M;
   /**
    * The validity state read from the bound element, if any. Represents the

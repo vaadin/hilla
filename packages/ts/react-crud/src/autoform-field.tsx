@@ -36,8 +36,8 @@ export type FieldOptions = Readonly<{
    * Example:
    * ```tsx
    * {
-   *   renderer: ({ field, label }) => (
-   *     <TextArea {...field} label={label} />
+   *   renderer: ({ field }) => (
+   *     <TextArea {...field} />
    *   )
    * }
    * ```

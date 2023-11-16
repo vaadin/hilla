@@ -9,12 +9,13 @@ import {
 } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import {
-  createDetachedModel,
   _parent,
   type AbstractModel,
+  createDetachedModel,
   type DetachedModelConstructor,
   type Value,
 } from './Models.js';
+import type { ClassStaticProperties } from './types.js';
 import {
   type InterpolateMessageCallback,
   runValidator,
@@ -61,6 +62,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
   readonly #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
 
   readonly #context: unknown = this;
+
+  declare readonly ['constructor']: ClassStaticProperties<typeof BinderRoot<M>>;
 
   /**
    *
@@ -255,7 +258,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
       return modelValidations.get(validator)!;
     }
 
-    const promise = runValidator(model, validator, BinderRoot.interpolateMessageCallback);
+    const promise = runValidator(model, validator, this.constructor.interpolateMessageCallback);
     modelValidations.set(validator, promise);
     const valueErrors = await promise;
 
