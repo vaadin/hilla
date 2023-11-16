@@ -25,5 +25,5 @@ export function registerStylesheet(stylesheet: CSSStyleSheet): void {
 
   const styleTag = document.createElement('style');
   styleTag.textContent = css;
-  document.head.insertAdjacentElement('afterbegin', styleTag);
+  document.head.prepend(styleTag);
 }
