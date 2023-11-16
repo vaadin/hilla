@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-crud",
-  "version": "2.4.0-beta1",
+  "version": "2.4.0-beta2",
   "description": "Hilla CRUD utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -31,6 +31,15 @@
   "exports": {
     ".": {
       "default": "./index.js"
+    },
+    "./autogrid.obj.js": {
+      "default": "./autogrid.obj.js"
+    },
+    "./autoform.obj.js": {
+      "default": "./autoform.obj.js"
+    },
+    "./autocrud.obj.js": {
+      "default": "./autocrud.obj.js"
     }
   },
   "author": "Vaadin Ltd",
@@ -47,10 +56,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "2.4.0-beta1",
-    "@hilla/frontend": "2.4.0-beta1",
+    "@hilla/form": "2.4.0-beta2",
+    "@hilla/frontend": "2.4.0-beta2",
     "@hilla/react-components": "2.2.1",
-    "@hilla/react-form": "2.4.0-beta1",
+    "@hilla/react-form": "2.4.0-beta2",
     "@vaadin/vaadin-lumo-styles": "24.2.2"
   },
   "peerDependencies": {
