@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-plugin-model",
-  "version": "2.4.0-beta1",
+  "version": "2.4.0-beta2",
   "description": "A Hilla TypeScript Generator plugin to generate form models",
   "main": "index.js",
   "type": "module",
@@ -51,19 +51,19 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@hilla/form": "2.4.0-beta1",
-    "@hilla/generator-typescript-core": "2.4.0-beta1",
-    "@hilla/generator-typescript-plugin-backbone": "2.4.0-beta1"
+    "@hilla/form": "2.4.0-beta2",
+    "@hilla/generator-typescript-core": "2.4.0-beta2",
+    "@hilla/generator-typescript-plugin-backbone": "2.4.0-beta2"
   },
   "dependencies": {
-    "@hilla/generator-typescript-utils": "2.4.0-beta1",
+    "@hilla/generator-typescript-utils": "2.4.0-beta2",
     "fast-deep-equal": "^3.1.3",
     "openapi-types": "^12.1.3",
     "typescript": "5.1.6"
   },
   "devDependencies": {
-    "@hilla/generator-typescript-core": "2.4.0-beta1",
-    "@hilla/generator-typescript-plugin-client": "2.4.0-beta1",
+    "@hilla/generator-typescript-core": "2.4.0-beta2",
+    "@hilla/generator-typescript-plugin-client": "2.4.0-beta2",
     "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.7.1",
