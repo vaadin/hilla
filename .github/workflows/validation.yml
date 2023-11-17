@@ -252,6 +252,8 @@ jobs:
         with:
           name: saved-outputs
           path: |
+            packages/java/tests/**/package.json
+            packages/java/tests/**/package-lock.json
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
 
@@ -298,6 +300,8 @@ jobs:
         with:
           name: saved-outputs-gradle
           path: |
+            packages/java/tests/**/package.json
+            packages/java/tests/**/package-lock.json
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
 
