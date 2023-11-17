@@ -23,8 +23,9 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
 import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
+import { registerStylesheet } from './util';
 
-document.adoptedStyleSheets.unshift(css);
+registerStylesheet(css);
 
 interface AutoGridOwnProps<TItem> {
   /**

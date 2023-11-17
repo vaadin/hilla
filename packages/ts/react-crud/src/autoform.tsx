@@ -10,9 +10,9 @@ import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './aut
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
 import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
-import type { ComponentStyleProps } from './util.js';
+import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
-document.adoptedStyleSheets.unshift(css);
+registerStylesheet(css);
 
 export const emptyItem = Symbol();
 
