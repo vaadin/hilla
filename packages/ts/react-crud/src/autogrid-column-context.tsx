@@ -16,7 +16,6 @@ export type ColumnContext = Readonly<{
   sortState: SortState;
   setSortState: Dispatch<SetStateAction<SortState>>;
   customColumnOptions?: ColumnOptions;
-  path: string;
 }>;
 
 export const ColumnContext = createContext<ColumnContext | null>(null);

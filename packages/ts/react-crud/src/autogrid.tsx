@@ -196,7 +196,6 @@ function useColumns(
           sortState,
           setSortState,
           customColumnOptions,
-          path: propertyInfo.name,
         }}
       >
         {column}
@@ -208,16 +207,15 @@ function useColumns(
     if (options.visibleColumns) {
       const columnMap = new Map<string, JSX.Element>();
       columns.forEach((column) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const { path } = column.props.value as ColumnContext;
-        if (path) {
-          columnMap.set(path, column);
+        const { key } = column;
+        if (key) {
+          columnMap.set(key, column);
         }
       });
       options.customColumns.forEach((customColumn) => {
-        const { path } = customColumn.props;
-        if (path) {
-          columnMap.set(path, customColumn);
+        const { key } = customColumn;
+        if (key) {
+          columnMap.set(key, customColumn);
         }
       });
       columns = Array(columns.length + options.customColumns.length).fill(null);

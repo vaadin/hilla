@@ -53,20 +53,6 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
   }
 }
 
-async function assertColumnPaths(grid: GridController, paths: string[], ...ids: string[]) {
-  const columns = await grid.getColumns();
-  expect(columns).to.have.length(ids.length);
-  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
-
-  for (let i = 0; i < paths.length; i++) {
-    if (paths[i] === '') {
-      expect(columns[i].path).to.equal(undefined);
-    } else {
-      expect(columns[i].path).to.equal(paths[i]);
-    }
-  }
-}
-
 describe('@hilla/react-crud', () => {
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
@@ -535,15 +521,14 @@ describe('@hilla/react-crud', () => {
             <TestAutoGrid
               visibleColumns={['fullName', 'gender', 'email', 'secondFullName', 'vip', 'birthDate', 'shiftStart']}
               customColumns={[
-                <GridColumn path="fullName" autoWidth renderer={FullNameRenderer} key={1000}></GridColumn>,
-                <GridColumn path="secondFullName" autoWidth renderer={FullNameHyphenRenderer} key={1001}></GridColumn>,
+                <GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn key="secondFullName" autoWidth renderer={FullNameHyphenRenderer}></GridColumn>,
               ]}
             />,
           ),
           user,
         );
-        const paths = ['fullName', 'gender', 'email', 'secondFullName', 'vip', 'birthDate', 'shiftStart'];
-        await assertColumnPaths(grid, paths, '', 'gender', 'email', '', 'vip', 'birthDate', 'shiftStart');
+        await assertColumns(grid, '', 'gender', 'email', '', 'vip', 'birthDate', 'shiftStart');
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
         expect(grid.getBodyCellContent(0, 3)).to.have.rendered.text('Jane-Love');
       });
@@ -563,29 +548,15 @@ describe('@hilla/react-crud', () => {
           render(
             <TestAutoGrid
               customColumns={[
-                <GridColumn path="fullName" autoWidth renderer={FullNameRenderer} key={1000}></GridColumn>,
-                <GridColumn path="secondFullName" autoWidth renderer={FullNameHyphenRenderer} key={1001}></GridColumn>,
+                <GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn key="secondFullName" autoWidth renderer={FullNameHyphenRenderer}></GridColumn>,
               ]}
             />,
           ),
           user,
         );
-        const paths = [
-          'firstName',
-          'lastName',
-          'gender',
-          'email',
-          'someInteger',
-          'someDecimal',
-          'vip',
-          'birthDate',
-          'shiftStart',
-          'fullName',
-          'secondFullName',
-        ];
-        await assertColumnPaths(
+        await assertColumns(
           grid,
-          paths,
           'firstName',
           'lastName',
           'gender',
@@ -600,6 +571,41 @@ describe('@hilla/react-crud', () => {
         );
         expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
         expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('Jane-Love');
+      });
+
+      it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
+        const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+          <span>
+            {item.firstName} {item.lastName}
+          </span>
+        );
+        const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+          <span>
+            {item.firstName}-{item.lastName}
+          </span>
+        );
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              visibleColumns={['fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart']}
+              customColumns={[
+                <GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn key="secondFullName" autoWidth renderer={FullNameHyphenRenderer}></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumns(
+          grid,
+          '', // fullName
+          'gender',
+          'email',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
