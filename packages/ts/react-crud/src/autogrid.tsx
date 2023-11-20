@@ -205,23 +205,12 @@ function useColumns(
 
   if (options.customColumns) {
     if (options.visibleColumns) {
-      const columnMap = new Map<string, JSX.Element>();
-      columns.forEach((column) => {
-        const { key } = column;
-        if (key) {
-          columnMap.set(key, column);
-        }
-      });
-      options.customColumns.forEach((customColumn) => {
-        const { key } = customColumn;
-        if (key) {
-          columnMap.set(key, customColumn);
-        }
-      });
-      columns = Array(columns.length + options.customColumns.length).fill(null);
-      effectiveColumns.forEach((key, index) => {
-        columns[index] = columnMap.get(key)!;
-      });
+      columns = effectiveColumns
+        .map(
+          (key) =>
+            options.customColumns?.find((column) => column.key === key) ?? columns.find((column) => column.key === key),
+        )
+        .filter(Boolean) as JSX.Element[];
     } else {
       columns = [...columns, ...options.customColumns];
     }
