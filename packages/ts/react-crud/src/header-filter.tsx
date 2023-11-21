@@ -13,6 +13,23 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
 
+export type HeaderFilterProps = Readonly<{
+  /**
+   * Placeholder text for the filter input.
+   */
+  filterPlaceholder?: string;
+  /**
+   * Debounce time for the filter input in milliseconds.
+   * Only applies to string value filters and number value filters.
+   */
+  filterDebounceTime?: number;
+  /**
+   * Minimum length for the filter input.
+   * Only applies to string value filters.
+   */
+  filterMinLength?: number;
+}>;
+
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
   const [matcher, setMatcher] = useState(initialMatcher);
