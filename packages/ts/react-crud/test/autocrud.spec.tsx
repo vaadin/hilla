@@ -123,6 +123,17 @@ describe('@hilla/react-crud', () => {
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jeff');
     });
 
+    it('keeps the form values after submitting a new item', async () => {
+      const { form, newButton } = await CrudController.init(render(<TestAutoCrud />), user);
+      await user.click(newButton);
+
+      await form.typeInField('First name', 'John');
+      await form.typeInField('Last name', 'Bulkeley');
+      await form.submit();
+
+      await expect(form.getValues('First name', 'Last name')).to.eventually.eql(['John', 'Bulkeley']);
+    });
+
     it('can update added item', async () => {
       const { grid, form, newButton } = await CrudController.init(
         render(<AutoCrud service={personService()} model={PersonModel} />),
@@ -211,15 +222,18 @@ describe('@hilla/react-crud', () => {
       expect(grid.getVisibleRowCount()).to.equal(2);
     });
 
-    it('does render a delete button without noDelete', async () => {
+    it('does render a delete button by default', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       await grid.toggleRowSelected(1);
       const deleteButton = form.queryButton('Delete...');
       expect(deleteButton).to.exist;
     });
 
-    it('does not render a delete button with noDelete', async () => {
-      const { grid, form } = await CrudController.init(render(<TestAutoCrud noDelete />), user);
+    it('does not render a delete button when hiding the delete button through form props', async () => {
+      const { grid, form } = await CrudController.init(
+        render(<TestAutoCrud formProps={{ deleteButtonVisible: false }} />),
+        user,
+      );
       await grid.toggleRowSelected(1);
       const deleteButton = form.queryButton('Delete...');
       expect(deleteButton).to.not.exist;

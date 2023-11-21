@@ -23,8 +23,9 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
 import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
+import { registerStylesheet } from './util';
 
-document.adoptedStyleSheets.unshift(css);
+registerStylesheet(css);
 
 interface AutoGridOwnProps<TItem> {
   /**
@@ -189,7 +190,13 @@ function useColumns(
     return (
       <ColumnContext.Provider
         key={propertyInfo.name}
-        value={{ propertyInfo, setPropertyFilter, sortState, setSortState, customColumnOptions }}
+        value={{
+          propertyInfo,
+          setPropertyFilter,
+          sortState,
+          setSortState,
+          customColumnOptions,
+        }}
       >
         {column}
       </ColumnContext.Provider>
@@ -197,7 +204,19 @@ function useColumns(
   });
 
   if (options.customColumns) {
-    columns = [...columns, ...options.customColumns];
+    if (options.visibleColumns) {
+      const columnMap = [...columns, ...options.customColumns].reduce((map, column) => {
+        const { key } = column;
+        if (key) {
+          map.set(key, column);
+        }
+        return map;
+      }, new Map<string, JSX.Element>());
+
+      columns = effectiveColumns.map((key) => columnMap.get(key)).filter(Boolean) as JSX.Element[];
+    } else {
+      columns = [...columns, ...options.customColumns];
+    }
   }
 
   if (options.rowNumbers) {

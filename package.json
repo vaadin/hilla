@@ -33,6 +33,7 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
+    "@hilla/react-components": "^2.2.0",
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
