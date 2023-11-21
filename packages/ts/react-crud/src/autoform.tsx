@@ -61,6 +61,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      *
      * Use the `onSubmitSuccess` callback to get notified when the item has been
      * saved.
+     *
+     * When submitting a new item (i.e. when `item` is null or undefined), the
+     * form will be automatically cleared, allowing to submit another new item.
+     * In order to keep editing the same item after submitting, set the `item`
+     * prop to the new item.
      */
     item?: Value<M> | typeof emptyItem | null;
     /**
@@ -143,6 +148,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     /**
      * A callback that will be called after the form has been successfully
      * submitted and the item has been saved.
+     *
+     * When submitting a new item (i.e. when `item` is null or undefined), the
+     * form will be automatically cleared, allowing to submit another new item.
+     * In order to keep editing the same item after submitting, set the `item`
+     * prop to the new item.
      */
     onSubmitSuccess?({ item }: SubmitEvent<Value<M>>): void;
     /**
@@ -219,6 +229,13 @@ export function AutoForm<M extends AbstractModel>({
         throw new EndpointError('No update performed');
       } else if (onSubmitSuccess) {
         onSubmitSuccess({ item: newItem });
+      }
+      // Automatically clear the form after submitting a new item.
+      // Otherwise, there would be no way for the developer to clear it, as the
+      // there is no new value to set for the item prop to trigger the above
+      // effect in case the prop is already null, undefined or the empty item.
+      if (!item || item === emptyItem) {
+        form.clear();
       }
     } catch (error) {
       if (error instanceof ValidationError) {

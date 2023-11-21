@@ -1,6 +1,7 @@
 import { _enum, type EnumModel } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
+import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
 import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
@@ -97,6 +98,14 @@ function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTime
   return <TimePicker {...other} {...form.field(model)} label={label} />;
 }
 
+type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
+
+function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
+  const model = getPropertyModel(form, propertyInfo);
+  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
+  return <DateTimePicker {...other} {...form.field(model)} label={label} />;
+}
+
 type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
 
 function AutoFormEnumField({ propertyInfo, form, label, ...other }: AutoFormEnumFieldProps) {
@@ -118,6 +127,7 @@ function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormB
 
 export type AutoFormFieldProps = CheckboxProps &
   DatePickerProps &
+  DateTimePickerProps &
   IntegerFieldProps &
   NumberFieldProps &
   SelectProps &
@@ -143,6 +153,8 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
       return <AutoFormDateField {...props} label={label}></AutoFormDateField>;
     case 'time':
       return <AutoFormTimeField {...props} label={label}></AutoFormTimeField>;
+    case 'datetime':
+      return <AutoFormDateTimeField {...props} label={label}></AutoFormDateTimeField>;
     case 'enum':
       return <AutoFormEnumField {...props} label={label}></AutoFormEnumField>;
     case 'boolean':

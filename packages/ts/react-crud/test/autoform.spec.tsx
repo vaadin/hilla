@@ -42,6 +42,7 @@ describe('@hilla/react-crud', () => {
       'Vip',
       'Birth date',
       'Shift start',
+      'Appointment time',
     ] as const;
     const KEYS = [
       'firstName',
@@ -53,6 +54,7 @@ describe('@hilla/react-crud', () => {
       'vip',
       'birthDate',
       'shiftStart',
+      'appointmentTime',
     ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
@@ -66,6 +68,7 @@ describe('@hilla/react-crud', () => {
       vip: false,
       birthDate: '',
       shiftStart: '',
+      appointmentTime: '',
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -121,6 +124,7 @@ describe('@hilla/react-crud', () => {
         vip: false,
         birthDate: '1999-12-31',
         shiftStart: '08:30',
+        appointmentTime: '2020-12-31T08:30',
       };
 
       const form = await FormController.init(
@@ -142,6 +146,7 @@ describe('@hilla/react-crud', () => {
         'vaadin-checkbox',
         'vaadin-date-picker',
         'vaadin-time-picker',
+        'vaadin-date-time-picker',
       ]);
     });
 
@@ -213,20 +218,20 @@ describe('@hilla/react-crud', () => {
       expect(newItem.someDecimal).to.equal(0.12);
     });
 
-    it('retains the form values a valid submit', async () => {
+    it('retains the form values after submitting an existing item', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const form = await FormController.init(
         user,
         render(<AutoForm service={service} model={PersonModel} item={person} />).container,
       );
-      await form.typeInField('First name', 'bar');
+      await form.typeInField('First name', 'foo');
       await form.submit();
-      const newPerson: Person = { ...person! };
-      newPerson.firstName = 'bar';
-      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      const updatedPerson: Person = { ...person!, firstName: 'foo' };
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(updatedPerson));
     });
-    it('retains the form values after a valid submit when using onSubmitSuccess', async () => {
+
+    it('retains the form values after submitting an existing item when using onSubmitSuccess', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
@@ -235,11 +240,33 @@ describe('@hilla/react-crud', () => {
         user,
         render(<AutoForm service={service} model={PersonModel} item={person} onSubmitSuccess={submitSpy} />).container,
       );
-      await form.typeInField('First name', 'baz');
+      await form.typeInField('First name', 'foo');
       await form.submit();
-      const newPerson: Person = { ...person! };
-      newPerson.firstName = 'baz';
-      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      const updatedPerson: Person = { ...person!, firstName: 'foo' };
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(updatedPerson));
+    });
+
+    it('clears the form values after submitting a new item', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+
+      // Item is undefined
+      const result = render(<AutoForm service={service} model={PersonModel} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+
+      // Item is null
+      result.rerender(<AutoForm service={service} model={PersonModel} item={null} />);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+
+      // Item is emptyItem
+      result.rerender(<AutoForm service={service} model={PersonModel} item={emptyItem} />);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
     it('calls onSubmitSuccess with the new item', async () => {
