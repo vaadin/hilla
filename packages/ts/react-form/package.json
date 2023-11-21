@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-form",
-  "version": "2.4.0-beta2",
+  "version": "2.4.0-rc1",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "2.4.0-beta2"
+    "@hilla/form": "2.4.0-rc1"
   },
   "peerDependencies": {
     "react": "^18"
@@ -58,7 +58,7 @@
     "@types/chai": "^4.3.6",
     "@types/chai-dom": "^1.11.1",
     "@types/mocha": "^10.0.2",
-    "@types/react": "^18.2.23",
+    "@types/react": "18.2.23 - 18.2.34",
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",

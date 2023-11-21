@@ -190,7 +190,13 @@ function useColumns(
     return (
       <ColumnContext.Provider
         key={propertyInfo.name}
-        value={{ propertyInfo, setPropertyFilter, sortState, setSortState, customColumnOptions }}
+        value={{
+          propertyInfo,
+          setPropertyFilter,
+          sortState,
+          setSortState,
+          customColumnOptions,
+        }}
       >
         {column}
       </ColumnContext.Provider>
@@ -198,7 +204,19 @@ function useColumns(
   });
 
   if (options.customColumns) {
-    columns = [...columns, ...options.customColumns];
+    if (options.visibleColumns) {
+      const columnMap = [...columns, ...options.customColumns].reduce((map, column) => {
+        const { key } = column;
+        if (key) {
+          map.set(key, column);
+        }
+        return map;
+      }, new Map<string, JSX.Element>());
+
+      columns = effectiveColumns.map((key) => columnMap.get(key)).filter(Boolean) as JSX.Element[];
+    } else {
+      columns = [...columns, ...options.customColumns];
+    }
   }
 
   if (options.rowNumbers) {
