@@ -42,6 +42,7 @@ describe('@hilla/react-crud', () => {
       'Vip',
       'Birth date',
       'Shift start',
+      'Appointment time',
     ] as const;
     const KEYS = [
       'firstName',
@@ -53,6 +54,7 @@ describe('@hilla/react-crud', () => {
       'vip',
       'birthDate',
       'shiftStart',
+      'appointmentTime',
     ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
@@ -66,6 +68,7 @@ describe('@hilla/react-crud', () => {
       vip: false,
       birthDate: '',
       shiftStart: '',
+      appointmentTime: '',
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -121,6 +124,7 @@ describe('@hilla/react-crud', () => {
         vip: false,
         birthDate: '1999-12-31',
         shiftStart: '08:30',
+        appointmentTime: '2020-12-31T08:30',
       };
 
       const form = await FormController.init(
@@ -142,6 +146,7 @@ describe('@hilla/react-crud', () => {
         'vaadin-checkbox',
         'vaadin-date-picker',
         'vaadin-time-picker',
+        'vaadin-date-time-picker',
       ]);
     });
 
