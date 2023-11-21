@@ -27,7 +27,10 @@ export default class FormController {
   }
 
   async getField(label: string): Promise<FormElement> {
-    return (await within(this.instance).findByLabelText(label)).parentElement as FormElement;
+    const elements = await within(this.instance).findAllByLabelText(label);
+    // DateTimePicker is found three times: itself, then the two input fields.
+    // Other fields are found as input fields, so we need the parent.
+    return (elements.length > 1 ? elements[0] : elements[0].parentElement) as FormElement;
   }
 
   queryField(label: string): FormElement | undefined {
