@@ -246,7 +246,7 @@ describe('@hilla/react-crud', () => {
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(updatedPerson));
     });
 
-    it.only('clears the form values after submitting a new item', async () => {
+    it('clears the form values after submitting a new item', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
 
       // Item is undefined
