@@ -87,6 +87,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
         );
       });
 
@@ -103,6 +104,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -582,11 +584,12 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
           'fullName',
           'secondFullName',
         );
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
-        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('Jane-Love');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 11)).to.have.rendered.text('Jane-Love');
       });
 
       it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
@@ -629,6 +632,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
         );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
@@ -664,6 +668,7 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
