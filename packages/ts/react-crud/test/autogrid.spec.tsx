@@ -638,7 +638,7 @@ describe('@hilla/react-crud', () => {
         expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
         const cell = grid.getHeaderCellContent(1, 0);
-        expect(cell.firstElementChild).to.have.tagName('vaadin-text-field');
+        expect(cell.firstElementChild!.querySelector('vaadin-text-field')).to.exist;
       });
 
       it('respects the header setting from custom column options', async () => {
