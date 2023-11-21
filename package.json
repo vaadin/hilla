@@ -44,6 +44,7 @@
     "esbuild": "^0.19.4",
     "eslint": "^8.50.0",
     "eslint-config-vaadin": "^1.0.0-alpha.18",
+    "eslint-plugin-mocha": "^10.2.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-tsdoc": "^0.2.17",
     "glob": "^10.3.10",
