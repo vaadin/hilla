@@ -1,12 +1,90 @@
 .auto-grid-comparation-selection {
   --vaadin-field-default-width: 2em;
-  margin-right: 3px;
 }
 
 .auto-grid-comparation-selection > vaadin-select-value-button {
   --_lumo-text-field-overflow-mask-image: none !important;
+  color: var(--lumo-secondary-text-color);
 }
 
 .auto-grid-comparation-selection::part(toggle-button) {
   display: none;
+}
+
+.auto-grid-string-filter {
+  display: flex;
+}
+.auto-grid-string-filter vaadin-text-field {
+  flex: 1 1 0;
+  width: 100px;
+}
+
+.auto-grid-boolean-filter {
+  display: flex;
+}
+.auto-grid-boolean-filter vaadin-select {
+  flex: 1 1 0;
+  width: 80px;
+}
+.auto-grid-boolean-filter vaadin-select-item {
+  font-size: 14px;
+}
+
+.auto-grid-number-filter {
+  display: flex;
+}
+.auto-grid-number-filter vaadin-number-field {
+  flex: 1 1 0;
+  width: 100px;
+}
+.auto-grid-number-filter vaadin-select::part(input-field) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.auto-grid-number-filter vaadin-number-field::part(input-field) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.auto-grid-enum-filter {
+  display: flex;
+}
+.auto-grid-enum-filter vaadin-select {
+  flex: 1 1 0;
+  width: 120px;
+}
+.auto-grid-enum-filter vaadin-select-item {
+  font-size: 14px;
+}
+
+.auto-grid-date-filter {
+  display: flex;
+}
+.auto-grid-date-filter vaadin-date-picker {
+  flex: 1 1 0;
+  width: 120px;
+}
+.auto-grid-date-filter vaadin-select::part(input-field) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.auto-grid-date-filter vaadin-date-picker::part(input-field) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.auto-grid-time-filter {
+  display: flex;
+}
+.auto-grid-time-filter vaadin-time-picker {
+  flex: 1 1 0;
+  width: 100px;
+}
+.auto-grid-time-filter vaadin-select::part(input-field) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.auto-grid-time-filter vaadin-time-picker::part(input-field) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }

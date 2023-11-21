@@ -58,6 +58,8 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
 
   return (
     <Select
+      theme="small"
+      className="auto-grid-comparation-selection"
       ref={select}
       value={value}
       onValueChanged={({ detail }) => {
@@ -76,7 +78,6 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
           </Item>
         </ListBox>
       )}
-      className="auto-grid-comparation-selection"
     ></Select>
   );
 }
@@ -85,13 +86,16 @@ export function StringHeaderFilter(): ReactElement {
   const { updateFilter } = useFilterState(Matcher.CONTAINS);
 
   return (
-    <TextField
-      placeholder="Filter..."
-      onInput={(e: any) => {
-        const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-        updateFilter(Matcher.CONTAINS, fieldValue);
-      }}
-    ></TextField>
+    <div className="auto-grid-string-filter">
+      <TextField
+        theme="small"
+        placeholder="Filter..."
+        onInput={(e: any) => {
+          const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
+          updateFilter(Matcher.CONTAINS, fieldValue);
+        }}
+      ></TextField>
+    </div>
   );
 }
 
@@ -102,16 +106,17 @@ export function NumberHeaderFilter(): ReactElement {
   useSelectInitWorkaround(select);
 
   return (
-    <>
+    <div className="auto-grid-number-filter">
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <NumberField
+        theme="small"
         placeholder="Filter..."
         onInput={(e) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
           updateFilter(matcher, fieldValue);
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -130,14 +135,17 @@ export function EnumHeaderFilter(): ReactElement {
     })),
   ];
   return (
-    <Select
-      items={options}
-      value={filterValue}
-      onValueChanged={(e) => {
-        const newFilterValue = e.detail.value;
-        updateFilter(Matcher.EQUALS, newFilterValue);
-      }}
-    />
+    <div className="auto-grid-enum-filter">
+      <Select
+        theme="small"
+        items={options}
+        value={filterValue}
+        onValueChanged={(e) => {
+          const newFilterValue = e.detail.value;
+          updateFilter(Matcher.EQUALS, newFilterValue);
+        }}
+      />
+    </div>
   );
 }
 
@@ -148,25 +156,28 @@ export function BooleanHeaderFilter(): ReactElement {
   useSelectInitWorkaround(select);
 
   return (
-    <Select
-      ref={select}
-      onValueChanged={(e) => {
-        const newFilterValue = e.detail.value;
-        updateFilter(Matcher.EQUALS, newFilterValue);
-      }}
-      renderer={() => (
-        <ListBox>
-          <Item value={''} {...{ label: '' }}></Item>
-          <Item value={'True'} {...{ label: 'Yes' }}>
-            Yes
-          </Item>
-          <Item value={'False'} {...{ label: 'No' }}>
-            No
-          </Item>
-        </ListBox>
-      )}
-      value={filterValue}
-    ></Select>
+    <div className="auto-grid-boolean-filter">
+      <Select
+        theme="small"
+        ref={select}
+        onValueChanged={(e) => {
+          const newFilterValue = e.detail.value;
+          updateFilter(Matcher.EQUALS, newFilterValue);
+        }}
+        renderer={() => (
+          <ListBox>
+            <Item value={''} {...{ label: '' }}></Item>
+            <Item value={'True'} {...{ label: 'Yes' }}>
+              Yes
+            </Item>
+            <Item value={'False'} {...{ label: 'No' }}>
+              No
+            </Item>
+          </ListBox>
+        )}
+        value={filterValue}
+      ></Select>
+    </div>
   );
 }
 
@@ -176,9 +187,10 @@ export function DateHeaderFilter(): ReactElement {
   const [invalid, setInvalid] = useState(false);
 
   return (
-    <>
+    <div className="auto-grid-date-filter">
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <DatePicker
+        theme="small"
         value={filterValue}
         placeholder="Filter..."
         i18n={i18n}
@@ -191,7 +203,7 @@ export function DateHeaderFilter(): ReactElement {
           }
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -200,9 +212,10 @@ export function TimeHeaderFilter(): ReactElement {
   const [invalid, setInvalid] = useState(false);
 
   return (
-    <>
+    <div className="auto-grid-time-filter">
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <TimePicker
+        theme="small"
         value={filterValue}
         placeholder="Filter..."
         onInvalidChanged={({ detail: { value } }) => {
@@ -214,7 +227,7 @@ export function TimeHeaderFilter(): ReactElement {
           }
         }}
       />
-    </>
+    </div>
   );
 }
 
