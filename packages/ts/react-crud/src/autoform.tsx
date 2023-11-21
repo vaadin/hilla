@@ -5,7 +5,7 @@ import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
-import { type ComponentType, type JSX, type ReactElement, useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type JSX,  type KeyboardEvent, type ReactElement, useEffect, useMemo, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
@@ -345,6 +345,13 @@ export function AutoForm<M extends AbstractModel>({
     setShowDeleteDialog(false);
   }
 
+  const handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
+      // eslint-disable-next-line no-void
+      void handleSubmit();
+    }
+  };
+
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
     const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name];
     const colspanValue = fieldOptionsForProperty?.colspan;
@@ -374,12 +381,13 @@ export function AutoForm<M extends AbstractModel>({
 
   return (
     <div className={`auto-form ${className ?? ''}`} id={id} style={style} data-testid="auto-form">
-      <VerticalLayout className="auto-form-fields">
+      <VerticalLayout className="auto-form-fields" onKeyDown={handleKeyDown}>
         {layout}
         {formError ? <div style={{ color: 'var(--lumo-error-color)' }}>{formError}</div> : <></>}
       </VerticalLayout>
       <div className="auto-form-toolbar">
         <Button
+          id="form-submit"
           theme="primary"
           disabled={!!disabled || (isEditMode && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
