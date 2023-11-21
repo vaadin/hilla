@@ -40,6 +40,7 @@ export interface Person extends HasIdVersion, Named {
   vip: boolean;
   birthDate: string;
   shiftStart: string;
+  appointmentTime: string;
 }
 
 export interface NestedTestValues {
@@ -134,6 +135,13 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
     return this[_getPropertyModel](
       'shiftStart',
       (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
+    );
+  }
+
+  get appointmentTime(): StringModel {
+    return this[_getPropertyModel](
+      'appointmentTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
     );
   }
 }
@@ -353,6 +361,7 @@ export const personData: Person[] = [
     vip: true,
     birthDate: '1999-12-31',
     shiftStart: '08:30',
+    appointmentTime: '2021-05-13T08:45',
   },
   {
     id: 2,
@@ -366,6 +375,7 @@ export const personData: Person[] = [
     vip: false,
     birthDate: '1999-12-31',
     shiftStart: '08:30',
+    appointmentTime: '2025-08-21T14:30',
   },
 ];
 
