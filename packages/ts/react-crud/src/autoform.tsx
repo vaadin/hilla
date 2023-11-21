@@ -16,16 +16,57 @@ registerStylesheet(css);
 
 export const emptyItem = Symbol();
 
+/**
+ * An event that is fired when an error occurs while submitting the form.
+ */
 export type SubmitErrorEvent = {
+  /**
+   * The error that occurred.
+   */
   error: EndpointError;
+  /**
+   * A function that can be used to set a custom error message. This will be
+   * shown in the form at the same position as the default error message.
+   * You are not required to call this function if you want to handle the
+   * error differently.
+   */
+  setMessage(message: string): void;
 };
+
+/**
+ * An event that is fired when the form has been successfully submitted.
+ */
 export type SubmitEvent<TItem> = {
+  /**
+   * The item that was submitted, as returned by the service.
+   */
   item: TItem;
 };
+
+/**
+ * An event that is fired when an error occurs while deleting an item.
+ */
 export type DeleteErrorEvent = {
+  /**
+   * The error that occurred.
+   */
   error: EndpointError;
+  /**
+   * A function that can be used to set a custom error message. This will be
+   * shown in the form at the same position as the default error message.
+   * You are not required to call this function if you want to handle the
+   * error differently.
+   */
+  setMessage(message: string): void;
 };
+
+/**
+ * An event that is fired when the form has been successfully deleted.
+ */
 export type DeleteEvent<TItem> = {
+  /**
+   * The item that was deleted, as returned by the service.
+   */
   item: TItem;
 };
 
@@ -244,7 +285,7 @@ export function AutoForm<M extends AbstractModel>({
       }
       if (error instanceof EndpointError) {
         if (onSubmitError) {
-          onSubmitError({ error });
+          onSubmitError({ error, setMessage: setFormError });
         } else {
           setFormError(error.message);
         }
@@ -273,7 +314,7 @@ export function AutoForm<M extends AbstractModel>({
     } catch (error) {
       if (error instanceof EndpointError) {
         if (onDeleteError) {
-          onDeleteError({ error });
+          onDeleteError({ error, setMessage: setFormError });
         } else {
           setFormError(error.message);
         }

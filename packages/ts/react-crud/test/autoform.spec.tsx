@@ -362,7 +362,7 @@ describe('@hilla/react-crud', () => {
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'No update performed'));
     });
 
-    it('calls onSubmitSuccessError and does not show error if the endpoint call fails', async () => {
+    it('calls onSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (_item: Person): Promise<Person | undefined> => {
@@ -386,6 +386,27 @@ describe('@hilla/react-crud', () => {
       expect(result.queryByText('foobar')).to.be.null;
       expect(submitSpy).to.have.not.been.called;
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'foobar'));
+    });
+
+    it('allows to show a custom error message if the endpoint call fails', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      sinon.stub(service, 'save').rejects(new EndpointError('foobar'));
+      const person = await getItem(service, 1);
+      const submitSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          onSubmitSuccess={submitSpy}
+          onSubmitError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(submitSpy).to.have.not.been.called;
+      expect(result.queryByText('Got error: foobar')).to.not.be.null;
     });
 
     it('disables all fields and buttons when disabled', async () => {
@@ -637,6 +658,32 @@ describe('@hilla/react-crud', () => {
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
+    });
+
+    it('allows to show a custom error message if deletion fails', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      sinon.stub(service, 'delete').rejects(new EndpointError('foobar'));
+      const person = await getItem(service, 1);
+      const deleteSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          deleteButtonVisible={true}
+          onDeleteSuccess={deleteSpy}
+          onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      const deleteButton = await form.findButton('Delete...');
+      await userEvent.click(deleteButton);
+
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      await dialog.confirm();
+
+      expect(deleteSpy).to.not.have.been.called;
+      expect(result.queryByText('Got error: foobar')).to.not.be.null;
     });
 
     describe('AutoFormEnumField', () => {
