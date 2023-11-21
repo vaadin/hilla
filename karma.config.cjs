@@ -11,6 +11,7 @@ const karmaViewport = require('karma-viewport');
 const MagicString = require('magic-string');
 const postcss = require('postcss');
 const cssnanoPlugin = require('cssnano');
+const { karmaMochaConfig } = require('./.mocharc.cjs');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -65,7 +66,7 @@ function constructCss() {
         css.set(id, content);
         return {
           code: '',
-        }
+        };
       }
     },
     async transform(_, id) {
@@ -182,39 +183,42 @@ module.exports = (config) => {
       },
     },
 
+    client: {
+      mocha: karmaMochaConfig,
+    },
+
     // Viewport configuration
     viewport: {
       breakpoints: [
         {
-          name: "mobile-portrait-320-480",
+          name: 'mobile-portrait-320-480',
           size: {
             width: 320,
-            height: 480
-          }
+            height: 480,
+          },
         },
         {
-          name: "screen-1024-768",
+          name: 'screen-1024-768',
           size: {
             width: 1024,
-            height: 768
-          }
+            height: 768,
+          },
         },
         {
-          name: "screen-1440-900",
+          name: 'screen-1440-900',
           size: {
             width: 1440,
-            height: 900
-          }
+            height: 900,
+          },
         },
         {
-          name: "screen-1980-1024",
+          name: 'screen-1980-1024',
           size: {
             width: 1980,
-            height: 1024
-          }
+            height: 1024,
+          },
         },
-
-      ]
-    }
+      ],
+    },
   });
 };
