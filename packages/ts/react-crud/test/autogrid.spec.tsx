@@ -39,11 +39,15 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-async function assertColumns(grid: GridController, ...ids: string[]) {
+async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
   expect(columns).to.have.length(ids.length);
   await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
+}
 
+async function assertColumns(grid: GridController, ...ids: string[]) {
+  await assertColumnsOrder(grid, ...ids);
+  const columns = await grid.getColumns();
   for (let i = 0; i < ids.length; i++) {
     if (ids[i] === '') {
       expect(columns[i].path).to.equal(undefined);
@@ -487,6 +491,17 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('customize columns', () => {
+      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName} {item.lastName}
+        </span>
+      );
+      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName}-{item.lastName}
+        </span>
+      );
+
       it('should only show configured columns in specified order', async () => {
         const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['email', 'firstName']} />), user);
         await assertColumns(grid, 'email', 'firstName');
@@ -505,21 +520,58 @@ describe('@hilla/react-crud', () => {
         await assertColumns(grid, 'email', 'firstName');
       });
 
-      it('renders custom columns at the end', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
-          <span>
-            {item.firstName} {item.lastName}
-          </span>
-        );
+      it('renders custom columns at the specified index by visibleColumns', async () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              customColumns={[<GridColumn key="test-column" autoWidth renderer={NameRenderer}></GridColumn>]}
+              noHeaderFilters
+              visibleColumns={['fullName', 'gender', 'email', 'secondFullName', 'vip', 'birthDate', 'shiftStart']}
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
             />,
           ),
           user,
         );
-        await assertColumns(
+        await assertColumnsOrder(
+          grid,
+          'fullName',
+          'gender',
+          'email',
+          'secondFullName',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 3)).to.have.rendered.text('Jane-Love');
+      });
+
+      it('renders custom columns at the end if visibleColumns is absent', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              noHeaderFilters
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumnsOrder(
           grid,
           'firstName',
           'lastName',
@@ -530,9 +582,34 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          '',
+          'fullName',
+          'secondFullName',
         );
         expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('Jane-Love');
+      });
+
+      it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              noHeaderFilters
+              visibleColumns={['fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart']}
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumnsOrder(grid, 'fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
