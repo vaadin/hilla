@@ -16,10 +16,11 @@ import {
   NumberHeaderFilter,
   StringHeaderFilter,
   TimeHeaderFilter,
+  type HeaderFilterProps,
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
-export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
+export type ColumnOptions = HeaderFilterProps & Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {

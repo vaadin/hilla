@@ -509,6 +509,16 @@ describe('@hilla/react-crud', () => {
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(_personService.lastFilter).to.deep.equal(expectedFilter);
         });
+
+        it('shows custom placeholder of filter', async () => {
+          const grid = await GridController.init(
+            render(<TestAutoGrid columnOptions={{ firstName: { filterPlaceholder: 'Custom placeholder' } }} />),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).firstElementChild as TextFieldElement;
+          expect(firstNameFilterField.placeholder).to.deep.equal('Custom placeholder');
+        });
       });
 
       it('removes the filters when you clear the fields', async () => {
