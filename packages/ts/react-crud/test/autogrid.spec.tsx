@@ -275,20 +275,20 @@ describe('@hilla/react-crud', () => {
         it('created for string columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 0);
-          expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+          expect(cell.querySelector('vaadin-text-field')).to.exist;
         });
 
         it('created for number columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 4);
-          expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
+          expect(cell.querySelector('vaadin-select')).to.exist;
         });
 
         it('filter when you type in the field for a string column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
 
-          const firstNameFilterField = grid.getHeaderCellContent(1, 0).firstElementChild as TextFieldElement;
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'filter-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await nextFrame();
