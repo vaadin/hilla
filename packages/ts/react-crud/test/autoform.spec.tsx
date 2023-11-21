@@ -660,6 +660,32 @@ describe('@hilla/react-crud', () => {
       });
     });
 
+    it('allows to show a custom error message if deletion fails', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      sinon.stub(service, 'delete').rejects(new EndpointError('foobar'));
+      const person = await getItem(service, 1);
+      const deleteSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          deleteButtonVisible={true}
+          onDeleteSuccess={deleteSpy}
+          onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      const deleteButton = await form.findButton('Delete...');
+      await userEvent.click(deleteButton);
+
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      await dialog.confirm();
+
+      expect(deleteSpy).to.not.have.been.called;
+      expect(result.queryByText('Got error: foobar')).to.not.be.null;
+    });
+
     describe('AutoFormEnumField', () => {
       it('formats enum values using title case', async () => {
         const service = personService();
