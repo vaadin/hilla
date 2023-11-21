@@ -390,10 +390,7 @@ describe('@hilla/react-crud', () => {
 
     it('allows to show a custom error message if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-      // eslint-disable-next-line @typescript-eslint/require-await
-      service.save = async (_item: Person): Promise<Person | undefined> => {
-        throw new EndpointError('foobar');
-      };
+      sinon.stub(service, 'save').rejects(new EndpointError('foobar'));
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
       const result = render(
