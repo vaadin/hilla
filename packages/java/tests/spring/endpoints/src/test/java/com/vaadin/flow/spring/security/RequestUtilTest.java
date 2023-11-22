@@ -25,8 +25,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.AnnotationReader;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.router.internal.NavigationRouteTarget;
 import com.vaadin.flow.router.internal.RouteTarget;
@@ -350,10 +352,16 @@ public class RequestUtilTest {
         Router router = Mockito.mock(Router.class);
         RouteRegistry routeRegistry = Mockito.mock(RouteRegistry.class);
 
+        DeploymentConfiguration deploymentConfiguration = Mockito
+                .mock(DeploymentConfiguration.class);
         Mockito.when(springServletRegistration.getServlet())
                 .thenReturn(servlet);
         Mockito.when(servlet.getService()).thenReturn(service);
         Mockito.when(service.getRouter()).thenReturn(router);
+        Mockito.when(service.getDeploymentConfiguration())
+                .thenReturn(deploymentConfiguration);
+        Mockito.when(deploymentConfiguration.isProductionMode())
+                .thenReturn(false);
         Mockito.when(router.getRegistry()).thenReturn(routeRegistry);
         return servlet;
     }
@@ -378,6 +386,8 @@ public class RequestUtilTest {
                 .thenReturn(navigationTarget);
         Mockito.when(navigationTarget.getRouteTarget())
                 .thenReturn(publicRouteTarget);
+        Mockito.when(navigationTarget.getRouteParameters())
+                .thenReturn(new RouteParameters());
         Mockito.when(publicRouteTarget.getTarget()).thenReturn((Class) view);
 
     }
