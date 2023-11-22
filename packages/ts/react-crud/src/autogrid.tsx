@@ -17,7 +17,7 @@ import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
-import { getDefaultProperties, ModelInfo, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';

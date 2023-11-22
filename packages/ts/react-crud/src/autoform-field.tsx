@@ -10,7 +10,7 @@ import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePi
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
 import { useDatePickerI18n } from './locale.js';
-import type { PropertyInfo } from './property-info.js';
+import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
 
 export type SharedFieldProps = Readonly<{

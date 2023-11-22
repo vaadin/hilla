@@ -1,9 +1,9 @@
 import { expect } from '@esm-bundle/chai';
 import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@hilla/form';
+import { ModelInfo } from '../model-info';
 
-/*
 describe('@hilla/react-crud', () => {
-  describe('PropertyInfo', () => {
+  describe('ModelInfo', () => {
     interface TestItem {
       property: any;
     }
@@ -17,9 +17,9 @@ describe('@hilla/react-crud', () => {
         }
       }
 
-      const properties = getProperties(TestModel);
-      expect(properties.length).to.equal(1);
-      return properties[0].type;
+      const property = new ModelInfo(TestModel).getProperty('property');
+      expect(property).to.exist;
+      return property!.type;
     }
 
     it('detects correct property types based on Java type and model type', () => {
@@ -46,5 +46,3 @@ describe('@hilla/react-crud', () => {
     });
   });
 });
-
- */

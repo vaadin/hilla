@@ -9,7 +9,7 @@ import { type ComponentType, type JSX, type ReactElement, useEffect, useMemo, us
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
-import { getDefaultProperties, ModelInfo, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
