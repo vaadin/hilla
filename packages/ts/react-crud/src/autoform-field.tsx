@@ -97,7 +97,6 @@ type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
 
 function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <DateTimePicker {...other} {...form.field(model)} label={label} />;
 }
 
