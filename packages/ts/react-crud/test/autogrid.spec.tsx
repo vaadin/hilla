@@ -88,6 +88,9 @@ describe('@hilla/react-crud', () => {
           'birthDate',
           'shiftStart',
           'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
       });
 
@@ -105,6 +108,9 @@ describe('@hilla/react-crud', () => {
           'birthDate',
           'shiftStart',
           'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -585,11 +591,14 @@ describe('@hilla/react-crud', () => {
           'birthDate',
           'shiftStart',
           'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
           'fullName',
           'secondFullName',
         );
-        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('Jane Love');
-        expect(grid.getBodyCellContent(0, 11)).to.have.rendered.text('Jane-Love');
+        expect(grid.getBodyCellContent(0, 13)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane-Love');
       });
 
       it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
@@ -633,6 +642,9 @@ describe('@hilla/react-crud', () => {
           'birthDate',
           'shiftStart',
           'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
@@ -669,6 +681,9 @@ describe('@hilla/react-crud', () => {
           'birthDate',
           'shiftStart',
           'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
