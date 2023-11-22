@@ -7,7 +7,6 @@ import {
   type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
-  _enum,
   EnumModel,
   ObjectModel,
 } from '@hilla/form';
@@ -85,70 +84,105 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-export const getPropertyIds = (model: DetachedModelConstructor<AbstractModel>): string[] => {
-  const propertyIds: string[] = [];
+const getPropertyNames = (model: DetachedModelConstructor<AbstractModel>): string[] => {
+  const propertyNames: string[] = [];
 
   for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
     // parent properties are added at the beginning
-    propertyIds.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)).filter((p) => p !== 'new'));
+    propertyNames.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)).filter((p) => p !== 'new'));
   }
 
-  return propertyIds;
+  return propertyNames;
 };
 
-export const getProperties = (model: DetachedModelConstructor<AbstractModel>): PropertyInfo[] => {
-  const propertyIds = getPropertyIds(model);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const modelInstance: any = createDetachedModel(model);
-  return (
-    propertyIds
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .map((name) => [name, modelInstance[name]])
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .filter(([, m]) => m?.[_meta])
-      .flatMap(([name, m]) => {
-        const propertyModel = m as AbstractModel;
-        const meta = propertyModel[_meta];
-        const humanReadableName = _generateHeader(name);
-        const type = determinePropertyType(propertyModel);
+export class ModelInfo {
+  private readonly modelInstance: AbstractModel;
 
-        if (hasAnnotation(meta, 'jakarta.persistence.OneToOne')) {
-          // Expand sub properties
-          const subProps = getProperties(propertyModel.constructor as any);
-          return subProps.map((prop) => ({ ...prop, name: `${name}.${prop.name}` }));
-        }
+  readonly idProperty?: PropertyInfo;
 
-        return {
-          name,
-          humanReadableName,
-          type,
-          meta,
-          model: propertyModel,
-        };
+  constructor(model: DetachedModelConstructor<AbstractModel>) {
+    this.modelInstance = createDetachedModel(model);
+
+    // Try to find id property
+    this.idProperty = this.getRootProperties().find((propertyInfo) =>
+      hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'),
+    );
+  }
+
+  private static resolvePropertyModel(modelInstance: AbstractModel, path: string): AbstractModel | undefined {
+    const parts = path.split('.');
+    let currentModel: AbstractModel | undefined = modelInstance;
+    for (const part of parts) {
+      if (!currentModel || !(currentModel instanceof ObjectModel)) {
+        return undefined;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      currentModel = (currentModel as any)[part];
+    }
+    return currentModel;
+  }
+
+  getRootProperties(path?: string): PropertyInfo[] {
+    const model = path ? ModelInfo.resolvePropertyModel(this.modelInstance, path) : this.modelInstance;
+    if (!model) {
+      return [];
+    }
+    return getPropertyNames(model.constructor as any)
+      .map((name) => {
+        const effectivePath = path ? `${path}.${name}` : name;
+        return this.getProperty(effectivePath);
       })
-  );
-};
+      .filter(Boolean) as PropertyInfo[];
+  }
 
-export function includeProperty(propertyInfo: PropertyInfo): unknown {
-  // Exclude properties annotated with id and version
-  if (
-    hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id') ||
-    hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Version')
-  ) {
-    return false;
+  getProperty(path: string): PropertyInfo | undefined {
+    const propertyModel = ModelInfo.resolvePropertyModel(this.modelInstance, path);
+    if (!propertyModel?.[_meta]) {
+      return undefined;
+    }
+
+    const pathParts = path.split('.');
+    const name = pathParts[pathParts.length - 1];
+
+    const meta = propertyModel[_meta];
+    const humanReadableName = _generateHeader(name);
+    const type = determinePropertyType(propertyModel);
+
+    return {
+      name: path,
+      humanReadableName,
+      type,
+      meta,
+      model: propertyModel,
+    };
   }
-  if (!propertyInfo.type) {
-    // Do not render columns we do not know how to render
-    return false;
+
+  getProperties(paths: string[]): PropertyInfo[] {
+    return paths.map((path) => this.getProperty(path)).filter(Boolean) as PropertyInfo[];
   }
-  return true;
 }
 
-export function getIdProperty(properties: PropertyInfo[]): PropertyInfo | undefined {
-  const idProperty = properties.find((propertyInfo) => hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'));
-  if (idProperty) {
-    return idProperty;
-  }
-
-  return undefined;
+export function getDefaultProperties(modelInfo: ModelInfo): PropertyInfo[] {
+  // Start from root properties
+  const properties = modelInfo.getRootProperties();
+  return (
+    properties
+      // Auto-expand nested properties of one-to-one relations
+      .flatMap((prop) => {
+        if (hasAnnotation(prop.meta, 'jakarta.persistence.OneToOne')) {
+          return modelInfo.getRootProperties(prop.name);
+        }
+        return prop;
+      })
+      // Exclude properties that have an unknown type, or are annotated with id
+      // and version
+      .filter(
+        (prop) =>
+          !!prop.type &&
+          !(
+            hasAnnotation(prop.meta, 'jakarta.persistence.Id') ||
+            hasAnnotation(prop.meta, 'jakarta.persistence.Version')
+          ),
+      )
+  );
 }

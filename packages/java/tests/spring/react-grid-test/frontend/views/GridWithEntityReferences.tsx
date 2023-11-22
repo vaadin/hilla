@@ -3,6 +3,11 @@ import EmployeeModel from 'Frontend/generated/dev/hilla/test/reactgrid/entityref
 import { EmployeeService } from 'Frontend/generated/endpoints.js';
 
 export function GridWithEntityReferences(): JSX.Element {
-  return <AutoGrid pageSize={10} service={EmployeeService} model={EmployeeModel} noHeaderFilters />;
-  /* page size is defined only to make testing easier */
+  return <div className="p-l">
+    <h3 className="mb-s">Default columns</h3>
+    <AutoGrid service={EmployeeService} model={EmployeeModel} />
+
+    <h3 className="mt-l mb-s">Customized columns</h3>
+    <AutoGrid service={EmployeeService} model={EmployeeModel} visibleColumns={['name', 'homeAddress.streetAddress', 'homeAddress.city', 'department.name']} />
+  </div> ;
 }
