@@ -42,18 +42,10 @@ describe('@hilla/react-crud', () => {
       'Vip',
       'Birth date',
       'Shift start',
+      'Street',
+      'City',
+      'Country',
     ] as const;
-    const KEYS = [
-      'firstName',
-      'lastName',
-      'gender',
-      'email',
-      'someInteger',
-      'someDecimal',
-      'vip',
-      'birthDate',
-      'shiftStart',
-    ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
@@ -66,13 +58,29 @@ describe('@hilla/react-crud', () => {
       vip: false,
       birthDate: '',
       shiftStart: '',
+      address: {
+        street: '',
+        city: '',
+        country: '',
+      },
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
     function getExpectedValues(person: Person) {
-      return (Object.entries(person) as ReadonlyArray<[keyof Person, Person[keyof Person]]>)
-        .filter(([key]) => KEYS.includes(key))
-        .map(([, value]) => value.toString());
+      return [
+        person.firstName,
+        person.lastName,
+        person.gender,
+        person.email,
+        person.someInteger.toString(),
+        person.someDecimal.toString(),
+        person.vip.toString(),
+        person.birthDate,
+        person.shiftStart,
+        person.address?.street ?? '',
+        person.address?.city ?? '',
+        person.address?.country ?? '',
+      ];
     }
 
     async function expectFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
@@ -121,6 +129,11 @@ describe('@hilla/react-crud', () => {
         vip: false,
         birthDate: '1999-12-31',
         shiftStart: '08:30',
+        address: {
+          street: 'Some street 1',
+          city: 'Some city',
+          country: 'Some country',
+        },
       };
 
       const form = await FormController.init(
@@ -142,6 +155,9 @@ describe('@hilla/react-crud', () => {
         'vaadin-checkbox',
         'vaadin-date-picker',
         'vaadin-time-picker',
+        'vaadin-text-field',
+        'vaadin-text-field',
+        'vaadin-text-field',
       ]);
     });
 
@@ -203,6 +219,7 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('Last name', 'Quinby');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '0.12');
+      await form.typeInField('Street', '123 Fake Street');
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;
@@ -211,6 +228,7 @@ describe('@hilla/react-crud', () => {
       expect(newItem.lastName).to.equal('Quinby');
       expect(newItem.someInteger).to.equal(12);
       expect(newItem.someDecimal).to.equal(0.12);
+      expect(newItem.address?.street).to.equal('123 Fake Street');
     });
 
     it('retains the form values a valid submit', async () => {

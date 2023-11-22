@@ -83,6 +83,9 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'address.street',
+          'address.city',
+          'address.country',
         );
       });
 
@@ -99,6 +102,9 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -530,9 +536,12 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'address.street',
+          'address.city',
+          'address.country',
           '',
         );
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 12)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -552,6 +561,9 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
@@ -587,6 +599,9 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });
