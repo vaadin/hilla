@@ -557,7 +557,7 @@ describe('@hilla/react-crud', () => {
         expect(submitSpy).to.have.not.been.called;
       });
 
-      it('do no submit when enter key is pressed with delete button focused', async () => {
+      it('do no submit when enter key is pressed with delete or discard button focused', async () => {
         const service = personService();
         const form = await populatePersonForm(1, { deleteButtonVisible: true }, undefined, undefined, service);
 
@@ -571,7 +571,13 @@ describe('@hilla/react-crud', () => {
 
         fireEvent.keyDown(deleteButton, { key: 'Enter', code: 'Enter', charCode: 13 });
         await nextFrame();
+        expect(submitSpy).to.have.not.been.called;
 
+        const discardButton = await form.findButton('Discard');
+        expect(discardButton.disabled).to.be.false;
+
+        fireEvent.keyDown(discardButton, { key: 'Enter', code: 'Enter', charCode: 13 });
+        await nextFrame();
         expect(submitSpy).to.have.not.been.called;
       });
 
