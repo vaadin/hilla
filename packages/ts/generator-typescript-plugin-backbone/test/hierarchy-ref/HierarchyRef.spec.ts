@@ -13,7 +13,7 @@ describe('BackbonePlugin', () => {
     const sectionName = 'HierarchyRef';
     const modelSectionPath = `${pathBase}/${sectionName.toLowerCase()}/${sectionName}Endpoint`;
 
-    it.only('correctly generates code', async () => {
+    it('correctly generates code', async () => {
       const generator = createGenerator([BackbonePlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
