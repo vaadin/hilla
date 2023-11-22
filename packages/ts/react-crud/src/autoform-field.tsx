@@ -53,8 +53,9 @@ export type FieldOptions = Readonly<{
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
+  const pathParts = propertyInfo.name.split('.');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return form.model[propertyInfo.name];
+  return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
 }
 
 type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;

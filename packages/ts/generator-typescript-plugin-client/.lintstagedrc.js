@@ -1,6 +1,6 @@
-import { commands } from '../../../.lintstagedrc.js';
+import { commands, extensions } from '../../../.lintstagedrc.js';
 
 export default {
-  'src/**/*.{js,ts}': commands,
-  'test/**/*.{js,ts}': commands,
+  [`src/**/*.{${extensions}}`]: commands,
+  [`test/**/*.{${extensions}}`]: commands,
 };
