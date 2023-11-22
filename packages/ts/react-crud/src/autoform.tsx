@@ -346,7 +346,7 @@ export function AutoForm<M extends AbstractModel>({
   }
 
   const handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && (disabled === false || (isEditMode && form.dirty))) {
       // eslint-disable-next-line no-void
       void handleSubmit();
     }
@@ -387,7 +387,6 @@ export function AutoForm<M extends AbstractModel>({
       </VerticalLayout>
       <div className="auto-form-toolbar">
         <Button
-          id="form-submit"
           theme="primary"
           disabled={!!disabled || (isEditMode && !form.dirty)}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
