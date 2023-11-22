@@ -123,6 +123,17 @@ describe('@hilla/react-crud', () => {
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jeff');
     });
 
+    it('keeps the form values after submitting a new item', async () => {
+      const { form, newButton } = await CrudController.init(render(<TestAutoCrud />), user);
+      await user.click(newButton);
+
+      await form.typeInField('First name', 'John');
+      await form.typeInField('Last name', 'Bulkeley');
+      await form.submit();
+
+      await expect(form.getValues('First name', 'Last name')).to.eventually.eql(['John', 'Bulkeley']);
+    });
+
     it('can update added item', async () => {
       const { grid, form, newButton } = await CrudController.init(
         render(<AutoCrud service={personService()} model={PersonModel} />),
