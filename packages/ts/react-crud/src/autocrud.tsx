@@ -5,7 +5,7 @@ import { type JSX, useEffect, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
-import AutoGrid, { type AutoGridProps } from './autogrid.js';
+import { type AutoGridProps, AutoGrid } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { type ComponentStyleProps, registerStylesheet } from './util';

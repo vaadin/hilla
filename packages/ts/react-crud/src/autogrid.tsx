@@ -11,14 +11,14 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import {
+  type ForwardedRef,
+  forwardRef,
   type JSX,
   type MutableRefObject,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
-  forwardRef,
-  useImperativeHandle,
-  type Ref,
 } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
@@ -35,6 +35,10 @@ import Direction from './types/org/springframework/data/domain/Sort/Direction.js
 import { registerStylesheet } from './util';
 
 registerStylesheet(css);
+
+export interface AutoGridRef {
+  refresh(): void;
+}
 
 interface AutoGridOwnProps<TItem> {
   /**
@@ -235,21 +239,7 @@ function useColumns(
   return columns;
 }
 
-/**
- * Auto Grid is a component for displaying tabular data based on a Java backend
- * service. It automatically generates columns based on the properties of a
- * Java class and provides features such as lazy-loading, sorting and filtering.
- *
- * Example usage:
- * ```tsx
- * import { AutoGrid } from '@hilla/react-crud';
- * import PersonService from 'Frontend/generated/endpoints';
- * import PersonModel from 'Frontend/generated/com/example/application/Person';
- *
- * <AutoGrid service={PersonService} model={PersonModel} />
- * ```
- */
-const AutoGrid: JSX.Element = forwardRef(function AutoGrid<TItem>(
+function AutoGridInner<TItem>(
   {
     service,
     model,
@@ -262,16 +252,18 @@ const AutoGrid: JSX.Element = forwardRef(function AutoGrid<TItem>(
     rowNumbers,
     ...gridProps
   }: AutoGridProps<TItem>,
-  ref?: Ref<unknown>,
+  ref: ForwardedRef<AutoGridRef>,
 ): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
   const [triggerRefresh, setTriggerRefresh] = useState(0);
+  const gridRef = useRef<GridElement<TItem>>(null);
+  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
 
   useImperativeHandle(
     ref,
     () => ({
       refresh() {
-        setTriggerRefresh(triggerRefresh + 1);
+        gridRef.current?.clearCache();
       },
     }),
     [],
@@ -316,9 +308,6 @@ const AutoGrid: JSX.Element = forwardRef(function AutoGrid<TItem>(
     }
   }, [noHeaderFilters]);
 
-  const gridRef = useRef<GridElement<TItem>>(null);
-  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
-
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = gridRef.current!;
@@ -342,6 +331,24 @@ const AutoGrid: JSX.Element = forwardRef(function AutoGrid<TItem>(
       {children}
     </Grid>
   );
-});
+}
 
-export default AutoGrid;
+type AutoGridSignature = <TItem>(
+  props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef> },
+) => ReturnType<typeof AutoGridInner>;
+
+/**
+ * Auto Grid is a component for displaying tabular data based on a Java backend
+ * service. It automatically generates columns based on the properties of a
+ * Java class and provides features such as lazy-loading, sorting and filtering.
+ *
+ * Example usage:
+ * ```tsx
+ * import { AutoGrid } from '@hilla/react-crud';
+ * import PersonService from 'Frontend/generated/endpoints';
+ * import PersonModel from 'Frontend/generated/com/example/application/Person';
+ *
+ * <AutoGrid service={PersonService} model={PersonModel} />
+ * ```
+ */
+export const AutoGrid: AutoGridSignature = forwardRef(AutoGridInner) as AutoGridSignature;

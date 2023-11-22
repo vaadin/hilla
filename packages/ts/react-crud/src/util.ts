@@ -1,4 +1,4 @@
-import type { CSSProperties, FunctionComponent } from 'react';
+import React, { type CSSProperties, type FunctionComponent } from 'react';
 
 export type ComponentStyleProps = Readonly<{
   id?: string;
@@ -41,9 +41,11 @@ function useFeatureRegistration(feature: string): void {
 }
 
 export function featureRegistration<C extends (...args: any[]) => any>(Component: C, feature: string): C {
-  const ComponentWithFeatureRegistration = (...args: any[]) => {
-    useFeatureRegistration(feature);
-    return Component(...args);
-  };
-  return ComponentWithFeatureRegistration as C;
+  // TODO: fix me
+  // const ComponentWithFeatureRegistration = (...args: any[]) => {
+  //   useFeatureRegistration(feature);
+  //   return Component(...args);
+  // };
+  // return ComponentWithFeatureRegistration as C;
+  return Component;
 }
