@@ -14,7 +14,7 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.json",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "test:update": "npm run test -- --update",
     "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
