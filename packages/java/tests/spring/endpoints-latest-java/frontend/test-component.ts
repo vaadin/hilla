@@ -20,7 +20,7 @@ export class TestComponent extends LitElement {
     `;
   }
 
-  protected createRenderRoot(): Element | ShadowRoot {
+  protected createRenderRoot(): HTMLElement | DocumentFragment {
     return this;
   }
 }
