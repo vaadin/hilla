@@ -10,7 +10,16 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { type JSX, type MutableRefObject, useEffect, useRef, useState } from 'react';
+import {
+  type JSX,
+  type MutableRefObject,
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  type Ref,
+} from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
@@ -240,19 +249,33 @@ function useColumns(
  * <AutoGrid service={PersonService} model={PersonModel} />
  * ```
  */
-export function AutoGrid<TItem>({
-  service,
-  model,
-  experimentalFilter,
-  visibleColumns,
-  noHeaderFilters,
-  refreshTrigger = 0,
-  customColumns,
-  columnOptions,
-  rowNumbers,
-  ...gridProps
-}: AutoGridProps<TItem>): JSX.Element {
+const AutoGrid: JSX.Element = forwardRef(function AutoGrid<TItem>(
+  {
+    service,
+    model,
+    experimentalFilter,
+    visibleColumns,
+    noHeaderFilters,
+    refreshTrigger = 0,
+    customColumns,
+    columnOptions,
+    rowNumbers,
+    ...gridProps
+  }: AutoGridProps<TItem>,
+  ref?: Ref<unknown>,
+): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const [triggerRefresh, setTriggerRefresh] = useState(0);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh() {
+        setTriggerRefresh(triggerRefresh + 1);
+      },
+    }),
+    [],
+  );
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -293,12 +316,12 @@ export function AutoGrid<TItem>({
     }
   }, [noHeaderFilters]);
 
-  const ref = useRef<GridElement<TItem>>(null);
+  const gridRef = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
 
   useEffect(() => {
     // Sets the data provider, should be done only once
-    const grid = ref.current!;
+    const grid = gridRef.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
       grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
@@ -307,16 +330,18 @@ export function AutoGrid<TItem>({
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = ref.current;
+    const grid = gridRef.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
       grid.clearCache();
     }
-  }, [experimentalFilter, internalFilter, refreshTrigger]);
+  }, [experimentalFilter, internalFilter, triggerRefresh]);
 
   return (
-    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref}>
+    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={gridRef}>
       {children}
     </Grid>
   );
-}
+});
+
+export default AutoGrid;

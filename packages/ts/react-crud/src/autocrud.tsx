@@ -1,11 +1,11 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { SplitLayout } from '@hilla/react-components/SplitLayout';
-import { type JSX, useState } from 'react';
+import { type JSX, useEffect, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
-import { AutoGrid, type AutoGridProps } from './autogrid.js';
+import AutoGrid, { type AutoGridProps } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query';
 import { type ComponentStyleProps, registerStylesheet } from './util';
@@ -83,11 +83,14 @@ export function AutoCrud<TItem>({
   className,
 }: AutoCrudProps<TItem>): JSX.Element {
   const [item, setItem] = useState<TItem | typeof emptyItem | undefined>(undefined);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
+  const autoGridRef = useRef<{ refresh(): void }>(null);
+
   function refreshGrid() {
-    setRefreshTrigger(refreshTrigger + 1);
+    // setRefreshTrigger(refreshTrigger + 1);
+    autoGridRef.current?.refresh();
   }
 
   function editItem(itemToEdit: TItem) {
@@ -102,7 +105,7 @@ export function AutoCrud<TItem>({
     <div className="auto-crud-main">
       <AutoGrid
         {...gridProps}
-        refreshTrigger={refreshTrigger}
+        // refreshTrigger={refreshTrigger}
         service={service}
         model={model}
         selectedItems={item && item !== emptyItem ? [item] : []}
@@ -110,6 +113,7 @@ export function AutoCrud<TItem>({
           const activeItem = e.detail.value;
           setItem(activeItem ?? undefined);
         }}
+        ref={autoGridRef}
       ></AutoGrid>
       <div className="auto-crud-toolbar">
         <Button theme="primary" onClick={() => setItem(emptyItem)}>
