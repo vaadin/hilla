@@ -110,17 +110,17 @@ interface AutoGridOwnProps<TItem> {
    */
   rowNumbers?: boolean;
   /**
-   * When enabled, shows the total count of records in the grid footer.
+   * When enabled, shows the total count of items in the grid footer.
    */
   totalCount?: boolean;
   /**
-   * When enabled, shows the visible record count in the grid footer.
-   * if totalCount is also enabled, it will show both totalCount and recordCount
+   * When enabled, shows the filtered item count in the grid footer.
+   * if totalCount is also enabled, it will show both totalCount and filteredCount
    */
-  recordCount?: boolean;
+  filteredCount?: boolean;
   /**
    * Allows to customize the grid footer with a custom renderer component for
-   *  the total count and record count.
+   *  the total count and filtered item count.
    */
   footerCountRenderer?: ComponentType<{ itemCountHolder: AutoGridItemCountHolder }>;
 }
@@ -136,7 +136,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 
 export type AutoGridItemCountHolder = {
   totalCount: boolean | undefined;
-  recordCount: boolean | undefined;
+  filteredCount: boolean | undefined;
   totalItemCount: number;
   filteredItemCount: number;
   setTotalItemCount: Dispatch<SetStateAction<number>>;
@@ -297,7 +297,7 @@ function useColumns(
     ];
   }
 
-  if (itemCountHolder.totalCount ?? itemCountHolder.recordCount) {
+  if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
     columns = AutoGridFooterItemCountRenderer(itemCountHolder, columns, footerCountRenderer);
   }
 
@@ -330,7 +330,7 @@ export function AutoGrid<TItem>({
   columnOptions,
   rowNumbers,
   totalCount,
-  recordCount,
+  filteredCount,
   footerCountRenderer,
   ...gridProps
 }: AutoGridProps<TItem>): JSX.Element {
@@ -361,9 +361,9 @@ export function AutoGrid<TItem>({
     }
   };
 
-  const recordCountHolder: AutoGridItemCountHolder = {
+  const itemCountHolder: AutoGridItemCountHolder = {
     totalCount,
-    recordCount,
+    filteredCount,
     totalItemCount,
     filteredItemCount,
     setTotalItemCount,
@@ -378,7 +378,7 @@ export function AutoGrid<TItem>({
     customColumns,
     columnOptions,
     rowNumbers,
-    itemCountHolder: recordCountHolder,
+    itemCountHolder,
     footerCountRenderer,
   });
 
@@ -397,7 +397,7 @@ export function AutoGrid<TItem>({
     const grid = ref.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
-      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, recordCountHolder);
+      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, itemCountHolder);
     }, 1);
   }, [model, service]);
 
@@ -406,7 +406,7 @@ export function AutoGrid<TItem>({
     const grid = ref.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
-      recordCountHolder.setFilteredItemCount(-1);
+      itemCountHolder.setFilteredItemCount(-1);
       grid.clearCache();
     }
   }, [experimentalFilter, internalFilter, refreshTrigger]);

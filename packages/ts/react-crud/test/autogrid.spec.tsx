@@ -226,7 +226,7 @@ describe('@hilla/react-crud', () => {
           expect(grid.getVisibleRowCount()).to.equal(387);
         });
 
-        it('Shows total record count', async () => {
+        it('Shows total item count', async () => {
           const service = personService();
           const personTestData: Person[] = Array(387)
             .fill(null)
@@ -241,14 +241,14 @@ describe('@hilla/react-crud', () => {
           expect(content).to.have.rendered.text('Total: 387');
         });
 
-        it('Shows filtered record count ', async () => {
+        it('Shows filtered filtered item count ', async () => {
           const service = personService();
           const personTestData: Person[] = Array(156)
             .fill(null)
             .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
           sinon.stub(service, 'list').resolves(personTestData);
           sinon.stub(service, 'count').resolves(personTestData.length);
-          const result = render(<TestAutoGridNoHeaderFilters service={service} recordCount />);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(156);
@@ -256,7 +256,7 @@ describe('@hilla/react-crud', () => {
           expect(content).to.have.rendered.text('Showing: 156');
         });
 
-        it('Shows zero as total count ', async () => {
+        it('Shows zero as total item count ', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
@@ -269,12 +269,12 @@ describe('@hilla/react-crud', () => {
           expect(content).to.have.rendered.text('Total: 0');
         });
 
-        it('Shows zero as record count ', async () => {
+        it('Shows zero as filtered item count ', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
           sinon.stub(service, 'count').resolves(personTestData.length);
-          const result = render(<TestAutoGridNoHeaderFilters service={service} recordCount />);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(0);
@@ -282,12 +282,12 @@ describe('@hilla/react-crud', () => {
           expect(content).to.have.rendered.text('Showing: 0');
         });
 
-        it('Shows zero as total and record count ', async () => {
+        it('Shows zero as total and filtered item count ', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
           sinon.stub(service, 'count').resolves(personTestData.length);
-          const result = render(<TestAutoGridNoHeaderFilters service={service} recordCount totalCount />);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount totalCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(0);
@@ -295,7 +295,7 @@ describe('@hilla/react-crud', () => {
           expect(content).to.have.rendered.text('Showing: 0 (0)');
         });
 
-        it('Show record count and changes', async () => {
+        it('Show filtered item count and changes', async () => {
           const service = personService();
           const personTestData: Person[] = Array(387)
             .fill(null)
@@ -303,7 +303,7 @@ describe('@hilla/react-crud', () => {
           const listStub = sinon.stub(service, 'list').resolves(personTestData);
           const countStub = sinon.stub(service, 'count').resolves(personTestData.length);
 
-          const result = render(<TestAutoGrid service={service} model={PersonModel} recordCount />);
+          const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(387);
@@ -323,7 +323,7 @@ describe('@hilla/react-crud', () => {
           expect(updatedFooterContent).to.have.rendered.text('Showing: 2');
         });
 
-        it('Shows both filtered record count and total record count ', async () => {
+        it('Shows both filtered item count and total item count ', async () => {
           const service = personService();
           const personTestData: Person[] = Array(3)
             .fill(null)
@@ -333,7 +333,7 @@ describe('@hilla/react-crud', () => {
           countStub.withArgs(undefined).resolves(100);
           countStub.withArgs(sinon.match.defined).resolves(personTestData.length);
 
-          const result = render(<TestAutoGrid service={service} model={PersonModel} totalCount recordCount />);
+          const result = render(<TestAutoGrid service={service} model={PersonModel} totalCount filteredCount />);
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(3);
@@ -354,7 +354,7 @@ describe('@hilla/react-crud', () => {
           expect(updatedContent).to.have.rendered.text('Showing: 2 (100)');
         });
 
-        it('Shows custom renderer for total and record count ', async () => {
+        it('Shows custom renderer for total and filtered item count ', async () => {
           const service = personService();
           const personTestData: Person[] = Array(3)
             .fill(null)
@@ -366,7 +366,7 @@ describe('@hilla/react-crud', () => {
           const result = render(
             <TestAutoGridNoHeaderFilters
               service={service}
-              recordCount
+              filteredCount
               totalCount
               footerCountRenderer={(props: { itemCountHolder: AutoGridItemCountHolder }) => (
                 <p>

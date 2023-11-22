@@ -78,31 +78,30 @@ export function AutoGridFooterItemCountRenderer(
   columns: JSX.Element[],
   footerCountRenderer?: ComponentType<{ itemCountHolder: AutoGridItemCountHolder }>,
 ): JSX.Element[] {
-  let newColumns: JSX.Element[] = columns;
   if (footerCountRenderer) {
     const FooterRenderer = footerCountRenderer;
-    newColumns = [
+    return [
       <GridColumnGroup key="grid-footer" footerRenderer={() => <FooterRenderer itemCountHolder={itemCountHolder} />}>
         {columns}
       </GridColumnGroup>,
     ];
-  } else {
-    let filterCountText: string | undefined;
-    if (itemCountHolder.recordCount && itemCountHolder.filteredItemCount >= 0) {
-      filterCountText =
-        itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0
-          ? `Showing: ${itemCountHolder.filteredItemCount} (${itemCountHolder.totalItemCount})`
-          : `Showing: ${itemCountHolder.filteredItemCount}`;
-    } else if (itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0) {
-      filterCountText = `Total: ${itemCountHolder.totalItemCount}`;
-    }
-    if (filterCountText) {
-      newColumns = [
-        <GridColumnGroup key="grid-footer" footerRenderer={() => <p>{filterCountText}</p>}>
-          {columns}
-        </GridColumnGroup>,
-      ];
-    }
   }
-  return newColumns;
+  let filterCountText: string | undefined;
+  if (itemCountHolder.filteredCount && itemCountHolder.filteredItemCount >= 0) {
+    filterCountText =
+      itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0
+        ? `Showing: ${itemCountHolder.filteredItemCount} (${itemCountHolder.totalItemCount})`
+        : `Showing: ${itemCountHolder.filteredItemCount}`;
+  } else if (itemCountHolder.totalCount && itemCountHolder.totalItemCount >= 0) {
+    filterCountText = `Total: ${itemCountHolder.totalItemCount}`;
+  }
+  if (filterCountText) {
+    return [
+      <GridColumnGroup key="grid-footer" footerRenderer={() => <p>{filterCountText}</p>}>
+        {columns}
+      </GridColumnGroup>,
+    ];
+  }
+
+  return columns;
 }
