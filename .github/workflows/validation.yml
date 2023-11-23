@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '2.3', '2.2', '2.1', '1.3' ]
+    branches: [ main, '2.4', '2.3', '2.2', '2.1', '1.4', '1.3' ]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   init:
-    name: Build Java and npm for other tasks
+    name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
