@@ -246,7 +246,7 @@ class TestProject {
         .withPluginClasspath()
         .withDebug(true) // use --debug to catch ReflectionsException: https://github.com/vaadin/vaadin-gradle-plugin/issues/99
         .forwardOutput()   // a must, otherwise ./gradlew check freezes on windows!
-        .withGradleVersion("7.6.1")
+        .withGradleVersion("8.3")
 
     override fun toString(): String = "TestProject(dir=$dir)"
 

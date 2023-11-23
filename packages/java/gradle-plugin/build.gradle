@@ -61,6 +61,7 @@ repositories {
     mavenCentral()
     maven { url = 'https://plugins.gradle.org/m2/' }
     maven { url = 'https://maven.vaadin.com/vaadin-prereleases' }
+    maven { url = 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
@@ -201,6 +202,9 @@ functionalTest {
 }
 
 kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
     explicitApi()
 }
 
