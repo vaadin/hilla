@@ -1,6 +1,11 @@
 package dev.hilla.engine.commandrunner;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,14 +111,26 @@ public class CommandRunnerTest {
         assertDoesNotThrow(() -> runner.run(null));
     }
 
-    @Test
-    void runningCommands_javaExecutablePathFromCurrentRunningProcess_isUsedToSetJavaHomeOfProcessBuilder() {
+    static class JavaExecTestArgs implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext ec)
+                throws Exception {
+            return CommandRunner.IS_WINDOWS ? Stream.of(
+                    Arguments.of("c:\\path\\to\\java\\home\\bin\\java.exe",
+                            "c:\\path\\to\\java\\home"),
+                    Arguments.of("c:\\path\\to\\java\\home\\bin\\javaw.exe",
+                            "c:\\path\\to\\java\\home"))
+                    : Stream.of(Arguments.of("/path/to/java/home/bin/java",
+                            "/path/to/java/home"));
+        }
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(JavaExecTestArgs.class)
+    void runningCommands_javaExecutablePathFromCurrentRunningProcess_isUsedToSetJavaHomeOfProcessBuilder(
+            String executable, String expectedJavaHome) {
 
         TestRunner runner = new TestRunner() {
-
-            static final String JAVA_EXEC_PATH = IS_WINDOWS
-                    ? "c:\\path\\to\\java\\home\\bin\\java.exe"
-                    : "/path/to/java/home/bin/java";
 
             @Override
             public List<String> executables() {
@@ -124,11 +142,11 @@ public class CommandRunnerTest {
                 return new MockProcessInfo();
             }
 
-            private static class MockProcessInfo implements ProcessHandle.Info {
+            private class MockProcessInfo implements ProcessHandle.Info {
 
                 @Override
                 public Optional<String> command() {
-                    return Optional.of(JAVA_EXEC_PATH);
+                    return Optional.of(executable);
                 }
 
                 @Override
@@ -157,10 +175,6 @@ public class CommandRunnerTest {
                 }
             }
         };
-
-        final String expectedJavaHome = TestRunner.IS_WINDOWS
-                ? "c:\\path\\to\\java\\home"
-                : "/path/to/java/home";
 
         assertEquals(expectedJavaHome, runner.environment().get("JAVA_HOME"));
 
