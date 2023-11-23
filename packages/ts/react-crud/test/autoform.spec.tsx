@@ -580,7 +580,7 @@ describe('@hilla/react-crud', () => {
         expect(form.queryField('Department')).to.be.undefined;
       });
 
-      it('property binds fields for nested properties that are not included by default', async () => {
+      it('properly binds fields for nested properties that are not included by default', async () => {
         const service = personService();
         const saveSpy = sinon.spy(service, 'save');
         const form = await populatePersonForm(1, { visibleFields: ['department.name'] }, undefined, false, service);
